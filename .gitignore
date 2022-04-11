@@ -1,0 +1,15 @@
+# MacOS metadata
+**/.DS_Store
+
+# PyCharm project files
+.idea
+
+# Pickle and gpickle files (typically large)
+*.pickle
+*.gpickle
+
+# JSON files
+*.json
+
+# Pycache
+__pycache__
