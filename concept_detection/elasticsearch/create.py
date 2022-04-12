@@ -1,14 +1,8 @@
 import time
 import configparser
-from elasticsearch import Elasticsearch
 import mysql.connector
-from concurrent.futures import as_completed
-from requests_futures.sessions import FuturesSession
-
-start_time = time.time()
-
-# URL for markup strip entry point
-STRIP_URL = 'http://86.119.27.90:30010/strip'
+from elasticsearch import Elasticsearch
+from wikimarkup_stripper.models.stripper import strip
 
 # Read es config and instantiate elasticsearch client
 es_config = configparser.ConfigParser()
@@ -27,41 +21,25 @@ cursor = cnx.cursor()
 query = f"""
     SELECT PageID, PageTitle, PageContent FROM graph.Nodes_N_Concept
     WHERE PageContent LIKE "%mathematics%"
+    LIMIT 1000
 """
 cursor.execute(query)
 
-# Launch API calls and store futures
-print('Launching markup strip calls')
-session = FuturesSession()
-futures = []
-for page_id, page_title, page_content in cursor:
-    future = session.post(STRIP_URL, json={'markup_code': page_content})
-    future.id = page_id
-    future.title = page_title
-    futures.append(future)
+start_time = time.time()
 
-    if len(futures) % 10e3 == 0:
-        if len(futures) % 10e4 == 0:
-            print('+', end='')
-        else:
-            print('.', end='')
-
-print()
-print('Indexing documents as responses arrive')
-# Add documents to elasticsearch index as responses arrive
 i = 0
-for future in as_completed(futures):
-    page_content = future.result().json()['stripped_code']
+for page_id, page_title, page_content in cursor:
+    stripped_page_content = strip(page_content)
     doc = {
-        'id': future.id,
-        'title': future.title,
-        'content': page_content
+        'id': page_id,
+        'title': page_title,
+        'content': stripped_page_content
     }
-    es.index(index=index, document=doc, id=future.id)
+    es.index(index=index, document=doc, id=page_id)
 
     i += 1
-    if i % 10e3 == 0:
-        if i % 10e4 == 0:
+    if i % 1e3 == 0:
+        if i % 1e4 == 0:
             print('+', end='')
         else:
             print('.', end='')
