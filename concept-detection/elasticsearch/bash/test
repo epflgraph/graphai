@@ -1,0 +1,12 @@
+#!/bin/bash
+#./kibana POST /_analyze '{"char_filter": ["html_strip"], "tokenizer": "standard", "filter": ["lowercase"], "text": "EPFL<div>I like <strong>pizza</strong> and <i>P</i><i>asta</i> for <br /> dinner</div>."}' | jq
+#./kibana POST /_analyze '{"analyzer": "stop", "text": "EPFL<div>I like <strong>pizza</strong> and <i>P</i><i>asta</i> for <br /> dinner</div>."}' | jq
+
+#./kibana GET /products/_search '{"query": {"term": {"name": "toaster"}}}' | jq
+#./kibana GET /products/_search '{"query": {"term": {"name": "Toaster"}}}' | jq
+#./kibana GET /products/_search '{"query": {"match": {"name": "Toaster"}}}' | jq
+
+#./kibana GET /products/_search '{"size": 0, "aggs": {"total_price": {"sum": {"field": "price"}}}}' | jq
+
+
+./kibana GET /books/_search '{"query": {"match": {"language": "english"}}}' | jq
