@@ -4,7 +4,6 @@ from elasticsearch import Elasticsearch
 es_config = configparser.ConfigParser()
 es_config.read('config/es.ini')
 es = Elasticsearch([f'{es_config["ES"].get("host")}:{es_config["ES"].get("port")}'])
-index = 'wikimath'
 
 query = {
     'match': {
@@ -14,7 +13,7 @@ query = {
         """
     }
 }
-r = es.search(index=index, query=query, highlight={
+r = es.search(index=es_config['ES'].get('index'), query=query, highlight={
     "fields": {
       "content": {}
     }
@@ -35,5 +34,5 @@ print(r)
 #   })
 # print(r)
 
-r = es.cat.indices(index=index, format='json', v=True)
+r = es.cat.indices(index=es_config['ES'].get('index'), format='json', v=True)
 print(r)

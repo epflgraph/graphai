@@ -8,8 +8,6 @@ from wikimarkup_stripper.models.stripper import strip
 es_config = configparser.ConfigParser()
 es_config.read('config/es.ini')
 es = Elasticsearch([f'{es_config["ES"].get("host")}:{es_config["ES"].get("port")}'])
-index = 'wikimath'
-es.indices.delete(index=index, ignore_unavailable=True)
 
 # Read db config from file and open connection
 db_config = configparser.ConfigParser()
@@ -35,7 +33,7 @@ for page_id, page_title, page_content in cursor:
         'title': page_title,
         'content': stripped_page_content
     }
-    es.index(index=index, document=doc, id=page_id)
+    es.index(index=es_config['ES'].get('index'), document=doc, id=page_id)
 
     i += 1
     if i % 1e3 == 0:
@@ -45,7 +43,7 @@ for page_id, page_title, page_content in cursor:
             print('.', end='')
 
 # Refresh index
-es.indices.refresh(index=index)
+es.indices.refresh(index=es_config['ES'].get('index'))
 
 print()
 print(f'Finished! Took {time.time() - start_time:.2f}s.')
