@@ -19,7 +19,6 @@ cursor = cnx.cursor()
 query = f"""
     SELECT PageID, PageTitle, PageContent FROM graph.Nodes_N_Concept
     WHERE PageContent LIKE "%mathematics%"
-    LIMIT 1000
 """
 cursor.execute(query)
 
