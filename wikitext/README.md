@@ -1,5 +1,5 @@
 # Wikitext
-The `wikitext` module provides a simple way to interact with the Concepts Detection API via a python class.
+The `wikitext` module provides a simple way to interact with the concept-detection API via a python class.
 
 ### Basic usage
 We can wikify a text as follows:
@@ -150,4 +150,4 @@ The `wikitext` module also provides the following function:
     * Returns:
         * `list[dict]`: A list of the common results aggregated according to f.
 
-Please check the [[https://c4science.ch/source/wikitext/browse/master/example.py | example file]] for more details.
+Please check the [example file](example.py) for more details.
