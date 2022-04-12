@@ -1,0 +1,6 @@
+{
+  "raw_text": "Def: If f:[a,b]->R continues, we define\nA(x):=∫ax f(t) dt\nA(x)\narea-function associated with f\na <-x-> b\n11.5.1. First part\nFundamental Theorem of Analysis (1st part):\nIf f:[a,b]->R is continuous, then x ↦ A(x) is\ndifferentiable on ]a,b[.",
+  "anchor_page_ids": [
+    50416
+  ]
+}

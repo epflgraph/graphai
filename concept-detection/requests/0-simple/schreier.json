@@ -1,0 +1,7 @@
+{
+  "raw_text": "We are interested in various aspects of spectral rigidity of Cayley and Schreier graphs of finitely generated groups. For each pair of integers, we consider an uncountable family of groups of automorphisms of the rooted d-regular tree, which provide examples of the following interesting phenomena. We get an uncountable family of non-quasi-isometric Cayley graphs with the same Laplacian spectrum, a union of two intervals, which we compute explicitly. Some of the groups provide examples where the spectrum of the Cayley graph is connected for one generating set and has a gap for another. We exhibit infinite Schreier graphs of these groups with the spectrum a Cantor set of Lebesgue measure zero union a countable set of isolated points accumulating on it. The Kesten spectral measures of the Laplacian on these Schreier graphs are discrete and concentrated on the isolated points. We construct, moreover, a complete system of eigenfunctions that are strongly localized.",
+  "anchor_page_ids": [
+    206137,
+    19873
+  ]
+}

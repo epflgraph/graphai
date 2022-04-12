@@ -1,0 +1,101 @@
+=> Par le TVI, ∃ c ∈ ]a,b[ t.q. f(c)=f □
+Rem: Sans l'hypothèse "f continue", le Th. de la moyenne n'est
+plus vrai !
+f <- ici, il n'existe
+aucun c t.q. f(c) = f
+11.5. Théorème fondamental de l'analyse
+
+
+
+
+
+
+f <- ici, il n'existe
+aucun c t.q. f(c) = f
+11.5. Théorème fondamental de l'analyse
+But: Calculer ∫ab f(x) dx ?
+
+
+
+
+
+
+f <- ici, il n'existe
+aucun c t.q. f(c) = f
+11.5. Théorème fondamental de l'analyse
+But: Calculer ∫ab f(x) dx ?
+Déf: Si f:[a,b]->R continue.
+
+
+
+
+
+aucun c t.q. f(c) = f
+11.5. Théorème fondamental de l'analyse
+But: Calculer ∫ab f(x) dx ?
+Déf: Si f:[a,b]->R continue, on définit
+a x b
+
+
+
+
+aucun c t.q. f(c) = f
+11.5. Théorème fondamental de l'analyse
+But: Calculer ∫ab f(x) dx ?
+Déf: Si f:[a,b]->R continue, on définit
+A(x):=∫ax f(t) dt
+A(x)
+a <-x-> b
+
+
+
+
+aucun c t.q. f(c) = f
+11.5. Théorème fondamental de l'analyse
+But: Calculer ∫ab f(x) dx ?
+Déf: Si f:[a,b]->R continue, on définit
+A(x):=∫ax f(t) dt
+A(x)
+fonction-aire associée à f
+a <-x-> b
+
+
+
+
+
+Déf: Si f:[a,b]->R continue, on définit
+A(x):=∫ax f(t) dt
+A(x)
+fonction-aire associée à f
+a <-x-> b
+11.5.1. Première partie
+Théorème Fondamental de l'Analyse (1ère partie)
+
+
+
+
+
+Déf: Si f:[a,b]->R continue, on définit
+A(x):=∫ax f(t) dt
+A(x)
+fonction-aire associée à f
+a <-x-> b
+11.5.1. Première partie
+Théorème Fondamental de l'Analyse (1ère partie):
+Si f:[a,b]->R est continue, alors x ↦ A(x) est
+dérivable sur ]a,b[.
+
+
+
+
+
+Déf: Si f:[a,b]->R continue, on définit
+A(x):=∫ax f(t) dt
+A(x)
+fonction-aire associée à f
+a <-x-> b
+11.5.1. Première partie
+Théorème Fondamental de l'Analyse (1ère partie):
+Si f:[a,b]->R est continue, alors x ↦ A(x) est
+dérivable sur ]a,b[, et
+A'(x) = f(x) ∀x∈]a,b[

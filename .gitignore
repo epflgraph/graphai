@@ -4,12 +4,11 @@
 # PyCharm project files
 .idea
 
-# Pickle and gpickle files (typically large)
-*.pickle
-*.gpickle
-
-# JSON files
-*.json
-
 # Pycache
 __pycache__
+
+# Data files (typically large)
+**/data
+
+# Config files (might include sensitive information or depend on the deployment)
+**/config

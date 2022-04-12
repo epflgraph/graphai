@@ -1,0 +1,6 @@
+{
+  "raw_text": "no c t.q. f(c) = f\n11.5. Fundamental Theorem of Analytics\nGoal: Calculate ∫ab f(x) dx?\nDef: If f:[a,b]->R continues, we define\nA(x):=∫ax f(t) dt\nA(x)\narea-function associated with f\na <-x-> b",
+  "anchor_page_ids": [
+    50416
+  ]
+}

@@ -1,0 +1,233 @@
+[
+  {
+    "keywords": "cantor set",
+    "page_id": 6172,
+    "page_title": "Cantor_set",
+    "page_title_0": "cantor set",
+    "searchrank": 1,
+    "median_graph_score": 0.47366500698031033,
+    "search_graph_ratio": 0.47366500698031033,
+    "levenshtein_score": 1,
+    "mixed_score": 0.4651455687130669
+  },
+  {
+    "keywords": "cantor set",
+    "page_id": 12216,
+    "page_title": "Georg_cantor",
+    "page_title_0": "georg cantor",
+    "searchrank": 2,
+    "median_graph_score": 0.4651667621335036,
+    "search_graph_ratio": 0.2325833810667518,
+    "levenshtein_score": 0.5454545454545454,
+    "mixed_score": 0.13720568334656674
+  },
+  {
+    "keywords": "cantor set",
+    "page_id": 922382,
+    "page_title": "Smith–volterra–cantor_set",
+    "page_title_0": "smith–volterra–cantor set",
+    "searchrank": 3,
+    "median_graph_score": 0.4257086061141322,
+    "search_graph_ratio": 0.14190286870471072,
+    "levenshtein_score": 0.5714285714285714,
+    "mixed_score": 0.0906890939069772
+  },
+  {
+    "keywords": "countable set",
+    "page_id": 43327,
+    "page_title": "Borel_set",
+    "page_title_0": "borel set",
+    "searchrank": 2,
+    "median_graph_score": 0.5316210246263717,
+    "search_graph_ratio": 0.26581051231318586,
+    "levenshtein_score": 0.5454545454545454,
+    "mixed_score": 0.1568070462100837
+  },
+  {
+    "keywords": "countable set",
+    "page_id": 19873,
+    "page_title": "Measure_(mathematics)",
+    "page_title_0": "measure (mathematics)",
+    "searchrank": 7,
+    "median_graph_score": 1,
+    "search_graph_ratio": 0.14285714285714285,
+    "levenshtein_score": 0.2941176470588235,
+    "mixed_score": 0.02307240775664064
+  },
+  {
+    "keywords": "exhibit infinite schreier graphs",
+    "page_id": 955164,
+    "page_title": "Geometric_group_theory",
+    "page_title_0": "geometric group theory",
+    "searchrank": 1,
+    "median_graph_score": 0.1920039666761616,
+    "search_graph_ratio": 0.1920039666761616,
+    "levenshtein_score": 0.33333333333333337,
+    "mixed_score": 0.04005366472907309
+  },
+  {
+    "keywords": "generating set",
+    "page_id": 56353,
+    "page_title": "Linear_span",
+    "page_title_0": "linear span",
+    "searchrank": 3,
+    "median_graph_score": 0.3770581704822038,
+    "search_graph_ratio": 0.12568605682740125,
+    "levenshtein_score": 0.4,
+    "mixed_score": 0.03896588498293946
+  },
+  {
+    "keywords": "groups provide examples",
+    "page_id": 17945,
+    "page_title": "Lie_group",
+    "page_title_0": "lie group",
+    "searchrank": 3,
+    "median_graph_score": 0.5010455459598495,
+    "search_graph_ratio": 0.1670151819866165,
+    "levenshtein_score": 0.3125,
+    "mixed_score": 0.030467832057522445
+  },
+  {
+    "keywords": "interesting phenomena",
+    "page_id": 146103,
+    "page_title": "Nonlinear_system",
+    "page_title_0": "nonlinear system",
+    "searchrank": 3,
+    "median_graph_score": 0.3061171021395065,
+    "search_graph_ratio": 0.10203903404650216,
+    "levenshtein_score": 0.43243243243243246,
+    "mixed_score": 0.03755667541064895
+  },
+  {
+    "keywords": "isolated points",
+    "page_id": 390557,
+    "page_title": "Isolated_point",
+    "page_title_0": "isolated point",
+    "searchrank": 1,
+    "median_graph_score": 0.3044964494573912,
+    "search_graph_ratio": 0.3044964494573912,
+    "levenshtein_score": 0.9655172413793104,
+    "mixed_score": 0.2973209367297194
+  },
+  {
+    "keywords": "isolated points",
+    "page_id": 30367,
+    "page_title": "Trigonometric_functions",
+    "page_title_0": "trigonometric functions",
+    "searchrank": 3,
+    "median_graph_score": 0.36159665441129435,
+    "search_graph_ratio": 0.12053221813709811,
+    "levenshtein_score": 0.368421052631579,
+    "mixed_score": 0.031184105806855992
+  },
+  {
+    "keywords": "isolated points",
+    "page_id": 89246,
+    "page_title": "Curve",
+    "page_title_0": "curve",
+    "searchrank": 4,
+    "median_graph_score": 0.45965307171660463,
+    "search_graph_ratio": 0.11491326792915116,
+    "levenshtein_score": 0.09999999999999998,
+    "mixed_score": 0.004500661197383446
+  },
+  {
+    "keywords": "kesten spectral measures",
+    "page_id": 19816546,
+    "page_title": "Harry_kesten",
+    "page_title_0": "harry kesten",
+    "searchrank": 1,
+    "median_graph_score": 0.19528374557887618,
+    "search_graph_ratio": 0.19528374557887618,
+    "levenshtein_score": 0.33333333333333337,
+    "mixed_score": 0.04073785457592341
+  },
+  {
+    "keywords": "laplacian",
+    "page_id": 174706,
+    "page_title": "Laplace_operator",
+    "page_title_0": "laplace operator",
+    "searchrank": 1,
+    "median_graph_score": 0.34562787817609714,
+    "search_graph_ratio": 0.34562787817609714,
+    "levenshtein_score": 0.56,
+    "mixed_score": 0.21351088720428893
+  },
+  {
+    "keywords": "laplacian spectrum",
+    "page_id": 174706,
+    "page_title": "Laplace_operator",
+    "page_title_0": "laplace operator",
+    "searchrank": 2,
+    "median_graph_score": 0.34562787817609714,
+    "search_graph_ratio": 0.17281393908804857,
+    "levenshtein_score": 0.6470588235294117,
+    "mixed_score": 0.13208387331640462
+  },
+  {
+    "keywords": "lebesgue measure",
+    "page_id": 18198,
+    "page_title": "Lebesgue_measure",
+    "page_title_0": "lebesgue measure",
+    "searchrank": 1,
+    "median_graph_score": 0.4557886677051185,
+    "search_graph_ratio": 0.4557886677051185,
+    "levenshtein_score": 1,
+    "mixed_score": 0.44759075702943224
+  },
+  {
+    "keywords": "lebesgue measure",
+    "page_id": 26064288,
+    "page_title": "Lebesgue_integration",
+    "page_title_0": "lebesgue integration",
+    "searchrank": 2,
+    "median_graph_score": 0.5246916467691431,
+    "search_graph_ratio": 0.2623458233845716,
+    "levenshtein_score": 0.6111111111111112,
+    "mixed_score": 0.18591420764273708
+  },
+  {
+    "keywords": "lebesgue measure",
+    "page_id": 252670,
+    "page_title": "Absolute_continuity",
+    "page_title_0": "absolute continuity",
+    "searchrank": 3,
+    "median_graph_score": 0.30459816432560893,
+    "search_graph_ratio": 0.10153272144186964,
+    "levenshtein_score": 0.34285714285714286,
+    "mixed_score": 0.02248605843267996
+  },
+  {
+    "keywords": "lebesgue measure",
+    "page_id": 19873,
+    "page_title": "Measure_(mathematics)",
+    "page_title_0": "measure (mathematics)",
+    "searchrank": 5,
+    "median_graph_score": 1,
+    "search_graph_ratio": 0.2,
+    "levenshtein_score": 0.4864864864864865,
+    "mixed_score": 0.09459985302690474
+  },
+  {
+    "keywords": "uncountable family",
+    "page_id": 32248,
+    "page_title": "Uncountable_set",
+    "page_title_0": "uncountable set",
+    "searchrank": 1,
+    "median_graph_score": 0.1876894774520177,
+    "search_graph_ratio": 0.1876894774520177,
+    "levenshtein_score": 0.7272727272727273,
+    "mixed_score": 0.16147823212149268
+  },
+  {
+    "keywords": "uncountable family",
+    "page_id": 44688,
+    "page_title": "Almost_everywhere",
+    "page_title_0": "almost everywhere",
+    "searchrank": 3,
+    "median_graph_score": 0.5375258708820279,
+    "search_graph_ratio": 0.17917529029400928,
+    "levenshtein_score": 0.22857142857142854,
+    "mixed_score": 0.018337823102748174
+  }
+]
