@@ -1,0 +1,7 @@
+wikitext module
+===============
+
+.. automodule:: wikitext
+   :members:
+   :undoc-members:
+   :show-inheritance:
