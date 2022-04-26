@@ -323,6 +323,16 @@ def section_title(section):
 
 
 def strip(page_content):
+    """
+    Strips wikimarkup from a string and returns a human-readable version by parsing the markup.
+
+    Args:
+        page_content (str): String containing the page content in wikimarkup format.
+
+    Returns:
+        str: String representing a human-readable version of the input text.
+    """
+    
     wikicode = mwparserfromhell.parse(page_content)
 
     sections = wikicode.get_sections(levels=[2], include_lead=True)
