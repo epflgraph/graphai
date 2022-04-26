@@ -1,7 +1,5 @@
 from requests import post
 import numpy as np
-import json
-from numbers import Number
 
 WIKIFY_TEST_URL = 'http://86.119.27.90:28800/wikify'
 WIKIFY_PROD_URL = 'http://86.119.30.77:28800/wikify'
