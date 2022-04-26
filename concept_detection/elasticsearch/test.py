@@ -13,11 +13,14 @@ query = {
         """
     }
 }
-r = es.search(index=es_config['ES'].get('index'), query=query, highlight={
-    "fields": {
-      "content": {}
+r = es.search(index=es_config['ES'].get('index'), query=query)
+print(r)
+
+query = {
+    'match_all': {
     }
-  })
+}
+r = es.search(index=es_config['ES'].get('index'), query=query)
 print(r)
 
 # query = {
