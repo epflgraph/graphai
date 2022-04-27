@@ -1,8 +1,0 @@
-wikitext
-========
-
-.. toctree::
-   :maxdepth: 4
-
-   example
-   wikitext
