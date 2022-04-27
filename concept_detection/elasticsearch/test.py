@@ -17,8 +17,9 @@ r = es.search(index=es_config['ES'].get('index'), query=query)
 print(r)
 
 query = {
-    'match_all': {
-    }
+   "query_string": {
+      "query": "( _exists_:field && -field:* )"
+   }
 }
 r = es.search(index=es_config['ES'].get('index'), query=query)
 print(r)
