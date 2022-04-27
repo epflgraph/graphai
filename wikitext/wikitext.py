@@ -1,3 +1,11 @@
+"""
+Module which provides a tool to use the concept-detection API in order to wikify a text.
+Wikifying a text is analyzing it and selecting a number of Wikipedia pages (concepts) which are relevant to it,
+together with several scores that measure this relevance.
+
+List of classes and functions:
+"""
+
 from requests import post
 import numpy as np
 
@@ -5,7 +13,7 @@ WIKIFY_TEST_URL = 'http://86.119.27.90:28800/wikify'
 WIKIFY_PROD_URL = 'http://86.119.30.77:28800/wikify'
 WIKIFY_URL = WIKIFY_PROD_URL
 
-__all__ = ['Wikitext', 'combine']
+# __all__ = ['Wikitext', 'combine']
 
 
 def equivalent(result1, result2):
@@ -13,8 +21,8 @@ def equivalent(result1, result2):
     Returns whether two wikify results are equivalent, i.e. whether they have the same keywords and page id.
 
     Args:
-        result1 (dict[str: *]): A wikify result.
-        result2 (dict[str: *]): A wikify result.
+        result1 (dict): A wikify result.
+        result2 (dict): Another wikify result.
 
     Returns:
         bool: True if both results are equivalent, False otherwise.

@@ -12,3 +12,6 @@ __pycache__
 
 # Config files (might include sensitive information or depend on the deployment)
 **/config
+
+# Documentation build files
+docs/build
