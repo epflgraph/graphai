@@ -5,7 +5,7 @@ if [ "$#" -ge 2 ]; then
 fi
 
 if [ "$#" -ge 1 ]; then
-    uvicorn main:app --host $1 --port 30010 --app-dir src --reload
+    uvicorn main:app --host $1 --port 30010 --reload
 else
-    uvicorn main:app --host 192.168.142.120 --port 30010 --app-dir src --reload
+    uvicorn main:app --host 192.168.142.120 --port 30010 --reload
 fi
