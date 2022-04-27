@@ -8,14 +8,12 @@ from concurrent.futures import as_completed
 from requests_futures.sessions import FuturesSession
 
 from typing import List, Optional
-from schemas.wikify_data import WikifyData, WikifyDataKeywords
-from schemas.wikify_result import WikifyResult
+from concept_detection.api.schemas import WikifyData, WikifyDataKeywords, WikifyResult
 
-from models.keyword_extraction import get_keyword_list
-from models.keyword_extraction import get_keyword_list_nltk
-import models.wikisearch as ws
-import models.elasticwikisearch as ews
-from models.postprocessing import compute_scores
+from concept_detection.keywords.extraction import get_keyword_list, get_keyword_list_nltk
+import concept_detection.search.wikisearch as ws
+import concept_detection.search.elasticwikisearch as ews
+from concept_detection.scores.postprocessing import compute_scores
 
 # Initialise FastAPI
 app = FastAPI(

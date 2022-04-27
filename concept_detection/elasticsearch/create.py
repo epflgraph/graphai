@@ -2,7 +2,7 @@ import time
 import configparser
 import mysql.connector
 from elasticsearch import Elasticsearch
-from wikimarkup_stripper.models.stripper import strip
+from wikimarkup_stripper.stripper import strip
 
 # Read es config and instantiate elasticsearch client
 es_config = configparser.ConfigParser()

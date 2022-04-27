@@ -1,7 +1,7 @@
 import wikipedia
 import ray
 
-from models.text_utils import decode_url_title
+from concept_detection.text.utils import decode_url_title
 
 # Set wikipedia language
 wikipedia.set_lang('en')
@@ -148,10 +148,7 @@ def run_wikisearch(keywords):
         keywords (str): Text to input in Wikipedia's search field.
 
     Returns:
-        dict(
-            'keywords': keywords (str),
-            'pages': list[dict]
-        )
+        dict('keywords': keywords (str), 'pages': list[dict])
     """
 
     # Check length of keywords. Return if too long

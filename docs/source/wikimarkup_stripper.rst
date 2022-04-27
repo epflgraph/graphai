@@ -1,5 +1,5 @@
 Wikimarkup stripper
 ===================
 
-.. automodule:: wikimarkup_stripper.models.stripper
+.. automodule:: wikimarkup_stripper.stripper
     :members:

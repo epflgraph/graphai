@@ -1,7 +1,7 @@
 import logging
 from fastapi import FastAPI
-from schemas.strip_data import StripData
-from models.stripper import strip
+from wikimarkup_stripper.schemas import StripData
+from wikimarkup_stripper.stripper import strip
 
 # Initialise FastAPI
 app = FastAPI(

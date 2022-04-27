@@ -5,8 +5,7 @@ import logging
 from fastapi import FastAPI
 
 from typing import List
-from schemas.scores_data import ScoresData
-from schemas.scores_result import ScoresResult
+from concept_detection.graph.schemas import ScoresData, ScoresResult
 
 # Initialise FastAPI
 app = FastAPI()

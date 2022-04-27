@@ -1,4 +1,4 @@
-from models.pyunicode import unxmlify
+from concept_detection.text.pyunicode import unxmlify
 
 
 def clean_text(raw_text):

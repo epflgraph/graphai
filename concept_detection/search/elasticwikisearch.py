@@ -1,11 +1,11 @@
 import configparser
 from elasticsearch import Elasticsearch
 
-from models.text_utils import decode_url_title
+from concept_detection.text.utils import decode_url_title
 
 es_config = configparser.ConfigParser()
-es_config.read('config/es.ini')
-es = Elasticsearch([f'{es_config["ES"].get("host")}:{es_config["ES"].get("port")}'])
+es_config.read('../config/es.ini')
+es = Elasticsearch([f'{es_config["ES"].get("host")}:{es_config["ES"].getint("port")}'])
 
 
 def preprocess(keyword_list):

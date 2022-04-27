@@ -1,7 +1,7 @@
 import RAKE
 import nltk
 from rake_nltk import Rake
-from models.text_utils import clean_text, word_tokens
+from concept_detection.text.utils import clean_text, word_tokens
 
 # Initialise RAKE model
 rake_model = RAKE.Rake(RAKE.SmartStopList())
