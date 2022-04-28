@@ -38,7 +38,7 @@ jobs:
           mkdir -p ${output_dir}
           ### apt-get --allow-releaseinfo-change update -y > ${output_dir}/apt-html.out;
           # GraphAI requirements
-          apt-get install -y python3 git-lfs g++ #>> ${output_dir}/apt-html.out;
+          apt-get install -y python3 git-lfs g++ libpython3.8-dev #>> ${output_dir}/apt-html.out;
           pip install --upgrade pip #> ${output_dir}/pip-html.out;
           cd ${GITHUB_WORKSPACE}/main;
           # Install GraphAI
