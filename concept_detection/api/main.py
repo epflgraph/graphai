@@ -8,6 +8,8 @@ from concurrent.futures import as_completed
 from requests_futures.sessions import FuturesSession
 
 from typing import List, Optional
+
+from definitions import DATA_DIR
 from concept_detection.api.schemas import WikifyData, WikifyDataKeywords, WikifyResult
 
 from concept_detection.keywords.extraction import get_keyword_list, get_keyword_list_nltk
@@ -30,13 +32,13 @@ logger = logging.getLogger('uvicorn.error')
 
 # Load page id titles mapping
 logger.info('Loading page_id_titles mapping...')
-with open('../data/page_id_titles.json') as f:
+with open(f'{DATA_DIR}/page_id_titles.json') as f:
     page_id_titles = json.load(f)
 logger.info('Loaded')
 
 # Load page title ids mapping
 logger.info('Loading page_title_ids mapping...')
-with open('../data/page_title_ids.json') as f:
+with open(f'{DATA_DIR}/page_title_ids.json') as f:
     page_title_ids = json.load(f)
 logger.info('Loaded')
 
