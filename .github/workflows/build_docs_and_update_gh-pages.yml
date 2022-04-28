@@ -56,8 +56,6 @@ jobs:
         ls docs/build
         echo "content of docs/build/html:"
         ls docs/build/html
-        echo "content of docs/build/latex:"
-        ls docs/build/latex
     # Create an artifact of the html output.
     - uses: actions/upload-artifact@v3
       with:
