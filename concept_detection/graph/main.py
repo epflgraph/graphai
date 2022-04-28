@@ -30,16 +30,7 @@ predecessors = {int(k): v for k, v in predecessors.items()}
 logger.info('Loaded')
 
 
-@app.post('/scores', response_model=List[ScoresResult])
-async def scores(scores_data: ScoresData):
-    """
-    Computes the graph scores for all pairs of source and target Wikipedia pages.
-    """
-
-    # Get input parameters
-    source_page_ids = scores_data.source_page_ids
-    target_page_ids = scores_data.target_page_ids
-
+def graph_scores(source_page_ids, target_page_ids):
     pairs = [(s, t) for s in source_page_ids for t in target_page_ids]
 
     results = []
@@ -83,8 +74,8 @@ async def scores(scores_data: ScoresData):
         n_in_paths = len(s_in & t_out) + (1 if s in t_out else 0)
 
         # Compute score
-        rebound = (1 + min(n_out_paths, n_in_paths))/(1 + max(n_out_paths, n_in_paths))
-        score = 1 - 1/(1 + np.log(1 + rebound * np.log(n_out_paths)))
+        rebound = (1 + min(n_out_paths, n_in_paths)) / (1 + max(n_out_paths, n_in_paths))
+        score = 1 - 1 / (1 + np.log(1 + rebound * np.log(n_out_paths)))
 
         # Append result
         results.append({
@@ -94,3 +85,16 @@ async def scores(scores_data: ScoresData):
         })
 
     return results
+
+
+@app.post('/scores', response_model=List[ScoresResult])
+async def scores(scores_data: ScoresData):
+    """
+    Computes the graph scores for all pairs of source and target Wikipedia pages.
+    """
+
+    # Get input parameters
+    source_page_ids = scores_data.source_page_ids
+    target_page_ids = scores_data.target_page_ids
+
+    return graph_scores(source_page_ids, target_page_ids)

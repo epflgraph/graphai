@@ -15,6 +15,7 @@ from concept_detection.api.schemas import WikifyData, WikifyDataKeywords, Wikify
 from concept_detection.keywords.extraction import get_keyword_list, get_keyword_list_nltk
 import concept_detection.search.wikisearch as ws
 import concept_detection.search.elasticwikisearch as ews
+from concept_detection.graph.main import graph_scores
 from concept_detection.scores.postprocessing import compute_scores
 
 # Initialise FastAPI
@@ -127,6 +128,11 @@ async def wikify(data: WikifyData, method: Optional[str] = None):
         for future in as_completed(futures):
             graph_results += future.result().json()
     logger.info(f'Computed graph scores for {len(source_page_ids)*len(anchor_page_ids)} pairs..................... Elapsed time: {time.time() - start_time}s.')
+
+    # Call graph scores directly
+    start_time = time.time()
+    graph_results = graph_scores(source_page_ids, anchor_page_ids)
+    logger.info(f'Computed graph scores directly for {len(source_page_ids)*len(anchor_page_ids)} pairs..................... Elapsed time: {time.time() - start_time}s.')
 
     # Post-process results and derive the different scores
     start_time = time.time()
