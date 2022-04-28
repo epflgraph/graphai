@@ -15,14 +15,14 @@ logger = logging.getLogger("uvicorn.error")
 
 # Load successors adjacency list
 logger.info('Loading successors adjacency list...')
-with open('data/successors.json') as f:
+with open('../data/successors.json') as f:
     successors = json.load(f)
 successors = {int(k): v for k, v in successors.items()}
 logger.info('Loaded')
 
 # Load predecessors adjacency list
 logger.info('Loading predecessors adjacency list...')
-with open('data/predecessors.json') as f:
+with open('../data/predecessors.json') as f:
     predecessors = json.load(f)
 predecessors = {int(k): v for k, v in predecessors.items()}
 logger.info('Loaded')

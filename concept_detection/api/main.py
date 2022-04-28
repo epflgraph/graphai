@@ -30,13 +30,13 @@ logger = logging.getLogger('uvicorn.error')
 
 # Load page id titles mapping
 logger.info('Loading page_id_titles mapping...')
-with open('data/page_id_titles.json') as f:
+with open('../data/page_id_titles.json') as f:
     page_id_titles = json.load(f)
 logger.info('Loaded')
 
 # Load page title ids mapping
 logger.info('Loading page_title_ids mapping...')
-with open('data/page_title_ids.json') as f:
+with open('../data/page_title_ids.json') as f:
     page_title_ids = json.load(f)
 logger.info('Loaded')
 
