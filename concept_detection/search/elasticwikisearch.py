@@ -1,14 +1,11 @@
-import os
 import configparser
 from elasticsearch import Elasticsearch
 
 from concept_detection.text.utils import decode_url_title
+from definitions import CONFIG_DIR
 
-dirname = os.path.dirname(__file__)
 es_config = configparser.ConfigParser()
-print(os.getcwd())
-print(f'{dirname}/../config/es.ini')
-es_config.read(f'{dirname}/../config/es.ini')
+es_config.read(f'{CONFIG_DIR}/es.ini')
 es = Elasticsearch([f'{es_config["ES"].get("host")}:{es_config["ES"].getint("port")}'])
 
 
