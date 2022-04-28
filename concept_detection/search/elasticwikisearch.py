@@ -6,6 +6,8 @@ from concept_detection.text.utils import decode_url_title
 
 dirname = os.path.dirname(__file__)
 es_config = configparser.ConfigParser()
+print(os.getcwd())
+print(f'{dirname}/../config/es.ini')
 es_config.read(f'{dirname}/../config/es.ini')
 es = Elasticsearch([f'{es_config["ES"].get("host")}:{es_config["ES"].getint("port")}'])
 
