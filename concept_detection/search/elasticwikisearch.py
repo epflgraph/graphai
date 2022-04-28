@@ -15,10 +15,10 @@ def preprocess(keyword_list):
     Cleans all the keywords in the given keyword list by applying the decode_url_title function.
 
     Args:
-        keyword_list (list[str]): List of keywords to be cleaned.
+        keyword_list (list of str): List of keywords to be cleaned.
 
     Returns:
-        list[str]: List of cleaned keywords.
+        list of str: List of cleaned keywords.
     """
     return [decode_url_title(keywords) for keywords in keyword_list]
 

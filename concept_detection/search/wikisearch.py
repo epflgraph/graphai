@@ -25,7 +25,7 @@ class WikisearchActor:
         Returns:
             dict(
                 'keywords': keywords (str),
-                'pages': list[dict]
+                'pages': list of dict
             )
         """
         # Check length of keywords. Return if too long
@@ -68,10 +68,10 @@ def preprocess(keyword_list):
     Cleans all the keywords in the given keyword list by applying the decode_url_title function.
 
     Args:
-        keyword_list (list[str]): List of keywords to be cleaned.
+        keyword_list (list of str): List of keywords to be cleaned.
 
     Returns:
-        list[str]: List of cleaned keywords.
+        list of str: List of cleaned keywords.
     """
     return [decode_url_title(keywords) for keywords in keyword_list]
 
@@ -81,11 +81,11 @@ def postprocess(results, page_title_ids):
     Modifies the given results to include page ids in addition to page titles.
 
     Args:
-        results (list[dict]): List of wikisearch results.
-        page_title_ids (dict{str: int}): Mapping from page titles to ids.
+        results (list of dict): List of wikisearch results.
+        page_title_ids (dict of str: int): Mapping from page titles to ids.
 
     Returns:
-        list[dict]: The list of wikisearch results, with updated page ids based on the page titles.
+        list of dict: The list of wikisearch results, with updated page ids based on the page titles.
     """
 
     for result in results:
@@ -102,10 +102,10 @@ def extract_page_ids(results):
     Iterates through the given wikisearch results and returns a list with all the page ids.
 
     Args:
-        results (list[dict]): List of wikisearch results.
+        results (list of dict): List of wikisearch results.
 
     Returns:
-        list[int]: List of all page ids present along all results.
+        list of int: List of all page ids present along all results.
     """
     return list(set(page['page_id'] for result in results for page in result['pages']))
 
@@ -115,11 +115,11 @@ def extract_anchor_page_ids(results, max_n=3):
     Iterates through the given wikisearch results and returns a list with the most relevant page ids.
 
     Args:
-        results (list[dict]): List of wikisearch results.
+        results (list of dict): List of wikisearch results.
         max_n (int): Maximum number of page ids returned. Default: 3.
 
     Returns:
-        list[int]: List of the most relevant page ids present along all results.
+        list of int: List of the most relevant page ids present along all results.
     """
 
     page_scores = {}
@@ -148,7 +148,7 @@ def run_wikisearch(keywords):
         keywords (str): Text to input in Wikipedia's search field.
 
     Returns:
-        dict('keywords': keywords (str), 'pages': list[dict])
+        dict: Dictionary with keys 'keywords' (str) and 'pages' (list of dict)
     """
 
     # Check length of keywords. Return if too long
@@ -186,13 +186,13 @@ def wikisearch(keyword_list, page_title_ids, how='ray'):
     Searches Wikipedia API for all keywords in the list, sequentially or in parallel.
 
     Args:
-        keyword_list (list[str]): List of keywords to perform the wikisearch.
-        page_title_ids (dict{str: int}): Mapping from page titles to ids.
+        keyword_list (list of str): List of keywords to perform the wikisearch.
+        page_title_ids (dict of str: int): Mapping from page titles to ids.
         how (str): String specifying whether to run the wikisearch sequentially or in parallel.
             Possible values: 'seq' (sequentially) or 'ray' (parallel). Default: 'ray'.
 
     Returns:
-        list[dict]: List of wikisearch results.
+        list of dict: List of wikisearch results.
     """
 
     # Clean all keywords in keyword_list
