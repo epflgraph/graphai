@@ -130,7 +130,7 @@ async def wikify(data: WikifyData, method: Optional[str] = None):
 
     # Post-process results and derive the different scores
     start_time = time.time()
-    scores = compute_scores(wikisearch_results, graph_results, page_id_titles, logger, debug=True)
+    scores = compute_scores(wikisearch_results, graph_results, page_id_titles, logger)
     logger.info(f'Post-processed results, got {len(scores)}.......................... Elapsed time: {time.time() - start_time}s.')
 
     # Display total elapsed time
