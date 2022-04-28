@@ -12,3 +12,4 @@ wikipedia
 ray
 python-Levenshtein
 mysql-connector
+mwparserfromhell
