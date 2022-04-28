@@ -42,7 +42,7 @@ jobs:
           pip install --upgrade pip #> ${output_dir}/pip-html.out;
           cd ${GITHUB_WORKSPACE}/main;
           # Install GraphAI
-          pip install -e .[docs,recommended] #>> ${output_dir}/pip-html.out;
+          pip install -e .[docs] #>> ${output_dir}/pip-html.out;
         build-command: "sphinx-build -M html source build -T"
     - name: Check docs
       run: |
