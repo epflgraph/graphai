@@ -84,7 +84,6 @@ jobs:
         cd  ${GITHUB_WORKSPACE}
         cp -r main/docs/build/html/* gh-pages/
         cd  gh-pages/
-        rm {pip,apt}-html.out
         echo "content of gh-pages: "
         ls ${GITHUB_WORKSPACE}/gh-pages
         git config --local user.email "action@github.com"
