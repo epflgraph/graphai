@@ -37,8 +37,211 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="wikitext">
-<h1>Wikitext<a class="headerlink" href="#wikitext" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="module-wikitext.wikitext">
+<span id="wikitext"></span><h1>Wikitext<a class="headerlink" href="#module-wikitext.wikitext" title="Permalink to this headline">¶</a></h1>
+<p>Module which provides a tool to use the concept-detection API in order to wikify a text.
+Wikifying a text is analyzing it and selecting a number of Wikipedia pages (concepts) which are relevant to it,
+together with several scores that measure this relevance.</p>
+<p>List of classes and functions:</p>
+<dl class="function">
+<dt id="wikitext.wikitext.equivalent">
+<code class="sig-prename descclassname">wikitext.wikitext.</code><code class="sig-name descname">equivalent</code><span class="sig-paren">(</span><em class="sig-param">result1</em>, <em class="sig-param">result2</em><span class="sig-paren">)</span><a class="headerlink" href="#wikitext.wikitext.equivalent" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns whether two wikify results are equivalent, i.e. whether they have the same keywords and page id.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>result1</strong> (<em>dict</em>) – A wikify result.</p></li>
+<li><p><strong>result2</strong> (<em>dict</em>) – Another wikify result.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>True if both results are equivalent, False otherwise.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="wikitext.wikitext.combine">
+<code class="sig-prename descclassname">wikitext.wikitext.</code><code class="sig-name descname">combine</code><span class="sig-paren">(</span><em class="sig-param">wikitexts</em>, <em class="sig-param">f=None</em><span class="sig-paren">)</span><a class="headerlink" href="#wikitext.wikitext.combine" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns all results for all wikitexts with the scores aggregated according to f.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>wikitexts</strong> (<em>list</em><em>[</em><a class="reference internal" href="#wikitext.wikitext.Wikitext" title="wikitext.wikitext.Wikitext"><em>Wikitext</em></a><em>]</em>) – A list of Wikitext objects.</p></li>
+<li><p><strong>f</strong> (<em>Callable</em><em>[</em><em>list</em><em>[</em><em>Number</em><em>]</em><em>, </em><em>Number</em><em>]</em>) – A function to aggregate the scores of the common pages.
+Default: None (numpy.mean)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A list of the common results aggregated according to f.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>list[dict]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="class">
+<dt id="wikitext.wikitext.Wikitext">
+<em class="property">class </em><code class="sig-prename descclassname">wikitext.wikitext.</code><code class="sig-name descname">Wikitext</code><span class="sig-paren">(</span><em class="sig-param">raw_text</em>, <em class="sig-param">anchor_page_ids=None</em><span class="sig-paren">)</span><a class="headerlink" href="#wikitext.wikitext.Wikitext" title="Permalink to this definition">¶</a></dt>
+<dd><p>A Wikitext is initialised with a text and computes its related Wikipedia concepts.</p>
+<dl class="attribute">
+<dt id="wikitext.wikitext.Wikitext.raw_text">
+<code class="sig-name descname">raw_text</code><a class="headerlink" href="#wikitext.wikitext.Wikitext.raw_text" title="Permalink to this definition">¶</a></dt>
+<dd><p>A string with the text the Wikitext represents.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="wikitext.wikitext.Wikitext.anchor_page_ids">
+<code class="sig-name descname">anchor_page_ids</code><a class="headerlink" href="#wikitext.wikitext.Wikitext.anchor_page_ids" title="Permalink to this definition">¶</a></dt>
+<dd><p>A list containing the ids of the anchor pages to define the search space.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>list[int]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="wikitext.wikitext.Wikitext.results">
+<code class="sig-name descname">results</code><a class="headerlink" href="#wikitext.wikitext.Wikitext.results" title="Permalink to this definition">¶</a></dt>
+<dd><p>A list of the results after wikifying the text.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>list[dict]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="wikitext.wikitext.Wikitext.keywords">
+<code class="sig-name descname">keywords</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#wikitext.wikitext.Wikitext.keywords" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>A list of the unique keywords present in the results.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>list[str]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="wikitext.wikitext.Wikitext.page_ids">
+<code class="sig-name descname">page_ids</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#wikitext.wikitext.Wikitext.page_ids" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>A list of the unique page ids present in the results.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>list[int]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="wikitext.wikitext.Wikitext.unique_pairs">
+<code class="sig-name descname">unique_pairs</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#wikitext.wikitext.Wikitext.unique_pairs" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>A list of the unique pairs (keywords, page id) present in the results.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>list[tuple(str, int)]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="wikitext.wikitext.Wikitext.page_titles">
+<code class="sig-name descname">page_titles</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#wikitext.wikitext.Wikitext.page_titles" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>A list of the unique page titles present in the results.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>list[str]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="wikitext.wikitext.Wikitext.keywords_results">
+<code class="sig-name descname">keywords_results</code><span class="sig-paren">(</span><em class="sig-param">keywords</em><span class="sig-paren">)</span><a class="headerlink" href="#wikitext.wikitext.Wikitext.keywords_results" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>A list of the results matching the provided keywords.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>list[dict]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="wikitext.wikitext.Wikitext.page_results">
+<code class="sig-name descname">page_results</code><span class="sig-paren">(</span><em class="sig-param">page_id</em><span class="sig-paren">)</span><a class="headerlink" href="#wikitext.wikitext.Wikitext.page_results" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>A list of the results matching the provided page id.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>list[dict]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="wikitext.wikitext.Wikitext.pair_results">
+<code class="sig-name descname">pair_results</code><span class="sig-paren">(</span><em class="sig-param">keywords</em>, <em class="sig-param">page_id</em><span class="sig-paren">)</span><a class="headerlink" href="#wikitext.wikitext.Wikitext.pair_results" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>A list of the results matching the provided pair (keywords, page id).</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>list[dict]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="wikitext.wikitext.Wikitext.keywords_aggregated">
+<code class="sig-name descname">keywords_aggregated</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#wikitext.wikitext.Wikitext.keywords_aggregated" title="Permalink to this definition">¶</a></dt>
+<dd><p>Aggregates results with the same keywords averaging their scores.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>A list of the aggregated results, unique by keywords. Their scores are averaged.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>list[dict]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="wikitext.wikitext.Wikitext.page_aggregated">
+<code class="sig-name descname">page_aggregated</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#wikitext.wikitext.Wikitext.page_aggregated" title="Permalink to this definition">¶</a></dt>
+<dd><p>Aggregates results with the same page id averaging their scores.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>A list of the aggregated results, unique by page id. Their scores are averaged.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>list[dict]</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
 </div>
 
 

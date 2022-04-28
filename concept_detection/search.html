@@ -42,8 +42,121 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="search">
-<h1>Search<a class="headerlink" href="#search" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="module-concept_detection.search.wikisearch">
+<span id="search"></span><h1>Search<a class="headerlink" href="#module-concept_detection.search.wikisearch" title="Permalink to this headline">¶</a></h1>
+<dl class="function">
+<dt id="concept_detection.search.wikisearch.preprocess">
+<code class="sig-prename descclassname">concept_detection.search.wikisearch.</code><code class="sig-name descname">preprocess</code><span class="sig-paren">(</span><em class="sig-param">keyword_list</em><span class="sig-paren">)</span><a class="headerlink" href="#concept_detection.search.wikisearch.preprocess" title="Permalink to this definition">¶</a></dt>
+<dd><p>Cleans all the keywords in the given keyword list by applying the decode_url_title function.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>keyword_list</strong> (<em>list of str</em>) – List of keywords to be cleaned.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>List of cleaned keywords.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>list of str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="concept_detection.search.wikisearch.postprocess">
+<code class="sig-prename descclassname">concept_detection.search.wikisearch.</code><code class="sig-name descname">postprocess</code><span class="sig-paren">(</span><em class="sig-param">results</em>, <em class="sig-param">page_title_ids</em><span class="sig-paren">)</span><a class="headerlink" href="#concept_detection.search.wikisearch.postprocess" title="Permalink to this definition">¶</a></dt>
+<dd><p>Modifies the given results to include page ids in addition to page titles.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>results</strong> (<em>list of dict</em>) – List of wikisearch results.</p></li>
+<li><p><strong>(</strong><strong>dict of str</strong> (<em>page_title_ids</em>) – int): Mapping from page titles to ids.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The list of wikisearch results, with updated page ids based on the page titles.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>list of dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="concept_detection.search.wikisearch.extract_page_ids">
+<code class="sig-prename descclassname">concept_detection.search.wikisearch.</code><code class="sig-name descname">extract_page_ids</code><span class="sig-paren">(</span><em class="sig-param">results</em><span class="sig-paren">)</span><a class="headerlink" href="#concept_detection.search.wikisearch.extract_page_ids" title="Permalink to this definition">¶</a></dt>
+<dd><p>Iterates through the given wikisearch results and returns a list with all the page ids.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>results</strong> (<em>list of dict</em>) – List of wikisearch results.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>List of all page ids present along all results.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>list of int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="concept_detection.search.wikisearch.extract_anchor_page_ids">
+<code class="sig-prename descclassname">concept_detection.search.wikisearch.</code><code class="sig-name descname">extract_anchor_page_ids</code><span class="sig-paren">(</span><em class="sig-param">results</em>, <em class="sig-param">max_n=3</em><span class="sig-paren">)</span><a class="headerlink" href="#concept_detection.search.wikisearch.extract_anchor_page_ids" title="Permalink to this definition">¶</a></dt>
+<dd><p>Iterates through the given wikisearch results and returns a list with the most relevant page ids.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>results</strong> (<em>list of dict</em>) – List of wikisearch results.</p></li>
+<li><p><strong>max_n</strong> (<em>int</em>) – Maximum number of page ids returned. Default: 3.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>List of the most relevant page ids present along all results.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>list of int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="concept_detection.search.wikisearch.run_wikisearch">
+<code class="sig-prename descclassname">concept_detection.search.wikisearch.</code><code class="sig-name descname">run_wikisearch</code><span class="sig-paren">(</span><em class="sig-param">keywords</em><span class="sig-paren">)</span><a class="headerlink" href="#concept_detection.search.wikisearch.run_wikisearch" title="Permalink to this definition">¶</a></dt>
+<dd><p>Searches Wikipedia API for input keywords. Returns top 10 results.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>keywords</strong> (<em>str</em>) – Text to input in Wikipedia’s search field.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Dictionary with keys ‘keywords’ (str) and ‘pages’ (list of dict)</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="concept_detection.search.wikisearch.wikisearch">
+<code class="sig-prename descclassname">concept_detection.search.wikisearch.</code><code class="sig-name descname">wikisearch</code><span class="sig-paren">(</span><em class="sig-param">keyword_list</em>, <em class="sig-param">page_title_ids</em>, <em class="sig-param">how='ray'</em><span class="sig-paren">)</span><a class="headerlink" href="#concept_detection.search.wikisearch.wikisearch" title="Permalink to this definition">¶</a></dt>
+<dd><p>Searches Wikipedia API for all keywords in the list, sequentially or in parallel.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>keyword_list</strong> (<em>list of str</em>) – List of keywords to perform the wikisearch.</p></li>
+<li><p><strong>(</strong><strong>dict of str</strong> (<em>page_title_ids</em>) – int): Mapping from page titles to ids.</p></li>
+<li><p><strong>how</strong> (<em>str</em>) – String specifying whether to run the wikisearch sequentially or in parallel.
+Possible values: ‘seq’ (sequentially) or ‘ray’ (parallel). Default: ‘ray’.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>List of wikisearch results.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>list of dict</p>
+</dd>
+</dl>
+</dd></dl>
+
 </div>
 
 
