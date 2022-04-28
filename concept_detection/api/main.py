@@ -4,9 +4,6 @@ import json
 
 from fastapi import FastAPI
 
-from concurrent.futures import as_completed
-from requests_futures.sessions import FuturesSession
-
 from typing import List, Optional
 
 from definitions import DATA_DIR
@@ -15,7 +12,7 @@ from concept_detection.api.schemas import WikifyData, WikifyDataKeywords, Wikify
 from concept_detection.keywords.extraction import get_keyword_list, get_keyword_list_nltk
 import concept_detection.search.wikisearch as ws
 import concept_detection.search.elasticwikisearch as ews
-from concept_detection.graph.main import graph_scores
+from concept_detection.graph.scores import graph_scores
 from concept_detection.scores.postprocessing import compute_scores
 
 # Initialise FastAPI
@@ -24,9 +21,6 @@ app = FastAPI(
     description="This API allows users to extract relevant Wikipedia pages from any given text, by using several AI techniques in combination with data from the EPFL Graph.",
     version="0.1.0"
 )
-
-# Specify URL for graph scores API call
-GRAPH_SCORES_URL = 'http://86.119.27.90:28900/scores'
 
 # Get uvicorn logger so we can write on it
 logger = logging.getLogger('uvicorn.error')
@@ -114,25 +108,10 @@ async def wikify(data: WikifyData, method: Optional[str] = None):
     source_page_ids = list(filter(None, source_page_ids))
     anchor_page_ids = list(filter(None, anchor_page_ids))
 
-    # Send request to compute graph scores between all pairs of source/target pages
-    # start_time = time.time()
-    # graph_results = []
-    # with FuturesSession() as session:
-    #     # Send request
-    #     futures = [session.post(GRAPH_SCORES_URL, json={
-    #         'source_page_ids': source_page_ids,
-    #         'target_page_ids': anchor_page_ids
-    #     })]
-    #
-    #     # Wait for result
-    #     for future in as_completed(futures):
-    #         graph_results += future.result().json()
-    # logger.info(f'Computed graph scores for {len(source_page_ids)*len(anchor_page_ids)} pairs..................... Elapsed time: {time.time() - start_time}s.')
-
-    # Call graph scores directly
+    # Compute graph scores
     start_time = time.time()
     graph_results = graph_scores(source_page_ids, anchor_page_ids)
-    logger.info(f'Computed graph scores directly for {len(source_page_ids)*len(anchor_page_ids)} pairs..................... Elapsed time: {time.time() - start_time}s.')
+    logger.info(f'Computed graph scores for {len(source_page_ids)*len(anchor_page_ids)} pairs..................... Elapsed time: {time.time() - start_time}s.')
 
     # Post-process results and derive the different scores
     start_time = time.time()
@@ -176,19 +155,9 @@ async def wikify_keywords(data: WikifyDataKeywords):
     source_page_ids = list(filter(None, source_page_ids))
     anchor_page_ids = list(filter(None, anchor_page_ids))
 
-    # Send request to compute graph scores between all pairs of source/target pages
+    # Compute graph scores
     start_time = time.time()
-    graph_results = []
-    with FuturesSession() as session:
-        # Send request
-        futures = [session.post(GRAPH_SCORES_URL, json={
-            'source_page_ids': source_page_ids,
-            'target_page_ids': anchor_page_ids
-        })]
-
-        # Wait for result
-        for future in as_completed(futures):
-            graph_results += future.result().json()
+    graph_results = graph_scores(source_page_ids, anchor_page_ids)
     logger.info(f'Computed graph scores for {len(source_page_ids)*len(anchor_page_ids)} pairs..................... Elapsed time: {time.time() - start_time}s.')
 
     # Post-process results and derive the different scores

@@ -1,33 +1,21 @@
 import numpy as np
 import json
-import logging
-
-from fastapi import FastAPI
-
-from typing import List
 
 from definitions import DATA_DIR
-from concept_detection.graph.schemas import ScoresData, ScoresResult
-
-# Initialise FastAPI
-app = FastAPI()
-
-# Get uvicorn logger so we can write on it
-logger = logging.getLogger("uvicorn.error")
 
 # Load successors adjacency list
-logger.info('Loading successors adjacency list...')
+print('Loading successors adjacency list...')
 with open(f'{DATA_DIR}/successors.json') as f:
     successors = json.load(f)
 successors = {int(k): v for k, v in successors.items()}
-logger.info('Loaded')
+print('Loaded')
 
 # Load predecessors adjacency list
-logger.info('Loading predecessors adjacency list...')
+print('Loading predecessors adjacency list...')
 with open(f'{DATA_DIR}/predecessors.json') as f:
     predecessors = json.load(f)
 predecessors = {int(k): v for k, v in predecessors.items()}
-logger.info('Loaded')
+print('Loaded')
 
 
 def graph_scores(source_page_ids, target_page_ids):
@@ -86,15 +74,3 @@ def graph_scores(source_page_ids, target_page_ids):
 
     return results
 
-
-@app.post('/scores', response_model=List[ScoresResult])
-async def scores(scores_data: ScoresData):
-    """
-    Computes the graph scores for all pairs of source and target Wikipedia pages.
-    """
-
-    # Get input parameters
-    source_page_ids = scores_data.source_page_ids
-    target_page_ids = scores_data.target_page_ids
-
-    return graph_scores(source_page_ids, target_page_ids)
