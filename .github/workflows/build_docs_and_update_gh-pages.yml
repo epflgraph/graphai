@@ -1,0 +1,109 @@
+# This is a basic workflow to help you get started with Actions
+
+name: "Build docs and update gh-pages"
+
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on push or pull request events
+  push:
+    branches:
+      - "master"
+  pull_request:
+    branches:
+      - "**"
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  docs:
+    runs-on: ubuntu-latest
+    steps:
+    # checkout relevant branch into main dir
+    - uses: actions/checkout@v3
+      with:
+        path: main
+    # Grabbing custom dependencies and building.
+    - uses: ammaraskar/sphinx-action@master
+      with:
+        docs-folder: "main/docs/"
+        pre-build-command: |
+          echo "current dir: $PWD";
+          echo "contents of GITHUB_WORKSPACE: $GITHUB_WORKSPACE";
+          ls $GITHUB_WORKSPACE;
+          echo "contents of ${GITHUB_WORKSPACE}/main:";
+          ls ${GITHUB_WORKSPACE}/main;
+          echo "run apt and pip"
+          output_dir="$GITHUB_WORKSPACE/main/docs/build/html"
+          mkdir -p ${output_dir}
+          ### apt-get --allow-releaseinfo-change update -y > ${output_dir}/apt-html.out;
+          # datapipe requirements
+          ### apt-get install -y python3 git-lfs default-mysql-client sqlite3 g++ gpg libpoppler-cpp-dev pkg-config alien curl >> ${output_dir}/apt-html.out;
+          ### pip install --upgrade pip > ${output_dir}/pip-html.out;
+          cd ${GITHUB_WORKSPACE}/main;
+          # install datapipe
+          ### pip install -e .[docs,recommended]  >> ${output_dir}/pip-html.out;
+        build-command: "sphinx-build -M html source build -T"
+    - name: Check docs
+      run: |
+        echo "content of current directory: $PWD"
+        ls ./
+        echo "going into main"
+        cd ${GITHUB_WORKSPACE}/main
+        echo "content of docs:"
+        ls docs
+        echo "content of docs/build:"
+        ls docs/build
+        echo "content of docs/build/html:"
+        ls docs/build/html
+    # Create an artifact of the html output.
+    - uses: actions/upload-artifact@v3
+      with:
+        name: DocumentationHTML
+        path: main/docs/build/html/
+    # clone the gh-pages branch into the gh-pages dir
+    - uses: actions/checkout@v3
+      with:
+        path: gh-pages
+        ref: gh-pages
+    # Publish built docs to gh-pages branch.
+    # ===============================
+    - name: Commit documentation changes
+      run: |
+        echo "content of current directory: $PWD"
+        ls ./
+        echo "going into main"
+        cd ${GITHUB_WORKSPACE}/main
+        git_hash=$(git rev-parse --short "$GITHUB_SHA")
+        git_branch=${GITHUB_REF#refs/heads/}
+        echo "content of  ${GITHUB_WORKSPACE}:"
+        ls ${GITHUB_WORKSPACE}
+        echo "content of gh-pages:"
+        ls ${GITHUB_WORKSPACE}/gh-pages
+        echo "copy ..."
+        cd  ${GITHUB_WORKSPACE}
+        cp -r main/docs/build/html/* gh-pages/
+        cd  gh-pages/
+        touch .nojekyll
+        echo "content of gh-pages: "
+        ls ${GITHUB_WORKSPACE}/gh-pages
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        echo "git status:"
+        git status
+        echo "adding changes..."
+        git add .
+        echo "git status:"
+        git status
+        echo "commiting changes..."
+        # The command below will fail if no changes were present, so we ignore that.
+        git commit -m "doc from ${git_branch} @ ${git_hash}" || true
+        echo "git status:"
+        git status
+    - name: Push changes
+      uses: ad-m/github-push-action@master
+      with:
+        branch: gh-pages
+        directory: gh-pages
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+    # ===============================
