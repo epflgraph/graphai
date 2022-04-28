@@ -1,0 +1,14 @@
+uvicorn
+fastapi
+elasticsearch
+numpy
+pandas
+matplotlib
+python-rake
+requests-futures
+nltk
+rake-nltk
+wikipedia
+ray
+python-Levenshtein
+mysql-connector
