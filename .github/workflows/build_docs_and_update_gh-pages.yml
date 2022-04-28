@@ -37,12 +37,12 @@ jobs:
           output_dir="$GITHUB_WORKSPACE/main/docs/build/html"
           mkdir -p ${output_dir}
           ### apt-get --allow-releaseinfo-change update -y > ${output_dir}/apt-html.out;
-          # datapipe requirements
-          ### apt-get install -y python3 git-lfs default-mysql-client sqlite3 g++ gpg libpoppler-cpp-dev pkg-config alien curl >> ${output_dir}/apt-html.out;
-          ### pip install --upgrade pip > ${output_dir}/pip-html.out;
+          # GraphAI requirements
+          apt-get install -y python3 git-lfs #>> ${output_dir}/apt-html.out;
+          pip install --upgrade pip #> ${output_dir}/pip-html.out;
           cd ${GITHUB_WORKSPACE}/main;
-          # install datapipe
-          ### pip install -e .[docs,recommended]  >> ${output_dir}/pip-html.out;
+          # Install GraphAI
+          pip install -e .[docs,recommended] #>> ${output_dir}/pip-html.out;
         build-command: "sphinx-build -M html source build -T"
     - name: Check docs
       run: |
