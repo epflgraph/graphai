@@ -12,7 +12,7 @@ HEADERS = {'User-Agent': 'graphai (https://github.com/epflgraph/graphai)'}
 # wikipedia.set_lang('en')
 
 # Init ray
-ray.init(namespace="wikisearch", include_dashboard=False, log_to_driver=True, runtime_env={'working_dir': ROOT_DIR, 'pip': ['requests']})
+ray.init(namespace="wikisearch", include_dashboard=False, log_to_driver=True)
 
 
 class PageResult:
