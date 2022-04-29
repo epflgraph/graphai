@@ -2,7 +2,7 @@ import requests
 import ray
 # import wikipedia
 
-from definitions import ROOT_DIR
+from concept_detection.search.types import *
 from concept_detection.text.utils import decode_url_title
 
 API_URL = 'http://en.wikipedia.org/w/api.php'
@@ -13,22 +13,6 @@ HEADERS = {'User-Agent': 'graphai (https://github.com/epflgraph/graphai)'}
 
 # Init ray
 ray.init(namespace="wikisearch", include_dashboard=False, log_to_driver=True)
-
-
-class PageResult:
-
-    def __init__(self, page_id, page_title, searchrank, score):
-        self.page_id = page_id
-        self.page_title = page_title
-        self.searchrank = searchrank
-        self.score = score
-
-
-class WikisearchResult:
-
-    def __init__(self, keywords, pages):
-        self.keywords = keywords
-        self.pages = pages
 
 
 @ray.remote
