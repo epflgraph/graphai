@@ -3,7 +3,7 @@
 This module contains projects and services enhancing the [EPFL Graph](https://www.epfl.ch/education/educational-initiatives/cede/campusanalytics/epfl-graph/) project with AI-based utilities.
 
 * [Setup](#setup)
-* [Concept Detection](#concept_detection)
+* [Concept Detection](#concept-detection)
 * [Wikitext](wikitext)
 
 ## Setup
