@@ -15,3 +15,6 @@ config
 
 # Documentation build files
 docs/build
+
+# Python package egg folder
+*egg-info
