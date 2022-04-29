@@ -4,7 +4,7 @@ This module contains projects and services enhancing the [EPFL Graph](https://ww
 
 * [Setup](#setup)
 * [Concept Detection](#concept_detection)
-* [Wikitext](#wikitext)
+* [Wikitext](wikitext)
 
 ## Setup
 The GraphAI module may be installed as a regular python package. To install it, simply run
