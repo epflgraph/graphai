@@ -42,13 +42,8 @@ logger = logging.getLogger('uvicorn.error')
 
 
 @app.post('/keywords')
-async def keywords(data: KeywordsRequest):
-    return get_keyword_list(data.raw_text)
-
-
-@app.post('/keywords_nltk')
-async def keywords_nltk(data: KeywordsRequest):
-    return get_keyword_list_nltk(data.raw_text)
+async def keywords(data: KeywordsRequest, method: Optional[str] = None):
+    return get_keyword_list(data.raw_text, method)
 
 
 @app.post('/wikify', response_model=List[WikifyResult])
