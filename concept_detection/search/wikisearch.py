@@ -2,6 +2,7 @@ import requests
 import ray
 # import wikipedia
 
+from definitions import ROOT_DIR
 from concept_detection.text.utils import decode_url_title
 
 API_URL = 'http://en.wikipedia.org/w/api.php'
@@ -11,8 +12,7 @@ HEADERS = {'User-Agent': 'graphai (https://github.com/epflgraph/graphai)'}
 # wikipedia.set_lang('en')
 
 # Init ray
-print('init ray')
-ray.init(namespace="wikisearch", include_dashboard=False, log_to_driver=True)
+ray.init(namespace="wikisearch", include_dashboard=False, log_to_driver=True, runtime_env={'working_dir': ROOT_DIR})
 
 
 class PageResult:
