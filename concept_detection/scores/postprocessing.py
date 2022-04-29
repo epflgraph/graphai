@@ -27,10 +27,10 @@ def compute_scores(wikisearch_results, graph_results, page_id_titles, logger, de
     # Convert wikisearch results to table
     wikisearch_table = []
     for wikisearch_result in wikisearch_results:
-        keywords = wikisearch_result['keywords']
-        pages = wikisearch_result['pages']
+        keywords = wikisearch_result.keywords
+        pages = wikisearch_result.pages
         for page in pages:
-            wikisearch_table.append([keywords, page['page_id'], page['page_title'], page['searchrank'], page['score']])
+            wikisearch_table.append([keywords, page.page_id, page.page_title, page.searchrank, page.score])
     wikisearch_df = pd.DataFrame(wikisearch_table, columns=['keywords', 'page_id', 'page_title_0', 'searchrank', 'search_score'])
 
     if debug:
