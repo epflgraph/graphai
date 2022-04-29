@@ -13,3 +13,4 @@ ray
 python-Levenshtein
 mysql-connector
 mwparserfromhell
+pydantic

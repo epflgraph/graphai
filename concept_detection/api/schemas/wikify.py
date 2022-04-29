@@ -1,10 +1,10 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, root_validator
 from typing import List, Optional
 
 
-class WikifyData(BaseModel):
+class KeywordsRequest(BaseModel):
     """
-    Object containing the raw text to be wikified and the list of anchor page ids to define the search space in the graph.
+    Object containing the raw text to extract keywords.
     """
     raw_text: str = Field(
         ...,
@@ -12,30 +12,38 @@ class WikifyData(BaseModel):
         description="Raw text to be wikified",
         example="To draw a straight line from any point to any point.\nTo produce a finite straight line continuously in a straight line.\nTo describe a circle with any center and radius.\nThat all right angles equal one another.\nThat, if a straight line falling on two straight lines makes the interior angles on the same side less than two right angles, the two straight lines, if produced indefinitely, meet on that side on which are the angles less than the two right angles."
     )
-    anchor_page_ids: Optional[List[int]] = Field(
-        [],
-        title="Anchor Page IDs",
-        description="List of IDs of Wikipedia pages definining the search space in the graph",
-        example=[18973446, 9417, 946975]
+
+
+class WikifyRequest(BaseModel):
+    """
+    Object containing the information to be wikified and the list of anchor page ids to define the search space in the graph.
+    """
+    raw_text: Optional[str] = Field(
+        None,
+        title="Raw Text",
+        description="Raw text to be wikified",
+        example="To draw a straight line from any point to any point.\nTo produce a finite straight line continuously in a straight line.\nTo describe a circle with any center and radius.\nThat all right angles equal one another.\nThat, if a straight line falling on two straight lines makes the interior angles on the same side less than two right angles, the two straight lines, if produced indefinitely, meet on that side on which are the angles less than the two right angles."
     )
 
-
-class WikifyDataKeywords(BaseModel):
-    """
-    Object containing the keywords to be wikified and the list of anchor page ids to define the search space in the graph.
-    """
-    keyword_list: List[str] = Field(
-        ...,
+    keyword_list: Optional[List[str]] = Field(
+        [],
         title="Keyword List",
         description="Keywords to be wikified",
         example=["straight line", "describe a circle", "right angles", "straight line falling", "interior angles"]
     )
+
     anchor_page_ids: Optional[List[int]] = Field(
         [],
         title="Anchor Page IDs",
         description="List of IDs of Wikipedia pages definining the search space in the graph",
         example=[18973446, 9417, 946975]
     )
+
+    @root_validator
+    def has_input(cls, values):
+        if 'raw_text' not in values and 'keyword_list' not in values:
+            raise ValueError('At least one of {raw_text, keyword_list} must be provided.')
+        return values
 
 
 class WikifyResult(BaseModel):
@@ -46,64 +54,55 @@ class WikifyResult(BaseModel):
     keywords: str = Field(
         ...,
         title="Keywords",
-        description="Keywords extracted from the text associated to this result",
-        # example="acoustic wave fields"
+        description="Keywords extracted from the text associated to this result"
     )
 
     page_id: int = Field(
         ...,
         title="Page ID",
-        description="ID of the Wiki page",
-        # example=5786179
+        description="ID of the Wiki page"
     )
 
     page_title: str = Field(
         ...,
         title="Page Title",
-        description="Title of the Wiki page",
-        # example="Acoustic_wave"
+        description="Title of the Wiki page"
     )
 
     page_title_0: str = Field(
         ...,
         title="Page Title 0",
-        description="Title of the Wiki page 0",
-        # example="Acoustic_wave"
+        description="Title of the Wiki page 0"
     )
 
     searchrank: int = Field(
         ...,
         title="Searchrank",
-        description="Position in which this Wiki page appears in the list of search results when searching for the keywords",
-        # example=1
+        description="Position in which this Wiki page appears in the list of search results when searching for the keywords"
     )
 
     median_graph_score: float = Field(
         ...,
         title="Median graph score",
-        description="Median of the graph scores obtained by this Wiki page with respect to each of the provided anchor pages",
-        # example=0.27529534818734913
+        description="Median of the graph scores obtained by this Wiki page with respect to each of the provided anchor pages"
     )
 
     search_graph_ratio: float = Field(
         ...,
         title="Search-graph ratio",
-        description="Ratio between the search and graph scores",
-        # example=0.27529534818734913
+        description="Ratio between the search and graph scores"
     )
 
     levenshtein_score: float = Field(
         ...,
         title="Levenshtein score",
-        description="Levenshtein score of this page's title with respect to the keywords",
-        # example=0.7878787878787878
+        description="Levenshtein score of this page's title with respect to the keywords"
     )
 
     mixed_score: float = Field(
         ...,
         title="Mixed score",
-        description="Combination of all scores",
-        # example=0.2502786257844656
+        description="Combination of all scores"
     )
 
     class Config:
