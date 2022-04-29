@@ -10,13 +10,13 @@ python_rake_model = RAKE.Rake(RAKE.SmartStopList())
 nltk_rake_model = Rake()
 
 
-def rake_extract(text, method, split_words=False, return_scores=False, threshold=1):
+def rake_extract(text, use_nltk, split_words=False, return_scores=False, threshold=1):
     """
     Extracts keywords from unconstrained text using python-rake or nltk-rake.
 
     Args:
         text (str): Text from which to extract the keywords.
-        method (str): Model to use ('nltk' for nltk-rake, otherwise python-rake).
+        use_nltk (bool): Whether to use nltk-rake for keyword extraction, otherwise python-rake is used.
         split_words (bool): If True, keywords with more than one word are split. Default: False.
         return_scores (bool): If True, keywords are retured in a tuple with their RAKE score. Default: False.
         threshold (float): Minimal RAKE score below which extracted keywords are ignored. Default: 1.
@@ -28,7 +28,7 @@ def rake_extract(text, method, split_words=False, return_scores=False, threshold
     """
 
     # Execute RAKE model with given text
-    if method == 'nltk':
+    if use_nltk:
         nltk_rake_model.extract_keywords_from_text(text)
         results = nltk_rake_model.get_ranked_phrases_with_scores()
         results = [(keywords, score) for score, keywords in results]
@@ -71,12 +71,13 @@ def rake_extract(text, method, split_words=False, return_scores=False, threshold
     return list(set([keywords for keywords, score in keyword_list]))
 
 
-def get_keyword_list(raw_text, method):
+def get_keyword_list(raw_text, use_nltk=False):
     """
     Clean raw text and extract keyword list.
 
     Args:
         raw_text (str): Text to be cleaned and used to extract keywords.
+        use_nltk (bool): Whether to use nltk-rake for keyword extraction, otherwise python-rake is used. Default: False.
 
     Returns:
         list[str]: A list of keywords automatically extracted from the given text.
@@ -89,9 +90,9 @@ def get_keyword_list(raw_text, method):
     #   * One with the full text.
     #   * One for each line.
     # This is done to account for slides with unconnected text in different lines.
-    keyword_list = rake_extract(cleaned_text, method)
+    keyword_list = rake_extract(cleaned_text, use_nltk)
     for line in cleaned_text.split('\n'):
-        keyword_list.extend(rake_extract(line, method))
+        keyword_list.extend(rake_extract(line, use_nltk))
 
     # Remove duplicates
     return list(set(keyword_list))
