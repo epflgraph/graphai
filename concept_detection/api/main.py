@@ -9,7 +9,7 @@ from typing import List, Optional
 from definitions import DATA_DIR
 from concept_detection.api.schemas.wikify import *
 
-from concept_detection.keywords.extraction import get_keyword_list, get_keyword_list_nltk
+from concept_detection.keywords.extraction import get_keyword_list
 import concept_detection.search.wikisearch as ws
 import concept_detection.search.elasticwikisearch as ews
 from concept_detection.graph.scores import graph_scores
