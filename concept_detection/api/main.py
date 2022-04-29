@@ -67,7 +67,7 @@ async def wikify(data: WikifyRequest, method: Optional[str] = None):
     keyword_list = data.keyword_list
     anchor_page_ids = data.anchor_page_ids
     if not method:
-        method = 'base'
+        method = 'api'
 
     # Extract keywords from text
     if raw_text:
@@ -77,15 +77,12 @@ async def wikify(data: WikifyRequest, method: Optional[str] = None):
 
     # Perform wikisearch and extract source_page_ids
     start_time = time.time()
-    if method == 'base':
-        wikisearch_results = ws.wikisearch(keyword_list, page_title_ids)
-    elif method == 'es-base':
+    if method == 'es-base':
         wikisearch_results = ews.wikisearch(keyword_list, es_scores=False)
     elif method == 'es-score':
         wikisearch_results = ews.wikisearch(keyword_list, es_scores=True)
     else:
-        # Should never get here
-        wikisearch_results = []
+        wikisearch_results = ws.wikisearch(keyword_list)
 
     # Extract source_page_ids and anchor_page_ids if needed
     source_page_ids = ws.extract_page_ids(wikisearch_results)
