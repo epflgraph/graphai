@@ -11,6 +11,7 @@ HEADERS = {'User-Agent': 'graphai (https://github.com/epflgraph/graphai)'}
 # wikipedia.set_lang('en')
 
 # Init ray
+print('init ray')
 ray.init(namespace="wikisearch", include_dashboard=False, log_to_driver=True)
 
 
