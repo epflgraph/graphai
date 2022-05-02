@@ -2,7 +2,7 @@ import configparser
 from elasticsearch import Elasticsearch
 
 es_config = configparser.ConfigParser()
-es_config.read('config/es.ini')
+es_config.read('../../config/es.ini')
 es = Elasticsearch([f'{es_config["ES"].get("host")}:{es_config["ES"].get("port")}'])
 
 query = {
