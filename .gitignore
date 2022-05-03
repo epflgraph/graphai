@@ -18,3 +18,6 @@ docs/build
 
 # Python package egg folder
 *egg-info
+
+# Python virtual environment
+venv
