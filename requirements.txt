@@ -9,7 +9,7 @@ requests-futures
 nltk
 rake-nltk
 wikipedia
-ray
+ray==1.10.0
 python-Levenshtein
 mysql-connector
 mwparserfromhell
