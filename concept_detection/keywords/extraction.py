@@ -3,6 +3,10 @@ import nltk
 from rake_nltk import Rake
 from concept_detection.text.utils import clean_text, word_tokens
 
+# Download nltk resources
+nltk.download('stopwords', quiet=True)
+
+
 # Initialise RAKE model
 python_rake_model = RAKE.Rake(RAKE.SmartStopList())
 
