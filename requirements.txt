@@ -5,6 +5,7 @@ numpy
 pandas
 matplotlib
 python-rake
+requests
 requests-futures
 nltk
 rake-nltk
