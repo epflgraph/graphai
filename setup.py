@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 setup(
-    name='GraphAI',
+    name='graphai',
     version='0.1.0',
     description='CEDE EPFL Graph AI',
     author='Aitor Pérez',
