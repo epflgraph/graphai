@@ -69,6 +69,10 @@ async def wikify(data: WikifyRequest, method: Optional[str] = None):
     if not method:
         method = 'api'
 
+    # Return if no input
+    if not raw_text and not keyword_list:
+        return []
+
     # Extract keywords from text
     if raw_text:
         start_time = time.time()
