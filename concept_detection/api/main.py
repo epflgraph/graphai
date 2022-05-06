@@ -41,18 +41,19 @@ print('Loaded')
 logger = logging.getLogger('uvicorn.error')
 
 
-def build_log_msg(msg, seconds, total=False, length=100):
+def build_log_msg(msg, seconds, total=False, length=64):
+    padding_length = length - len(msg)
+    if padding_length > 0:
+        padding = '.' * padding_length
+    else:
+        padding = ''
+
     if total:
         time_msg = f'Elapsed total time: {seconds}s.'
     else:
         time_msg = f'Elapsed time: {seconds}s.'
 
-    padding_length = length - len(msg) - len(time_msg) - 1
-    if padding_length > 0:
-        padding = '.' * padding_length
-        return f'{msg}{padding} {time_msg}'
-    else:
-        return f'{msg} {time_msg}'
+    return f'{msg}{padding} {time_msg}'
 
 
 @app.post('/keywords')
