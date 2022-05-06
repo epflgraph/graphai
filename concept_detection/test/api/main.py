@@ -1,8 +1,7 @@
 import requests
 
+from definitions import TEST_API_URL
 from concept_detection.test.conftest import *
-
-TEST_API_URL = 'http://86.119.27.90:28800'
 
 
 def test_keywords():
