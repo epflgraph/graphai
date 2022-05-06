@@ -12,7 +12,7 @@ rake-nltk
 wikipedia
 ray==1.10.0
 python-Levenshtein
-mysql-connector
+mysql-connector-python
 mwparserfromhell
 pydantic
 pytest

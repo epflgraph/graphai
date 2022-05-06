@@ -41,6 +41,20 @@ print('Loaded')
 logger = logging.getLogger('uvicorn.error')
 
 
+def build_log_msg(msg, seconds, total=False, length=100):
+    if total:
+        time_msg = f'Elapsed total time: {seconds}s.'
+    else:
+        time_msg = f'Elapsed time: {seconds}s.'
+
+    padding_length = length - len(msg) - len(time_msg) - 1
+    if padding_length > 0:
+        padding = '.' * padding_length
+        return f'{msg}{padding} {time_msg}'
+    else:
+        return f'{msg} {time_msg}'
+
+
 @app.post('/keywords')
 async def keywords(data: KeywordsRequest, method: Optional[str] = None):
     return get_keyword_list(data.raw_text, method)
@@ -77,7 +91,7 @@ async def wikify(data: WikifyRequest, method: Optional[str] = None):
     if raw_text:
         start_time = time.time()
         keyword_list = get_keyword_list(raw_text)
-        logger.info(f'Extracted list of {len(keyword_list)} keywords........................... Elapsed time: {time.time() - start_time}s.')
+        logger.info(build_log_msg(f'Extracted list of {len(keyword_list)} keywords', time.time() - start_time))
 
     # Perform wikisearch and extract source_page_ids
     start_time = time.time()
@@ -96,22 +110,25 @@ async def wikify(data: WikifyRequest, method: Optional[str] = None):
     # Filter None values from source and anchor page ids, due to pages not found in the page title ids mapping
     source_page_ids = list(filter(None, source_page_ids))
     anchor_page_ids = list(filter(None, anchor_page_ids))
-    logger.info(f'Finished {method} wikisearch with {len(source_page_ids)} source pages............... Elapsed time: {time.time() - start_time}s.')
+    n_source_page_ids = len(source_page_ids)
+    n_anchor_page_ids = len(anchor_page_ids)
+    logger.info(build_log_msg(f'Finished {method} wikisearch with {n_source_page_ids} source pages', time.time() - start_time))
 
     # Compute graph scores
     start_time = time.time()
     graph_results = graph_scores(source_page_ids, anchor_page_ids)
-    logger.info(f'Computed graph scores for {len(source_page_ids)*len(anchor_page_ids)} pairs..................... Elapsed time: {time.time() - start_time}s.')
+    logger.info(build_log_msg(f'Computed graph scores for {n_source_page_ids * n_anchor_page_ids} pairs', time.time() - start_time))
 
     # Post-process results and derive the different scores
     start_time = time.time()
-    scores = compute_scores(wikisearch_results, graph_results, page_id_titles, logger)
-    logger.info(f'Post-processed results, got {len(scores)}.......................... Elapsed time: {time.time() - start_time}s.')
+    results = compute_scores(wikisearch_results, graph_results, page_id_titles, logger)
+    n_results = len(results)
+    logger.info(build_log_msg(f'Post-processed results, got {n_results}', time.time() - start_time))
 
     # Display total elapsed time
-    logger.info(f'Finished all tasks...................................... Elapsed total time: {time.time() - global_start_time}s.')
+    logger.info(build_log_msg(f'Finished all tasks', time.time() - start_time, total=True))
 
-    return scores
+    return results
 
 
 @app.post('/markup_strip')
