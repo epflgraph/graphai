@@ -127,7 +127,7 @@ async def wikify(data: WikifyRequest, method: Optional[str] = None):
     logger.info(build_log_msg(f'Post-processed results, got {n_results}', time.time() - start_time))
 
     # Display total elapsed time
-    logger.info(build_log_msg(f'Finished all tasks', time.time() - start_time, total=True))
+    logger.info(build_log_msg(f'Finished all tasks', time.time() - global_start_time, total=True))
 
     return results
 
