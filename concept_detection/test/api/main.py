@@ -28,8 +28,8 @@ def test_keywords():
         assert set(keyword_list) == set(fixture['keyword_list_nltk'])
 
 
-def _test_wikify_case(params):
-    response = requests.post(f'{TEST_API_URL}/wikify', json=params)
+def _test_wikify_case(url, params):
+    response = requests.post(url, json=params)
     assert response.status_code == 200
     results = response.json()
     assert results
@@ -45,16 +45,43 @@ def test_wikify():
     assert not results
 
     for fixture in fixtures:
+        url = f'{TEST_API_URL}/wikify'
+
         # From raw_text
         params = {'raw_text': fixture['raw_text']}
-        _test_wikify_case(params)
+        _test_wikify_case(url, params)
 
         # From keywords
         params = {'keyword_list': fixture['keyword_list']}
-        _test_wikify_case(params)
+        _test_wikify_case(url, params)
 
-        # From raw_text specifying anchor pages
+        # From raw_text, specifying anchor pages
         params = {'raw_text': fixture['raw_text'], 'anchor_page_ids': fixture['anchor_page_ids']}
-        _test_wikify_case(params)
+        _test_wikify_case(url, params)
+
+        # From keywords, specifying anchor pages
+        params = {'keyword_list': fixture['keyword_list'], 'anchor_page_ids': fixture['anchor_page_ids']}
+        _test_wikify_case(url, params)
+
+        url = f'{TEST_API_URL}/wikify?method=es-base'
+
+        # From raw_text, specifying anchor pages and elasticsearch method es-base
+        params = {'raw_text': fixture['raw_text'], 'anchor_page_ids': fixture['anchor_page_ids']}
+        _test_wikify_case(url, params)
+
+        # From keywords, specifying anchor pages and elasticsearch method es-base
+        params = {'keyword_list': fixture['keyword_list'], 'anchor_page_ids': fixture['anchor_page_ids']}
+        _test_wikify_case(url, params)
+
+        url = f'{TEST_API_URL}/wikify?method=es-score'
+
+        # From raw_text, specifying anchor pages and elasticsearch method es-base
+        params = {'raw_text': fixture['raw_text'], 'anchor_page_ids': fixture['anchor_page_ids']}
+        _test_wikify_case(url, params)
+
+        # From keywords, specifying anchor pages and elasticsearch method es-base
+        params = {'keyword_list': fixture['keyword_list'], 'anchor_page_ids': fixture['anchor_page_ids']}
+        _test_wikify_case(url, params)
+
 
 

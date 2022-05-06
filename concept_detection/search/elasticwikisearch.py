@@ -1,7 +1,8 @@
 import configparser
 from elasticsearch import Elasticsearch
 
-from concept_detection.text.utils import decode_url_title
+from concept_detection.search.types import *
+from concept_detection.search.wikisearch import clean
 from definitions import CONFIG_DIR
 
 es_config = configparser.ConfigParser()
@@ -9,22 +10,9 @@ es_config.read(f'{CONFIG_DIR}/es.ini')
 es = Elasticsearch([f'{es_config["ES"].get("host")}:{es_config["ES"].getint("port")}'])
 
 
-def preprocess(keyword_list):
-    """
-    Cleans all the keywords in the given keyword list by applying the decode_url_title function.
-
-    Args:
-        keyword_list (list of str): List of keywords to be cleaned.
-
-    Returns:
-        list of str: List of cleaned keywords.
-    """
-    return [decode_url_title(keywords) for keywords in keyword_list]
-
-
 def wikisearch(keyword_list, es_scores):
     # Clean all keywords in keyword_list
-    keyword_list = preprocess(keyword_list)
+    keyword_list = clean(keyword_list)
 
     results = []
     for keywords in keyword_list:
@@ -52,16 +40,13 @@ def wikisearch(keyword_list, es_scores):
             else:
                 score = 1 / searchrank
 
-            pages.append({
-                'page_id': page_id,
-                'page_title': page_title,
-                'searchrank': searchrank,
-                'score': score
-            })
+            pages.append(PageResult(
+                page_id=page_id,
+                page_title=page_title,
+                searchrank=searchrank,
+                score=score
+            ))
 
-        results.append({
-            'keywords': keywords,
-            'pages': pages
-        })
+        results.append(WikisearchResult(keywords=keywords, pages=pages))
 
     return results
