@@ -2,6 +2,8 @@ import mysql.connector
 import configparser
 
 from definitions import CONFIG_DIR
+
+from concept_detection.test.types import WikifyResult
 from concept_detection.test.courses.html_cleaner import HTMLCleaner
 
 
@@ -163,12 +165,12 @@ class DB:
             if course_id not in wikified_course_descriptions:
                 wikified_course_descriptions[course_id] = []
 
-            wikified_course_descriptions[course_id].append({
-                'keywords': keywords,
-                'page_id': page_id,
-                'page_title': page_title,
-                'median_graph_score': 1
-            })
+            wikified_course_descriptions[course_id].append(WikifyResult(
+                keywords=keywords,
+                page_id=page_id,
+                page_title=page_title,
+                median_graph_score=1
+            ))
 
         return wikified_course_descriptions
 

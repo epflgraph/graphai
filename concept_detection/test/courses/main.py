@@ -1,14 +1,14 @@
-from requests import post
 import numpy as np
 
-from definitions import TEST_API_URL
-
+from concept_detection.test.types import WikifyResult
 from concept_detection.test.courses.db import DB
+from concept_detection.test.courses.api import Api
 from concept_detection.test.courses.compare import *
 
 
 def compare_course_descriptions_api_db(limit=None):
     db = DB()
+    api = Api()
 
     course_descriptions = db.query_course_descriptions()
     course_ids = list(course_descriptions.keys())
@@ -30,8 +30,8 @@ def compare_course_descriptions_api_db(limit=None):
         raw_text = course_descriptions[course_id]
         anchor_page_ids = db.course_anchor_page_ids(course_id)
 
-        api_wikified_course_description = post(f'{TEST_API_URL}/wikify', json={'raw_text': raw_text, 'anchor_page_ids': anchor_page_ids}).json()
-        comp = compare(api_wikified_course_description, db_wikified_course_descriptions[course_id])
+        api_wikified_course_description = api.wikify(raw_text, anchor_page_ids)
+        comp = WikifyResult.compare(api_wikified_course_description, db_wikified_course_descriptions[course_id])
 
         t['results'].append({
             'course_id': course_id,
@@ -40,15 +40,15 @@ def compare_course_descriptions_api_db(limit=None):
             'db': comp['results_2']
         })
 
-        new_pairs = [(result['keywords'], result['page_id']) for result in comp['results_1']]
-        db_pairs = [(result['keywords'], result['page_id']) for result in comp['results_2']]
+        new_pairs = [(result.keywords, result.page_id) for result in comp['results_1']]
+        db_pairs = [(result.keywords, result.page_id) for result in comp['results_2']]
 
         conf = confusion_matrix(new_pairs, db_pairs)
         conf['course_id'] = course_id
         t['pair_confs'].append(conf)
 
-        new_page_ids = [result['page_id'] for result in comp['results_1']]
-        db_page_ids = [result['page_id'] for result in comp['results_2']]
+        new_page_ids = [result.page_id for result in comp['results_1']]
+        db_page_ids = [result.page_id for result in comp['results_2']]
 
         conf = confusion_matrix(new_page_ids, db_page_ids)
         conf['course_id'] = course_id
