@@ -11,7 +11,7 @@ class WikifyResult:
         self.mixed_score = mixed_score
 
     def __repr__(self):
-        return f'WikifyResult({self.keywords}, {self.page_id}, {self.page_title}, {self.mixed_score:.4f})'
+        return f'WikifyResult({self.keywords}, {self.page_id}, {self.page_title}, {self.median_graph_score:.4f}, {self.mixed_score:.4f})'
 
     def equivalent(self, other):
         return self.keywords == other.keywords and self.page_id == other.page_id
@@ -32,32 +32,3 @@ class WikifyResult:
             levenshtein_score=d.get('levenshtein_score'),
             mixed_score=d.get('mixed_score')
         )
-
-    @staticmethod
-    def compare(results_1, results_2):
-        n_equivalent = 0
-        n_equal = 0
-        differences = []
-        for result_1 in results_1:
-            for result_2 in results_2:
-                if result_1.equivalent(result_2):
-                    n_equivalent += 1
-
-                    if result_1.equal(result_2):
-                        n_equal += 1
-                    else:
-                        differences.append({
-                            '1': result_1,
-                            '2': result_2
-                        })
-
-        return {
-            'results_1': results_1,
-            'results_2': results_2,
-            'n_results_1': len(results_1),
-            'n_results_2': len(results_2),
-            'n_equivalent': n_equivalent,
-            'n_equal': n_equal,
-            'ok': n_equivalent == n_equal,
-            'differences': differences
-        }
