@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 
-from concept_detection.test.courses.db import DB
-from concept_detection.test.courses.api import Api
+from concept_detection.interfaces.db import DB
+from concept_detection.interfaces.api import Api
 
 
 def confusion_stats(predicted, actual):
