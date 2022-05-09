@@ -10,23 +10,26 @@ setup(
     packages=find_packages(),
     include_package_data=True,
     install_requires=[
-        'uvicorn',
-        'fastapi',
-        'elasticsearch',
         'numpy',
-        'pandas',
-        'matplotlib',
-        'python-rake',
-        'requests-futures',
-        'nltk',
-        'rake-nltk',
-        'wikipedia',
-        'ray',
-        'python-Levenshtein',
-        'mysql-connector',
-        'mwparserfromhell'
+        'requests'
     ],
     extras_require={
+        'main': [
+            'uvicorn',
+            'fastapi',
+            'elasticsearch',
+            'pandas',
+            'matplotlib',
+            'python-rake',
+            'requests-futures',
+            'nltk',
+            'rake-nltk',
+            'wikipedia',
+            'ray',
+            'python-Levenshtein',
+            'mysql-connector',
+            'mwparserfromhell'
+        ],
         'docs': ['sphinx']
     },
     license=''
