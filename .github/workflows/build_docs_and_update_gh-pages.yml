@@ -36,7 +36,7 @@ jobs:
           echo "run apt and pip"
           output_dir="$GITHUB_WORKSPACE/main/docs/build/html"
           mkdir -p ${output_dir}
-          ### apt-get --allow-releaseinfo-change update -y > ${output_dir}/apt-html.out;
+          apt-get --allow-releaseinfo-change update -y #> ${output_dir}/apt-html.out;
           # GraphAI requirements
           apt-get install -y python3 git-lfs g++ gcc #>> ${output_dir}/apt-html.out;
           apt install libpython3.8-dev
