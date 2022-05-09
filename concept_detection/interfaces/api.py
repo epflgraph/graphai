@@ -13,18 +13,19 @@ class Api:
 
         return post(f'{TEST_API_URL}/keywords', json=params).json()
 
-    def wikify(self, raw_text, anchor_page_ids=None):
-        if anchor_page_ids is None:
-            params = {
-                'raw_text': raw_text
-            }
-        else:
-            params = {
-                'raw_text': raw_text,
-                'anchor_page_ids': anchor_page_ids
-            }
+    def wikify(self, raw_text, anchor_page_ids=None, method=None):
+        params = {
+            'raw_text': raw_text
+        }
 
-        results = post(f'{TEST_API_URL}/wikify', json=params).json()
+        if anchor_page_ids:
+            params['anchor_page_ids'] = anchor_page_ids
+
+        url = f'{TEST_API_URL}/wikify'
+        if method:
+            url += f'?method={method}'
+
+        results = post(url, json=params).json()
         return list(map(WikifyResult.from_dict, results))
 
     def wikify_keywords(self, keyword_list, anchor_page_ids=None):

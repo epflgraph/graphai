@@ -86,49 +86,59 @@ def compare_course_descriptions_api_db(limit=None):
     db = DB()
     api = Api()
 
+    # Fetch courses and their descriptions from db
     course_descriptions = db.query_course_descriptions()
     course_ids = list(course_descriptions.keys())
     n_courses = len(course_ids)
     print(f'Got {n_courses} courses')
 
+    # Fetch wikify results from older executions from db
     db_wikified_course_descriptions = db.query_wikified_course_descriptions()
 
+    # Prepare data structure to store how well db and api results compare
     comparative = {
         'results': [],
-        'pair_confs': [],
-        'page_confs': []
+        'pair_stats': [],
+        'page_stats': []
     }
+
     i = 0
     for course_id in course_ids:
         i += 1
         print(i)
 
+        # Get course description and its anchor page ids to use in the API call
         raw_text = course_descriptions[course_id]
         anchor_page_ids = db.course_anchor_page_ids(course_id)
 
+        # Perform api calls to the service running on the server
         api_wikified_course_description = api.wikify(raw_text, anchor_page_ids)
-        comp = compare_result_lists(api_wikified_course_description, db_wikified_course_descriptions[course_id])
 
+        # Compare both (api and db) lists of results
+        course_comparative = compare_result_lists(api_wikified_course_description, db_wikified_course_descriptions[course_id])
+
+        # Update comparative with the results of the current course
         comparative['results'].append({
             'course_id': course_id,
             'raw_text': raw_text,
-            'new': comp['results_1'],
-            'db': comp['results_2']
+            'new': course_comparative['results_1'],
+            'db': course_comparative['results_2']
         })
 
-        new_pairs = [(result.keywords, result.page_id) for result in comp['results_1']]
-        db_pairs = [(result.keywords, result.page_id) for result in comp['results_2']]
+        # Extract results for pairs (keywords, page_id) and compute their confusion stats
+        api_pairs = [(result.keywords, result.page_id) for result in course_comparative['results_1']]
+        db_pairs = [(result.keywords, result.page_id) for result in course_comparative['results_2']]
 
-        conf = confusion_stats(new_pairs, db_pairs)
-        conf['course_id'] = course_id
-        comparative['pair_confs'].append(conf)
+        pairs_stats = confusion_stats(api_pairs, db_pairs)
+        pairs_stats['course_id'] = course_id
+        comparative['pair_stats'].append(pairs_stats)
 
-        new_page_ids = [result.page_id for result in comp['results_1']]
-        db_page_ids = [result.page_id for result in comp['results_2']]
+        api_page_ids = [result.page_id for result in course_comparative['results_1']]
+        db_page_ids = [result.page_id for result in course_comparative['results_2']]
 
-        conf = confusion_stats(new_page_ids, db_page_ids)
-        conf['course_id'] = course_id
-        comparative['page_confs'].append(conf)
+        pages_stats = confusion_stats(api_page_ids, db_page_ids)
+        pages_stats['course_id'] = course_id
+        comparative['page_stats'].append(pages_stats)
 
         if i == limit:
             break
