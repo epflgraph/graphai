@@ -57,8 +57,8 @@ def build_log_msg(msg, seconds, total=False, length=64):
 
 
 @app.post('/keywords')
-async def keywords(data: KeywordsRequest, method: Optional[str] = None):
-    return get_keyword_list(data.raw_text, method)
+async def keywords(data: KeywordsRequest, use_nltk: Optional[bool] = False):
+    return get_keyword_list(data.raw_text, use_nltk)
 
 
 @app.post('/wikify', response_model=List[WikifyResult])
@@ -82,7 +82,7 @@ async def wikify(data: WikifyRequest, method: Optional[str] = None):
     keyword_list = data.keyword_list
     anchor_page_ids = data.anchor_page_ids
     if not method:
-        method = 'api'
+        method = 'wikipedia-api'
 
     # Return if no input
     if not raw_text and not keyword_list:

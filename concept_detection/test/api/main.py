@@ -21,7 +21,7 @@ def test_keywords():
         assert set(keyword_list) == set(fixture['keyword_list'])
 
         # Method nltk-rake
-        response = requests.post(f'{TEST_API_URL}/keywords?method=nltk', json=params)
+        response = requests.post(f'{TEST_API_URL}/keywords?use_nltk=True', json=params)
         assert response.status_code == 200
         keyword_list = response.json()
         assert set(keyword_list) == set(fixture['keyword_list_nltk'])
