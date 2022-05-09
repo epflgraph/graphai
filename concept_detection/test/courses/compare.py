@@ -71,10 +71,6 @@ def compare_result_lists(results_1, results_2):
                     })
 
     return {
-        'results_1': results_1,
-        'results_2': results_2,
-        'n_results_1': len(results_1),
-        'n_results_2': len(results_2),
         'n_equivalent': n_equivalent,
         'n_equal': n_equal,
         'ok': n_equivalent == n_equal,
@@ -82,7 +78,7 @@ def compare_result_lists(results_1, results_2):
     }
 
 
-def compare_course_descriptions_api_db(limit=None):
+def compare_wikify_course_descriptions_api_db(methods, limit=None):
     db = DB()
     api = Api()
 
@@ -112,33 +108,50 @@ def compare_course_descriptions_api_db(limit=None):
         anchor_page_ids = db.course_anchor_page_ids(course_id)
 
         # Perform api calls to the service running on the server
-        api_wikified_course_description = api.wikify(raw_text, anchor_page_ids)
+        api_wikified_course_description = {}
+        for method in methods:
+            api_wikified_course_description[method] = api.wikify(raw_text, anchor_page_ids, method=method)
 
-        # Compare both (api and db) lists of results
-        course_comparative = compare_result_lists(api_wikified_course_description, db_wikified_course_descriptions[course_id])
+        # Compare api lists of results with db list of results
+        course_comparative = {}
+        for method in methods:
+            course_comparative[method] = compare_result_lists(api_wikified_course_description[method], db_wikified_course_descriptions[course_id])
 
         # Update comparative with the results of the current course
-        comparative['results'].append({
+        comparative_summary = {
             'course_id': course_id,
             'raw_text': raw_text,
-            'new': course_comparative['results_1'],
-            'db': course_comparative['results_2']
-        })
+            'db': db_wikified_course_descriptions[course_id]
+        }
+        for method in methods:
+            comparative_summary[method] = api_wikified_course_description[method]
+        comparative['results'].append(comparative_summary)
 
-        # Extract results for pairs (keywords, page_id) and compute their confusion stats
-        api_pairs = [(result.keywords, result.page_id) for result in course_comparative['results_1']]
-        db_pairs = [(result.keywords, result.page_id) for result in course_comparative['results_2']]
+        # Extract results for pairs (keywords, page_id)
+        api_pairs = {}
+        for method in methods:
+            api_pairs[method] = [(result.keywords, result.page_id) for result in api_wikified_course_description[method]]
+        db_pairs = [(result.keywords, result.page_id) for result in db_wikified_course_descriptions[course_id]]
 
-        pairs_stats = confusion_stats(api_pairs, db_pairs)
-        pairs_stats['course_id'] = course_id
-        comparative['pair_stats'].append(pairs_stats)
+        # Compute their confusion stats
+        pair_stats = {}
+        for method in methods:
+            pair_stats[method] = confusion_stats(api_pairs[method], db_pairs)
+            pair_stats[method]['course_id'] = course_id
+        comparative['pair_stats'].append(pair_stats)
 
-        api_page_ids = [result.page_id for result in course_comparative['results_1']]
-        db_page_ids = [result.page_id for result in course_comparative['results_2']]
+        # Extract results for pages (page_id)
+        api_page_ids = {}
+        for method in methods:
+            api_page_ids[method] = [result.page_id for result in api_wikified_course_description[method]]
+        db_page_ids = [result.page_id for result in db_wikified_course_descriptions[course_id]]
 
-        pages_stats = confusion_stats(api_page_ids, db_page_ids)
-        pages_stats['course_id'] = course_id
-        comparative['page_stats'].append(pages_stats)
+        # Compute their confusion stats
+        page_stats = {}
+        for method in methods:
+            page_stats[method] = confusion_stats(api_page_ids[method], db_page_ids)
+            page_stats[method]['course_id'] = course_id
+        comparative['page_stats'].append(page_stats)
 
         if i == limit:
             break
