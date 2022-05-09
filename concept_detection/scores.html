@@ -42,8 +42,33 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="scores">
-<h1>Scores<a class="headerlink" href="#scores" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="module-concept_detection.scores.postprocessing">
+<span id="scores"></span><h1>Scores<a class="headerlink" href="#module-concept_detection.scores.postprocessing" title="Permalink to this headline">¶</a></h1>
+<dl class="function">
+<dt id="concept_detection.scores.postprocessing.compute_scores">
+<code class="sig-prename descclassname">concept_detection.scores.postprocessing.</code><code class="sig-name descname">compute_scores</code><span class="sig-paren">(</span><em class="sig-param">wikisearch_results</em>, <em class="sig-param">graph_results</em>, <em class="sig-param">page_id_titles</em>, <em class="sig-param">logger</em>, <em class="sig-param">debug=False</em><span class="sig-paren">)</span><a class="headerlink" href="#concept_detection.scores.postprocessing.compute_scores" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes the results of a wikisearch and a graph search and creates a dataframe with them as well as new derived scores.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>wikisearch_results</strong> (<em>list</em>) – The results of a wikisearch. Each element is a dictionary containing the keywords and
+a list of Wikipedia pages for those keywords.</p></li>
+<li><p><strong>graph_results</strong> (<em>list</em>) – The results of a graph search. Each element is a dictionary containing the source and the
+anchor page ids and their graph score.</p></li>
+<li><p><strong>page_id_titles</strong> (<em>dict</em>) – The mapping from page ids to their titles.</p></li>
+<li><p><strong>logger</strong> (<em>Logger</em>) – A logger to use for debugging purposes.</p></li>
+<li><p><strong>debug</strong> (<em>bool</em>) – Whether the function prints the results at each step. Default: False.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A dictionary representing a pandas dataframe with all the scores.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
 </div>
 
 

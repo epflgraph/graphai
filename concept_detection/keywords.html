@@ -42,8 +42,58 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="keywords">
-<h1>Keywords<a class="headerlink" href="#keywords" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="module-concept_detection.keywords.extraction">
+<span id="keywords"></span><h1>Keywords<a class="headerlink" href="#module-concept_detection.keywords.extraction" title="Permalink to this headline">¶</a></h1>
+<dl class="function">
+<dt id="concept_detection.keywords.extraction.rake_extract">
+<code class="sig-prename descclassname">concept_detection.keywords.extraction.</code><code class="sig-name descname">rake_extract</code><span class="sig-paren">(</span><em class="sig-param">text</em>, <em class="sig-param">use_nltk</em>, <em class="sig-param">split_words=False</em>, <em class="sig-param">return_scores=False</em>, <em class="sig-param">threshold=1</em><span class="sig-paren">)</span><a class="headerlink" href="#concept_detection.keywords.extraction.rake_extract" title="Permalink to this definition">¶</a></dt>
+<dd><p>Extracts keywords from unconstrained text using python-rake or nltk-rake.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>text</strong> (<em>str</em>) – Text from which to extract the keywords.</p></li>
+<li><p><strong>use_nltk</strong> (<em>bool</em>) – Whether to use nltk-rake for keyword extraction, otherwise python-rake is used.</p></li>
+<li><p><strong>split_words</strong> (<em>bool</em>) – If True, keywords with more than one word are split. Default: False.</p></li>
+<li><p><strong>return_scores</strong> (<em>bool</em>) – If True, keywords are retured in a tuple with their RAKE score. Default: False.</p></li>
+<li><p><strong>threshold</strong> (<em>float</em>) – Minimal RAKE score below which extracted keywords are ignored. Default: 1.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>A list of</dt><dd><ul class="simple">
+<li><p>str: Keywords, if split_words is True or return_scores is False.</p></li>
+<li><p>(str, float): A pair representing keywords and score, otherwise.</p></li>
+</ul>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="concept_detection.keywords.extraction.get_keyword_list">
+<code class="sig-prename descclassname">concept_detection.keywords.extraction.</code><code class="sig-name descname">get_keyword_list</code><span class="sig-paren">(</span><em class="sig-param">raw_text</em>, <em class="sig-param">use_nltk=False</em><span class="sig-paren">)</span><a class="headerlink" href="#concept_detection.keywords.extraction.get_keyword_list" title="Permalink to this definition">¶</a></dt>
+<dd><p>Clean raw text and extract keyword list.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>raw_text</strong> (<em>str</em>) – Text to be cleaned and used to extract keywords.</p></li>
+<li><p><strong>use_nltk</strong> (<em>bool</em>) – Whether to use nltk-rake for keyword extraction, otherwise python-rake is used. Default: False.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A list of keywords automatically extracted from the given text.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>list[str]</p>
+</dd>
+</dl>
+</dd></dl>
+
 </div>
 
 
