@@ -10,7 +10,7 @@ This module contains projects and services enhancing the [EPFL Graph](https://ww
 The GraphAI module may be installed as a regular python package. To install it, simply run
 ```
 pip install -r requirements.txt
-pip install -e .
+pip install -e .[main]
 ```
 
 Finally, create and populate the ``data`` and ``config`` folders. The code expects ``data`` to contain the following files:

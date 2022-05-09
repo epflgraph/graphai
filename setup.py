@@ -25,9 +25,10 @@ setup(
             'nltk',
             'rake-nltk',
             'wikipedia',
-            'ray',
+            'ray==1.10.0',
+            'pydantic',
             'python-Levenshtein',
-            'mysql-connector',
+            'mysql-connector-python',
             'mwparserfromhell'
         ],
         'docs': ['sphinx']

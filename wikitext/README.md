@@ -1,6 +1,13 @@
 # Wikitext
 The `wikitext` module provides a simple way to interact with the concept-detection API via a python class.
 
+### Setup
+The wikitext module may be installed as the minimal installation of a regular python package. To do so, simply run
+```
+pip install -e .
+```
+from the root folder of the graphai repository.
+
 ### Basic usage
 We can wikify a text as follows:
 ```
