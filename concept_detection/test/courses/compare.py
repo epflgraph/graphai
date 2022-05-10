@@ -37,7 +37,7 @@ def plot_stats(stats, label_name):
     n = len(stats)
     m = len(next(iter(stats.values())))
 
-    fig, axs = plt.subplots(n, m, figsize=(18, 10))
+    fig, axs = plt.subplots(n, m, figsize=(18, 10), dpi=200)
     i = 0
     for how in stats:
         j = 0
@@ -63,6 +63,43 @@ def plot_stats(stats, label_name):
             h, l = axs[i, j].get_legend_handles_labels()
             axs[i, j].legend(reversed(h), reversed(l))
             axs[i, j].set_title(f'{how} - {method}')
+
+            j += 1
+        i += 1
+
+    plt.show()
+
+    metrics = ['p', 'r', 'f-score']
+    m = len(metrics)
+
+    fig, axs = plt.subplots(n, m, figsize=(18, 10), dpi=200)
+    i = 0
+    for how in stats:
+        j = 0
+        for metric in metrics:
+            methods = list(stats[how].keys())
+
+            # values_per_method has len(methods) elements, each being a list with all values
+            # for the given how, method and metric
+            values_per_method = [[confusion[metric] for confusion in stats[how][method]] for method in methods]
+
+            # Sort all lists in parallel
+            sorted_values_per_method = list(zip(*sorted(zip(*values_per_method))))
+
+            k = 0
+            for method_sorted_values in sorted_values_per_method:
+                axs[i, j].plot(method_sorted_values, label=methods[k], alpha=0.8)
+                k += 1
+
+            axs[i, j].set_xlabel(label_name)
+
+            axs[i, j].set_ylim([0, 1])
+
+            axs[i, j].axes.xaxis.set_ticklabels([])
+
+            h, l = axs[i, j].get_legend_handles_labels()
+            axs[i, j].legend(reversed(h), reversed(l))
+            axs[i, j].set_title(f'{how} - {metric}')
 
             j += 1
         i += 1
@@ -140,9 +177,14 @@ def compare_wikify_course_descriptions_api_db(methods, limit=None):
     }
 
     i = 0
+    percent = 0
     for course_id in course_ids:
         i += 1
-        print(i)
+
+        next_percent = 100 * i / limit
+        if percent // 10 != next_percent // 10:
+            print(f'{10 * int(next_percent // 10)}%')
+        percent = next_percent
 
         # Get course description and its anchor page ids to use in the API call
         raw_text = course_descriptions[course_id]
