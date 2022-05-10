@@ -1,9 +1,10 @@
 import configparser
 from elasticsearch import Elasticsearch
 
-from concept_detection.search.types import *
-from concept_detection.search.wikisearch import clean
 from definitions import CONFIG_DIR
+from concept_detection.types.page_result import PageResult
+from concept_detection.types.wikisearch_result import WikisearchResult
+from concept_detection.search.wikisearch import clean
 
 es_config = configparser.ConfigParser()
 es_config.read(f'{CONFIG_DIR}/es.ini')
