@@ -6,9 +6,5 @@ class PageResult:
         self.searchrank = searchrank
         self.score = score
 
-
-class WikisearchResult:
-
-    def __init__(self, keywords, pages):
-        self.keywords = keywords
-        self.pages = pages
+    def __repr__(self):
+        return f'PageResult({self.page_id}, {self.page_title}, {self.searchrank}. {self.score})'
