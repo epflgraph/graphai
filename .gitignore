@@ -21,3 +21,6 @@ docs/build
 
 # Python virtual environment
 venv
+
+# Jupyter-lab files
+**/.ipynb_checkpoints

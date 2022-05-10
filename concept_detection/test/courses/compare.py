@@ -3,6 +3,8 @@ import matplotlib.pyplot as plt
 from concept_detection.interfaces.db import DB
 from concept_detection.interfaces.api import Api
 
+plt.style.use('seaborn-dark')
+
 
 def confusion_stats(predicted, actual):
     predicted = set(predicted)
@@ -29,6 +31,43 @@ def confusion_stats(predicted, actual):
         'r': r,
         'f-score': f_score
     }
+
+
+def plot_stats(stats, label_name):
+    n = len(stats)
+    m = len(next(iter(stats.values())))
+
+    fig, axs = plt.subplots(n, m, figsize=(18, 10))
+    i = 0
+    for how in stats:
+        j = 0
+        for method in stats[how]:
+            confusions = stats[how][method]
+            labels = [confusion[label_name] for confusion in confusions]
+
+            tp = [confusion['tp'] for confusion in confusions]
+            fn = [confusion['fn'] for confusion in confusions]
+
+            sorted_zip_lists = sorted(zip(tp, fn))
+
+            tp = [x for x, _ in sorted_zip_lists]
+            fn = [y for _, y in sorted_zip_lists]
+
+            axs[i, j].bar(labels, fn, label='FN', alpha=0.8, bottom=tp)
+            axs[i, j].bar(labels, tp, label='TP', alpha=0.8)
+
+            axs[i, j].set_xlabel(label_name)
+
+            axs[i, j].axes.xaxis.set_ticklabels([])
+
+            h, l = axs[i, j].get_legend_handles_labels()
+            axs[i, j].legend(reversed(h), reversed(l))
+            axs[i, j].set_title(f'{how} - {method}')
+
+            j += 1
+        i += 1
+
+    plt.show()
 
 
 def plot_confs(confs, label_name, title):
