@@ -1,23 +1,26 @@
+import time
 import numpy as np
 
 from concept_detection.test.courses.compare import *
 from concept_detection.text.io import pprint
 
-methods = ['wikipedia-api', 'es-base', 'es-score']
+st = time.time()
 
-comparative = compare_wikify_course_descriptions_api_db(methods, limit=2)
+methods = ['wikipedia-api', 'es-base', 'es-score']
+limit = 10
+
+comparative = compare_wikify_course_descriptions_api_db(methods, limit=limit)
 pprint(comparative, only_first=True)
 
-for method in methods:
-    method_pair_stats = [stat[method] for stat in comparative['pair_stats']]
-    method_page_stats = [stat[method] for stat in comparative['page_stats']]
+for how in ['pair', 'page']:
+    for method in methods:
+        plot_confs(comparative['stats'][how][method], 'course_id', f'{how} - {method}')
 
-    plot_confs(method_pair_stats, 'course_id', f'Pairs ({method})')
-    plot_confs(method_page_stats, 'course_id', f'Pages ({method})')
-
-    print(f'Method {method}')
+for how in ['pair', 'page']:
     for metric in ['p', 'r', 'f-score']:
-        pairs_metric = np.mean([conf[metric] for conf in method_pair_stats])
-        pages_metric = np.mean([conf[metric] for conf in method_page_stats])
-        print(f'Average {metric} for pairs: {pairs_metric:.4f}')
-        print(f'Average {metric} for pages: {pages_metric:.4f}')
+        for method in methods:
+            value = np.mean([stat[metric] for stat in comparative['stats'][how][method]])
+            print(f'Average {metric} for {how} - {method}: {value:.4f}')
+
+ft = time.time()
+print(f'Total time for {limit} courses: {ft - st:.2f}s (each ~{(ft - st) / limit:.2f}s, full execution ~{2000 * (ft - st) / (limit * 3600):.2f}h).')

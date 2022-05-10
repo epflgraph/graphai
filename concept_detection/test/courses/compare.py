@@ -94,8 +94,10 @@ def compare_wikify_course_descriptions_api_db(methods, limit=None):
     # Prepare data structure to store how well db and api results compare
     comparative = {
         'results': [],
-        'pair_stats': [],
-        'page_stats': []
+        'stats': {
+            'pair': {method: [] for method in methods},
+            'page': {method: [] for method in methods}
+        }
     }
 
     i = 0
@@ -127,31 +129,23 @@ def compare_wikify_course_descriptions_api_db(methods, limit=None):
             comparative_summary[method] = api_wikified_course_description[method]
         comparative['results'].append(comparative_summary)
 
-        # Extract results for pairs (keywords, page_id)
-        api_pairs = {}
-        for method in methods:
-            api_pairs[method] = [(result.keywords, result.page_id) for result in api_wikified_course_description[method]]
+        # Extract results for pairs (keywords, page_id) and compute pair confusion stats
         db_pairs = [(result.keywords, result.page_id) for result in db_wikified_course_descriptions[course_id]]
-
-        # Compute their confusion stats
-        pair_stats = {}
         for method in methods:
-            pair_stats[method] = confusion_stats(api_pairs[method], db_pairs)
-            pair_stats[method]['course_id'] = course_id
-        comparative['pair_stats'].append(pair_stats)
+            api_pairs = [(result.keywords, result.page_id) for result in api_wikified_course_description[method]]
 
-        # Extract results for pages (page_id)
-        api_page_ids = {}
-        for method in methods:
-            api_page_ids[method] = [result.page_id for result in api_wikified_course_description[method]]
+            pair_stats = confusion_stats(api_pairs, db_pairs)
+            pair_stats['course_id'] = course_id
+            comparative['stats']['pair'][method].append(pair_stats)
+
+        # Extract results for pages (page_id) and compute page confusion stats
         db_page_ids = [result.page_id for result in db_wikified_course_descriptions[course_id]]
-
-        # Compute their confusion stats
-        page_stats = {}
         for method in methods:
-            page_stats[method] = confusion_stats(api_page_ids[method], db_page_ids)
-            page_stats[method]['course_id'] = course_id
-        comparative['page_stats'].append(page_stats)
+            api_page_ids = [result.page_id for result in api_wikified_course_description[method]]
+
+            page_stats = confusion_stats(api_page_ids, db_page_ids)
+            page_stats['course_id'] = course_id
+            comparative['stats']['page'][method].append(page_stats)
 
         if i == limit:
             break
