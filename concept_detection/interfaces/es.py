@@ -3,6 +3,8 @@ from elasticsearch import Elasticsearch
 
 from definitions import CONFIG_DIR
 
+from concept_detection.types.page_result import PageResult
+
 
 class ES:
     def __init__(self):
@@ -19,12 +21,17 @@ class ES:
 
     def minsearch(self, query):
         search = self.search(query)
+        hits = search['hits']['hits']
 
-        return [{
-            'page_id': hit['_source']['id'],
-            'page_title': hit['_source']['title'],
-            'score': hit['_score'],
-        } for hit in search['hits']['hits']]
+        return [
+            PageResult(
+                page_id=hits[i]['_source']['id'],
+                page_title=hits[i]['_source']['title'],
+                searchrank=(i + 1),
+                score=(1 / (i + 1))
+            )
+            for i in range(len(hits))
+        ]
 
     def indices(self):
         return self.es.cat.indices(index=self.index, format='json', v=True)

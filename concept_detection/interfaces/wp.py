@@ -1,5 +1,7 @@
 import requests
 
+from concept_detection.types.page_result import PageResult
+
 
 class WP:
     def __init__(self):
@@ -21,10 +23,11 @@ class WP:
         top_pages = r['query']['search']
 
         return [
-            {
-                'page_id': top_pages[i]['pageid'],
-                'page_title': top_pages[i]['title'],
-                'score': 1 / (i + 1)
-            }
+            PageResult(
+                page_id=top_pages[i]['pageid'],
+                page_title=top_pages[i]['title'],
+                searchrank=(i + 1),
+                score=(1 / (i + 1))
+            )
             for i in range(len(top_pages))
         ]
