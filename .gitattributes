@@ -1,0 +1,2 @@
+# Ignore jupyter notebooks as language, as their verbosity gives misleading stats compared to pure python files
+*.ipynb linguist-vendored
