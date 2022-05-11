@@ -8,3 +8,9 @@ class PageResult:
 
     def __repr__(self):
         return f'PageResult({self.page_id}, {self.page_title}, {self.searchrank}. {self.score})'
+
+    def equivalent(self, other):
+        return self.page_id == other.page_id
+
+    def equal(self, other):
+        return self.equivalent(other) and self.score == other.score

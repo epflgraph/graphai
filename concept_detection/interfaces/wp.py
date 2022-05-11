@@ -16,8 +16,9 @@ class WP:
         self.headers = {'User-Agent': 'graphai (https://github.com/epflgraph/graphai)'}
         self.url = 'http://en.wikipedia.org/w/api.php'
 
-    def minsearch(self, text):
+    def search(self, text, limit=10):
         self.params['srsearch'] = text
+        self.params['srlimit'] = limit
         r = requests.get(self.url, params=self.params, headers=self.headers).json()
 
         top_pages = r['query']['search']
