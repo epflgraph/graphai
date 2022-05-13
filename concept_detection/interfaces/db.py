@@ -197,3 +197,15 @@ class DB:
             return list({anchor_page_id for channel_id in channel_ids for anchor_page_id in self.channel_anchor_page_ids[channel_id]})
         else:
             return []
+
+    def query_wikipedia_page_ids(self):
+        query = f"""
+            SELECT PageID FROM graph.Nodes_N_Concept
+        """
+        self.cursor.execute(query)
+
+        page_ids = []
+        for page_id, in self.cursor:
+            page_ids.append(page_id)
+
+        return page_ids
