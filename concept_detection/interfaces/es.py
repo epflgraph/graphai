@@ -8,32 +8,59 @@ from definitions import CONFIG_DIR
 from concept_detection.types.page_result import PageResult
 
 
-def es_bool(must=None, must_not=None, should=None):
+def es_bool(must=None, must_not=None, should=None, filter=None):
     query = {
         'bool': {}
     }
 
-    if must:
+    if must is not None:
         query['bool']['must'] = must
 
-    if must_not:
+    if must_not is not None:
         query['bool']['must_not'] = must_not
 
-    if should:
+    if should is not None:
         query['bool']['should'] = should
+
+    if filter is not None:
+        query['bool']['filter'] = filter
 
     return query
 
 
-def es_match(field, text, boost=1):
-    return {
+def es_match(field, text, boost=None, operator=None):
+    query = {
         'match': {
             field: {
-                'query': text,
-                'boost': boost
+                'query': text
             }
         }
     }
+
+    if boost is not None:
+        query['match'][field]['boost'] = boost
+
+    if operator is not None:
+        query['match'][field]['operator'] = operator
+
+    return query
+
+
+def es_multi_match(fields, text, type=None, operator=None):
+    query = {
+        'multi_match': {
+            'fields': fields,
+            'query': text
+        }
+    }
+
+    if type is not None:
+        query['multi_match']['type'] = type
+
+    if operator is not None:
+        query['multi_match']['operator'] = operator
+
+    return query
 
 
 def es_exp_decay_function(field, scale):
@@ -91,8 +118,8 @@ class ES:
 
         self.es = Elasticsearch([f'{self.host}:{self.port}'])
 
-    def _search(self, query, limit=10):
-        return self.es.search(index=self.index, query=query, size=limit)
+    def _search(self, query, limit=10, explain=False):
+        return self.es.search(index=self.index, query=query, size=limit, explain=explain)
 
     def _results_from_search(self, search):
         hits = search['hits']['hits']
@@ -151,6 +178,24 @@ class ES:
                 should=es_match('title', text)
             ),
             script=es_exp_booster_source(scale=scale, max_boost=max_boost)
+        )
+        search = self._search(query, limit=limit)
+        return self._results_from_search(search)
+
+    def search_mediawiki_simplified(self, text, limit=10, boost_title=0.9, boost_content=1.8):
+        query = es_bool(
+            filter=es_match(field='content', text=text, operator='AND'),
+            should=[
+                es_match(field='title', text=text, boost=boost_title),
+                es_match(field='content', text=text, boost=boost_content)
+            ]
+        )
+        search = self._search(query, limit=limit)
+        return self._results_from_search(search)
+
+    def search_like_frontend(self, text, limit=10):
+        query = es_bool(
+            must=es_multi_match(fields=['title', 'title._2gram', 'title._3gram'], text=text, type='bool_prefix', operator='AND')
         )
         search = self._search(query, limit=limit)
         return self._results_from_search(search)
