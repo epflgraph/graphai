@@ -200,7 +200,8 @@ class DB:
 
     def query_wikipedia_page_ids(self):
         query = f"""
-            SELECT PageID FROM graph.Nodes_N_Concept
+            SELECT PageID
+            FROM graph.Nodes_N_Concept
         """
         self.cursor.execute(query)
 
@@ -209,3 +210,25 @@ class DB:
             page_ids.append(page_id)
 
         return page_ids
+
+    def query_wikipedia_pages(self, limit=None):
+        query = f"""
+            SELECT PageID, PageTitle, PageContent
+            FROM graph.Nodes_N_Concept
+        """
+
+        if limit is not None:
+            query += f"""
+                LIMIT {limit}
+            """
+
+        self.cursor.execute(query)
+
+        return [
+            {
+                'page_id': page_id,
+                'page_title': page_title,
+                'page_content': page_content
+            }
+            for page_id, page_title, page_content in self.cursor
+        ]

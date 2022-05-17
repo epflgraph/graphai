@@ -1,39 +1,27 @@
 import time
-import configparser
-import mysql.connector
-from elasticsearch import Elasticsearch
-from wikimarkup_stripper.stripper import strip
 
-# Read es config and instantiate elasticsearch client
-es_config = configparser.ConfigParser()
-es_config.read('config/es.ini')
-es = Elasticsearch([f'{es_config["ES"].get("host")}:{es_config["ES"].get("port")}'])
+from concept_detection.interfaces.db import DB
+from concept_detection.interfaces.es import ES
+from concept_detection.text.stripper import strip
 
-# Read db config from file and open connection
-db_config = configparser.ConfigParser()
-db_config.read('config/db.ini')
-cnx = mysql.connector.connect(host=db_config['DB'].get('host'), port=db_config['DB'].getint('port'), user=db_config['DB'].get('user'), password=db_config['DB'].get('password'))
-cursor = cnx.cursor()
+db = DB()
+es = ES()
 
-# Execute query on db
-query = f"""
-    SELECT PageID, PageTitle, PageContent FROM graph.Nodes_N_Concept
-"""
-cursor.execute(query)
+st = time.time()
 
-start_time = time.time()
-
-for page_id, page_title, page_content in cursor:
-    stripped_page_content = strip(page_content)
+pages = db.query_wikipedia_pages(limit=1)
+for page in pages:
+    stripped_page_content = strip(page['page_content'])
     doc = {
-        'id': page_id,
-        'title': page_title,
+        'id': page['page_id'],
+        'title': page['page_title'],
         'content': stripped_page_content
     }
-    es.index(index=es_config['ES'].get('index'), document=doc, id=page_id)
+    print(doc)
+    es.index_doc(doc)
 
 # Refresh index
-es.indices.refresh(index=es_config['ES'].get('index'))
+es.refresh()
 
-print()
-print(f'Finished! Took {time.time() - start_time:.2f}s.')
+ft = time.time()
+print(f'Finished! Took {ft - st:.2f}s.')

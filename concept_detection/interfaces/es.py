@@ -203,3 +203,11 @@ class ES:
     def indices(self):
         return self.es.cat.indices(index=self.index, format='json', v=True)
 
+    def index_doc(self, doc):
+        if 'id' in doc:
+            self.es.index(index=self.index, document=doc, id=doc['id'])
+        else:
+            self.es.index(index=self.index, document=doc)
+
+    def refresh(self):
+        self.es.indices.refresh(index=self.index)
