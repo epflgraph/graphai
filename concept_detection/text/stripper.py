@@ -204,11 +204,11 @@ def parse_template(node):
 
 
 def parse(node):
-    # Node is actually None
+    # node is actually None
     if not node:
         return ''
 
-    # Node is actually a Wikicode
+    # node is actually a Wikicode
     if isinstance(node, Wikicode):
         return ''.join([parse(child) for child in node.nodes])
 
@@ -308,18 +308,35 @@ def clean(text):
     # Collapse consecutive whitespaces
     text = re.sub(' +', ' ', text)
 
+    # Normalize unicode characters
+    unicodedata.normalize('NFKC', text)
+
     return text
 
 
-def section_title(section):
-    headings = section.filter_headings()
+def get_section_headings(section):
+    return [clean(parse(heading.title)) for heading in section.filter_headings()]
 
-    if not headings:
-        return ''
 
-    title = parse(headings[0].title)
+def get_categories(section):
+    # Pattern:
+    #   \[\[        - leading [[
+    #   Category    - literal
+    #   \s*         - any number of whitespaces
+    #   :           - literal
+    #   \s*         - any number of whitespaces
+    #   (.+)        - capturing group, at least one character
+    #   \s*         - any number of whitespaces
+    #   \]\]        - trailing ]]
+    matches = re.findall(r'\[\[Category\s*:\s*(.+)\s*\]\]', section)
 
-    return title
+    # Some categories have format [[Category:something]], some others have format
+    # [[Category:something|something else]]. We clean the second type.
+    categories = [re.split(r'\|', match, maxsplit=1)[0] for match in matches]
+
+    categories = [clean(category) for category in categories]
+
+    return categories
 
 
 def strip(page_content):
@@ -330,17 +347,43 @@ def strip(page_content):
         page_content (str): String containing the page content in wikimarkup format.
 
     Returns:
-        str: String representing a human-readable version of the input text.
+        dict: Dictionary containing several fields derived from the markup parsing, containing a 'text' field which
+            represents a human-readable version of the input text.
     """
     
     wikicode = mwparserfromhell.parse(page_content)
 
     sections = wikicode.get_sections(levels=[2], include_lead=True)
 
-    parsed_sections = []
+    stripped_page = {
+        'headings': [],
+        'opening_text': '',
+        'text': [],
+        'categories': []
+    }
     for section in sections:
+        # Extract list of section headings
+        section_headings = get_section_headings(section)
+        section_title = section_headings[0] if section_headings else ''
+        if section_headings:
+            stripped_page['headings'].append(' '.join(section_headings))
 
-        if section_title(section) not in ['See also', 'References', 'External links']:
-            parsed_sections.append(clean(parse(section)))
+        # Extract list of categories
+        categories = get_categories(section.__str__())
+        if categories:
+            stripped_page['categories'].append(' '.join(categories))
 
-    return unicodedata.normalize('NFKC', ''.join(parsed_sections))
+        # Parse section text
+        if section_title not in ['See also', 'References', 'External links']:
+            section_text = clean(parse(section))
+            stripped_page['text'].append(section_text)
+
+            if not section_title:
+                stripped_page['opening_text'] = section_text
+
+    # Flatten lists over sections
+    stripped_page['headings'] = ' '.join(stripped_page['headings'])
+    stripped_page['text'] = ' '.join(stripped_page['text'])
+    stripped_page['categories'] = ' '.join(stripped_page['categories'])
+
+    return stripped_page

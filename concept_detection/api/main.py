@@ -134,4 +134,4 @@ async def wikify(data: WikifyRequest, method: Optional[str] = None):
 
 @app.post('/markup_strip')
 async def markup_strip(data: StripData):
-    return {'stripped_code': strip(data.markup_code)}
+    return {'stripped_code': strip(data.markup_code)['text']}

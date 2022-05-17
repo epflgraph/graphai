@@ -11,13 +11,12 @@ st = time.time()
 
 pages = db.query_wikipedia_pages(limit=1)
 for page in pages:
-    stripped_page_content = strip(page['page_content'])
+    stripped_page = strip(page['page_content'])
     doc = {
         'id': page['page_id'],
         'title': page['page_title'],
-        'content': stripped_page_content
+        'content': stripped_page['text']
     }
-    print(doc)
     es.index_doc(doc)
 
 # Refresh index
