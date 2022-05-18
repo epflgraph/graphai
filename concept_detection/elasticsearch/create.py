@@ -7,15 +7,18 @@ from concept_detection.text.stripper import strip
 db = DB()
 es = ES()
 
-st = time.time()
+pages = db.query_wikipedia_pages(limit=1000)
 
-pages = db.query_wikipedia_pages(limit=1)
+st = time.time()
 for page in pages:
     stripped_page = strip(page['page_content'])
     doc = {
         'id': page['page_id'],
         'title': page['page_title'],
-        'content': stripped_page['text']
+        'text': stripped_page['text'],
+        'headings': stripped_page['headings'],
+        'opening_text': stripped_page['opening_text'],
+        'categories': stripped_page['categories']
     }
     es.index_doc(doc)
 

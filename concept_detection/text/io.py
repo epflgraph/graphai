@@ -30,6 +30,10 @@ def pprint(t, indent=0, inline=False, only_first=False):
 
         return
 
+    # Shorten long strings not to flood the terminal
+    if type(t) is str and len(t) > 92:
+        t = f'{t[:92]} [...]'
+
     if inline:
         print(t)
     else:
