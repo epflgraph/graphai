@@ -211,11 +211,16 @@ class DB:
 
         return page_ids
 
-    def query_wikipedia_pages(self, limit=None):
+    def query_wikipedia_pages(self, ids=None, limit=None):
         query = f"""
             SELECT PageID, PageTitle, PageContent
             FROM graph.Nodes_N_Concept
         """
+
+        if ids is not None:
+            query += f"""
+                WHERE PageID IN ({','.join(ids)})
+            """
 
         if limit is not None:
             query += f"""

@@ -118,8 +118,8 @@ class ES:
 
         self.es = Elasticsearch([f'{self.host}:{self.port}'])
 
-    def _search(self, query, limit=10, explain=False):
-        return self.es.search(index=self.index, query=query, size=limit, explain=explain)
+    def _search(self, query, limit=10, source=None, explain=False):
+        return self.es.search(index=self.index, query=query, source=source, size=limit, explain=explain)
 
     def _results_from_search(self, search):
         hits = search['hits']['hits']

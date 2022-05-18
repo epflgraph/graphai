@@ -7,7 +7,21 @@ from concept_detection.text.stripper import strip
 db = DB()
 es = ES()
 
-pages = db.query_wikipedia_pages(limit=1000)
+# Get ids of document batch checking which still have
+batch_size = 1000
+query = {
+    'bool': {
+        'must': {
+            'exists': {
+                'field': 'content'
+            }
+        }
+    }
+}
+r = es._search(query=query, source=['id'], limit=batch_size)
+batch_page_ids = [str(hit['_source']['id']) for hit in r['hits']['hits']]
+
+pages = db.query_wikipedia_pages(ids=batch_page_ids)
 
 st = time.time()
 for page in pages:

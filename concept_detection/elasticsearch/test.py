@@ -14,14 +14,17 @@ es = ES()
 
 query = {
     'bool': {
-        'must_not': {
+        'must': {
             'exists': {
                 'field': 'content'
             }
         }
     }
 }
-r = es._search(query=query).body
+
+source = ['id', 'title']
+
+r = es._search(query=query, source=source).body
 pprint(r)
 
 r = es.indices().body
