@@ -1,3 +1,5 @@
+import json
+
 def pprint(t, indent=0, inline=False, only_first=False):
     if type(t) is dict:
         if inline:
@@ -39,3 +41,7 @@ def pprint(t, indent=0, inline=False, only_first=False):
     else:
         print(f'{" " * indent}{t}')
 
+
+def read_json(filename):
+    with open(filename) as file:
+        return json.load(file)
