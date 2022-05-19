@@ -27,5 +27,8 @@ source = ['id', 'title']
 r = es._search(query=query, source=source).body
 pprint(r)
 
+r = es.es.count(index='wikipages', query=query)
+print(r)
+
 r = es.indices().body
 pprint(r)
