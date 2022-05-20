@@ -184,10 +184,16 @@ class ES:
 
     def search_mediawiki_simplified(self, text, limit=10, boost_title=0.9, boost_content=1.8):
         query = es_bool(
-            filter=es_match(field='content', text=text, operator='AND'),
+            filter=es_bool(
+                should=[
+                    es_match(field='content', text=text, operator='AND'),
+                    es_match(field='text', text=text, operator='AND'),
+                ]
+            ),
             should=[
                 es_match(field='title', text=text, boost=boost_title),
-                es_match(field='content', text=text, boost=boost_content)
+                es_match(field='content', text=text, boost=boost_content),
+                es_match(field='text', text=text, boost=boost_content)
             ]
         )
         search = self._search(query, limit=limit)
