@@ -309,7 +309,7 @@ def clean(text):
     text = re.sub(' +', ' ', text)
 
     # Normalize unicode characters
-    unicodedata.normalize('NFKC', text)
+    text = unicodedata.normalize('NFKC', text)
 
     return text
 
