@@ -215,5 +215,22 @@ class ES:
         else:
             self.es.index(index=self.index, document=doc)
 
+    def create_index(self, settings=None, mapping=None):
+        body = {}
+
+        if settings is not None:
+            body['settings'] = settings
+
+        if mapping is not None:
+            body['mappings'] = mapping
+
+        if body:
+            self.es.indices.create(index=self.index, body=body)
+        else:
+            self.es.indices.create(index=self.index)
+
+    def delete_index(self):
+        self.es.indices.delete(index=self.index, ignore_unavailable=True)
+
     def refresh(self):
         self.es.indices.refresh(index=self.index)

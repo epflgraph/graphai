@@ -11,7 +11,7 @@ __pycache__
 data
 
 # Config files (might include sensitive information or depend on the deployment)
-config
+/config
 
 # Documentation build files
 docs/build

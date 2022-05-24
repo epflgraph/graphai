@@ -1,0 +1,299 @@
+{
+  "dynamic": "false",
+  "properties": {
+    "all": {
+      "type": "text",
+      "similarity": "BM25",
+      "fields": {
+        "plain": {
+          "type": "text",
+          "similarity": "BM25",
+          "analyzer": "plain",
+          "search_analyzer": "plain_search",
+          "position_increment_gap": 10
+        }
+      },
+      "analyzer": "text",
+      "search_analyzer": "text_search",
+      "position_increment_gap": 10
+    },
+    "all_near_match": {
+      "type": "text",
+      "index_options": "freqs",
+      "similarity": "BM25",
+      "fields": {
+        "asciifolding": {
+          "type": "text",
+          "index_options": "freqs",
+          "similarity": "BM25",
+          "analyzer": "near_match_asciifolding"
+        }
+      },
+      "analyzer": "near_match"
+    },
+    "auxiliary_text": {
+      "type": "text",
+      "index_options": "offsets",
+      "similarity": "BM25",
+      "fields": {
+        "plain": {
+          "type": "text",
+          "index_options": "offsets",
+          "similarity": "BM25",
+          "analyzer": "plain",
+          "search_analyzer": "plain_search",
+          "position_increment_gap": 10
+        }
+      },
+      "copy_to": [
+        "all"
+      ],
+      "analyzer": "text",
+      "search_analyzer": "text_search",
+      "position_increment_gap": 10
+    },
+    "category": {
+      "type": "text",
+      "index_options": "offsets",
+      "similarity": "arrays",
+      "fields": {
+        "plain": {
+          "type": "text",
+          "index_options": "offsets",
+          "similarity": "arrays",
+          "analyzer": "plain",
+          "search_analyzer": "plain_search",
+          "position_increment_gap": 10
+        }
+      },
+      "copy_to": [
+        "all",
+        "all",
+        "all",
+        "all",
+        "all",
+        "all",
+        "all",
+        "all"
+      ],
+      "analyzer": "text",
+      "search_analyzer": "text_search",
+      "position_increment_gap": 10
+    },
+    "file_text": {
+      "type": "text",
+      "index_options": "offsets",
+      "similarity": "BM25",
+      "fields": {
+        "plain": {
+          "type": "text",
+          "index_options": "offsets",
+          "similarity": "BM25",
+          "analyzer": "plain",
+          "search_analyzer": "plain_search",
+          "position_increment_gap": 10
+        }
+      },
+      "copy_to": [
+        "all"
+      ],
+      "analyzer": "text",
+      "search_analyzer": "text_search",
+      "position_increment_gap": 10
+    },
+    "heading": {
+      "type": "text",
+      "index_options": "offsets",
+      "similarity": "arrays",
+      "fields": {
+        "plain": {
+          "type": "text",
+          "index_options": "offsets",
+          "similarity": "arrays",
+          "analyzer": "plain",
+          "search_analyzer": "plain_search",
+          "position_increment_gap": 10
+        }
+      },
+      "copy_to": [
+        "all",
+        "all",
+        "all",
+        "all",
+        "all"
+      ],
+      "analyzer": "text",
+      "search_analyzer": "text_search",
+      "position_increment_gap": 10
+    },
+    "incoming_links": {
+      "type": "long"
+    },
+    "opening_text": {
+      "type": "text",
+      "similarity": "BM25",
+      "fields": {
+        "plain": {
+          "type": "text",
+          "similarity": "BM25",
+          "analyzer": "plain",
+          "search_analyzer": "plain_search",
+          "position_increment_gap": 10
+        }
+      },
+      "copy_to": [
+        "all",
+        "all",
+        "all"
+      ],
+      "analyzer": "text",
+      "search_analyzer": "text_search",
+      "position_increment_gap": 10
+    },
+    "popularity_score": {
+      "type": "double"
+    },
+    "redirect": {
+      "type": "text",
+      "index_options": "offsets",
+      "similarity": "arrays",
+      "fields": {
+        "plain": {
+          "type": "text",
+          "index_options": "offsets",
+          "similarity": "arrays",
+          "analyzer": "plain",
+          "search_analyzer": "plain_search",
+          "position_increment_gap": 10
+        }
+      },
+      "copy_to": [
+        "suggest",
+        "all",
+        "all",
+        "all",
+        "all",
+        "all",
+        "all",
+        "all",
+        "all",
+        "all",
+        "all",
+        "all",
+        "all",
+        "all",
+        "all",
+        "all",
+        "all_near_match",
+        "all_near_match",
+        "all_near_match",
+        "all_near_match",
+        "all_near_match",
+        "all_near_match",
+        "all_near_match",
+        "all_near_match",
+        "all_near_match",
+        "all_near_match",
+        "all_near_match",
+        "all_near_match",
+        "all_near_match",
+        "all_near_match",
+        "all_near_match"
+      ],
+      "analyzer": "text",
+      "search_analyzer": "text_search",
+      "position_increment_gap": 10
+    },
+    "suggest": {
+      "type": "text",
+      "index_options": "freqs",
+      "similarity": "arrays",
+      "analyzer": "suggest"
+    },
+    "text": {
+      "type": "text",
+      "index_options": "offsets",
+      "similarity": "BM25",
+      "fields": {
+        "plain": {
+          "type": "text",
+          "index_options": "offsets",
+          "similarity": "BM25",
+          "analyzer": "plain",
+          "search_analyzer": "plain_search",
+          "position_increment_gap": 10
+        },
+        "word_count": {
+          "type": "token_count",
+          "store": "true",
+          "analyzer": "plain"
+        }
+      },
+      "copy_to": [
+        "all"
+      ],
+      "analyzer": "text",
+      "search_analyzer": "text_search",
+      "position_increment_gap": 10
+    },
+    "title": {
+      "type": "text",
+      "similarity": "BM25",
+      "fields": {
+        "plain": {
+          "type": "text",
+          "similarity": "BM25",
+          "analyzer": "plain",
+          "search_analyzer": "plain_search",
+          "position_increment_gap": 10
+        }
+      },
+      "copy_to": [
+        "suggest",
+        "all",
+        "all",
+        "all",
+        "all",
+        "all",
+        "all",
+        "all",
+        "all",
+        "all",
+        "all",
+        "all",
+        "all",
+        "all",
+        "all",
+        "all",
+        "all",
+        "all",
+        "all",
+        "all",
+        "all",
+        "all_near_match",
+        "all_near_match",
+        "all_near_match",
+        "all_near_match",
+        "all_near_match",
+        "all_near_match",
+        "all_near_match",
+        "all_near_match",
+        "all_near_match",
+        "all_near_match",
+        "all_near_match",
+        "all_near_match",
+        "all_near_match",
+        "all_near_match",
+        "all_near_match",
+        "all_near_match",
+        "all_near_match",
+        "all_near_match",
+        "all_near_match",
+        "all_near_match"
+      ],
+      "analyzer": "text",
+      "search_analyzer": "text_search",
+      "position_increment_gap": 10
+    }
+  }
+}
