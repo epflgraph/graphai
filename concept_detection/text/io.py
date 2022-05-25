@@ -45,3 +45,17 @@ def pprint(t, indent=0, inline=False, only_first=False):
 def read_json(filename):
     with open(filename) as file:
         return json.load(file)
+
+
+class ProgressBar:
+    def __init__(self, n_iterations, bar_length=50):
+        self.current_iteration = 0
+        self.n_iterations = n_iterations
+        self.bar_length = bar_length
+
+    def update(self):
+        self.current_iteration += 1
+
+        progress = int(self.bar_length * self.current_iteration / self.n_iterations)
+        remaining = self.bar_length - progress
+        print(f'\r[{"#" * progress}{"." * remaining}]', end='', flush=True)

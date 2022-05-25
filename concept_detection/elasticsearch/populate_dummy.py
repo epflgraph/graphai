@@ -1,5 +1,6 @@
 import time
 
+from concept_detection.text.io import ProgressBar
 from concept_detection.interfaces.es import ES
 
 es = ES()
@@ -22,13 +23,9 @@ docs = [
 ]
 
 st = time.time()
-i = 0
+b = ProgressBar(len(docs))
 for doc in docs:
-    i += 1
-    bar_length = 50
-    done = int(bar_length * i / len(docs))
-    to_do = bar_length - done
-    print(f'\r[{"#" * done}{"." * to_do}]', end='', flush=True)
+    b.update()
 
     es.index_doc(doc)
 

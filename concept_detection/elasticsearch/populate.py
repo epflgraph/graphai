@@ -1,5 +1,6 @@
 import time
 
+from concept_detection.text.io import ProgressBar
 from concept_detection.interfaces.db import DB
 from concept_detection.interfaces.es import ES
 from concept_detection.text.stripper import strip
@@ -29,13 +30,9 @@ for i in range(n_batches):
     pages = db.query_wikipedia_pages(ids=batch_page_ids)
 
     st = time.time()
-    i = 0
+    b = ProgressBar(len(pages))
     for page in pages:
-        i += 1
-        bar_length = 50
-        done = int(bar_length * i / len(pages))
-        to_do = bar_length - done
-        print(f'\r[{"#" * done}{"." * to_do}]', end='', flush=True)
+        b.update()
 
         stripped_page = strip(page['page_content'])
         doc = {
