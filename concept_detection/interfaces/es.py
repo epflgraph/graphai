@@ -134,8 +134,8 @@ class ES:
 
         self.es = Elasticsearch([f'{self.host}:{self.port}'])
 
-    def _search(self, query, limit=10, source=None, explain=False):
-        return self.es.search(index=self.index, query=query, source=source, size=limit, explain=explain)
+    def _search(self, query, limit=10, source=None, explain=False, rescore=None):
+        return self.es.search(index=self.index, query=query, source=source, rescore=rescore, size=limit, explain=explain, profile=True)
 
     def _results_from_search(self, search):
         hits = search['hits']['hits']
@@ -250,7 +250,44 @@ class ES:
             ]
         )
 
-        search = self._search(query, limit=limit)
+        rescore = [
+            {
+                "window_size": 8192,
+                "query": {
+                    "query_weight": 1,
+                    "rescore_query_weight": 1,
+                    "score_mode": "total",
+                    "rescore_query": {
+                        "function_score": {
+                            "score_mode": "sum",
+                            "boost_mode": "sum",
+                            "functions": [
+                                {
+                                    "script_score": {
+                                        "script": {
+                                            "source": "pow(doc['popularity_score'].value , 0.8) / ( pow(doc['popularity_score'].value, 0.8) + pow(8.0E-6,0.8))",
+                                            "lang": "expression"
+                                        }
+                                    },
+                                    "weight": 3
+                                },
+                                {
+                                    "script_score": {
+                                        "script": {
+                                            "source": "pow(doc['incoming_links'].value , 0.7) / ( pow(doc['incoming_links'].value, 0.7) + pow(30,0.7))",
+                                            "lang": "expression"
+                                        }
+                                    },
+                                    "weight": 10
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        ]
+
+        search = self._search(query, limit=limit, rescore=rescore)
         return self._results_from_search(search)
 
     def search_like_frontend(self, text, limit=10):
