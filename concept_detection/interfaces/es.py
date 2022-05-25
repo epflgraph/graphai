@@ -46,7 +46,7 @@ def es_match(field, text, boost=None, operator=None):
     return query
 
 
-def es_multi_match(fields, text, type=None, operator=None):
+def es_multi_match(fields, text, type=None, boost=None, min_should_match=None, operator=None):
     query = {
         'multi_match': {
             'fields': fields,
@@ -57,8 +57,22 @@ def es_multi_match(fields, text, type=None, operator=None):
     if type is not None:
         query['multi_match']['type'] = type
 
+    if boost is not None:
+        query['multi_match']['boost'] = boost
+
+    if min_should_match is not None:
+        query['multi_match']['min_should_match'] = min_should_match
+
     if operator is not None:
         query['multi_match']['operator'] = operator
+
+    return query
+
+
+def es_dis_max(clauses):
+    query = {
+        'dis_max': clauses
+    }
 
     return query
 
@@ -196,6 +210,41 @@ class ES:
                 es_match(field='text', text=text, boost=boost_content)
             ]
         )
+        search = self._search(query, limit=limit)
+        return self._results_from_search(search)
+
+    def search_mediawiki(self, text, limit=10):
+        query = es_bool(
+            should=[
+                es_multi_match(fields=['all_near_match^10', 'all_near_match_asciifolding^7.5'], text=text),
+                es_bool(
+                    filter=[
+                        es_bool(
+                            should=[
+                                es_match('all', text=text, operator='and'),
+                                es_match('all.plain', text=text, operator='and')
+                            ]
+                        )
+                    ],
+                    should=[
+                        es_multi_match(fields=['title^3', 'title.plain^1'], text=text, type='most_fields', boost=0.3, min_should_match=1),
+                        es_multi_match(fields=['category^3', 'category.plain^1'], text=text, type='most_fields', boost=0.05, min_should_match=1),
+                        es_multi_match(fields=['heading^3', 'heading.plain^1'], text=text, type='most_fields', boost=0.05, min_should_match=1),
+                        es_multi_match(fields=['auxiliary_text^3', 'auxiliary_text.plain^1'], text=text, type='most_fields', boost=0.05, min_should_match=1),
+                        es_multi_match(fields=['file_text^3', 'file_text.plain^1'], text=text, type='most_fields', boost=0.5, min_should_match=1),
+                        es_dis_max([
+                            es_multi_match(fields=['redirect^3', 'redirect.plain^1'], text=text, type='most_fields', boost=0.27, min_should_match=1),
+                            es_multi_match(fields=['suggest'], text=text, type='most_fields', boost=0.2, min_should_match=1)
+                        ]),
+                        es_dis_max([
+                            es_multi_match(fields=['text^3', 'text.plain^1'], text=text, type='most_fields', boost=0.6, min_should_match=1),
+                            es_multi_match(fields=['opening_text^3', 'opening_text.plain^1'], text=text, type='most_fields', boost=0.5, min_should_match=1)
+                        ]),
+                    ]
+                )
+            ]
+        )
+
         search = self._search(query, limit=limit)
         return self._results_from_search(search)
 
