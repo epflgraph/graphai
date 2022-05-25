@@ -284,6 +284,38 @@ class ES:
                         }
                     }
                 }
+            },
+            {
+                "window_size": 448,
+                "query": {
+                    "query_weight": 1,
+                    "rescore_query_weight": 10000,
+                    "score_mode": "total",
+                    "rescore_query": {
+                        "bool": {
+                            "should": [
+                                {
+                                    "constant_score": {
+                                        "filter": {
+                                            "match_all": {
+
+                                            }
+                                        },
+                                        "boost": 100000
+                                    }
+                                },
+                                {
+                                    "sltr": {
+                                        "model": "enwiki-20220421-20180215-query_explorer",
+                                        "params": {
+                                            "query_string": text
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
             }
         ]
 
