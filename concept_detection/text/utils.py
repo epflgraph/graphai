@@ -1,9 +1,11 @@
+import re
+
 from concept_detection.text.pyunicode import unxmlify
 
 
 def clean_text(raw_text):
     """
-    Cleans raw text from XML tags an other rubbish
+    Cleans raw text from XML tags and other rubbish
 
     Args:
         raw_text (str): String containing the text to be cleaned
@@ -21,6 +23,9 @@ def clean_text(raw_text):
     # Remove or replace special characters and rubbish
     cleaned_text = cleaned_text.replace('•', '\n')
     cleaned_text = cleaned_text.replace('*', '\n')
+
+    # Collapse multiple dashes
+    cleaned_text = re.sub('-{2,}', '-', cleaned_text)
 
     # Return cleaned text
     return cleaned_text
