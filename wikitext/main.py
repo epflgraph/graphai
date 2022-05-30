@@ -58,7 +58,7 @@ def combine(wikitexts, f=None):
 
         agg_result = {}
         for key in pair_results[0]:
-            if key == 'keywords' or key == 'page_id' or key == 'page_title':
+            if 'keywords' in key or 'page_id' in key or 'page_title' in key:
                 agg_result[key] = pair_results[0][key]
                 continue
 
@@ -93,18 +93,20 @@ class Wikitext:
         self.raw_text = raw_text
         self.anchor_page_ids = anchor_page_ids
 
-        if anchor_page_ids is None:
-            params = {
-                'raw_text': raw_text
-            }
-        else:
-            params = {
-                'raw_text': raw_text,
-                'anchor_page_ids': anchor_page_ids
-            }
+        params = {
+            'raw_text': raw_text
+        }
+
+        if anchor_page_ids is not None:
+            params['anchor_page_ids'] = anchor_page_ids
 
         # Get wikify results
-        self.results = post(WIKIFY_URL, json=params).json()
+        r = post(WIKIFY_URL, json=params)
+
+        # Raise exception if bad status_code
+        r.raise_for_status()
+
+        self.results = r.json()
 
     def keywords(self):
         """
@@ -172,7 +174,7 @@ class Wikitext:
                     agg_result[key] = keywords_results[0][key]
                     continue
 
-                if key == 'page_id' or key == 'page_title':
+                if 'page_id' in key or 'page_title' in key:
                     agg_result[f'{key}s'] = [result[key] for result in keywords_results]
                     continue
 
@@ -199,7 +201,7 @@ class Wikitext:
                     agg_result[f'{key}_list'] = [result[key] for result in page_results]
                     continue
 
-                if key == 'page_id' or key == 'page_title':
+                if 'page_id' in key or 'page_title' in key:
                     agg_result[key] = page_results[0][key]
                     continue
 
