@@ -236,8 +236,8 @@ def parse(node):
     if isinstance(node, Tag):
         tag = parse(node.tag)
 
-        # Exclude reference and math tags
-        if tag in ['ref', 'math']:
+        # Exclude reference, math tags and tables
+        if tag in ['ref', 'math', 'table']:
             return ''
 
         return parse(node.contents)
@@ -290,6 +290,18 @@ def parse(node):
     return ''
 
 
+def parse_hatnote(node):
+    # Hatnotes can only be templates
+    if isinstance(node, Template):
+        # Ignore redirects and date hatnotes
+        name = node.name.lower()
+        if 'redirect' not in name and 'date' not in name:
+            # Concatenate all parsed parameters. This could be perhaps refined depending on the template.
+            return ' '.join([parse(param.value) for param in node.params])
+
+    return ''
+
+
 def clean(text):
     # Normalize line breaks and tabs
     text = re.sub('[\r\f\v]', '\n', text)
@@ -339,6 +351,33 @@ def get_categories(section):
     return categories
 
 
+def get_tables(section):
+    return [clean(parse(table.contents)) for table in section.filter_tags(matches=lambda node: node.tag == 'table')]
+
+
+def split_hatnotes_opening_text(section):
+    hatnotes = []
+    opening_text = ''
+
+    started = False
+    for child in section.nodes:
+        if not started and not isinstance(child, Template):
+            text = parse(child)
+            if text.strip():
+                opening_text += text
+                started = True
+            continue
+
+        if started:
+            opening_text += parse(child)
+        else:
+            hatnote = clean(parse_hatnote(child))
+            if hatnote:
+                hatnotes.append(clean(parse_hatnote(child)))
+
+    return hatnotes, clean(opening_text)
+
+
 def strip(page_content):
     """
     Strips wikimarkup from a string and returns a human-readable version by parsing the markup.
@@ -355,35 +394,50 @@ def strip(page_content):
 
     sections = wikicode.get_sections(levels=[2], include_lead=True)
 
+    # Sections not processed for text
+    text_excluded_sections = ['See also', 'References', 'External links']
+
+    # Sections processed for auxiliary text
+    auxiliary_text_sections = ['See also']
+
     stripped_page = {
-        'headings': [],
+        'heading': [],
         'opening_text': '',
-        'text': [],
-        'categories': []
+        'text': '',
+        'auxiliary_text': []
     }
     for section in sections:
         # Extract list of section headings
         section_headings = get_section_headings(section)
+        stripped_page['heading'].extend([h for h in section_headings if h not in text_excluded_sections])
+
+        # Tables are extracted and stored as auxiliary text
+        stripped_page['auxiliary_text'].extend(get_tables(section))
+
+        # Extract section title from headings and proceed depending on the case
         section_title = section_headings[0] if section_headings else ''
-        if section_headings:
-            stripped_page['headings'].append(' '.join(section_headings))
-
-        # Extract list of categories
-        categories = get_categories(section.__str__())
-        if categories:
-            stripped_page['categories'].append(' '.join(categories))
-
-        # Parse section text
-        if section_title not in ['See also', 'References', 'External links']:
-            section_text = clean(parse(section))
-            stripped_page['text'].append(section_text)
-
-            if not section_title:
-                stripped_page['opening_text'] = section_text
-
-    # Flatten lists over sections
-    stripped_page['headings'] = ' '.join(stripped_page['headings'])
-    stripped_page['text'] = ' '.join(stripped_page['text'])
-    stripped_page['categories'] = ' '.join(stripped_page['categories'])
+        if not section_title:
+            # First section, split hatnotes and opening_text and store them as
+            # auxiliary text and opening_text/text, respectively.
+            hatnotes, opening_text = split_hatnotes_opening_text(section)
+            stripped_page['auxiliary_text'].extend(hatnotes)
+            stripped_page['opening_text'] = opening_text
+            stripped_page['text'] += f'\n{opening_text}'
+        else:
+            # Named section, may be processed as either text or auxiliary text
+            if section_title in auxiliary_text_sections and section_title in text_excluded_sections:
+                # Section to be processed only as auxiliary text
+                text = clean(parse(section))
+                stripped_page['auxiliary_text'].append(text)
+            elif section_title in auxiliary_text_sections and section_title not in text_excluded_sections:
+                # Section to be processed as both text and auxiliary text
+                text = clean(parse(section))
+                stripped_page['auxiliary_text'].append(text)
+                stripped_page['text'] += f'\n{text}'
+            elif section_title not in auxiliary_text_sections and section_title not in text_excluded_sections:
+                # Section to be processed only as text
+                text = clean(parse(section))
+                stripped_page['text'] += f'\n{text}'
 
     return stripped_page
+
