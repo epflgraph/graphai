@@ -296,14 +296,18 @@ def parse(node):
 
 def parse_hatnote(node):
     # Hatnotes can only be templates
-    if isinstance(node, Template):
-        # Ignore redirects and date hatnotes
-        name = node.name.lower()
-        if 'redirect' not in name and 'date' not in name:
-            # Concatenate all parsed parameters. This could be perhaps refined depending on the template.
-            return ' '.join([parse(param.value) for param in node.params])
+    if not isinstance(node, Template):
+        return ''
 
-    return ''
+    # Ignore redirects, date hatnotes and other irrelevant hatnotes
+    name = node.name.lower()
+    irrelevant_hatnotes = ['redirect', 'date', 'engvarb', 'coord']
+    for irrelevant_hatnote in irrelevant_hatnotes:
+        if irrelevant_hatnote in name:
+            return ''
+
+    # Concatenate all parsed parameters by default. This could be perhaps refined depending on the template.
+    return ' '.join([parse(param.value) for param in node.params])
 
 
 def clean(text):
@@ -359,6 +363,39 @@ def get_tables(section):
     return [clean(parse(table.contents)) for table in section.filter_tags(matches=lambda node: node.tag == 'table')]
 
 
+def get_captions(section):
+    wikilinks = section.filter_wikilinks(matches=lambda node: 'file' in node.title.lower())
+
+    captions = []
+    for wikilink in wikilinks:
+        # Split string like 'thumb|right|500px|alt=Exterior of a large English Baroque palace|Blenheim Palace'
+        pieces = [piece.strip() for piece in parse(wikilink.text).split('|')]
+
+        # Extract alt_text piece
+        alt_text = ''
+        for piece in pieces:
+            if 'alt=' in piece:
+                alt_text = piece
+                break
+
+        # Remove it from pieces list and drop prefix 'alt='
+        if alt_text:
+            pieces = [piece for piece in pieces if piece != alt_text]
+            alt_text = alt_text.replace('alt=', '')
+
+        # Last piece is the caption
+        caption = pieces[-1]
+
+        # Keep both caption and alt_text if any as captions
+        caption = mwparserfromhell.parse(caption)
+        captions.append(clean(parse(caption)))
+        if alt_text:
+            alt_text = mwparserfromhell.parse(alt_text)
+            captions.append(clean(parse(alt_text)))
+
+    return captions
+
+
 def split_hatnotes_opening_text(section):
     hatnotes = []
     opening_text = ''
@@ -399,7 +436,7 @@ def strip(page_content):
     sections = wikicode.get_sections(levels=[2], include_lead=True)
 
     # Sections not processed for text
-    text_excluded_sections = ['See also', 'References', 'References and notes', 'External links']
+    text_excluded_sections = ['See also', 'References', 'References and notes', 'External links', 'Footnotes']
 
     # Sections processed for auxiliary text
     auxiliary_text_sections = ['See also']
@@ -416,6 +453,7 @@ def strip(page_content):
         stripped_page['heading'].extend([h for h in section_headings if h not in text_excluded_sections])
 
         # Tables are extracted and stored as auxiliary text
+        stripped_page['auxiliary_text'].extend(get_captions(section))
         stripped_page['auxiliary_text'].extend(get_tables(section))
 
         # Extract section title from headings and proceed depending on the case

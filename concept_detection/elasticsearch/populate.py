@@ -10,7 +10,7 @@ from concept_detection.text.stripper import strip
 db = DB()
 es = ES()
 
-random.seed(1)
+random.seed(2)
 ids = [str(n) for n in random.sample(range(1000, 10000000), 100)]
 pages = db.query_wikipedia_pages(ids=ids, limit=3)
 
@@ -19,7 +19,11 @@ b = ProgressBar(len(pages))
 for page in pages:
     b.update()
 
-    stripped_page = strip(page['page_content'])
+    # stripped_page = strip(page['page_content'])
+    stripped_page = strip("""
+    some text
+    ==Hola==
+    """)
     doc = {
         'id': page['page_id'],
         'title': page['page_title'],
@@ -43,7 +47,7 @@ for page in pages:
     # es.index_doc(doc)
 
 # Refresh index
-es.refresh()
+# es.refresh()
 
 ft = time.time()
 print(f'\nFinished! Took {ft - st:.2f}s.')
