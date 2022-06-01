@@ -19,11 +19,7 @@ b = ProgressBar(len(pages))
 for page in pages:
     b.update()
 
-    # stripped_page = strip(page['page_content'])
-    stripped_page = strip("""
-    some text
-    ==Hola==
-    """)
+    stripped_page = strip(page['page_content'])
     doc = {
         'id': page['page_id'],
         'title': page['page_title'],
