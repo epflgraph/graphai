@@ -205,7 +205,7 @@ def parse_template(node):
 
 def parse(node):
     # node is actually None
-    if not node:
+    if node is None:
         return ''
 
     # node is actually a Wikicode
@@ -234,12 +234,16 @@ def parse(node):
 
     # Tag nodes have wikicode as content
     if isinstance(node, Tag):
-        tag = parse(node.tag)
+        # Tag is ex or implicitly self-closing, like <br> or <img/>
+        if node.implicit or node.self_closing:
+            return ' '
 
         # Exclude reference, math tags and tables
+        tag = parse(node.tag)
         if tag in ['ref', 'math', 'table']:
             return ''
 
+        # Parse tag contents by default
         return parse(node.contents)
 
     # Template nodes require processing
@@ -373,7 +377,7 @@ def split_hatnotes_opening_text(section):
         else:
             hatnote = clean(parse_hatnote(child))
             if hatnote:
-                hatnotes.append(clean(parse_hatnote(child)))
+                hatnotes.append(hatnote)
 
     return hatnotes, clean(opening_text)
 
@@ -395,7 +399,7 @@ def strip(page_content):
     sections = wikicode.get_sections(levels=[2], include_lead=True)
 
     # Sections not processed for text
-    text_excluded_sections = ['See also', 'References', 'External links']
+    text_excluded_sections = ['See also', 'References', 'References and notes', 'External links']
 
     # Sections processed for auxiliary text
     auxiliary_text_sections = ['See also']
