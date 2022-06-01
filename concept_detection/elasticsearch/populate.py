@@ -10,7 +10,7 @@ from concept_detection.text.stripper import strip
 db = DB()
 es = ES()
 
-random.seed(2)
+random.seed(6)
 ids = [str(n) for n in random.sample(range(1000, 10000000), 100)]
 pages = db.query_wikipedia_pages(ids=ids, limit=3)
 
@@ -26,18 +26,24 @@ for page in pages:
         'text': stripped_page['text'],
         'heading': stripped_page['heading'],
         'opening_text': stripped_page['opening_text'],
-        'auxiliary_text': stripped_page['auxiliary_text']
+        'auxiliary_text': stripped_page['auxiliary_text'],
+        'file_text': '',
+        'redirect': [],
+        'category': [],
+        'incoming_links': 1,
+        'popularity_score': 1
     }
     print()
     print(f'id: {doc["id"]}')
     print(f'title: {doc["title"]}')
-    print(f'opening_text: {doc["opening_text"]}')
-    print(f'text: {doc["text"]}')
 
-    for key in ['auxiliary_text', 'heading']:
+    for key in ['heading', 'auxiliary_text']:
         print(f'################################# {key} #################################')
         for t in doc[key]:
             print(t)
+
+    print(f'opening_text: {doc["opening_text"]}')
+    print(f'text: {doc["text"]}')
 
     break
     # es.index_doc(doc)
