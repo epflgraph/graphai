@@ -211,7 +211,7 @@ class DB:
 
         return page_ids
 
-    def get_wikipages(self, ids=None, limit=None):
+    def get_wikipages(self, ids=None, id_min_max=None, limit=None):
         query = """
             SELECT concepts.PageID, titles.PageTitle, contents.PageContent
             FROM graph.Nodes_N_Concept AS concepts
@@ -225,6 +225,11 @@ class DB:
             ids = [str(_id) for _id in ids]
             query += f"""
                 WHERE concepts.PageID IN ({','.join(ids)})
+            """
+        elif id_min_max is not None:
+            query += f"""
+                WHERE concepts.PageID >= {id_min_max[0]}
+                AND concepts.PageID <= {id_min_max[1]}
             """
 
         if limit is not None:
@@ -250,7 +255,6 @@ class DB:
             ON concepts.PageID = pages_categories.PageID
             INNER JOIN piper_wikipedia.Categories AS categories
             ON pages_categories.CategoryID = categories.CategoryID
-            GROUP BY concepts.PageID
         """
 
         if ids is not None:
