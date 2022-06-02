@@ -237,3 +237,60 @@ class DB:
             }
             for page_id, page_title, page_content in self.cursor
         ]
+
+    def get_wikipages(self, ids=None, limit=None):
+        query = """
+            SELECT ptpim.PageID, ptpim.PageTitle, pc.PageContent FROM piper_wikipedia.PageTitle_to_PageID_Mapping AS ptpim
+            LEFT JOIN piper_wikipedia.Page_Content AS pc
+            ON ptpim.PageID = pc.PageID
+        """
+
+        if ids is not None:
+            ids = [str(_id) for _id in ids]
+            query += f"""
+                WHERE ptpim.PageID IN ({','.join(ids)})
+            """
+
+        if limit is not None:
+            query += f"""
+                LIMIT {limit}
+            """
+
+        self.cursor.execute(query)
+
+        return {
+            _id: {
+                'title': title,
+                'content': content
+            }
+            for _id, title, content in self.cursor
+        }
+
+    def get_wikipage_categories(self, ids=None, limit=None):
+        query = """
+            SELECT picim.PageID, GROUP_CONCAT(c.CategoryTitle) AS Categories FROM piper_wikipedia.PageID_to_CategoriesID_Mapping AS picim
+            LEFT JOIN piper_wikipedia.Categories AS c
+            ON picim.CategoryID = c.CategoryID
+        """
+
+        if ids is not None:
+            ids = [str(_id) for _id in ids]
+            query += f"""
+                WHERE picim.PageID IN ({','.join(ids)})
+            """
+
+        query += """
+            GROUP BY picim.PageID
+        """
+
+        if limit is not None:
+            query += f"""
+                LIMIT {limit}
+            """
+
+        self.cursor.execute(query)
+
+        return {
+            page_id: categories.split(',')
+            for page_id, categories in self.cursor
+        }
