@@ -368,7 +368,7 @@ def get_tables(section):
 
 
 def get_captions(section):
-    wikilinks = section.filter_wikilinks(matches=lambda node: 'file' in node.title.lower())
+    wikilinks = section.filter_wikilinks(matches=lambda node: 'file:' in node.title.lower())
 
     captions = []
     for wikilink in wikilinks:
