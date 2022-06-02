@@ -211,44 +211,20 @@ class DB:
 
         return page_ids
 
-    def query_wikipedia_pages(self, ids=None, limit=None):
-        query = f"""
-            SELECT PageID, PageTitle, PageContent
-            FROM graph.Nodes_N_Concept
-        """
-
-        if ids is not None:
-            query += f"""
-                WHERE PageID IN ({','.join(ids)})
-            """
-
-        if limit is not None:
-            query += f"""
-                LIMIT {limit}
-            """
-
-        self.cursor.execute(query)
-
-        return [
-            {
-                'page_id': page_id,
-                'page_title': page_title,
-                'page_content': page_content
-            }
-            for page_id, page_title, page_content in self.cursor
-        ]
-
     def get_wikipages(self, ids=None, limit=None):
         query = """
-            SELECT ptpim.PageID, ptpim.PageTitle, pc.PageContent FROM piper_wikipedia.PageTitle_to_PageID_Mapping AS ptpim
-            LEFT JOIN piper_wikipedia.Page_Content AS pc
-            ON ptpim.PageID = pc.PageID
+            SELECT concepts.PageID, titles.PageTitle, contents.PageContent
+            FROM graph.Nodes_N_Concept AS concepts
+            INNER JOIN piper_wikipedia.PageTitle_to_PageID_Mapping AS titles
+            ON concepts.PageID = titles.PageID
+            INNER JOIN piper_wikipedia.Page_Content AS contents
+            ON concepts.PageID = contents.PageID
         """
 
         if ids is not None:
             ids = [str(_id) for _id in ids]
             query += f"""
-                WHERE ptpim.PageID IN ({','.join(ids)})
+                WHERE concepts.PageID IN ({','.join(ids)})
             """
 
         if limit is not None:
@@ -268,19 +244,23 @@ class DB:
 
     def get_wikipage_categories(self, ids=None, limit=None):
         query = """
-            SELECT picim.PageID, GROUP_CONCAT(c.CategoryTitle) AS Categories FROM piper_wikipedia.PageID_to_CategoriesID_Mapping AS picim
-            LEFT JOIN piper_wikipedia.Categories AS c
-            ON picim.CategoryID = c.CategoryID
+            SELECT concepts.PageID, GROUP_CONCAT(categories.CategoryTitle)
+            FROM graph.Nodes_N_Concept AS concepts
+            INNER JOIN piper_wikipedia.PageID_to_CategoriesID_Mapping AS pages_categories
+            ON concepts.PageID = pages_categories.PageID
+            INNER JOIN piper_wikipedia.Categories AS categories
+            ON pages_categories.CategoryID = categories.CategoryID
+            GROUP BY concepts.PageID
         """
 
         if ids is not None:
             ids = [str(_id) for _id in ids]
             query += f"""
-                WHERE picim.PageID IN ({','.join(ids)})
+                WHERE concepts.PageID IN ({','.join(ids)})
             """
 
         query += """
-            GROUP BY picim.PageID
+            GROUP BY concepts.PageID
         """
 
         if limit is not None:
