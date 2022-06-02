@@ -58,4 +58,4 @@ class ProgressBar:
 
         progress = int(self.bar_length * self.current_iteration / self.n_iterations)
         remaining = self.bar_length - progress
-        print(f'\r[{"#" * progress}{"." * remaining}]', end='', flush=True)
+        print(f'\r[{"#" * progress}{"." * remaining}]{100 * self.current_iteration / self.n_iterations:.2f}%', end='', flush=True)
