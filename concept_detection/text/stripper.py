@@ -456,7 +456,7 @@ def strip(page_content):
         section_headings = get_section_headings(section)
         stripped_page['heading'].extend([h for h in section_headings if h not in text_excluded_sections])
 
-        # Tables are extracted and stored as auxiliary text
+        # Captions and tables are extracted and stored as auxiliary text
         stripped_page['auxiliary_text'].extend(get_captions(section))
         stripped_page['auxiliary_text'].extend(get_tables(section))
 
