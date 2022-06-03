@@ -7,5 +7,5 @@ es = ES()
 settings = read_json('config/settings.json')
 mapping = read_json('config/mapping.json')
 
-# es.delete_index()
+es.delete_index()
 es.create_index(settings=settings, mapping=mapping)
