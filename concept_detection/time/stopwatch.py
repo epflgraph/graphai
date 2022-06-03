@@ -21,6 +21,9 @@ class Stopwatch:
     def stop(self):
         self.end_time = time.time()
 
+    def reset(self):
+        self.__init__()
+
     def report(self, msg=''):
         self.stop()
 
