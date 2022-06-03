@@ -227,7 +227,7 @@ class DB:
         elif id_min_max is not None:
             query += f"""
                 WHERE titles.PageID >= {id_min_max[0]}
-                AND titles.PageID <= {id_min_max[1]}
+                AND titles.PageID < {id_min_max[1]}
             """
 
         if limit is not None:
@@ -263,7 +263,7 @@ class DB:
         elif id_min_max is not None:
             query += f"""
                 WHERE pages_categories.PageID >= {id_min_max[0]}
-                AND pages_categories.PageID <= {id_min_max[1]}
+                AND pages_categories.PageID < {id_min_max[1]}
             """
 
         query += """
