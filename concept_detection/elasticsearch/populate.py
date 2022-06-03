@@ -40,44 +40,59 @@ class Actor:
 n_actors = 16
 actors = [Actor.remote() for i in range(n_actors)]
 
-# Define window size and offset to filter page ids
-window_size = 1000
-window_offset = 0
-min_id = window_offset * window_size
-max_id = (window_offset + 1) * window_size
+# Init DB interface
+db = DB()
 
 # Init stopwatch to track time
 sw = Stopwatch()
 
-# Fetch pages from database
-db = DB()
-pages = db.get_wikipages(id_min_max=(min_id, max_id))
-n_pages = len(pages)
-print(f'Got {n_pages} pages (id in [{min_id}, {max_id}])!')
-sw.lap()
+# Define window size to filter page ids
+window_size = 100000
 
-# Fetch categories from database
-categories = db.get_wikipage_categories(id_min_max=(min_id, max_id))
-print(f'Got categories for {len(categories)} pages (id in [{min_id}, {max_id}])!')
+window = 0
+while True:
+    # Get min/max page id for current window
+    min_id = window * window_size
+    max_id = (window + 1) * window_size
 
-# Print time summary
-sw.report('Finished fetching from database')
+    # Fetch pages from database
+    sw.reset()
+    pages = db.get_wikipages(id_min_max=(min_id, max_id))
+    n_pages = len(pages)
+    print(f'Got {n_pages} pages (id in [{min_id}, {max_id}))!')
 
-# Reset stopwatch and iterate over all pages
-sw.reset()
-i = 0
-results = []
-for page_id in pages:
-    # Extract page data and categories
-    page = pages[page_id]
-    page_categories = categories.get(page_id, [])
+    # Fetch categories from database
+    sw.lap()
+    categories = db.get_wikipage_categories(id_min_max=(min_id, max_id))
+    print(f'Got categories for {len(categories)} pages (id in [{min_id}, {max_id}))!')
 
-    # Execute strip_and_index in parallel
-    results.append(actors[i % n_actors].strip_and_index.remote(page_id, page['title'], page['content'], page_categories))
-    i += 1
+    # Print time summary
+    sw.report('Finished fetching from database')
 
-# Wait for the results
-results = ray.get(results)
+    # Exit if no pages in window
+    if not pages:
+        break
 
-# Print time summary
-sw.report(f'Finished indexing {n_pages} pages on elasticsearch')
+    # Reset stopwatch and iterate over all pages
+    sw.reset()
+    actor = 0
+    results = []
+    for page_id in pages:
+        # Extract page data and categories
+        page = pages[page_id]
+        page_categories = categories.get(page_id, [])
+
+        # Execute strip_and_index in parallel
+        results.append(actors[actor].strip_and_index.remote(page_id, page['title'], page['content'], page_categories))
+
+        # Update actor index
+        actor = (actor + 1) % n_actors
+
+    # Wait for the results
+    results = ray.get(results)
+
+    # Print time summary
+    sw.report(f'Finished indexing {n_pages} pages on elasticsearch')
+
+    # Update window
+    window += 1
