@@ -198,10 +198,10 @@ class DB:
         else:
             return []
 
-    def query_wikipedia_page_ids(self):
+    def get_wikipage_ids(self):
         query = f"""
             SELECT PageID
-            FROM graph.Nodes_N_Concept
+            FROM piper_wikipedia.PageTitle_to_PageID_Mapping
         """
         self.cursor.execute(query)
 
