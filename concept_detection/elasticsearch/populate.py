@@ -11,7 +11,7 @@ ray.init(namespace="populate_elasticsearch", include_dashboard=False, log_to_dri
 @ray.remote
 class Actor:
     def __init__(self):
-        self.es = ES()
+        self.es = ES('wikipages')
 
     def strip_and_index(self, page_id, page_title, page_content, page_categories):
         # Strip page content
