@@ -47,7 +47,7 @@ db = DB()
 sw = Stopwatch()
 
 # Define window size to filter page ids
-window_size = 100000
+window_size = 1000000
 
 window = 0
 while True:
