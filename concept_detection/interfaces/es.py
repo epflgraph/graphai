@@ -1,6 +1,7 @@
 import configparser
 import math
 
+from ssl import create_default_context
 from elasticsearch import Elasticsearch
 
 from definitions import CONFIG_DIR
@@ -123,16 +124,20 @@ def es_script_score(query, script):
         }
     }
 
-
 class ES:
-    def __init__(self):
+    def __init__(self, index):
+        self.index = index
+
         self.es_config = configparser.ConfigParser()
         self.es_config.read(f'{CONFIG_DIR}/es.ini')
         self.host = self.es_config["ES"].get("host")
         self.port = self.es_config["ES"].get("port")
-        self.index = self.es_config["ES"].get("index")
+        self.username = self.es_config["ES"].get("username")
+        self.cafile = self.es_config["ES"].get("cafile")
+        password = self.es_config["ES"].get("password")
 
-        self.es = Elasticsearch([f'{self.host}:{self.port}'])
+        context = create_default_context(cafile=self.cafile)
+        self.es = Elasticsearch([f'https://{self.username}:{password}@{self.host}:{self.port}'], ssl_context=context)
 
     def _search(self, query, limit=10, source=None, explain=False, rescore=None):
         return self.es.search(index=self.index, query=query, source=source, rescore=rescore, size=limit, explain=explain, profile=True)
