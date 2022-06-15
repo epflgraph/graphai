@@ -21,6 +21,10 @@ class Stopwatch:
     def stop(self):
         self.end_time = time.time()
 
+    def delta(self):
+        self.stop()
+        return self.end_time - self.start_time
+
     def reset(self):
         self.__init__()
 
