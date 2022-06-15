@@ -337,7 +337,106 @@ class ES:
         search = self._search(query, limit=limit)
         return self._results_from_search(search)
 
-    def search_mediawiki_title_text_with_opening_heading(self, text, limit=10):
+    def search_mediawiki_no_plain(self, text, limit=10):
+        query = es_bool(
+            should=[
+                es_match(field='all_near_match', text=text, boost=10),
+                es_bool(
+                    filter=[
+                        es_match('all', text=text, operator='and')
+                    ],
+                    should=[
+                        es_match(field='title', text=text, boost=0.9),
+                        es_match(field='category', text=text, boost=0.15),
+                        es_match(field='heading', text=text, boost=0.15),
+                        es_match(field='auxiliary_text', text=text, boost=0.15),
+                        es_match(field='file_text', text=text, boost=1.5),
+                        es_dis_max([
+                            es_match(field='redirect', text=text, boost=0.81),
+                            es_match(field='suggest', text=text, boost=0.2)
+                        ]),
+                        es_dis_max([
+                            es_match(field='text', text=text, boost=1.8),
+                            es_match(field='opening_text', text=text, boost=1.5)
+                        ])
+                    ]
+                )
+            ]
+        )
+
+        rescore = [
+            {
+                "window_size": 8192,
+                "query": {
+                    "query_weight": 1,
+                    "rescore_query_weight": 1,
+                    "score_mode": "total",
+                    "rescore_query": {
+                        "function_score": {
+                            "score_mode": "sum",
+                            "boost_mode": "sum",
+                            "functions": [
+                                {
+                                    "script_score": {
+                                        "script": {
+                                            "source": "pow(doc['popularity_score'].value , 0.8) / ( pow(doc['popularity_score'].value, 0.8) + pow(8.0E-6,0.8))",
+                                            "lang": "expression"
+                                        }
+                                    },
+                                    "weight": 3
+                                },
+                                {
+                                    "script_score": {
+                                        "script": {
+                                            "source": "pow(doc['incoming_links'].value , 0.7) / ( pow(doc['incoming_links'].value, 0.7) + pow(30,0.7))",
+                                            "lang": "expression"
+                                        }
+                                    },
+                                    "weight": 10
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            {
+                "window_size": 448,
+                "query": {
+                    "query_weight": 1,
+                    "rescore_query_weight": 10000,
+                    "score_mode": "total",
+                    "rescore_query": {
+                        "bool": {
+                            "should": [
+                                {
+                                    "constant_score": {
+                                        "filter": {
+                                            "match_all": {
+
+                                            }
+                                        },
+                                        "boost": 100000
+                                    }
+                                },
+                                {
+                                    "sltr": {
+                                        "model": "enwiki-20220421-20180215-query_explorer",
+                                        "params": {
+                                            "query_string": text
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        ]
+
+        search = self._search(query, limit=limit, rescore=rescore)
+        return self._results_from_search(search)
+
+    def search_mediawiki_restrict_4(self, text, limit=10):
         query = es_bool(
             should=[
                 es_bool(
@@ -437,7 +536,7 @@ class ES:
         search = self._search(query, limit=limit, rescore=rescore)
         return self._results_from_search(search)
 
-    def search_mediawiki_title_text_only(self, text, limit=10):
+    def search_mediawiki_restrict_2(self, text, limit=10):
         query = es_bool(
             should=[
                 es_bool(
