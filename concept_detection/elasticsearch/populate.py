@@ -8,10 +8,12 @@ from concept_detection.time.stopwatch import Stopwatch
 # Init ray
 ray.init(namespace="populate_elasticsearch", include_dashboard=False, log_to_driver=True)
 
+index = 'wikipages_1_shards'
+
 @ray.remote
 class Actor:
     def __init__(self):
-        self.es = ES('wikipages')
+        self.es = ES(index)
 
     def strip_and_index(self, page_id, page_title, page_content, page_categories):
         # Strip page content
