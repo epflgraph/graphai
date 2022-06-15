@@ -137,7 +137,7 @@ class ES:
         password = self.es_config["ES"].get("password")
 
         context = create_default_context(cafile=self.cafile)
-        self.es = Elasticsearch([f'https://{self.username}:{password}@{self.host}:{self.port}'], ssl_context=context)
+        self.es = Elasticsearch([f'https://{self.username}:{password}@{self.host}:{self.port}'], ssl_context=context, timeout=3600)
 
     def _search(self, query, limit=10, source=None, explain=False, rescore=None):
         return self.es.search(index=self.index, query=query, source=source, rescore=rescore, size=limit, explain=explain, profile=True)
@@ -157,14 +157,6 @@ class ES:
 
     def search(self, text, limit=10):
         return self.search_mediawiki(text, limit=limit)
-
-    def search_basic(self, text, limit=10):
-        query = es_bool(
-            must=es_match('content', text),
-            should=es_match('title', text)
-        )
-        search = self._search(query, limit=limit)
-        return self._results_from_search(search)
 
     def search_boost_title(self, text, limit=10, boost=2):
         query = es_bool(
@@ -202,23 +194,6 @@ class ES:
                 should=es_match('title', text)
             ),
             script=es_exp_booster_source(scale=scale, max_boost=max_boost)
-        )
-        search = self._search(query, limit=limit)
-        return self._results_from_search(search)
-
-    def search_mediawiki_simplified(self, text, limit=10, boost_title=0.9, boost_content=1.8):
-        query = es_bool(
-            filter=es_bool(
-                should=[
-                    es_match(field='content', text=text, operator='AND'),
-                    es_match(field='text', text=text, operator='AND'),
-                ]
-            ),
-            should=[
-                es_match(field='title', text=text, boost=boost_title),
-                es_match(field='content', text=text, boost=boost_content),
-                es_match(field='text', text=text, boost=boost_content)
-            ]
         )
         search = self._search(query, limit=limit)
         return self._results_from_search(search)
@@ -327,11 +302,233 @@ class ES:
         search = self._search(query, limit=limit, rescore=rescore)
         return self._results_from_search(search)
 
-    def search_like_frontend(self, text, limit=10):
+    def search_mediawiki_no_rescore(self, text, limit=10):
         query = es_bool(
-            must=es_multi_match(fields=['title', 'title._2gram', 'title._3gram'], text=text, type='bool_prefix', operator='AND')
+            should=[
+                es_multi_match(fields=['all_near_match^10', 'all_near_match_asciifolding^7.5'], text=text),
+                es_bool(
+                    filter=[
+                        es_bool(
+                            should=[
+                                es_match('all', text=text, operator='and'),
+                                es_match('all.plain', text=text, operator='and')
+                            ]
+                        )
+                    ],
+                    should=[
+                        es_multi_match(fields=['title^3', 'title.plain^1'], text=text, type='most_fields', boost=0.3, minimum_should_match=1),
+                        es_multi_match(fields=['category^3', 'category.plain^1'], text=text, type='most_fields', boost=0.05, minimum_should_match=1),
+                        es_multi_match(fields=['heading^3', 'heading.plain^1'], text=text, type='most_fields', boost=0.05, minimum_should_match=1),
+                        es_multi_match(fields=['auxiliary_text^3', 'auxiliary_text.plain^1'], text=text, type='most_fields', boost=0.05, minimum_should_match=1),
+                        es_multi_match(fields=['file_text^3', 'file_text.plain^1'], text=text, type='most_fields', boost=0.5, minimum_should_match=1),
+                        es_dis_max([
+                            es_multi_match(fields=['redirect^3', 'redirect.plain^1'], text=text, type='most_fields', boost=0.27, minimum_should_match=1),
+                            es_multi_match(fields=['suggest'], text=text, type='most_fields', boost=0.2, minimum_should_match=1)
+                        ]),
+                        es_dis_max([
+                            es_multi_match(fields=['text^3', 'text.plain^1'], text=text, type='most_fields', boost=0.6, minimum_should_match=1),
+                            es_multi_match(fields=['opening_text^3', 'opening_text.plain^1'], text=text, type='most_fields', boost=0.5, minimum_should_match=1)
+                        ]),
+                    ]
+                )
+            ]
         )
+
         search = self._search(query, limit=limit)
+        return self._results_from_search(search)
+
+    def search_mediawiki_title_text_with_opening_heading(self, text, limit=10):
+        query = es_bool(
+            should=[
+                es_bool(
+                    filter=[
+                        es_bool(
+                            should=[
+                                es_match('title', text=text, operator='and'),
+                                es_match('title.plain', text=text, operator='and'),
+                                es_match('text', text=text, operator='and'),
+                                es_match('text.plain', text=text, operator='and'),
+                                es_match('heading', text=text, operator='and'),
+                                es_match('heading.plain', text=text, operator='and')
+                            ]
+                        )
+                    ],
+                    should=[
+                        es_multi_match(fields=['title^3', 'title.plain^1'], text=text, type='most_fields', boost=0.3, minimum_should_match=1),
+                        es_multi_match(fields=['heading^3', 'heading.plain^1'], text=text, type='most_fields', boost=0.05, minimum_should_match=1),
+                        es_dis_max([
+                            es_multi_match(fields=['text^3', 'text.plain^1'], text=text, type='most_fields', boost=0.6, minimum_should_match=1),
+                            es_multi_match(fields=['opening_text^3', 'opening_text.plain^1'], text=text, type='most_fields', boost=0.5, minimum_should_match=1)
+                        ])
+                    ]
+                )
+            ]
+        )
+
+        rescore = [
+            {
+                "window_size": 8192,
+                "query": {
+                    "query_weight": 1,
+                    "rescore_query_weight": 1,
+                    "score_mode": "total",
+                    "rescore_query": {
+                        "function_score": {
+                            "score_mode": "sum",
+                            "boost_mode": "sum",
+                            "functions": [
+                                {
+                                    "script_score": {
+                                        "script": {
+                                            "source": "pow(doc['popularity_score'].value , 0.8) / ( pow(doc['popularity_score'].value, 0.8) + pow(8.0E-6,0.8))",
+                                            "lang": "expression"
+                                        }
+                                    },
+                                    "weight": 3
+                                },
+                                {
+                                    "script_score": {
+                                        "script": {
+                                            "source": "pow(doc['incoming_links'].value , 0.7) / ( pow(doc['incoming_links'].value, 0.7) + pow(30,0.7))",
+                                            "lang": "expression"
+                                        }
+                                    },
+                                    "weight": 10
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            {
+                "window_size": 448,
+                "query": {
+                    "query_weight": 1,
+                    "rescore_query_weight": 10000,
+                    "score_mode": "total",
+                    "rescore_query": {
+                        "bool": {
+                            "should": [
+                                {
+                                    "constant_score": {
+                                        "filter": {
+                                            "match_all": {
+
+                                            }
+                                        },
+                                        "boost": 100000
+                                    }
+                                },
+                                {
+                                    "sltr": {
+                                        "model": "enwiki-20220421-20180215-query_explorer",
+                                        "params": {
+                                            "query_string": text
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        ]
+
+        search = self._search(query, limit=limit, rescore=rescore)
+        return self._results_from_search(search)
+
+    def search_mediawiki_title_text_only(self, text, limit=10):
+        query = es_bool(
+            should=[
+                es_bool(
+                    filter=[
+                        es_bool(
+                            should=[
+                                es_match('title', text=text, operator='and'),
+                                es_match('title.plain', text=text, operator='and'),
+                                es_match('text', text=text, operator='and'),
+                                es_match('text.plain', text=text, operator='and')
+                            ]
+                        )
+                    ],
+                    should=[
+                        es_multi_match(fields=['title^3', 'title.plain^1'], text=text, type='most_fields', boost=0.3, minimum_should_match=1),
+                        es_multi_match(fields=['text^3', 'text.plain^1'], text=text, type='most_fields', boost=0.6, minimum_should_match=1)
+                    ]
+                )
+            ]
+        )
+
+        rescore = [
+            {
+                "window_size": 8192,
+                "query": {
+                    "query_weight": 1,
+                    "rescore_query_weight": 1,
+                    "score_mode": "total",
+                    "rescore_query": {
+                        "function_score": {
+                            "score_mode": "sum",
+                            "boost_mode": "sum",
+                            "functions": [
+                                {
+                                    "script_score": {
+                                        "script": {
+                                            "source": "pow(doc['popularity_score'].value , 0.8) / ( pow(doc['popularity_score'].value, 0.8) + pow(8.0E-6,0.8))",
+                                            "lang": "expression"
+                                        }
+                                    },
+                                    "weight": 3
+                                },
+                                {
+                                    "script_score": {
+                                        "script": {
+                                            "source": "pow(doc['incoming_links'].value , 0.7) / ( pow(doc['incoming_links'].value, 0.7) + pow(30,0.7))",
+                                            "lang": "expression"
+                                        }
+                                    },
+                                    "weight": 10
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            {
+                "window_size": 448,
+                "query": {
+                    "query_weight": 1,
+                    "rescore_query_weight": 10000,
+                    "score_mode": "total",
+                    "rescore_query": {
+                        "bool": {
+                            "should": [
+                                {
+                                    "constant_score": {
+                                        "filter": {
+                                            "match_all": {
+
+                                            }
+                                        },
+                                        "boost": 100000
+                                    }
+                                },
+                                {
+                                    "sltr": {
+                                        "model": "enwiki-20220421-20180215-query_explorer",
+                                        "params": {
+                                            "query_string": text
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        ]
+
+        search = self._search(query, limit=limit, rescore=rescore)
         return self._results_from_search(search)
 
     def indices(self):
