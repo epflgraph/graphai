@@ -19,6 +19,11 @@ class DB:
         self.channel_anchor_page_ids = self.query_channel_anchor_page_ids()
         self.course_channel_ids = self.query_course_channel_ids()
 
+    def query(self, query):
+        self.cursor.execute(query)
+
+        return list(self.cursor)
+
     def query_channel_anchor_page_ids(self):
         query = f"""
             SELECT SwitchChannelID, IF(AnchorPageIDs1 IS NOT NULL, AnchorPageIDs1, AnchorPageIDs2) AS AnchorPageIDs
