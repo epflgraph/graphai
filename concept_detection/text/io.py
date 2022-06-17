@@ -43,6 +43,16 @@ def pprint(t, indent=0, inline=False, only_first=False):
         print(f'{" " * indent}{t}')
 
 
+def read_json(filename):
+    with open(filename) as file:
+        return json.load(file)
+
+
+def save_json(data, filename):
+    with open(filename, 'w', encoding='utf-8') as file:
+        json.dump(data, file, ensure_ascii=False)
+
+
 class Colors:
     pref = '\033['
     reset = f'{pref}0m'
@@ -61,30 +71,3 @@ class Colors:
 
 def cprint(text, color='white', is_bold=False):
     print(f'{Colors.pref}{1 if is_bold else 0};{Colors.codes.get(color, Colors.codes["white"])}' + text + Colors.reset)
-
-
-def read_json(filename):
-    with open(filename) as file:
-        return json.load(file)
-
-
-def save_json(data, filename):
-    with open(filename, 'w', encoding='utf-8') as file:
-        json.dump(data, file, ensure_ascii=False)
-
-
-class ProgressBar:
-    def __init__(self, n_iterations, bar_length=50):
-        self.current_iteration = 0
-        self.n_iterations = n_iterations
-        self.bar_length = bar_length
-
-    def update(self):
-        self.current_iteration += 1
-
-        progress = int(self.bar_length * self.current_iteration / self.n_iterations)
-        remaining = self.bar_length - progress
-        print(f'\r[{"#" * progress}{"." * remaining}] {100 * self.current_iteration / self.n_iterations:.2f}%', end='', flush=True)
-
-        if self.current_iteration == self.n_iterations:
-            print()
