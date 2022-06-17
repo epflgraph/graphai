@@ -68,6 +68,11 @@ def read_json(filename):
         return json.load(file)
 
 
+def save_json(data, filename):
+    with open(filename, 'w', encoding='utf-8') as file:
+        json.dump(data, file, ensure_ascii=False)
+
+
 class ProgressBar:
     def __init__(self, n_iterations, bar_length=50):
         self.current_iteration = 0
