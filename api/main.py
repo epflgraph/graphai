@@ -79,8 +79,6 @@ async def wikify(data: WikifyRequest, method: Optional[str] = None):
     raw_text = data.raw_text
     keyword_list = data.keyword_list
     anchor_page_ids = data.anchor_page_ids
-    if not method:
-        method = 'wikipedia-api'
 
     # Return if no input
     if not raw_text and not keyword_list:
