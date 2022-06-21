@@ -13,7 +13,7 @@ from api.schemas.strip import *
 from concept_detection.keyword_extraction import get_keyword_list
 import concept_detection.wikisearch as ws
 from graph.scores import compute_graph_scores
-from concept_detection.scores.postprocessing import compute_scores
+from concept_detection.scores import compute_scores
 
 from concept_detection.text.stripper import strip
 
