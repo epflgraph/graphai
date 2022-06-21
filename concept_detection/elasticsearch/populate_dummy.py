@@ -1,10 +1,10 @@
 import time
 
-from concept_detection.text.io import ProgressBar
+from utils.progress_bar import ProgressBar
 from concept_detection.elasticsearch.dummy import gen_random_docs
 from concept_detection.interfaces.es import ES
 
-es = ES()
+es = ES('test')
 
 docs = gen_random_docs(10)
 

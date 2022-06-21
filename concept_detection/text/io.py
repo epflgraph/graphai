@@ -1,5 +1,6 @@
 import json
 
+
 def pprint(t, indent=0, inline=False, only_first=False):
     if type(t) is dict:
         if inline:
@@ -47,15 +48,26 @@ def read_json(filename):
         return json.load(file)
 
 
-class ProgressBar:
-    def __init__(self, n_iterations, bar_length=50):
-        self.current_iteration = 0
-        self.n_iterations = n_iterations
-        self.bar_length = bar_length
+def save_json(data, filename):
+    with open(filename, 'w', encoding='utf-8') as file:
+        json.dump(data, file, ensure_ascii=False)
 
-    def update(self):
-        self.current_iteration += 1
 
-        progress = int(self.bar_length * self.current_iteration / self.n_iterations)
-        remaining = self.bar_length - progress
-        print(f'\r[{"#" * progress}{"." * remaining}]', end='', flush=True)
+class Colors:
+    pref = '\033['
+    reset = f'{pref}0m'
+
+    codes = {
+        'black': '30m',
+        'red': '31m',
+        'green': '32m',
+        'yellow': '33m',
+        'blue': '34m',
+        'magenta': '35m',
+        'cyan': '36m',
+        'white': '37m',
+    }
+
+
+def cprint(text, color='white', is_bold=False):
+    print(f'{Colors.pref}{1 if is_bold else 0};{Colors.codes.get(color, Colors.codes["white"])}' + text + Colors.reset)

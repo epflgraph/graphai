@@ -14,3 +14,6 @@ class PageResult:
 
     def equal(self, other):
         return self.equivalent(other) and self.score == other.score
+
+    def to_tuple(self):
+        return self.page_id, self.page_title, self.searchrank, self.score

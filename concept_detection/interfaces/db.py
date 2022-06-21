@@ -19,6 +19,11 @@ class DB:
         self.channel_anchor_page_ids = self.query_channel_anchor_page_ids()
         self.course_channel_ids = self.query_course_channel_ids()
 
+    def query(self, query):
+        self.cursor.execute(query)
+
+        return list(self.cursor)
+
     def query_channel_anchor_page_ids(self):
         query = f"""
             SELECT SwitchChannelID, IF(AnchorPageIDs1 IS NOT NULL, AnchorPageIDs1, AnchorPageIDs2) AS AnchorPageIDs
@@ -198,10 +203,10 @@ class DB:
         else:
             return []
 
-    def query_wikipedia_page_ids(self):
+    def get_wikipage_ids(self):
         query = f"""
             SELECT PageID
-            FROM graph.Nodes_N_Concept
+            FROM piper_wikipedia.PageTitle_to_PageID_Mapping
         """
         self.cursor.execute(query)
 
@@ -211,15 +216,23 @@ class DB:
 
         return page_ids
 
-    def query_wikipedia_pages(self, ids=None, limit=None):
-        query = f"""
-            SELECT PageID, PageTitle, PageContent
-            FROM graph.Nodes_N_Concept
+    def get_wikipages(self, ids=None, id_min_max=None, limit=None):
+        query = """
+            SELECT titles.PageID, titles.PageTitle, contents.PageContent
+            FROM piper_wikipedia.PageTitle_to_PageID_Mapping AS titles
+            INNER JOIN piper_wikipedia.Page_Content AS contents
+            ON titles.PageID = contents.PageID
         """
 
         if ids is not None:
+            ids = [str(_id) for _id in ids]
             query += f"""
-                WHERE PageID IN ({','.join(ids)})
+                WHERE titles.PageID IN ({','.join(ids)})
+            """
+        elif id_min_max is not None:
+            query += f"""
+                WHERE titles.PageID >= {id_min_max[0]}
+                AND titles.PageID < {id_min_max[1]}
             """
 
         if limit is not None:
@@ -229,11 +242,47 @@ class DB:
 
         self.cursor.execute(query)
 
-        return [
-            {
-                'page_id': page_id,
-                'page_title': page_title,
-                'page_content': page_content
+        return {
+            _id: {
+                'title': title,
+                'content': content
             }
-            for page_id, page_title, page_content in self.cursor
-        ]
+            for _id, title, content in self.cursor
+        }
+
+    def get_wikipage_categories(self, ids=None, id_min_max=None, limit=None):
+        query = """            
+            SELECT titles.PageID, GROUP_CONCAT(categories.CategoryTitle)
+            FROM piper_wikipedia.PageTitle_to_PageID_Mapping AS titles
+            INNER JOIN piper_wikipedia.PageID_to_CategoriesID_Mapping AS pages_categories
+            ON titles.PageId = pages_categories.PageID
+            INNER JOIN piper_wikipedia.Categories AS categories
+            ON pages_categories.CategoryID = categories.CategoryID
+        """
+
+        if ids is not None:
+            ids = [str(_id) for _id in ids]
+            query += f"""
+                WHERE pages_categories.PageID IN ({','.join(ids)})
+            """
+        elif id_min_max is not None:
+            query += f"""
+                WHERE pages_categories.PageID >= {id_min_max[0]}
+                AND pages_categories.PageID < {id_min_max[1]}
+            """
+
+        query += """
+            GROUP BY titles.PageID
+        """
+
+        if limit is not None:
+            query += f"""
+                LIMIT {limit}
+            """
+
+        self.cursor.execute(query)
+
+        return {
+            page_id: categories.split(',')
+            for page_id, categories in self.cursor
+        }
