@@ -10,7 +10,7 @@ from definitions import DATA_DIR
 from api.schemas.wikify import *
 from api.schemas.strip import *
 
-from concept_detection.keywords.extraction import get_keyword_list
+from concept_detection.keyword_extraction import get_keyword_list
 import concept_detection.search.wikisearch as ws
 import concept_detection.search.elasticwikisearch as ews
 from graph.scores import compute_graph_scores
