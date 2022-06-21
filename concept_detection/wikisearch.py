@@ -6,7 +6,7 @@ from models.wikisearch_result import WikisearchResult
 
 from interfaces.es import ES
 
-from concept_detection.text.utils import decode_url_title
+from utils.text.utils import decode_url_title
 
 API_URL = 'http://en.wikipedia.org/w/api.php'
 HEADERS = {'User-Agent': 'graphai (https://github.com/epflgraph/graphai)'}

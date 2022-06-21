@@ -1,7 +1,7 @@
 import re
 import unicodedata
 
-from concept_detection.text.pyunicode import unxmlify
+from utils.text.pyunicode import unxmlify
 
 
 def clean_text(raw_text):

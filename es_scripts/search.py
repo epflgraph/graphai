@@ -1,5 +1,5 @@
-from concept_detection.text.io import pprint
 from interfaces.es import ES
+from utils.text.io import pprint
 
 es = ES('wikipages')
 

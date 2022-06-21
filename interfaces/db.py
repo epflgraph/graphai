@@ -4,7 +4,7 @@ import configparser
 from definitions import CONFIG_DIR
 
 from models.wikify_result import WikifyResult
-from concept_detection.text.html_cleaner import HTMLCleaner
+from utils.text.html_cleaner import HTMLCleaner
 
 
 class DB:

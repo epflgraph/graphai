@@ -1,6 +1,6 @@
 import time
 
-from concept_detection.text.io import cprint
+from utils.text.io import cprint
 
 
 class Stopwatch:

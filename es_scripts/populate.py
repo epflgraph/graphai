@@ -2,7 +2,7 @@ import ray
 
 from interfaces.db import DB
 from interfaces.es import ES
-from concept_detection.text.stripper import strip
+from utils.text.stripper import strip
 from utils.time.stopwatch import Stopwatch
 
 # Init ray

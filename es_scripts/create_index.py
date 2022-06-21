@@ -1,6 +1,6 @@
 from interfaces.es import ES
 
-from concept_detection.text.io import read_json
+from utils.text.io import read_json
 
 index = 'wikipages'
 es = ES(index)

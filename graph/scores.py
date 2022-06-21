@@ -1,7 +1,7 @@
 import numpy as np
 
 from definitions import DATA_DIR
-from concept_detection.text.io import read_json
+from utils.text.io import read_json
 
 # Load successors adjacency list
 print('Loading successors adjacency list...', end=' ')
