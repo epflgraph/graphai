@@ -1,7 +1,7 @@
 import requests
 
 from definitions import TEST_API_URL
-from concept_detection.test.conftest import *
+from tests.conftest import *
 
 
 def test_keywords():
