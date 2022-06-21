@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 
-from concept_detection.interfaces.db import DB
-from concept_detection.interfaces.api import Api
+from interfaces.db import DB
+from interfaces.api import Api
 
 plt.style.use('seaborn-dark')
 

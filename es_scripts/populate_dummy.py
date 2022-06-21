@@ -2,7 +2,7 @@ import time
 
 from utils.progress_bar import ProgressBar
 from es_scripts.dummy import gen_random_docs
-from concept_detection.interfaces.es import ES
+from interfaces.es import ES
 
 es = ES('test')
 

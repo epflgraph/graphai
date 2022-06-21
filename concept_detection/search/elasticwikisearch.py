@@ -1,4 +1,4 @@
-from concept_detection.interfaces.es import ES
+from interfaces.es import ES
 from concept_detection.types.page_result import PageResult
 from concept_detection.types.wikisearch_result import WikisearchResult
 from concept_detection.search.wikisearch import clean

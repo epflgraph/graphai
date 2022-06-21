@@ -1,7 +1,7 @@
 import ray
 
-from concept_detection.interfaces.db import DB
-from concept_detection.interfaces.es import ES
+from interfaces.db import DB
+from interfaces.es import ES
 from concept_detection.text.stripper import strip
 from concept_detection.time.stopwatch import Stopwatch
 

@@ -1,4 +1,4 @@
-from concept_detection.interfaces.es import ES
+from interfaces.es import ES
 
 from concept_detection.text.io import read_json
 
