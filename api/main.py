@@ -30,11 +30,6 @@ print('Loading page_id_titles mapping...', end=' ')
 page_id_titles = read_json(f'{DATA_DIR}/page_id_titles.json')
 print('Done')
 
-# Load page title ids mapping
-print('Loading page_title_ids mapping...', end=' ')
-page_title_ids = read_json(f'{DATA_DIR}/page_title_ids.json')
-print('Done')
-
 # Get uvicorn logger so we can write on it
 logger = logging.getLogger('uvicorn.error')
 
