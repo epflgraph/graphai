@@ -7,7 +7,7 @@ from fastapi import FastAPI
 from typing import List, Optional
 
 from definitions import DATA_DIR
-from concept_detection.api.schemas.wikify import *
+from api.schemas.wikify import *
 
 from concept_detection.keywords.extraction import get_keyword_list
 import concept_detection.search.wikisearch as ws
@@ -15,13 +15,14 @@ import concept_detection.search.elasticwikisearch as ews
 from concept_detection.graph.scores import graph_scores
 from concept_detection.scores.postprocessing import compute_scores
 
-from concept_detection.api.schemas.strip import *
+from api.schemas.strip import *
 from concept_detection.text.stripper import strip
 
 # Initialise FastAPI
 app = FastAPI(
-    title="EPFL Graph - Concept detection API",
-    description="This API offers several tools related with automatized concept detection, e.g. from a given text.",
+    title="EPFL Graph AI API",
+    description="This API offers several tools related with AI in the context of the EPFL Graph project, "
+                "such as automatized concept detection from a given text.",
     version="0.1.0"
 )
 
