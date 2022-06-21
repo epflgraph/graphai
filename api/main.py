@@ -8,6 +8,7 @@ from typing import List, Optional
 
 from definitions import DATA_DIR
 from api.schemas.wikify import *
+from api.schemas.strip import *
 
 from concept_detection.keywords.extraction import get_keyword_list
 import concept_detection.search.wikisearch as ws
@@ -15,7 +16,6 @@ import concept_detection.search.elasticwikisearch as ews
 from graph.scores import compute_graph_scores
 from concept_detection.scores.postprocessing import compute_scores
 
-from api.schemas.strip import *
 from concept_detection.text.stripper import strip
 
 # Initialise FastAPI
@@ -134,5 +134,5 @@ async def wikify(data: WikifyRequest, method: Optional[str] = None):
 
 
 @app.post('/markup_strip')
-async def markup_strip(data: StripData):
+async def markup_strip(data: StripRequest):
     return {'stripped_code': strip(data.markup_code)['text']}

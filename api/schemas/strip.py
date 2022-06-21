@@ -1,7 +1,7 @@
 from pydantic import BaseModel, Field
 
 
-class StripData(BaseModel):
+class StripRequest(BaseModel):
     """
     Object containing the wikimarkup code to be stripped.
     """
