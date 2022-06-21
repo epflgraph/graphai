@@ -12,7 +12,7 @@ from api.schemas.wikify import *
 from concept_detection.keywords.extraction import get_keyword_list
 import concept_detection.search.wikisearch as ws
 import concept_detection.search.elasticwikisearch as ews
-from concept_detection.graph.scores import graph_scores
+from graph.scores import compute_graph_scores
 from concept_detection.scores.postprocessing import compute_scores
 
 from api.schemas.strip import *
@@ -118,7 +118,7 @@ async def wikify(data: WikifyRequest, method: Optional[str] = None):
 
     # Compute graph scores
     start_time = time.time()
-    graph_results = graph_scores(source_page_ids, anchor_page_ids)
+    graph_results = compute_graph_scores(source_page_ids, anchor_page_ids)
     logger.info(build_log_msg(f'Computed graph scores for {n_source_page_ids * n_anchor_page_ids} pairs', time.time() - start_time))
 
     # Post-process results and derive the different scores

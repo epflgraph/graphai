@@ -1,24 +1,27 @@
 import numpy as np
-import json
 
 from definitions import DATA_DIR
+from concept_detection.text.io import read_json
 
 # Load successors adjacency list
-print('Loading successors adjacency list...')
-with open(f'{DATA_DIR}/successors.json') as f:
-    successors = json.load(f)
+print('Loading successors adjacency list...', end=' ')
+successors = read_json(f'{DATA_DIR}/successors.json')
 successors = {int(k): v for k, v in successors.items()}
-print('Loaded')
+print('Done')
 
 # Load predecessors adjacency list
-print('Loading predecessors adjacency list...')
-with open(f'{DATA_DIR}/predecessors.json') as f:
-    predecessors = json.load(f)
+print('Loading predecessors adjacency list...', end=' ')
+predecessors = read_json(f'{DATA_DIR}/predecessors.json')
 predecessors = {int(k): v for k, v in predecessors.items()}
-print('Loaded')
+print('Done')
 
 
-def graph_scores(source_page_ids, target_page_ids):
+def compute_score(n_out_paths, n_in_paths):
+    rebound = (1 + min(n_out_paths, n_in_paths)) / (1 + max(n_out_paths, n_in_paths))
+    return 1 - 1 / (1 + np.log(1 + rebound * np.log(n_out_paths)))
+
+
+def compute_graph_scores(source_page_ids, target_page_ids):
     pairs = [(s, t) for s in source_page_ids for t in target_page_ids]
 
     results = []
@@ -62,8 +65,7 @@ def graph_scores(source_page_ids, target_page_ids):
         n_in_paths = len(s_in & t_out) + (1 if s in t_out else 0)
 
         # Compute score
-        rebound = (1 + min(n_out_paths, n_in_paths)) / (1 + max(n_out_paths, n_in_paths))
-        score = 1 - 1 / (1 + np.log(1 + rebound * np.log(n_out_paths)))
+        score = compute_score(n_out_paths, n_in_paths)
 
         # Append result
         results.append({
