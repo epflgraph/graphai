@@ -3,7 +3,7 @@ import ray
 from interfaces.db import DB
 from interfaces.es import ES
 from concept_detection.text.stripper import strip
-from concept_detection.time.stopwatch import Stopwatch
+from utils.time.stopwatch import Stopwatch
 
 # Init ray
 ray.init(namespace="populate_elasticsearch", include_dashboard=False, log_to_driver=True)
