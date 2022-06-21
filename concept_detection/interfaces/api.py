@@ -1,7 +1,7 @@
 from requests import post
 
 from definitions import TEST_API_URL
-from concept_detection.test.types import WikifyResult
+from models.wikify_result import WikifyResult
 
 
 class Api:
