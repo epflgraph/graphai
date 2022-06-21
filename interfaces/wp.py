@@ -1,6 +1,6 @@
 import requests
 
-from concept_detection.types.page_result import PageResult
+from models.page_result import PageResult
 
 
 class WP:

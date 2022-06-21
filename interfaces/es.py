@@ -6,7 +6,7 @@ from elasticsearch import Elasticsearch
 
 from definitions import CONFIG_DIR
 
-from concept_detection.types.page_result import PageResult
+from models.page_result import PageResult
 
 
 def es_bool(must=None, must_not=None, should=None, filter=None):

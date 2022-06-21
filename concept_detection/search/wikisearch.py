@@ -2,8 +2,8 @@ import requests
 import ray
 # import wikipedia
 
-from concept_detection.types.page_result import PageResult
-from concept_detection.types.wikisearch_result import WikisearchResult
+from models.page_result import PageResult
+from models.wikisearch_result import WikisearchResult
 from concept_detection.text.utils import decode_url_title
 
 API_URL = 'http://en.wikipedia.org/w/api.php'
