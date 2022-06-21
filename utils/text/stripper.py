@@ -425,13 +425,13 @@ def split_hatnotes_opening_text(section):
 
 def strip(page_content):
     """
-    Strips wikimarkup from a string and returns a human-readable version by parsing the markup.
+    Strips wikimarkdown from a string and returns a human-readable version by parsing the markdown.
 
     Args:
-        page_content (str): String containing the page content in wikimarkup format.
+        page_content (str): String containing the page content in wikimarkdown format.
 
     Returns:
-        dict: Dictionary containing several fields derived from the markup parsing, containing a 'text' field which
+        dict: Dictionary containing several fields derived from the markdown parsing, containing a 'text' field which
             represents a human-readable version of the input text.
     """
     

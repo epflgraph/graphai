@@ -83,17 +83,17 @@ def test_wikify():
         _test_wikify_case(url, params)
 
 
-def test_markup_strip():
+def test_markdown_strip():
     # Empty call
-    response = requests.post(f'{TEST_API_URL}/markup_strip', json={})
+    response = requests.post(f'{TEST_API_URL}/markdown_strip', json={})
     assert response.status_code == 422  # Unprocessable entity
 
     for fixture in fixtures:
         params = {
-            'markup_code': fixture['markup_code']
+            'markdown_code': fixture['markdown_code']
         }
 
-        response = requests.post(f'{TEST_API_URL}/markup_strip', json=params)
+        response = requests.post(f'{TEST_API_URL}/markdown_strip', json=params)
         assert response.status_code == 200
         result = response.json()
         assert result['stripped_code'] == fixture['stripped_code']
