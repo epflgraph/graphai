@@ -1,6 +1,5 @@
 import time
 import logging
-import json
 
 from fastapi import FastAPI
 
@@ -16,6 +15,7 @@ from graph.scores import compute_graph_scores
 from concept_detection.scores import compute_scores
 
 from utils.text.stripper import strip
+from utils.text.io import read_json
 
 # Initialise FastAPI
 app = FastAPI(
@@ -26,16 +26,14 @@ app = FastAPI(
 )
 
 # Load page id titles mapping
-print('Loading page_id_titles mapping...')
-with open(f'{DATA_DIR}/page_id_titles.json') as f:
-    page_id_titles = json.load(f)
-print('Loaded')
+print('Loading page_id_titles mapping...', end=' ')
+page_id_titles = read_json(f'{DATA_DIR}/page_id_titles.json')
+print('Done')
 
 # Load page title ids mapping
-print('Loading page_title_ids mapping...')
-with open(f'{DATA_DIR}/page_title_ids.json') as f:
-    page_title_ids = json.load(f)
-print('Loaded')
+print('Loading page_title_ids mapping...', end=' ')
+page_title_ids = read_json(f'{DATA_DIR}/page_title_ids.json')
+print('Done')
 
 # Get uvicorn logger so we can write on it
 logger = logging.getLogger('uvicorn.error')
