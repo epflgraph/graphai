@@ -11,8 +11,7 @@ from api.schemas.wikify import *
 from api.schemas.strip import *
 
 from concept_detection.keyword_extraction import get_keyword_list
-import concept_detection.search.wikisearch as ws
-import concept_detection.search.elasticwikisearch as ews
+import concept_detection.wikisearch as ws
 from graph.scores import compute_graph_scores
 from concept_detection.scores.postprocessing import compute_scores
 
@@ -97,12 +96,7 @@ async def wikify(data: WikifyRequest, method: Optional[str] = None):
 
     # Perform wikisearch and extract source_page_ids
     start_time = time.time()
-    if method == 'es-base':
-        wikisearch_results = ews.wikisearch(keyword_list, es_scores=False)
-    elif method == 'es-score':
-        wikisearch_results = ews.wikisearch(keyword_list, es_scores=True)
-    else:
-        wikisearch_results = ws.wikisearch(keyword_list)
+    wikisearch_results = ws.wikisearch(keyword_list, method)
 
     # Extract source_page_ids and anchor_page_ids if needed
     source_page_ids = ws.extract_page_ids(wikisearch_results)
