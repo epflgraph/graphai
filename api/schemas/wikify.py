@@ -46,7 +46,7 @@ class WikifyRequest(BaseModel):
         return values
 
 
-class WikifyResult(BaseModel):
+class WikifyResponseElem(BaseModel):
     """
     Object representing each of the wikify results. It consists of a set of keywords, a Wikipedia page and several
     scores which measure the degree of relevance of the result with respect to the text.

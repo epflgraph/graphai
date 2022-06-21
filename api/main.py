@@ -62,7 +62,7 @@ async def keywords(data: KeywordsRequest, use_nltk: Optional[bool] = False):
     return get_keyword_list(data.raw_text, use_nltk)
 
 
-@app.post('/wikify', response_model=List[WikifyResult])
+@app.post('/wikify', response_model=List[WikifyResponseElem])
 async def wikify(data: WikifyRequest, method: Optional[str] = None):
     """
     Wikifies some text.
