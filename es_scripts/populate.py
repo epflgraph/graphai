@@ -8,11 +8,15 @@ from utils.time.stopwatch import Stopwatch
 # Init ray
 ray.init(namespace="populate_elasticsearch", include_dashboard=False, log_to_driver=True)
 
-index = 'wikipages_1_shards'
+indices = ['wikipages_1_shards', 'wikipages_3_shards', 'wikipages_6_shards', 'wikipages_12_shards']
+
 
 @ray.remote
-class Actor:
+class PopulateActor:
     def __init__(self):
+        self.es = None
+
+    def set_index(self, index):
         self.es = ES(index)
 
     def strip_and_index(self, page_id, page_title, page_content, page_categories):
@@ -40,7 +44,7 @@ class Actor:
 
 # Instantiate ray actor list
 n_actors = 16
-actors = [Actor.remote() for i in range(n_actors)]
+actors = [PopulateActor.remote() for i in range(n_actors)]
 
 # Init DB interface
 db = DB()
@@ -48,53 +52,58 @@ db = DB()
 # Init stopwatch to track time
 sw = Stopwatch()
 
-# Define window size to filter page ids
-window_size = 1000000
+for index in indices:
+    # Define window size to filter page ids
+    window_size = 200000
 
-window = 0
-while True:
-    # Get min/max page id for current window
-    min_id = window * window_size
-    max_id = (window + 1) * window_size
+    # Set proper index for all actors
+    for actor in actors:
+        actor.set_index(index)
 
-    # Fetch pages from database
-    sw.reset()
-    pages = db.get_wikipages(id_min_max=(min_id, max_id))
-    n_pages = len(pages)
-    print(f'Got {n_pages} pages (id in [{min_id}, {max_id}))!')
+    window = 0
+    while True:
+        # Get min/max page id for current window
+        min_id = window * window_size
+        max_id = (window + 1) * window_size
 
-    # Fetch categories from database
-    sw.lap()
-    categories = db.get_wikipage_categories(id_min_max=(min_id, max_id))
-    print(f'Got categories for {len(categories)} pages (id in [{min_id}, {max_id}))!')
+        # Fetch pages from database
+        sw.reset()
+        pages = db.get_wikipages(id_min_max=(min_id, max_id))
+        n_pages = len(pages)
+        print(f'[Index: {index}] Got {n_pages} pages (id in [{min_id}, {max_id}))!')
 
-    # Print time summary
-    sw.report('Finished fetching from database')
+        # Fetch categories from database
+        sw.lap()
+        categories = db.get_wikipage_categories(id_min_max=(min_id, max_id))
+        print(f'[Index: {index}] Got categories for {len(categories)} pages (id in [{min_id}, {max_id}))!')
 
-    # Exit if no pages in window
-    if not pages:
-        break
+        # Print time summary
+        sw.report('Finished fetching from database')
 
-    # Reset stopwatch and iterate over all pages
-    sw.reset()
-    actor = 0
-    results = []
-    for page_id in pages:
-        # Extract page data and categories
-        page = pages[page_id]
-        page_categories = categories.get(page_id, [])
+        # Exit if no pages in window
+        if not pages:
+            break
 
-        # Execute strip_and_index in parallel
-        results.append(actors[actor].strip_and_index.remote(page_id, page['title'], page['content'], page_categories))
+        # Reset stopwatch and iterate over all pages
+        sw.reset()
+        actor = 0
+        results = []
+        for page_id in pages:
+            # Extract page data and categories
+            page = pages[page_id]
+            page_categories = categories.get(page_id, [])
 
-        # Update actor index
-        actor = (actor + 1) % n_actors
+            # Execute strip_and_index in parallel
+            results.append(actors[actor].strip_and_index.remote(page_id, page['title'], page['content'], page_categories))
 
-    # Wait for the results
-    results = ray.get(results)
+            # Update actor index
+            actor = (actor + 1) % n_actors
 
-    # Print time summary
-    sw.report(f'Finished indexing {n_pages} pages on elasticsearch')
+        # Wait for the results
+        results = ray.get(results)
 
-    # Update window
-    window += 1
+        # Print time summary
+        sw.report(f'Finished indexing {n_pages} pages on elasticsearch')
+
+        # Update window
+        window += 1
