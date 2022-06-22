@@ -93,15 +93,3 @@ def decode_url_title(url_title):
     decoded_title = decoded_title.replace("'", '-')
 
     return decoded_title
-
-
-def normalize(text):
-    text = text.replace('“', '')
-    text = text.replace('”', '')
-    text = text.replace('‘', '')
-    text = text.replace('’', '')
-    text = text.replace('«', '')
-    text = text.replace('»', '')
-    text = text.replace('§', '')
-
-    return unicodedata.normalize('NFKC', clean_text(text)).lower().strip()
