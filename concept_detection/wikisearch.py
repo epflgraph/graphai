@@ -6,8 +6,6 @@ from models.wikisearch_result import WikisearchResult
 
 from interfaces.es import ES
 
-from utils.text.clean import decode_url_title
-
 API_URL = 'http://en.wikipedia.org/w/api.php'
 HEADERS = {'User-Agent': 'graphai (https://github.com/epflgraph/graphai)'}
 
@@ -151,9 +149,6 @@ def wikisearch(keyword_list, method):
     Returns:
         list of WikisearchResult: List of wikisearch results.
     """
-
-    # Clean all keywords in keyword_list
-    keyword_list = clean(keyword_list)
 
     if method == 'es-base':
         return wikisearch_es(keyword_list, es_scores=False)
