@@ -115,7 +115,6 @@ def normalize(text):
     return text.lower().strip()
 
 
-
 def decode_url_title(url_title):
     """
     Decodes free text title from wikipedia URL title:
