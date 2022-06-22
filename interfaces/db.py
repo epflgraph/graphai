@@ -4,7 +4,6 @@ import configparser
 from definitions import CONFIG_DIR
 
 from models.wikify_result import WikifyResult
-from utils.text.html_cleaner import HTMLCleaner
 
 
 class DB:
@@ -140,9 +139,7 @@ class DB:
 
         course_descriptions = {}
         for course_id, course_description in self.cursor:
-            c = HTMLCleaner()
-            c.feed(course_description)
-            course_descriptions[course_id] = c.get_data()
+            course_descriptions[course_id] = course_description
 
         return course_descriptions
 
