@@ -1,12 +1,14 @@
 import requests
 
-from definitions import TEST_API_URL
+from definitions import LOCAL_API_URL
 from tests.conftest import *
+
+url = LOCAL_API_URL
 
 
 def test_keywords():
     # Empty call
-    response = requests.post(f'{TEST_API_URL}/keywords', json={})
+    response = requests.post(f'{url}/keywords', json={})
     assert response.status_code == 422  # Unprocessable entity
 
     for fixture in fixtures:
@@ -15,13 +17,13 @@ def test_keywords():
         }
 
         # Method python-rake
-        response = requests.post(f'{TEST_API_URL}/keywords', json=params)
+        response = requests.post(f'{url}/keywords', json=params)
         assert response.status_code == 200
         keyword_list = response.json()
         assert set(keyword_list) == set(fixture['keyword_list'])
 
         # Method nltk-rake
-        response = requests.post(f'{TEST_API_URL}/keywords?use_nltk=True', json=params)
+        response = requests.post(f'{url}/keywords?use_nltk=True', json=params)
         assert response.status_code == 200
         keyword_list = response.json()
         assert set(keyword_list) == set(fixture['keyword_list_nltk'])
@@ -38,13 +40,13 @@ def _test_wikify_case(url, params):
 
 def test_wikify():
     # Empty call
-    response = requests.post(f'{TEST_API_URL}/wikify', json={})
+    response = requests.post(f'{url}/wikify', json={})
     assert response.status_code == 200
     results = response.json()
     assert not results
 
     for fixture in fixtures:
-        url = f'{TEST_API_URL}/wikify'
+        url = f'{url}/wikify'
 
         # From raw_text
         params = {'raw_text': fixture['raw_text']}
@@ -62,7 +64,7 @@ def test_wikify():
         params = {'keyword_list': fixture['keyword_list'], 'anchor_page_ids': fixture['anchor_page_ids']}
         _test_wikify_case(url, params)
 
-        url = f'{TEST_API_URL}/wikify?method=es-base'
+        url = f'{url}/wikify?method=es-base'
 
         # From raw_text, specifying anchor pages and elasticsearch method es-base
         params = {'raw_text': fixture['raw_text'], 'anchor_page_ids': fixture['anchor_page_ids']}
@@ -72,7 +74,7 @@ def test_wikify():
         params = {'keyword_list': fixture['keyword_list'], 'anchor_page_ids': fixture['anchor_page_ids']}
         _test_wikify_case(url, params)
 
-        url = f'{TEST_API_URL}/wikify?method=es-score'
+        url = f'{url}/wikify?method=es-score'
 
         # From raw_text, specifying anchor pages and elasticsearch method es-base
         params = {'raw_text': fixture['raw_text'], 'anchor_page_ids': fixture['anchor_page_ids']}
@@ -85,7 +87,7 @@ def test_wikify():
 
 def test_markdown_strip():
     # Empty call
-    response = requests.post(f'{TEST_API_URL}/markdown_strip', json={})
+    response = requests.post(f'{url}/markdown_strip', json={})
     assert response.status_code == 422  # Unprocessable entity
 
     for fixture in fixtures:
@@ -93,7 +95,7 @@ def test_markdown_strip():
             'markdown_code': fixture['markdown_code']
         }
 
-        response = requests.post(f'{TEST_API_URL}/markdown_strip', json=params)
+        response = requests.post(f'{url}/markdown_strip', json=params)
         assert response.status_code == 200
         result = response.json()
         assert result['stripped_code'] == fixture['stripped_code']
