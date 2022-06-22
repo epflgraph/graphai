@@ -68,19 +68,6 @@ actors = [WikisearchActor.remote() for i in range(n_actors)]
 es = ES('wikipages')
 
 
-def clean(keyword_list):
-    """
-    Cleans all the keywords in the given keyword list by applying the decode_url_title function.
-
-    Args:
-        keyword_list (list of str): List of keywords to be cleaned.
-
-    Returns:
-        list of str: List of cleaned keywords.
-    """
-    return [decode_url_title(keywords) for keywords in keyword_list]
-
-
 def extract_page_ids(results):
     """
     Iterates through the given wikisearch results and returns a list with all the page ids.
@@ -127,9 +114,6 @@ def extract_anchor_page_ids(results, max_n=3):
 
 
 def wikisearch_wp_api(keyword_list):
-    # Clean all keywords in keyword_list
-    keyword_list = clean(keyword_list)
-
     # Execute wikisearch in parallel
     results = [actors[i % n_actors].wikisearch.remote(keyword_list[i]) for i in range(len(keyword_list))]
 
@@ -140,9 +124,6 @@ def wikisearch_wp_api(keyword_list):
 
 
 def wikisearch_es(keyword_list, es_scores):
-    # Clean all keywords in keyword_list
-    keyword_list = clean(keyword_list)
-
     results = []
     for keywords in keyword_list:
         pages = es.search(keywords)
@@ -170,6 +151,9 @@ def wikisearch(keyword_list, method):
     Returns:
         list of WikisearchResult: List of wikisearch results.
     """
+
+    # Clean all keywords in keyword_list
+    keyword_list = clean(keyword_list)
 
     if method == 'es-base':
         return wikisearch_es(keyword_list, es_scores=False)
