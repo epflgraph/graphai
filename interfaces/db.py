@@ -200,36 +200,64 @@ class DB:
         else:
             return []
 
-    def get_wikipage_ids(self):
-        query = f"""
-            SELECT PageID
-            FROM piper_wikipedia.PageTitle_to_PageID_Mapping
-        """
-        self.cursor.execute(query)
+    def get_wikipage_ids(self, filter_orphan=False):
+        if filter_orphan:
+            query = f"""
+                SELECT DISTINCT SourcePageID
+                FROM piper_wikipedia.Page_Links_Random_Walk
+            """
+            self.cursor.execute(query)
 
-        page_ids = []
-        for page_id, in self.cursor:
-            page_ids.append(page_id)
+            source_page_ids = []
+            for source_page_id, in self.cursor:
+                source_page_ids.append(source_page_id)
 
-        return page_ids
+            query = f"""
+                SELECT DISTINCT TargetPageID
+                FROM piper_wikipedia.Page_Links_Random_Walk
+            """
+            self.cursor.execute(query)
+
+            target_page_ids = []
+            for target_page_id, in self.cursor:
+                target_page_ids.append(target_page_id)
+
+            return list(set(source_page_ids) | set(target_page_ids))
+
+        else:
+            query = f"""
+                SELECT PageID
+                FROM piper_wikipedia.PageTitle_to_PageID_Mapping
+            """
+            self.cursor.execute(query)
+
+            page_ids = []
+            for page_id, in self.cursor:
+                page_ids.append(page_id)
+
+            return page_ids
 
     def get_wikipages(self, ids=None, id_min_max=None, limit=None):
         query = """
-            SELECT titles.PageID, titles.PageTitle, contents.PageContent
+            SELECT titles.PageID, titles.PageTitle, contents.PageContent, contents.Redirects, contents.Popularity
             FROM piper_wikipedia.PageTitle_to_PageID_Mapping AS titles
             INNER JOIN piper_wikipedia.Page_Content AS contents
             ON titles.PageID = contents.PageID
         """
 
+        conditions = []
+
         if ids is not None:
             ids = [str(_id) for _id in ids]
+            conditions.append(f"""titles.PageID IN ({','.join(ids)})""")
+
+        if id_min_max is not None:
+            conditions.append(f"""titles.PageID >= {id_min_max[0]}""")
+            conditions.append(f"""titles.PageID < {id_min_max[1]}""")
+
+        if conditions:
             query += f"""
-                WHERE titles.PageID IN ({','.join(ids)})
-            """
-        elif id_min_max is not None:
-            query += f"""
-                WHERE titles.PageID >= {id_min_max[0]}
-                AND titles.PageID < {id_min_max[1]}
+                WHERE {' AND '.join(conditions)}
             """
 
         if limit is not None:
@@ -242,9 +270,11 @@ class DB:
         return {
             _id: {
                 'title': title,
-                'content': content
+                'content': content,
+                'redirect': redirect if redirect else [],
+                'popularity': popularity if popularity else 1
             }
-            for _id, title, content in self.cursor
+            for _id, title, content, redirect, popularity in self.cursor
         }
 
     def get_wikipage_categories(self, ids=None, id_min_max=None, limit=None):
@@ -257,16 +287,20 @@ class DB:
             ON pages_categories.CategoryID = categories.CategoryID
         """
 
+        conditions = []
+
         if ids is not None:
             ids = [str(_id) for _id in ids]
+            conditions.append(f"""pages_categories.PageID IN ({','.join(ids)})""")
+
+        if id_min_max is not None:
+            conditions.append(f"""pages_categories.PageID >= {id_min_max[0]}""")
+            conditions.append(f"""pages_categories.PageID < {id_min_max[1]}""")
+
+        if conditions:
             query += f"""
-                WHERE pages_categories.PageID IN ({','.join(ids)})
-            """
-        elif id_min_max is not None:
-            query += f"""
-                WHERE pages_categories.PageID >= {id_min_max[0]}
-                AND pages_categories.PageID < {id_min_max[1]}
-            """
+                        WHERE {' AND '.join(conditions)}
+                    """
 
         query += """
             GROUP BY titles.PageID
