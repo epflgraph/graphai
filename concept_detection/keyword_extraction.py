@@ -1,7 +1,8 @@
 import RAKE
 import nltk
 from rake_nltk import Rake
-from utils.text.utils import clean_text, word_tokens
+from utils.text.clean import clean
+from utils.text.utils import word_tokens
 
 # Download nltk resources
 nltk.download('stopwords', quiet=True)
@@ -75,27 +76,26 @@ def rake_extract(text, use_nltk, split_words=False, return_scores=False, thresho
     return list(set([keywords for keywords, score in keyword_list]))
 
 
-def get_keyword_list(raw_text, use_nltk=False):
+def get_keyword_list(text, use_nltk=False):
     """
     Clean raw text and extract keyword list.
 
     Args:
-        raw_text (str): Text to be cleaned and used to extract keywords.
+        text (str): Text to be cleaned and used to extract keywords.
         use_nltk (bool): Whether to use nltk-rake for keyword extraction, otherwise python-rake is used. Default: False.
 
     Returns:
         list[str]: A list of keywords automatically extracted from the given text.
     """
 
-    # Clean raw text of XML tags and other rubbish
-    cleaned_text = clean_text(raw_text)
+    text = clean(text)
 
     # Extract keywords from clean text. We perform two extractions:
     #   * One with the full text.
     #   * One for each line.
     # This is done to account for slides with unconnected text in different lines.
-    keyword_list = rake_extract(cleaned_text, use_nltk)
-    for line in cleaned_text.split('\n'):
+    keyword_list = rake_extract(text, use_nltk)
+    for line in text.split('\n'):
         keyword_list.extend(rake_extract(line, use_nltk))
 
     # Remove duplicates
