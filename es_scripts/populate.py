@@ -54,7 +54,7 @@ all_page_ids = db.get_wikipage_ids(filter_orphan=True)
 sw = Stopwatch()
 
 # Define window size to filter page ids
-window_size = 1000000
+window_size = 400000
 
 window = 0
 while True:
