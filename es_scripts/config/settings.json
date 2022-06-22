@@ -1,5 +1,4 @@
 {
-  "number_of_shards": 12,
   "refresh_interval": "30s",
   "query": {
     "default_field": "all"
