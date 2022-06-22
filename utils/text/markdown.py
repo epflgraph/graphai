@@ -467,7 +467,7 @@ def strip(page_content):
             # auxiliary text and opening_text/text, respectively.
             hatnotes, opening_text = split_hatnotes_opening_text(section)
             stripped_page['auxiliary_text'].extend(hatnotes)
-            stripped_page['opening_text'] = opening_text
+            stripped_page['opening_text'] = opening_text.strip()
             stripped_page['text'] += f'\n{opening_text}'
         else:
             # Named section, may be processed as either text or auxiliary text
@@ -484,6 +484,8 @@ def strip(page_content):
                 # Section to be processed only as text
                 text = clean(parse(section))
                 stripped_page['text'] += f'\n{text}'
+
+    stripped_page['text'] = stripped_page['text'].strip()
 
     return stripped_page
 
