@@ -21,6 +21,9 @@ class WP:
         self.params['srlimit'] = limit
         r = requests.get(self.url, params=self.params, headers=self.headers).json()
 
+        if 'error' in r:
+            raise Exception(r['error']['info'])
+
         top_pages = r['query']['search']
 
         return [

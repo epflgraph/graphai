@@ -1,9 +1,8 @@
-import requests
 import ray
 
-from models.page_result import PageResult
 from models.wikisearch_result import WikisearchResult
 
+from interfaces.wp import WP
 from interfaces.es import ES
 
 API_URL = 'http://en.wikipedia.org/w/api.php'
@@ -18,42 +17,35 @@ class WikisearchActor:
     """
     Class representing a ray Actor to perform wikisearch in parallel.
     """
-    def wikisearch(self, keywords):
+    def __init__(self):
+        # Instantiate wikipedia-api and elasticsearch interfaces
+        self.wp = WP()
+        self.es = ES('wikipages')
+
+    def wikisearch(self, keywords, method):
         """
-        Searches Wikipedia API for input keywords. Returns top 10 results.
+        Returns top 10 results for Wikipedia pages relevant to the keywords.
 
         Args:
-            keywords (str): Text to input in Wikipedia's search field.
+            keywords (str): Text to search for among Wikipedia pages.
+            method (str): Method to retrieve the wikipedia pages. It can be either "wikipedia-api",
+            to use the Wikipedia API (default), or one of {"es-base", "es-score"}, to use elasticsearch,
+            returning as score the inverse of the searchrank or the actual elasticsearch score, respectively.
 
         Returns:
             WikisearchResult: Object containing the given keywords and their associated list of page results.
         """
 
-        # Send request to Wikipedia API
-        params = {
-            'format': 'json',
-            'action': 'query',
-            'list': 'search',
-            'srsearch': keywords,
-            'srlimit': 10,
-            'srprop': ''
-        }
-        r = requests.get(API_URL, params=params, headers=HEADERS).json()
+        if method == 'es-base':
+            pages = self.es.search(keywords)
 
-        if 'error' in r:
-            raise Exception(r['error']['info'])
-
-        top_pages = r['query']['search']
-
-        pages = [
-            PageResult(
-                page_id=top_pages[i]['pageid'],
-                page_title=top_pages[i]['title'],
-                searchrank=(i + 1),
-                score=(1 / (i + 1))
-            )
-            for i in range(len(top_pages))
-        ]
+            # Replace score with 1/searchrank
+            for page in pages:
+                page.score = 1 / page.searchrank
+        elif method == 'es-score':
+            pages = self.es.search(keywords)
+        else:
+            pages = self.wp.search(keywords)
 
         return WikisearchResult(keywords=keywords, pages=pages)
 
@@ -62,8 +54,28 @@ class WikisearchActor:
 n_actors = 16
 actors = [WikisearchActor.remote() for i in range(n_actors)]
 
-# Instantiate elasticsearch interface
-es = ES('wikipages')
+
+def wikisearch(keyword_list, method):
+    """
+    Retrieves wikipages for all keywords in the list.
+
+    Args:
+        keyword_list (list of str): List of keywords to perform the wikisearch.
+        method (str): Method to retrieve the wikipedia pages. It can be either "wikipedia-api",
+        to use the Wikipedia API (default), or one of {"es-base", "es-score"}, to use elasticsearch,
+        returning as score the inverse of the searchrank or the actual elasticsearch score, respectively.
+
+    Returns:
+        list of WikisearchResult: List of wikisearch results.
+    """
+
+    # Execute wikisearch in parallel
+    results = [actors[i % n_actors].wikisearch.remote(keyword_list[i], method) for i in range(len(keyword_list))]
+
+    # Wait for the results
+    results = ray.get(results)
+
+    return results
 
 
 def extract_page_ids(results):
@@ -110,49 +122,3 @@ def extract_anchor_page_ids(results, max_n=3):
 
     return list(set(page_id for page_id in page_scores if page_scores[page_id] in high_scores))
 
-
-def wikisearch_wp_api(keyword_list):
-    # Execute wikisearch in parallel
-    results = [actors[i % n_actors].wikisearch.remote(keyword_list[i]) for i in range(len(keyword_list))]
-
-    # Wait for the results
-    results = ray.get(results)
-
-    return results
-
-
-def wikisearch_es(keyword_list, es_scores):
-    results = []
-    for keywords in keyword_list:
-        pages = es.search(keywords)
-
-        if not es_scores:
-            # Replace score with 1/searchrank
-            for page in pages:
-                page.score = 1 / page.searchrank
-
-        results.append(WikisearchResult(keywords=keywords, pages=pages))
-
-    return results
-
-
-def wikisearch(keyword_list, method):
-    """
-    Retrieves wikipages for all keywords in the list.
-
-    Args:
-        keyword_list (list of str): List of keywords to perform the wikisearch.
-        method (str): Method to retrieve the wikipedia pages. It can be either "wikipedia-api",
-            to use the Wikipedia API (default), or one of {"es-base", "es-score"}, to use elasticsearch,
-            returning as score the inverse of the searchrank or the actual elasticsearch score, respectively.
-
-    Returns:
-        list of WikisearchResult: List of wikisearch results.
-    """
-
-    if method == 'es-base':
-        return wikisearch_es(keyword_list, es_scores=False)
-    elif method == 'es-score':
-        return wikisearch_es(keyword_list, es_scores=True)
-    else:
-        return wikisearch_wp_api(keyword_list)
