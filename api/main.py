@@ -14,7 +14,7 @@ import concept_detection.wikisearch as ws
 from graph.scores import compute_graph_scores
 from concept_detection.scores import compute_scores
 
-from utils.text.stripper import strip
+from utils.text.markdown import strip
 from utils.text.io import read_json
 
 # Initialise FastAPI
