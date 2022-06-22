@@ -1,7 +1,7 @@
 import RAKE
 import nltk
 from rake_nltk import Rake
-from utils.text.clean import clean
+from utils.text.clean import normalize
 from utils.text.utils import word_tokens
 
 # Download nltk resources
@@ -88,9 +88,9 @@ def get_keyword_list(text, use_nltk=False):
         list[str]: A list of keywords automatically extracted from the given text.
     """
 
-    text = clean(text)
+    text = normalize(text)
 
-    # Extract keywords from clean text. We perform two extractions:
+    # Extract keywords from text. We perform two extractions:
     #   * One with the full text.
     #   * One for each line.
     # This is done to account for slides with unconnected text in different lines.
