@@ -9,8 +9,8 @@ requests
 requests-futures
 nltk
 rake-nltk
-wikipedia
-ray==1.10.0
+clean-text
+ray
 python-Levenshtein
 mysql-connector-python
 mwparserfromhell
