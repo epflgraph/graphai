@@ -4,7 +4,33 @@ import pandas as pd
 import Levenshtein
 
 
-def compute_scores(wikisearch_results, graph_results, page_id_titles, logger, debug=False):
+def log(msg, logger, debug):
+    if debug:
+        logger.info(msg)
+
+
+def get_wikisearch_df(wikisearch_results):
+    wikisearch_table = []
+    for wikisearch_result in wikisearch_results:
+        keywords = wikisearch_result.keywords
+        pages = wikisearch_result.pages
+        for page in pages:
+            wikisearch_table.append([keywords, page.page_id, page.page_title, page.searchrank, page.score])
+
+    columns = ['keywords', 'page_id', 'page_title', 'searchrank', 'search_score']
+    return pd.DataFrame(wikisearch_table, columns=columns)
+
+
+def get_graph_df(graph_results):
+    graph_table = []
+    for graph_result in graph_results:
+        graph_table.append([graph_result['source_page_id'], graph_result['target_page_id'], graph_result['score']])
+
+    columns = ['page_id', 'anchor_page_id', 'graph_score']
+    return pd.DataFrame(graph_table, columns=columns)
+
+
+def compute_scores(wikisearch_results, graph_results, logger, debug=False):
     """
     Takes the results of a wikisearch and a graph search and creates a dataframe with them as well as new derived scores.
 
@@ -21,110 +47,67 @@ def compute_scores(wikisearch_results, graph_results, page_id_titles, logger, de
         dict: A dictionary representing a pandas dataframe with all the scores.
     """
 
-    if debug:
-        logger.info(f'wikisearch_results: {wikisearch_results}')
+    # Convert wikisearch results to DataFrame
+    log(f'wikisearch_results: {wikisearch_results}', logger, debug)
+    wikisearch_df = get_wikisearch_df(wikisearch_results)
+    log(f'wikisearch_df: {wikisearch_df}', logger, debug)
 
-    # Convert wikisearch results to table
-    wikisearch_table = []
-    for wikisearch_result in wikisearch_results:
-        keywords = wikisearch_result.keywords
-        pages = wikisearch_result.pages
-        for page in pages:
-            wikisearch_table.append([keywords, page.page_id, page.page_title, page.searchrank, page.score])
-    wikisearch_df = pd.DataFrame(wikisearch_table, columns=['keywords', 'page_id', 'page_title_0', 'searchrank', 'search_score'])
+    # Convert graph scores to DataFrame and keep only non-zero scores
+    log(f'graph_results: {graph_results}', logger, debug)
+    graph_df = get_graph_df(graph_results)
+    graph_df = graph_df[graph_df['graph_score'] > 0]
+    log(f'graph_df: {graph_df}', logger, debug)
 
-    if debug:
-        logger.info(f'wikisearch_df: {wikisearch_df}')
-
-    if debug:
-        logger.info(f'graph_results: {graph_results}')
-
-    # Convert graph scores to table
-    graph_table = []
-    for graph_result in graph_results:
-        graph_table.append([graph_result['source_page_id'], graph_result['target_page_id'], graph_result['score']])
-    graph_df = pd.DataFrame(graph_table, columns=['page_id', 'anchor_page_id', 'graph_score'])
-
-    if debug:
-        logger.info(f'graph_df: {graph_df}')
-
-    # Merge graph and wikisearch dataframes
+    # Merge graph and wikisearch dataframes, and sort values by keywords, searchrank and graph_score
     merged_df = pd.merge(graph_df, wikisearch_df, how='left', on='page_id')
+    # merged_df = merged_df.sort_values(by=['keywords', 'searchrank', 'graph_score'], ascending=[True, True, False])
+    log(f'merged_df: {merged_df}', logger, debug)
 
-    # Keep only non-zero graph scores
-    merged_df = merged_df[merged_df['graph_score'] > 0]
-
-    # Sort values by keywords, searchrank and graph_score
-    merged_df = merged_df.sort_values(by=['keywords', 'searchrank', 'graph_score'], ascending=[True, True, False])
-
-    if debug:
-        logger.info(f'merged_df: {merged_df}')
-
-    # If empty, return
+    # If dataframe is empty, return
     if len(merged_df) == 0:
         return []
 
     # Calculate median graph scores
-    median_scores_df = merged_df[['keywords', 'searchrank', 'page_id', 'page_title_0', 'graph_score', 'search_score']].groupby(
-        ['keywords', 'searchrank', 'page_id', 'page_title_0']).median().rename(
-        columns={'graph_score': 'median_graph_score'}).reset_index()
-
-    if debug:
-        logger.info(f'median_scores_df: {median_scores_df}')
-
-    # Join page titles
-    page_id_title_table = []
-    for page_id in set(median_scores_df['page_id']):
-        page_id_title_table.append([page_id, page_id_titles.get(str(page_id), '').replace('<squote/>', "'")])
-    page_id_title_df = pd.DataFrame(page_id_title_table, columns=['page_id', 'page_name'])
-    scores_df = pd.merge(median_scores_df, page_id_title_df, how='left', on='page_id')
-
-    if debug:
-        logger.info(f'scores_df (with page names): {scores_df}')
+    select_columns = ['keywords', 'searchrank', 'page_id', 'page_title', 'graph_score', 'search_score']
+    group_columns = ['keywords', 'searchrank', 'page_id', 'page_title']
+    scores_df = merged_df[select_columns].groupby(group_columns, as_index=False).median()
+    scores_df = scores_df.rename(columns={'graph_score': 'median_graph_score'})
+    log(f'scores_df (after aggregation with median scores): {scores_df}', logger, debug)
 
     # Calculate search-graph score ratio
     scores_df['search_graph_ratio'] = scores_df.apply(lambda r: r['search_score'] * r['median_graph_score'], axis=1)
-
-    if debug:
-        logger.info(f'scores_df (with sr_score and sr_graph_ratio): {scores_df}')
+    log(f'scores_df (with sr_score and sr_graph_ratio): {scores_df}', logger, debug)
 
     # Filter rows with low search-graph ratio
     scores_df = scores_df[scores_df['search_graph_ratio'] >= 0.1]
+    log(f'scores_df (filtering search_graph_ratio >= 0.1): {scores_df}', logger, debug)
 
-    if debug:
-        logger.info(f'scores_df (filtering search_graph_ratio >= 0.1): {scores_df}')
-
-    # If empty, return
+    # If dataframe is empty, return
     if len(scores_df) == 0:
         return []
 
     # Calculate Levenshtein score
-    scores_df['levenshtein_score'] = scores_df.apply(lambda r: Levenshtein.ratio(r['keywords'], r['page_name']), axis=1)
+    scores_df['levenshtein_score'] = scores_df.apply(lambda r: Levenshtein.ratio(r['keywords'], r['page_title'].lower()), axis=1)
 
     # Calculate mixed score
     def f(x):
-        return 1 / (1 + np.exp(-8 * (x - 1 / 2)))
-    scores_df['mixed_score'] = scores_df.apply(lambda r: r['search_graph_ratio'] * f(r['levenshtein_score']), axis=1)
+        return 1 / (1 + np.exp(-8 * (x - 1 / 2)))   # f pulls values in [0, 1] away from 1/2, exaggerating differences
 
-    if debug:
-        logger.info(f'scores_df (with lev and mixed scores): {scores_df}')
+    scores_df['mixed_score'] = scores_df['search_graph_ratio'] * f(scores_df['levenshtein_score'])
+    log(f'scores_df (with lev and mixed scores): {scores_df}', logger, debug)
 
     # Fix page id data type
     scores_df['page_id'] = scores_df['page_id'].astype(int)
 
-    # Add page titles
-    scores_df['page_title'] = scores_df.apply(lambda r: r['page_name'].replace(' ', '_').capitalize(), axis=1)
-
-    if debug:
-        logger.info(f'scores_df (with page titles): {scores_df}')
+    # Replace ' ' with '_' in titles to make it consistent with db
+    scores_df['page_title'] = scores_df.apply(lambda r: r['page_title'].replace(' ', '_'), axis=1)
+    log(f'scores_df (with page titles): {scores_df}', logger, debug)
 
     # Generate output dataframe
-    scores_df = scores_df[
-        ['keywords', 'page_id', 'page_title_0', 'page_title', 'searchrank', 'median_graph_score', 'search_graph_ratio',
-         'levenshtein_score', 'mixed_score']]
-
-    if debug:
-        logger.info(f'scores_df (output form): {scores_df}')
+    output_columns = ['keywords', 'page_id', 'page_title', 'searchrank',
+                      'median_graph_score', 'search_graph_ratio', 'levenshtein_score', 'mixed_score']
+    scores_df = scores_df[output_columns]
+    log(f'scores_df (output form): {scores_df}', logger, debug)
 
     # Return it as a dictionary
     return scores_df.to_dict(orient='records')

@@ -69,12 +69,6 @@ class WikifyResponseElem(BaseModel):
         description="Title of the Wiki page"
     )
 
-    page_title_0: str = Field(
-        ...,
-        title="Page Title 0",
-        description="Title of the Wiki page 0"
-    )
-
     searchrank: int = Field(
         ...,
         title="Searchrank",
@@ -320,3 +314,6 @@ class WikifyResponseElem(BaseModel):
                 }
             ]
         }
+
+
+WikifyResponse = List[WikifyResponseElem]

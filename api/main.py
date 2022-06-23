@@ -3,9 +3,8 @@ import logging
 
 from fastapi import FastAPI
 
-from typing import List, Optional
+from typing import Optional
 
-from definitions import DATA_DIR
 from api.schemas.wikify import *
 from api.schemas.strip import *
 
@@ -15,7 +14,6 @@ from graph.scores import compute_graph_scores
 from concept_detection.scores import compute_scores
 
 from utils.text.markdown import strip
-from utils.text.io import read_json
 
 # Initialise FastAPI
 app = FastAPI(
@@ -24,11 +22,6 @@ app = FastAPI(
                 "such as automatized concept detection from a given text.",
     version="0.1.0"
 )
-
-# Load page id titles mapping
-print('Loading page_id_titles mapping...', end=' ')
-page_id_titles = read_json(f'{DATA_DIR}/page_id_titles.json')
-print('Done')
 
 # Get uvicorn logger so we can write on it
 logger = logging.getLogger('uvicorn.error')
@@ -54,7 +47,7 @@ async def keywords(data: KeywordsRequest, use_nltk: Optional[bool] = False):
     return get_keyword_list(data.raw_text, use_nltk)
 
 
-@app.post('/wikify', response_model=List[WikifyResponseElem])
+@app.post('/wikify', response_model=WikifyResponse)
 async def wikify(data: WikifyRequest, method: Optional[str] = None):
     """
     Wikifies some text.
@@ -99,7 +92,7 @@ async def wikify(data: WikifyRequest, method: Optional[str] = None):
     anchor_page_ids = list(filter(None, anchor_page_ids))
     n_source_page_ids = len(source_page_ids)
     n_anchor_page_ids = len(anchor_page_ids)
-    logger.info(build_log_msg(f'Finished {method} wikisearch with {n_source_page_ids} source pages', time.time() - start_time))
+    logger.info(build_log_msg(f'Finished {f"{method} " if method else ""}wikisearch with {n_source_page_ids} source pages', time.time() - start_time))
 
     # Compute graph scores
     start_time = time.time()
@@ -108,7 +101,7 @@ async def wikify(data: WikifyRequest, method: Optional[str] = None):
 
     # Post-process results and derive the different scores
     start_time = time.time()
-    results = compute_scores(wikisearch_results, graph_results, page_id_titles, logger)
+    results = compute_scores(wikisearch_results, graph_results, logger)
     n_results = len(results)
     logger.info(build_log_msg(f'Post-processed results, got {n_results}', time.time() - start_time))
 
