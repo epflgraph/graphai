@@ -1,5 +1,5 @@
 Wikitext
 ========
 
-.. automodule:: wikitext.wikitext
+.. automodule:: wikitext
     :members:

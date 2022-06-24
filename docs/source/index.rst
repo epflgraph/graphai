@@ -8,5 +8,8 @@ Welcome to graphai's documentation!
     :caption: Contents:
 
     concept_detection
-    wikimarkup_stripper
+    graph
+    interfaces
+    models
+    utils
     wikitext

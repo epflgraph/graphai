@@ -1,5 +1,5 @@
 Scores
 ======
 
-.. automodule:: concept_detection.scores.postprocessing
+.. automodule:: concept_detection.scores
    :members:

@@ -1,8 +1,12 @@
 Concept Detection
 =================
 
-.. toctree::
-    :maxdepth: 1
-    :glob:
+ola ke ase
 
-    concept_detection/*
+.. toctree::
+    :maxdepth: 2
+    :caption: Contents:
+
+    concept_detection/keyword_extraction
+    concept_detection/scores
+    concept_detection/wikisearch
