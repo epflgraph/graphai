@@ -5,46 +5,47 @@ from utils.text.io import cprint
 
 class Stopwatch:
     def __init__(self):
-        self.start_time = None
-        self.laps = []
-        self.end_time = None
+        self.checkpoints = []
         self.color = 'cyan'
+        self.error_color = 'red'
 
-        self.start()
-
-    def start(self):
-        self.start_time = time.time()
-
-    def lap(self):
-        self.laps.append(time.time())
-
-    def stop(self):
-        self.end_time = time.time()
-
-    def delta(self):
-        self.stop()
-        return self.end_time - self.start_time
+        self.tick()
 
     def reset(self):
         self.__init__()
 
-    def report(self, msg=''):
-        self.stop()
+    def tick(self):
+        self.checkpoints.append(time.time())
 
-        if msg:
-            cprint(f'{msg}. Took {self.end_time - self.start_time:.2f}s.', color=self.color)
-        else:
-            cprint(f'Finished! Took {self.end_time - self.start_time:.2f}s.', color=self.color)
+    def delta(self):
+        self.tick()
 
-        if self.laps:
-            self.report_laps()
+        if len(self.checkpoints) < 2:
+            return 0
 
-    def report_laps(self):
-        n_laps = len(self.laps)
-        for i in range(n_laps + 1):
-            if i == 0:
-                cprint(f'    Lap 0: {self.laps[0] - self.start_time:.2f}s.', color=self.color)
-            elif i == n_laps:
-                cprint(f'    Lap {i}: {self.end_time - self.laps[i-1]:.2f}s.', color=self.color)
-            else:
-                cprint(f'    Lap {i}: {self.laps[i] - self.laps[i-1]:.2f}s.', color=self.color)
+        return self.checkpoints[-1] - self.checkpoints[-2]
+
+    def total(self):
+        self.tick()
+
+        if len(self.checkpoints) < 2:
+            return 0
+
+        return self.checkpoints[-1] - self.checkpoints[0]
+
+    def report(self, msg='Finished'):
+        self.tick()
+
+        n_ticks = len(self.checkpoints)
+
+        if n_ticks < 2:
+            cprint(f'ERROR: Stopwatch expected to have at least 2 ticks, only {n_ticks} found.', color=self.error_color)
+            return
+
+        cprint(f'{msg}. Total time: {self.checkpoints[-1] - self.checkpoints[0]:.2f}s.', color=self.color)
+
+        if n_ticks == 2:
+            return
+
+        for i in range(n_ticks - 1):
+            cprint(f'    Lap {i}: {self.checkpoints[i + 1] - self.checkpoints[i]:.2f}s.', color=self.color)
