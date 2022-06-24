@@ -1,7 +1,7 @@
-Welcome to graphai's documentation!
-===================================
+Welcome
+=======
 
-**graphai** contains projects and services enhancing the EPFL Graph project with AI-based utilities.
+The **graphai** package contains tools and services enhancing the EPFL Graph project with AI-based utilities.
 
 .. toctree::
     :maxdepth: 2
