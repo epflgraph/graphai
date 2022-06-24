@@ -6,6 +6,8 @@ from old_api import OldApi
 
 from compare import *
 
+from utils.time.stopwatch import Stopwatch
+
 
 def summary_slides(slide_ids):
     channel_ids = [slide_id.split('_')[0] for slide_id in slide_ids]
@@ -116,7 +118,7 @@ def test_db(limit=10, offset=0, pseudorandom=False, fallback_to_old=True):
 
 
 if __name__ == '__main__':
-    start_time = time.time()
+    sw = Stopwatch()
 
     limit = 1000
     offset = 0
@@ -129,5 +131,5 @@ if __name__ == '__main__':
     plot_venns(t['venns_db'], 'slide_id', f'results/{limit}x{offset}x{pseudorandom}-new-db.png')
     plot_venns(t['venns_old'], 'slide_id', f'results/{limit}x{offset}x{pseudorandom}-new-old.png')
 
-    total_time = time.time() - start_time
+    total_time = sw.delta()
     print(f'Total time: {int(total_time//60)}m {total_time%60:.2f}s')

@@ -1,22 +1,21 @@
-import time
-
-from utils.progress_bar import ProgressBar
-from es_scripts.dummy import gen_random_docs
 from interfaces.es import ES
+from utils.progress_bar import ProgressBar
+from utils.time.stopwatch import Stopwatch
+
+from es_scripts.dummy import gen_random_docs
 
 es = ES('test')
 
+sw = Stopwatch()
+
 docs = gen_random_docs(10)
 
-
-st = time.time()
-b = ProgressBar(len(docs))
+pb = ProgressBar(len(docs))
 for doc in docs:
-    b.update()
+    pb.update()
     es.index_doc(doc)
 
 # Refresh index
 es.refresh()
 
-ft = time.time()
-print(f'\nFinished! Took {ft - st:.2f}s.')
+print(f'\nFinished! Took {sw.delta():.2f}s.')
