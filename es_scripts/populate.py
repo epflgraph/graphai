@@ -63,13 +63,13 @@ while True:
     max_id = (window + 1) * window_size
 
     # Fetch pages from database
-    sw.reset()
+    sw.tick()
     pages = db.get_wikipages(ids=all_page_ids, id_min_max=(min_id, max_id))
     n_pages = len(pages)
     print(f'Got {n_pages} pages (id in [{min_id}, {max_id}))!')
 
     # Fetch categories from database
-    sw.lap()
+    sw.tick()
     categories = db.get_wikipage_categories(ids=all_page_ids, id_min_max=(min_id, max_id))
     print(f'Got categories for {len(categories)} pages (id in [{min_id}, {max_id}))!')
 
