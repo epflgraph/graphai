@@ -1,4 +1,3 @@
-import time
 import logging
 
 from fastapi import FastAPI
@@ -14,6 +13,9 @@ from graph.scores import compute_graph_scores
 from concept_detection.scores import compute_scores
 
 from utils.text.markdown import strip
+
+from utils.time.stopwatch import Stopwatch
+from utils.time.date import now
 
 # Initialise FastAPI
 app = FastAPI(
@@ -39,7 +41,7 @@ def build_log_msg(msg, seconds, total=False, length=64):
     else:
         time_msg = f'Elapsed time: {seconds}s.'
 
-    return f'{msg}{padding} {time_msg}'
+    return f'[{now()}] {msg}{padding} {time_msg}'
 
 
 @app.post('/keywords')
@@ -60,8 +62,6 @@ async def wikify(data: WikifyRequest, method: Optional[str] = None):
     * Postprocessing: For each set of keywords and Wikipedia page, the graph scores are aggregated over all anchor pages
         and several other scores are computed.
     """
-    # Measure execution time
-    global_start_time = time.time()
 
     # Get input parameters
     raw_text = data.raw_text
@@ -72,14 +72,15 @@ async def wikify(data: WikifyRequest, method: Optional[str] = None):
     if not raw_text and not keyword_list:
         return []
 
+    # Initialize stopwatch to track time
+    sw = Stopwatch()
+
     # Extract keywords from text
     if raw_text:
-        start_time = time.time()
         keyword_list = get_keyword_list(raw_text)
-        logger.info(build_log_msg(f'Extracted list of {len(keyword_list)} keywords', time.time() - start_time))
+        logger.info(build_log_msg(f'Extracted list of {len(keyword_list)} keywords', sw.delta()))
 
     # Perform wikisearch and extract source_page_ids
-    start_time = time.time()
     wikisearch_results = ws.wikisearch(keyword_list, method)
 
     # Extract source_page_ids and anchor_page_ids if needed
@@ -92,21 +93,19 @@ async def wikify(data: WikifyRequest, method: Optional[str] = None):
     anchor_page_ids = list(filter(None, anchor_page_ids))
     n_source_page_ids = len(source_page_ids)
     n_anchor_page_ids = len(anchor_page_ids)
-    logger.info(build_log_msg(f'Finished {f"{method} " if method else ""}wikisearch with {n_source_page_ids} source pages', time.time() - start_time))
+    logger.info(build_log_msg(f'Finished {f"{method} " if method else ""}wikisearch with {n_source_page_ids} source pages', sw.delta()))
 
     # Compute graph scores
-    start_time = time.time()
     graph_results = compute_graph_scores(source_page_ids, anchor_page_ids)
-    logger.info(build_log_msg(f'Computed graph scores for {n_source_page_ids * n_anchor_page_ids} pairs', time.time() - start_time))
+    logger.info(build_log_msg(f'Computed graph scores for {n_source_page_ids * n_anchor_page_ids} pairs', sw.delta()))
 
     # Post-process results and derive the different scores
-    start_time = time.time()
     results = compute_scores(wikisearch_results, graph_results, logger)
     n_results = len(results)
-    logger.info(build_log_msg(f'Post-processed results, got {n_results}', time.time() - start_time))
+    logger.info(build_log_msg(f'Post-processed results, got {n_results}', sw.delta()))
 
     # Display total elapsed time
-    logger.info(build_log_msg(f'Finished all tasks', time.time() - global_start_time, total=True))
+    logger.info(build_log_msg(f'Finished all tasks', sw.total(), total=True))
 
     return results
 
