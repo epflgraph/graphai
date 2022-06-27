@@ -4,6 +4,10 @@ from models.page_result import PageResult
 
 
 class WP:
+    """
+    Base class to communicate with the Wikipedia API.
+    """
+
     def __init__(self):
         self.params = {
             'format': 'json',
@@ -17,6 +21,17 @@ class WP:
         self.url = 'http://en.wikipedia.org/w/api.php'
 
     def search(self, text, limit=10):
+        """
+        Perform search query to Wikipedia API.
+
+        Args:
+            text (str): Query text for the search.
+            limit (int): Maximum number of returned results.
+
+        Returns:
+            list[:class:`~models.page_result.PageResult`]: List of results of the wikisearch.
+        """
+
         self.params['srsearch'] = text
         self.params['srlimit'] = limit
         r = requests.get(self.url, params=self.params, headers=self.headers).json()
