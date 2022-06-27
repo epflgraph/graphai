@@ -19,11 +19,14 @@ def word_tokens(text):
     Generates all possible word tokens from a sentence.
 
     Args:
-        text (str): String containing words separated by spaces. Example: "how are you"
+        text (str): String containing words separated by spaces.
 
     Returns:
-        list: A list with all the possible word tokens for the given sentence.
-        Example: ['how', 'are', 'you', 'how are', 'are you', 'how are you']
+        list[str]: A list with all the possible word tokens for the given sentence.
+
+    Examples:
+        >>> word_tokens('how are you')
+        ['how', 'are', 'you', 'how are', 'are you', 'how are you']
     """
 
     # Split text as word list
@@ -54,9 +57,17 @@ def rake_extract(text, use_nltk, split_words=False, return_scores=False, thresho
         threshold (float): Minimal RAKE score below which extracted keywords are ignored. Default: 1.
 
     Returns:
-        list: A list of
+        list[str] or list[tuple(str, float)]: A list of
             * str: Keywords, if split_words is True or return_scores is False.
-            * (str, float): A pair representing keywords and score, otherwise.
+            * tuple(str, float): A pair representing keywords and score, otherwise.
+
+    Examples:
+        >>> text = ' '.join(["Then a crowd a young boys they're a foolin' around in the corner",
+        >>>     "Drunk and dressed in their best brown baggies and their platform soles",
+        >>>     "They don't give a damn about any trumpet playin' band",
+        >>>     "It ain't what they call Rock and Roll"])
+        >>> rake_extract(text)
+        ['brown baggies', 'young boys', 'trumpet playin', 'corner drunk', 'platform soles']
     """
 
     # Execute RAKE model with given text
@@ -105,10 +116,10 @@ def rake_extract(text, use_nltk, split_words=False, return_scores=False, thresho
 
 def get_keyword_list(text, use_nltk=False):
     """
-    Clean raw text and extract keyword list.
+    Normalize raw text and extract keyword list.
 
     Args:
-        text (str): Text to be cleaned and used to extract keywords.
+        text (str): Text to extract keywords from.
         use_nltk (bool): Whether to use nltk-rake for keyword extraction, otherwise python-rake is used. Default: False.
 
     Returns:

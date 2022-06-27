@@ -10,6 +10,18 @@ def log(msg, logger, debug):
 
 
 def get_wikisearch_df(wikisearch_results):
+    """
+    Creates a pandas DataFrame from a list of results of a wikisearch.
+
+    Args:
+        wikisearch_results (list[:class:`~models.wikisearch_result.WikisearchResult`]): List of results of a wikisearch.
+
+    Returns:
+        pd.DataFrame: A pandas DataFrame with columns
+        ['keywords', 'page_id', 'page_title', 'searchrank', 'search_score'],
+        containing the data from the wikisearch results.
+    """
+
     wikisearch_table = []
     for wikisearch_result in wikisearch_results:
         keywords = wikisearch_result.keywords
@@ -22,6 +34,17 @@ def get_wikisearch_df(wikisearch_results):
 
 
 def get_graph_df(graph_results):
+    """
+    Creates a pandas DataFrame from a list of results of a graph search.
+
+    Args:
+        graph_results (list[dict[str]]): List of results of a wikisearch. Each element of the list must have the keys
+        'source_page_id' (int), 'target_page_id' (int) and 'score' (float).
+
+    Returns:
+        pd.DataFrame: A pandas DataFrame with columns ['page_id', 'anchor_page_id', 'graph_score'],
+        containing the data from the graph search results.
+    """
     graph_table = []
     for graph_result in graph_results:
         graph_table.append([graph_result['source_page_id'], graph_result['target_page_id'], graph_result['score']])
@@ -32,7 +55,8 @@ def get_graph_df(graph_results):
 
 def compute_scores(wikisearch_results, graph_results, logger, debug=False):
     """
-    Takes the results of a wikisearch and a graph search and creates a dataframe with them as well as new derived scores.
+    Takes the results of a wikisearch and a graph search and combines them to produce a list of results aggregating
+    them and deriving other new scores.
 
     Args:
         wikisearch_results (list): The results of a wikisearch. Each element is a dictionary containing the keywords and
@@ -44,7 +68,15 @@ def compute_scores(wikisearch_results, graph_results, logger, debug=False):
         debug (bool): Whether the function prints the results at each step. Default: False.
 
     Returns:
-        dict: A dictionary representing a pandas dataframe with all the scores.
+        list[dict[str]]: A dictionary representing a pandas dataframe with all the scores. The keys of each element are:
+            * 'keywords' (str): Set of keywords.
+            * 'page_id' (int): Id of a wikipage.
+            * 'page_title' (str): Title of a wikipage.
+            * 'searchrank' (int): Index of the result for the wikisearch.
+            * 'median_graph_score' (float): Median of the graph scores associated with this page.
+            * 'search_graph_ratio' (float): Ratio graph_score / search_score.
+            * 'levenshtein_score' (float): Levenshtein score for keywords and page_title.
+            * 'mixed_score' (float): Combination of all scores.
     """
 
     # Convert wikisearch results to DataFrame
