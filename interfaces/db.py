@@ -7,6 +7,10 @@ from models.wikify_result import WikifyResult
 
 
 class DB:
+    """
+    Base class to communicate with the EPFLGraph database.
+    """
+
     def __init__(self):
         # Read db config from file and open connection
         db_config = configparser.ConfigParser()
@@ -19,11 +23,22 @@ class DB:
         self.course_channel_ids = self.query_course_channel_ids()
 
     def query(self, query):
+        """
+        Execute custom query.
+        """
+
         self.cursor.execute(query)
 
         return list(self.cursor)
 
     def query_channel_anchor_page_ids(self):
+        """
+        Retrieve a mapping from each SWITCH channel id to its list of anchor page ids.
+
+        Returns:
+            dict[str, list[int]]: A dictionary with SWITCH channel ids as keys and list of anchor page ids as values.
+        """
+
         query = f"""
             SELECT SwitchChannelID, IF(AnchorPageIDs1 IS NOT NULL, AnchorPageIDs1, AnchorPageIDs2) AS AnchorPageIDs
             FROM (
@@ -60,6 +75,13 @@ class DB:
         return channel_anchor_page_ids
 
     def query_slide_texts(self, limit=10, offset=0, pseudorandom=False):
+        """
+        Retrieve a mapping from each slide id to its OCR-extracted text.
+
+        Returns:
+            dict[str, str]: A dictionary with slide ids as keys and slide texts as values.
+        """
+
         query = f"""
             SELECT DISTINCT st.SlideID, st.SlideText
             FROM gen_switchtube.Slide_Text st
@@ -84,6 +106,24 @@ class DB:
         return slide_texts
 
     def query_wikified_slides(self, slide_ids):
+        """
+        Retrieve the results of wikifying the given slides, as stored in the database.
+
+        Args:
+            slide_ids (list[str]): List of slide ids.
+
+        Returns:
+            list[dict[str]]: List of wikify results for keywords from the texts of the given slides.
+            Each element has the following keys:
+
+            * 'keywords' (str): Set of keywords.
+            * 'page_id' (int): Id of the wikipage.
+            * 'page_title' (str): Title of the wikipage.
+            * 'searchrank' (int): Position of the wikipage in the wikisearch.
+            * 'median_graph_score' (float): Median of the graph_score over all anchor pages.
+            * 'searchrank_graph_ratio' (float): Ratio graph_score/search_score.
+        """
+
         query = f"""
             SELECT DISTINCT sk.SlideID, sk.Keywords, sk.PageID, sk.PageTitle, sk.Rank, sk.Score 
             FROM gen_switchtube.Slide_Text st
@@ -110,10 +150,27 @@ class DB:
         return wikified_slides
 
     def slide_anchor_page_ids(self, slide_id):
+        """
+        Retrieve list of anchor page ids for the given slide.
+
+        Args:
+            slide_id (int): Id of a slide.
+
+        Returns:
+            list[int]: List of ids of the anchor pages associated with the given slide.
+        """
+
         channel_id = slide_id.split('_')[0]
         return self.channel_anchor_page_ids[channel_id]
 
     def query_course_descriptions(self):
+        """
+        Retrieve a mapping from each course id to its description text.
+
+        Returns:
+            dict[str, str]: A dictionary with course ids as keys and course descriptions as values.
+        """
+
         query = f"""
             SELECT CourseCode, CONCAT_WS(
                 '\n', SubjectName, Abstract, Contents, Keywords, Concepts, Bibliography
@@ -144,6 +201,21 @@ class DB:
         return course_descriptions
 
     def query_wikified_course_descriptions(self):
+        """
+        Retrieve the results of wikifying the given course descriptions, as stored in the database.
+
+        Returns:
+            list[dict[str]]: List of wikify results for keywords from the given course descriptions.
+            Each element has the following keys:
+
+            * 'keywords' (str): Set of keywords.
+            * 'page_id' (int): Id of the wikipage.
+            * 'page_title' (str): Title of the wikipage.
+            * 'searchrank' (int): Position of the wikipage in the wikisearch.
+            * 'median_graph_score' (float): Median of the graph_score over all anchor pages.
+            * 'searchrank_graph_ratio' (float): Ratio graph_score/search_score.
+        """
+
         query = f"""
             SELECT m.CourseCode, m.Keywords, m.PageID, m.PageTitle
             FROM man_isacademia.Course2Wiki_Current_Mapping m
@@ -177,6 +249,13 @@ class DB:
         return wikified_course_descriptions
 
     def query_course_channel_ids(self):
+        """
+        Retrieve a mapping from each course id to its list of channel ids.
+
+        Returns:
+            dict[str, str]: A dictionary with course ids as keys and lists of their associated channel ids as values.
+        """
+
         query = f"""
             SELECT CourseID, GROUP_CONCAT(SwitchChannelID SEPARATOR ',') AS SwitchChannelIDs
             FROM ca_switchtube.Channel_to_Course_Mapping
@@ -194,6 +273,16 @@ class DB:
         return course_channel_ids
 
     def course_anchor_page_ids(self, course_id):
+        """
+        Retrieve list of anchor page ids for the given course.
+
+        Args:
+            course_id (str): Id of a course.
+
+        Returns:
+            list[int]: List of ids of the anchor pages associated with the given course.
+        """
+
         channel_ids = self.course_channel_ids.get(course_id, None)
         if channel_ids:
             return list({anchor_page_id for channel_id in channel_ids for anchor_page_id in self.channel_anchor_page_ids[channel_id]})
@@ -201,6 +290,16 @@ class DB:
             return []
 
     def get_wikipage_ids(self, filter_orphan=False):
+        """
+        Retrieve a full list of all wikipage ids present in the database.
+
+        Args:
+            filter_orphan (bool): Whether to filter out wikipages with no links from or to other wikipages.
+
+        Returns:
+            list[int]: List of wikipage ids.
+        """
+
         if filter_orphan:
             query = f"""
                 SELECT DISTINCT SourcePageID
@@ -238,6 +337,23 @@ class DB:
             return page_ids
 
     def get_wikipages(self, ids=None, id_min_max=None, limit=None):
+        """
+        Retrieve wikipages and related information from the database.
+
+        Args:
+            ids (list[int]): If set, restrict to wikipages with id in this list.
+            id_min_max (tuple[int, int]): If set, restrict to wikipages with id in the given range.
+            limit: If set, limit the number of wikipages to this number.
+
+        Returns:
+            dict[int, dict[str]]: Dictionary with wikipage ids as keys and whose values contain the following keys:
+
+            * 'title' (str): Title of the wikipage.
+            * 'content' (str): Content of the wikipage.
+            * 'redirect' (list[str]): List of titles of wikipages redirecting to this one.
+            * 'popularity' (float): Popularity score of the wikipage.
+        """
+
         query = """
             SELECT titles.PageID, titles.PageTitle, contents.PageContent, contents.Redirects, contents.Popularity
             FROM piper_wikipedia.PageTitle_to_PageID_Mapping AS titles
@@ -278,6 +394,18 @@ class DB:
         }
 
     def get_wikipage_categories(self, ids=None, id_min_max=None, limit=None):
+        """
+        Retrieve wikipage categories from the database.
+
+        Args:
+            ids (list[int]): If set, restrict to wikipages with id in this list.
+            id_min_max (tuple[int, int]): If set, restrict to wikipages with id in the given range.
+            limit: If set, limit the number of wikipages to this number.
+
+        Returns:
+            dict[int, str]: Dictionary with wikipage ids as keys and a concatenation of the category titles as values.
+        """
+
         query = """            
             SELECT titles.PageID, GROUP_CONCAT(categories.CategoryTitle)
             FROM piper_wikipedia.PageTitle_to_PageID_Mapping AS titles
