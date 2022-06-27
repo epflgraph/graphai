@@ -2,6 +2,16 @@ import json
 
 
 def pprint(t, indent=0, inline=False, only_first=False):
+    """
+    Pretty print dictionary.
+
+    Args:
+        t (dict): Dictionary to print.
+        indent (int): Number of spaces preceding every line.
+        inline (bool): Skip preceding spaces for the first line.
+        only_first (bool): If True, prints only an ellipsis to avoid big blocks.
+    """
+
     if type(t) is dict:
         if inline:
             print('{')
@@ -44,11 +54,29 @@ def pprint(t, indent=0, inline=False, only_first=False):
 
 
 def read_json(filename):
+    """
+    Reads json file.
+
+    Args:
+        filename (str): Name of the file to be read.
+
+    Returns:
+        dict: Dictionary with the contents of the json file.
+    """
+
     with open(filename) as file:
         return json.load(file)
 
 
 def save_json(data, filename):
+    """
+    Saves a dictionary as a json file.
+
+    Args:
+        data (dict): Dictionary to save.
+        filename (str): Name of the file to be read.
+    """
+
     with open(filename, 'w', encoding='utf-8') as file:
         json.dump(data, file, ensure_ascii=False)
 
@@ -70,4 +98,13 @@ class Colors:
 
 
 def cprint(text, color='white', is_bold=False):
+    """
+    Print in a given color.
+
+    Args:
+        text (str): Text to print.
+        color (str): Color to print in.
+        is_bold (bool): Should print in bold case.
+    """
+
     print(f'{Colors.pref}{1 if is_bold else 0};{Colors.codes.get(color, Colors.codes["white"])}' + text + Colors.reset)
