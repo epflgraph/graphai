@@ -6,7 +6,7 @@ The `interfaces` package contains several classes whose purpose is to transparen
 :mod:`interfaces.api` Module
 ----------------------------
 
-Communicates with the graphai API.
+Communicates with the Graph AI API.
 
 .. automodule:: interfaces.api
    :members:
