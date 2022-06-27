@@ -110,7 +110,7 @@ def extract_anchor_page_ids(results, max_n=3):
         list[int]: List of the most relevant page ids present along all results.
     Examples:
         >>> extract_anchor_page_ids(wikisearch(['brown baggies', 'platform soles'], method='wikipedia-api'))
-        [33921, 699690, 5859444, 700953]
+        [33921, 699690, 5859444]
     """
 
     # Compute sum of scores for each page over all results
@@ -130,5 +130,5 @@ def extract_anchor_page_ids(results, max_n=3):
     # Sort by high scores and keep only max_n
     high_scores = sorted(page_scores.values(), reverse=True)[:max_n]
 
-    return list(set(page_id for page_id in page_scores if page_scores[page_id] in high_scores))
+    return list(set(page_id for page_id in page_scores if page_scores[page_id] in high_scores))[:max_n]
 
