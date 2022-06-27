@@ -3,17 +3,17 @@ import numpy as np
 from definitions import DATA_DIR
 from utils.text.io import read_json
 
-# # Load successors adjacency list
-# print('Loading successors adjacency list...', end=' ')
-# successors = read_json(f'{DATA_DIR}/successors.json')
-# successors = {int(k): v for k, v in successors.items()}
-# print('Done')
-#
-# # Load predecessors adjacency list
-# print('Loading predecessors adjacency list...', end=' ')
-# predecessors = read_json(f'{DATA_DIR}/predecessors.json')
-# predecessors = {int(k): v for k, v in predecessors.items()}
-# print('Done')
+# Load successors adjacency list
+print('Loading successors adjacency list...', end=' ')
+successors = read_json(f'{DATA_DIR}/successors.json')
+successors = {int(k): v for k, v in successors.items()}
+print('Done')
+
+# Load predecessors adjacency list
+print('Loading predecessors adjacency list...', end=' ')
+predecessors = read_json(f'{DATA_DIR}/predecessors.json')
+predecessors = {int(k): v for k, v in predecessors.items()}
+print('Done')
 
 
 def compute_score(n_out_paths, n_in_paths):
@@ -44,6 +44,41 @@ def compute_graph_scores(source_page_ids, target_page_ids):
     Returns:
         list[dict[str]]: A list with all possible source-target pairs and their graph score. Each element of the list
         has keys 'source_page_id' (int), 'target_page_id' (int) and 'score' (float).
+
+    Examples:
+        >>> compute_graph_scores([6220, 1196], [18973446, 9417, 946975])
+        [
+            {
+                'source_page_id': 6220,
+                'target_page_id': 18973446,
+                'score': 0.6187232849309675
+            },
+            {
+                'source_page_id': 6220,
+                'target_page_id': 9417,
+                'score': 0.627444454118999
+            },
+            {
+                'source_page_id': 6220,
+                'target_page_id': 946975,
+                'score': 0.6114293794482915
+            },
+            {
+                'source_page_id': 1196,
+                'target_page_id': 18973446,
+                'score': 0.4912413298812224
+            },
+            {
+                'source_page_id': 1196,
+                'target_page_id': 9417,
+                'score': 0.3372925094508338
+            },
+            {
+                'source_page_id': 1196,
+                'target_page_id': 946975,
+                'score': 0.36674985172844654
+            }
+        ]
     """
     pairs = [(s, t) for s in source_page_ids for t in target_page_ids]
 
