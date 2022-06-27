@@ -32,6 +32,31 @@ symbols = {
 
 
 class HTMLCleaner(HTMLParser):
+    """
+    Class to parse and clean HTML tags from raw text.
+
+    Examples:
+        Use as follows:
+
+        >>> text = ' '.join([
+        >>>     "<p>You get a <i>shiver</i> in the <strong>dark</strong>"
+        >>>     "<br/>"
+        >>>     "It's a raining in the <a>park</a> but meantime</p>"
+        >>> ])
+        >>> c = HTMLCleaner()
+        >>> c.feed(text)
+        >>> print(c.get_data())
+
+        You get a shiver in the dark
+
+        It's a raining in the
+
+        park
+
+        but meantime
+
+    """
+
     def __init__(self):
         self.reset()
         self.strict = False
@@ -104,6 +129,36 @@ class HTMLCleaner(HTMLParser):
 
 
 def normalize(text):
+    """
+    Normalizes the given text by solving encoding problems, deleting URLs, emails, cleaning HTML tags and
+    converting to lowercase.
+
+    Args:
+        text (str): Text to be normalized.
+
+    Returns:
+        str: Normalized text.
+
+    Examples:
+        >>> text = ' '.join([
+        >>>     "<p>You get a <i>shiver</i> in the <strong>dark</strong>"
+        >>>     "<br/>"
+        >>>     "It's a \\u2018raining\\u2019 in the <a>park</a> but »meantime«</p>"
+        >>>     "&lt;3"
+        >>> ])
+        >>> print(normalize(text))
+
+        you get a shiver in the dark
+
+        it's a 'raining' in the
+
+        park
+
+        but meantime
+
+        <3
+    """
+
     # Clean text of encoding problems and other rubbish
     text = ct.clean(text, lower=False, to_ascii=False, no_line_breaks=False, no_urls=True, replace_with_url='', no_emails=True, replace_with_email='')
 
