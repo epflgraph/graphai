@@ -1,4 +1,8 @@
 class WikifyResult:
+    """
+    Class representing a keywords and wikipage match, with all its associated scores.
+    """
+
     def __init__(self, keywords, page_id, page_title, searchrank=0, median_graph_score=0, search_graph_ratio=0, levenshtein_score=0, mixed_score=0):
         self.keywords = keywords
         self.page_id = page_id
@@ -13,13 +17,25 @@ class WikifyResult:
         return f'WikifyResult({self.keywords}, {self.page_id}, {self.page_title}, {self.median_graph_score:.4f}, {self.mixed_score:.4f})'
 
     def equivalent(self, other):
+        """
+        Return whether self and other result have the same keywords and wikipage id.
+        """
+
         return self.keywords == other.keywords and self.page_id == other.page_id
 
     def equal(self, other):
+        """
+        Return whether self and other result have the same keywords, wikipage id and graph score.
+        """
+
         return self.equivalent(other) and abs(self.median_graph_score - other.median_graph_score) < 10e-4
 
     @staticmethod
     def from_dict(d):
+        """
+        Create a WikifyResult from a dictionary.
+        """
+
         return WikifyResult(
             keywords=d.get('keywords'),
             page_id=d.get('page_id'),

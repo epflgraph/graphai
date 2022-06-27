@@ -1,4 +1,7 @@
 class WikisearchResult:
+    """
+    lalala
+    """
 
     def __init__(self, keywords, pages):
         self.keywords = keywords
