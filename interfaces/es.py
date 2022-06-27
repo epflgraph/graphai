@@ -1,5 +1,4 @@
 import configparser
-import math
 
 from ssl import create_default_context
 from elasticsearch import Elasticsearch
@@ -10,6 +9,13 @@ from models.page_result import PageResult
 
 
 def es_bool(must=None, must_not=None, should=None, filter=None):
+    """
+    Build elasticsearch bool clause with given arguments.
+
+    Returns:
+        dict
+    """
+
     query = {
         'bool': {}
     }
@@ -30,6 +36,13 @@ def es_bool(must=None, must_not=None, should=None, filter=None):
 
 
 def es_match(field, text, boost=None, operator=None):
+    """
+    Build elasticsearch match clause with given arguments.
+
+    Returns:
+        dict
+    """
+
     query = {
         'match': {
             field: {
@@ -48,6 +61,13 @@ def es_match(field, text, boost=None, operator=None):
 
 
 def es_multi_match(fields, text, type=None, boost=None, minimum_should_match=None, operator=None):
+    """
+    Build elasticsearch multi_match clause with given arguments.
+
+    Returns:
+        dict
+    """
+
     query = {
         'multi_match': {
             'fields': fields,
@@ -71,6 +91,13 @@ def es_multi_match(fields, text, type=None, boost=None, minimum_should_match=Non
 
 
 def es_dis_max(queries):
+    """
+    Build elasticsearch dis_max clause with given arguments.
+
+    Returns:
+        dict
+    """
+
     query = {
         'dis_max': {
             'queries': queries
@@ -80,51 +107,11 @@ def es_dis_max(queries):
     return query
 
 
-def es_exp_decay_function(field, scale):
-    # Decay function is exp(-x/scale)
-    # How to pick a value for scale:
-    # Page score is multiplied by a factor
-    #   * For pages with field < scale, the factor will be > 1/e (~= 0.37)
-    #   * For pages with field > scale, the factor will be < 1/e (~= 0.37)
-    #
-    # Pages with high field values (>scale) will have their score roughly thirded, or worse.
-    return {
-        'exp': {
-            field: {
-                'origin': 0,
-                'offset': 0,
-                'scale': scale,
-                'decay': 1/math.e
-            }
-        }
-    }
-
-
-def es_function_score(query, functions, boost_mode='multiply'):
-    return {
-        'function_score': {
-            'query': query,
-            'functions': functions,
-            'boost_mode': boost_mode
-        }
-    }
-
-
-def es_exp_booster_source(scale=1e9, max_boost=0.5):
-    return {
-        'source': f"_score * (1 + {max_boost} * Math.exp(- doc['id'].value/{scale}))"
-    }
-
-
-def es_script_score(query, script):
-    return {
-        'script_score': {
-            'query': query,
-            'script': script
-        }
-    }
-
 class ES:
+    """
+    Base class to communicate with the elasticsearch EPFLGraph graphai instance.
+    """
+
     def __init__(self, index):
         self.index = index
 
@@ -156,49 +143,31 @@ class ES:
         ]
 
     def search(self, text, limit=10):
+        """
+        Perform elasticsearch search query.
+
+        Args:
+            text (str): Query text for the search.
+            limit (int): Maximum number of returned results.
+
+        Returns:
+            list[:class:`~models.page_result.PageResult`]: List of results of the wikisearch.
+        """
+
         return self.search_mediawiki(text, limit=limit)
 
-    def search_boost_title(self, text, limit=10, boost=2):
-        query = es_bool(
-            must=es_match('content', text),
-            should=es_match('title', text, boost=boost)
-        )
-        search = self._search(query, limit=limit)
-        return self._results_from_search(search)
-
-    def search_penalize_title(self, text, limit=10, penalty=2):
-        query = es_bool(
-            must=es_match('content', text),
-            should=es_bool(
-                must_not=es_match('title', text, boost=penalty)
-            )
-        )
-        search = self._search(query, limit=limit)
-        return self._results_from_search(search)
-
-    def search_decay_page_id(self, text, limit=10, scale=1e9):
-        query = es_function_score(
-            query=es_bool(
-                must=es_match('content', text),
-                should=es_match('title', text)
-            ),
-            functions=[es_exp_decay_function(field='id', scale=scale)]
-        )
-        search = self._search(query, limit=limit)
-        return self._results_from_search(search)
-
-    def search_boost_low_page_id(self, text, limit=10, scale=1e9, max_boost=0.5):
-        query = es_script_score(
-            query=es_bool(
-                must=es_match('content', text),
-                should=es_match('title', text)
-            ),
-            script=es_exp_booster_source(scale=scale, max_boost=max_boost)
-        )
-        search = self._search(query, limit=limit)
-        return self._results_from_search(search)
-
     def search_mediawiki(self, text, limit=10):
+        """
+        Perform elasticsearch search query using the mediawiki query structure.
+
+        Args:
+            text (str): Query text for the search.
+            limit (int): Maximum number of returned results.
+
+        Returns:
+            list[:class:`~models.page_result.PageResult`]: List of results of the wikisearch.
+        """
+
         query = es_bool(
             should=[
                 es_multi_match(fields=['all_near_match^10', 'all_near_match_asciifolding^7.5'], text=text),
@@ -303,6 +272,17 @@ class ES:
         return self._results_from_search(search)
 
     def search_mediawiki_no_rescore(self, text, limit=10):
+        """
+        Perform elasticsearch search query using the mediawiki query structure, skipping the rescore part.
+
+        Args:
+            text (str): Query text for the search.
+            limit (int): Maximum number of returned results.
+
+        Returns:
+            list[:class:`~models.page_result.PageResult`]: List of results of the wikisearch.
+        """
+
         query = es_bool(
             should=[
                 es_multi_match(fields=['all_near_match^10', 'all_near_match_asciifolding^7.5'], text=text),
@@ -338,6 +318,17 @@ class ES:
         return self._results_from_search(search)
 
     def search_mediawiki_no_plain(self, text, limit=10):
+        """
+        Perform elasticsearch search query using the mediawiki query structure, restricted to non-plain fields.
+
+        Args:
+            text (str): Query text for the search.
+            limit (int): Maximum number of returned results.
+
+        Returns:
+            list[:class:`~models.page_result.PageResult`]: List of results of the wikisearch.
+        """
+
         query = es_bool(
             should=[
                 es_match(field='all_near_match', text=text, boost=10),
@@ -437,6 +428,18 @@ class ES:
         return self._results_from_search(search)
 
     def search_mediawiki_restrict_4(self, text, limit=10):
+        """
+        Perform elasticsearch search query using the mediawiki query structure, restricted to the following fields:
+        title, text, heading, opening_text
+
+        Args:
+            text (str): Query text for the search.
+            limit (int): Maximum number of returned results.
+
+        Returns:
+            list[:class:`~models.page_result.PageResult`]: List of results of the wikisearch.
+        """
+
         query = es_bool(
             should=[
                 es_bool(
@@ -537,6 +540,18 @@ class ES:
         return self._results_from_search(search)
 
     def search_mediawiki_restrict_2(self, text, limit=10):
+        """
+        Perform elasticsearch search query using the mediawiki query structure, restricted to the following fields:
+        title, text
+
+        Args:
+            text (str): Query text for the search.
+            limit (int): Maximum number of returned results.
+
+        Returns:
+            list[:class:`~models.page_result.PageResult`]: List of results of the wikisearch.
+        """
+
         query = es_bool(
             should=[
                 es_bool(
@@ -631,15 +646,42 @@ class ES:
         return self._results_from_search(search)
 
     def indices(self):
+        """
+        Retrieve information about all elasticsearch indices.
+
+        Returns:
+            dict: elasticsearch response
+        """
         return self.es.cat.indices(index=self.index, format='json', v=True)
 
     def index_doc(self, doc):
+        """
+        Index the given document.
+
+        Args:
+            doc (dict): Document to index.
+
+        Returns:
+            dict: elasticsearch response
+        """
+
         if 'id' in doc:
             self.es.index(index=self.index, document=doc, id=doc['id'])
         else:
             self.es.index(index=self.index, document=doc)
 
     def create_index(self, settings=None, mapping=None):
+        """
+        Create index with the given settings and mapping.
+
+        Args:
+            settings (dict): Dictionary with elasticsearch settings, in that format.
+            mapping (dict): Dictionary with elasticsearch mapping, in that format.
+
+        Returns:
+            dict: elasticsearch response
+        """
+
         body = {}
 
         if settings is not None:
@@ -654,7 +696,21 @@ class ES:
             self.es.indices.create(index=self.index)
 
     def delete_index(self):
+        """
+        Delete index.
+
+        Returns:
+            dict: elasticsearch response
+        """
+
         self.es.indices.delete(index=self.index, ignore_unavailable=True)
 
     def refresh(self):
+        """
+        Refresh index.
+
+        Returns:
+            dict: elasticsearch response
+        """
+
         self.es.indices.refresh(index=self.index)
