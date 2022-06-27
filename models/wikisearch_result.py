@@ -1,6 +1,6 @@
 class WikisearchResult:
     """
-    lalala
+    Class representing the result of a wikisearch for a given set of keywords.
     """
 
     def __init__(self, keywords, pages):
