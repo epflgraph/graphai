@@ -3,25 +3,48 @@ import numpy as np
 from definitions import DATA_DIR
 from utils.text.io import read_json
 
-# Load successors adjacency list
-print('Loading successors adjacency list...', end=' ')
-successors = read_json(f'{DATA_DIR}/successors.json')
-successors = {int(k): v for k, v in successors.items()}
-print('Done')
-
-# Load predecessors adjacency list
-print('Loading predecessors adjacency list...', end=' ')
-predecessors = read_json(f'{DATA_DIR}/predecessors.json')
-predecessors = {int(k): v for k, v in predecessors.items()}
-print('Done')
+# # Load successors adjacency list
+# print('Loading successors adjacency list...', end=' ')
+# successors = read_json(f'{DATA_DIR}/successors.json')
+# successors = {int(k): v for k, v in successors.items()}
+# print('Done')
+#
+# # Load predecessors adjacency list
+# print('Loading predecessors adjacency list...', end=' ')
+# predecessors = read_json(f'{DATA_DIR}/predecessors.json')
+# predecessors = {int(k): v for k, v in predecessors.items()}
+# print('Done')
 
 
 def compute_score(n_out_paths, n_in_paths):
+    """
+    Function to compute the graph score of an pair based on the number of in and outward paths.
+    """
     rebound = (1 + min(n_out_paths, n_in_paths)) / (1 + max(n_out_paths, n_in_paths))
     return 1 - 1 / (1 + np.log(1 + rebound * np.log(n_out_paths)))
 
 
 def compute_graph_scores(source_page_ids, target_page_ids):
+    """
+    Computes the graph scores for all possible source-target pairs from two lists of page ids.
+    The graph score of a pair (s, t) is computed as:
+
+    :math:`\\displaystyle score(s, t) = 1 - \\frac{1}{1 + \\ln(1 + rebound(s, t) * \\ln(out(s, t)))}`, with
+
+    :math:`\\displaystyle rebound(s, t) = \\frac{1 + \\min\\{in(s, t), out(s, t)\\}}{1 + \max\\{in(s, t), out(s, t)\\}}`,
+
+    :math:`in(s, t) =` number of paths from t to s,
+
+    :math:`out(s, t) =` number of paths from s to t.
+
+    Args:
+        source_page_ids (list[int]): List of source page ids.
+        target_page_ids (list[int]): List of target page ids.
+
+    Returns:
+        list[dict[str]]: A list with all possible source-target pairs and their graph score. Each element of the list
+        has keys 'source_page_id' (int), 'target_page_id' (int) and 'score' (float).
+    """
     pairs = [(s, t) for s in source_page_ids for t in target_page_ids]
 
     results = []
