@@ -68,6 +68,9 @@ def wikisearch(keyword_list, method):
 
     Returns:
         list[:class:`~models.wikisearch_result.WikisearchResult`]: List of wikisearch results.
+    Examples:
+        >>> wikisearch(['brown baggies', 'platform soles'], method='wikipedia-api')
+        [WikisearchResult(brown baggies, 10), WikisearchResult(platform soles, 10)]
     """
 
     # Execute wikisearch in parallel
@@ -88,6 +91,9 @@ def extract_page_ids(results):
 
     Returns:
         list[int]: List of all page ids present along all results.
+    Examples:
+        >>> extract_page_ids(wikisearch(['brown baggies', 'platform soles'], method='wikipedia-api'))
+        [33921, 64498690, ..., 5859444, 50334463]
     """
     return list(set(page.page_id for result in results for page in result.pages))
 
@@ -102,13 +108,9 @@ def extract_anchor_page_ids(results, max_n=3):
 
     Returns:
         list[int]: List of the most relevant page ids present along all results.
-
     Examples:
-        Examples should be written in doctest format, and should illustrate how
-        to use the function.
-
-        >>> print([i for i in example_generator(4)])
-        [0, 1, 2, 3]
+        >>> extract_anchor_page_ids(wikisearch(['brown baggies', 'platform soles'], method='wikipedia-api'))
+        [33921, 699690, 5859444, 700953]
     """
 
     # Compute sum of scores for each page over all results

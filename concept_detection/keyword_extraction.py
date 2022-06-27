@@ -62,11 +62,13 @@ def rake_extract(text, use_nltk, split_words=False, return_scores=False, thresho
             * tuple(str, float): A pair representing keywords and score, otherwise.
 
     Examples:
-        >>> text = ' '.join(["Then a crowd a young boys they're a foolin' around in the corner",
+        >>> text = ' '.join([
+        >>>     "Then a crowd a young boys they're a foolin' around in the corner",
         >>>     "Drunk and dressed in their best brown baggies and their platform soles",
         >>>     "They don't give a damn about any trumpet playin' band",
-        >>>     "It ain't what they call Rock and Roll"])
-        >>> rake_extract(text)
+        >>>     "It ain't what they call 'rock and roll'"
+        >>> ])
+        >>> rake_extract(text, use_nltk=False)
         ['brown baggies', 'young boys', 'trumpet playin', 'corner drunk', 'platform soles']
     """
 
@@ -124,6 +126,18 @@ def get_keyword_list(text, use_nltk=False):
 
     Returns:
         list[str]: A list of keywords automatically extracted from the given text.
+
+    Examples:
+        >>> text = ' '.join([
+        >>>     "<p>",
+        >>>     "Then a crowd a young boys they're a foolin' around in the corner",
+        >>>     "Drunk and dressed in their best brown baggies and their platform soles",
+        >>>     "They don't give a damn about any trumpet playin' band",
+        >>>     "It ain't what they call 'rock and roll'",
+        >>>     "</p>"
+        >>> ])
+        >>> get_keyword_list(text)
+        ['brown baggies', 'young boys', 'trumpet playin', 'corner drunk', 'platform soles']
     """
 
     text = normalize(text)
