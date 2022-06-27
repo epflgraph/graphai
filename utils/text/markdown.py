@@ -17,6 +17,16 @@ codes = ['lang', 'local', 'ipa', 'also', 'uk', 'us', 'uklang', 'uslang', 'ukalso
 
 
 def parse_template(node):
+    """
+    Parse template node.
+
+    Args:
+        node (mwparserfromhell.nodes.Node): Node to parse.
+
+    Returns:
+        str: Parsed node as text.
+    """
+
     # node.name is a Wikicode object, we parse it to a lowercase string
     name = parse(node.name).lower()
 
@@ -204,6 +214,16 @@ def parse_template(node):
 
 
 def parse(node):
+    """
+    Parse node.
+
+    Args:
+        node (mwparserfromhell.nodes.Node): Node to parse.
+
+    Returns:
+        str: Parsed node as text.
+    """
+
     # node is actually None
     if node is None:
         return ''
@@ -295,6 +315,16 @@ def parse(node):
 
 
 def parse_hatnote(node):
+    """
+    Parse hatnote node.
+
+    Args:
+        node (mwparserfromhell.nodes.Node): Node to parse.
+
+    Returns:
+        str: Parsed node as text.
+    """
+
     # Hatnotes can only be templates
     if not isinstance(node, Template):
         return ''
@@ -315,6 +345,10 @@ def parse_hatnote(node):
 
 
 def clean(text):
+    """
+    Clean and normalizes text.
+    """
+
     # Normalize line breaks and tabs
     text = re.sub('[\r\f\v]', '\n', text)
     text = re.sub('\t', ' ', text)
@@ -339,10 +373,30 @@ def clean(text):
 
 
 def get_section_headings(section):
+    """
+    Extract headings from the given section.
+
+    Args:
+        section (mwparserfromhell.wikicode.Wikicode): Section to extract headings from.
+
+    Returns:
+        list[str]: List of parsed headings in the section.
+    """
+
     return [clean(parse(heading.title)) for heading in section.filter_headings()]
 
 
 def get_categories(section):
+    """
+    Extract categories from the given section.
+
+    Args:
+        section (mwparserfromhell.wikicode.Wikicode): Section to extract categories from.
+
+    Returns:
+        list[str]: List of parsed categories in the section.
+    """
+
     # Pattern:
     #   \[\[        - leading [[
     #   Category    - literal
@@ -364,10 +418,30 @@ def get_categories(section):
 
 
 def get_tables(section):
+    """
+    Extract tables from given section.
+
+    Args:
+        section (mwparserfromhell.wikicode.Wikicode): Section to extract tables from.
+
+    Returns:
+        list[str]: List of parsed tables in the section.
+    """
+
     return [clean(parse(table.contents)) for table in section.filter_tags(matches=lambda node: node.tag == 'table')]
 
 
 def get_captions(section):
+    """
+    Extract captions from given section.
+
+    Args:
+        section (mwparserfromhell.wikicode.Wikicode): Section to extract captions from.
+
+    Returns:
+        list[str]: List of parsed captions in the section.
+    """
+
     wikilinks = section.filter_wikilinks(matches=lambda node: 'file:' in node.title.lower())
 
     captions = []
@@ -401,6 +475,16 @@ def get_captions(section):
 
 
 def split_hatnotes_opening_text(section):
+    """
+    Split hatnotes from opening text in the given section.
+
+    Args:
+        section (mwparserfromhell.wikicode.Wikicode): Section to split content from.
+
+    Returns:
+        tuple[list[str], str]: Pair containing a list of hatnotes and opening text from the section.
+    """
+
     hatnotes = []
     opening_text = ''
 
@@ -425,14 +509,18 @@ def split_hatnotes_opening_text(section):
 
 def strip(page_content):
     """
-    Strips wikimarkdown from a string and returns a human-readable version by parsing the markdown.
+    Strips wikimarkdown from a string and extracts the data in several fields.
 
     Args:
         page_content (str): String containing the page content in wikimarkdown format.
 
     Returns:
-        dict: Dictionary containing several fields derived from the markdown parsing, containing a 'text' field which
-            represents a human-readable version of the input text.
+        dict[str]: Dictionary containing several fields derived from the markdown parsing. It has the following keys:
+
+        * 'heading' (list[str]): List of all headings.
+        * 'opening_text' (str): Text before the first heading.
+        * 'text' (str): Most text from the page, except for auxiliary text.
+        * 'auxiliary_text' (list[str]): Content in hatnotes, tables and some special sections like "See also".
     """
     
     wikicode = mwparserfromhell.parse(page_content)
@@ -488,4 +576,3 @@ def strip(page_content):
     stripped_page['text'] = stripped_page['text'].strip()
 
     return stripped_page
-
