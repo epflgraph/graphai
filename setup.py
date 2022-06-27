@@ -31,7 +31,7 @@ setup(
             'mysql-connector-python',
             'mwparserfromhell',
         ],
-        'docs': ['sphinx']
+        'docs': ['sphinx', 'sphinx-material']
     },
     license=''
 )
