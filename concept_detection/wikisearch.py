@@ -20,7 +20,7 @@ class WikisearchActor:
     def __init__(self):
         # Instantiate wikipedia-api and elasticsearch interfaces
         self.wp = WP()
-        self.es = ES('wikipages')
+        self.es = ES('wikipages_6_shards')
 
     def wikisearch(self, keywords, method):
         """
