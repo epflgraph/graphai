@@ -24,12 +24,13 @@ setup(
             'requests-futures',
             'nltk',
             'rake-nltk',
-            'clean-text'
+            'clean-text',
             'ray',
             'pydantic',
             'python-Levenshtein',
             'mysql-connector-python',
             'mwparserfromhell',
+            'unidecode'
         ],
         'docs': ['sphinx', 'sphinx-material']
     },
