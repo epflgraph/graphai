@@ -2,6 +2,8 @@ from rake_nltk import Rake
 import RAKE
 from keybert import KeyBERT
 
+from utils.time.stopwatch import Stopwatch
+
 text1 = """
     Théorie et critique du projet BA1Architecture projects ; envisioning environments , places of interaction , spaces , not as a product of immediate creation , but the result of a process where the tools of architectural production are critical . The 1st semester focusses on this field between actuality and the process of imagination . 
     Focussing on the relationship between the mind and the hand , students will enter an initial process , Arpenter , asking them to survey , map and cast . Beginning with one of four bridges located in Lausanne , students will devise both a method and an instrument to survey the site in relation to a given datum having defined which aspect of the site to survey and with what dimension it will be surveyed . The results are mapped onto a studio drawing in order to construct a mould and plaster cast , engaging the question of solid and void and therefore spatial thinking . The casts , which make reference to the given datum , are then set out as a mise-en-scène in the field , represented by a physical planar grid , and explored through a perspective drawing , from which notions of horizon , gravity and scale are debated . 
@@ -73,19 +75,16 @@ def venn(l1, l2, l3):
 
 text = text1
 
-import time
+sw = Stopwatch()
 
-start_time = time.time()
 rpyth_kw_list = rpyth(text)
-print(f'pyth {time.time() - start_time:.3f}s')
+print(f'pyth {sw.delta():.3f}s')
 
-start_time = time.time()
 rnltk_kw_list = rnltk(text)
-print(f'nltk {time.time() - start_time:.3f}s')
+print(f'nltk {sw.delta():.3f}s')
 
-start_time = time.time()
 rbert_kw_list = rbert(text)
-print(f'bert {time.time() - start_time:.3f}s')
+print(f'bert {sw.delta():.3f}s')
 
 venn(rpyth_kw_list, rnltk_kw_list, rbert_kw_list)
 
