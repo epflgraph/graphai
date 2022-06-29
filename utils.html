@@ -1,0 +1,802 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <meta name="lang:clipboard.copy" content="Copy to clipboard">
+  <meta name="lang:clipboard.copied" content="Copied to clipboard">
+  <meta name="lang:search.language" content="en">
+  <meta name="lang:search.pipeline.stopwords" content="True">
+  <meta name="lang:search.pipeline.trimmer" content="True">
+  <meta name="lang:search.result.none" content="No matching documents">
+  <meta name="lang:search.result.one" content="1 matching document">
+  <meta name="lang:search.result.other" content="# matching documents">
+  <meta name="lang:search.tokenizer" content="[\s\-]+">
+
+  
+    <link href="https://fonts.gstatic.com/" rel="preconnect" crossorigin>
+    <link href="https://fonts.googleapis.com/css?family=Roboto+Mono:400,500,700|Roboto:300,400,400i,700&display=fallback" rel="stylesheet">
+
+    <style>
+      body,
+      input {
+        font-family: "Roboto", "Helvetica Neue", Helvetica, Arial, sans-serif
+      }
+
+      code,
+      kbd,
+      pre {
+        font-family: "Roboto Mono", "Courier New", Courier, monospace
+      }
+    </style>
+  
+
+  <link rel="stylesheet" href="_static/stylesheets/application.css"/>
+  <link rel="stylesheet" href="_static/stylesheets/application-palette.css"/>
+  <link rel="stylesheet" href="_static/stylesheets/application-fixes.css"/>
+  
+  <link rel="stylesheet" href="_static/fonts/material-icons.css"/>
+  
+  <meta name="theme-color" content="#3f51b5">
+  <script src="_static/javascripts/modernizr.js"></script>
+  
+  
+  
+    <title>Utils &#8212; EPFL Graph AI</title>
+    <link rel="stylesheet" href="_static/material.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Wikitext" href="wikitext.html" />
+    <link rel="prev" title="Models" href="models.html" />
+  
+   
+
+  </head>
+  <body dir=ltr
+        data-md-color-primary=blue-grey data-md-color-accent=blue>
+  
+  <svg class="md-svg">
+    <defs data-children-count="0">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" width="416" height="448" viewBox="0 0 416 448" id="__github"><path fill="currentColor" d="M160 304q0 10-3.125 20.5t-10.75 19T128 352t-18.125-8.5-10.75-19T96 304t3.125-20.5 10.75-19T128 256t18.125 8.5 10.75 19T160 304zm160 0q0 10-3.125 20.5t-10.75 19T288 352t-18.125-8.5-10.75-19T256 304t3.125-20.5 10.75-19T288 256t18.125 8.5 10.75 19T320 304zm40 0q0-30-17.25-51T296 232q-10.25 0-48.75 5.25Q229.5 240 208 240t-39.25-2.75Q130.75 232 120 232q-29.5 0-46.75 21T56 304q0 22 8 38.375t20.25 25.75 30.5 15 35 7.375 37.25 1.75h42q20.5 0 37.25-1.75t35-7.375 30.5-15 20.25-25.75T360 304zm56-44q0 51.75-15.25 82.75-9.5 19.25-26.375 33.25t-35.25 21.5-42.5 11.875-42.875 5.5T212 416q-19.5 0-35.5-.75t-36.875-3.125-38.125-7.5-34.25-12.875T37 371.5t-21.5-28.75Q0 312 0 260q0-59.25 34-99-6.75-20.5-6.75-42.5 0-29 12.75-54.5 27 0 47.5 9.875t47.25 30.875Q171.5 96 212 96q37 0 70 8 26.25-20.5 46.75-30.25T376 64q12.75 25.5 12.75 54.5 0 21.75-6.75 42 34 40 34 99.5z"/></svg>
+      
+    </defs>
+  </svg>
+  
+  <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer">
+  <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search">
+  <label class="md-overlay" data-md-component="overlay" for="__drawer"></label>
+  <a href="#utils" tabindex="1" class="md-skip"> Skip to content </a>
+  <header class="md-header" data-md-component="header">
+  <nav class="md-header-nav md-grid">
+    <div class="md-flex navheader">
+      <div class="md-flex__cell md-flex__cell--shrink">
+        <a href="index.html" title="EPFL Graph AI"
+           class="md-header-nav__button md-logo">
+          
+            &nbsp;
+          
+        </a>
+      </div>
+      <div class="md-flex__cell md-flex__cell--shrink">
+        <label class="md-icon md-icon--menu md-header-nav__button" for="__drawer"></label>
+      </div>
+      <div class="md-flex__cell md-flex__cell--stretch">
+        <div class="md-flex__ellipsis md-header-nav__title" data-md-component="title">
+          <span class="md-header-nav__topic">EPFL Graph AI</span>
+          <span class="md-header-nav__topic"> Utils </span>
+        </div>
+      </div>
+      <div class="md-flex__cell md-flex__cell--shrink">
+        <label class="md-icon md-icon--search md-header-nav__button" for="__search"></label>
+        
+<div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" action="search.html" method="get" name="search">
+      <input type="text" class="md-search__input" name="q" placeholder="Search"
+             autocapitalize="off" autocomplete="off" spellcheck="false"
+             data-md-component="query" data-md-state="active">
+      <label class="md-icon md-search__icon" for="__search"></label>
+      <button type="reset" class="md-icon md-search__icon" data-md-component="reset" tabindex="-1">
+        &#xE5CD;
+      </button>
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="result">
+          <div class="md-search-result__meta">
+            Type to start searching
+          </div>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+      </div>
+      
+      
+  
+  <script src="_static/javascripts/version_dropdown.js"></script>
+  <script>
+    var json_loc = ""versions.json"",
+        target_loc = "../",
+        text = "Versions";
+    $( document ).ready( add_version_dropdown(json_loc, target_loc, text));
+  </script>
+  
+
+    </div>
+  </nav>
+</header>
+
+  
+  <div class="md-container">
+    
+    
+    
+  <nav class="md-tabs" data-md-component="tabs">
+    <div class="md-tabs__inner md-grid">
+      <ul class="md-tabs__list">
+          <li class="md-tabs__item"><a href="index.html" class="md-tabs__link">EPFL Graph AI</a></li>
+      </ul>
+    </div>
+  </nav>
+    <main class="md-main">
+      <div class="md-main__inner md-grid" data-md-component="container">
+        
+          <div class="md-sidebar md-sidebar--primary" data-md-component="navigation">
+            <div class="md-sidebar__scrollwrap">
+              <div class="md-sidebar__inner">
+                <nav class="md-nav md-nav--primary" data-md-level="0">
+  <label class="md-nav__title md-nav__title--site" for="__drawer">
+    <a href="index.html" title="EPFL Graph AI" class="md-nav__button md-logo">
+      
+        <img src="_static/" alt=" logo" width="48" height="48">
+      
+    </a>
+    <a href="index.html"
+       title="EPFL Graph AI">EPFL Graph AI</a>
+  </label>
+  
+
+  
+  <ul class="md-nav__list">
+    <li class="md-nav__item">
+    
+      <span class="md-nav__link caption"><span class="caption-text">Contents:</span></span>
+    
+    </li>
+    <li class="md-nav__item">
+    
+    
+      <a href="concept_detection.html" class="md-nav__link">Concept Detection</a>
+      
+    
+    </li>
+    <li class="md-nav__item">
+    
+    
+      <a href="graph.html" class="md-nav__link">Graph</a>
+      
+    
+    </li>
+    <li class="md-nav__item">
+    
+    
+      <a href="interfaces.html" class="md-nav__link">Interfaces</a>
+      
+    
+    </li>
+    <li class="md-nav__item">
+    
+    
+      <a href="models.html" class="md-nav__link">Models</a>
+      
+    
+    </li>
+    <li class="md-nav__item">
+    
+    
+    <input class="md-toggle md-nav__toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+    <label class="md-nav__link md-nav__link--active" for="__toc"> Utils </label>
+    
+      <a href="#" class="md-nav__link md-nav__link--active">Utils</a>
+      
+        
+<nav class="md-nav md-nav--secondary">
+    <label class="md-nav__title" for="__toc">Contents</label>
+  <ul class="md-nav__list" data-md-scrollfix="">
+        <li class="md-nav__item"><a href="#utils--page-root" class="md-nav__link">Utils</a><nav class="md-nav">
+              <ul class="md-nav__list">
+        <li class="md-nav__item"><a href="#utils-text-clean-module" class="md-nav__link"><code class="xref py py-mod docutils literal notranslate"><span class="pre">utils.text.clean</span></code> Module</a>
+        </li>
+        <li class="md-nav__item"><a href="#utils-text-io-module" class="md-nav__link"><code class="xref py py-mod docutils literal notranslate"><span class="pre">utils.text.io</span></code> Module</a>
+        </li>
+        <li class="md-nav__item"><a href="#utils-text-markdown-module" class="md-nav__link"><code class="xref py py-mod docutils literal notranslate"><span class="pre">utils.text.markdown</span></code> Module</a>
+        </li>
+        <li class="md-nav__item"><a href="#utils-time-date-module" class="md-nav__link"><code class="xref py py-mod docutils literal notranslate"><span class="pre">utils.time.date</span></code> Module</a>
+        </li>
+        <li class="md-nav__item"><a href="#utils-time-stopwatch-module" class="md-nav__link"><code class="xref py py-mod docutils literal notranslate"><span class="pre">utils.time.stopwatch</span></code> Module</a>
+        </li>
+        <li class="md-nav__item"><a href="#utils-progress-bar-module" class="md-nav__link"><code class="xref py py-mod docutils literal notranslate"><span class="pre">utils.progress_bar</span></code> Module</a>
+        </li></ul>
+            </nav>
+        </li>
+    
+<li class="md-nav__item"><a class="md-nav__extra_link" href="_sources/utils.rst.txt">Show Source</a> </li>
+
+  </ul>
+</nav>
+      
+    
+    </li>
+    <li class="md-nav__item">
+    
+    
+      <a href="wikitext.html" class="md-nav__link">Wikitext</a>
+      
+    
+    </li>
+  </ul>
+  
+
+</nav>
+              </div>
+            </div>
+          </div>
+          <div class="md-sidebar md-sidebar--secondary" data-md-component="toc">
+            <div class="md-sidebar__scrollwrap">
+              <div class="md-sidebar__inner">
+                
+<nav class="md-nav md-nav--secondary">
+    <label class="md-nav__title" for="__toc">Contents</label>
+  <ul class="md-nav__list" data-md-scrollfix="">
+        <li class="md-nav__item"><a href="#utils--page-root" class="md-nav__link">Utils</a><nav class="md-nav">
+              <ul class="md-nav__list">
+        <li class="md-nav__item"><a href="#utils-text-clean-module" class="md-nav__link"><code class="xref py py-mod docutils literal notranslate"><span class="pre">utils.text.clean</span></code> Module</a>
+        </li>
+        <li class="md-nav__item"><a href="#utils-text-io-module" class="md-nav__link"><code class="xref py py-mod docutils literal notranslate"><span class="pre">utils.text.io</span></code> Module</a>
+        </li>
+        <li class="md-nav__item"><a href="#utils-text-markdown-module" class="md-nav__link"><code class="xref py py-mod docutils literal notranslate"><span class="pre">utils.text.markdown</span></code> Module</a>
+        </li>
+        <li class="md-nav__item"><a href="#utils-time-date-module" class="md-nav__link"><code class="xref py py-mod docutils literal notranslate"><span class="pre">utils.time.date</span></code> Module</a>
+        </li>
+        <li class="md-nav__item"><a href="#utils-time-stopwatch-module" class="md-nav__link"><code class="xref py py-mod docutils literal notranslate"><span class="pre">utils.time.stopwatch</span></code> Module</a>
+        </li>
+        <li class="md-nav__item"><a href="#utils-progress-bar-module" class="md-nav__link"><code class="xref py py-mod docutils literal notranslate"><span class="pre">utils.progress_bar</span></code> Module</a>
+        </li></ul>
+            </nav>
+        </li>
+    
+<li class="md-nav__item"><a class="md-nav__extra_link" href="_sources/utils.rst.txt">Show Source</a> </li>
+
+<li id="searchbox" class="md-nav__item"></li>
+
+  </ul>
+</nav>
+              </div>
+            </div>
+          </div>
+        
+        <div class="md-content">
+          <article class="md-content__inner md-typeset" role="main">
+            
+  
+<h1 id="utils--page-root">Utils<a class="headerlink" href="#utils--page-root" title="Permalink to this headline">¶</a></h1>
+<p>The <cite>utils</cite> package contains a variety of standalone tools that are used throughout the other packages.</p>
+
+<h2 id="utils-text-clean-module"><a class="reference internal" href="#module-utils.text.clean" title="utils.text.clean"><code class="xref py py-mod docutils literal notranslate"><span class="pre">utils.text.clean</span></code></a> Module<a class="headerlink" href="#utils-text-clean-module" title="Permalink to this headline">¶</a></h2>
+<p>Contains tools related to text cleaning.</p>
+<span class="target" id="module-utils.text.clean"></span><dl class="class">
+<dt id="utils.text.clean.HTMLCleaner">
+<em class="property">class </em><code class="sig-prename descclassname">utils.text.clean.</code><code class="sig-name descname">HTMLCleaner</code><a class="headerlink" href="#utils.text.clean.HTMLCleaner" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class to parse and clean HTML tags from raw text.</p>
+<p class="rubric">Examples</p>
+<p>Use as follows:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">text</span> <span class="o">=</span> <span class="s1">' '</span><span class="o">.</span><span class="n">join</span><span class="p">([</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="s2">"&lt;p&gt;You get a &lt;i&gt;shiver&lt;/i&gt; in the &lt;strong&gt;dark&lt;/strong&gt;"</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="s2">"&lt;br/&gt;"</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="s2">"It's a raining in the &lt;a&gt;park&lt;/a&gt; but meantime&lt;/p&gt;"</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">c</span> <span class="o">=</span> <span class="n">HTMLCleaner</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">c</span><span class="o">.</span><span class="n">feed</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">get_data</span><span class="p">())</span>
+</pre></div>
+</div>
+<p>You get a shiver in the dark</p>
+<p>It’s a raining in the</p>
+<p>park</p>
+<p>but meantime</p>
+</dd></dl>
+<dl class="function">
+<dt id="utils.text.clean.normalize">
+<code class="sig-prename descclassname">utils.text.clean.</code><code class="sig-name descname">normalize</code><span class="sig-paren">(</span><em class="sig-param">text</em><span class="sig-paren">)</span><a class="headerlink" href="#utils.text.clean.normalize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Normalizes the given text by solving encoding problems, deleting URLs, emails, cleaning HTML tags and
+converting to lowercase.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>text</strong> (<em>str</em>) – Text to be normalized.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Normalized text.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">text</span> <span class="o">=</span> <span class="s1">' '</span><span class="o">.</span><span class="n">join</span><span class="p">([</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="s2">"&lt;p&gt;You get a &lt;i&gt;shiver&lt;/i&gt; in the &lt;strong&gt;dark&lt;/strong&gt;"</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="s2">"&lt;br/&gt;"</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="s2">"It's a </span><span class="se">\u2018</span><span class="s2">raining</span><span class="se">\u2019</span><span class="s2"> in the &lt;a&gt;park&lt;/a&gt; but »meantime«&lt;/p&gt;"</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="s2">"&amp;lt;3"</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">normalize</span><span class="p">(</span><span class="n">text</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>you get a shiver in the dark</p>
+<p>it’s a ‘raining’ in the</p>
+<p>park</p>
+<p>but meantime</p>
+<p>&lt;3</p>
+</dd></dl>
+
+
+<h2 id="utils-text-io-module"><a class="reference internal" href="#module-utils.text.io" title="utils.text.io"><code class="xref py py-mod docutils literal notranslate"><span class="pre">utils.text.io</span></code></a> Module<a class="headerlink" href="#utils-text-io-module" title="Permalink to this headline">¶</a></h2>
+<p>Contains tools related to input and output of text.</p>
+<span class="target" id="module-utils.text.io"></span><dl class="function">
+<dt id="utils.text.io.pprint">
+<code class="sig-prename descclassname">utils.text.io.</code><code class="sig-name descname">pprint</code><span class="sig-paren">(</span><em class="sig-param">t</em>, <em class="sig-param">indent=0</em>, <em class="sig-param">inline=False</em>, <em class="sig-param">only_first=False</em><span class="sig-paren">)</span><a class="headerlink" href="#utils.text.io.pprint" title="Permalink to this definition">¶</a></dt>
+<dd><p>Pretty print dictionary.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>t</strong> (<em>dict</em>) – Dictionary to print.</p></li>
+<li><p><strong>indent</strong> (<em>int</em>) – Number of spaces preceding every line.</p></li>
+<li><p><strong>inline</strong> (<em>bool</em>) – Skip preceding spaces for the first line.</p></li>
+<li><p><strong>only_first</strong> (<em>bool</em>) – If True, prints only an ellipsis to avoid big blocks.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+<dl class="function">
+<dt id="utils.text.io.read_json">
+<code class="sig-prename descclassname">utils.text.io.</code><code class="sig-name descname">read_json</code><span class="sig-paren">(</span><em class="sig-param">filename</em><span class="sig-paren">)</span><a class="headerlink" href="#utils.text.io.read_json" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads json file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>filename</strong> (<em>str</em>) – Name of the file to be read.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Dictionary with the contents of the json file.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="function">
+<dt id="utils.text.io.save_json">
+<code class="sig-prename descclassname">utils.text.io.</code><code class="sig-name descname">save_json</code><span class="sig-paren">(</span><em class="sig-param">data</em>, <em class="sig-param">filename</em><span class="sig-paren">)</span><a class="headerlink" href="#utils.text.io.save_json" title="Permalink to this definition">¶</a></dt>
+<dd><p>Saves a dictionary as a json file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<em>dict</em>) – Dictionary to save.</p></li>
+<li><p><strong>filename</strong> (<em>str</em>) – Name of the file to be read.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+<dl class="function">
+<dt id="utils.text.io.cprint">
+<code class="sig-prename descclassname">utils.text.io.</code><code class="sig-name descname">cprint</code><span class="sig-paren">(</span><em class="sig-param">text</em>, <em class="sig-param">color='white'</em>, <em class="sig-param">is_bold=False</em><span class="sig-paren">)</span><a class="headerlink" href="#utils.text.io.cprint" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print in a given color.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>text</strong> (<em>str</em>) – Text to print.</p></li>
+<li><p><strong>color</strong> (<em>str</em>) – Color to print in.</p></li>
+<li><p><strong>is_bold</strong> (<em>bool</em>) – Should print in bold case.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+
+<h2 id="utils-text-markdown-module"><a class="reference internal" href="#module-utils.text.markdown" title="utils.text.markdown"><code class="xref py py-mod docutils literal notranslate"><span class="pre">utils.text.markdown</span></code></a> Module<a class="headerlink" href="#utils-text-markdown-module" title="Permalink to this headline">¶</a></h2>
+<p>Contains tools related to markdown text processing.</p>
+<span class="target" id="module-utils.text.markdown"></span><dl class="function">
+<dt id="utils.text.markdown.parse_template">
+<code class="sig-prename descclassname">utils.text.markdown.</code><code class="sig-name descname">parse_template</code><span class="sig-paren">(</span><em class="sig-param">node</em><span class="sig-paren">)</span><a class="headerlink" href="#utils.text.markdown.parse_template" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parse template node.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>node</strong> (<em>mwparserfromhell.nodes.Node</em>) – Node to parse.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Parsed node as text.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="function">
+<dt id="utils.text.markdown.parse">
+<code class="sig-prename descclassname">utils.text.markdown.</code><code class="sig-name descname">parse</code><span class="sig-paren">(</span><em class="sig-param">node</em><span class="sig-paren">)</span><a class="headerlink" href="#utils.text.markdown.parse" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parse node.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>node</strong> (<em>mwparserfromhell.nodes.Node</em>) – Node to parse.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Parsed node as text.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="function">
+<dt id="utils.text.markdown.parse_hatnote">
+<code class="sig-prename descclassname">utils.text.markdown.</code><code class="sig-name descname">parse_hatnote</code><span class="sig-paren">(</span><em class="sig-param">node</em><span class="sig-paren">)</span><a class="headerlink" href="#utils.text.markdown.parse_hatnote" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parse hatnote node.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>node</strong> (<em>mwparserfromhell.nodes.Node</em>) – Node to parse.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Parsed node as text.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="function">
+<dt id="utils.text.markdown.clean">
+<code class="sig-prename descclassname">utils.text.markdown.</code><code class="sig-name descname">clean</code><span class="sig-paren">(</span><em class="sig-param">text</em><span class="sig-paren">)</span><a class="headerlink" href="#utils.text.markdown.clean" title="Permalink to this definition">¶</a></dt>
+<dd><p>Clean and normalizes text.</p>
+</dd></dl>
+<dl class="function">
+<dt id="utils.text.markdown.get_section_headings">
+<code class="sig-prename descclassname">utils.text.markdown.</code><code class="sig-name descname">get_section_headings</code><span class="sig-paren">(</span><em class="sig-param">section</em><span class="sig-paren">)</span><a class="headerlink" href="#utils.text.markdown.get_section_headings" title="Permalink to this definition">¶</a></dt>
+<dd><p>Extract headings from the given section.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>section</strong> (<em>mwparserfromhell.wikicode.Wikicode</em>) – Section to extract headings from.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>List of parsed headings in the section.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>list[str]</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="function">
+<dt id="utils.text.markdown.get_categories">
+<code class="sig-prename descclassname">utils.text.markdown.</code><code class="sig-name descname">get_categories</code><span class="sig-paren">(</span><em class="sig-param">section</em><span class="sig-paren">)</span><a class="headerlink" href="#utils.text.markdown.get_categories" title="Permalink to this definition">¶</a></dt>
+<dd><p>Extract categories from the given section.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>section</strong> (<em>mwparserfromhell.wikicode.Wikicode</em>) – Section to extract categories from.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>List of parsed categories in the section.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>list[str]</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="function">
+<dt id="utils.text.markdown.get_tables">
+<code class="sig-prename descclassname">utils.text.markdown.</code><code class="sig-name descname">get_tables</code><span class="sig-paren">(</span><em class="sig-param">section</em><span class="sig-paren">)</span><a class="headerlink" href="#utils.text.markdown.get_tables" title="Permalink to this definition">¶</a></dt>
+<dd><p>Extract tables from given section.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>section</strong> (<em>mwparserfromhell.wikicode.Wikicode</em>) – Section to extract tables from.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>List of parsed tables in the section.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>list[str]</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="function">
+<dt id="utils.text.markdown.get_captions">
+<code class="sig-prename descclassname">utils.text.markdown.</code><code class="sig-name descname">get_captions</code><span class="sig-paren">(</span><em class="sig-param">section</em><span class="sig-paren">)</span><a class="headerlink" href="#utils.text.markdown.get_captions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Extract captions from given section.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>section</strong> (<em>mwparserfromhell.wikicode.Wikicode</em>) – Section to extract captions from.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>List of parsed captions in the section.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>list[str]</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="function">
+<dt id="utils.text.markdown.split_hatnotes_opening_text">
+<code class="sig-prename descclassname">utils.text.markdown.</code><code class="sig-name descname">split_hatnotes_opening_text</code><span class="sig-paren">(</span><em class="sig-param">section</em><span class="sig-paren">)</span><a class="headerlink" href="#utils.text.markdown.split_hatnotes_opening_text" title="Permalink to this definition">¶</a></dt>
+<dd><p>Split hatnotes from opening text in the given section.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>section</strong> (<em>mwparserfromhell.wikicode.Wikicode</em>) – Section to split content from.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Pair containing a list of hatnotes and opening text from the section.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>tuple[list[str], str]</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="function">
+<dt id="utils.text.markdown.strip">
+<code class="sig-prename descclassname">utils.text.markdown.</code><code class="sig-name descname">strip</code><span class="sig-paren">(</span><em class="sig-param">page_content</em><span class="sig-paren">)</span><a class="headerlink" href="#utils.text.markdown.strip" title="Permalink to this definition">¶</a></dt>
+<dd><p>Strips wikimarkdown from a string and extracts the data in several fields.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>page_content</strong> (<em>str</em>) – String containing the page content in wikimarkdown format.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><p>Dictionary containing several fields derived from the markdown parsing. It has the following keys:</p>
+<ul class="simple">
+<li><p>’heading’ (list[str]): List of all headings.</p></li>
+<li><p>’opening_text’ (str): Text before the first heading.</p></li>
+<li><p>’text’ (str): Most text from the page, except for auxiliary text.</p></li>
+<li><p>’auxiliary_text’ (list[str]): Content in hatnotes, tables and some special sections like “See also”.</p></li>
+</ul>
+</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>dict[str]</p>
+</dd>
+</dl>
+</dd></dl>
+
+
+<h2 id="utils-time-date-module"><a class="reference internal" href="#module-utils.time.date" title="utils.time.date"><code class="xref py py-mod docutils literal notranslate"><span class="pre">utils.time.date</span></code></a> Module<a class="headerlink" href="#utils-time-date-module" title="Permalink to this headline">¶</a></h2>
+<p>Contains tools related to dates.</p>
+<span class="target" id="module-utils.time.date"></span><dl class="function">
+<dt id="utils.time.date.now">
+<code class="sig-prename descclassname">utils.time.date.</code><code class="sig-name descname">now</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#utils.time.date.now" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return current timestamp as a datetime object that prints as “2022-06-28 09:46:21.677968”</p>
+</dd></dl>
+
+
+<h2 id="utils-time-stopwatch-module"><a class="reference internal" href="#module-utils.time.stopwatch" title="utils.time.stopwatch"><code class="xref py py-mod docutils literal notranslate"><span class="pre">utils.time.stopwatch</span></code></a> Module<a class="headerlink" href="#utils-time-stopwatch-module" title="Permalink to this headline">¶</a></h2>
+<p>Contains tools related to time tracking.</p>
+<span class="target" id="module-utils.time.stopwatch"></span><dl class="class">
+<dt id="utils.time.stopwatch.Stopwatch">
+<em class="property">class </em><code class="sig-prename descclassname">utils.time.stopwatch.</code><code class="sig-name descname">Stopwatch</code><a class="headerlink" href="#utils.time.stopwatch.Stopwatch" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class representing a stopwatch to track execution times. Usage is as follows:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">sw</span> <span class="o">=</span> <span class="n">Stopwatch</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Run some time-consuming tasks</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sw</span><span class="o">.</span><span class="n">delta</span><span class="p">()</span>
+<span class="go">4.284306764602661</span>
+</pre></div>
+</div>
+<p>Time is returned in seconds and as a float variable. Several consecutive execution blocks can be tracked as well:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">sw</span> <span class="o">=</span> <span class="n">Stopwatch</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Run some time-consuming tasks</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">t1</span> <span class="o">=</span> <span class="n">sw</span><span class="o">.</span><span class="n">delta</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Run more time-consuming tasks</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">t2</span> <span class="o">=</span> <span class="n">sw</span><span class="o">.</span><span class="n">delta</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Run yet more time-consuming tasks</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">t3</span> <span class="o">=</span> <span class="n">sw</span><span class="o">.</span><span class="n">delta</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">t1</span><span class="p">,</span> <span class="n">t2</span><span class="p">,</span> <span class="n">t3</span><span class="p">)</span>
+<span class="go">5.609307289123535 2.849977970123291 4.660188913345337</span>
+</pre></div>
+</div>
+<p>The total time can also be retrieved:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">sw</span> <span class="o">=</span> <span class="n">Stopwatch</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Preprocessing</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pre_time</span> <span class="o">=</span> <span class="n">sw</span><span class="o">.</span><span class="n">delta</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Run some time-consuming tasks</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">task_time</span> <span class="o">=</span> <span class="n">sw</span><span class="o">.</span><span class="n">delta</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Postprocessing</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">post_time</span> <span class="o">=</span> <span class="n">sw</span><span class="o">.</span><span class="n">delta</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">total_time</span> <span class="o">=</span> <span class="n">sw</span><span class="o">.</span><span class="n">total</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'Proportion of total time used by task: {task_time/total_time}'</span><span class="p">)</span>
+<span class="go">Proportion of total time used by task: 0.5176954220125477</span>
+</pre></div>
+</div>
+<p>The <a class="reference internal" href="#utils.time.stopwatch.Stopwatch.tick" title="utils.time.stopwatch.Stopwatch.tick"><code class="xref py py-func docutils literal notranslate"><span class="pre">tick()</span></code></a> function can replace <a class="reference internal" href="#utils.time.stopwatch.Stopwatch.delta" title="utils.time.stopwatch.Stopwatch.delta"><code class="xref py py-func docutils literal notranslate"><span class="pre">delta()</span></code></a>
+if the partial time is not needed.</p>
+<p>Furthermore, a report can be printed too:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">sw</span> <span class="o">=</span> <span class="n">Stopwatch</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Preprocessing</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sw</span><span class="o">.</span><span class="n">tick</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Run some time-consuming tasks</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sw</span><span class="o">.</span><span class="n">tick</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Postprocessing</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sw</span><span class="o">.</span><span class="n">report</span><span class="p">(</span><span class="s1">'Completed all tasks'</span><span class="p">)</span>
+<span class="go">Completed all tasks. Total time: 19.86s.</span>
+<span class="go">    Lap 0: 6.74s.</span>
+<span class="go">    Lap 1: 11.66s.</span>
+<span class="go">    Lap 2: 1.45s.</span>
+</pre></div>
+</div>
+<p>Finally, a stopwatch can be reset for reuse:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">sw</span> <span class="o">=</span> <span class="n">Stopwatch</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Task 1.1</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sw</span><span class="o">.</span><span class="n">tick</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Task 1.2</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sw</span><span class="o">.</span><span class="n">tick</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Task 1.3</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sw</span><span class="o">.</span><span class="n">report</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="o">...</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Run other tasks without tracking time</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="o">...</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sw</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Task 2.1</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sw</span><span class="o">.</span><span class="n">tick</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Task 2.2</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sw</span><span class="o">.</span><span class="n">report</span><span class="p">()</span>
+</pre></div>
+</div>
+<dl class="method">
+<dt id="utils.time.stopwatch.Stopwatch.reset">
+<code class="sig-name descname">reset</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#utils.time.stopwatch.Stopwatch.reset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Resets all time checkpoints.</p>
+</dd></dl>
+<dl class="method">
+<dt id="utils.time.stopwatch.Stopwatch.tick">
+<code class="sig-name descname">tick</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#utils.time.stopwatch.Stopwatch.tick" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a new time checkpoint.</p>
+</dd></dl>
+<dl class="method">
+<dt id="utils.time.stopwatch.Stopwatch.delta">
+<code class="sig-name descname">delta</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#utils.time.stopwatch.Stopwatch.delta" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a new time checkpoint and returns the difference with the previous one.</p>
+</dd></dl>
+<dl class="method">
+<dt id="utils.time.stopwatch.Stopwatch.total">
+<code class="sig-name descname">total</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#utils.time.stopwatch.Stopwatch.total" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a new time checkpoint and returns the difference with the first one.</p>
+</dd></dl>
+<dl class="method">
+<dt id="utils.time.stopwatch.Stopwatch.report">
+<code class="sig-name descname">report</code><span class="sig-paren">(</span><em class="sig-param">msg='Finished'</em><span class="sig-paren">)</span><a class="headerlink" href="#utils.time.stopwatch.Stopwatch.report" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a new time checkpoint and prints a summary of all of them, including the differences between each pair
+of consecutive checkpoints and the difference between the last and the first.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>msg</strong> (<em>str</em>) – Message to be printed at the beginning of the summary. Defaults to “Finished”.</p>
+</dd>
+</dl>
+</dd></dl>
+</dd></dl>
+
+
+<h2 id="utils-progress-bar-module"><a class="reference internal" href="#module-utils.progress_bar" title="utils.progress_bar"><code class="xref py py-mod docutils literal notranslate"><span class="pre">utils.progress_bar</span></code></a> Module<a class="headerlink" href="#utils-progress-bar-module" title="Permalink to this headline">¶</a></h2>
+<p>Contains tools related to execution progress tracking.</p>
+<span class="target" id="module-utils.progress_bar"></span><dl class="class">
+<dt id="utils.progress_bar.ProgressBar">
+<em class="property">class </em><code class="sig-prename descclassname">utils.progress_bar.</code><code class="sig-name descname">ProgressBar</code><span class="sig-paren">(</span><em class="sig-param">n_iterations</em>, <em class="sig-param">bar_length=50</em><span class="sig-paren">)</span><a class="headerlink" href="#utils.progress_bar.ProgressBar" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class representing a progress bar to keep track of execution progress. Usage is as follows:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">letters</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'a'</span><span class="p">,</span> <span class="s1">'b'</span><span class="p">,</span> <span class="s1">'c'</span><span class="p">,</span> <span class="s1">'d'</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pb</span> <span class="o">=</span> <span class="n">ProgressBar</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">letters</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">letter</span> <span class="ow">in</span> <span class="n">letters</span><span class="p">:</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="c1"># Run some time-consuming tasks</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">pb</span><span class="o">.</span><span class="n">update</span><span class="p">()</span>
+<span class="go">[############......................................] 25.00%</span>
+<span class="go">[########################..........................] 50.00%</span>
+<span class="go">[####################################..............] 75.00%</span>
+<span class="go">[##################################################] 100.00%</span>
+</pre></div>
+</div>
+<p>This prints at each iteration a progress bar and the percentage of completion, overwriting the previous one.</p>
+<p>The state of progress ban be reset as follows:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">letters</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'a'</span><span class="p">,</span> <span class="s1">'b'</span><span class="p">,</span> <span class="s1">'c'</span><span class="p">,</span> <span class="s1">'d'</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="o">...</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pb</span> <span class="o">=</span> <span class="n">ProgressBar</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">letters</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">letter</span> <span class="ow">in</span> <span class="n">letters</span><span class="p">:</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="c1"># Run some time-consuming tasks</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">pb</span><span class="o">.</span><span class="n">update</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="o">...</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pb</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">letter</span> <span class="ow">in</span> <span class="n">letters</span><span class="p">:</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="c1"># Run more time-consuming tasks</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">pb</span><span class="o">.</span><span class="n">update</span><span class="p">()</span>
+</pre></div>
+</div>
+<dl class="method">
+<dt id="utils.progress_bar.ProgressBar.update">
+<code class="sig-name descname">update</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#utils.progress_bar.ProgressBar.update" title="Permalink to this definition">¶</a></dt>
+<dd><p>Increments by one the iterations counter and prints the progress bar.</p>
+</dd></dl>
+<dl class="method">
+<dt id="utils.progress_bar.ProgressBar.reset">
+<code class="sig-name descname">reset</code><span class="sig-paren">(</span><em class="sig-param">n_iterations=None</em><span class="sig-paren">)</span><a class="headerlink" href="#utils.progress_bar.ProgressBar.reset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Resets the progress bar for reuse.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>n_iterations</strong> (<em>int</em>) – Total number of iterations for completion.</p>
+</dd>
+</dl>
+</dd></dl>
+</dd></dl>
+
+
+
+
+          </article>
+        </div>
+      </div>
+    </main>
+  </div>
+  <footer class="md-footer">
+    <div class="md-footer-nav">
+      <nav class="md-footer-nav__inner md-grid">
+          
+            <a href="models.html" title="Models"
+               class="md-flex md-footer-nav__link md-footer-nav__link--prev"
+               rel="prev">
+              <div class="md-flex__cell md-flex__cell--shrink">
+                <i class="md-icon md-icon--arrow-back md-footer-nav__button"></i>
+              </div>
+              <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
+                <span class="md-flex__ellipsis">
+                  <span
+                      class="md-footer-nav__direction"> Previous </span> Models </span>
+              </div>
+            </a>
+          
+          
+            <a href="wikitext.html" title="Wikitext"
+               class="md-flex md-footer-nav__link md-footer-nav__link--next"
+               rel="next">
+            <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title"><span
+                class="md-flex__ellipsis"> <span
+                class="md-footer-nav__direction"> Next </span> Wikitext </span>
+            </div>
+            <div class="md-flex__cell md-flex__cell--shrink"><i
+                class="md-icon md-icon--arrow-forward md-footer-nav__button"></i>
+            </div>
+          
+        </a>
+        
+      </nav>
+    </div>
+    <div class="md-footer-meta md-typeset">
+      <div class="md-footer-meta__inner md-grid">
+        <div class="md-footer-copyright">
+          <div class="md-footer-copyright__highlight">
+              &#169; Copyright 2022, Aitor Pérez, Francisco Pinto.
+              
+          </div>
+            Created using
+            <a href="http://www.sphinx-doc.org/">Sphinx</a> 2.4.4.
+             and
+            <a href="https://github.com/bashtage/sphinx-material/">Material for
+              Sphinx</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+  <script src="_static/javascripts/application.js"></script>
+  <script>app.initialize({version: "1.0.4", url: {base: ".."}})</script>
+  </body>
+</html>
