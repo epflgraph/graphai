@@ -15,17 +15,28 @@ class DB:
         # Read db config from file and open connection
         db_config = configparser.ConfigParser()
         db_config.read(f'{CONFIG_DIR}/db.ini')
-        self.cnx = mysql.connector.connect(host=db_config['DB'].get('host'), port=db_config['DB'].getint('port'), user=db_config['DB'].get('user'), password=db_config['DB'].get('password'))
-        self.cursor = self.cnx.cursor()
+
+        self.host = db_config['DB'].get('host')
+        self.port = db_config['DB'].getint('port')
+        self.user = db_config['DB'].get('user')
+        self.password = db_config['DB'].get('password')
+
+        self.connect()
 
         # Fetch initial data
         self.channel_anchor_page_ids = self.query_channel_anchor_page_ids()
         self.course_channel_ids = self.query_course_channel_ids()
 
+    def connect(self):
+        self.cnx = mysql.connector.connect(host=self.host, port=self.port, user=self.user, password=self.password)
+        self.cursor = self.cnx.cursor()
+
     def query(self, query):
         """
         Execute custom query.
         """
+
+        self.connect()
 
         self.cursor.execute(query)
 
@@ -38,6 +49,8 @@ class DB:
         Returns:
             dict[str, list[int]]: A dictionary with SWITCH channel ids as keys and list of anchor page ids as values.
         """
+
+        self.connect()
 
         query = f"""
             SELECT SwitchChannelID, IF(AnchorPageIDs1 IS NOT NULL, AnchorPageIDs1, AnchorPageIDs2) AS AnchorPageIDs
@@ -82,6 +95,8 @@ class DB:
             dict[str, str]: A dictionary with slide ids as keys and slide texts as values.
         """
 
+        self.connect()
+
         query = f"""
             SELECT DISTINCT st.SlideID, st.SlideText
             FROM gen_switchtube.Slide_Text st
@@ -124,6 +139,8 @@ class DB:
             * 'searchrank_graph_ratio' (float): Ratio graph_score/search_score.
         """
 
+        self.connect()
+
         query = f"""
             SELECT DISTINCT sk.SlideID, sk.Keywords, sk.PageID, sk.PageTitle, sk.Rank, sk.Score 
             FROM gen_switchtube.Slide_Text st
@@ -160,6 +177,8 @@ class DB:
             list[int]: List of ids of the anchor pages associated with the given slide.
         """
 
+        self.connect()
+
         channel_id = slide_id.split('_')[0]
         return self.channel_anchor_page_ids[channel_id]
 
@@ -170,6 +189,8 @@ class DB:
         Returns:
             dict[str, str]: A dictionary with course ids as keys and course descriptions as values.
         """
+
+        self.connect()
 
         query = f"""
             SELECT CourseCode, CONCAT_WS(
@@ -216,6 +237,8 @@ class DB:
             * 'searchrank_graph_ratio' (float): Ratio graph_score/search_score.
         """
 
+        self.connect()
+
         query = f"""
             SELECT m.CourseCode, m.Keywords, m.PageID, m.PageTitle
             FROM man_isacademia.Course2Wiki_Current_Mapping m
@@ -256,6 +279,8 @@ class DB:
             dict[str, str]: A dictionary with course ids as keys and lists of their associated channel ids as values.
         """
 
+        self.connect()
+
         query = f"""
             SELECT CourseID, GROUP_CONCAT(SwitchChannelID SEPARATOR ',') AS SwitchChannelIDs
             FROM ca_switchtube.Channel_to_Course_Mapping
@@ -283,6 +308,8 @@ class DB:
             list[int]: List of ids of the anchor pages associated with the given course.
         """
 
+        self.connect()
+
         channel_ids = self.course_channel_ids.get(course_id, None)
         if channel_ids:
             return list({anchor_page_id for channel_id in channel_ids for anchor_page_id in self.channel_anchor_page_ids[channel_id]})
@@ -299,6 +326,8 @@ class DB:
         Returns:
             list[int]: List of wikipage ids.
         """
+
+        self.connect()
 
         if filter_orphan:
             query = f"""
@@ -354,6 +383,8 @@ class DB:
             * 'popularity' (float): Popularity score of the wikipage.
         """
 
+        self.connect()
+
         query = """
             SELECT titles.PageID, titles.PageTitle, contents.PageContent, contents.Redirects, contents.Popularity
             FROM piper_wikipedia.PageTitle_to_PageID_Mapping AS titles
@@ -406,6 +437,8 @@ class DB:
             dict[int, str]: Dictionary with wikipage ids as keys and a concatenation of the category titles as values.
         """
 
+        self.connect()
+
         query = """            
             SELECT titles.PageID, GROUP_CONCAT(categories.CategoryTitle)
             FROM piper_wikipedia.PageTitle_to_PageID_Mapping AS titles
@@ -445,3 +478,238 @@ class DB:
             page_id: categories.split(',')
             for page_id, categories in self.cursor
         }
+
+    def get_table(self, table, fields=None, limit=None):
+        """
+        TODO DOC
+        Args:
+            table:
+
+        Returns:
+        """
+
+        self.connect()
+
+        if fields is None:
+            query = f"""
+                SELECT * FROM {table}
+            """
+        else:
+            query = f"""
+                SELECT {', '.join([field for field in fields])} FROM {table}
+            """
+
+        if limit is not None:
+            query += f"""LIMIT {limit}"""
+
+        return self.query(query)
+
+    def get_organisations(self, ids=None, limit=None):
+
+        self.connect()
+
+        query = f"""
+            SELECT OrganisationID,
+                   OrganisationType,
+                   OrganisationName,
+                   OperatingStatus,
+                   FoundingDate,
+                   TerminationDate,
+                   City,
+                   Region,
+                   CountryCodeISO3,
+                   CB_NumberOfEmployees,
+                   CB_LastFundingDate,
+                   CB_NumFundingRounds,
+                   CB_TotalFundingCurrency,
+                   CB_TotalFunding,
+                   CB_TotalFundingUSD,
+                   CB_Roles,
+                   CB_Rank
+            FROM graph.Nodes_N_Organisation
+        """
+
+        if ids is not None:
+            query += f"""
+                WHERE OrganisationID IN ({', '.join(['%s'] * len(ids))})
+            """
+
+        if limit is not None:
+            query += f"""
+                LIMIT {limit}
+            """
+
+        if ids is not None:
+            self.cursor.execute(query, ids)
+        else:
+            self.cursor.execute(query)
+
+        return list(self.cursor)
+
+    def get_people(self, ids=None, limit=None):
+
+        self.connect()
+
+        query = f"""
+            SELECT PersonID,
+                   SCIPER,
+                   LastName,
+                   FirstName,
+                   FullName,
+                   Gender
+            FROM graph.Nodes_N_Person
+        """
+
+        if ids is not None:
+            query += f"""
+                WHERE PersonID IN ({', '.join(['%s'] * len(ids))})
+            """
+
+        if limit is not None:
+            query += f"""
+                LIMIT {limit}
+            """
+
+        if ids is not None:
+            self.cursor.execute(query, ids)
+        else:
+            self.cursor.execute(query)
+
+        return list(self.cursor)
+
+    def get_startups(self, ids=None, limit=None):
+
+        self.connect()
+
+        query = f"""
+            SELECT EPFLStartupID,
+                   StartupName,
+                   LegalEntity,
+                   FoundingYear,
+                   ExitYear,
+                   Status,
+                   Industry
+            FROM graph.Nodes_N_EPFLStartup
+        """
+
+        if ids is not None:
+            query += f"""
+                WHERE EPFLStartupID IN ({', '.join(['%s'] * len(ids))})
+            """
+
+        if limit is not None:
+            query += f"""
+                LIMIT {limit}
+            """
+
+        if ids is not None:
+            self.cursor.execute(query, ids)
+        else:
+            self.cursor.execute(query)
+
+        return list(self.cursor)
+
+    def get_concepts(self, ids=None, limit=None):
+
+        self.connect()
+
+        query = f"""
+            SELECT PageID,
+                   PageTitle
+            FROM graph.Nodes_N_Concept
+        """
+
+        if ids is not None:
+            query += f"""
+                WHERE PageID IN ({', '.join(['%s'] * len(ids))})
+            """
+
+        if limit is not None:
+            query += f"""
+                LIMIT {limit}
+            """
+
+        if ids is not None:
+            self.cursor.execute(query, ids)
+        else:
+            self.cursor.execute(query)
+
+        return list(self.cursor)
+
+
+
+
+
+
+    def get_concepts(self, concept_ids=None):
+
+        self.connect()
+
+        query = f"""
+            SELECT PageID,
+                   PageTitle
+            FROM graph.Nodes_N_Concept
+        """
+
+        if concept_ids is not None:
+            query += f"""
+                WHERE PageID IN ({', '.join(['%s'] * len(concept_ids))})
+            """
+
+            self.cursor.execute(query, concept_ids)
+        else:
+            self.cursor.execute(query)
+
+        return list(self.cursor)
+
+    def get_concept_organisations(self, concept_ids):
+
+        self.connect()
+
+        query = f"""
+            SELECT PageID, OrganisationID 
+            FROM graph.Edges_N_Organisation_N_Concept
+            WHERE PageID IN ({', '.join(['%s'] * len(concept_ids))})
+        """
+
+        self.cursor.execute(query, concept_ids)
+
+        return list(self.cursor)
+
+    def get_beneficiary_funding_rounds(self, org_ids):
+
+        self.connect()
+
+        query = f"""
+            SELECT OrganisationID, FundingRoundID 
+            FROM graph.Edges_N_Organisation_N_FundingRound
+            WHERE Action = "Raised from"
+            AND OrganisationID IN ({', '.join(['%s'] * len(org_ids))})
+        """
+
+        self.cursor.execute(query, org_ids)
+
+        return list(self.cursor)
+
+    def get_funding_rounds(self, fr_ids=None):
+
+        self.connect()
+
+        query = f"""
+            SELECT FundingRoundID,
+                   FundingRoundDate,
+                   FundingAmount_USD
+            FROM graph.Nodes_N_FundingRound
+        """
+
+        if fr_ids is not None:
+            query += f"""
+                WHERE FundingRoundID IN ({', '.join(['%s'] * len(fr_ids))})
+            """
+
+        if fr_ids is not None:
+            self.cursor.execute(query, fr_ids)
+        else:
+            self.cursor.execute(query)
+
+        return list(self.cursor)
