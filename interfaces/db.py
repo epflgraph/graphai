@@ -713,3 +713,31 @@ class DB:
             self.cursor.execute(query)
 
         return list(self.cursor)
+
+    def get_funding_round_investors(self, fr_ids):
+
+        self.connect()
+
+        query = f"""
+            SELECT FundingRoundID, OrganisationID, "organisation" as Type
+            FROM graph.Edges_N_Organisation_N_FundingRound
+            WHERE Action = "Invested in"
+            AND FundingRoundID IN ({', '.join(['%s'] * len(fr_ids))})
+        """
+
+        self.cursor.execute(query, fr_ids)
+
+        organisation_investors = list(self.cursor)
+
+        query = f"""
+            SELECT FundingRoundID, PersonID, 'person' as Type
+            FROM graph.Edges_N_Person_N_FundingRound
+            WHERE Action = "Invested in"
+            AND FundingRoundID IN ({', '.join(['%s'] * len(fr_ids))})
+        """
+
+        self.cursor.execute(query, fr_ids)
+
+        person_investors = list(self.cursor)
+
+        return organisation_investors + person_investors
