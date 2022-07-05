@@ -20,7 +20,7 @@ reduced_cherrypicked_concept_ids = [1164, 11657, 12266, 1944675, 19541494,
 
 # concept_ids = bottom_concept_ids[-5:]
 # concept_ids = top_concept_ids[:5]
-concept_ids = reduced_cherrypicked_concept_ids
+concept_ids = reduced_cherrypicked_concept_ids[:1]
 
 
 def log(msg, debug):
@@ -76,6 +76,10 @@ def get_yearly_concept_investors(concept_ids, debug=False):
     concepts_orgs_frs_investors = pd.merge(concepts_orgs_frs, fr_investors, how='inner', on='fr_id')
     log(concepts_orgs_frs_investors, debug)
 
+    # Extract list of investor ids
+    investor_ids = list(set(concepts_orgs_frs_investors['investor_id']))
+    log(f'Got {len(investor_ids)} investors!', debug)
+
     # Group by concept, investor and year
     investors = concepts_orgs_frs_investors[['concept_id', 'investor_id', 'year', 'fr_id', 'amount']]
     investors = investors.groupby(by=['concept_id', 'investor_id', 'year'], as_index=False).agg(
@@ -95,29 +99,60 @@ def get_yearly_concept_investors(concept_ids, debug=False):
 
     # Fill NA values
     investors = investors.fillna(0)
+    log('IEEEEEEEEEE', debug)
     log(investors, debug)
 
-    # Add concept name information and rearrange columns
+    # Add concept names
     investors = pd.merge(investors, concepts, how='left', on='concept_id')
-    investors = investors[['concept_id', 'concept_name', 'investor_id', 'investor_type', 'year', 'n_frs', 'total_amount']]
+
+    # Add organisation investor names
+    orgs = pd.DataFrame(db.get_organisations(investor_ids), columns=['investor_id', 'org_name'])
+    orgs['investor_type'] = 'organisation'
+    investors = pd.merge(investors, orgs, how='left', on=['investor_id', 'investor_type'])
+    log(investors, debug)
+
+    # Add person investor names
+    people = pd.DataFrame(db.get_people(investor_ids), columns=['investor_id', 'person_name'])
+    people['investor_type'] = 'person'
+    investors = pd.merge(investors, people, how='left', on=['investor_id', 'investor_type'])
+    log(investors, debug)
+
+    # Combine org and person names in one column
+    investors['investor_name'] = investors['org_name'].fillna(investors['person_name'])
+    log(investors, debug)
+
+    # Rearrange columns
+    investors = investors[['concept_id', 'concept_name', 'investor_id', 'investor_name', 'investor_type', 'year', 'n_frs', 'total_amount']]
     log(investors, debug)
 
     return investors
 
 
-def plot_yearly_concept_investments(investments):
+def plot_yearly_concept_investors(investors, debug=False):
+    investor_totals = investors[['investor_id', 'investor_type', 'n_frs']].groupby(by=['investor_id', 'investor_type'], as_index=False).sum()
+    investor_totals = investor_totals.sort_values(by=['n_frs'], ascending=False)
+
+    top_investor_ids = list(investor_totals['investor_id'][:10])
+    top_investors = investors[investors['investor_id'].isin(top_investor_ids)]
+
     # Produce plot with results
     fig, ax = plt.subplots(dpi=150, figsize=(9, 6))
 
-    for concept_id in list(set(investments['concept_id'])):
-        concept_name = investments.loc[investments['concept_id'] == concept_id, 'concept_name'].iloc[0]
-        concept_years = investments.loc[investments['concept_id'] == concept_id, 'year']
-        concept_amounts = investments.loc[investments['concept_id'] == concept_id, 'amount']
-        ax.plot(concept_years, concept_amounts, label=concept_name, alpha=0.8, linewidth=0.8)
+    for investor_id in top_investor_ids:
+        concept_ids = list(set(top_investors.loc[top_investors['investor_id'] == investor_id, 'concept_id']))
+        for concept_id in concept_ids:
+            rows = (top_investors['concept_id'] == concept_id) & (top_investors['investor_id'] == investor_id)
+            concept_name = top_investors.loc[rows, 'concept_name'].iloc[0]
+            investor_name = top_investors.loc[rows, 'investor_name'].iloc[0]
+            label = f'{concept_name} - {investor_name}'
+
+            years = top_investors.loc[rows, 'year']
+            n_frs = top_investors.loc[rows, 'n_frs']
+            ax.plot(years, n_frs, label=label, alpha=0.8, linewidth=0.8)
 
     ax.set_xlabel('Time (years)')
-    ax.set_ylabel('Aggregated investment (M$)')
-    ax.set_title('Aggregated investment per concept over time')
+    ax.set_ylabel('Number of investments')
+    ax.set_title('Number of investments per concept and investor over time')
 
     # Shrink current axis by 20%
     box = ax.get_position()
@@ -129,5 +164,5 @@ def plot_yearly_concept_investments(investments):
     plt.show()
 
 
-investments = get_yearly_concept_investors(concept_ids, debug=True)
-# plot_yearly_concept_investments(investments)
+investors = get_yearly_concept_investors(concept_ids, debug=True)
+plot_yearly_concept_investors(investors, debug=True)
