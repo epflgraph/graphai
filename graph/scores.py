@@ -134,3 +134,11 @@ def compute_graph_scores(source_page_ids, target_page_ids):
 
     return results
 
+
+def compute_graph_similarity(source_page_ids, target_page_ids):
+    graph_scores = compute_graph_scores(source_page_ids, target_page_ids)
+
+    scores = [pair['score'] for pair in graph_scores]
+
+    return np.median(scores)
+
