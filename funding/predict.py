@@ -20,7 +20,7 @@ reduced_cherrypicked_concept_ids = [1164, 11657, 12266, 1944675, 19541494,
 
 # concept_ids = bottom_concept_ids[-5:]
 # concept_ids = top_concept_ids[:5]
-concept_ids = reduced_cherrypicked_concept_ids[:1]
+concept_ids = reduced_cherrypicked_concept_ids
 
 
 def log(msg, debug):
@@ -28,7 +28,7 @@ def log(msg, debug):
         print(msg)
 
 
-def get_yearly_concept_investors(concept_ids, debug=False):
+def build_dataframe(concept_ids, debug=False):
     pd.set_option('display.width', 320)
     pd.set_option('display.max_rows', 1000)
     pd.set_option('display.max_columns', 10)
@@ -66,8 +66,14 @@ def get_yearly_concept_investors(concept_ids, debug=False):
     concepts_orgs_frs = pd.merge(concepts_orgs_frs, frs, how='inner', on='fr_id')
     log(concepts_orgs_frs, debug)
 
-    # Derive year from date
+    # Derive year and month from date
     concepts_orgs_frs['year'] = concepts_orgs_frs['date'].astype(str).str.split('-').str[0].astype(int)
+    concepts_orgs_frs['month'] = concepts_orgs_frs['date'].astype(str).str.split('-').str[1].astype(int)
+
+    # Compute month_id as time variable (1 means January of first year, 13 means January of second year, etc.)
+    min_year = max(2000, min(concepts_orgs_frs['year']))
+    max_year = min(2021, max(concepts_orgs_frs['year']))
+    concepts_orgs_frs['month_id'] = (concepts_orgs_frs['year'] - min_year) * 12 + concepts_orgs_frs['month']
     concepts_orgs_frs = concepts_orgs_frs.drop('date', axis=1)
     log(concepts_orgs_frs, debug)
 
@@ -80,21 +86,17 @@ def get_yearly_concept_investors(concept_ids, debug=False):
     investor_ids = list(set(concepts_orgs_frs_investors['investor_id']))
     log(f'Got {len(investor_ids)} investors!', debug)
 
-    # Group by concept, investor and year
-    investors = concepts_orgs_frs_investors[['concept_id', 'investor_id', 'year', 'fr_id', 'amount']]
-    investors = investors.groupby(by=['concept_id', 'investor_id', 'year'], as_index=False).agg(
-        n_frs=('fr_id', 'count'), total_amount=('amount', 'sum')
-    )
+    # Group by concept, investor and month id
+    investors = concepts_orgs_frs_investors[['concept_id', 'investor_id', 'month_id', 'fr_id', 'amount']]
+    investors = investors.groupby(by=['concept_id', 'investor_id', 'month_id'], as_index=False).agg(
+        n_frs=('fr_id', 'count'), total_amount=('amount', 'sum'))
     log(investors, debug)
 
     # Create complete grid of concepts and years
-    min_year = max(2000, min(investors['year']))
-    max_year = min(2021, max(investors['year']))
-
     skeleton = investors[['concept_id', 'investor_id']].drop_duplicates()
     skeleton = skeleton.merge(fr_investors[['investor_id', 'investor_type']].drop_duplicates(), how='left', on='investor_id')
-    skeleton = skeleton.merge(pd.DataFrame({'year': range(min_year, max_year + 1)}), how='cross')
-    investors = pd.merge(skeleton, investors, how='left', on=['concept_id', 'investor_id', 'year'])
+    skeleton = skeleton.merge(pd.DataFrame({'month_id': range(1, (max_year - min_year + 1) * 12)}), how='cross')
+    investors = pd.merge(skeleton, investors, how='left', on=['concept_id', 'investor_id', 'month_id'])
     log(investors, debug)
 
     # Fill NA values
@@ -121,47 +123,12 @@ def get_yearly_concept_investors(concept_ids, debug=False):
     log(investors, debug)
 
     # Rearrange columns
-    investors = investors[['concept_id', 'concept_name', 'investor_id', 'investor_name', 'investor_type', 'year', 'n_frs', 'total_amount']]
+    investors = investors[['concept_id', 'concept_name', 'investor_id', 'investor_name', 'investor_type', 'month_id', 'n_frs', 'total_amount']]
     log(investors, debug)
 
     return investors
 
 
-def plot_yearly_concept_investors(investors, debug=False):
-    investor_totals = investors[['investor_id', 'investor_type', 'n_frs']].groupby(by=['investor_id', 'investor_type'], as_index=False).sum()
-    investor_totals = investor_totals.sort_values(by=['n_frs'], ascending=False)
+# def extract_features():
 
-    top_investor_ids = list(investor_totals['investor_id'][:10])
-    top_investors = investors[investors['investor_id'].isin(top_investor_ids)]
-
-    # Produce plot with results
-    fig, ax = plt.subplots(dpi=150, figsize=(9, 6))
-
-    for investor_id in top_investor_ids:
-        concept_ids = list(set(top_investors.loc[top_investors['investor_id'] == investor_id, 'concept_id']))
-        for concept_id in concept_ids:
-            rows = (top_investors['concept_id'] == concept_id) & (top_investors['investor_id'] == investor_id)
-            concept_name = top_investors.loc[rows, 'concept_name'].iloc[0]
-            investor_name = top_investors.loc[rows, 'investor_name'].iloc[0]
-            label = f'{concept_name} - {investor_name}'
-
-            years = top_investors.loc[rows, 'year']
-            n_frs = top_investors.loc[rows, 'n_frs']
-            ax.plot(years, n_frs, label=label, alpha=0.8, linewidth=0.8)
-
-    ax.set_xlabel('Time (years)')
-    ax.set_ylabel('Number of investments')
-    ax.set_title('Number of investments per concept and investor over time')
-
-    # Shrink current axis by 20%
-    box = ax.get_position()
-    ax.set_position([box.x0, box.y0, box.width * 0.8, box.height])
-
-    # Put a legend to the right of the current axis
-    ax.legend(loc='center left', bbox_to_anchor=(1, 0.5), prop={'size': 6})
-
-    plt.show()
-
-
-investors = get_yearly_concept_investors(concept_ids, debug=True)
-plot_yearly_concept_investors(investors, debug=True)
+build_dataframe(concept_ids, debug=True)
