@@ -504,79 +504,6 @@ class DB:
 
         return self.query(query)
 
-    def get_organisations(self, ids=None, limit=None):
-
-        self.connect()
-
-        query = f"""
-            SELECT OrganisationID,
-                   OrganisationType,
-                   OrganisationName,
-                   OperatingStatus,
-                   FoundingDate,
-                   TerminationDate,
-                   City,
-                   Region,
-                   CountryCodeISO3,
-                   CB_NumberOfEmployees,
-                   CB_LastFundingDate,
-                   CB_NumFundingRounds,
-                   CB_TotalFundingCurrency,
-                   CB_TotalFunding,
-                   CB_TotalFundingUSD,
-                   CB_Roles,
-                   CB_Rank
-            FROM graph.Nodes_N_Organisation
-        """
-
-        if ids is not None:
-            query += f"""
-                WHERE OrganisationID IN ({', '.join(['%s'] * len(ids))})
-            """
-
-        if limit is not None:
-            query += f"""
-                LIMIT {limit}
-            """
-
-        if ids is not None:
-            self.cursor.execute(query, ids)
-        else:
-            self.cursor.execute(query)
-
-        return list(self.cursor)
-
-    def get_people(self, ids=None, limit=None):
-
-        self.connect()
-
-        query = f"""
-            SELECT PersonID,
-                   SCIPER,
-                   LastName,
-                   FirstName,
-                   FullName,
-                   Gender
-            FROM graph.Nodes_N_Person
-        """
-
-        if ids is not None:
-            query += f"""
-                WHERE PersonID IN ({', '.join(['%s'] * len(ids))})
-            """
-
-        if limit is not None:
-            query += f"""
-                LIMIT {limit}
-            """
-
-        if ids is not None:
-            self.cursor.execute(query, ids)
-        else:
-            self.cursor.execute(query)
-
-        return list(self.cursor)
-
     def get_startups(self, ids=None, limit=None):
 
         self.connect()
@@ -730,7 +657,7 @@ class DB:
         organisation_investors = list(self.cursor)
 
         query = f"""
-            SELECT FundingRoundID, PersonID, 'person' as Type
+            SELECT FundingRoundID, PersonID, "person" as Type
             FROM graph.Edges_N_Person_N_FundingRound
             WHERE Action = "Invested in"
             AND FundingRoundID IN ({', '.join(['%s'] * len(fr_ids))})
@@ -741,3 +668,47 @@ class DB:
         person_investors = list(self.cursor)
 
         return organisation_investors + person_investors
+
+    def get_organisations(self, org_ids=None):
+
+        self.connect()
+
+        query = f"""
+            SELECT OrganisationID,
+                   OrganisationName
+            FROM graph.Nodes_N_Organisation
+        """
+
+        if org_ids is not None:
+            query += f"""
+                WHERE OrganisationID IN ({', '.join(['%s'] * len(org_ids))})
+            """
+
+        if org_ids is not None:
+            self.cursor.execute(query, org_ids)
+        else:
+            self.cursor.execute(query)
+
+        return list(self.cursor)
+
+    def get_people(self, people_ids=None):
+
+        self.connect()
+
+        query = f"""
+            SELECT PersonID,
+                   FullName
+            FROM graph.Nodes_N_Person
+        """
+
+        if people_ids is not None:
+            query += f"""
+                WHERE PersonID IN ({', '.join(['%s'] * len(people_ids))})
+            """
+
+        if people_ids is not None:
+            self.cursor.execute(query, people_ids)
+        else:
+            self.cursor.execute(query)
+
+        return list(self.cursor)
