@@ -54,7 +54,7 @@ def get_yearly_concept_investments(concept_ids, debug=False):
     log(f'Got {len(org_ids)} organisations!', debug)
 
     # Add association funded organisations <-> funding rounds
-    funded_orgs_frs = pd.DataFrame(db.get_beneficiary_funding_rounds(org_ids), columns=['org_id', 'fr_id'])
+    funded_orgs_frs = pd.DataFrame(db.get_investees_funding_rounds(org_ids=org_ids), columns=['org_id', 'fr_id'])
     concepts_orgs_frs = pd.merge(concepts_orgs, funded_orgs_frs, how='inner', on='org_id')
     log(concepts_orgs_frs, debug)
 

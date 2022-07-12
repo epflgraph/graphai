@@ -28,107 +28,82 @@ def log(msg, debug):
         print(msg)
 
 
-def build_dataframe(concept_ids, debug=False):
+def build_time_series(min_year, max_year, concept_ids, debug=False):
     pd.set_option('display.width', 320)
     pd.set_option('display.max_rows', 1000)
     pd.set_option('display.max_columns', 10)
 
     db = DB()
 
-    # Get concepts with id in starting list
+    # Check years
+    assert min_year <= max_year, 'max_year must be greater than or equal to min_year'
+
+    ##################
+    # FUNDING ROUNDS #
+    ##################
+
+    # Get funding rounds in time window
+    frs = pd.DataFrame(db.get_funding_rounds(min_year, max_year), columns=['fr_id', 'year', 'amount'])
+    log(frs, debug)
+
+    # Extract list of funding round ids
+    fr_ids = list(set(frs['fr_id']))
+    log(f'Got {len(fr_ids)} funding rounds!', debug)
+
+    #############
+    # INVESTEES #
+    #############
+
+    # Get association investees <-> funding rounds
+    investees_frs = pd.DataFrame(db.get_investees_funding_rounds(fr_ids=fr_ids), columns=['investee_id', 'fr_id'])
+    log(investees_frs, debug)
+
+    # Extract list of investee ids
+    investee_ids = list(set(investees_frs['investee_id']))
+    log(f'Got {len(investee_ids)} investees!', debug)
+
+    # Get investees
+    investees = pd.DataFrame(db.get_organisations(org_ids=investee_ids), columns=['investee_id', 'investee_name'])
+    log(investees, debug)
+
+    ############
+    # CONCEPTS #
+    ############
+
+    # Get association concepts <-> investees
+    concepts_investees = pd.DataFrame(db.get_concepts_organisations(concept_ids=concept_ids, org_ids=investee_ids), columns=['concept_id', 'investee_id'])
+    log(concepts_investees, debug)
+
+    # Get concepts
     concepts = pd.DataFrame(db.get_concepts(concept_ids), columns=['concept_id', 'concept_name'])
     log(concepts, debug)
 
-    # Extract list of concept ids
-    concept_ids = list(set(concepts['concept_id']))
-    log(f'Got {len(concept_ids)} concepts!', debug)
+    ###############
+    # TIME SERIES #
+    ###############
 
-    # Add association concepts <-> organisations
-    concepts_orgs = pd.DataFrame(db.get_concept_organisations(concept_ids), columns=['concept_id', 'org_id'])
-    concepts_orgs = pd.merge(concepts, concepts_orgs, how='inner', on='concept_id')
-    log(concepts_orgs, debug)
+    # Merge funding rounds with investees
+    time_series = pd.merge(frs, investees_frs, how='inner', on='fr_id')
+    time_series = pd.merge(time_series, investees, how='left', on='investee_id')
+    log(time_series, debug)
 
-    # Extract list of organisation ids
-    org_ids = list(set(concepts_orgs['org_id']))
-    log(f'Got {len(org_ids)} organisations!', debug)
+    # Merge with concepts
+    time_series = pd.merge(time_series, concepts_investees, how='inner', on='investee_id')
+    time_series = pd.merge(time_series, concepts, how='left', on='concept_id')
+    log(time_series, debug)
 
-    # Add association funded organisations <-> funding rounds
-    funded_orgs_frs = pd.DataFrame(db.get_beneficiary_funding_rounds(org_ids), columns=['org_id', 'fr_id'])
-    concepts_orgs_frs = pd.merge(concepts_orgs, funded_orgs_frs, how='inner', on='org_id')
-    log(concepts_orgs_frs, debug)
-
-    # Extract list of funding round ids
-    fr_ids = list(set(concepts_orgs_frs['fr_id']))
-    log(f'Got {len(fr_ids)} funding rounds!', debug)
-
-    # Add funding round dates and amounts
-    frs = pd.DataFrame(db.get_funding_rounds(fr_ids), columns=['fr_id', 'date', 'amount'])
-    concepts_orgs_frs = pd.merge(concepts_orgs_frs, frs, how='inner', on='fr_id')
-    log(concepts_orgs_frs, debug)
-
-    # Derive year and month from date
-    concepts_orgs_frs['year'] = concepts_orgs_frs['date'].astype(str).str.split('-').str[0].astype(int)
-    concepts_orgs_frs['month'] = concepts_orgs_frs['date'].astype(str).str.split('-').str[1].astype(int)
-
-    # Compute month_id as time variable (1 means January of first year, 13 means January of second year, etc.)
-    min_year = max(2000, min(concepts_orgs_frs['year']))
-    max_year = min(2021, max(concepts_orgs_frs['year']))
-    concepts_orgs_frs['month_id'] = (concepts_orgs_frs['year'] - min_year) * 12 + concepts_orgs_frs['month']
-    concepts_orgs_frs = concepts_orgs_frs.drop('date', axis=1)
-    log(concepts_orgs_frs, debug)
-
-    # Add investors
-    fr_investors = pd.DataFrame(db.get_funding_round_investors(fr_ids), columns=['fr_id', 'investor_id', 'investor_type'])
-    concepts_orgs_frs_investors = pd.merge(concepts_orgs_frs, fr_investors, how='inner', on='fr_id')
-    log(concepts_orgs_frs_investors, debug)
-
-    # Extract list of investor ids
-    investor_ids = list(set(concepts_orgs_frs_investors['investor_id']))
-    log(f'Got {len(investor_ids)} investors!', debug)
-
-    # Group by concept, investor and month id
-    investors = concepts_orgs_frs_investors[['concept_id', 'investor_id', 'month_id', 'fr_id', 'amount']]
-    investors = investors.groupby(by=['concept_id', 'investor_id', 'month_id'], as_index=False).agg(
-        n_frs=('fr_id', 'count'), total_amount=('amount', 'sum'))
-    log(investors, debug)
-
-    # Create complete grid of concepts and years
-    skeleton = investors[['concept_id', 'investor_id']].drop_duplicates()
-    skeleton = skeleton.merge(fr_investors[['investor_id', 'investor_type']].drop_duplicates(), how='left', on='investor_id')
-    skeleton = skeleton.merge(pd.DataFrame({'month_id': range(1, (max_year - min_year + 1) * 12)}), how='cross')
-    investors = pd.merge(skeleton, investors, how='left', on=['concept_id', 'investor_id', 'month_id'])
-    log(investors, debug)
+    # Aggregate by concept and year
+    time_series = time_series[['concept_id', 'concept_name', 'year', 'amount']]
+    time_series = time_series.groupby(by=['concept_id', 'concept_name', 'year'], as_index=False).sum()
+    log(time_series, debug)
 
     # Fill NA values
-    investors = investors.fillna(0)
-    log(investors, debug)
+    time_series = time_series.fillna(0)
+    log(time_series, debug)
 
-    # Add concept names
-    investors = pd.merge(investors, concepts, how='left', on='concept_id')
-
-    # Add organisation investor names
-    orgs = pd.DataFrame(db.get_organisations(investor_ids), columns=['investor_id', 'org_name'])
-    orgs['investor_type'] = 'organisation'
-    investors = pd.merge(investors, orgs, how='left', on=['investor_id', 'investor_type'])
-    log(investors, debug)
-
-    # Add person investor names
-    people = pd.DataFrame(db.get_people(investor_ids), columns=['investor_id', 'person_name'])
-    people['investor_type'] = 'person'
-    investors = pd.merge(investors, people, how='left', on=['investor_id', 'investor_type'])
-    log(investors, debug)
-
-    # Combine org and person names in one column
-    investors['investor_name'] = investors['org_name'].fillna(investors['person_name'])
-    log(investors, debug)
-
-    # Rearrange columns
-    investors = investors[['concept_id', 'concept_name', 'investor_id', 'investor_name', 'investor_type', 'month_id', 'n_frs', 'total_amount']]
-    log(investors, debug)
-
-    return investors
+    return time_series
 
 
-# def extract_features():
+build_time_series(2019, 2021, concept_ids, debug=True)
 
-build_dataframe(concept_ids, debug=True)
+
