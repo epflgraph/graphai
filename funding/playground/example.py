@@ -49,7 +49,7 @@ def load_data(n, length, seed=None):
     return df, y
 
 
-def extract_features_and_flatten_ts(df, y, manual=False):
+def extract_features(df):
     # Feature extraction
     X = extract_features(df, column_id='concept_id', column_sort='year', column_value='amount',
                          default_fc_parameters=ComprehensiveFCParameters(),
@@ -57,6 +57,10 @@ def extract_features_and_flatten_ts(df, y, manual=False):
 
     print('Shape of df after feature extraction: ', X.shape)
 
+    return X
+
+
+def select_features(X, y, manual=False):
     # Feature selection
     X_filtered = select_features(X, y)
     print('Shape of df after feature selection: ', X_filtered.shape)
@@ -136,8 +140,9 @@ if __name__ == '__main__':
     y.index = y['concept_id']
     y = y['amount']
 
-    # Extract features and flatten time series
-    X = extract_features_and_flatten_ts(df, y)
+    # Extract features and select most relevant ones
+    X = extract_features(df)
+    X = select_features(X, y)
 
     # Train regressor and evaluate performance
     train_regressor(X, y)
