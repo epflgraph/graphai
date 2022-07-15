@@ -569,20 +569,6 @@ class DB:
 
 
 
-    def get_concept_organisations(self, concept_ids):
-
-        self.connect()
-
-        query = f"""
-            SELECT PageID, OrganisationID 
-            FROM graph.Edges_N_Organisation_N_Concept
-            WHERE PageID IN ({', '.join(['%s'] * len(concept_ids))})
-        """
-
-        self.cursor.execute(query, concept_ids)
-
-        return list(self.cursor)
-
     def get_funding_round_investors(self, fr_ids):
 
         self.connect()
@@ -776,3 +762,16 @@ class DB:
             self.cursor.execute(query)
 
         return list(self.cursor)
+
+    def get_crunchbase_concept_ids(self):
+
+        self.connect()
+
+        query = f"""
+            SELECT DISTINCT PageID
+            FROM graph.Edges_N_Organisation_N_Concept
+        """
+
+        self.cursor.execute(query)
+
+        return [concept_id for concept_id, in self.cursor]

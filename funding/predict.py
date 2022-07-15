@@ -93,8 +93,13 @@ def build_time_series(min_year, max_year, concept_ids, debug=False):
     log(time_series, debug)
 
     # Aggregate by concept and year
-    time_series = time_series[['concept_id', 'concept_name', 'year', 'amount']]
-    time_series = time_series.groupby(by=['concept_id', 'concept_name', 'year'], as_index=False).sum()
+    time_series = time_series[['concept_id', 'year', 'amount']]
+    time_series = time_series.groupby(by=['concept_id', 'year'], as_index=False).sum()
+    log(time_series, debug)
+
+    # Complete missing data (e.g. years with no data for a concept)
+    skeleton = pd.merge(concepts, pd.DataFrame({'year': range(min_year, max_year + 1)}), how='cross')
+    time_series = pd.merge(skeleton, time_series, how='left', on=['concept_id', 'year'])
     log(time_series, debug)
 
     # Fill NA values
@@ -104,6 +109,7 @@ def build_time_series(min_year, max_year, concept_ids, debug=False):
     return time_series
 
 
-build_time_series(2019, 2021, concept_ids, debug=True)
+if __name__ == '__main__':
+    build_time_series(2019, 2021, concept_ids, debug=True)
 
 
