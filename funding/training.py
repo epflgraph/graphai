@@ -10,10 +10,12 @@ from sklearn.model_selection import train_test_split, cross_val_score, RepeatedK
 from xgboost import XGBRegressor
 
 
-def extract_features(df):
-    # Feature extraction
+def extract_features(df, kind_to_fc_params=None):
+    if kind_to_fc_params is None:
+        kind_to_fc_params = {'amount': ComprehensiveFCParameters()}
+
     X = tsf.extract_features(df, column_id='concept_id', column_sort='year', column_value='amount',
-                         default_fc_parameters=ComprehensiveFCParameters(),
+                         kind_to_fc_parameters=kind_to_fc_params,
                          impute_function=impute)  # we impute = remove all NaN features automatically
 
     print('Shape of df after feature extraction: ', X.shape)
@@ -75,3 +77,5 @@ def train_regressor(X, y):
 
     score = model.score(X_test, y_pred)
     print(f'R2 score (1 - (residual sum squares)/(total sum squares)) on test data vs. pred responses: {score}')
+
+    return model

@@ -5,6 +5,7 @@ import platform
 ROOT_DIR = os.path.dirname(__file__)
 
 CONCEPT_DETECTION_DIR = f'{ROOT_DIR}/concept_detection'
+FUNDING_DIR = f'{ROOT_DIR}/funding'
 WIKITEXT_DIR = f'{ROOT_DIR}/wikitext'
 
 CONFIG_DIR = f'{ROOT_DIR}/config'
