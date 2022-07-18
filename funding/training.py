@@ -39,6 +39,30 @@ def select_features(X, y, manual=False):
     return X_filtered
 
 
+def cross_validate(X, y):
+    # Create model
+    model = XGBRegressor()
+
+    # Create cross-validation object
+    n_splits = 10
+    n_repeats = 3
+    cv = RepeatedKFold(n_splits=10, n_repeats=3, random_state=0)
+
+    # Execute cross-validation and keep scores
+    scores = cross_val_score(model, X, y, cv=cv, n_jobs=-1)
+    mean_score = scores.mean()
+    print(f'Average R2 score (1 - (residual sum squares)/(total sum squares)) after {n_splits}x{n_repeats} cross-validation: {mean_score}')
+
+    return mean_score
+
+
+def get_feature_importances(X, model):
+    feature_importances = pd.DataFrame({'feature': X.columns, 'importance': model.feature_importances_})
+    feature_importances = feature_importances.sort_values(by='importance', ascending=False)
+
+    return feature_importances
+
+
 def train_regressor(X, y):
     # Split train/test
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, random_state=0)
@@ -46,17 +70,11 @@ def train_regressor(X, y):
     # Model training: TODO fine-tune hyperparameters to reduce overfitting
     model = XGBRegressor()
 
-    # Cross-validation to evaluate performance
-    cv = RepeatedKFold(n_splits=10, n_repeats=3, random_state=0)
-    scores = cross_val_score(model, X_train, y_train, cv=cv, n_jobs=-1)
-    print(f'Average R2 score (1 - (residual sum squares)/(total sum squares)) after 3x10 cross-validation: {scores.mean()}')
-
-    # Train model with full data
+    # Train model
     model.fit(X_train, y_train)
 
     # Feature importances
-    feature_importances = pd.DataFrame({'feature': X.columns, 'importance': model.feature_importances_})
-    feature_importances = feature_importances.sort_values(by='importance', ascending=False)
+    feature_importances = get_feature_importances(X_train, model)
     print('Feature importances:')
     print(feature_importances.head(10))
 
