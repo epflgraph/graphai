@@ -3,11 +3,15 @@ import pandas as pd
 import tsfresh as tsf
 from tsfresh.utilities.dataframe_functions import impute
 from tsfresh.feature_extraction import ComprehensiveFCParameters
+from tsfresh.feature_extraction.settings import from_columns
 from tsfresh.feature_selection.relevance import calculate_relevance_table
 
 from sklearn.model_selection import train_test_split, cross_val_score, RepeatedKFold
 
 from xgboost import XGBRegressor
+
+from definitions import FUNDING_DIR
+from utils.text.io import mkdir, save_json
 
 
 def extract_features(df, kind_to_fc_params=None):
@@ -39,7 +43,10 @@ def select_features(X, y, manual=False):
     return X_filtered
 
 
-def cross_validate(X, y):
+def evaluate_model(X, y):
+    # Split train/test
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, random_state=0)
+
     # Create model
     model = XGBRegressor()
 
@@ -48,12 +55,23 @@ def cross_validate(X, y):
     n_repeats = 3
     cv = RepeatedKFold(n_splits=10, n_repeats=3, random_state=0)
 
-    # Execute cross-validation and keep scores
-    scores = cross_val_score(model, X, y, cv=cv, n_jobs=-1)
-    mean_score = scores.mean()
-    print(f'Average R2 score (1 - (residual sum squares)/(total sum squares)) after {n_splits}x{n_repeats} cross-validation: {mean_score}')
+    # Execute cross-validation and compute cv score
+    scores = cross_val_score(model, X_train, y_train, cv=cv, n_jobs=-1)
+    cv_score = scores.mean()
+    print(f'CV SCORE [R2 score (1 - (residual sum squares)/(total sum squares))] after {n_splits}x{n_repeats} cross-validation: {cv_score}')
 
-    return mean_score
+    # Train model with the full train data
+    model.fit(X_train, y_train)
+
+    # Performance of model on train data
+    train_score = model.score(X_train, y_train)
+    print(f'TRAIN SCORE [R2 score (1 - (residual sum squares)/(total sum squares))]: {train_score}')
+
+    # Performance of model on test data
+    test_score = model.score(X_test, y_test)
+    print(f'TEST SCORE [R2 score (1 - (residual sum squares)/(total sum squares))]: {test_score}')
+
+    return [('train', train_score), ('cv', cv_score), ('test', test_score)]
 
 
 def get_feature_importances(X, model):
@@ -63,37 +81,22 @@ def get_feature_importances(X, model):
     return feature_importances
 
 
-def train_regressor(X, y):
-    # Split train/test
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, random_state=0)
-
-    # Model training: TODO fine-tune hyperparameters to reduce overfitting
+def train_model(X, y):
     model = XGBRegressor()
 
     # Train model
-    model.fit(X_train, y_train)
+    model.fit(X, y)
 
-    # Feature importances
-    feature_importances = get_feature_importances(X_train, model)
-    print('Feature importances:')
-    print(feature_importances.head(10))
-
-    # Performance of model on train data
-    score = model.score(X_train, y_train)
-    print(f'R2 score (1 - (residual sum squares)/(total sum squares)) on train data: {score}')
-
-    y_pred = model.predict(X_train)
-
-    score = model.score(X_train, y_pred)
-    print(f'R2 score (1 - (residual sum squares)/(total sum squares)) on train data vs. pred responses: {score}')
-
-    # Performance of model on test data
-    score = model.score(X_test, y_test)
-    print(f'R2 score (1 - (residual sum squares)/(total sum squares)) on test data: {score}')
-
-    y_pred = model.predict(X_test)
-
-    score = model.score(X_test, y_pred)
-    print(f'R2 score (1 - (residual sum squares)/(total sum squares)) on test data vs. pred responses: {score}')
+    # # Feature importances
+    # feature_importances = get_feature_importances(X, model)
+    # print('Feature importances:')
+    # print(feature_importances.head(10))
 
     return model
+
+
+def save_model(model, X, name):
+    model_dirname = f'{FUNDING_DIR}/models/{name}'
+    mkdir(model_dirname)
+    save_json(from_columns(X), f'{model_dirname}/features.json')
+    model.save_model(f'{model_dirname}/model.json')

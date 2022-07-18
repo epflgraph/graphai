@@ -1,13 +1,9 @@
 import pandas as pd
 
-from tsfresh.feature_extraction.settings import from_columns
-
 from funding.preprocessing import build_time_series, split_last_year
-from funding.training import extract_features, select_features, train_regressor
+from funding.training import extract_features, select_features, train_model, save_model
 
-from definitions import FUNDING_DIR
 from interfaces.db import DB
-from utils.text.io import mkdir, save_json
 
 pd.set_option('display.width', 320)
 pd.set_option('display.max_rows', 100)
@@ -31,12 +27,8 @@ if __name__ == '__main__':
     X = extract_features(df)
     X = select_features(X, y)
 
-    # Train regressor and evaluate performance
-    model = train_regressor(X, y)
+    # Train model and evaluate performance
+    model = train_model(X, y)
 
     # Save model and its properties
-    name = 'test'
-    model_dirname = f'{FUNDING_DIR}/models/{name}'
-    mkdir(model_dirname)
-    save_json(from_columns(X), f'{model_dirname}/features.json')
-    model.save_model(f'{model_dirname}/model.json')
+    save_model(model, X, name='test')
