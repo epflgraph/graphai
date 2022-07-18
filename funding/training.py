@@ -10,8 +10,12 @@ from sklearn.model_selection import train_test_split, cross_val_score, RepeatedK
 
 from xgboost import XGBRegressor
 
+from funding.preprocessing import build_time_series, split_last_year
+
 from definitions import FUNDING_DIR
-from utils.text.io import mkdir, save_json
+from interfaces.db import DB
+from utils.text.io import log, mkdir, save_json
+from utils.time.date import now
 
 
 def extract_features(df, kind_to_fc_params=None):
@@ -100,3 +104,34 @@ def save_model(model, X, name):
     mkdir(model_dirname)
     save_json(from_columns(X), f'{model_dirname}/features.json')
     model.save_model(f'{model_dirname}/model.json')
+
+
+def create_model(min_year, max_year, concept_ids=None, name='', debug=False):
+
+    assert min_year < max_year, f'min_year ({min_year}) should be lower than max_year ({max_year})'
+
+    if concept_ids is None:
+        db = DB()
+        concept_ids = db.get_crunchbase_concept_ids()
+
+    # Create time series with data from database
+    log(f'Creating time series for time window {min_year}-{max_year}...', debug)
+    df = build_time_series(min_year, max_year, concept_ids=concept_ids, debug=False)
+
+    # Split df rows into < max_year (training data) and = max_year (response variable)
+    df, y = split_last_year(df, max_year)
+
+    # Extract features and select most relevant ones
+    log(f'Extracting features and selecting the most relevant ones...', debug)
+    X = extract_features(df)
+    X = select_features(X, y)
+
+    # Train model and evaluate performance
+    log(f'Training model...', debug)
+    model = train_model(X, y)
+
+    # Save model and its features
+    if not name:
+        name = now().strftime('%Y%m%d%H%M%S')
+    log(f'Saving model to disk under the name "{name}"...', debug)
+    save_model(model, X, name=name)
