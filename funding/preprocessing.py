@@ -84,3 +84,16 @@ def build_time_series(min_year, max_year, concept_ids, debug=False):
 
     return time_series
 
+
+def split_last_year(df, last_year):
+    # Extract response variable
+    y = df[df['year'] == last_year]
+    df = df[df['year'] < last_year]
+
+    # Set concept_id as index
+    y.index = y['concept_id']
+
+    # Convert y to pd.Series
+    y = y['amount']
+
+    return df, y

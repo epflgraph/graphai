@@ -1,7 +1,7 @@
 import pandas as pd
 
 from interfaces.db import DB
-from funding.preprocessing import build_time_series
+from funding.preprocessing import build_time_series, split_last_year
 from funding.training import extract_features, select_features, train_regressor
 
 pd.set_option('display.width', 320)
@@ -10,17 +10,15 @@ pd.set_option('display.max_columns', 10)
 
 
 if __name__ == '__main__':
+    min_year = 2018
+    max_year = 2021
+
     db = DB()
     concept_ids = db.get_crunchbase_concept_ids()
-    df = build_time_series(2018, 2021, concept_ids=concept_ids, debug=False)
+    df = build_time_series(min_year, max_year, concept_ids=concept_ids, debug=False)
 
-    # Extract response variable
-    y = df[df['year'] == 2021]
-    df = df[df['year'] != 2021]
-
-    # Set concept_id as index
-    y.index = y['concept_id']
-    y = y['amount']
+    # Split df rows into < max_year (training data) and = max_year (response variable)
+    df, y = split_last_year(df, max_year)
 
     # Extract features and select most relevant ones
     X = extract_features(df)
