@@ -1,6 +1,15 @@
 import json
 
 
+def log(msg, debug):
+    """
+    Prints msg only if debug evaluates to True.
+    """
+
+    if debug:
+        print(msg)
+
+
 def pprint(t, indent=0, inline=False, only_first=False):
     """
     Pretty print dictionary.
