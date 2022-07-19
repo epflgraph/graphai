@@ -97,3 +97,27 @@ def split_last_year(df, last_year):
     y = y['amount']
 
     return df, y
+
+
+def combine_last_year(df, y, last_year):
+    # Convert y to pd.DataFrame
+    y = pd.DataFrame(y, columns=['amount'])
+
+    # Add index as column
+    y['concept_id'] = y.index
+
+    # Add year column
+    y['year'] = last_year
+
+    # Add concept names
+    concepts = df[['concept_id', 'concept_name']].drop_duplicates()
+    y = pd.merge(y, concepts, how='left', on='concept_id')
+
+    # Fix column order
+    y = y[df.columns]
+
+    # Combine DataFrames, sort values and reset index
+    combined_df = pd.concat([df, y])
+    combined_df = combined_df.sort_values(by=['concept_id', 'year']).reset_index(drop=True)
+
+    return combined_df

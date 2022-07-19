@@ -60,11 +60,11 @@ def evaluate_model(min_year, max_year, concept_ids=None, name='', debug=False):
     # Split df rows into < max_year (training data) and = max_year (response variable)
     df, y = split_last_year(df, max_year)
 
-    # Load model
-    log(f'Loading model and features from disk...', debug)
+    # Load features
+    log(f'Loading model features from disk...', debug)
     features = load_features(name)
 
-    # Extract features and select most relevant ones
+    # Extract model features
     log(f'Extracting model features...', debug)
     X = extract_features(df, features)
 
