@@ -1,4 +1,6 @@
-from sklearn.model_selection import train_test_split, cross_val_score, RepeatedKFold
+import numpy as np
+
+from sklearn.model_selection import train_test_split, cross_validate, cross_val_score, RepeatedKFold
 
 from xgboost import XGBRegressor
 
@@ -10,12 +12,15 @@ from interfaces.db import DB
 from utils.text.io import log
 
 
-def evaluate(X, y):
+def evaluate(X, y, xgb_params=None, debug=False):
     # Split train/test
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, random_state=0)
 
+    if xgb_params is None:
+        xgb_params = {}
+
     # Create model
-    model = XGBRegressor()
+    model = XGBRegressor(**xgb_params)
 
     # Create cross-validation object
     n_splits = 10
@@ -23,29 +28,39 @@ def evaluate(X, y):
     cv = RepeatedKFold(n_splits=10, n_repeats=3, random_state=0)
 
     # Execute cross-validation and compute cv score
-    scores = cross_val_score(model, X_train, y_train, cv=cv, n_jobs=-1)
-    cv_score = scores.mean()
-    print(f'CV SCORE [R2 score (1 - (residual sum squares)/(total sum squares))] after {n_splits}x{n_repeats} cross-validation: {cv_score}')
+    fit_params = {
+        'verbose': False,
+        'eval_set': [(X_test, y_test)]
+    }
+    cv_results = cross_validate(model, X_train, y_train, cv=cv, return_estimator=True, n_jobs=-1, fit_params=fit_params)
+    avg_n_trees = int(np.round(np.mean([estimator.best_ntree_limit for estimator in cv_results['estimator']])))
+    log(f'Optimal number of trees, averaged over all cv folds and rounded: {avg_n_trees}', debug)
+
+    cv_score = cv_results['test_score'].mean()
+    log(f'CV SCORE [R2 score (1 - (residual sum squares)/(total sum squares))] after {n_splits}x{n_repeats} cross-validation: {cv_score}', debug)
 
     # Train model with the full train data
-    model.fit(X_train, y_train)
+    model.fit(X_train, y_train, **fit_params)
 
     # Performance of model on train data
     train_score = model.score(X_train, y_train)
-    print(f'TRAIN SCORE [R2 score (1 - (residual sum squares)/(total sum squares))]: {train_score}')
+    log(f'TRAIN SCORE [R2 score (1 - (residual sum squares)/(total sum squares))]: {train_score}', debug)
 
     # Performance of model on test data
     test_score = model.score(X_test, y_test)
-    print(f'TEST SCORE [R2 score (1 - (residual sum squares)/(total sum squares))]: {test_score}')
+    log(f'TEST SCORE [R2 score (1 - (residual sum squares)/(total sum squares))]: {test_score}', debug)
 
     return {
         'train': train_score,
         'cv': cv_score,
-        'test': test_score
+        'test': test_score,
+        'diff-train-cv': abs(train_score - cv_score),
+        'diff-train-test': abs(train_score - test_score),
+        'diff-test-cv': abs(test_score - cv_score)
     }
 
 
-def evaluate_model(min_year, max_year, concept_ids=None, name='', debug=False):
+def evaluate_model(min_year, max_year, concept_ids=None, name='', xgb_params=None, debug=False):
 
     assert min_year < max_year, f'min_year ({min_year}) should be lower than max_year ({max_year})'
 
@@ -70,7 +85,7 @@ def evaluate_model(min_year, max_year, concept_ids=None, name='', debug=False):
 
     # Evaluate model
     log(f'Evaluating model...', debug)
-    scores = evaluate(X, y)
+    scores = evaluate(X, y, xgb_params)
 
     # Save results
     save_scores(min_year, max_year, scores, name)

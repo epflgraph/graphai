@@ -10,11 +10,12 @@ if __name__ == '__main__':
     min_year = 2018
     max_year = 2021
 
-    # create_model(min_year, max_year, name=f'simple_{min_year}_{max_year}', debug=True)
+    create_model(min_year, max_year, name=f'simple_{min_year}_{max_year}', debug=True)
 
     # evaluate_model(min_year, max_year, name=f'simple_{min_year}_{max_year}', debug=True)
 
-    year = 2022
-    df = predict_concepts_year(year, concept_ids, name=f'simple_{min_year}_{max_year}', debug=True)
-    plot_df(df)
+    # year = 2022
+    # df = predict_concepts_year(year, concept_ids, name=f'simple_{min_year}_{max_year}', debug=True)
+    # plot_df(df)
+
 

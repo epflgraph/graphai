@@ -51,8 +51,11 @@ def get_feature_importances(X, model):
     return feature_importances
 
 
-def train_model(X, y):
-    model = XGBRegressor()
+def train_model(X, y, xgb_params=None):
+    if xgb_params is None:
+        xgb_params = {}
+
+    model = XGBRegressor(**xgb_params)
 
     # Train model
     model.fit(X, y)
@@ -65,7 +68,7 @@ def train_model(X, y):
     return model
 
 
-def create_model(min_year, max_year, concept_ids=None, name='', debug=False):
+def create_model(min_year, max_year, concept_ids=None, name='', xgb_params=None, debug=False):
 
     assert min_year < max_year, f'min_year ({min_year}) should be lower than max_year ({max_year})'
 
@@ -87,7 +90,7 @@ def create_model(min_year, max_year, concept_ids=None, name='', debug=False):
 
     # Train model and evaluate performance
     log(f'Training model...', debug)
-    model = train_model(X, y)
+    model = train_model(X, y, xgb_params=xgb_params)
 
     # Save model and its features
     if not name:
