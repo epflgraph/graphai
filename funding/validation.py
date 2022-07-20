@@ -56,7 +56,8 @@ def evaluate(X, y, xgb_params=None, debug=False):
         'test': test_score,
         'diff-train-cv': abs(train_score - cv_score),
         'diff-train-test': abs(train_score - test_score),
-        'diff-test-cv': abs(test_score - cv_score)
+        'diff-test-cv': abs(test_score - cv_score),
+        'avg_n_trees': avg_n_trees
     }
 
 
