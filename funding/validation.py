@@ -25,7 +25,7 @@ def evaluate(X, y, xgb_params=None, debug=False):
     # Create cross-validation object
     n_splits = 10
     n_repeats = 3
-    cv = RepeatedKFold(n_splits=10, n_repeats=3, random_state=0)
+    cv = RepeatedKFold(n_splits=10, n_repeats=3)
 
     # Execute cross-validation and compute cv score
     fit_params = {
