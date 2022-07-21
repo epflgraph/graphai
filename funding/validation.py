@@ -6,7 +6,7 @@ from xgboost import XGBRegressor
 
 from funding.preprocessing import build_time_series, split_last_year
 from funding.training import extract_features
-from funding.io import load_features, save_scores
+from funding.io import load_features, load_model, save_scores
 
 from interfaces.db import DB
 from utils.text.io import log
@@ -14,7 +14,8 @@ from utils.text.io import log
 
 def evaluate(X, y, xgb_params=None, debug=False):
     # Split train/test
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, random_state=0)
+    # X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, random_state=0)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25)
 
     if xgb_params is None:
         xgb_params = {}
@@ -25,7 +26,8 @@ def evaluate(X, y, xgb_params=None, debug=False):
     # Create cross-validation object
     n_splits = 10
     n_repeats = 3
-    cv = RepeatedKFold(n_splits=10, n_repeats=3)
+    # cv = RepeatedKFold(n_splits=5, n_repeats=6, random_state=0)
+    cv = RepeatedKFold(n_splits=5, n_repeats=6)
 
     # Execute cross-validation and compute cv score
     fit_params = {
@@ -61,7 +63,7 @@ def evaluate(X, y, xgb_params=None, debug=False):
     }
 
 
-def evaluate_model(min_year, max_year, concept_ids=None, name='', xgb_params=None, debug=False):
+def evaluate_model(min_year, max_year, concept_ids=None, name='', debug=False):
 
     assert min_year < max_year, f'min_year ({min_year}) should be lower than max_year ({max_year})'
 
@@ -83,6 +85,11 @@ def evaluate_model(min_year, max_year, concept_ids=None, name='', xgb_params=Non
     # Extract model features
     log(f'Extracting model features...', debug)
     X = extract_features(df, features)
+
+    # Load model params
+    log(f'Loading model from disk...', debug)
+    model = load_model(name)
+    xgb_params = model.get_params()
 
     # Evaluate model
     log(f'Evaluating model...', debug)
