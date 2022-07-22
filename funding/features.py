@@ -12,22 +12,24 @@ from definitions import FUNDING_DIR
 from utils.text.io import log, mkdir, read_json, save_json
 
 
-def save_features(features, name):
+def save_features(features, attributes, name):
     # Create directory for features if it does not exist
     dirname = f'{FUNDING_DIR}/features/{name}'
     mkdir(dirname)
 
-    # Save model features
+    # Save model features and attributes
     save_json(features, f'{dirname}/features.json')
+    save_json(attributes, f'{dirname}/attributes.json')
 
 
 def load_features(name):
     dirname = f'{FUNDING_DIR}/features/{name}'
 
-    # Read features
+    # Read features and attributes
     features = read_json(f'{dirname}/features.json')
+    attributes = read_json(f'{dirname}/attributes.json')
 
-    return features
+    return features, attributes
 
 
 def extract_features(df, features=None):
@@ -84,6 +86,12 @@ def create_feature_set(min_year, max_year, concept_ids=None, debug=False):
     else:
         name = f'{min_year}-{max_year}-{sum(concept_ids)}'
     log(f'Saving features to disk under the name "{name}"...', debug)
-    save_features(from_columns(X), name=name)
+    features = from_columns(X)
+    attributes = {
+        'min_year': min_year,
+        'max_year': max_year,
+        'concept_ids': concept_ids
+    }
+    save_features(features, attributes, name=name)
 
 

@@ -1,12 +1,31 @@
 import numpy as np
 
-from funding.preprocessing import build_time_series, split_last_year
-from funding.training import extract_features, create_model
-from funding.validation import evaluate, evaluate_model
-from funding.io import load_features
+from funding.preprocessing import build_data
+from funding.features import load_features
+from funding.validation import evaluate
 
-from interfaces.db import DB
-from utils.text.io import log
+from definitions import FUNDING_DIR
+from utils.text.io import log, mkdir, read_json, save_json
+
+
+def save_xgb_params(xgb_params, evaluation_summary, name):
+    # Create directory for xgb_params if it does not exist
+    dirname = f'{FUNDING_DIR}/features/{name}'
+    mkdir(dirname)
+
+    # Save xgb_params and evaluation_summary
+    save_json(xgb_params, f'{dirname}/xgb_params.json')
+    save_json(evaluation_summary, f'{dirname}/evaluation_summary.json')
+
+
+def load_xgb_params(name):
+    dirname = f'{FUNDING_DIR}/features/{name}'
+
+    # Read xgb_params and evaluation_summary
+    xgb_params = read_json(f'{dirname}/xgb_params.json')
+    evaluation_summary = read_json(f'{dirname}/evaluation_summary.json')
+
+    return xgb_params, evaluation_summary
 
 
 def tune_parameter_single(param_grids, xgb_params, X, y):
@@ -230,41 +249,23 @@ def report(xgb_params, search_spaces, cv_score):
     print(cv_score)
 
 
-if __name__ == '__main__':
-    min_year = 2018
-    max_year = 2021
-
-    debug = True
-
-    name = f'simple_{min_year}_{max_year}'
-
-    ######################
-    # BUILD DATA FROM DB #
-    ######################
-
-    db = DB()
-    concept_ids = db.get_crunchbase_concept_ids()
-
-    # Create time series with data from database
-    log(f'Creating time series for time window {min_year}-{max_year}...', debug)
-    df = build_time_series(min_year, max_year, concept_ids=concept_ids, debug=False)
-
-    # Split df rows into < max_year (training data) and = max_year (response variable)
-    df, y = split_last_year(df, max_year)
-
+def create_tuned_xgb_params(features_name, debug=False):
     # Load features
-    log(f'Loading model features from disk...', debug)
-    features = load_features(name)
+    log(f'Loading features from disk...', debug)
+    _, attributes = load_features(features_name)
 
-    # Extract model features
-    log(f'Extracting model features...', debug)
-    X = extract_features(df, features)
+    min_year = attributes['min_year']
+    max_year = attributes['max_year']
+    concept_ids = attributes['concept_ids']
+
+    # Build data
+    X, y = build_data(min_year, max_year, concept_ids=concept_ids, features_name=features_name, split_y=True, debug=debug)
 
     ####################
     # PARAMETER TUNING #
     ####################
 
-    # Initial parameters
+    # Initial parameters, with learning_rate = 0.1 and n_estimators = 1000
     xgb_params = {
         'n_estimators': 1000,
         'max_depth': 6,
@@ -278,13 +279,11 @@ if __name__ == '__main__':
         'early_stopping_rounds': 50
     }
 
-    # Get optimal number of estimators for the given parameters
-    xgb_params['learning_rate'] = 0.1
-    xgb_params['n_estimators'] = 1000
+    # Get optimal number of estimators for the given parameters and update parameter
     avg_n_trees = evaluate(X, y, xgb_params, debug=False)['avg_n_trees']
     xgb_params['n_estimators'] = avg_n_trees
 
-    # Search spaces
+    # Define search spaces for each parameter and set all their status to 'open'
     search_spaces = {
         'n_estimators': (1, 5000, 'open'),
         'max_depth': (1, 20, 'open'),
@@ -300,33 +299,14 @@ if __name__ == '__main__':
     # Launch tuning of all parameters
     xgb_params, search_spaces, cv_score = tune_all_parameters(xgb_params, search_spaces, X, y)
     report(xgb_params, search_spaces, cv_score)
-    print('#'*50)
 
-    # Lower learning rate and repeat
+    # Lower learning rate and get new optimal number of estimators
     xgb_params['learning_rate'] = 0.01
     xgb_params['n_estimators'] = 1000
-    avg_n_trees = evaluate(X, y, xgb_params, debug=False)['avg_n_trees']
-    xgb_params['n_estimators'] = avg_n_trees
-
-    # Search spaces
-    search_spaces = {
-        'n_estimators': (1, 5000, 'open'),
-        'max_depth': (1, 20, 'open'),
-        'learning_rate': (0, 1, 'open'),
-        'gamma': (0, 10, 'open'),
-        'min_child_weight': (1, 20, 'open'),
-        'subsample': (0.5, 1, 'open'),
-        'colsample_bytree': (0.5, 1, 'open'),
-        'reg_alpha': (0, 10, 'open'),
-        'reg_lambda': (1, 10, 'open')
-    }
-
-    # Launch tuning of all parameters
-    xgb_params, search_spaces, cv_score = tune_all_parameters(xgb_params, search_spaces, X, y)
-    report(xgb_params, search_spaces, cv_score)
-    print('#'*50)
+    evaluation_summary = evaluate(X, y, xgb_params, debug=False)['avg_n_trees']
+    xgb_params['n_estimators'] = evaluation_summary['avg_n_trees']
 
     # Remove early stopping and create model with the tuned parameters
     del xgb_params['early_stopping_rounds']
-    create_model(min_year, max_year, xgb_params=xgb_params, name='tuned')
-    evaluate_model(min_year, max_year, name='tuned')
+    save_xgb_params(xgb_params, evaluation_summary, features_name)
+

@@ -5,8 +5,9 @@ from sklearn.model_selection import train_test_split, cross_validate, cross_val_
 from xgboost import XGBRegressor
 
 from funding.preprocessing import build_time_series, split_last_year
-from funding.training import extract_features
-from funding.io import load_features, load_model, save_scores
+from funding.features import load_features, extract_features
+from funding.training import load_model
+from funding.io import save_scores
 
 from interfaces.db import DB
 from utils.text.io import log

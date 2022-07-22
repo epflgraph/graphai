@@ -146,7 +146,7 @@ def build_data(min_year, max_year, concept_ids=None, features_name=None, split_y
         X = extract_features(df)
     else:
         log(f'Extracting features {features_name}...', debug)
-        features = load_features(features_name)
+        features, _ = load_features(features_name)
         X = extract_features(df, features)
 
     if split_y:
