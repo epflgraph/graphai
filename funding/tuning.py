@@ -157,7 +157,7 @@ def is_stable(param, search_spaces):
 
 
 def tune_all_parameters(xgb_params, search_spaces, X, y):
-    # Step 2: Tune max_depth and min_child_weight
+    # Step 1: Tune max_depth and min_child_weight
     while not is_stable('max_depth', search_spaces) or not is_stable('min_child_weight', search_spaces):
         # Create search grids based on search spaces
         md_grid = gen_grid('max_depth', search_spaces, 'int')
@@ -178,7 +178,7 @@ def tune_all_parameters(xgb_params, search_spaces, X, y):
         cv_score = evaluate(X, y, xgb_params, debug=False)['cv']
         report(xgb_params, search_spaces, cv_score)
 
-    # Step 3: Tune gamma
+    # Step 2: Tune gamma
     while not is_stable('gamma', search_spaces):
         # Create search grid based on search space
         gamma_grid = gen_grid('gamma', search_spaces, 'log')
@@ -196,7 +196,7 @@ def tune_all_parameters(xgb_params, search_spaces, X, y):
         cv_score = evaluate(X, y, xgb_params, debug=False)['cv']
         report(xgb_params, search_spaces, cv_score)
 
-    # Step 4: Tune subsample and colsample_bytree
+    # Step 3: Tune subsample and colsample_bytree
     while not is_stable('subsample', search_spaces) or not is_stable('colsample_bytree', search_spaces):
         # Create search grids based on search spaces
         ss_grid = gen_grid('subsample', search_spaces, 'float')
@@ -217,7 +217,7 @@ def tune_all_parameters(xgb_params, search_spaces, X, y):
         cv_score = evaluate(X, y, xgb_params, debug=False)['cv']
         report(xgb_params, search_spaces, cv_score)
 
-    # Step 5: Tune reg_alpha and reg_lambda
+    # Step 4: Tune reg_alpha and reg_lambda
     while not is_stable('reg_alpha', search_spaces) or not is_stable('reg_lambda', search_spaces):
         # Create search grids based on search spaces
         alpha_grid = gen_grid('reg_alpha', search_spaces, 'log')
@@ -238,8 +238,7 @@ def tune_all_parameters(xgb_params, search_spaces, X, y):
         cv_score = evaluate(X, y, xgb_params, debug=False)['cv']
         report(xgb_params, search_spaces, cv_score)
 
-    evaluation_summary = evaluate(X, y, xgb_params, debug=False)
-    return xgb_params, search_spaces, evaluation_summary['cv']
+    return xgb_params, search_spaces
 
 
 def report(xgb_params, search_spaces, cv_score):
@@ -297,8 +296,7 @@ def create_tuned_xgb_params(features_name, debug=False):
     }
 
     # Launch tuning of all parameters
-    xgb_params, search_spaces, cv_score = tune_all_parameters(xgb_params, search_spaces, X, y)
-    report(xgb_params, search_spaces, cv_score)
+    xgb_params, search_spaces = tune_all_parameters(xgb_params, search_spaces, X, y)
 
     # Lower learning rate and get new optimal number of estimators
     xgb_params['learning_rate'] = 0.01
@@ -306,7 +304,12 @@ def create_tuned_xgb_params(features_name, debug=False):
     evaluation_summary = evaluate(X, y, xgb_params, debug=False)['avg_n_trees']
     xgb_params['n_estimators'] = evaluation_summary['avg_n_trees']
 
-    # Remove early stopping and create model with the tuned parameters
+    # Disable early stopping
     del xgb_params['early_stopping_rounds']
+
+    # Print final report
+    report(xgb_params, search_spaces, evaluation_summary['cv'])
+
+    # Create model with the tuned parameters
     save_xgb_params(xgb_params, evaluation_summary, features_name)
 
