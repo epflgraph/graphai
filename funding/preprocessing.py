@@ -1,5 +1,7 @@
 import pandas as pd
 
+from funding.features import extract_features, load_features
+
 from interfaces.db import DB
 from utils.text.io import log
 
@@ -121,3 +123,34 @@ def combine_last_year(df, y, last_year):
     combined_df = combined_df.sort_values(by=['concept_id', 'year']).reset_index(drop=True)
 
     return combined_df
+
+
+def build_data(min_year, max_year, concept_ids=None, features_name=None, split_y=False, debug=False):
+
+    if concept_ids is None:
+        db = DB()
+        concept_ids = db.get_crunchbase_concept_ids()
+
+    # Create time series with data from database
+    log(f'Creating time series for time window {min_year}-{max_year}...', debug)
+    df = build_time_series(min_year, max_year, concept_ids=concept_ids, debug=False)
+
+    # Split df rows into < max_year and = max_year
+    if split_y:
+        log(f'Splitting y from last year data', debug)
+        df, y = split_last_year(df, max_year)
+
+    # Extract features
+    if features_name is None:
+        log(f'Extracting all features...', debug)
+        X = extract_features(df)
+    else:
+        log(f'Extracting features {features_name}...', debug)
+        features = load_features(features_name)
+        X = extract_features(df, features)
+
+    if split_y:
+        return X, y
+    else:
+        return X
+
