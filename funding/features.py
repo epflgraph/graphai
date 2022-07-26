@@ -13,8 +13,8 @@ from utils.text.io import log, mkdir, read_json, save_json
 
 
 def save_features(features, attributes, name):
-    # Create directory for features if it does not exist
-    dirname = f'{FUNDING_DIR}/features/{name}'
+    # Create directory if it does not exist
+    dirname = f'{FUNDING_DIR}/models/features-{name}'
     mkdir(dirname)
 
     # Save model features and attributes
@@ -23,7 +23,7 @@ def save_features(features, attributes, name):
 
 
 def load_features(name):
-    dirname = f'{FUNDING_DIR}/features/{name}'
+    dirname = f'{FUNDING_DIR}/models/features-{name}'
 
     # Read features and attributes
     features = read_json(f'{dirname}/features.json')
@@ -74,7 +74,7 @@ def create_feature_set(min_year, max_year, concept_ids=None, debug=False):
 
     # Build data
     log(f'Building data for time window {min_year}-{max_year} and all features...', debug)
-    X, y = build_data(min_year, max_year, concept_ids, split_y=True, debug=False)
+    X, y = build_data(min_year=min_year, max_year=max_year, concept_ids=concept_ids, split_y=True, debug=False)
 
     # Select most relevant features
     log(f'Extracting features and selecting the most relevant ones...', debug)

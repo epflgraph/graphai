@@ -8,9 +8,9 @@ from definitions import FUNDING_DIR
 from utils.text.io import log, mkdir, read_json, save_json
 
 
-def save_xgb_params(xgb_params, evaluation_summary, name):
-    # Create directory for xgb_params if it does not exist
-    dirname = f'{FUNDING_DIR}/features/{name}'
+def save_xgb_params(xgb_params, evaluation_summary, features_name, name):
+    # Create directory if it does not exist
+    dirname = f'{FUNDING_DIR}/models/features-{features_name}/xgb-params-{name}'
     mkdir(dirname)
 
     # Save xgb_params and evaluation_summary
@@ -18,8 +18,8 @@ def save_xgb_params(xgb_params, evaluation_summary, name):
     save_json(evaluation_summary, f'{dirname}/evaluation_summary.json')
 
 
-def load_xgb_params(name):
-    dirname = f'{FUNDING_DIR}/features/{name}'
+def load_xgb_params(features_name, name):
+    dirname = f'{FUNDING_DIR}/models/features-{features_name}/xgb-params-{name}'
 
     # Read xgb_params and evaluation_summary
     xgb_params = read_json(f'{dirname}/xgb_params.json')
@@ -241,6 +241,14 @@ def tune_all_parameters(xgb_params, search_spaces, X, y):
     return xgb_params, search_spaces
 
 
+def update_n_estimators(X, y, xgb_params, initial_n_estimators=1000):
+    xgb_params['n_estimators'] = initial_n_estimators
+    avg_n_trees = evaluate(X, y, xgb_params, debug=False)['avg_n_trees']
+    xgb_params['n_estimators'] = avg_n_trees
+
+    return xgb_params
+
+
 def report(xgb_params, search_spaces, cv_score):
     print()
     for param in search_spaces:
@@ -249,16 +257,8 @@ def report(xgb_params, search_spaces, cv_score):
 
 
 def create_tuned_xgb_params(features_name, debug=False):
-    # Load features
-    log(f'Loading features from disk...', debug)
-    _, attributes = load_features(features_name)
-
-    min_year = attributes['min_year']
-    max_year = attributes['max_year']
-    concept_ids = attributes['concept_ids']
-
     # Build data
-    X, y = build_data(min_year, max_year, concept_ids=concept_ids, features_name=features_name, split_y=True, debug=debug)
+    X, y = build_data(features_name=features_name, split_y=True, debug=debug)
 
     ####################
     # PARAMETER TUNING #
@@ -279,8 +279,7 @@ def create_tuned_xgb_params(features_name, debug=False):
     }
 
     # Get optimal number of estimators for the given parameters and update parameter
-    avg_n_trees = evaluate(X, y, xgb_params, debug=False)['avg_n_trees']
-    xgb_params['n_estimators'] = avg_n_trees
+    xgb_params = update_n_estimators(X, y, xgb_params)
 
     # Define search spaces for each parameter and set all their status to 'open'
     search_spaces = {
@@ -300,16 +299,14 @@ def create_tuned_xgb_params(features_name, debug=False):
 
     # Lower learning rate and get new optimal number of estimators
     xgb_params['learning_rate'] = 0.01
-    xgb_params['n_estimators'] = 1000
-    evaluation_summary = evaluate(X, y, xgb_params, debug=False)['avg_n_trees']
-    xgb_params['n_estimators'] = evaluation_summary['avg_n_trees']
+    xgb_params = update_n_estimators(X, y, xgb_params)
 
     # Disable early stopping
     del xgb_params['early_stopping_rounds']
 
     # Print final report
+    evaluation_summary = evaluate(X, y, xgb_params, debug=False)
     report(xgb_params, search_spaces, evaluation_summary['cv'])
 
     # Create model with the tuned parameters
-    save_xgb_params(xgb_params, evaluation_summary, features_name)
-
+    save_xgb_params(xgb_params, evaluation_summary, features_name, 'tuned')
