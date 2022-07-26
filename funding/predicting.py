@@ -38,3 +38,5 @@ def predict_concepts_year(year, concept_ids, features_name, xgb_params_name, deb
     log(f'Predicting values...', debug)
     y = predict(model, X)
     log(y, debug)
+
+    return y

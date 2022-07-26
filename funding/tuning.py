@@ -309,4 +309,7 @@ def create_tuned_xgb_params(features_name, debug=False):
     report(xgb_params, search_spaces, evaluation_summary['cv'])
 
     # Create model with the tuned parameters
-    save_xgb_params(xgb_params, evaluation_summary, features_name, 'tuned')
+    xgb_params_name = 'tuned'
+    save_xgb_params(xgb_params, evaluation_summary, features_name, xgb_params_name)
+
+    return xgb_params_name

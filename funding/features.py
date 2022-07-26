@@ -94,4 +94,6 @@ def create_feature_set(min_year, max_year, concept_ids=None, debug=False):
     }
     save_features(features, attributes, name=name)
 
+    return name
+
 
