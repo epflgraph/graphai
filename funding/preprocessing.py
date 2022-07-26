@@ -128,7 +128,7 @@ def combine_last_year(df, y, last_year):
 def build_data(min_year=None, max_year=None, concept_ids=None, features_name=None, split_y=False, debug=False):
     # Normalize input:
     # * If features_name is not provided, make sure the years are, and load the concept_ids if needed.
-    # * Else, get years and concepts from the attributes.
+    # * Else, use years if provided or get years and concepts from the attributes otherwise.
     if features_name is None:
         assert min_year is not None and max_year is not None, f'If features_name is not provided, min_year and max_year must be provided'
 
@@ -136,11 +136,19 @@ def build_data(min_year=None, max_year=None, concept_ids=None, features_name=Non
             db = DB()
             concept_ids = db.get_crunchbase_concept_ids()
     else:
-        assert min_year is None and max_year is None and concept_ids is None, f'If features_name is provided, min_year, max_year and concept_ids must not be provided'
         features, attributes = load_features(features_name)
-        min_year = attributes['min_year']
-        max_year = attributes['max_year']
-        concept_ids = attributes['concept_ids']
+
+        if min_year is None or max_year is None:
+            log(f'features_name are provided but some of min_year, max_year are not. Using years and concepts from attributes in {features_name}...', debug)
+            min_year = attributes['min_year']
+            max_year = attributes['max_year']
+            concept_ids = attributes['concept_ids']
+        else:
+            log(f'features_name are provided, min_year, max_year are provided too. Using min_year={min_year} and max_year={max_year} and ignoring years and concepts from attributes in {features_name}...', debug)
+
+            if concept_ids is None:
+                db = DB()
+                concept_ids = db.get_crunchbase_concept_ids()
 
     # Create time series with data from database
     log(f'Creating time series for time window {min_year}-{max_year}...', debug)
