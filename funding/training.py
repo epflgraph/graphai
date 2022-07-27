@@ -1,30 +1,9 @@
 from xgboost import XGBRegressor
 
-from funding.preprocessing import build_data
-from funding.features import load_features
-from funding.tuning import load_xgb_params
+from funding.data_processing import build_data
+from funding.io import load_features, load_xgb_params, save_model
 
-from definitions import FUNDING_DIR
-from utils.text.io import log, mkdir
-
-
-def save_model(model, features_name, xgb_params_name):
-    # Create directory if it does not exist
-    dirname = f'{FUNDING_DIR}/models/features-{features_name}/xgb-params-{xgb_params_name}'
-    mkdir(dirname)
-
-    # Save model
-    model.save_model(f'{dirname}/model.json')
-
-
-def load_model(features_name, xgb_params_name):
-    dirname = f'{FUNDING_DIR}/models/features-{features_name}/xgb-params-{xgb_params_name}'
-
-    # Load model
-    model = XGBRegressor()
-    model.load_model(f'{dirname}/model.json')
-
-    return model
+from utils.text.io import log
 
 
 def train_model(X, y, xgb_params=None):

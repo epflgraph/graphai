@@ -1,8 +1,7 @@
 import pandas as pd
 
-from funding.preprocessing import build_data
-from funding.features import load_features
-from funding.training import load_model
+from funding.data_processing import build_data
+from funding.io import load_features, load_model
 
 from utils.text.io import log
 

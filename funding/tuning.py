@@ -1,31 +1,63 @@
 import numpy as np
+from sklearn.model_selection import train_test_split, RepeatedKFold, cross_validate
 
-from funding.preprocessing import build_data
-from funding.features import load_features
-from funding.validation import evaluate
+from xgboost import XGBRegressor
 
-from definitions import FUNDING_DIR
-from utils.text.io import log, mkdir, read_json, save_json
+from funding.data_processing import build_data
+from funding.io import save_xgb_params
 
-
-def save_xgb_params(xgb_params, evaluation_summary, features_name, name):
-    # Create directory if it does not exist
-    dirname = f'{FUNDING_DIR}/models/features-{features_name}/xgb-params-{name}'
-    mkdir(dirname)
-
-    # Save xgb_params and evaluation_summary
-    save_json(xgb_params, f'{dirname}/xgb_params.json')
-    save_json(evaluation_summary, f'{dirname}/evaluation_summary.json')
+from utils.text.io import log
 
 
-def load_xgb_params(features_name, name):
-    dirname = f'{FUNDING_DIR}/models/features-{features_name}/xgb-params-{name}'
+def evaluate(X, y, xgb_params=None, debug=False):
+    # Split train/test
+    # X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, random_state=0)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25)
 
-    # Read xgb_params and evaluation_summary
-    xgb_params = read_json(f'{dirname}/xgb_params.json')
-    evaluation_summary = read_json(f'{dirname}/evaluation_summary.json')
+    if xgb_params is None:
+        xgb_params = {}
 
-    return xgb_params, evaluation_summary
+    # Create model
+    model = XGBRegressor(**xgb_params)
+
+    # Create cross-validation object
+    n_splits = 10
+    n_repeats = 3
+    # cv = RepeatedKFold(n_splits=5, n_repeats=6, random_state=0)
+    cv = RepeatedKFold(n_splits=5, n_repeats=6)
+
+    # Execute cross-validation and compute cv score
+    fit_params = {
+        'verbose': False,
+        'eval_set': [(X_test, y_test)]
+    }
+    cv_results = cross_validate(model, X_train, y_train, cv=cv, return_estimator=True, n_jobs=-1, fit_params=fit_params)
+    avg_n_trees = int(np.round(np.mean([estimator.best_ntree_limit for estimator in cv_results['estimator']])))
+    log(f'Optimal number of trees, averaged over all cv folds and rounded: {avg_n_trees}', debug)
+
+    cv_score = cv_results['test_score'].mean()
+    log(f'CV SCORE [R2 score (1 - (residual sum squares)/(total sum squares))] after {n_splits}x{n_repeats} cross-validation: {cv_score}', debug)
+
+    # Train model with the full train data
+    model.fit(X_train, y_train, **fit_params)
+
+    # Performance of model on train data
+    train_score = model.score(X_train, y_train)
+    log(f'TRAIN SCORE [R2 score (1 - (residual sum squares)/(total sum squares))]: {train_score}', debug)
+
+    # Performance of model on test data
+    test_score = model.score(X_test, y_test)
+    log(f'TEST SCORE [R2 score (1 - (residual sum squares)/(total sum squares))]: {test_score}', debug)
+
+    return {
+        'train': train_score,
+        'cv': cv_score,
+        'test': test_score,
+        'diff-train-cv': abs(train_score - cv_score),
+        'diff-train-test': abs(train_score - test_score),
+        'diff-test-cv': abs(test_score - cv_score),
+        'avg_n_trees': avg_n_trees
+    }
 
 
 def tune_parameter_single(param_grids, xgb_params, X, y):

@@ -1,4 +1,4 @@
-from funding.features import create_feature_set
+from funding.data_processing import create_feature_set
 from funding.tuning import create_tuned_xgb_params
 from funding.training import create_model
 from funding.predicting import predict_concepts_year
