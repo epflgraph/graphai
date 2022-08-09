@@ -1,6 +1,6 @@
 import pandas as pd
 
-from funding.data_processing import build_data
+from funding.data_processing import build_data, next_time_period
 from funding.io import load_features, load_model
 
 from utils.text.io import log
@@ -16,7 +16,13 @@ def predict(model, X):
     return y
 
 
-def predict_concepts_year(year, concept_ids, features_name, xgb_params_name, debug=False):
+def predict_concepts_time_period(time_period, concept_ids, features_name, xgb_params_name, debug=False):
+    # Check time period is in the correct format
+    year, quarter = time_period.split('-Q')
+    year = int(year)
+    quarter = int(quarter)
+    assert year > 0 and quarter in [1, 2, 3, 4], f'Incorrect format for time_period. Should be <year>-Q<quarter>, e.g. 2025-Q3.'
+
     # Load features
     log(f'Loading features from disk...', debug)
     features, _ = load_features(features_name)

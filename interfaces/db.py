@@ -687,24 +687,24 @@ class DB:
 
         return list(self.cursor)
 
-    def get_funding_rounds(self, min_year=None, max_year=None, fr_ids=None):
+    def get_funding_rounds(self, min_date=None, max_date=None, fr_ids=None):
 
         self.connect()
 
         query = f"""
             SELECT FundingRoundID,
-                   YEAR(FundingRoundDate) AS FundingRoundYear,
+                   CONCAT(YEAR(FundingRoundDate), "-Q", QUARTER(FundingRoundDate)) AS FundingRoundTimePeriod,
                    FundingAmount_USD
             FROM graph.Nodes_N_FundingRound
         """
 
         conditions = []
 
-        if min_year is not None:
-            conditions.append(f"""YEAR(FundingRoundDate) >= {min_year}""")
+        if min_date is not None:
+            conditions.append(f"""FundingRoundDate >= "{min_date}" """)
 
-        if max_year is not None:
-            conditions.append(f"""YEAR(FundingRoundDate) <= {max_year}""")
+        if max_date is not None:
+            conditions.append(f"""FundingRoundDate < "{max_date}" """)
 
         if fr_ids is not None:
             conditions.append(f"""FundingRoundID IN ({', '.join(['%s'] * len(fr_ids))})""")

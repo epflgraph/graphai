@@ -8,10 +8,10 @@ def plot_df(df):
 
     for concept_id, concept_name in zip(concepts['concept_id'], concepts['concept_name']):
         concept_df = df[df['concept_id'] == concept_id]
-        ax.plot(concept_df['year'], concept_df['amount'] / 1e6, label=concept_name)
+        ax.plot(concept_df['time'], concept_df['amount'] / 1e6, label=concept_name)
 
     ax.set_title('Investment per concept')
-    ax.set_xlabel('Year')
+    ax.set_xlabel('Time')
     ax.set_ylabel('Investment (M$)')
 
     ax.legend()
