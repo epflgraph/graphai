@@ -158,6 +158,14 @@ def time_period_range(min_time_period, max_time_period):
     return time_periods
 
 
+def time_period_first_date(time_period):
+    year, quarter = time_period.split('-Q')
+    year = int(year)
+    quarter = int(quarter)
+    month = 1 + 3 * (quarter - 1)
+    return f'{year}-{month}-01'
+
+
 def split_last_time_period(df):
     # Extract response variable
     last_time_period = max(df['time'])
@@ -197,7 +205,7 @@ def combine_last_time_period(df, y):
     return combined_df
 
 
-def build_data(min_date=None, max_date=None, concept_ids=None, features_name=None, split_y=False, debug=False):
+def build_data(min_date=None, max_date=None, concept_ids=None, features_name=None, split_y=False, return_df=False, debug=False):
     # Normalize input:
     # * If features_name is not provided, make sure the years are, and load the concept_ids if needed.
     # * Else, use years if provided or get years and concepts from the attributes otherwise.
@@ -221,7 +229,7 @@ def build_data(min_date=None, max_date=None, concept_ids=None, features_name=Non
     # Create time series with data from database
     log(f'Creating time series for time window [{min_date}, {max_date}) and {len(concept_ids)} concepts...', debug)
     df = build_time_series(min_date, max_date, concept_ids=concept_ids, debug=False)
-    print(f'Created df with shape {df.shape}')
+    log(f'Created df with shape {df.shape}', debug)
 
     # Split df rows by extracting last time period
     if split_y:
@@ -236,8 +244,12 @@ def build_data(min_date=None, max_date=None, concept_ids=None, features_name=Non
         log(f'Extracting features {features_name}...', debug)
         X = extract_features(df, features)
 
-    if split_y:
+    if split_y and return_df:
+        return df, X, y
+    elif split_y and not return_df:
         return X, y
+    elif not split_y and return_df:
+        return df, X
     else:
         return X
 
@@ -246,9 +258,7 @@ def extract_features(df, features=None):
     if features is None:
         features = {'amount': EfficientFCParameters()}
 
-    print(f'Ramtin shape of df: {df.shape}')
     X = tsf.extract_features(df, column_id='concept_id', column_sort='time', column_value='amount',
-                         default_fc_parameters={},
                          kind_to_fc_parameters=features,
                          impute_function=impute)  # we impute = remove all NaN features automatically
 

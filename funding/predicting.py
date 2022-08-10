@@ -1,6 +1,6 @@
 import pandas as pd
 
-from funding.data_processing import build_data, next_time_period
+from funding.data_processing import build_data, time_period_first_date
 from funding.io import load_features, load_model
 
 from utils.text.io import log
@@ -25,23 +25,26 @@ def predict_concepts_time_period(time_period, concept_ids, features_name, xgb_pa
 
     # Load features
     log(f'Loading features from disk...', debug)
-    features, _ = load_features(features_name)
+    features, attributes = load_features(features_name)
 
     # Load xgb_params
     log(f'Loading model from disk...', debug)
     model = load_model(features_name, xgb_params_name)
 
-    min_year = year - 3
-    max_year = year - 1
+    max_time_period = time_period
+    min_time_period = f'{year - 3}-Q{quarter}'
 
-    # Build data
+    min_date = time_period_first_date(min_time_period)
+    max_date = time_period_first_date(max_time_period)
+
+    # Build data for prediction
     log(f'Building data for features {features_name}...', debug)
-    X = build_data(min_year=min_year, max_year=max_year, concept_ids=concept_ids, features_name=features_name, split_y=False, debug=False)
+    df, X = build_data(min_date=min_date, max_date=max_date, concept_ids=concept_ids, features_name=features_name, split_y=False, return_df=True, debug=False)
     log(X, debug)
 
-    # Predict values for given year
+    # Predict values for given time period
     log(f'Predicting values...', debug)
     y = predict(model, X)
     log(y, debug)
 
-    return y
+    return df, y

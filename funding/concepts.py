@@ -13,6 +13,11 @@ cherrypicked_concept_ids = [1164, 11657, 12266, 12799, 14412, 1526031, 15928,
 reduced_cherrypicked_concept_ids = [1164, 11657, 12266, 1944675, 19541494,
                                     26162030, 28249265, 4835266, 564204, 604727]
 
+# Artificial intelligence, Fashion, Genetics, Journalism, Social network, Educational technology,
+# Cloud computing, Public transport, Bitcoin, Clean technology, ESports, Coffee
+reduced12_cherrypicked_concept_ids = [1164, 11657, 12266, 15928, 34327569, 1944675,
+                                      19541494, 26162030, 28249265, 4835266, 564204, 604727]
+
 # concept_ids = bottom_concept_ids[-5:]
 # concept_ids = top_concept_ids[:5]
-concept_ids = reduced_cherrypicked_concept_ids
+concept_ids = reduced12_cherrypicked_concept_ids
