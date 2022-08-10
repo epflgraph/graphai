@@ -28,8 +28,8 @@ def plot_df(df, time_period, y_pred, y_true):
         amounts_pred = pd.concat([concept_df['amount'], pd.Series([y_pred[concept_id]])]) / 1e6
 
         ax = axs[i // ncols, i % ncols]
-        ax.plot(times, amounts_pred, label=f'Pred', linewidth=1)
-        ax.plot(times, amounts_true, label='True', linewidth=1, alpha=0.6)
+        ax.plot(times, amounts_pred, label=f'Pred', linewidth=0.5)
+        ax.plot(times, amounts_true, label='True', linewidth=0.5, alpha=0.6)
 
         ax.set_title(concept_name)
         ax.set_xlabel('Time')

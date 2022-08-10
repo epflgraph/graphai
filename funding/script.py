@@ -7,17 +7,17 @@ from funding.visualization import plot_df
 from funding.concepts import concept_ids
 
 if __name__ == '__main__':
-    min_date = '2018-01-01'
+    min_date = '1990-01-01'
     max_date = '2022-01-01'
 
-    features_name = f'{min_date}-{max_date}-all'
-    xgb_params_name = 'tuned'
-
     # features_name = create_feature_set(min_date, max_date, debug=True)
-
+    #
     # xgb_params_name = create_tuned_xgb_params(features_name, debug=True)
-
+    #
     # create_model(features_name, xgb_params_name, debug=True)
+
+    features_name = '1990-01-01-2022-01-01-all'
+    xgb_params_name = 'tuned'
 
     time_period = '2022-Q1'
     df, y_pred = predict_concepts_time_period(time_period, concept_ids, features_name, xgb_params_name, debug=True)

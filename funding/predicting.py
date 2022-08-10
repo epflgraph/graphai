@@ -1,7 +1,7 @@
 import pandas as pd
 
-from funding.data_processing import build_data, time_period_first_date
-from funding.io import load_features, load_model
+from funding.data_processing import build_data, time_period_first_date, date_time_period
+from funding.io import load_model
 
 from utils.text.io import log
 
@@ -23,16 +23,12 @@ def predict_concepts_time_period(time_period, concept_ids, features_name, xgb_pa
     quarter = int(quarter)
     assert year > 0 and quarter in [1, 2, 3, 4], f'Incorrect format for time_period. Should be <year>-Q<quarter>, e.g. 2025-Q3.'
 
-    # Load features
-    log(f'Loading features from disk...', debug)
-    features, attributes = load_features(features_name)
-
     # Load xgb_params
     log(f'Loading model from disk...', debug)
     model = load_model(features_name, xgb_params_name)
 
     max_time_period = time_period
-    min_time_period = f'{year - 3}-Q{quarter}'
+    min_time_period = f'1990-Q1'
 
     min_date = time_period_first_date(min_time_period)
     max_date = time_period_first_date(max_time_period)

@@ -166,6 +166,14 @@ def time_period_first_date(time_period):
     return f'{year}-{month}-01'
 
 
+def date_time_period(date):
+    year, month, day = date.split('-')
+    year = int(year)
+    month = int(month)
+    quarter = 1 + (month - 1) // 3
+    return f'{year}-Q{quarter}'
+
+
 def split_last_time_period(df):
     # Extract response variable
     last_time_period = max(df['time'])
