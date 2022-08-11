@@ -504,126 +504,6 @@ class DB:
 
         return self.query(query)
 
-    def get_startups(self, ids=None, limit=None):
-
-        self.connect()
-
-        query = f"""
-            SELECT EPFLStartupID,
-                   StartupName,
-                   LegalEntity,
-                   FoundingYear,
-                   ExitYear,
-                   Status,
-                   Industry
-            FROM graph.Nodes_N_EPFLStartup
-        """
-
-        if ids is not None:
-            query += f"""
-                WHERE EPFLStartupID IN ({', '.join(['%s'] * len(ids))})
-            """
-
-        if limit is not None:
-            query += f"""
-                LIMIT {limit}
-            """
-
-        if ids is not None:
-            self.cursor.execute(query, ids)
-        else:
-            self.cursor.execute(query)
-
-        return list(self.cursor)
-
-    def get_concepts_old(self, ids=None, limit=None):
-
-        self.connect()
-
-        query = f"""
-            SELECT PageID,
-                   PageTitle
-            FROM graph.Nodes_N_Concept
-        """
-
-        if ids is not None:
-            query += f"""
-                WHERE PageID IN ({', '.join(['%s'] * len(ids))})
-            """
-
-        if limit is not None:
-            query += f"""
-                LIMIT {limit}
-            """
-
-        if ids is not None:
-            self.cursor.execute(query, ids)
-        else:
-            self.cursor.execute(query)
-
-        return list(self.cursor)
-
-
-
-
-
-
-
-    def get_funding_round_investors(self, fr_ids):
-
-        self.connect()
-
-        query = f"""
-            SELECT FundingRoundID, OrganisationID, "organisation" as Type
-            FROM graph.Edges_N_Organisation_N_FundingRound
-            WHERE Action = "Invested in"
-            AND FundingRoundID IN ({', '.join(['%s'] * len(fr_ids))})
-        """
-
-        self.cursor.execute(query, fr_ids)
-
-        organisation_investors = list(self.cursor)
-
-        query = f"""
-            SELECT FundingRoundID, PersonID, "person" as Type
-            FROM graph.Edges_N_Person_N_FundingRound
-            WHERE Action = "Invested in"
-            AND FundingRoundID IN ({', '.join(['%s'] * len(fr_ids))})
-        """
-
-        self.cursor.execute(query, fr_ids)
-
-        person_investors = list(self.cursor)
-
-        return organisation_investors + person_investors
-
-    def get_people(self, people_ids=None):
-
-        self.connect()
-
-        query = f"""
-            SELECT PersonID,
-                   FullName
-            FROM graph.Nodes_N_Person
-        """
-
-        if people_ids is not None:
-            query += f"""
-                WHERE PersonID IN ({', '.join(['%s'] * len(people_ids))})
-            """
-
-        if people_ids is not None:
-            self.cursor.execute(query, people_ids)
-        else:
-            self.cursor.execute(query)
-
-        return list(self.cursor)
-
-
-
-
-
-
     def get_investees_funding_rounds(self, org_ids=None, fr_ids=None):
 
         self.connect()
@@ -639,6 +519,68 @@ class DB:
         if org_ids is not None:
             conditions.append(f"""OrganisationID IN ({', '.join(['%s'] * len(org_ids))})""")
             ids.extend(org_ids)
+
+        if fr_ids is not None:
+            conditions.append(f"""FundingRoundID IN ({', '.join(['%s'] * len(fr_ids))})""")
+            ids.extend(fr_ids)
+
+        query += f"""
+            WHERE {' AND '.join(conditions)}
+        """
+
+        if ids:
+            self.cursor.execute(query, ids)
+        else:
+            self.cursor.execute(query)
+
+        return list(self.cursor)
+
+    def get_org_investors_funding_rounds(self, org_ids=None, fr_ids=None):
+
+        self.connect()
+
+        query = f"""
+            SELECT OrganisationID, FundingRoundID 
+            FROM graph.Edges_N_Organisation_N_FundingRound
+        """
+
+        conditions = ['Action = "Invested in"']
+        ids = []
+
+        if org_ids is not None:
+            conditions.append(f"""OrganisationID IN ({', '.join(['%s'] * len(org_ids))})""")
+            ids.extend(org_ids)
+
+        if fr_ids is not None:
+            conditions.append(f"""FundingRoundID IN ({', '.join(['%s'] * len(fr_ids))})""")
+            ids.extend(fr_ids)
+
+        query += f"""
+            WHERE {' AND '.join(conditions)}
+        """
+
+        if ids:
+            self.cursor.execute(query, ids)
+        else:
+            self.cursor.execute(query)
+
+        return list(self.cursor)
+
+    def get_person_investors_funding_rounds(self, person_ids=None, fr_ids=None):
+
+        self.connect()
+
+        query = f"""
+            SELECT PersonID, FundingRoundID 
+            FROM graph.Edges_N_Person_N_FundingRound
+        """
+
+        conditions = ['Action = "Invested in"']
+        ids = []
+
+        if person_ids is not None:
+            conditions.append(f"""PersonID IN ({', '.join(['%s'] * len(person_ids))})""")
+            ids.extend(person_ids)
 
         if fr_ids is not None:
             conditions.append(f"""FundingRoundID IN ({', '.join(['%s'] * len(fr_ids))})""")
@@ -687,16 +629,22 @@ class DB:
 
         return list(self.cursor)
 
-    def get_funding_rounds(self, min_date=None, max_date=None, fr_ids=None):
+    def get_funding_rounds(self, min_date=None, max_date=None, fr_ids=None, fields=None):
 
         self.connect()
 
-        query = f"""
-            SELECT FundingRoundID,
-                   CONCAT(YEAR(FundingRoundDate), "-Q", QUARTER(FundingRoundDate)) AS FundingRoundTimePeriod,
-                   FundingAmount_USD
-            FROM graph.Nodes_N_FundingRound
-        """
+        if fields is None:
+            query = f"""
+                SELECT FundingRoundID,
+                       CONCAT(YEAR(FundingRoundDate), "-Q", QUARTER(FundingRoundDate)) AS FundingRoundTimePeriod,
+                       FundingAmount_USD
+                FROM graph.Nodes_N_FundingRound
+            """
+        else:
+            query = f"""
+                SELECT {', '.join(fields)}
+                FROM graph.Nodes_N_FundingRound
+            """
 
         conditions = []
 
@@ -775,3 +723,129 @@ class DB:
         self.cursor.execute(query)
 
         return [concept_id for concept_id, in self.cursor]
+
+
+
+
+
+
+
+    # To be checked if deprecated
+    def get_startups(self, ids=None, limit=None):
+
+        self.connect()
+
+        query = f"""
+            SELECT EPFLStartupID,
+                   StartupName,
+                   LegalEntity,
+                   FoundingYear,
+                   ExitYear,
+                   Status,
+                   Industry
+            FROM graph.Nodes_N_EPFLStartup
+        """
+
+        if ids is not None:
+            query += f"""
+                WHERE EPFLStartupID IN ({', '.join(['%s'] * len(ids))})
+            """
+
+        if limit is not None:
+            query += f"""
+                LIMIT {limit}
+            """
+
+        if ids is not None:
+            self.cursor.execute(query, ids)
+        else:
+            self.cursor.execute(query)
+
+        return list(self.cursor)
+
+    # To be checked if deprecated
+    def get_concepts_old(self, ids=None, limit=None):
+
+        self.connect()
+
+        query = f"""
+            SELECT PageID,
+                   PageTitle
+            FROM graph.Nodes_N_Concept
+        """
+
+        if ids is not None:
+            query += f"""
+                WHERE PageID IN ({', '.join(['%s'] * len(ids))})
+            """
+
+        if limit is not None:
+            query += f"""
+                LIMIT {limit}
+            """
+
+        if ids is not None:
+            self.cursor.execute(query, ids)
+        else:
+            self.cursor.execute(query)
+
+        return list(self.cursor)
+
+
+
+
+
+
+
+
+    # Deprecated, to be removed
+    def get_funding_round_investors(self, fr_ids):
+
+        self.connect()
+
+        query = f"""
+            SELECT FundingRoundID, OrganisationID, "organisation" as Type
+            FROM graph.Edges_N_Organisation_N_FundingRound
+            WHERE Action = "Invested in"
+            AND FundingRoundID IN ({', '.join(['%s'] * len(fr_ids))})
+        """
+
+        self.cursor.execute(query, fr_ids)
+
+        organisation_investors = list(self.cursor)
+
+        query = f"""
+            SELECT FundingRoundID, PersonID, "person" as Type
+            FROM graph.Edges_N_Person_N_FundingRound
+            WHERE Action = "Invested in"
+            AND FundingRoundID IN ({', '.join(['%s'] * len(fr_ids))})
+        """
+
+        self.cursor.execute(query, fr_ids)
+
+        person_investors = list(self.cursor)
+
+        return organisation_investors + person_investors
+
+    # Deprecated, to be removed
+    def get_people(self, people_ids=None):
+
+        self.connect()
+
+        query = f"""
+            SELECT PersonID,
+                   FullName
+            FROM graph.Nodes_N_Person
+        """
+
+        if people_ids is not None:
+            query += f"""
+                WHERE PersonID IN ({', '.join(['%s'] * len(people_ids))})
+            """
+
+        if people_ids is not None:
+            self.cursor.execute(query, people_ids)
+        else:
+            self.cursor.execute(query)
+
+        return list(self.cursor)
