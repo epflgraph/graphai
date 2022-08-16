@@ -724,6 +724,94 @@ class DB:
 
         return [concept_id for concept_id, in self.cursor]
 
+    def create_table_Nodes_N_Investor(self, df):
+
+        self.connect()
+
+        query = f"""
+            DROP TABLE IF EXISTS ca_temp.Nodes_N_Investor;
+        """
+
+        self.cursor.execute(query)
+
+        query = f"""
+            CREATE TABLE ca_temp.Nodes_N_Investor (
+                            InvestorID      CHAR(64),
+                            InvestorType    CHAR(32),
+                            PRIMARY KEY InvestorID (InvestorID)
+                        ) ENGINE=InnoDB DEFAULT CHARSET ascii;
+        """
+
+        self.cursor.execute(query)
+
+        tuples = list(df.itertuples(index=False, name=None))
+        values = [value for line in tuples for value in line]
+
+        query = f"""INSERT INTO ca_temp.Nodes_N_Investor VALUES {', '.join(['(%s, %s)'] * len(tuples))}"""
+
+        self.cursor.execute(query, values)
+
+        self.cnx.commit()
+
+    def create_table_Edges_N_Investor_N_Investor(self, df):
+
+        self.connect()
+
+        query = f"""
+            DROP TABLE IF EXISTS ca_temp.Edges_N_Investor_N_Investor;
+        """
+
+        self.cursor.execute(query)
+
+        query = f"""
+            CREATE TABLE ca_temp.Edges_N_Investor_N_Investor (
+                            SourceInvestorID      CHAR(64),
+                            TargetInvestorID      CHAR(64),
+                            KEY SourceInvestorID (SourceInvestorID),
+                            KEY TargetInvestorID (TargetInvestorID)
+                        ) ENGINE=InnoDB DEFAULT CHARSET ascii;
+        """
+
+        self.cursor.execute(query)
+
+        tuples = list(df.itertuples(index=False, name=None))
+        values = [value for line in tuples for value in line]
+
+        query = f"""INSERT INTO ca_temp.Edges_N_Investor_N_Investor VALUES {', '.join(['(%s, %s)'] * len(tuples))}"""
+
+        self.cursor.execute(query, values)
+
+        self.cnx.commit()
+
+    def create_table_Edges_N_Investor_N_Concept(self, df):
+
+        self.connect()
+
+        query = f"""
+            DROP TABLE IF EXISTS ca_temp.Edges_N_Investor_N_Concept;
+        """
+
+        self.cursor.execute(query)
+
+        query = f"""
+            CREATE TABLE ca_temp.Edges_N_Investor_N_Concept (
+                            InvestorID      CHAR(64),
+                            PageID          INT UNSIGNED,
+                            KEY InvestorID (InvestorID),
+                            KEY PageID (PageID)
+                        ) ENGINE=InnoDB DEFAULT CHARSET ascii;
+        """
+
+        self.cursor.execute(query)
+
+        tuples = list(df.itertuples(index=False, name=None))
+        values = [value for line in tuples for value in line]
+
+        query = f"""INSERT INTO ca_temp.Edges_N_Investor_N_Concept VALUES {', '.join(['(%s, %s)'] * len(tuples))}"""
+
+        self.cursor.execute(query, values)
+
+        self.cnx.commit()
 
 
 
