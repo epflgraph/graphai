@@ -1,11 +1,7 @@
 import pandas as pd
-
-import networkx as nx
-
 from itertools import combinations
 
 from interfaces.db import DB
-
 from utils.time.stopwatch import Stopwatch
 
 
@@ -15,8 +11,8 @@ def retrieve_funding_rounds(min_date, max_date):
     db = DB()
 
     # Retrieve funding rounds in time window
-    fields = ['FundingRoundID']
-    columns = ['fr_id']
+    fields = ['FundingRoundID', 'FundingRoundDate', 'FundingAmount_USD']
+    columns = ['fr_id', 'date', 'amount']
     frs = pd.DataFrame(db.get_funding_rounds(min_date=min_date, max_date=max_date, fields=fields), columns=columns)
 
     return frs
@@ -35,19 +31,35 @@ def retrieve_investors(frs):
     person_investors_frs = pd.DataFrame(db.get_person_investors_funding_rounds(fr_ids=fr_ids), columns=['investor_id', 'fr_id'])
     person_investors_frs['investor_type'] = 'Person'
     investors_frs = pd.concat([org_investors_frs, person_investors_frs])
+    investors_frs = investors_frs[['investor_id', 'investor_type', 'fr_id']]
 
     return investors_frs
 
 
-def insert_investors(investors_frs):
+def retrieve_investees(frs):
     # Instantiate db interface to communicate with database
     db = DB()
 
-    # Drop duplicate investors
-    investors = investors_frs[['investor_id', 'investor_type']].drop_duplicates()
+    # Extract list of funding round ids
+    fr_ids = list(frs['fr_id'])
 
-    # Insert into DB
-    db.create_table_Nodes_N_Investor(investors)
+    # Retrieve investees
+    frs_investees = pd.DataFrame(db.get_funding_rounds_investees(fr_ids=fr_ids), columns=['fr_id', 'investee_id'])
+
+    return frs_investees
+
+
+def retrieve_concepts(frs_investees):
+    # Instantiate db interface to communicate with database
+    db = DB()
+
+    # Extract list of investee ids
+    investee_ids = list(frs_investees['investee_id'])
+
+    # Retrieve investees' concepts
+    investees_concepts = pd.DataFrame(db.get_investees_concepts(org_ids=investee_ids), columns=['investee_id', 'concept_id'])
+
+    return investees_concepts
 
 
 def compute_investor_pairs(investors_frs):
@@ -61,165 +73,180 @@ def compute_investor_pairs(investors_frs):
     investor_pairs.columns = ['fr_id', 'source_investor_id', 'target_investor_id']
 
     # Duplicate DataFrame flipping source and target, since the relation is symmetrical
-    first_half = pd.DataFrame(investor_pairs[['fr_id', 'source_investor_id', 'target_investor_id']].values, columns=['fr_id', 'source_investor_id', 'target_investor_id'])
-    second_half = pd.DataFrame(investor_pairs[['fr_id', 'target_investor_id', 'source_investor_id']].values, columns=['fr_id', 'source_investor_id', 'target_investor_id'])
+    first_half = pd.DataFrame(investor_pairs[['source_investor_id', 'fr_id', 'target_investor_id']].values, columns=['source_investor_id', 'fr_id', 'target_investor_id'])
+    second_half = pd.DataFrame(investor_pairs[['target_investor_id', 'fr_id', 'source_investor_id']].values, columns=['source_investor_id', 'fr_id', 'target_investor_id'])
     return pd.concat([first_half, second_half]).reset_index(drop=True)
 
 
-def insert_investor_edges(investor_pairs):
+def insert_funding_rounds(frs):
+    # Instantiate db interface to communicate with database
+    db = DB()
+
+    # Insert into DB
+    db.create_table_Nodes_N_FundingRound(frs)
+
+
+def insert_investors(investors_frs):
     # Instantiate db interface to communicate with database
     db = DB()
 
     # Drop duplicate investors
-    investors = investor_pairs[['source_investor_id', 'target_investor_id']].drop_duplicates()
+    nodes = investors_frs[['investor_id', 'investor_type']].drop_duplicates()
 
     # Insert into DB
-    db.create_table_Edges_N_Investor_N_Investor(investors)
+    db.create_table_Nodes_N_Investor(nodes)
 
 
-def retrieve_concepts(frs):
+def insert_investees(frs_investees):
     # Instantiate db interface to communicate with database
     db = DB()
 
-    # Extract list of funding round ids
-    fr_ids = list(frs['fr_id'])
+    # Drop duplicate investees
+    nodes = frs_investees[['investee_id']].drop_duplicates()
 
-    # Retrieve investees
-    investees_frs = pd.DataFrame(db.get_investees_funding_rounds(fr_ids=fr_ids), columns=['investee_id', 'fr_id'])
-
-    # Extract list of investee ids
-    investee_ids = list(investees_frs['investee_id'])
-
-    # Retrieve investees' concepts
-    concepts_investees = pd.DataFrame(db.get_concepts_organisations(org_ids=investee_ids), columns=['concept_id', 'investee_id'])
-
-    # Join frs and concepts through investees
-    concepts_frs = pd.merge(investees_frs, concepts_investees, how='inner', on='investee_id')
-    concepts_frs = concepts_frs[['fr_id', 'concept_id']]
-
-    return concepts_frs
+    # Insert into DB
+    db.create_table_Nodes_N_Investee(nodes)
 
 
-def compute_investor_concept_pairs(investors_frs, concepts_frs):
-    investors_concepts = pd.merge(investors_frs, concepts_frs, how='inner', on='fr_id')
-    investors_concepts = investors_concepts[['investor_id', 'investor_type', 'concept_id']].drop_duplicates()
-
-    return investors_concepts
-
-
-def insert_investor_concept_edges(investors_concepts):
+def insert_investors_frs(investors_frs):
     # Instantiate db interface to communicate with database
     db = DB()
 
-    investors_concepts_edges = investors_concepts[['investor_id', 'concept_id']]
+    edges = investors_frs[['investor_id', 'fr_id']]
 
     # Insert into DB
-    db.create_table_Edges_N_Investor_N_Concept(investors_concepts_edges)
+    db.create_table_Edges_N_Investor_N_FundingRound(edges)
 
 
+def insert_investors_investors(investors_investors):
+    # Instantiate db interface to communicate with database
+    db = DB()
+
+    # Drop duplicate investor pairs
+    edges = investors_investors[['source_investor_id', 'target_investor_id']].drop_duplicates()
+
+    # Insert into DB
+    db.create_table_Edges_N_Investor_N_Investor(edges)
 
 
+def insert_investors_investees(investors_frs, frs_investees):
+    # Instantiate db interface to communicate with database
+    db = DB()
+
+    # Merge investors and investees through frs and drop duplicates
+    edges = pd.merge(investors_frs, frs_investees, how='inner', on='fr_id')[['investor_id', 'investee_id']].drop_duplicates()
+
+    # Insert into DB
+    db.create_table_Edges_N_Investor_N_Investee(edges)
 
 
+def insert_investors_concepts(investors_frs, frs_investees, investees_concepts):
+    # Instantiate db interface to communicate with database
+    db = DB()
+
+    # Merge investors and concepts through frs and investees and drop duplicates
+    edges = pd.merge(investors_frs, frs_investees, how='inner', on='fr_id')
+    edges = pd.merge(edges, investees_concepts, how='inner', on='investee_id')
+    edges = edges[['investor_id', 'concept_id']].drop_duplicates()
+
+    # Insert into DB
+    db.create_table_Edges_N_Investor_N_Concept(edges)
 
 
+def insert_frs_investees(frs_investees):
+    # Instantiate db interface to communicate with database
+    db = DB()
+
+    edges = frs_investees[['fr_id', 'investee_id']]
+
+    # Insert into DB
+    db.create_table_Edges_N_FundingRound_N_Investee(edges)
 
 
+def insert_frs_concepts(frs_investees, investees_concepts):
+    # Instantiate db interface to communicate with database
+    db = DB()
 
-def compute_investor_edges(investor_pairs):
-    # Convert to list of dictionaries to create graph
-    investor_pairs = investor_pairs.to_dict(orient='records')
+    # Merge frs and concepts through investees and drop duplicates
+    edges = pd.merge(frs_investees, investees_concepts, how='inner', on='investee_id')[['fr_id', 'concept_id']].drop_duplicates()
 
-    # Group by investor pair and include aggregated funding rounds as history data of the investor pair
-    investor_edges = {}
-    for pair in investor_pairs:
-        key = f"{pair['investor_id_1']}x{pair['investor_id_2']}"
-
-        fr = {
-            'fr_id': pair['fr_id'],
-            'date': pair['fr_date'],
-            'amount': pair['fr_amount'],
-            'n_investors': pair['fr_n_investors'],
-            'amount_per_investor': pair['fr_amount_per_investor']
-        }
-
-        if key in investor_edges:
-            investor_edges[key]['d'].append(fr)
-        else:
-            investor_edges[key] = {
-                's': pair['investor_id_1'],
-                't': pair['investor_id_2'],
-                'd': [fr]
-            }
-
-    # Reshape as networkx container of edges
-    investor_edges = [(investor_edges[key]['s'], investor_edges[key]['t'], {'hist': investor_edges[key]['d']}) for key in investor_edges]
-
-    return investor_edges
+    # Insert into DB
+    db.create_table_Edges_N_FundingRound_N_Concept(edges)
 
 
-def create_investor_graph(investor_edges):
-    # Create graph and populate it with data from investor edges
-    G = nx.Graph()
-    G.add_edges_from(investor_edges)
-    G.remove_nodes_from(list(nx.isolates(G)))
+def insert_investees_concepts(investees_concepts):
+    # Instantiate db interface to communicate with database
+    db = DB()
 
-    return G
+    # Insert into DB
+    db.create_table_Edges_N_Investee_N_Concept(investees_concepts)
 
 
 def main():
     sw = Stopwatch()
 
-    min_date = '2021-11-01'
+    min_date = '2018-01-01'
     max_date = '2022-01-01'
 
-    print('0. Retrieving funding rounds...')
+    print('Retrieving funding rounds...')
     frs = retrieve_funding_rounds(min_date, max_date)
     sw.tick()
 
-    print('1. Retrieving investors...')
+    print('Inserting funding rounds into database...')
+    insert_funding_rounds(frs)
+    sw.tick()
+
+    print('Retrieving investors...')
     investors_frs = retrieve_investors(frs)
     sw.tick()
 
-    print('2. Inserting investors into database...')
+    print('Inserting investors into database...')
     insert_investors(investors_frs)
     sw.tick()
 
-    print('3. Computing investor pairs...')
-    investor_pairs = compute_investor_pairs(investors_frs)
+    print('Inserting investors-frs edges into database...')
+    insert_investors_frs(investors_frs)
     sw.tick()
 
-    print('4. Inserting investor edges into database...')
-    insert_investor_edges(investor_pairs)
+    print('Computing investor pairs...')
+    investors_investors = compute_investor_pairs(investors_frs)
     sw.tick()
 
-    print('5. Retrieving concepts...')
-    concepts_frs = retrieve_concepts(frs)
+    print('Inserting investor-investor edges into database...')
+    insert_investors_investors(investors_investors)
     sw.tick()
 
-    print('6. Computing investor-concept pairs...')
-    investors_concepts = compute_investor_concept_pairs(investors_frs, concepts_frs)
+    print('Retrieving investees...')
+    frs_investees = retrieve_investees(frs)
     sw.tick()
 
-    print('7. Inserting investor-concept edges into database...')
-    insert_investor_concept_edges(investors_concepts)
+    print('Inserting investees into database...')
+    insert_investees(frs_investees)
+    sw.tick()
 
-    # print('Computing investor edges...')
-    # investor_edges = compute_investor_edges(investor_pairs)
-    # print('Creating investor graph...')
-    # G = create_investor_graph(investor_edges)
-    #
-    # n_nodes = len(G.nodes)
-    # n_edges = len(G.edges)
-    # cc_sizes = [len(c) for c in sorted(nx.connected_components(G), key=len, reverse=True)]
-    #
-    # print(f'Investor graph for time range [{min_date}, {max_date}) [n_nodes: {n_nodes}, n_edges: {n_edges}, n_ccs: {len(cc_sizes)}, cc_sizes: {cc_sizes[:5] + [...]}]')
+    print('Inserting frs-investees edges into database...')
+    insert_frs_investees(frs_investees)
+    sw.tick()
 
+    print('Inserting investors-investees edges into database...')
+    insert_investors_investees(investors_frs, frs_investees)
+    sw.tick()
+
+    print('Retrieving concepts...')
+    investees_concepts = retrieve_concepts(frs_investees)
+    sw.tick()
+
+    print('Inserting investees-concepts edges into database...')
+    insert_investees_concepts(investees_concepts)
+    sw.tick()
+
+    print('Inserting frs-concepts edges into database...')
+    insert_frs_concepts(frs_investees, investees_concepts)
+    sw.tick()
+
+    print('Inserting investors-concepts edges into database...')
+    insert_investors_concepts(investors_frs, frs_investees, investees_concepts)
     sw.report()
-
-    # nx.draw_spring(G, node_size=1)
-    # import matplotlib.pyplot as plt
-    # plt.show()
 
 
 if __name__ == '__main__':

@@ -27,6 +27,10 @@ class DB:
         self.channel_anchor_page_ids = self.query_channel_anchor_page_ids()
         self.course_channel_ids = self.query_course_channel_ids()
 
+    ################
+    # BASE METHODS #
+    ################
+
     def connect(self):
         self.cnx = mysql.connector.connect(host=self.host, port=self.port, user=self.user, password=self.password)
         self.cursor = self.cnx.cursor()
@@ -41,6 +45,35 @@ class DB:
         self.cursor.execute(query)
 
         return list(self.cursor)
+
+    def get_table(self, table, fields=None, limit=None):
+        """
+        TODO DOC
+        Args:
+            table:
+
+        Returns:
+        """
+
+        self.connect()
+
+        if fields is None:
+            query = f"""
+                SELECT * FROM {table}
+            """
+        else:
+            query = f"""
+                SELECT {', '.join([field for field in fields])} FROM {table}
+            """
+
+        if limit is not None:
+            query += f"""LIMIT {limit}"""
+
+        return self.query(query)
+
+    #####################
+    # CONCEPT DETECTION #
+    #####################
 
     def query_channel_anchor_page_ids(self):
         """
@@ -479,50 +512,29 @@ class DB:
             for page_id, categories in self.cursor
         }
 
-    def get_table(self, table, fields=None, limit=None):
-        """
-        TODO DOC
-        Args:
-            table:
+    ##############
+    # CRUNCHBASE #
+    ##############
 
-        Returns:
-        """
-
-        self.connect()
-
-        if fields is None:
-            query = f"""
-                SELECT * FROM {table}
-            """
-        else:
-            query = f"""
-                SELECT {', '.join([field for field in fields])} FROM {table}
-            """
-
-        if limit is not None:
-            query += f"""LIMIT {limit}"""
-
-        return self.query(query)
-
-    def get_investees_funding_rounds(self, org_ids=None, fr_ids=None):
+    def get_funding_rounds_investees(self, fr_ids=None, org_ids=None):
 
         self.connect()
 
         query = f"""
-            SELECT OrganisationID, FundingRoundID 
+            SELECT FundingRoundID, OrganisationID 
             FROM graph.Edges_N_Organisation_N_FundingRound
         """
 
         conditions = ['Action = "Raised from"']
         ids = []
 
-        if org_ids is not None:
-            conditions.append(f"""OrganisationID IN ({', '.join(['%s'] * len(org_ids))})""")
-            ids.extend(org_ids)
-
         if fr_ids is not None:
             conditions.append(f"""FundingRoundID IN ({', '.join(['%s'] * len(fr_ids))})""")
             ids.extend(fr_ids)
+
+        if org_ids is not None:
+            conditions.append(f"""OrganisationID IN ({', '.join(['%s'] * len(org_ids))})""")
+            ids.extend(org_ids)
 
         query += f"""
             WHERE {' AND '.join(conditions)}
@@ -597,25 +609,25 @@ class DB:
 
         return list(self.cursor)
 
-    def get_concepts_organisations(self, concept_ids=None, org_ids=None):
+    def get_investees_concepts(self, org_ids=None, concept_ids=None):
 
         self.connect()
 
         query = f"""
-            SELECT PageID, OrganisationID 
+            SELECT OrganisationID, PageID 
             FROM graph.Edges_N_Organisation_N_Concept
         """
 
         conditions = []
         ids = []
 
-        if concept_ids is not None:
-            conditions.append(f"""PageID IN ({', '.join(['%s'] * len(concept_ids))})""")
-            ids.extend(concept_ids)
-
         if org_ids is not None:
             conditions.append(f"""OrganisationID IN ({', '.join(['%s'] * len(org_ids))})""")
             ids.extend(org_ids)
+
+        if concept_ids is not None:
+            conditions.append(f"""PageID IN ({', '.join(['%s'] * len(concept_ids))})""")
+            ids.extend(concept_ids)
 
         if conditions:
             query += f"""
@@ -724,6 +736,42 @@ class DB:
 
         return [concept_id for concept_id, in self.cursor]
 
+    #############################
+    # CRUNCHBASE GRAPH CREATION #
+    #############################
+
+    def create_table_Nodes_N_FundingRound(self, df):
+
+        self.connect()
+
+        query = f"""
+            DROP TABLE IF EXISTS ca_temp.Nodes_N_FundingRound;
+        """
+
+        self.cursor.execute(query)
+
+        query = f"""
+            CREATE TABLE ca_temp.Nodes_N_FundingRound (
+                            FundingRoundID          CHAR(64),
+                            FundingRoundDate        DATE,
+                            FundingAmount_USD   FLOAT,
+                            PRIMARY KEY FundingRoundID (FundingRoundID)
+                        ) ENGINE=InnoDB DEFAULT CHARSET ascii;
+        """
+
+        self.cursor.execute(query)
+
+        tuples = list(df.itertuples(index=False, name=None))
+        values = [value for line in tuples for value in line]
+
+        # placeholder for the row of values, e.g. "(%s, %s, %s)"
+        placeholder = f'({", ".join(["%s"] * len(df.columns))})'
+        query = f"""INSERT INTO ca_temp.Nodes_N_FundingRound VALUES {', '.join([placeholder] * len(tuples))}"""
+
+        self.cursor.execute(query, values)
+
+        self.cnx.commit()
+
     def create_table_Nodes_N_Investor(self, df):
 
         self.connect()
@@ -747,7 +795,71 @@ class DB:
         tuples = list(df.itertuples(index=False, name=None))
         values = [value for line in tuples for value in line]
 
-        query = f"""INSERT INTO ca_temp.Nodes_N_Investor VALUES {', '.join(['(%s, %s)'] * len(tuples))}"""
+        # placeholder for the row of values, e.g. "(%s, %s, %s)"
+        placeholder = f'({", ".join(["%s"] * len(df.columns))})'
+        query = f"""INSERT INTO ca_temp.Nodes_N_Investor VALUES {', '.join([placeholder] * len(tuples))}"""
+
+        self.cursor.execute(query, values)
+
+        self.cnx.commit()
+
+    def create_table_Nodes_N_Investee(self, df):
+
+        self.connect()
+
+        query = f"""
+            DROP TABLE IF EXISTS ca_temp.Nodes_N_Investee;
+        """
+
+        self.cursor.execute(query)
+
+        query = f"""
+            CREATE TABLE ca_temp.Nodes_N_Investee (
+                            InvesteeID      CHAR(64),
+                            PRIMARY KEY InvesteeID (InvesteeID)
+                        ) ENGINE=InnoDB DEFAULT CHARSET ascii;
+        """
+
+        self.cursor.execute(query)
+
+        tuples = list(df.itertuples(index=False, name=None))
+        values = [value for line in tuples for value in line]
+
+        # placeholder for the row of values, e.g. "(%s, %s, %s)"
+        placeholder = f'({", ".join(["%s"] * len(df.columns))})'
+        query = f"""INSERT INTO ca_temp.Nodes_N_Investee VALUES {', '.join([placeholder] * len(tuples))}"""
+
+        self.cursor.execute(query, values)
+
+        self.cnx.commit()
+
+    def create_table_Edges_N_Investor_N_FundingRound(self, df):
+
+        self.connect()
+
+        query = f"""
+            DROP TABLE IF EXISTS ca_temp.Edges_N_Investor_N_FundingRound;
+        """
+
+        self.cursor.execute(query)
+
+        query = f"""
+            CREATE TABLE ca_temp.Edges_N_Investor_N_FundingRound (
+                            InvestorID        CHAR(64),
+                            FundingRoundID    CHAR(64),
+                            KEY InvestorID (InvestorID),
+                            KEY FundingRoundID (FundingRoundID)
+                        ) ENGINE=InnoDB DEFAULT CHARSET ascii;
+        """
+
+        self.cursor.execute(query)
+
+        tuples = list(df.itertuples(index=False, name=None))
+        values = [value for line in tuples for value in line]
+
+        # placeholder for the row of values, e.g. "(%s, %s, %s)"
+        placeholder = f'({", ".join(["%s"] * len(df.columns))})'
+        query = f"""INSERT INTO ca_temp.Edges_N_Investor_N_FundingRound VALUES {', '.join([placeholder] * len(tuples))}"""
 
         self.cursor.execute(query, values)
 
@@ -777,7 +889,41 @@ class DB:
         tuples = list(df.itertuples(index=False, name=None))
         values = [value for line in tuples for value in line]
 
-        query = f"""INSERT INTO ca_temp.Edges_N_Investor_N_Investor VALUES {', '.join(['(%s, %s)'] * len(tuples))}"""
+        # placeholder for the row of values, e.g. "(%s, %s, %s)"
+        placeholder = f'({", ".join(["%s"] * len(df.columns))})'
+        query = f"""INSERT INTO ca_temp.Edges_N_Investor_N_Investor VALUES {', '.join([placeholder] * len(tuples))}"""
+
+        self.cursor.execute(query, values)
+
+        self.cnx.commit()
+
+    def create_table_Edges_N_Investor_N_Investee(self, df):
+
+        self.connect()
+
+        query = f"""
+            DROP TABLE IF EXISTS ca_temp.Edges_N_Investor_N_Investee;
+        """
+
+        self.cursor.execute(query)
+
+        query = f"""
+            CREATE TABLE ca_temp.Edges_N_Investor_N_Investee (
+                            InvestorID      CHAR(64),
+                            InvesteeID      CHAR(64),
+                            KEY InvestorID (InvestorID),
+                            KEY InvesteeID (InvesteeID)
+                        ) ENGINE=InnoDB DEFAULT CHARSET ascii;
+        """
+
+        self.cursor.execute(query)
+
+        tuples = list(df.itertuples(index=False, name=None))
+        values = [value for line in tuples for value in line]
+
+        # placeholder for the row of values, e.g. "(%s, %s, %s)"
+        placeholder = f'({", ".join(["%s"] * len(df.columns))})'
+        query = f"""INSERT INTO ca_temp.Edges_N_Investor_N_Investee VALUES {', '.join([placeholder] * len(tuples))}"""
 
         self.cursor.execute(query, values)
 
@@ -807,7 +953,105 @@ class DB:
         tuples = list(df.itertuples(index=False, name=None))
         values = [value for line in tuples for value in line]
 
-        query = f"""INSERT INTO ca_temp.Edges_N_Investor_N_Concept VALUES {', '.join(['(%s, %s)'] * len(tuples))}"""
+        # placeholder for the row of values, e.g. "(%s, %s, %s)"
+        placeholder = f'({", ".join(["%s"] * len(df.columns))})'
+        query = f"""INSERT INTO ca_temp.Edges_N_Investor_N_Concept VALUES {', '.join([placeholder] * len(tuples))}"""
+
+        self.cursor.execute(query, values)
+
+        self.cnx.commit()
+
+    def create_table_Edges_N_FundingRound_N_Investee(self, df):
+
+        self.connect()
+
+        query = f"""
+            DROP TABLE IF EXISTS ca_temp.Edges_N_FundingRound_N_Investee;
+        """
+
+        self.cursor.execute(query)
+
+        query = f"""
+            CREATE TABLE ca_temp.Edges_N_FundingRound_N_Investee (
+                            FundingRoundID      CHAR(64),
+                            InvesteeID          CHAR(64),
+                            KEY FundingRoundID (FundingRoundID),
+                            KEY InvesteeID (InvesteeID)
+                        ) ENGINE=InnoDB DEFAULT CHARSET ascii;
+        """
+
+        self.cursor.execute(query)
+
+        tuples = list(df.itertuples(index=False, name=None))
+        values = [value for line in tuples for value in line]
+
+        # placeholder for the row of values, e.g. "(%s, %s, %s)"
+        placeholder = f'({", ".join(["%s"] * len(df.columns))})'
+        query = f"""INSERT INTO ca_temp.Edges_N_FundingRound_N_Investee VALUES {', '.join([placeholder] * len(tuples))}"""
+
+        self.cursor.execute(query, values)
+
+        self.cnx.commit()
+
+    def create_table_Edges_N_FundingRound_N_Concept(self, df):
+
+        self.connect()
+
+        query = f"""
+            DROP TABLE IF EXISTS ca_temp.Edges_N_FundingRound_N_Concept;
+        """
+
+        self.cursor.execute(query)
+
+        query = f"""
+            CREATE TABLE ca_temp.Edges_N_FundingRound_N_Concept (
+                            FundingRoundID      CHAR(64),
+                            PageID              INT UNSIGNED,
+                            KEY FundingRoundID (FundingRoundID),
+                            KEY PageID (PageID)
+                        ) ENGINE=InnoDB DEFAULT CHARSET ascii;
+        """
+
+        self.cursor.execute(query)
+
+        tuples = list(df.itertuples(index=False, name=None))
+        values = [value for line in tuples for value in line]
+
+        # placeholder for the row of values, e.g. "(%s, %s, %s)"
+        placeholder = f'({", ".join(["%s"] * len(df.columns))})'
+        query = f"""INSERT INTO ca_temp.Edges_N_FundingRound_N_Concept VALUES {', '.join([placeholder] * len(tuples))}"""
+
+        self.cursor.execute(query, values)
+
+        self.cnx.commit()
+
+    def create_table_Edges_N_Investee_N_Concept(self, df):
+
+        self.connect()
+
+        query = f"""
+            DROP TABLE IF EXISTS ca_temp.Edges_N_Investee_N_Concept;
+        """
+
+        self.cursor.execute(query)
+
+        query = f"""
+            CREATE TABLE ca_temp.Edges_N_Investee_N_Concept (
+                            InvesteeID      CHAR(64),
+                            PageID          INT UNSIGNED,
+                            KEY InvesteeID (InvesteeID),
+                            KEY PageID (PageID)
+                        ) ENGINE=InnoDB DEFAULT CHARSET ascii;
+        """
+
+        self.cursor.execute(query)
+
+        tuples = list(df.itertuples(index=False, name=None))
+        values = [value for line in tuples for value in line]
+
+        # placeholder for the row of values, e.g. "(%s, %s, %s)"
+        placeholder = f'({", ".join(["%s"] * len(df.columns))})'
+        query = f"""INSERT INTO ca_temp.Edges_N_Investee_N_Concept VALUES {', '.join([placeholder] * len(tuples))}"""
 
         self.cursor.execute(query, values)
 
