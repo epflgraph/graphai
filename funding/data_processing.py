@@ -41,7 +41,10 @@ def build_time_series(min_date, max_date, concept_ids, debug=False):
     ##################
 
     # Get funding rounds in time window
-    frs = pd.DataFrame(db.get_funding_rounds(min_date, max_date), columns=['fr_id', 'time', 'amount'])
+    table_name = 'graph.Nodes_N_FundingRound'
+    fields = ['FundingRoundID', 'CONCAT(YEAR(FundingRoundDate), "-Q", QUARTER(FundingRoundDate))', 'FundingAmount_USD']
+    conditions = {'FundingRoundDate': {'>=': min_date, '<': max_date}}
+    frs = pd.DataFrame(db.find(table_name, fields=fields, conditions=conditions), columns=['fr_id', 'time', 'amount'])
     log(frs, debug)
 
     # Extract list of funding round ids
@@ -61,7 +64,10 @@ def build_time_series(min_date, max_date, concept_ids, debug=False):
     log(f'Got {len(investee_ids)} investees!', debug)
 
     # Get investees
-    investees = pd.DataFrame(db.get_organisations(org_ids=investee_ids), columns=['investee_id', 'investee_name'])
+    table_name = 'graph.Nodes_N_Organisation'
+    fields = ['OrganisationID', 'OrganisationName']
+    conditions = {'OrganisationID': investee_ids}
+    investees = pd.DataFrame(db.find(table_name, fields=fields, conditions=conditions), columns=['investee_id', 'investee_name'])
     log(investees, debug)
 
     ############
@@ -73,7 +79,10 @@ def build_time_series(min_date, max_date, concept_ids, debug=False):
     log(concepts_investees, debug)
 
     # Get concepts
-    concepts = pd.DataFrame(db.get_concepts(concept_ids), columns=['concept_id', 'concept_name'])
+    table_name = 'graph.Nodes_N_Concept'
+    fields = ['PageID', 'PageTitle']
+    conditions = {'PageID': concept_ids}
+    concepts = pd.DataFrame(db.find(table_name, fields=fields, conditions=conditions), columns=['concept_id', 'concept_name'])
     log(concepts, debug)
 
     ###############

@@ -6,6 +6,13 @@ from definitions import CONFIG_DIR
 from models.wikify_result import WikifyResult
 
 
+def quote_value(v):
+    if isinstance(v, str):
+        return f'"{v}"'
+    else:
+        return v
+
+
 class DB:
     """
     Base class to communicate with the EPFLGraph database.
@@ -70,6 +77,66 @@ class DB:
             query += f"""LIMIT {limit}"""
 
         return self.query(query)
+
+    def find(self, table_name, fields=None, conditions=None):
+        if fields:
+            fields_str = ', '.join(fields)
+        else:
+            fields_str = '*'
+
+        conditions_str = ''
+        values = []
+        if conditions:
+            conditions_list = []
+            for key in conditions:
+                if isinstance(conditions[key], list):
+                    conditions_list.append(f'{key} IN ({", ".join(["%s"] * len(conditions[key]))})')
+                    values.extend(conditions[key])
+                elif isinstance(conditions[key], dict):
+                    for operator in conditions[key]:
+                        conditions_list.append(f'{key} {operator} {quote_value(conditions[key][operator])}')
+                else:
+                    conditions_list.append(f'{key} = {quote_value(conditions[key])}')
+
+            conditions_str = 'WHERE ' + ' AND '.join(conditions_list)
+
+        query = f"""
+            SELECT {fields_str}
+            FROM {table_name}
+            {conditions_str}
+        """
+
+        self.connect()
+        self.cursor.execute(query, values)
+        return list(self.cursor)
+
+    def create(self, table_name, definition, df):
+        self.connect()
+        query = f"""
+            DROP TABLE IF EXISTS {table_name};
+        """
+        self.cursor.execute(query)
+        self.cnx.commit()
+
+        self.connect()
+        query = f"""
+            CREATE TABLE {table_name} (
+                {', '.join([line for line in definition])}
+            ) ENGINE=InnoDB DEFAULT CHARSET ascii;
+        """
+        self.cursor.execute(query)
+        self.cnx.commit()
+
+        tuples = list(df.itertuples(index=False, name=None))
+        values = [value for line in tuples for value in line]
+
+        # placeholder for the row of values, e.g. "(%s, %s, %s)"
+        placeholder = f'({", ".join(["%s"] * len(df.columns))})'
+
+        self.connect()
+        query = f"""INSERT INTO {table_name} VALUES {', '.join([placeholder] * len(tuples))}"""
+        self.cursor.execute(query, values)
+        self.cnx.commit()
 
     #####################
     # CONCEPT DETECTION #
@@ -512,217 +579,6 @@ class DB:
             for page_id, categories in self.cursor
         }
 
-    ##############
-    # CRUNCHBASE #
-    ##############
-
-    def get_funding_rounds_investees(self, fr_ids=None, org_ids=None):
-
-        self.connect()
-
-        query = f"""
-            SELECT FundingRoundID, OrganisationID 
-            FROM graph.Edges_N_Organisation_N_FundingRound
-        """
-
-        conditions = ['Action = "Raised from"']
-        ids = []
-
-        if fr_ids is not None:
-            conditions.append(f"""FundingRoundID IN ({', '.join(['%s'] * len(fr_ids))})""")
-            ids.extend(fr_ids)
-
-        if org_ids is not None:
-            conditions.append(f"""OrganisationID IN ({', '.join(['%s'] * len(org_ids))})""")
-            ids.extend(org_ids)
-
-        query += f"""
-            WHERE {' AND '.join(conditions)}
-        """
-
-        if ids:
-            self.cursor.execute(query, ids)
-        else:
-            self.cursor.execute(query)
-
-        return list(self.cursor)
-
-    def get_org_investors_funding_rounds(self, org_ids=None, fr_ids=None):
-
-        self.connect()
-
-        query = f"""
-            SELECT OrganisationID, FundingRoundID 
-            FROM graph.Edges_N_Organisation_N_FundingRound
-        """
-
-        conditions = ['Action = "Invested in"']
-        ids = []
-
-        if org_ids is not None:
-            conditions.append(f"""OrganisationID IN ({', '.join(['%s'] * len(org_ids))})""")
-            ids.extend(org_ids)
-
-        if fr_ids is not None:
-            conditions.append(f"""FundingRoundID IN ({', '.join(['%s'] * len(fr_ids))})""")
-            ids.extend(fr_ids)
-
-        query += f"""
-            WHERE {' AND '.join(conditions)}
-        """
-
-        if ids:
-            self.cursor.execute(query, ids)
-        else:
-            self.cursor.execute(query)
-
-        return list(self.cursor)
-
-    def get_person_investors_funding_rounds(self, person_ids=None, fr_ids=None):
-
-        self.connect()
-
-        query = f"""
-            SELECT PersonID, FundingRoundID 
-            FROM graph.Edges_N_Person_N_FundingRound
-        """
-
-        conditions = ['Action = "Invested in"']
-        ids = []
-
-        if person_ids is not None:
-            conditions.append(f"""PersonID IN ({', '.join(['%s'] * len(person_ids))})""")
-            ids.extend(person_ids)
-
-        if fr_ids is not None:
-            conditions.append(f"""FundingRoundID IN ({', '.join(['%s'] * len(fr_ids))})""")
-            ids.extend(fr_ids)
-
-        query += f"""
-            WHERE {' AND '.join(conditions)}
-        """
-
-        if ids:
-            self.cursor.execute(query, ids)
-        else:
-            self.cursor.execute(query)
-
-        return list(self.cursor)
-
-    def get_investees_concepts(self, org_ids=None, concept_ids=None):
-
-        self.connect()
-
-        query = f"""
-            SELECT OrganisationID, PageID 
-            FROM graph.Edges_N_Organisation_N_Concept
-        """
-
-        conditions = []
-        ids = []
-
-        if org_ids is not None:
-            conditions.append(f"""OrganisationID IN ({', '.join(['%s'] * len(org_ids))})""")
-            ids.extend(org_ids)
-
-        if concept_ids is not None:
-            conditions.append(f"""PageID IN ({', '.join(['%s'] * len(concept_ids))})""")
-            ids.extend(concept_ids)
-
-        if conditions:
-            query += f"""
-                WHERE {' AND '.join(conditions)}
-            """
-
-        if ids:
-            self.cursor.execute(query, ids)
-        else:
-            self.cursor.execute(query)
-
-        return list(self.cursor)
-
-    def get_funding_rounds(self, min_date=None, max_date=None, fr_ids=None, fields=None):
-
-        self.connect()
-
-        if fields is None:
-            query = f"""
-                SELECT FundingRoundID,
-                       CONCAT(YEAR(FundingRoundDate), "-Q", QUARTER(FundingRoundDate)) AS FundingRoundTimePeriod,
-                       FundingAmount_USD
-                FROM graph.Nodes_N_FundingRound
-            """
-        else:
-            query = f"""
-                SELECT {', '.join(fields)}
-                FROM graph.Nodes_N_FundingRound
-            """
-
-        conditions = []
-
-        if min_date is not None:
-            conditions.append(f"""FundingRoundDate >= "{min_date}" """)
-
-        if max_date is not None:
-            conditions.append(f"""FundingRoundDate < "{max_date}" """)
-
-        if fr_ids is not None:
-            conditions.append(f"""FundingRoundID IN ({', '.join(['%s'] * len(fr_ids))})""")
-
-        if conditions:
-            query += f"""
-                WHERE {' AND '.join(conditions)}
-            """
-
-        if fr_ids is not None:
-            self.cursor.execute(query, fr_ids)
-        else:
-            self.cursor.execute(query)
-
-        return list(self.cursor)
-
-    def get_organisations(self, org_ids=None):
-
-        self.connect()
-
-        query = f"""
-            SELECT OrganisationID,
-                   OrganisationName
-            FROM graph.Nodes_N_Organisation
-        """
-
-        if org_ids is not None:
-            query += f"""
-                WHERE OrganisationID IN ({', '.join(['%s'] * len(org_ids))})
-            """
-
-            self.cursor.execute(query, org_ids)
-        else:
-            self.cursor.execute(query)
-
-        return list(self.cursor)
-
-    def get_concepts(self, concept_ids=None):
-
-        self.connect()
-
-        query = f"""
-            SELECT PageID,
-                   PageTitle
-            FROM graph.Nodes_N_Concept
-        """
-
-        if concept_ids is not None:
-            query += f"""
-                WHERE PageID IN ({', '.join(['%s'] * len(concept_ids))})
-            """
-
-            self.cursor.execute(query, concept_ids)
-        else:
-            self.cursor.execute(query)
-
-        return list(self.cursor)
-
     def get_crunchbase_concept_ids(self):
 
         self.connect()
@@ -736,448 +592,56 @@ class DB:
 
         return [concept_id for concept_id, in self.cursor]
 
-    #############################
-    # CRUNCHBASE GRAPH CREATION #
-    #############################
+    ##############
+    # CRUNCHBASE #
+    ##############
 
     def create_table_Nodes_N_FundingRound(self, df):
-
-        self.connect()
-
-        query = f"""
-            DROP TABLE IF EXISTS ca_temp.Nodes_N_FundingRound;
-        """
-
-        self.cursor.execute(query)
-
-        query = f"""
-            CREATE TABLE ca_temp.Nodes_N_FundingRound (
-                            FundingRoundID          CHAR(64),
-                            FundingRoundDate        DATE,
-                            FundingAmount_USD   FLOAT,
-                            PRIMARY KEY FundingRoundID (FundingRoundID)
-                        ) ENGINE=InnoDB DEFAULT CHARSET ascii;
-        """
-
-        self.cursor.execute(query)
-
-        tuples = list(df.itertuples(index=False, name=None))
-        values = [value for line in tuples for value in line]
-
-        # placeholder for the row of values, e.g. "(%s, %s, %s)"
-        placeholder = f'({", ".join(["%s"] * len(df.columns))})'
-        query = f"""INSERT INTO ca_temp.Nodes_N_FundingRound VALUES {', '.join([placeholder] * len(tuples))}"""
-
-        self.cursor.execute(query, values)
-
-        self.cnx.commit()
+        table_name = 'ca_temp.Nodes_N_FundingRound'
+        definition = ['FundingRoundID CHAR(64)', 'FundingRoundDate DATE', 'FundingAmount_USD FLOAT', 'PRIMARY KEY FundingRoundID (FundingRoundID)']
+        self.create(table_name, definition, df)
 
     def create_table_Nodes_N_Investor(self, df):
-
-        self.connect()
-
-        query = f"""
-            DROP TABLE IF EXISTS ca_temp.Nodes_N_Investor;
-        """
-
-        self.cursor.execute(query)
-
-        query = f"""
-            CREATE TABLE ca_temp.Nodes_N_Investor (
-                            InvestorID      CHAR(64),
-                            InvestorType    CHAR(32),
-                            PRIMARY KEY InvestorID (InvestorID)
-                        ) ENGINE=InnoDB DEFAULT CHARSET ascii;
-        """
-
-        self.cursor.execute(query)
-
-        tuples = list(df.itertuples(index=False, name=None))
-        values = [value for line in tuples for value in line]
-
-        # placeholder for the row of values, e.g. "(%s, %s, %s)"
-        placeholder = f'({", ".join(["%s"] * len(df.columns))})'
-        query = f"""INSERT INTO ca_temp.Nodes_N_Investor VALUES {', '.join([placeholder] * len(tuples))}"""
-
-        self.cursor.execute(query, values)
-
-        self.cnx.commit()
+        table_name = 'ca_temp.Nodes_N_Investor'
+        definition = ['InvestorID CHAR(64)', 'InvestorType CHAR(32)', 'PRIMARY KEY InvestorID (InvestorID)']
+        self.create(table_name, definition, df)
 
     def create_table_Nodes_N_Investee(self, df):
-
-        self.connect()
-
-        query = f"""
-            DROP TABLE IF EXISTS ca_temp.Nodes_N_Investee;
-        """
-
-        self.cursor.execute(query)
-
-        query = f"""
-            CREATE TABLE ca_temp.Nodes_N_Investee (
-                            InvesteeID      CHAR(64),
-                            PRIMARY KEY InvesteeID (InvesteeID)
-                        ) ENGINE=InnoDB DEFAULT CHARSET ascii;
-        """
-
-        self.cursor.execute(query)
-
-        tuples = list(df.itertuples(index=False, name=None))
-        values = [value for line in tuples for value in line]
-
-        # placeholder for the row of values, e.g. "(%s, %s, %s)"
-        placeholder = f'({", ".join(["%s"] * len(df.columns))})'
-        query = f"""INSERT INTO ca_temp.Nodes_N_Investee VALUES {', '.join([placeholder] * len(tuples))}"""
-
-        self.cursor.execute(query, values)
-
-        self.cnx.commit()
+        table_name = 'ca_temp.Nodes_N_Investee'
+        definition = ['InvesteeID CHAR(64)', 'PRIMARY KEY InvesteeID (InvesteeID)']
+        self.create(table_name, definition, df)
 
     def create_table_Edges_N_Investor_N_FundingRound(self, df):
-
-        self.connect()
-
-        query = f"""
-            DROP TABLE IF EXISTS ca_temp.Edges_N_Investor_N_FundingRound;
-        """
-
-        self.cursor.execute(query)
-
-        query = f"""
-            CREATE TABLE ca_temp.Edges_N_Investor_N_FundingRound (
-                            InvestorID        CHAR(64),
-                            FundingRoundID    CHAR(64),
-                            KEY InvestorID (InvestorID),
-                            KEY FundingRoundID (FundingRoundID)
-                        ) ENGINE=InnoDB DEFAULT CHARSET ascii;
-        """
-
-        self.cursor.execute(query)
-
-        tuples = list(df.itertuples(index=False, name=None))
-        values = [value for line in tuples for value in line]
-
-        # placeholder for the row of values, e.g. "(%s, %s, %s)"
-        placeholder = f'({", ".join(["%s"] * len(df.columns))})'
-        query = f"""INSERT INTO ca_temp.Edges_N_Investor_N_FundingRound VALUES {', '.join([placeholder] * len(tuples))}"""
-
-        self.cursor.execute(query, values)
-
-        self.cnx.commit()
+        table_name = 'ca_temp.Edges_N_Investor_N_FundingRound'
+        definition = ['InvestorID CHAR(64)', 'FundingRoundID CHAR(64)', 'KEY InvestorID (InvestorID)', 'KEY FundingRoundID (FundingRoundID)']
+        self.create(table_name, definition, df)
 
     def create_table_Edges_N_Investor_N_Investor(self, df):
-
-        self.connect()
-
-        query = f"""
-            DROP TABLE IF EXISTS ca_temp.Edges_N_Investor_N_Investor;
-        """
-
-        self.cursor.execute(query)
-
-        query = f"""
-            CREATE TABLE ca_temp.Edges_N_Investor_N_Investor (
-                            SourceInvestorID      CHAR(64),
-                            TargetInvestorID      CHAR(64),
-                            KEY SourceInvestorID (SourceInvestorID),
-                            KEY TargetInvestorID (TargetInvestorID)
-                        ) ENGINE=InnoDB DEFAULT CHARSET ascii;
-        """
-
-        self.cursor.execute(query)
-
-        tuples = list(df.itertuples(index=False, name=None))
-        values = [value for line in tuples for value in line]
-
-        # placeholder for the row of values, e.g. "(%s, %s, %s)"
-        placeholder = f'({", ".join(["%s"] * len(df.columns))})'
-        query = f"""INSERT INTO ca_temp.Edges_N_Investor_N_Investor VALUES {', '.join([placeholder] * len(tuples))}"""
-
-        self.cursor.execute(query, values)
-
-        self.cnx.commit()
+        table_name = 'ca_temp.Edges_N_Investor_N_Investor'
+        definition = ['SourceInvestorID CHAR(64)', 'TargetInvestorID CHAR(64)', 'KEY SourceInvestorID (SourceInvestorID)', 'KEY TargetInvestorID (TargetInvestorID)']
+        self.create(table_name, definition, df)
 
     def create_table_Edges_N_Investor_N_Investee(self, df):
-
-        self.connect()
-
-        query = f"""
-            DROP TABLE IF EXISTS ca_temp.Edges_N_Investor_N_Investee;
-        """
-
-        self.cursor.execute(query)
-
-        query = f"""
-            CREATE TABLE ca_temp.Edges_N_Investor_N_Investee (
-                            InvestorID      CHAR(64),
-                            InvesteeID      CHAR(64),
-                            KEY InvestorID (InvestorID),
-                            KEY InvesteeID (InvesteeID)
-                        ) ENGINE=InnoDB DEFAULT CHARSET ascii;
-        """
-
-        self.cursor.execute(query)
-
-        tuples = list(df.itertuples(index=False, name=None))
-        values = [value for line in tuples for value in line]
-
-        # placeholder for the row of values, e.g. "(%s, %s, %s)"
-        placeholder = f'({", ".join(["%s"] * len(df.columns))})'
-        query = f"""INSERT INTO ca_temp.Edges_N_Investor_N_Investee VALUES {', '.join([placeholder] * len(tuples))}"""
-
-        self.cursor.execute(query, values)
-
-        self.cnx.commit()
+        table_name = 'ca_temp.Edges_N_Investor_N_Investee'
+        definition = ['InvestorID CHAR(64)', 'InvesteeID CHAR(64)', 'KEY InvestorID (InvestorID)', 'KEY InvesteeID (InvesteeID)']
+        self.create(table_name, definition, df)
 
     def create_table_Edges_N_Investor_N_Concept(self, df):
-
-        self.connect()
-
-        query = f"""
-            DROP TABLE IF EXISTS ca_temp.Edges_N_Investor_N_Concept;
-        """
-
-        self.cursor.execute(query)
-
-        query = f"""
-            CREATE TABLE ca_temp.Edges_N_Investor_N_Concept (
-                            InvestorID      CHAR(64),
-                            PageID          INT UNSIGNED,
-                            KEY InvestorID (InvestorID),
-                            KEY PageID (PageID)
-                        ) ENGINE=InnoDB DEFAULT CHARSET ascii;
-        """
-
-        self.cursor.execute(query)
-
-        tuples = list(df.itertuples(index=False, name=None))
-        values = [value for line in tuples for value in line]
-
-        # placeholder for the row of values, e.g. "(%s, %s, %s)"
-        placeholder = f'({", ".join(["%s"] * len(df.columns))})'
-        query = f"""INSERT INTO ca_temp.Edges_N_Investor_N_Concept VALUES {', '.join([placeholder] * len(tuples))}"""
-
-        self.cursor.execute(query, values)
-
-        self.cnx.commit()
+        table_name = 'ca_temp.Edges_N_Investor_N_Concept'
+        definition = ['InvestorID CHAR(64)', 'PageID INT UNSIGNED', 'KEY InvestorID (InvestorID)', 'KEY PageID (PageID)']
+        self.create(table_name, definition, df)
 
     def create_table_Edges_N_FundingRound_N_Investee(self, df):
-
-        self.connect()
-
-        query = f"""
-            DROP TABLE IF EXISTS ca_temp.Edges_N_FundingRound_N_Investee;
-        """
-
-        self.cursor.execute(query)
-
-        query = f"""
-            CREATE TABLE ca_temp.Edges_N_FundingRound_N_Investee (
-                            FundingRoundID      CHAR(64),
-                            InvesteeID          CHAR(64),
-                            KEY FundingRoundID (FundingRoundID),
-                            KEY InvesteeID (InvesteeID)
-                        ) ENGINE=InnoDB DEFAULT CHARSET ascii;
-        """
-
-        self.cursor.execute(query)
-
-        tuples = list(df.itertuples(index=False, name=None))
-        values = [value for line in tuples for value in line]
-
-        # placeholder for the row of values, e.g. "(%s, %s, %s)"
-        placeholder = f'({", ".join(["%s"] * len(df.columns))})'
-        query = f"""INSERT INTO ca_temp.Edges_N_FundingRound_N_Investee VALUES {', '.join([placeholder] * len(tuples))}"""
-
-        self.cursor.execute(query, values)
-
-        self.cnx.commit()
+        table_name = 'ca_temp.Edges_N_FundingRound_N_Investee'
+        definition = ['FundingRoundID CHAR(64)', 'InvesteeID CHAR(64)', 'KEY FundingRoundID (FundingRoundID)', 'KEY InvesteeID (InvesteeID)']
+        self.create(table_name, definition, df)
 
     def create_table_Edges_N_FundingRound_N_Concept(self, df):
-
-        self.connect()
-
-        query = f"""
-            DROP TABLE IF EXISTS ca_temp.Edges_N_FundingRound_N_Concept;
-        """
-
-        self.cursor.execute(query)
-
-        query = f"""
-            CREATE TABLE ca_temp.Edges_N_FundingRound_N_Concept (
-                            FundingRoundID      CHAR(64),
-                            PageID              INT UNSIGNED,
-                            KEY FundingRoundID (FundingRoundID),
-                            KEY PageID (PageID)
-                        ) ENGINE=InnoDB DEFAULT CHARSET ascii;
-        """
-
-        self.cursor.execute(query)
-
-        tuples = list(df.itertuples(index=False, name=None))
-        values = [value for line in tuples for value in line]
-
-        # placeholder for the row of values, e.g. "(%s, %s, %s)"
-        placeholder = f'({", ".join(["%s"] * len(df.columns))})'
-        query = f"""INSERT INTO ca_temp.Edges_N_FundingRound_N_Concept VALUES {', '.join([placeholder] * len(tuples))}"""
-
-        self.cursor.execute(query, values)
-
-        self.cnx.commit()
+        table_name = 'ca_temp.Edges_N_FundingRound_N_Concept'
+        definition = ['FundingRoundID CHAR(64)', 'PageID INT UNSIGNED', 'KEY FundingRoundID (FundingRoundID)', 'KEY PageID (PageID)']
+        self.create(table_name, definition, df)
 
     def create_table_Edges_N_Investee_N_Concept(self, df):
-
-        self.connect()
-
-        query = f"""
-            DROP TABLE IF EXISTS ca_temp.Edges_N_Investee_N_Concept;
-        """
-
-        self.cursor.execute(query)
-
-        query = f"""
-            CREATE TABLE ca_temp.Edges_N_Investee_N_Concept (
-                            InvesteeID      CHAR(64),
-                            PageID          INT UNSIGNED,
-                            KEY InvesteeID (InvesteeID),
-                            KEY PageID (PageID)
-                        ) ENGINE=InnoDB DEFAULT CHARSET ascii;
-        """
-
-        self.cursor.execute(query)
-
-        tuples = list(df.itertuples(index=False, name=None))
-        values = [value for line in tuples for value in line]
-
-        # placeholder for the row of values, e.g. "(%s, %s, %s)"
-        placeholder = f'({", ".join(["%s"] * len(df.columns))})'
-        query = f"""INSERT INTO ca_temp.Edges_N_Investee_N_Concept VALUES {', '.join([placeholder] * len(tuples))}"""
-
-        self.cursor.execute(query, values)
-
-        self.cnx.commit()
-
-
-
-
-
-
-    # To be checked if deprecated
-    def get_startups(self, ids=None, limit=None):
-
-        self.connect()
-
-        query = f"""
-            SELECT EPFLStartupID,
-                   StartupName,
-                   LegalEntity,
-                   FoundingYear,
-                   ExitYear,
-                   Status,
-                   Industry
-            FROM graph.Nodes_N_EPFLStartup
-        """
-
-        if ids is not None:
-            query += f"""
-                WHERE EPFLStartupID IN ({', '.join(['%s'] * len(ids))})
-            """
-
-        if limit is not None:
-            query += f"""
-                LIMIT {limit}
-            """
-
-        if ids is not None:
-            self.cursor.execute(query, ids)
-        else:
-            self.cursor.execute(query)
-
-        return list(self.cursor)
-
-    # To be checked if deprecated
-    def get_concepts_old(self, ids=None, limit=None):
-
-        self.connect()
-
-        query = f"""
-            SELECT PageID,
-                   PageTitle
-            FROM graph.Nodes_N_Concept
-        """
-
-        if ids is not None:
-            query += f"""
-                WHERE PageID IN ({', '.join(['%s'] * len(ids))})
-            """
-
-        if limit is not None:
-            query += f"""
-                LIMIT {limit}
-            """
-
-        if ids is not None:
-            self.cursor.execute(query, ids)
-        else:
-            self.cursor.execute(query)
-
-        return list(self.cursor)
-
-
-
-
-
-
-
-
-    # Deprecated, to be removed
-    def get_funding_round_investors(self, fr_ids):
-
-        self.connect()
-
-        query = f"""
-            SELECT FundingRoundID, OrganisationID, "organisation" as Type
-            FROM graph.Edges_N_Organisation_N_FundingRound
-            WHERE Action = "Invested in"
-            AND FundingRoundID IN ({', '.join(['%s'] * len(fr_ids))})
-        """
-
-        self.cursor.execute(query, fr_ids)
-
-        organisation_investors = list(self.cursor)
-
-        query = f"""
-            SELECT FundingRoundID, PersonID, "person" as Type
-            FROM graph.Edges_N_Person_N_FundingRound
-            WHERE Action = "Invested in"
-            AND FundingRoundID IN ({', '.join(['%s'] * len(fr_ids))})
-        """
-
-        self.cursor.execute(query, fr_ids)
-
-        person_investors = list(self.cursor)
-
-        return organisation_investors + person_investors
-
-    # Deprecated, to be removed
-    def get_people(self, people_ids=None):
-
-        self.connect()
-
-        query = f"""
-            SELECT PersonID,
-                   FullName
-            FROM graph.Nodes_N_Person
-        """
-
-        if people_ids is not None:
-            query += f"""
-                WHERE PersonID IN ({', '.join(['%s'] * len(people_ids))})
-            """
-
-        if people_ids is not None:
-            self.cursor.execute(query, people_ids)
-        else:
-            self.cursor.execute(query)
-
-        return list(self.cursor)
+        table_name = 'ca_temp.Edges_N_Investee_N_Concept'
+        definition = ['InvesteeID CHAR(64)', 'PageID INT UNSIGNED', 'KEY InvesteeID (InvesteeID)', 'KEY PageID (PageID)']
+        self.create(table_name, definition, df)

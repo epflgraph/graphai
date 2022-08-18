@@ -6,58 +6,76 @@ from utils.time.stopwatch import Stopwatch
 
 
 def retrieve_funding_rounds(min_date, max_date):
-
     # Instantiate db interface to communicate with database
     db = DB()
 
     # Retrieve funding rounds in time window
+    table_name = 'graph.Nodes_N_FundingRound'
     fields = ['FundingRoundID', 'FundingRoundDate', 'FundingAmount_USD']
-    columns = ['fr_id', 'date', 'amount']
-    frs = pd.DataFrame(db.get_funding_rounds(min_date=min_date, max_date=max_date, fields=fields), columns=columns)
+    conditions = {'FundingRoundDate': {'>=': min_date, '<': max_date}}
+    frs = pd.DataFrame(db.find(table_name, fields=fields, conditions=conditions), columns=fields)
 
     return frs
 
 
 def retrieve_investors(frs):
+    # Extract list of funding round ids
+    fr_ids = list(frs['FundingRoundID'])
+
     # Instantiate db interface to communicate with database
     db = DB()
 
-    # Extract list of funding round ids
-    fr_ids = list(frs['fr_id'])
+    # Retrieve organization investors
+    table_name = 'graph.Edges_N_Organisation_N_FundingRound'
+    fields = ['OrganisationID', 'FundingRoundID']
+    conditions = {'Action': 'Invested in', 'FundingRoundID': fr_ids}
+    org_investors_frs = pd.DataFrame(db.find(table_name, fields=fields, conditions=conditions), columns=['InvestorID', 'FundingRoundID'])
 
-    # Retrieve organization and person investors and combine them in a single DataFrame
-    org_investors_frs = pd.DataFrame(db.get_org_investors_funding_rounds(fr_ids=fr_ids), columns=['investor_id', 'fr_id'])
-    org_investors_frs['investor_type'] = 'Organization'
-    person_investors_frs = pd.DataFrame(db.get_person_investors_funding_rounds(fr_ids=fr_ids), columns=['investor_id', 'fr_id'])
-    person_investors_frs['investor_type'] = 'Person'
+    # Retrieve person investors
+    table_name = 'graph.Edges_N_Person_N_FundingRound'
+    fields = ['PersonID', 'FundingRoundID']
+    conditions = {'Action': 'Invested in', 'FundingRoundID': fr_ids}
+    person_investors_frs = pd.DataFrame(db.find(table_name, fields=fields, conditions=conditions), columns=['InvestorID', 'FundingRoundID'])
+
+    # Add extra column with investor type
+    org_investors_frs['InvestorType'] = 'Organization'
+    person_investors_frs['InvestorType'] = 'Person'
+
+    # Combine organization investors and person investors in a single DataFrame
     investors_frs = pd.concat([org_investors_frs, person_investors_frs])
-    investors_frs = investors_frs[['investor_id', 'investor_type', 'fr_id']]
+    investors_frs = investors_frs[['InvestorID', 'InvestorType', 'FundingRoundID']]
 
     return investors_frs
 
 
 def retrieve_investees(frs):
+    # Extract list of funding round ids
+    fr_ids = list(frs['FundingRoundID'])
+
     # Instantiate db interface to communicate with database
     db = DB()
 
-    # Extract list of funding round ids
-    fr_ids = list(frs['fr_id'])
-
     # Retrieve investees
-    frs_investees = pd.DataFrame(db.get_funding_rounds_investees(fr_ids=fr_ids), columns=['fr_id', 'investee_id'])
+    table_name = 'graph.Edges_N_Organisation_N_FundingRound'
+    fields = ['FundingRoundID', 'OrganisationID']
+    conditions = {'Action': 'Raised from', 'FundingRoundID': fr_ids}
+    frs_investees = pd.DataFrame(db.find(table_name, fields=fields, conditions=conditions), columns=['FundingRoundID', 'InvesteeID'])
 
     return frs_investees
 
 
 def retrieve_concepts(frs_investees):
+    # Extract list of investee ids
+    investee_ids = list(frs_investees['InvesteeID'])
+
     # Instantiate db interface to communicate with database
     db = DB()
 
-    # Extract list of investee ids
-    investee_ids = list(frs_investees['investee_id'])
-
     # Retrieve investees' concepts
-    investees_concepts = pd.DataFrame(db.get_investees_concepts(org_ids=investee_ids), columns=['investee_id', 'concept_id'])
+    table_name = 'graph.Edges_N_Organisation_N_Concept'
+    fields = ['OrganisationID', 'PageID']
+    conditions = {'OrganisationID': investee_ids}
+    investees_concepts = pd.DataFrame(db.find(table_name, fields=fields, conditions=conditions), columns=['InvesteeID', 'PageID'])
 
     return investees_concepts
 
@@ -67,14 +85,14 @@ def compute_investor_pairs(investors_frs):
     # Two investors are related if they have participated in at least one funding round together
     # in the given time period.
     def combine(group):
-        return pd.DataFrame.from_records(combinations(group['investor_id'], 2))
+        return pd.DataFrame.from_records(combinations(group['InvestorID'], 2))
 
-    investor_pairs = investors_frs.groupby('fr_id').apply(combine).reset_index(level=0)
-    investor_pairs.columns = ['fr_id', 'source_investor_id', 'target_investor_id']
+    investor_pairs = investors_frs.groupby('FundingRoundID').apply(combine).reset_index(level=0)
+    investor_pairs.columns = ['FundingRoundID', 'SourceInvestorID', 'TargetInvestorID']
 
     # Duplicate DataFrame flipping source and target, since the relation is symmetrical
-    first_half = pd.DataFrame(investor_pairs[['source_investor_id', 'fr_id', 'target_investor_id']].values, columns=['source_investor_id', 'fr_id', 'target_investor_id'])
-    second_half = pd.DataFrame(investor_pairs[['target_investor_id', 'fr_id', 'source_investor_id']].values, columns=['source_investor_id', 'fr_id', 'target_investor_id'])
+    first_half = pd.DataFrame(investor_pairs[['SourceInvestorID', 'FundingRoundID', 'TargetInvestorID']].values, columns=['SourceInvestorID', 'FundingRoundID', 'TargetInvestorID'])
+    second_half = pd.DataFrame(investor_pairs[['TargetInvestorID', 'FundingRoundID', 'SourceInvestorID']].values, columns=['SourceInvestorID', 'FundingRoundID', 'TargetInvestorID'])
     return pd.concat([first_half, second_half]).reset_index(drop=True)
 
 
@@ -87,88 +105,88 @@ def insert_funding_rounds(frs):
 
 
 def insert_investors(investors_frs):
+    # Drop duplicate investors
+    nodes = investors_frs[['InvestorID', 'InvestorType']].drop_duplicates()
+
     # Instantiate db interface to communicate with database
     db = DB()
-
-    # Drop duplicate investors
-    nodes = investors_frs[['investor_id', 'investor_type']].drop_duplicates()
 
     # Insert into DB
     db.create_table_Nodes_N_Investor(nodes)
 
 
 def insert_investees(frs_investees):
+    # Drop duplicate investees
+    nodes = frs_investees[['InvesteeID']].drop_duplicates()
+
     # Instantiate db interface to communicate with database
     db = DB()
-
-    # Drop duplicate investees
-    nodes = frs_investees[['investee_id']].drop_duplicates()
 
     # Insert into DB
     db.create_table_Nodes_N_Investee(nodes)
 
 
 def insert_investors_frs(investors_frs):
+    edges = investors_frs[['InvestorID', 'FundingRoundID']]
+
     # Instantiate db interface to communicate with database
     db = DB()
-
-    edges = investors_frs[['investor_id', 'fr_id']]
 
     # Insert into DB
     db.create_table_Edges_N_Investor_N_FundingRound(edges)
 
 
 def insert_investors_investors(investors_investors):
+    # Drop duplicate investor pairs
+    edges = investors_investors[['SourceInvestorID', 'TargetInvestorID']].drop_duplicates()
+
     # Instantiate db interface to communicate with database
     db = DB()
-
-    # Drop duplicate investor pairs
-    edges = investors_investors[['source_investor_id', 'target_investor_id']].drop_duplicates()
 
     # Insert into DB
     db.create_table_Edges_N_Investor_N_Investor(edges)
 
 
 def insert_investors_investees(investors_frs, frs_investees):
+    # Merge investors and investees through frs and drop duplicates
+    edges = pd.merge(investors_frs, frs_investees, how='inner', on='FundingRoundID')[['InvestorID', 'InvesteeID']].drop_duplicates()
+
     # Instantiate db interface to communicate with database
     db = DB()
-
-    # Merge investors and investees through frs and drop duplicates
-    edges = pd.merge(investors_frs, frs_investees, how='inner', on='fr_id')[['investor_id', 'investee_id']].drop_duplicates()
 
     # Insert into DB
     db.create_table_Edges_N_Investor_N_Investee(edges)
 
 
 def insert_investors_concepts(investors_frs, frs_investees, investees_concepts):
+    # Merge investors and concepts through frs and investees and drop duplicates
+    edges = pd.merge(investors_frs, frs_investees, how='inner', on='FundingRoundID')
+    edges = pd.merge(edges, investees_concepts, how='inner', on='InvesteeID')
+    edges = edges[['InvestorID', 'PageID']].drop_duplicates()
+
     # Instantiate db interface to communicate with database
     db = DB()
-
-    # Merge investors and concepts through frs and investees and drop duplicates
-    edges = pd.merge(investors_frs, frs_investees, how='inner', on='fr_id')
-    edges = pd.merge(edges, investees_concepts, how='inner', on='investee_id')
-    edges = edges[['investor_id', 'concept_id']].drop_duplicates()
 
     # Insert into DB
     db.create_table_Edges_N_Investor_N_Concept(edges)
 
 
 def insert_frs_investees(frs_investees):
+    edges = frs_investees[['FundingRoundID', 'InvesteeID']]
+
     # Instantiate db interface to communicate with database
     db = DB()
-
-    edges = frs_investees[['fr_id', 'investee_id']]
 
     # Insert into DB
     db.create_table_Edges_N_FundingRound_N_Investee(edges)
 
 
 def insert_frs_concepts(frs_investees, investees_concepts):
+    # Merge frs and concepts through investees and drop duplicates
+    edges = pd.merge(frs_investees, investees_concepts, how='inner', on='InvesteeID')[['FundingRoundID', 'PageID']].drop_duplicates()
+
     # Instantiate db interface to communicate with database
     db = DB()
-
-    # Merge frs and concepts through investees and drop duplicates
-    edges = pd.merge(frs_investees, investees_concepts, how='inner', on='investee_id')[['fr_id', 'concept_id']].drop_duplicates()
 
     # Insert into DB
     db.create_table_Edges_N_FundingRound_N_Concept(edges)
@@ -185,7 +203,7 @@ def insert_investees_concepts(investees_concepts):
 def main():
     sw = Stopwatch()
 
-    min_date = '2018-01-01'
+    min_date = '2021-12-25'
     max_date = '2022-01-01'
 
     print('Retrieving funding rounds...')
