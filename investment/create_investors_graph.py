@@ -203,7 +203,7 @@ def insert_investees_concepts(investees_concepts):
 def main():
     sw = Stopwatch()
 
-    min_date = '2021-12-25'
+    min_date = '2021-01-01'
     max_date = '2022-01-01'
 
     print('Retrieving funding rounds...')

@@ -76,21 +76,39 @@ def get_investor_concept_history(investor_ids, concept_ids):
     ###########
 
     frs = frs.sort_values(by='FundingRoundDate').reset_index(drop=True)
-    print(frs)
+    print(len(frs))
 
-    aaa = investors_frs \
+    df = investors_frs \
         .merge(frs_investees, how='inner', on='FundingRoundID') \
         .merge(investees_concepts, how='inner', on='InvesteeID') \
         .merge(frs, how='inner', on='FundingRoundID')
-    print(aaa)
+    print(len(df))
 
+    history = {}
     for concept_id in concept_ids:
-        for investor_id in investor_ids:
-            print('#' * 50)
-            print(concept_id, investor_id)
+        history[concept_id] = {}
 
-            bbb = aaa[(aaa['InvestorID'] == investor_id) & (aaa['PageID'] == concept_id)]
-            print(bbb)
+        for investor_id in investor_ids:
+            history[concept_id][investor_id] = {}
+
+            concept_investor_df = df[(df['InvestorID'] == investor_id) & (df['PageID'] == concept_id)]
+
+            if len(concept_investor_df) == 0:
+                continue
+
+            for fr_date in concept_investor_df['FundingRoundDate'].drop_duplicates():
+                history[concept_id][investor_id][str(fr_date)] = {}
+
+                concept_investor_date_df = concept_investor_df[concept_investor_df['FundingRoundDate'] == fr_date]
+
+                for fr_id in concept_investor_date_df['FundingRoundID']:
+                    concept_investor_date_fr_df = concept_investor_date_df[concept_investor_date_df['FundingRoundID'] == fr_id]
+
+                    assert len(concept_investor_date_fr_df) == 1, f'There should be at most one row for investor {investor_id} and funding round {fr_id}, {len(concept_investor_date_fr_df)} found.'
+
+                    history[concept_id][investor_id][str(fr_date)][fr_id] = {'amount': concept_investor_date_fr_df['FundingAmountPerInvestor_USD'].iloc[0]}
+
+    print(history)
 
 
 def main():
