@@ -28,55 +28,43 @@ class DB:
         self.user = db_config['DB'].get('user')
         self.password = db_config['DB'].get('password')
 
-        self.connect()
+        self.cnx = mysql.connector.connect(host=self.host, port=self.port, user=self.user, password=self.password)
 
         # Fetch initial data
-        self.channel_anchor_page_ids = self.query_channel_anchor_page_ids()
-        self.course_channel_ids = self.query_course_channel_ids()
+        # self.channel_anchor_page_ids = self.query_channel_anchor_page_ids()
+        # self.course_channel_ids = self.query_course_channel_ids()
+
+    def __del__(self):
+        if hasattr(self, 'cnx'):
+            self.cnx.close()
 
     ################
     # BASE METHODS #
     ################
 
-    def connect(self):
-        self.cnx = mysql.connector.connect(host=self.host, port=self.port, user=self.user, password=self.password)
-        self.cursor = self.cnx.cursor()
-
-    def query(self, query):
+    def execute_query(self, query, values=None):
         """
         Execute custom query.
         """
 
-        self.connect()
+        # Refresh connection
+        self.cnx.ping(reconnect=True)
+        cursor = self.cnx.cursor()
 
-        self.cursor.execute(query)
+        try:
+            if values:
+                cursor.execute(query, values)
+            else:
+                cursor.execute(query)
+        except mysql.connector.Error as e:
+            print("Error", e)
+            raise e
 
-        return list(self.cursor)
+        results = list(cursor)
 
-    def get_table(self, table, fields=None, limit=None):
-        """
-        TODO DOC
-        Args:
-            table:
+        self.cnx.commit()
 
-        Returns:
-        """
-
-        self.connect()
-
-        if fields is None:
-            query = f"""
-                SELECT * FROM {table}
-            """
-        else:
-            query = f"""
-                SELECT {', '.join([field for field in fields])} FROM {table}
-            """
-
-        if limit is not None:
-            query += f"""LIMIT {limit}"""
-
-        return self.query(query)
+        return results
 
     def find(self, table_name, fields=None, conditions=None):
         if fields:
@@ -106,37 +94,49 @@ class DB:
             {conditions_str}
         """
 
-        self.connect()
-        self.cursor.execute(query, values)
-        return list(self.cursor)
+        return self.execute_query(query, values)
 
-    def create(self, table_name, definition, df):
-        self.connect()
+    def drop_table(self, table_name):
         query = f"""
             DROP TABLE IF EXISTS {table_name};
         """
-        self.cursor.execute(query)
-        self.cnx.commit()
+        self.execute_query(query)
 
-        self.connect()
+    def create_table(self, table_name, definition):
         query = f"""
             CREATE TABLE {table_name} (
                 {', '.join([line for line in definition])}
             ) ENGINE=InnoDB DEFAULT CHARSET ascii;
         """
-        self.cursor.execute(query)
-        self.cnx.commit()
+        self.execute_query(query)
 
+    def insert_dataframe(self, table_name, df):
         tuples = list(df.itertuples(index=False, name=None))
         values = [value for line in tuples for value in line]
 
         # placeholder for the row of values, e.g. "(%s, %s, %s)"
         placeholder = f'({", ".join(["%s"] * len(df.columns))})'
 
-        self.connect()
         query = f"""INSERT INTO {table_name} VALUES {', '.join([placeholder] * len(tuples))}"""
-        self.cursor.execute(query, values)
-        self.cnx.commit()
+
+        try:
+            self.execute_query(query, values)
+        except mysql.connector.Error as e:
+            handled_error_codes = [
+                mysql.connector.errorcode.CR_SERVER_LOST_EXTENDED,  # Broken pipe error (connection closed by server)
+                mysql.connector.errorcode.ER_NET_PACKET_TOO_LARGE   # Packet bigger than max_allowed_packet
+            ]
+
+            if e.errno in handled_error_codes:
+                n = len(df)
+                print(f'Failed inserting df with {n} rows. Splitting in two and retrying...')
+
+                df1 = df.iloc[:(n // 2)]
+                df2 = df.iloc[(n // 2):]
+                self.insert_dataframe(table_name, df1)
+                self.insert_dataframe(table_name, df2)
+            else:
+                raise e
 
     #####################
     # CONCEPT DETECTION #
@@ -598,50 +598,90 @@ class DB:
 
     def create_table_Nodes_N_FundingRound(self, df):
         table_name = 'ca_temp.Nodes_N_FundingRound'
+        self.drop_table(table_name)
+
         definition = ['FundingRoundID CHAR(64)', 'FundingRoundDate DATE', 'FundingAmount_USD FLOAT', 'PRIMARY KEY FundingRoundID (FundingRoundID)']
-        self.create(table_name, definition, df)
+        self.create_table(table_name, definition)
+
+        self.insert_dataframe(table_name, df)
 
     def create_table_Nodes_N_Investor(self, df):
         table_name = 'ca_temp.Nodes_N_Investor'
+        self.drop_table(table_name)
+
         definition = ['InvestorID CHAR(64)', 'InvestorType CHAR(32)', 'PRIMARY KEY InvestorID (InvestorID)']
-        self.create(table_name, definition, df)
+        self.create_table(table_name, definition)
+
+        self.insert_dataframe(table_name, df)
 
     def create_table_Nodes_N_Investee(self, df):
         table_name = 'ca_temp.Nodes_N_Investee'
+        self.drop_table(table_name)
+
         definition = ['InvesteeID CHAR(64)', 'PRIMARY KEY InvesteeID (InvesteeID)']
-        self.create(table_name, definition, df)
+        self.create_table(table_name, definition)
+
+        self.insert_dataframe(table_name, df)
 
     def create_table_Edges_N_Investor_N_FundingRound(self, df):
         table_name = 'ca_temp.Edges_N_Investor_N_FundingRound'
+        self.drop_table(table_name)
+
         definition = ['InvestorID CHAR(64)', 'FundingRoundID CHAR(64)', 'KEY InvestorID (InvestorID)', 'KEY FundingRoundID (FundingRoundID)']
-        self.create(table_name, definition, df)
+        self.create_table(table_name, definition)
+
+        self.insert_dataframe(table_name, df)
 
     def create_table_Edges_N_Investor_N_Investor(self, df):
         table_name = 'ca_temp.Edges_N_Investor_N_Investor'
+        self.drop_table(table_name)
+
         definition = ['SourceInvestorID CHAR(64)', 'TargetInvestorID CHAR(64)', 'KEY SourceInvestorID (SourceInvestorID)', 'KEY TargetInvestorID (TargetInvestorID)']
-        self.create(table_name, definition, df)
+        self.create_table(table_name, definition)
+
+        self.insert_dataframe(table_name, df)
 
     def create_table_Edges_N_Investor_N_Investee(self, df):
         table_name = 'ca_temp.Edges_N_Investor_N_Investee'
+        self.drop_table(table_name)
+
         definition = ['InvestorID CHAR(64)', 'InvesteeID CHAR(64)', 'KEY InvestorID (InvestorID)', 'KEY InvesteeID (InvesteeID)']
-        self.create(table_name, definition, df)
+        self.create_table(table_name, definition)
+
+        self.insert_dataframe(table_name, df)
 
     def create_table_Edges_N_Investor_N_Concept(self, df):
         table_name = 'ca_temp.Edges_N_Investor_N_Concept'
+        self.drop_table(table_name)
+
         definition = ['InvestorID CHAR(64)', 'PageID INT UNSIGNED', 'KEY InvestorID (InvestorID)', 'KEY PageID (PageID)']
-        self.create(table_name, definition, df)
+        self.create_table(table_name, definition)
+
+        self.insert_dataframe(table_name, df)
 
     def create_table_Edges_N_FundingRound_N_Investee(self, df):
         table_name = 'ca_temp.Edges_N_FundingRound_N_Investee'
+        self.drop_table(table_name)
+
         definition = ['FundingRoundID CHAR(64)', 'InvesteeID CHAR(64)', 'KEY FundingRoundID (FundingRoundID)', 'KEY InvesteeID (InvesteeID)']
-        self.create(table_name, definition, df)
+        self.create_table(table_name, definition)
+
+        self.insert_dataframe(table_name, df)
 
     def create_table_Edges_N_FundingRound_N_Concept(self, df):
         table_name = 'ca_temp.Edges_N_FundingRound_N_Concept'
+        self.drop_table(table_name)
+
         definition = ['FundingRoundID CHAR(64)', 'PageID INT UNSIGNED', 'KEY FundingRoundID (FundingRoundID)', 'KEY PageID (PageID)']
-        self.create(table_name, definition, df)
+        self.create_table(table_name, definition)
+
+        self.insert_dataframe(table_name, df)
 
     def create_table_Edges_N_Investee_N_Concept(self, df):
         table_name = 'ca_temp.Edges_N_Investee_N_Concept'
+        self.drop_table(table_name)
+
         definition = ['InvesteeID CHAR(64)', 'PageID INT UNSIGNED', 'KEY InvesteeID (InvesteeID)', 'KEY PageID (PageID)']
-        self.create(table_name, definition, df)
+        self.create_table(table_name, definition)
+
+        self.insert_dataframe(table_name, df)
