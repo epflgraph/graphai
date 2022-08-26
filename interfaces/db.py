@@ -600,7 +600,7 @@ class DB:
         table_name = 'ca_temp.Nodes_N_FundingRound'
         self.drop_table(table_name)
 
-        definition = ['FundingRoundID CHAR(64)', 'FundingRoundDate DATE', 'FundingAmount_USD FLOAT', 'PRIMARY KEY FundingRoundID (FundingRoundID)']
+        definition = ['FundingRoundID CHAR(64)', 'FundingRoundDate DATE', 'FundingAmount_USD FLOAT', 'FundingAmountPerInvestor_USD FLOAT', 'PRIMARY KEY FundingRoundID (FundingRoundID)']
         self.create_table(table_name, definition)
 
         self.insert_dataframe(table_name, df)
@@ -654,7 +654,23 @@ class DB:
         table_name = 'ca_temp.Edges_N_Investor_N_Concept'
         self.drop_table(table_name)
 
-        definition = ['InvestorID CHAR(64)', 'PageID INT UNSIGNED', 'KEY InvestorID (InvestorID)', 'KEY PageID (PageID)']
+        definition = [
+            'InvestorID CHAR(64)',
+            'PageID INT UNSIGNED',
+            'ScoreLinNInv FLOAT',
+            'ScoreLinAmount FLOAT',
+            'ScoreLinNInvNorm FLOAT',
+            'ScoreLinAmountNorm FLOAT',
+            'ScoreQuadNInv FLOAT',
+            'ScoreQuadAmount FLOAT',
+            'ScoreQuadNInvNorm FLOAT',
+            'ScoreQuadAmountNorm FLOAT',
+            'ScoreConstNInv FLOAT',
+            'ScoreConstAmount FLOAT',
+            'ScoreConstNInvNorm FLOAT',
+            'ScoreConstAmountNorm FLOAT',
+            'KEY InvestorID (InvestorID)',
+            'KEY PageID (PageID)']
         self.create_table(table_name, definition)
 
         self.insert_dataframe(table_name, df)

@@ -1,7 +1,10 @@
 import pandas as pd
+import numpy as np
+
 from itertools import combinations
 
 from interfaces.db import DB
+from utils.time.date import now, rescale
 from utils.time.stopwatch import Stopwatch
 
 
@@ -11,9 +14,10 @@ def retrieve_funding_rounds(min_date, max_date):
 
     # Retrieve funding rounds in time window
     table_name = 'graph.Nodes_N_FundingRound'
-    fields = ['FundingRoundID', 'FundingRoundDate', 'FundingAmount_USD']
+    fields = ['FundingRoundID', 'FundingRoundDate', 'FundingAmount_USD', 'FundingAmount_USD / CB_InvestorCount']
+    columns = ['FundingRoundID', 'FundingRoundDate', 'FundingAmount_USD', 'FundingAmountPerInvestor_USD']
     conditions = {'FundingRoundDate': {'>=': min_date, '<': max_date}}
-    frs = pd.DataFrame(db.find(table_name, fields=fields, conditions=conditions), columns=fields)
+    frs = pd.DataFrame(db.find(table_name, fields=fields, conditions=conditions), columns=columns)
 
     return frs
 
@@ -96,6 +100,72 @@ def compute_investor_pairs(investors_frs):
     return pd.concat([first_half, second_half]).reset_index(drop=True)
 
 
+def compute_investors_concepts_history(df):
+    # Extract list of investor-concept pairs
+    investor_concept_pairs = df[['InvestorID', 'PageID']].drop_duplicates().itertuples(index=False, name=None)
+
+    # Compute investor-concept history for each pair
+    history = {}
+    for investor_id, concept_id in investor_concept_pairs:
+        if investor_id not in history:
+            history[investor_id] = {}
+
+        history[investor_id][concept_id] = {}
+
+        # Restrict df to current investor and concept
+        investor_concept_df = df[(df['InvestorID'] == investor_id) & (df['PageID'] == concept_id)]
+
+        # Iterate over all dates and gather all investments made by current investor in current concept each day.
+        for fr_date in investor_concept_df['FundingRoundDate'].drop_duplicates():
+            history[investor_id][concept_id][str(fr_date)] = {}
+
+            # Restrict df to current concept, investor and date
+            investor_concept_date_df = investor_concept_df[investor_concept_df['FundingRoundDate'] == fr_date]
+
+            # Iterate over frs and gather all investments made by current investor in current concept on given day.
+            total_amount = 0
+            for fr_id in investor_concept_date_df['FundingRoundID']:
+                # Restrict df to current investor, concept, date and funding round
+                investor_concept_date_fr_df = investor_concept_date_df[investor_concept_date_df['FundingRoundID'] == fr_id]
+
+                # There should be exactly one row for each combination of parameters
+                assert len(investor_concept_date_fr_df) == 1, f'There should be exactly one row for investor {investor_id} and funding round {fr_id}, {len(investor_concept_date_fr_df)} found.'
+
+                # Extract amount and build history
+                amount = investor_concept_date_fr_df['FundingAmountPerInvestor_USD'].iloc[0]
+                history[investor_id][concept_id][str(fr_date)][fr_id] = {'amount': amount}
+                total_amount += np.nan_to_num(amount)
+
+            # Compute number of investments for the given investor, concept and date
+            n_investments = len(history[investor_id][concept_id][str(fr_date)])
+
+            # Store number of investments and total amount for the given investor, concept and date
+            history[investor_id][concept_id][str(fr_date)]['n_investments'] = n_investments
+            history[investor_id][concept_id][str(fr_date)]['total_amount'] = total_amount
+
+        # Compute number of investments and total investment amount for the given investor and concept
+        n_investments = sum(
+            [history[investor_id][concept_id][d]['n_investments'] for d in history[investor_id][concept_id]]
+        )
+        total_amount = sum(
+            [history[investor_id][concept_id][d]['total_amount'] for d in history[investor_id][concept_id]]
+        )
+
+        # Store number of investments and total investment amount for the given investor and concept
+        history[investor_id][concept_id]['n_investments'] = n_investments
+        history[investor_id][concept_id]['total_amount'] = total_amount
+
+    # Compute number of investments and total investment amount for the given investor
+    n_investments = sum([history[investor_id][concept_id]['n_investments'] for concept_id in history[investor_id]])
+    total_amount = sum([history[investor_id][concept_id]['total_amount'] for concept_id in history[investor_id]])
+
+    # Store number of investments and total investment amount for the given investor
+    history[investor_id]['n_investments'] = n_investments
+    history[investor_id]['total_amount'] = total_amount
+
+    return history
+
+
 def insert_funding_rounds(frs):
     # Instantiate db interface to communicate with database
     db = DB()
@@ -158,17 +228,53 @@ def insert_investors_investees(investors_frs, frs_investees):
     db.create_table_Edges_N_Investor_N_Investee(edges)
 
 
-def insert_investors_concepts(investors_frs, frs_investees, investees_concepts):
-    # Merge investors and concepts through frs and investees and drop duplicates
-    edges = pd.merge(investors_frs, frs_investees, how='inner', on='FundingRoundID')
-    edges = pd.merge(edges, investees_concepts, how='inner', on='InvesteeID')
-    edges = edges[['InvestorID', 'PageID']].drop_duplicates()
+def insert_investors_concepts(df, investors_concepts_history, min_date='1990-01-01', max_date='today'):
+
+    if max_date == 'today':
+        max_date = str(now().date())
+
+    df = df[['InvestorID', 'PageID']].drop_duplicates()
+
+    def compute_scores(x):
+        investor_id = x['InvestorID']
+        concept_id = x['PageID']
+
+        dates = [date for date in investors_concepts_history[investor_id][concept_id] if date != 'n_investments' and date != 'total_amount']
+        n_investments = [investors_concepts_history[investor_id][concept_id][date]['n_investments'] for date in dates]
+        total_amounts = [investors_concepts_history[investor_id][concept_id][date]['total_amount'] for date in dates]
+        dates_scaled = [rescale(date, min_date, max_date) for date in dates]
+
+        sum_investments = sum(n_investments)
+        sum_amounts = sum(total_amounts)
+
+        hs = {
+            'lin': lambda k: dates_scaled[k],
+            'quad': lambda k: dates_scaled[k]**2,
+            'const': lambda k: 1
+        }
+
+        Fs = {
+            'n_inv': lambda k: n_investments[k],
+            'amount': lambda k: total_amounts[k],
+            'n_inv_norm': lambda k: n_investments[k] / sum_investments if sum_investments else 0,
+            'amount_norm': lambda k: total_amounts[k] / sum_amounts if sum_amounts else 0
+        }
+
+        d = {}
+        for h_id, h in hs.items():
+            for F_id, F in Fs.items():
+                d[f'{h_id}__{F_id}'] = sum([h(k) * F(k) for k in range(len(dates_scaled))])
+
+        return pd.Series(d)
+
+    scores = df.apply(compute_scores, axis=1)
+    df = pd.concat([df, scores], axis=1)
 
     # Instantiate db interface to communicate with database
     db = DB()
 
     # Insert into DB
-    db.create_table_Edges_N_Investor_N_Concept(edges)
+    db.create_table_Edges_N_Investor_N_Concept(df)
 
 
 def insert_frs_investees(frs_investees):
@@ -262,10 +368,24 @@ def main():
     insert_frs_concepts(frs_investees, investees_concepts)
     sw.tick()
 
+    # Merge dataframes investors-frs-investees-concepts to have all information together
+    df = investors_frs \
+        .merge(frs_investees, how='inner', on='FundingRoundID') \
+        .merge(investees_concepts, how='inner', on='InvesteeID') \
+        .merge(frs, how='inner', on='FundingRoundID')
+
+    print('Computing investors-concepts history...')
+    investors_concepts_history = compute_investors_concepts_history(df)
+    sw.tick()
+
     print('Inserting investors-concepts edges into database...')
-    insert_investors_concepts(investors_frs, frs_investees, investees_concepts)
+    insert_investors_concepts(df, investors_concepts_history)
     sw.report()
 
 
 if __name__ == '__main__':
+    pd.set_option('display.max_rows', 500)
+    pd.set_option('display.max_columns', 500)
+    pd.set_option('display.width', 1000)
+
     main()
