@@ -138,6 +138,11 @@ class DB:
             else:
                 raise e
 
+    def drop_create_insert_table(self, table_name, definition, df):
+        self.drop_table(table_name)
+        self.create_table(table_name, definition)
+        self.insert_dataframe(table_name, df)
+
     #####################
     # CONCEPT DETECTION #
     #####################
@@ -591,113 +596,3 @@ class DB:
         self.cursor.execute(query)
 
         return [concept_id for concept_id, in self.cursor]
-
-    ##############
-    # CRUNCHBASE #
-    ##############
-
-    def create_table_Nodes_N_FundingRound(self, df):
-        table_name = 'ca_temp.Nodes_N_FundingRound'
-        self.drop_table(table_name)
-
-        definition = ['FundingRoundID CHAR(64)', 'FundingRoundDate DATE', 'FundingAmount_USD FLOAT', 'FundingAmountPerInvestor_USD FLOAT', 'PRIMARY KEY FundingRoundID (FundingRoundID)']
-        self.create_table(table_name, definition)
-
-        self.insert_dataframe(table_name, df)
-
-    def create_table_Nodes_N_Investor(self, df):
-        table_name = 'ca_temp.Nodes_N_Investor'
-        self.drop_table(table_name)
-
-        definition = ['InvestorID CHAR(64)', 'InvestorType CHAR(32)', 'PRIMARY KEY InvestorID (InvestorID)']
-        self.create_table(table_name, definition)
-
-        self.insert_dataframe(table_name, df)
-
-    def create_table_Nodes_N_Investee(self, df):
-        table_name = 'ca_temp.Nodes_N_Investee'
-        self.drop_table(table_name)
-
-        definition = ['InvesteeID CHAR(64)', 'PRIMARY KEY InvesteeID (InvesteeID)']
-        self.create_table(table_name, definition)
-
-        self.insert_dataframe(table_name, df)
-
-    def create_table_Edges_N_Investor_N_FundingRound(self, df):
-        table_name = 'ca_temp.Edges_N_Investor_N_FundingRound'
-        self.drop_table(table_name)
-
-        definition = ['InvestorID CHAR(64)', 'FundingRoundID CHAR(64)', 'KEY InvestorID (InvestorID)', 'KEY FundingRoundID (FundingRoundID)']
-        self.create_table(table_name, definition)
-
-        self.insert_dataframe(table_name, df)
-
-    def create_table_Edges_N_Investor_N_Investor(self, df):
-        table_name = 'ca_temp.Edges_N_Investor_N_Investor'
-        self.drop_table(table_name)
-
-        definition = ['SourceInvestorID CHAR(64)', 'TargetInvestorID CHAR(64)', 'KEY SourceInvestorID (SourceInvestorID)', 'KEY TargetInvestorID (TargetInvestorID)']
-        self.create_table(table_name, definition)
-
-        self.insert_dataframe(table_name, df)
-
-    def create_table_Edges_N_Investor_N_Investee(self, df):
-        table_name = 'ca_temp.Edges_N_Investor_N_Investee'
-        self.drop_table(table_name)
-
-        definition = ['InvestorID CHAR(64)', 'InvesteeID CHAR(64)', 'KEY InvestorID (InvestorID)', 'KEY InvesteeID (InvesteeID)']
-        self.create_table(table_name, definition)
-
-        self.insert_dataframe(table_name, df)
-
-    def create_table_Edges_N_Investor_N_Concept(self, df):
-        table_name = 'ca_temp.Edges_N_Investor_N_Concept'
-        self.drop_table(table_name)
-
-        definition = [
-            'InvestorID CHAR(64)',
-            'PageID INT UNSIGNED',
-            'ScoreLinNInv FLOAT',
-            'ScoreLinAmount FLOAT',
-            'ScoreLinNInvNorm FLOAT',
-            'ScoreLinAmountNorm FLOAT',
-            'ScoreQuadNInv FLOAT',
-            'ScoreQuadAmount FLOAT',
-            'ScoreQuadNInvNorm FLOAT',
-            'ScoreQuadAmountNorm FLOAT',
-            'ScoreConstNInv FLOAT',
-            'ScoreConstAmount FLOAT',
-            'ScoreConstNInvNorm FLOAT',
-            'ScoreConstAmountNorm FLOAT',
-            'KEY InvestorID (InvestorID)',
-            'KEY PageID (PageID)']
-        self.create_table(table_name, definition)
-
-        self.insert_dataframe(table_name, df)
-
-    def create_table_Edges_N_FundingRound_N_Investee(self, df):
-        table_name = 'ca_temp.Edges_N_FundingRound_N_Investee'
-        self.drop_table(table_name)
-
-        definition = ['FundingRoundID CHAR(64)', 'InvesteeID CHAR(64)', 'KEY FundingRoundID (FundingRoundID)', 'KEY InvesteeID (InvesteeID)']
-        self.create_table(table_name, definition)
-
-        self.insert_dataframe(table_name, df)
-
-    def create_table_Edges_N_FundingRound_N_Concept(self, df):
-        table_name = 'ca_temp.Edges_N_FundingRound_N_Concept'
-        self.drop_table(table_name)
-
-        definition = ['FundingRoundID CHAR(64)', 'PageID INT UNSIGNED', 'KEY FundingRoundID (FundingRoundID)', 'KEY PageID (PageID)']
-        self.create_table(table_name, definition)
-
-        self.insert_dataframe(table_name, df)
-
-    def create_table_Edges_N_Investee_N_Concept(self, df):
-        table_name = 'ca_temp.Edges_N_Investee_N_Concept'
-        self.drop_table(table_name)
-
-        definition = ['InvesteeID CHAR(64)', 'PageID INT UNSIGNED', 'KEY InvesteeID (InvesteeID)', 'KEY PageID (PageID)']
-        self.create_table(table_name, definition)
-
-        self.insert_dataframe(table_name, df)
