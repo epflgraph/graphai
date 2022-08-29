@@ -2,13 +2,16 @@ import json
 from pathlib import Path
 
 
-def log(msg, debug):
+def log(msg, debug=True, color=None):
     """
     Prints msg only if debug evaluates to True.
     """
 
     if debug:
-        print(msg)
+        if color is None:
+            print(msg)
+        else:
+            cprint(msg, color)
 
 
 class Colors:
