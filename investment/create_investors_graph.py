@@ -367,6 +367,8 @@ def main():
 
     ############################################################
 
+    sw.report(laps=False)
+
 
 if __name__ == '__main__':
     pd.set_option('display.max_rows', 500)
