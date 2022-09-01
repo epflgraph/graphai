@@ -1,3 +1,5 @@
+import sys
+
 import mysql.connector
 import configparser
 
@@ -129,7 +131,8 @@ class DB:
 
             if e.errno in handled_error_codes:
                 n = len(df)
-                print(f'Failed inserting df with {n} rows. Splitting in two and retrying...')
+                payload_size_bytes = sys.getsizeof(query)
+                print(f'Failed inserting df with {n} rows (query payload size: {payload_size_bytes / 1024} MB). Splitting in two and retrying...')
 
                 df1 = df.iloc[:(n // 2)]
                 df2 = df.iloc[(n // 2):]
