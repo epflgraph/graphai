@@ -1,7 +1,5 @@
 import pandas as pd
 
-from itertools import combinations
-
 from interfaces.db import DB
 
 from utils.text.io import log
@@ -9,7 +7,7 @@ from utils.time.date import now, rescale
 from utils.time.stopwatch import Stopwatch
 
 
-def derive_historical_data(df, groupby_columns, date_column, amount_column, min_date='1990-01-01', max_date='today'):
+def derive_historical_data(df, groupby_columns, date_column, amount_column, min_date, max_date):
 
     if max_date == 'today':
         max_date = str(now().date())
@@ -65,7 +63,7 @@ def main():
     db = DB()
 
     # Define all history time window, investments outside it will be ignored.
-    min_date = '2021-12-25'
+    min_date = '2006-01-01'
     max_date = '2022-01-01'
 
     log(f'Creating investments graph for time window [{min_date}, {max_date})')
@@ -152,7 +150,7 @@ def main():
     log('Computing historical data for investor nodes...')
 
     df = pd.merge(investors_frs, frs, how='inner', on='FundingRoundID')
-    investors = derive_historical_data(df, groupby_columns=['InvestorID', 'InvestorType'], date_column='FundingRoundDate', amount_column='FundingAmountPerInvestor_USD')
+    investors = derive_historical_data(df, groupby_columns=['InvestorID', 'InvestorType'], date_column='FundingRoundDate', amount_column='FundingAmountPerInvestor_USD', min_date=min_date, max_date=max_date)
 
     log(f'    {sw.delta():.3f}s', color='green')
 
@@ -162,7 +160,7 @@ def main():
 
     df = pd.merge(frs_investees, investees_concepts, how='inner', on='InvesteeID')
     df = pd.merge(df, frs, how='inner', on='FundingRoundID')
-    concepts = derive_historical_data(df, groupby_columns='PageID', date_column='FundingRoundDate', amount_column='FundingAmount_USD')
+    concepts = derive_historical_data(df, groupby_columns='PageID', date_column='FundingRoundDate', amount_column='FundingAmount_USD', min_date=min_date, max_date=max_date)
 
     log(f'    {sw.delta():.3f}s', color='green')
 
@@ -179,7 +177,7 @@ def main():
 
     # Attach fr info and extract historical data
     df = pd.merge(investors_investors, frs, how='inner', on='FundingRoundID')
-    investors_investors = derive_historical_data(df, groupby_columns=['SourceInvestorID', 'TargetInvestorID'], date_column='FundingRoundDate', amount_column='FundingAmountPerInvestor_USD')
+    investors_investors = derive_historical_data(df, groupby_columns=['SourceInvestorID', 'TargetInvestorID'], date_column='FundingRoundDate', amount_column='FundingAmountPerInvestor_USD', min_date=min_date, max_date=max_date)
 
     log(f'    {sw.delta():.3f}s', color='green')
 
@@ -191,7 +189,7 @@ def main():
     df = pd.merge(df, investees_concepts, how='inner', on='InvesteeID')
     df = pd.merge(df, frs, how='inner', on='FundingRoundID')
 
-    investors_concepts = derive_historical_data(df, groupby_columns=['InvestorID', 'PageID'], date_column='FundingRoundDate', amount_column='FundingAmountPerInvestor_USD')
+    investors_concepts = derive_historical_data(df, groupby_columns=['InvestorID', 'PageID'], date_column='FundingRoundDate', amount_column='FundingAmountPerInvestor_USD', min_date=min_date, max_date=max_date)
 
     log(f'    {sw.delta():.3f}s', color='green')
 
