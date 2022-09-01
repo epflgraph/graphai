@@ -63,7 +63,7 @@ def main():
     db = DB()
 
     # Define all history time window, investments outside it will be ignored.
-    min_date = '2006-01-01'
+    min_date = '1990-01-01'
     max_date = '2022-01-01'
 
     log(f'Creating investments graph for time window [{min_date}, {max_date})')
