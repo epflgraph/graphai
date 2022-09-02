@@ -1,9 +1,14 @@
+import numpy as np
 import pandas as pd
 
 from interfaces.db import DB
 
 from utils.text.io import log
 from utils.time.stopwatch import Stopwatch
+
+
+def weight(x, k=1):
+    return np.tanh(k * x)
 
 
 def main():
@@ -23,10 +28,13 @@ def main():
     fields = ['SourceInvestorID', 'TargetInvestorID', 'ScoreQuadCount']
     df = pd.DataFrame(db.find(table_name, fields=fields), columns=fields)
 
+    # Add weight column
+    df['Weight'] = weight(df['ScoreQuadCount'])
+
     # Duplicate as to have all edges and not only in one direction
-    reversed_fields = ['TargetInvestorID', 'SourceInvestorID', 'ScoreQuadCount']
-    reversed_df = pd.DataFrame(df[reversed_fields].values, columns=fields)
-    investors_investors = pd.concat([df, reversed_df])
+    reversed_df = df.copy()
+    reversed_df[['SourceInvestorID', 'TargetInvestorID']] = df[['TargetInvestorID', 'SourceInvestorID']]
+    investors_investors = pd.concat([df, reversed_df]).reset_index(drop=True)
 
     # Extract list of investor ids
     investor_ids = list(investors_investors['SourceInvestorID'].drop_duplicates())
@@ -44,6 +52,9 @@ def main():
     fields = ['InvestorID', 'PageID', 'ScoreQuadCount']
     investors_concepts = pd.DataFrame(db.find(table_name, fields=fields), columns=fields)
 
+    # Add weight column
+    investors_concepts['Weight'] = weight(investors_concepts['ScoreQuadCount'])
+
     # Extract list of concept ids
     concept_ids = list(investors_concepts['PageID'].drop_duplicates())
 
@@ -57,9 +68,12 @@ def main():
     log('Fetching concept-concept edges from database...')
 
     table_name = 'graph.Edges_N_Concept_N_Concept_T_GraphScore'
-    fields = ['SourcePageID', 'TargetPageID']
+    fields = ['SourcePageID', 'TargetPageID', 'NormalisedScore']
     conditions = {'SourcePageID': concept_ids, 'TargetPageID': concept_ids}
     concepts_concepts = pd.DataFrame(db.find(table_name, fields=fields, conditions=conditions), columns=fields)
+
+    # Add weight column
+    concepts_concepts['Weight'] = weight(concepts_concepts['NormalisedScore'])
 
     log('concepts_concepts')
     log(concepts_concepts)
