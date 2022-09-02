@@ -252,7 +252,7 @@ def main():
     # Drop, recreate table and fill with df
     table_name = 'ca_temp.Nodes_N_Concept'
     definition = [
-        'InvesteeID CHAR(64)',
+        'PageID INT UNSIGNED',
         'CountAmount FLOAT',
         'MinAmount FLOAT',
         'MaxAmount FLOAT',
