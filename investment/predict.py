@@ -57,6 +57,8 @@ def main():
     reversed_df[['SourceInvestorID', 'TargetInvestorID']] = df[['TargetInvestorID', 'SourceInvestorID']]
     investors_investors = pd.concat([df, reversed_df]).reset_index(drop=True)
 
+    del df, reversed_df
+
     log(f'{sw.delta():.3f}s', color='green', indent=(indent+1))
 
     ############################################################
@@ -142,16 +144,16 @@ def main():
     log('Preparing potential edges with investor as pivot...', indent=indent)
 
     # Start with investor-investor edges
-    df = investors_investors
+    inv_inv_cpt = investors_investors
 
     ############################################################
 
     indent += 1
     log('Adding source investor weight...', indent=indent)
 
-    df = pd.merge(df, investors, how='left', left_on='SourceInvestorID', right_on='InvestorID')
-    df = df.drop('InvestorID', axis=1)
-    df = df.rename(columns={'SourceInvestorID': 'SourceID', 'TargetInvestorID': 'PivotID', 'Weight_x': 'WeightSourcePivot', 'Weight_y': 'WeightSource'})
+    inv_inv_cpt = pd.merge(inv_inv_cpt, investors, how='left', left_on='SourceInvestorID', right_on='InvestorID')
+    inv_inv_cpt = inv_inv_cpt.drop('InvestorID', axis=1)
+    inv_inv_cpt = inv_inv_cpt.rename(columns={'SourceInvestorID': 'SourceID', 'TargetInvestorID': 'PivotID', 'Weight_x': 'WeightSourcePivot', 'Weight_y': 'WeightSource'})
 
     log(f'{sw.delta():.3f}s', color='green', indent=(indent+1))
 
@@ -160,9 +162,9 @@ def main():
     log('Adding pivot investor weight...', indent=indent)
 
     # Add pivot investor weight
-    df = pd.merge(df, investors, how='left', left_on='PivotID', right_on='InvestorID')
-    df = df.drop('InvestorID', axis=1)
-    df = df.rename(columns={'Weight': 'WeightPivot'})
+    inv_inv_cpt = pd.merge(inv_inv_cpt, investors, how='left', left_on='PivotID', right_on='InvestorID')
+    inv_inv_cpt = inv_inv_cpt.drop('InvestorID', axis=1)
+    inv_inv_cpt = inv_inv_cpt.rename(columns={'Weight': 'WeightPivot'})
 
     log(f'{sw.delta():.3f}s', color='green', indent=(indent+1))
 
@@ -170,9 +172,9 @@ def main():
 
     log('Merging with investor-concept edges through pivot...', indent=indent)
 
-    df = pd.merge(df, investors_concepts, how='inner', left_on='PivotID', right_on='InvestorID')
-    df = df.drop('InvestorID', axis=1)
-    df = df.rename(columns={'PageID': 'TargetID', 'Weight': 'WeightPivotTarget'})
+    inv_inv_cpt = pd.merge(inv_inv_cpt, investors_concepts, how='inner', left_on='PivotID', right_on='InvestorID')
+    inv_inv_cpt = inv_inv_cpt.drop('InvestorID', axis=1)
+    inv_inv_cpt = inv_inv_cpt.rename(columns={'PageID': 'TargetID', 'Weight': 'WeightPivotTarget'})
 
     log(f'{sw.delta():.3f}s', color='green', indent=(indent+1))
 
@@ -181,9 +183,9 @@ def main():
     log('Adding target concept weight...', indent=indent)
 
     # Add target concept weight
-    df = pd.merge(df, concepts, how='left', left_on='TargetID', right_on='PageID')
-    df = df.drop('PageID', axis=1)
-    df = df.rename(columns={'Weight': 'WeightTarget'})
+    inv_inv_cpt = pd.merge(inv_inv_cpt, concepts, how='left', left_on='TargetID', right_on='PageID')
+    inv_inv_cpt = inv_inv_cpt.drop('PageID', axis=1)
+    inv_inv_cpt = inv_inv_cpt.rename(columns={'Weight': 'WeightTarget'})
 
     log(f'{sw.delta():.3f}s', color='green', indent=(indent+1))
 
@@ -191,15 +193,17 @@ def main():
 
     log('Rearranging columns...', indent=indent)
 
-    df = df[['SourceID', 'PivotID', 'TargetID', 'WeightSource', 'WeightPivot', 'WeightTarget', 'WeightSourcePivot', 'WeightPivotTarget']]
+    inv_inv_cpt = inv_inv_cpt[['SourceID', 'PivotID', 'TargetID', 'WeightSource', 'WeightPivot', 'WeightTarget', 'WeightSourcePivot', 'WeightPivotTarget']]
 
     log(f'{sw.delta():.3f}s', color='green', indent=(indent+1))
     indent -= 1
 
     ############################################################
 
-    log('df')
-    log(f'{df}')
+    log('inv_inv_cpt')
+    log(f'{inv_inv_cpt}')
+
+    ############################################################
 
     sw.report(laps=False)
 
