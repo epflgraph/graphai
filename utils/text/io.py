@@ -2,12 +2,15 @@ import json
 from pathlib import Path
 
 
-def log(msg, debug=True, color=None):
+def log(msg, debug=True, color=None, indent=0):
     """
     Prints msg only if debug evaluates to True.
     """
 
     if debug:
+        indent_size = 4
+        msg = (' ' * indent_size * indent) + msg
+
         if color is None:
             print(msg)
         else:
