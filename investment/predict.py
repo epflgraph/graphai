@@ -35,11 +35,14 @@ def main():
     # Instantiate db interface to communicate with database
     db = DB()
 
+    # Initialize indent variable
+    indent = 0
+
     ############################################################
     # FETCH GRAPH FROM DATABASE                                #
     ############################################################
 
-    log('Fetching investor-investor edges from database...')
+    log('Fetching investor-investor edges from database...', indent=indent)
 
     table_name = 'ca_temp.Edges_N_Investor_N_Investor'
     fields = ['SourceInvestorID', 'TargetInvestorID', 'ScoreQuadCount']
@@ -54,14 +57,11 @@ def main():
     reversed_df[['SourceInvestorID', 'TargetInvestorID']] = df[['TargetInvestorID', 'SourceInvestorID']]
     investors_investors = pd.concat([df, reversed_df]).reset_index(drop=True)
 
-    log('investors_investors')
-    log(investors_investors)
-
-    log(f'    {sw.delta():.3f}s', color='green')
+    log(f'{sw.delta():.3f}s', color='green', indent=(indent+1))
 
     ############################################################
 
-    log('Fetching investor-concept edges from database...')
+    log('Fetching investor-concept edges from database...', indent=indent)
 
     table_name = 'ca_temp.Edges_N_Investor_N_Concept'
     fields = ['InvestorID', 'PageID', 'ScoreQuadCount']
@@ -71,14 +71,11 @@ def main():
     investors_concepts['Weight'] = weight(investors_concepts['ScoreQuadCount'])
     investors_concepts = investors_concepts.drop('ScoreQuadCount', axis=1)
 
-    log('investors_concepts')
-    log(investors_concepts)
-
-    log(f'    {sw.delta():.3f}s', color='green')
+    log(f'{sw.delta():.3f}s', color='green', indent=(indent+1))
 
     ############################################################
 
-    log('Fetching concept-concept edges from database...')
+    log('Fetching concept-concept edges from database...', indent=indent)
 
     table_name = 'graph.Edges_N_Concept_N_Concept_T_GraphScore'
     fields = ['SourcePageID', 'TargetPageID', 'NormalisedScore']
@@ -90,14 +87,11 @@ def main():
     concepts_concepts['Weight'] = weight(concepts_concepts['NormalisedScore'])
     concepts_concepts = concepts_concepts.drop('NormalisedScore', axis=1)
 
-    log('concepts_concepts')
-    log(concepts_concepts)
-
-    log(f'    {sw.delta():.3f}s', color='green')
+    log(f'{sw.delta():.3f}s', color='green', indent=(indent+1))
 
     ############################################################
 
-    log('Fetching investor nodes from database...')
+    log('Fetching investor nodes from database...', indent=indent)
 
     table_name = 'ca_temp.Nodes_N_Investor'
     fields = ['InvestorID', 'ScoreQuadCount']
@@ -107,27 +101,22 @@ def main():
     investors['Weight'] = weight(investors['ScoreQuadCount'])
     investors = investors.drop('ScoreQuadCount', axis=1)
 
-    log('investors')
-    log(investors)
-
-    log(f'    {sw.delta():.3f}s', color='green')
+    log(f'{sw.delta():.3f}s', color='green', indent=(indent+1))
 
     ############################################################
 
-    log('Fetching concept nodes from database...')
+    log('Fetching concept nodes from database...', indent=indent)
 
     table_name = 'ca_temp.Nodes_N_Concept'
     fields = ['InvesteeID', 'ScoreQuadCount']   # TODO correct this, should be PageID instead of InvesteeID
     concepts = pd.DataFrame(db.find(table_name, fields=fields), columns=['PageID', 'ScoreQuadCount'])    # TODO correct this, should be fields instead of given list
+    concepts['PageID'] = concepts['PageID'].astype('int64')
 
     # Add weight column
     concepts['Weight'] = weight(concepts['ScoreQuadCount'])
     concepts = concepts.drop('ScoreQuadCount', axis=1)
 
-    log('concepts')
-    log(concepts)
-
-    log(f'    {sw.delta():.3f}s', color='green')
+    log(f'{sw.delta():.3f}s', color='green', indent=(indent+1))
 
     ############################################################
     # PREPARATION OF POTENTIAL EDGES                           #
@@ -140,34 +129,77 @@ def main():
     #       - C(i) is the set of concepts c such that (i, c) is an (investor-concept) edge
     #       - C(c) is the set of concepts d such that (c, d) is an (concept-concept) edge
 
-    # Prepare dataframe with all triples investor-investor-concept (i, j, c) such that i -> j -> c, in a uniform format
+    ############################################################
+    # PREPARATION OF POTENTIAL EDGES - INV INV CPT             #
+    ############################################################
 
-    # Add source investor weight
-    df = pd.merge(investors_investors, investors, how='inner', left_on='SourceInvestorID', right_on='InvestorID')
+    # Prepare dataframe with all triples investor-investor-concept (i, j, c) such that i -> j -> c, in a uniform format,
+    # whose columns are:
+    #
+    # SourceID, PivotID, TargetID, WeightSource, WeightPivot, WeightTarget, WeightSourcePivot, WeightPivotTarget
+    # ---------Node IDs----------  --------------Node weights-------------  ------------Edge weights------------
+
+    log('Preparing potential edges with investor as pivot...', indent=indent)
+
+    # Start with investor-investor edges
+    df = investors_investors
+
+    ############################################################
+
+    indent += 1
+    log('Adding source investor weight...', indent=indent)
+
+    df = pd.merge(df, investors, how='left', left_on='SourceInvestorID', right_on='InvestorID')
     df = df.drop('InvestorID', axis=1)
     df = df.rename(columns={'SourceInvestorID': 'SourceID', 'TargetInvestorID': 'PivotID', 'Weight_x': 'WeightSourcePivot', 'Weight_y': 'WeightSource'})
 
-    # Add target investor weight
-    df = pd.merge(df, investors, how='inner', left_on='PivotID', right_on='InvestorID')
+    log(f'{sw.delta():.3f}s', color='green', indent=(indent+1))
+
+    ############################################################
+
+    log('Adding pivot investor weight...', indent=indent)
+
+    # Add pivot investor weight
+    df = pd.merge(df, investors, how='left', left_on='PivotID', right_on='InvestorID')
     df = df.drop('InvestorID', axis=1)
     df = df.rename(columns={'Weight': 'WeightPivot'})
 
-    log('df')
-    log(df)
-
-    # TODO continue here merging df with investors_concepts
-    # df = pd.merge(investors_investors, investors_concepts, how='inner', left_on='TargetInvestorID', right_on='InvestorID')
-
-    log('df')
-    log(df)
-
-    # Prepare dataframe with all triples investor-concept-concept (i, d, c) such that i -> d -> c, in a uniform format
-    # df = pd.merge(investors_concepts, concepts_concepts, how='inner', left_on='PageID', right_on='SourcePageID')
-
-
-    log(f'    {sw.delta():.3f}s', color='green')
+    log(f'{sw.delta():.3f}s', color='green', indent=(indent+1))
 
     ############################################################
+
+    log('Merging with investor-concept edges through pivot...', indent=indent)
+
+    df = pd.merge(df, investors_concepts, how='inner', left_on='PivotID', right_on='InvestorID')
+    df = df.drop('InvestorID', axis=1)
+    df = df.rename(columns={'PageID': 'TargetID', 'Weight': 'WeightPivotTarget'})
+
+    log(f'{sw.delta():.3f}s', color='green', indent=(indent+1))
+
+    ############################################################
+
+    log('Adding target concept weight...', indent=indent)
+
+    # Add target concept weight
+    df = pd.merge(df, concepts, how='left', left_on='TargetID', right_on='PageID')
+    df = df.drop('PageID', axis=1)
+    df = df.rename(columns={'Weight': 'WeightTarget'})
+
+    log(f'{sw.delta():.3f}s', color='green', indent=(indent+1))
+
+    ############################################################
+
+    log('Rearranging columns...', indent=indent)
+
+    df = df[['SourceID', 'PivotID', 'TargetID', 'WeightSource', 'WeightPivot', 'WeightTarget', 'WeightSourcePivot', 'WeightPivotTarget']]
+
+    log(f'{sw.delta():.3f}s', color='green', indent=(indent+1))
+    indent -= 1
+
+    ############################################################
+
+    log('df')
+    log(f'{df}')
 
     sw.report(laps=False)
 
