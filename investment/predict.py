@@ -48,6 +48,9 @@ def main():
     df['Weight'] = weight(df['ScoreQuadCount'])
     df = df.drop('ScoreQuadCount', axis=1)
 
+    # Filter out edges with 0 weight
+    df = df[df['Weight'] > 0]
+
     # Duplicate as to have all edges and not only in one direction
     reversed_df = df.copy()
     reversed_df[['SourceInvestorID', 'TargetInvestorID']] = df[['TargetInvestorID', 'SourceInvestorID']]
@@ -64,9 +67,12 @@ def main():
     investors_concepts = pd.DataFrame(db.find(table_name, fields=fields), columns=fields)
     investors_concepts['PageID'] = investors_concepts['PageID'].astype(str)
 
-    # Add weight column
+    # Add weight column and filter out edges with 0 weight
     investors_concepts['Weight'] = weight(investors_concepts['ScoreQuadCount'])
     investors_concepts = investors_concepts.drop('ScoreQuadCount', axis=1)
+
+    # Filter out edges with 0 weight
+    investors_concepts = investors_concepts[investors_concepts['Weight'] > 0]
 
     ############################################################
 
@@ -84,6 +90,9 @@ def main():
     concepts_concepts['Weight'] = weight(concepts_concepts['NormalisedScore'])
     concepts_concepts = concepts_concepts.drop('NormalisedScore', axis=1)
 
+    # Filter out edges with 0 weight
+    concepts_concepts = concepts_concepts[concepts_concepts['Weight'] > 0]
+
     ############################################################
 
     bc.log('Fetching investor nodes from database...')
@@ -95,6 +104,9 @@ def main():
     # Add weight column
     investors['Weight'] = weight(investors['ScoreQuadCount'])
     investors = investors.drop('ScoreQuadCount', axis=1)
+
+    # Filter out nodes with 0 weight
+    investors = investors[investors['Weight'] > 0]
 
     ############################################################
 
@@ -109,8 +121,11 @@ def main():
     concepts['Weight'] = weight(concepts['ScoreQuadCount'])
     concepts = concepts.drop('ScoreQuadCount', axis=1)
 
+    # Filter out nodes with 0 weight
+    concepts = concepts[concepts['Weight'] > 0]
+
     ############################################################
-    # POTENTIAL EDGES - WEIGHTS                                #
+    # POTENTIAL EDGES - PREPARATION                            #
     ############################################################
 
     # Potential edges are pairs investor-concept (i, c) at distance at most 2 in the graph.
@@ -122,118 +137,17 @@ def main():
 
     ############################################################
 
-    bc.log('Adding source and target weight to investor-investor edges...')
-
-    investors_investors = pd.merge(investors_investors, investors, how='inner', left_on='SourceInvestorID', right_on='InvestorID')
-    investors_investors = investors_investors.drop('InvestorID', axis=1)
-    investors_investors = investors_investors.rename(columns={'Weight_x': 'EdgeWeight', 'Weight_y': 'SourceWeight'})
-
-    investors_investors = pd.merge(investors_investors, investors, how='inner', left_on='TargetInvestorID', right_on='InvestorID')
-    investors_investors = investors_investors.drop('InvestorID', axis=1)
-    investors_investors = investors_investors.rename(columns={'Weight': 'TargetWeight'})
-
-    ############################################################
-
-    bc.log('Adding investor and concept weight to investor-concept edges...')
-
-    investors_concepts = pd.merge(investors_concepts, investors, how='inner', on='InvestorID')
-    investors_concepts = investors_concepts.rename(columns={'Weight_x': 'EdgeWeight', 'Weight_y': 'SourceWeight'})
-
-    investors_concepts = pd.merge(investors_concepts, concepts, how='inner', on='PageID')
-    investors_concepts = investors_concepts.rename(columns={'Weight': 'TargetWeight'})
-
-    ############################################################
-
-    bc.log('Adding source and target weight to concept-concept edges...')
-
-    concepts_concepts = pd.merge(concepts_concepts, concepts, how='inner', left_on='SourcePageID', right_on='PageID')
-    concepts_concepts = concepts_concepts.drop('PageID', axis=1)
-    concepts_concepts = concepts_concepts.rename(columns={'Weight_x': 'EdgeWeight', 'Weight_y': 'SourceWeight'})
-
-    concepts_concepts = pd.merge(concepts_concepts, concepts, how='inner', left_on='TargetPageID', right_on='PageID')
-    concepts_concepts = concepts_concepts.drop('PageID', axis=1)
-    concepts_concepts = concepts_concepts.rename(columns={'Weight': 'TargetWeight'})
-
-    ############################################################
-    # PREPARATION OF POTENTIAL EDGES - BASE TERMS              #
-    ############################################################
-
-    bc.log('Computing base term T^I(i)...')
-
-    # For a given investor i, its base term T^I(i) is defined as
-    #   T^I(i) = sum_{i~>j} w(j) * w(i, j)
-
-    investors_investors['BaseTerm_TIi'] = investors_investors['EdgeWeight'] * investors_investors['TargetWeight']
-    df = investors_investors[['SourceInvestorID', 'BaseTerm_TIi']].groupby(by='SourceInvestorID').sum().reset_index()
-    df = df.rename(columns={'SourceInvestorID': 'InvestorID'})
-    investors = pd.merge(investors, df, how='left', on='InvestorID')
-    investors = investors.fillna(0)
-
-    del df
-
-    ############################################################
-
-    bc.log('Computing base term T^C(i)...')
-
-    # For a given investor i, its base term T^C(i) is defined as
-    #   T^C(i) = sum_{i~>d} w(d) * w(i, d)
-
-    investors_concepts['BaseTerm_TCi'] = investors_concepts['EdgeWeight'] * investors_concepts['TargetWeight']
-    df = investors_concepts[['InvestorID', 'BaseTerm_TCi']].groupby(by='InvestorID').sum().reset_index()
-    investors = pd.merge(investors, df, how='left', on='InvestorID')
-    investors = investors.fillna(0)
-
-    del df
-
-    ############################################################
-
-    bc.log('Computing base term T^I(c)...')
-
-    # For a given concept c, its base term T^I(c) is defined as
-    #   T^I(c) = sum_{j~>c} w(j) * w(j, c)
-
-    investors_concepts['BaseTerm_TIc'] = investors_concepts['EdgeWeight'] * investors_concepts['SourceWeight']
-    df = investors_concepts[['PageID', 'BaseTerm_TIc']].groupby(by='PageID').sum().reset_index()
-    concepts = pd.merge(concepts, df, how='left', on='PageID')
-    concepts = concepts.fillna(0)
-
-    del df
-
-    ############################################################
-
-    bc.log('Computing base term T^C(c)...')
-
-    # For a given concept c, its base term T^C(c) is defined as
-    #   T^C(c) = sum_{d~>c} w(d) * w(d, c)
-
-    concepts_concepts['BaseTerm_TCc'] = concepts_concepts['EdgeWeight'] * concepts_concepts['SourceWeight']
-    df = concepts_concepts[['TargetPageID', 'BaseTerm_TCc']].groupby(by='TargetPageID').sum().reset_index()
-    df = df.rename(columns={'TargetPageID': 'PageID'})
-    concepts = pd.merge(concepts, df, how='left', on='PageID')
-    concepts = concepts.fillna(0)
-
-    del df
-
-    ############################################################
-    # PREPARATION OF POTENTIAL EDGES - INTERSECTION TERMS      #
-    ############################################################
-
     bc.log('Merging investor-investor edges with investor-concept edges...')
 
     inv_inv_cpt = pd.merge(investors_investors, investors_concepts, how='inner', left_on='TargetInvestorID', right_on='InvestorID')
     inv_inv_cpt = inv_inv_cpt.drop('InvestorID', axis=1)
-    inv_inv_cpt = inv_inv_cpt.drop('SourceWeight_y', axis=1)    # PivotWeight := TargetWeight_x = SourceWeight_y
     inv_inv_cpt = inv_inv_cpt.rename(columns={
         'SourceInvestorID': 'SourceID',
         'TargetInvestorID': 'PivotID',
         'PageID': 'TargetID',
-        'EdgeWeight_x': 'SourcePivotWeight',
-        'EdgeWeight_y': 'PivotTargetWeight',
-        'SourceWeight_x': 'SourceWeight',
-        'TargetWeight_x': 'PivotWeight',
-        'TargetWeight_y': 'TargetWeight'
+        'Weight_x': 'SourcePivotWeight',
+        'Weight_y': 'PivotTargetWeight'
     })
-    inv_inv_cpt = inv_inv_cpt[['SourceID', 'PivotID', 'TargetID', 'SourceWeight', 'PivotWeight', 'TargetWeight', 'SourcePivotWeight', 'PivotTargetWeight', 'BaseTerm_TIi', 'BaseTerm_TCi', 'BaseTerm_TIc']]
 
     ############################################################
 
@@ -241,24 +155,37 @@ def main():
 
     inv_cpt_cpt = pd.merge(investors_concepts, concepts_concepts, how='inner', left_on='PageID', right_on='SourcePageID')
     inv_cpt_cpt = inv_cpt_cpt.drop('PageID', axis=1)
-    inv_cpt_cpt = inv_cpt_cpt.drop('SourceWeight_y', axis=1)    # PivotWeight := TargetWeight_x = SourceWeight_y
     inv_cpt_cpt = inv_cpt_cpt.rename(columns={
         'InvestorID': 'SourceID',
         'SourcePageID': 'PivotID',
         'TargetPageID': 'TargetID',
-        'EdgeWeight_x': 'SourcePivotWeight',
-        'EdgeWeight_y': 'PivotTargetWeight',
-        'SourceWeight_x': 'SourceWeight',
-        'TargetWeight_x': 'PivotWeight',
-        'TargetWeight_y': 'TargetWeight'
+        'Weight_x': 'SourcePivotWeight',
+        'Weight_y': 'PivotTargetWeight'
     })
-    inv_cpt_cpt = inv_cpt_cpt[['SourceID', 'PivotID', 'TargetID', 'SourceWeight', 'PivotWeight', 'TargetWeight', 'SourcePivotWeight', 'PivotTargetWeight', 'BaseTerm_TCi', 'BaseTerm_TIc', 'BaseTerm_TCc']]
 
     ############################################################
 
     bc.log('Preparing dataframe with potential edges...')
 
     potential_edges = pd.concat([inv_inv_cpt[['SourceID', 'TargetID']], inv_cpt_cpt[['SourceID', 'TargetID']]]).drop_duplicates()
+
+    ############################################################
+    # POTENTIAL EDGES - INTERSECTION TERMS                     #
+    ############################################################
+
+    bc.log('Adding investor pivot weight...')
+
+    inv_inv_cpt = pd.merge(inv_inv_cpt, investors, how='left', left_on='PivotID', right_on='InvestorID')
+    inv_inv_cpt = inv_inv_cpt.drop('InvestorID', axis=1)
+    inv_inv_cpt = inv_inv_cpt.rename(columns={'Weight': 'PivotWeight'})
+
+    ############################################################
+
+    bc.log('Adding concept pivot weight...')
+
+    inv_cpt_cpt = pd.merge(inv_cpt_cpt, concepts, how='left', left_on='PivotID', right_on='PageID')
+    inv_cpt_cpt = inv_cpt_cpt.drop('PageID', axis=1)
+    inv_cpt_cpt = inv_cpt_cpt.rename(columns={'Weight': 'PivotWeight'})
 
     ############################################################
 
@@ -289,9 +216,111 @@ def main():
     del df
 
     ############################################################
+    # POTENTIAL EDGES - BASE TERMS                             #
+    ############################################################
 
-    # TODO Rewrite the code below to correctly compute the weights. Need to do:
-    #   - Compute Jaccard coefficient as T(i, c) / (T(i) + T(c) - T(i, c))
+    bc.log('Adding target node weight to investor-investor edges...')
+
+    investors_investors = pd.merge(investors_investors, investors, how='inner', left_on='TargetInvestorID', right_on='InvestorID')
+    investors_investors = investors_investors.drop('InvestorID', axis=1)
+    investors_investors = investors_investors.rename(columns={'Weight_x': 'EdgeWeight', 'Weight_y': 'TargetWeight'})
+
+    ############################################################
+
+    bc.log('Adding investor and concept node weights to investor-concept edges...')
+
+    investors_concepts = pd.merge(investors_concepts, investors, how='inner', on='InvestorID')
+    investors_concepts = investors_concepts.rename(columns={'Weight_x': 'EdgeWeight', 'Weight_y': 'SourceWeight'})
+
+    investors_concepts = pd.merge(investors_concepts, concepts, how='inner', on='PageID')
+    investors_concepts = investors_concepts.rename(columns={'Weight': 'TargetWeight'})
+
+    ############################################################
+
+    bc.log('Adding source node weight to concept-concept edges...')
+
+    concepts_concepts = pd.merge(concepts_concepts, concepts, how='inner', left_on='SourcePageID', right_on='PageID')
+    concepts_concepts = concepts_concepts.drop('PageID', axis=1)
+    concepts_concepts = concepts_concepts.rename(columns={'Weight_x': 'EdgeWeight', 'Weight_y': 'SourceWeight'})
+
+    ############################################################
+
+    bc.log('Computing base term T^I(i)...')
+
+    # For a given investor i, its base term T^I(i) is defined as
+    #   T^I(i) = sum_{i~>j} w(j) * w(i, j)
+
+    investors_investors['BaseTerm_TIi'] = investors_investors['EdgeWeight'] * investors_investors['TargetWeight']
+    df = investors_investors[['SourceInvestorID', 'BaseTerm_TIi']].groupby(by='SourceInvestorID').sum().reset_index()
+    df = df.rename(columns={'SourceInvestorID': 'SourceID'})
+    potential_edges = pd.merge(potential_edges, df, how='left', on='SourceID')
+    potential_edges = potential_edges.fillna(0)
+
+    del df
+
+    ############################################################
+
+    bc.log('Computing base term T^C(i)...')
+
+    # For a given investor i, its base term T^C(i) is defined as
+    #   T^C(i) = sum_{i~>d} w(d) * w(i, d)
+
+    investors_concepts['BaseTerm_TCi'] = investors_concepts['EdgeWeight'] * investors_concepts['TargetWeight']
+    df = investors_concepts[['InvestorID', 'BaseTerm_TCi']].groupby(by='InvestorID').sum().reset_index()
+    df = df.rename(columns={'InvestorID': 'SourceID'})
+    potential_edges = pd.merge(potential_edges, df, how='left', on='SourceID')
+    potential_edges = potential_edges.fillna(0)
+
+    del df
+
+    ############################################################
+
+    bc.log('Computing base term T^I(c)...')
+
+    # For a given concept c, its base term T^I(c) is defined as
+    #   T^I(c) = sum_{j~>c} w(j) * w(j, c)
+
+    investors_concepts['BaseTerm_TIc'] = investors_concepts['EdgeWeight'] * investors_concepts['SourceWeight']
+    df = investors_concepts[['PageID', 'BaseTerm_TIc']].groupby(by='PageID').sum().reset_index()
+    df = df.rename(columns={'PageID': 'TargetID'})
+    potential_edges = pd.merge(potential_edges, df, how='left', on='TargetID')
+    potential_edges = potential_edges.fillna(0)
+
+    del df
+
+    ############################################################
+
+    bc.log('Computing base term T^C(c)...')
+
+    # For a given concept c, its base term T^C(c) is defined as
+    #   T^C(c) = sum_{d~>c} w(d) * w(d, c)
+
+    concepts_concepts['BaseTerm_TCc'] = concepts_concepts['EdgeWeight'] * concepts_concepts['SourceWeight']
+    df = concepts_concepts[['TargetPageID', 'BaseTerm_TCc']].groupby(by='TargetPageID').sum().reset_index()
+    df = df.rename(columns={'TargetPageID': 'TargetID'})
+    potential_edges = pd.merge(potential_edges, df, how='left', on='TargetID')
+    potential_edges = potential_edges.fillna(0)
+
+    del df
+
+    ############################################################
+    # POTENTIAL EDGES - WEIGHTED JACCARD COEFFICIENT           #
+    ############################################################
+
+    bc.log('Computing Jaccard coefficient...')
+
+    # For given investor i and concept c, their weighted Jaccard coefficient WJC(i, c) is defined as
+    #   WJC(i, c) = (T^I(i, c) + T^C(i, c)) / (T^I(i) + T^C(i) + T^I(c) + T^C(c) - T^I(i, c) - T^C(i, c))
+
+    intersection_terms = potential_edges['IntersectionTerm_TIic'] + potential_edges['IntersectionTerm_TCic']
+    base_terms = potential_edges['BaseTerm_TIi'] + potential_edges['BaseTerm_TCi'] + potential_edges['BaseTerm_TIc'] + potential_edges['BaseTerm_TCc']
+    potential_edges['JaccardCoef'] = intersection_terms / (base_terms - intersection_terms)
+    potential_edges = potential_edges.fillna(0)
+    potential_edges = potential_edges.replace([np.inf, -np.inf], 1)
+
+    ############################################################
+
+    print(potential_edges.sort_values(by='JaccardCoef', ascending=False))
 
     ############################################################
 
