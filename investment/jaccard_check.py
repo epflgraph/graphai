@@ -25,13 +25,19 @@ def get_investor_name(db, investor_id):
         fields = ['OrganisationID', 'OrganisationName']
         conditions = {'OrganisationID': investor_id}
         orgs = pd.DataFrame(db.find(table_name, fields=fields, conditions=conditions), columns=fields)
-        return orgs['OrganisationName'][0]
+        try:
+            return orgs['OrganisationName'][0]
+        except IndexError:
+            return '__UNKNOWN_ORG__'
     else:
         table_name = 'graph.Nodes_N_Person'
         fields = ['PersonID', 'FullName']
         conditions = {'PersonID': investor_id}
         people = pd.DataFrame(db.find(table_name, fields=fields, conditions=conditions), columns=fields)
-        return people['FullName'][0]
+        try:
+            return people['FullName'][0]
+        except IndexError:
+            return '__UNKNOWN_PERSON__'
 
 
 def get_investor_fr_ids(db, fr_ids, investor_id):
@@ -58,9 +64,10 @@ def get_investor_partner_ids(db, fr_ids, investor_id):
     for investor_fr_id in investor_fr_ids:
         partner_ids += get_fr_investor_ids(db, investor_fr_id)
 
+    partner_ids = list(dict.fromkeys(partner_ids))
     partner_ids.remove(investor_id)
 
-    return list(dict.fromkeys(partner_ids))
+    return partner_ids
 
 
 def get_fr_date(db, fr_id):
@@ -163,8 +170,8 @@ def main():
     db = DB()
 
     # Investor-concept pair to be checked
-    investor_id = 'd4877f3f-6ae1-4513-ba2d-1b5f7d7e28fc'
-    concept_id = 1164
+    investor_id = '063bf170-ddb2-4041-8068-409fab18d502'
+    concept_id = 46545
 
     investor_name = get_investor_name(db, investor_id)
     concept_name = get_concept_name(db, concept_id)
