@@ -4,7 +4,7 @@ from utils.time.stopwatch import Stopwatch
 
 class Breadcrumb:
 
-    def __init__(self, debug=True, color=None, time_color='green'):
+    def __init__(self, debug=True, color=None, time_color='gray'):
         self.stopwatches = []
         self.index = 0
         self.status = 'off'
@@ -47,7 +47,9 @@ class Breadcrumb:
         self.status = 'off'
 
     def outdent(self):
-        self._print_delta()
-        self._pop_stopwatch()
+        if self.status != 'off':
+            self._print_delta()
+            self._pop_stopwatch()
+
         self.status = 'on'
         self.index -= 1
