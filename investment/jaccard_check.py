@@ -117,7 +117,10 @@ def get_concept_name(db, concept_id):
     conditions = {'PageID': concept_id}
     concepts = pd.DataFrame(db.find(table_name, fields=fields, conditions=conditions), columns=fields)
 
-    return concepts['PageTitle'][0]
+    try:
+        return concepts['PageTitle'][0]
+    except IndexError:
+        return '__UNKNOWN_CONCEPT__'
 
 
 def get_concept_org_ids(db, concept_id):
@@ -170,8 +173,8 @@ def main():
     db = DB()
 
     # Investor-concept pair to be checked
-    investor_id = '063bf170-ddb2-4041-8068-409fab18d502'
-    concept_id = 46545
+    investor_id = '1d474074-5b12-4ac8-9461-d7a9647a04d7'
+    concept_id = 44518453
 
     investor_name = get_investor_name(db, investor_id)
     concept_name = get_concept_name(db, concept_id)
@@ -315,6 +318,63 @@ def main():
         bc.log(f'Target concept concept {concept_concept_id} ({concept_concept_name})')
 
     bc.outdent()
+
+    ############################################################
+
+    bc.outdent()
+
+    ############################################################
+    # INTERSECTIONS                                            #
+    ############################################################
+
+    bc.log(f'#### INTERSECTION INVESTORS ####')
+    bc.indent()
+
+    ############################################################
+
+    intersection_investor_ids = [partner_id for partner_id in partner_ids if partner_id in concept_investor_ids]
+    bc.log(f'Source investor and target concept have {len(intersection_investor_ids)} common investors in time period')
+
+    ############################################################
+
+    if len(intersection_investor_ids) < 50:
+        bc.indent()
+
+        for intersection_investor_id in intersection_investor_ids:
+            intersection_investor_name = get_investor_name(db, intersection_investor_id)
+            bc.log(f'Intersection investor {intersection_investor_id} ({intersection_investor_name})')
+
+            bc.indent()
+            intersection_investor_fr_ids = get_investor_fr_ids(db, fr_ids, intersection_investor_id)
+            bc.log(f'Invested in {len(intersection_investor_fr_ids)} funding rounds in time window.')
+            bc.outdent()
+
+        bc.outdent()
+
+    ############################################################
+
+    bc.outdent()
+
+    ############################################################
+
+    bc.log(f'#### INTERSECTION CONCEPTS ####')
+    bc.indent()
+
+    ############################################################
+
+    intersection_concept_ids = [investor_concept_id for investor_concept_id in investor_concept_ids if investor_concept_id in concept_concept_ids]
+    bc.log(f'Source investor and target concept have {len(intersection_concept_ids)} common concepts in time period')
+
+    ############################################################
+
+    if len(intersection_concept_ids) < 50:
+        bc.indent()
+
+        for intersection_concept_id in intersection_concept_ids:
+            intersection_concept_name = get_concept_name(db, intersection_concept_id)
+            bc.log(f'Intersection concept {intersection_concept_id} ({intersection_concept_name})')
+
+        bc.outdent()
 
     ############################################################
 
