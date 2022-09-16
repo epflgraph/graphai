@@ -2,9 +2,8 @@ import pandas as pd
 
 from interfaces.db import DB
 
-from utils.text.io import log
+from utils.breadcrumb import Breadcrumb
 from utils.time.date import now, rescale
-from utils.time.stopwatch import Stopwatch
 
 
 def derive_historical_data(df, groupby_columns, date_column, amount_column, min_date, max_date):
@@ -56,8 +55,8 @@ def main():
     # INITIALIZATION                                           #
     ############################################################
 
-    # Initialize stopwatch to keep track of time
-    sw = Stopwatch()
+    # Initialize breadcrumb to log and keep track of time
+    bc = Breadcrumb()
 
     # Instantiate db interface to communicate with database
     db = DB()
@@ -66,13 +65,13 @@ def main():
     min_date = '2021-01-01'
     max_date = '2022-01-01'
 
-    log(f'Creating investments graph for time window [{min_date}, {max_date})')
+    bc.log(f'Creating investments graph for time window [{min_date}, {max_date})')
 
     ############################################################
     # BUILD DATAFRAME                                          #
     ############################################################
 
-    log('Retrieving funding rounds...')
+    bc.log('Retrieving funding rounds...')
 
     # Fetch funding rounds in time window from database
     table_name = 'graph.Nodes_N_FundingRound'
@@ -86,11 +85,9 @@ def main():
 
     fr_ids = list(frs['FundingRoundID'])
 
-    log(f'    {sw.delta():.3f}s', color='green')
-
     ############################################################
 
-    log('Retrieving investors...')
+    bc.log('Retrieving investors...')
 
     # Fetch organization investors from database
     table_name = 'graph.Edges_N_Organisation_N_FundingRound'
@@ -114,11 +111,9 @@ def main():
     investors_frs = pd.concat([org_investors_frs, person_investors_frs])
     investors_frs = investors_frs[['InvestorID', 'InvestorType', 'FundingRoundID']]
 
-    log(f'    {sw.delta():.3f}s', color='green')
-
     ############################################################
 
-    log('Retrieving investees...')
+    bc.log('Retrieving investees...')
 
     # Fetch investees from database
     table_name = 'graph.Edges_N_Organisation_N_FundingRound'
@@ -128,11 +123,9 @@ def main():
                                  columns=['FundingRoundID', 'InvesteeID'])
     investee_ids = list(frs_investees['InvesteeID'])
 
-    log(f'    {sw.delta():.3f}s', color='green')
-
     ############################################################
 
-    log('Retrieving concepts...')
+    bc.log('Retrieving concepts...')
 
     # Fetch concepts from database
     table_name = 'graph.Edges_N_Organisation_N_Concept'
@@ -141,32 +134,26 @@ def main():
     investees_concepts = pd.DataFrame(db.find(table_name, fields=fields, conditions=conditions),
                                       columns=['InvesteeID', 'PageID'])
 
-    log(f'    {sw.delta():.3f}s', color='green')
-
     ############################################################
     # COMPUTE DERIVED DATA                                     #
     ############################################################
 
-    log('Computing historical data for investor nodes...')
+    bc.log('Computing historical data for investor nodes...')
 
     df = pd.merge(investors_frs, frs, how='inner', on='FundingRoundID')
     investors = derive_historical_data(df, groupby_columns=['InvestorID', 'InvestorType'], date_column='FundingRoundDate', amount_column='FundingAmountPerInvestor_USD', min_date=min_date, max_date=max_date)
 
-    log(f'    {sw.delta():.3f}s', color='green')
-
     ############################################################
 
-    log('Computing historical data for concept nodes...')
+    bc.log('Computing historical data for concept nodes...')
 
     df = pd.merge(frs_investees, investees_concepts, how='inner', on='InvesteeID')
     df = pd.merge(df, frs, how='inner', on='FundingRoundID')
     concepts = derive_historical_data(df, groupby_columns='PageID', date_column='FundingRoundDate', amount_column='FundingAmount_USD', min_date=min_date, max_date=max_date)
 
-    log(f'    {sw.delta():.3f}s', color='green')
-
     ############################################################
 
-    log('Computing historical data for investor-investor edges...')
+    bc.log('Computing historical data for investor-investor edges...')
 
     # Merge the dataframe investors_frs with itself to obtain all pairs of investors
     investors_investors = pd.merge(investors_frs[['InvestorID', 'FundingRoundID']], investors_frs[['InvestorID', 'FundingRoundID']], how='inner', on='FundingRoundID')
@@ -179,11 +166,9 @@ def main():
     df = pd.merge(investors_investors, frs, how='inner', on='FundingRoundID')
     investors_investors = derive_historical_data(df, groupby_columns=['SourceInvestorID', 'TargetInvestorID'], date_column='FundingRoundDate', amount_column='FundingAmountPerInvestor_USD', min_date=min_date, max_date=max_date)
 
-    log(f'    {sw.delta():.3f}s', color='green')
-
     ############################################################
 
-    log('Computing historical data for investor-concept edges...')
+    bc.log('Computing historical data for investor-concept edges...')
 
     df = pd.merge(investors_frs, frs_investees, how='inner', on='FundingRoundID')
     df = pd.merge(df, investees_concepts, how='inner', on='InvesteeID')
@@ -191,13 +176,11 @@ def main():
 
     investors_concepts = derive_historical_data(df, groupby_columns=['InvestorID', 'PageID'], date_column='FundingRoundDate', amount_column='FundingAmountPerInvestor_USD', min_date=min_date, max_date=max_date)
 
-    log(f'    {sw.delta():.3f}s', color='green')
-
     ############################################################
     # INSERT NODES INTO DATABASE                               #
     ############################################################
 
-    log('Inserting funding rounds into database...')
+    bc.log('Inserting funding rounds into database...')
 
     # Drop, recreate table and fill with frs
     table_name = 'ca_temp.Nodes_N_FundingRound'
@@ -205,11 +188,9 @@ def main():
                   'FundingAmountPerInvestor_USD FLOAT', 'PRIMARY KEY FundingRoundID (FundingRoundID)']
     db.drop_create_insert_table(table_name, definition, frs)
 
-    log(f'    {sw.delta():.3f}s', color='green')
-
     ############################################################
 
-    log('Inserting investors into database...')
+    bc.log('Inserting investors into database...')
 
     # Drop, recreate table and fill with df
     table_name = 'ca_temp.Nodes_N_Investor'
@@ -231,11 +212,9 @@ def main():
     ]
     db.drop_create_insert_table(table_name, definition, investors)
 
-    log(f'    {sw.delta():.3f}s', color='green')
-
     ############################################################
 
-    log('Inserting investees into database...')
+    bc.log('Inserting investees into database...')
 
     # Drop, recreate table and fill with df
     table_name = 'ca_temp.Nodes_N_Investee'
@@ -243,11 +222,9 @@ def main():
     df = frs_investees[['InvesteeID']].drop_duplicates()
     db.drop_create_insert_table(table_name, definition, df)
 
-    log(f'    {sw.delta():.3f}s', color='green')
-
     ############################################################
 
-    log('Inserting concepts into database...')
+    bc.log('Inserting concepts into database...')
 
     # Drop, recreate table and fill with df
     table_name = 'ca_temp.Nodes_N_Concept'
@@ -268,13 +245,11 @@ def main():
     ]
     db.drop_create_insert_table(table_name, definition, concepts)
 
-    log(f'    {sw.delta():.3f}s', color='green')
-
     ############################################################
     # INSERT EDGES INTO DATABASE                               #
     ############################################################
 
-    log('Inserting investors-frs edges into database...')
+    bc.log('Inserting investors-frs edges into database...')
 
     # Drop, recreate table and fill with df
     table_name = 'ca_temp.Edges_N_Investor_N_FundingRound'
@@ -283,11 +258,9 @@ def main():
     df = investors_frs[['InvestorID', 'FundingRoundID']]
     db.drop_create_insert_table(table_name, definition, df)
 
-    log(f'    {sw.delta():.3f}s', color='green')
-
     ############################################################
 
-    log('Inserting frs-investees edges into database...')
+    bc.log('Inserting frs-investees edges into database...')
 
     # Drop, recreate table and fill with df
     table_name = 'ca_temp.Edges_N_FundingRound_N_Investee'
@@ -296,22 +269,18 @@ def main():
     df = frs_investees[['FundingRoundID', 'InvesteeID']]
     db.drop_create_insert_table(table_name, definition, df)
 
-    log(f'    {sw.delta():.3f}s', color='green')
-
     ############################################################
 
-    log('Inserting investees-concepts edges into database...')
+    bc.log('Inserting investees-concepts edges into database...')
 
     # Drop, recreate table and fill with df
     table_name = 'ca_temp.Edges_N_Investee_N_Concept'
     definition = ['InvesteeID CHAR(64)', 'PageID INT UNSIGNED', 'KEY InvesteeID (InvesteeID)', 'KEY PageID (PageID)']
     db.drop_create_insert_table(table_name, definition, investees_concepts)
 
-    log(f'    {sw.delta():.3f}s', color='green')
-
     ############################################################
 
-    log('Inserting investor-investor edges into database...')
+    bc.log('Inserting investor-investor edges into database...')
 
     # Drop, recreate table and fill with df
     table_name = 'ca_temp.Edges_N_Investor_N_Investor'
@@ -334,11 +303,9 @@ def main():
     ]
     db.drop_create_insert_table(table_name, definition, investors_investors)
 
-    log(f'    {sw.delta():.3f}s', color='green')
-
     ############################################################
 
-    log('Inserting investors-concepts edges into database...')
+    bc.log('Inserting investors-concepts edges into database...')
 
     # Drop, recreate table and fill with df
     table_name = 'ca_temp.Edges_N_Investor_N_Concept'
@@ -361,11 +328,9 @@ def main():
     ]
     db.drop_create_insert_table(table_name, definition, investors_concepts)
 
-    log(f'    {sw.delta():.3f}s', color='green')
-
     ############################################################
 
-    sw.report(laps=False)
+    bc.report()
 
 
 if __name__ == '__main__':

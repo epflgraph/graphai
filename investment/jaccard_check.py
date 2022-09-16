@@ -181,8 +181,8 @@ def main():
     db = DB()
 
     # Investor-concept pair to be checked
-    investor_id = '1d474074-5b12-4ac8-9461-d7a9647a04d7'
-    concept_id = 44518453
+    investor_id = '7e772e20-8ede-4205-a101-d827be09dfe6'
+    concept_id = 33094374
 
     investor_name = get_investor_name(db, investor_id)
     investor_type = get_investor_type(db, investor_id)
