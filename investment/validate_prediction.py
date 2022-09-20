@@ -11,6 +11,59 @@ from investment.data import *
 from investment.create_investments_graph import derive_historical_data
 
 
+def get_metrics(field, pred_investors_concepts, true_investors_concepts):
+    union_pairs = pd.merge(true_investors_concepts[['InvestorID', 'PageID']], pred_investors_concepts[['InvestorID', 'PageID']], how='outer', on=['InvestorID', 'PageID'])
+
+    true_n_investments = true_investors_concepts['CountAmount'].sum()
+    true_total_amount = true_investors_concepts['SumAmount'].sum()
+
+    thresholds = pred_investors_concepts[field].quantile(q=np.linspace(0, 1, 100 + 1))
+    thresholds = list(dict.fromkeys(thresholds))
+
+    metrics = []
+    for threshold in thresholds:
+        threshold_pred_investors_concepts = pred_investors_concepts[pred_investors_concepts[field] >= threshold]
+        threshold_pred_pairs = set(threshold_pred_investors_concepts[['InvestorID', 'PageID']].itertuples(index=False, name=None))
+
+        threshold_common_investments = pd.merge(threshold_pred_investors_concepts, true_investors_concepts, how='inner', on=['InvestorID', 'PageID'])
+
+        tp = len(threshold_common_investments)
+        fp = len(threshold_pred_pairs) - len(threshold_common_investments)
+        fn = len(true_investors_concepts) - len(threshold_common_investments)
+        tn = len(union_pairs) - len(threshold_pred_pairs) - len(true_investors_concepts) + len(threshold_common_investments)
+
+        accuracy = (tp + tn) / (tp + fp + fn + tn) if tp + fp + fn + tn > 0 else 0
+        precision = (tp / (tp + fp)) if tp + fp > 0 else 0
+        recall = (tp / (tp + fn)) if tp + fn > 0 else 0
+
+        threshold_common_n_investments = threshold_common_investments['CountAmount'].sum()
+        threshold_common_total_amount = threshold_common_investments['SumAmount'].sum()
+        ponderated_recall_count = (threshold_common_n_investments / true_n_investments) if true_n_investments > 0 else 0
+        ponderated_recall_amount = (threshold_common_total_amount / true_total_amount) if true_total_amount > 0 else 0
+
+        metrics.append([threshold, accuracy, precision, recall, ponderated_recall_count, ponderated_recall_amount])
+
+    metrics = pd.DataFrame(metrics, columns=['Threshold', 'Accuracy', 'Precision', 'Recall', 'PonderatedRecallCount', 'PonderatedRecallAmount'])
+
+    return metrics
+
+
+def plot_metrics(metrics, title=''):
+    fig, ax = plt.subplots(dpi=150)
+
+    ax.plot(metrics['Threshold'], metrics['Accuracy'], label='Accuracy')
+    ax.plot(metrics['Threshold'], metrics['Precision'], label='Precision')
+    ax.plot(metrics['Threshold'], metrics['Recall'], label='Recall')
+    ax.plot(metrics['Threshold'], metrics['PonderatedRecallCount'], label='Ponderated recall (Count)')
+    ax.plot(metrics['Threshold'], metrics['PonderatedRecallAmount'], label='Ponderated recall (Amount)')
+
+    ax.legend()
+
+    ax.set_title(title)
+
+    plt.show()
+
+
 def main():
     # Initialize breadcrumb to log and keep track of time
     bc = Breadcrumb()
@@ -81,46 +134,15 @@ def main():
     # EXTRACT PAIRS AND COMPUTE METRICS                        #
     ############################################################
 
-    bc.log('Extracting investor-concept pairs...')
-
-    true_pairs = set(true_investors_concepts[['InvestorID', 'PageID']].itertuples(index=False, name=None))
-    pred_pairs = set(pred_investors_concepts[['InvestorID', 'PageID']].itertuples(index=False, name=None))
-    all_pairs = true_pairs | pred_pairs
-
-    ############################################################
-
     bc.log('Computing metrics for each threshold...')
 
-    thresholds = np.linspace(0, 1, 101)
-
-    metrics = []
-    for threshold in thresholds:
-        pred_pairs = set(pred_investors_concepts.loc[pred_investors_concepts['Jaccard_000'] >= threshold, ['InvestorID', 'PageID']].itertuples(index=False, name=None))
-
-        tp = len(pred_pairs & true_pairs)
-        fp = len(pred_pairs - true_pairs)
-        fn = len(true_pairs - pred_pairs)
-        tn = len(all_pairs - pred_pairs - true_pairs)
-
-        accuracy = (tp + tn) / (tp + fp + fn + tn) if tp + fp + fn + tn > 0 else 0
-        precision = (tp / (tp + fp)) if tp + fp > 0 else 0
-        recall = (tp / (tp + fn)) if tp + fn > 0 else 0
-
-        metrics.append([threshold, accuracy, precision, recall])
-
-    metrics = pd.DataFrame(metrics, columns=['Threshold', 'Accuracy', 'Precision', 'Recall'])
+    metrics = get_metrics('Jaccard_000', pred_investors_concepts, true_investors_concepts)
 
     ############################################################
 
-    fig, ax = plt.subplots(dpi=150)
+    bc.log('Plotting metrics...')
 
-    ax.plot(metrics['Threshold'], metrics['Accuracy'], label='Accuracy')
-    ax.plot(metrics['Threshold'], metrics['Precision'], label='Precision')
-    ax.plot(metrics['Threshold'], metrics['Recall'], label='Recall')
-
-    ax.legend()
-
-    plt.show()
+    plot_metrics(metrics, title='Metrics for Jaccard_000')
 
     ############################################################
 
