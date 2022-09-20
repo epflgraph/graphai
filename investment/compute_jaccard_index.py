@@ -387,7 +387,7 @@ def main():
 
     # Filter potential edges based on relevant Jaccard index.
     # Otherwise data is too heavy (e.g. >400GB for potential edges from just one year)
-    epsilon = 0.05
+    epsilon = 0.01
     condition = (potential_edges['Jaccard_000'] >= epsilon) & (potential_edges['Jaccard_100'] >= epsilon) & (potential_edges['Jaccard_010'] >= epsilon) & (potential_edges['Jaccard_110'] >= epsilon)
     potential_edges = potential_edges[condition]
 
