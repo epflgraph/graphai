@@ -121,6 +121,16 @@ def main():
     true_investors_concepts = derive_historical_data(df, groupby_columns=['InvestorID', 'PageID'], date_column='FundingRoundDate', amount_column='FundingAmountPerInvestor_USD', min_date=min_date, max_date=max_date)
 
     ############################################################
+
+    bc.log('Filtering new investors from true edges...')
+
+    table_name = 'ca_temp.Nodes_N_Investor'
+    fields = ['InvestorID']
+    known_investors = pd.DataFrame(db.find(table_name, fields=fields), columns=fields)
+
+    true_investors_concepts = true_investors_concepts[true_investors_concepts['InvestorID'].isin(known_investors['InvestorID'])]
+
+    ############################################################
     # BUILD PREDICTIONS DATAFRAME                              #
     ############################################################
 
@@ -136,13 +146,17 @@ def main():
 
     bc.log('Computing metrics for each threshold...')
 
-    metrics = get_metrics('Jaccard_000', pred_investors_concepts, true_investors_concepts)
+    metrics = {
+        field: get_metrics(field, pred_investors_concepts, true_investors_concepts)
+        for field in ['Jaccard_000', 'Jaccard_100', 'Jaccard_010', 'Jaccard_110']
+    }
 
     ############################################################
 
     bc.log('Plotting metrics...')
 
-    plot_metrics(metrics, title='Metrics for Jaccard_000')
+    for field in metrics:
+        plot_metrics(metrics[field], title=f'Metrics for {field}')
 
     ############################################################
 
