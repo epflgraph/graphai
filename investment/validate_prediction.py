@@ -12,34 +12,31 @@ from investment.create_investments_graph import derive_historical_data
 
 
 def get_metrics(field, pred_investors_concepts, true_investors_concepts):
-    union_pairs = pd.merge(true_investors_concepts[['InvestorID', 'PageID']], pred_investors_concepts[['InvestorID', 'PageID']], how='outer', on=['InvestorID', 'PageID'])
+    union_investors_concepts = pd.merge(true_investors_concepts[['InvestorID', 'PageID']], pred_investors_concepts[['InvestorID', 'PageID']], how='outer', on=['InvestorID', 'PageID'])
 
     true_n_investments = true_investors_concepts['CountAmount'].sum()
     true_total_amount = true_investors_concepts['SumAmount'].sum()
 
-    thresholds = pred_investors_concepts[field].quantile(q=np.linspace(0, 1, 100 + 1))
-    thresholds = list(dict.fromkeys(thresholds))
+    thresholds = np.linspace(0, 1, 100 + 1)
 
     metrics = []
     for threshold in thresholds:
         threshold_pred_investors_concepts = pred_investors_concepts[pred_investors_concepts[field] >= threshold]
-        threshold_pred_pairs = set(threshold_pred_investors_concepts[['InvestorID', 'PageID']].itertuples(index=False, name=None))
+        threshold_common_investors_concepts = pd.merge(threshold_pred_investors_concepts, true_investors_concepts, how='inner', on=['InvestorID', 'PageID'])
 
-        threshold_common_investments = pd.merge(threshold_pred_investors_concepts, true_investors_concepts, how='inner', on=['InvestorID', 'PageID'])
-
-        tp = len(threshold_common_investments)
-        fp = len(threshold_pred_pairs) - len(threshold_common_investments)
-        fn = len(true_investors_concepts) - len(threshold_common_investments)
-        tn = len(union_pairs) - len(threshold_pred_pairs) - len(true_investors_concepts) + len(threshold_common_investments)
+        tp = len(threshold_common_investors_concepts)
+        fp = len(threshold_pred_investors_concepts) - len(threshold_common_investors_concepts)
+        fn = len(true_investors_concepts) - len(threshold_common_investors_concepts)
+        tn = len(union_investors_concepts) - len(threshold_pred_investors_concepts) - len(true_investors_concepts) + len(threshold_common_investors_concepts)
 
         accuracy = (tp + tn) / (tp + fp + fn + tn) if tp + fp + fn + tn > 0 else 0
         precision = (tp / (tp + fp)) if tp + fp > 0 else 0
         recall = (tp / (tp + fn)) if tp + fn > 0 else 0
 
-        threshold_common_n_investments = threshold_common_investments['CountAmount'].sum()
-        threshold_common_total_amount = threshold_common_investments['SumAmount'].sum()
-        ponderated_recall_count = (threshold_common_n_investments / true_n_investments) if true_n_investments > 0 else 0
-        ponderated_recall_amount = (threshold_common_total_amount / true_total_amount) if true_total_amount > 0 else 0
+        threshold_common_count_amount = threshold_common_investors_concepts['CountAmount'].sum()
+        threshold_common_sum_amount = threshold_common_investors_concepts['SumAmount'].sum()
+        ponderated_recall_count = (threshold_common_count_amount / true_n_investments) if true_n_investments > 0 else 0
+        ponderated_recall_amount = (threshold_common_sum_amount / true_total_amount) if true_total_amount > 0 else 0
 
         metrics.append([threshold, accuracy, precision, recall, ponderated_recall_count, ponderated_recall_amount])
 
@@ -57,7 +54,12 @@ def plot_metrics(metrics, title=''):
     ax.plot(metrics['Threshold'], metrics['PonderatedRecallCount'], label='Ponderated recall (Count)')
     ax.plot(metrics['Threshold'], metrics['PonderatedRecallAmount'], label='Ponderated recall (Amount)')
 
+    ax.set_xlim(left=0, right=1)
+    ax.set_ylim(bottom=0, top=1)
+
     ax.legend()
+
+    ax.set_xlabel('Jaccard index threshold')
 
     ax.set_title(title)
 
