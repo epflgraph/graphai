@@ -358,7 +358,7 @@ converting to lowercase.</p>
 <p>Contains tools related to input and output of text.</p>
 <span class="target" id="module-utils.text.io"></span><dl class="function">
 <dt id="utils.text.io.log">
-<code class="sig-prename descclassname">utils.text.io.</code><code class="sig-name descname">log</code><span class="sig-paren">(</span><em class="sig-param">msg</em>, <em class="sig-param">debug</em><span class="sig-paren">)</span><a class="headerlink" href="#utils.text.io.log" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">utils.text.io.</code><code class="sig-name descname">log</code><span class="sig-paren">(</span><em class="sig-param">msg</em>, <em class="sig-param">debug=True</em>, <em class="sig-param">color=None</em>, <em class="sig-param">indent=0</em><span class="sig-paren">)</span><a class="headerlink" href="#utils.text.io.log" title="Permalink to this definition">¶</a></dt>
 <dd><p>Prints msg only if debug evaluates to True.</p>
 </dd></dl>
 <dl class="function">
@@ -593,6 +593,13 @@ converting to lowercase.</p>
 <code class="sig-prename descclassname">utils.time.date.</code><code class="sig-name descname">now</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#utils.time.date.now" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return current timestamp as a datetime object that prints as “2022-06-28 09:46:21.677968”</p>
 </dd></dl>
+<dl class="function">
+<dt id="utils.time.date.rescale">
+<code class="sig-prename descclassname">utils.time.date.</code><code class="sig-name descname">rescale</code><span class="sig-paren">(</span><em class="sig-param">date</em>, <em class="sig-param">min_date</em>, <em class="sig-param">max_date</em><span class="sig-paren">)</span><a class="headerlink" href="#utils.time.date.rescale" title="Permalink to this definition">¶</a></dt>
+<dd><p>Maps a date between min_date and max_date linearly to a number in [0, 1].
+Dates below or above the given range are mapped to 0 or 1, respectively.
+Dates are assumed to be in format yyyy-mm-dd.</p>
+</dd></dl>
 
 
 <h2 id="utils-time-stopwatch-module"><a class="reference internal" href="#module-utils.time.stopwatch" title="utils.time.stopwatch"><code class="xref py py-mod docutils literal notranslate"><span class="pre">utils.time.stopwatch</span></code></a> Module<a class="headerlink" href="#utils-time-stopwatch-module" title="Permalink to this headline">¶</a></h2>
@@ -688,12 +695,15 @@ if the partial time is not needed.</p>
 </dd></dl>
 <dl class="method">
 <dt id="utils.time.stopwatch.Stopwatch.report">
-<code class="sig-name descname">report</code><span class="sig-paren">(</span><em class="sig-param">msg='Finished'</em><span class="sig-paren">)</span><a class="headerlink" href="#utils.time.stopwatch.Stopwatch.report" title="Permalink to this definition">¶</a></dt>
-<dd><p>Creates a new time checkpoint and prints a summary of all of them, including the differences between each pair
+<code class="sig-name descname">report</code><span class="sig-paren">(</span><em class="sig-param">tick=False</em>, <em class="sig-param">laps=True</em>, <em class="sig-param">msg='Finished'</em><span class="sig-paren">)</span><a class="headerlink" href="#utils.time.stopwatch.Stopwatch.report" title="Permalink to this definition">¶</a></dt>
+<dd><p>Prints a summary of all time checkpoints, including the differences between each pair
 of consecutive checkpoints and the difference between the last and the first.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>msg</strong> (<em>str</em>) – Message to be printed at the beginning of the summary. Defaults to “Finished”.</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>tick</strong> (<em>boolean</em>) – Whether to create a new time checkpoint before printing.</p></li>
+<li><p><strong>msg</strong> (<em>str</em>) – Message to be printed at the beginning of the summary. Defaults to “Finished”.</p></li>
+</ul>
 </dd>
 </dl>
 </dd></dl>
