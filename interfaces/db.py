@@ -1,9 +1,18 @@
+import sys
+
 import mysql.connector
 import configparser
 
 from definitions import CONFIG_DIR
 
 from models.wikify_result import WikifyResult
+
+
+def quote_value(v):
+    if isinstance(v, str):
+        return f'"{v}"'
+    else:
+        return v
 
 
 class DB:
@@ -15,21 +24,131 @@ class DB:
         # Read db config from file and open connection
         db_config = configparser.ConfigParser()
         db_config.read(f'{CONFIG_DIR}/db.ini')
-        self.cnx = mysql.connector.connect(host=db_config['DB'].get('host'), port=db_config['DB'].getint('port'), user=db_config['DB'].get('user'), password=db_config['DB'].get('password'))
-        self.cursor = self.cnx.cursor()
+
+        self.host = db_config['DB'].get('host')
+        self.port = db_config['DB'].getint('port')
+        self.user = db_config['DB'].get('user')
+        self.password = db_config['DB'].get('password')
+
+        self.cnx = mysql.connector.connect(host=self.host, port=self.port, user=self.user, password=self.password)
 
         # Fetch initial data
-        self.channel_anchor_page_ids = self.query_channel_anchor_page_ids()
-        self.course_channel_ids = self.query_course_channel_ids()
+        # self.channel_anchor_page_ids = self.query_channel_anchor_page_ids()
+        # self.course_channel_ids = self.query_course_channel_ids()
 
-    def query(self, query):
+    def __del__(self):
+        if hasattr(self, 'cnx'):
+            self.cnx.close()
+
+    ################
+    # BASE METHODS #
+    ################
+
+    def execute_query(self, query, values=None):
         """
         Execute custom query.
         """
 
-        self.cursor.execute(query)
+        # Refresh connection
+        self.cnx.ping(reconnect=True)
+        cursor = self.cnx.cursor()
 
-        return list(self.cursor)
+        try:
+            if values:
+                cursor.execute(query, values)
+            else:
+                cursor.execute(query)
+        except mysql.connector.Error as e:
+            print("Error", e)
+            raise e
+
+        results = list(cursor)
+
+        self.cnx.commit()
+
+        return results
+
+    def find(self, table_name, fields=None, conditions=None):
+        if fields:
+            fields_str = ', '.join(fields)
+        else:
+            fields_str = '*'
+
+        conditions_str = ''
+        values = []
+        if conditions:
+            conditions_list = []
+            for key in conditions:
+                if isinstance(conditions[key], list):
+                    conditions_list.append(f'{key} IN ({", ".join(["%s"] * len(conditions[key]))})')
+                    values.extend(conditions[key])
+                elif isinstance(conditions[key], dict):
+                    for operator in conditions[key]:
+                        conditions_list.append(f'{key} {operator} {quote_value(conditions[key][operator])}')
+                else:
+                    conditions_list.append(f'{key} = {quote_value(conditions[key])}')
+
+            conditions_str = 'WHERE ' + ' AND '.join(conditions_list)
+
+        query = f"""
+            SELECT {fields_str}
+            FROM {table_name}
+            {conditions_str}
+        """
+
+        return self.execute_query(query, values)
+
+    def drop_table(self, table_name):
+        query = f"""
+            DROP TABLE IF EXISTS {table_name};
+        """
+        self.execute_query(query)
+
+    def create_table(self, table_name, definition):
+        query = f"""
+            CREATE TABLE {table_name} (
+                {', '.join([line for line in definition])}
+            ) ENGINE=InnoDB DEFAULT CHARSET ascii;
+        """
+        self.execute_query(query)
+
+    def insert_dataframe(self, table_name, df):
+        tuples = list(df.itertuples(index=False, name=None))
+        values = [value for line in tuples for value in line]
+
+        # placeholder for the row of values, e.g. "(%s, %s, %s)"
+        placeholder = f'({", ".join(["%s"] * len(df.columns))})'
+
+        query = f"""INSERT INTO {table_name} VALUES {', '.join([placeholder] * len(tuples))}"""
+
+        try:
+            self.execute_query(query, values)
+        except mysql.connector.Error as e:
+            handled_error_codes = [
+                mysql.connector.errorcode.CR_SERVER_LOST_EXTENDED,  # Broken pipe error (connection closed by server)
+                mysql.connector.errorcode.ER_NET_PACKET_TOO_LARGE   # Packet bigger than max_allowed_packet
+            ]
+
+            if e.errno in handled_error_codes:
+                n = len(df)
+                payload_size_bytes = sys.getsizeof(query)
+                print(f'Failed inserting df with {n} rows (query payload size: {payload_size_bytes / 1024} MB). Splitting in two and retrying...')
+
+                df1 = df.iloc[:(n // 2)]
+                df2 = df.iloc[(n // 2):]
+                self.insert_dataframe(table_name, df1)
+                self.insert_dataframe(table_name, df2)
+            else:
+                raise e
+
+    def drop_create_insert_table(self, table_name, definition, df):
+        self.drop_table(table_name)
+        self.create_table(table_name, definition)
+        self.insert_dataframe(table_name, df)
+
+    #####################
+    # CONCEPT DETECTION #
+    #####################
 
     def query_channel_anchor_page_ids(self):
         """
@@ -38,6 +157,8 @@ class DB:
         Returns:
             dict[str, list[int]]: A dictionary with SWITCH channel ids as keys and list of anchor page ids as values.
         """
+
+        self.connect()
 
         query = f"""
             SELECT SwitchChannelID, IF(AnchorPageIDs1 IS NOT NULL, AnchorPageIDs1, AnchorPageIDs2) AS AnchorPageIDs
@@ -82,6 +203,8 @@ class DB:
             dict[str, str]: A dictionary with slide ids as keys and slide texts as values.
         """
 
+        self.connect()
+
         query = f"""
             SELECT DISTINCT st.SlideID, st.SlideText
             FROM gen_switchtube.Slide_Text st
@@ -124,6 +247,8 @@ class DB:
             * 'searchrank_graph_ratio' (float): Ratio graph_score/search_score.
         """
 
+        self.connect()
+
         query = f"""
             SELECT DISTINCT sk.SlideID, sk.Keywords, sk.PageID, sk.PageTitle, sk.Rank, sk.Score 
             FROM gen_switchtube.Slide_Text st
@@ -160,6 +285,8 @@ class DB:
             list[int]: List of ids of the anchor pages associated with the given slide.
         """
 
+        self.connect()
+
         channel_id = slide_id.split('_')[0]
         return self.channel_anchor_page_ids[channel_id]
 
@@ -170,6 +297,8 @@ class DB:
         Returns:
             dict[str, str]: A dictionary with course ids as keys and course descriptions as values.
         """
+
+        self.connect()
 
         query = f"""
             SELECT CourseCode, CONCAT_WS(
@@ -216,6 +345,8 @@ class DB:
             * 'searchrank_graph_ratio' (float): Ratio graph_score/search_score.
         """
 
+        self.connect()
+
         query = f"""
             SELECT m.CourseCode, m.Keywords, m.PageID, m.PageTitle
             FROM man_isacademia.Course2Wiki_Current_Mapping m
@@ -256,6 +387,8 @@ class DB:
             dict[str, str]: A dictionary with course ids as keys and lists of their associated channel ids as values.
         """
 
+        self.connect()
+
         query = f"""
             SELECT CourseID, GROUP_CONCAT(SwitchChannelID SEPARATOR ',') AS SwitchChannelIDs
             FROM ca_switchtube.Channel_to_Course_Mapping
@@ -283,6 +416,8 @@ class DB:
             list[int]: List of ids of the anchor pages associated with the given course.
         """
 
+        self.connect()
+
         channel_ids = self.course_channel_ids.get(course_id, None)
         if channel_ids:
             return list({anchor_page_id for channel_id in channel_ids for anchor_page_id in self.channel_anchor_page_ids[channel_id]})
@@ -299,6 +434,8 @@ class DB:
         Returns:
             list[int]: List of wikipage ids.
         """
+
+        self.connect()
 
         if filter_orphan:
             query = f"""
@@ -354,6 +491,8 @@ class DB:
             * 'popularity' (float): Popularity score of the wikipage.
         """
 
+        self.connect()
+
         query = """
             SELECT titles.PageID, titles.PageTitle, contents.PageContent, contents.Redirects, contents.Popularity
             FROM piper_wikipedia.PageTitle_to_PageID_Mapping AS titles
@@ -406,6 +545,8 @@ class DB:
             dict[int, str]: Dictionary with wikipage ids as keys and a concatenation of the category titles as values.
         """
 
+        self.connect()
+
         query = """            
             SELECT titles.PageID, GROUP_CONCAT(categories.CategoryTitle)
             FROM piper_wikipedia.PageTitle_to_PageID_Mapping AS titles
@@ -445,3 +586,16 @@ class DB:
             page_id: categories.split(',')
             for page_id, categories in self.cursor
         }
+
+    def get_crunchbase_concept_ids(self):
+
+        self.connect()
+
+        query = f"""
+            SELECT DISTINCT PageID
+            FROM graph.Edges_N_Organisation_N_Concept
+        """
+
+        self.cursor.execute(query)
+
+        return [concept_id for concept_id, in self.cursor]

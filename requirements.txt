@@ -16,3 +16,4 @@ mysql-connector-python
 mwparserfromhell
 pydantic
 pytest
+unidecode

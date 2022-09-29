@@ -118,16 +118,18 @@ class Stopwatch:
 
         return self.checkpoints[-1] - self.checkpoints[0]
 
-    def report(self, msg='Finished'):
+    def report(self, tick=False, laps=True, msg='Finished'):
         """
-        Creates a new time checkpoint and prints a summary of all of them, including the differences between each pair
+        Prints a summary of all time checkpoints, including the differences between each pair
         of consecutive checkpoints and the difference between the last and the first.
 
         Args:
+            tick (boolean): Whether to create a new time checkpoint before printing.
             msg (str): Message to be printed at the beginning of the summary. Defaults to "Finished".
         """
 
-        self.tick()
+        if tick:
+            self.tick()
 
         n_ticks = len(self.checkpoints)
 
@@ -137,7 +139,7 @@ class Stopwatch:
 
         cprint(f'{msg}. Total time: {self.checkpoints[-1] - self.checkpoints[0]:.2f}s.', color=self.color)
 
-        if n_ticks == 2:
+        if n_ticks == 2 or not laps:
             return
 
         for i in range(n_ticks - 1):

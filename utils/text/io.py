@@ -1,4 +1,49 @@
 import json
+from pathlib import Path
+
+
+def log(msg, debug=True, color=None, indent=0):
+    """
+    Prints msg only if debug evaluates to True.
+    """
+
+    if debug:
+        indent_size = 4
+        msg = (' ' * indent_size * indent) + msg
+
+        if color is None:
+            print(msg)
+        else:
+            cprint(msg, color)
+
+
+class Colors:
+    pref = '\033['
+    reset = f'{pref}0m'
+
+    codes = {
+        'black': '30m',
+        'red': '31m',
+        'green': '32m',
+        'yellow': '33m',
+        'blue': '34m',
+        'magenta': '35m',
+        'cyan': '36m',
+        'white': '37m',
+    }
+
+
+def cprint(text, color='white', is_bold=False):
+    """
+    Print in a given color.
+
+    Args:
+        text (str): Text to print.
+        color (str): Color to print in.
+        is_bold (bool): Should print in bold case.
+    """
+
+    print(f'{Colors.pref}{1 if is_bold else 0};{Colors.codes.get(color, Colors.codes["white"])}' + text + Colors.reset)
 
 
 def pprint(t, indent=0, inline=False, only_first=False):
@@ -81,30 +126,9 @@ def save_json(data, filename):
         json.dump(data, file, ensure_ascii=False)
 
 
-class Colors:
-    pref = '\033['
-    reset = f'{pref}0m'
-
-    codes = {
-        'black': '30m',
-        'red': '31m',
-        'green': '32m',
-        'yellow': '33m',
-        'blue': '34m',
-        'magenta': '35m',
-        'cyan': '36m',
-        'white': '37m',
-    }
-
-
-def cprint(text, color='white', is_bold=False):
+def mkdir(dirname):
     """
-    Print in a given color.
-
-    Args:
-        text (str): Text to print.
-        color (str): Color to print in.
-        is_bold (bool): Should print in bold case.
+    Creates the given directory if it does not exist.
     """
 
-    print(f'{Colors.pref}{1 if is_bold else 0};{Colors.codes.get(color, Colors.codes["white"])}' + text + Colors.reset)
+    Path(dirname).mkdir(parents=True, exist_ok=True)
