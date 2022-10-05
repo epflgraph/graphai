@@ -1,32 +1,28 @@
 import pandas as pd
 
 
-def get_frs(db, min_date, max_date):
+def get_frs(db):
     # Fetch funding rounds in time window from database
     table_name = 'graph.Nodes_N_FundingRound'
-    fields = ['FundingRoundID', 'FundingRoundDate', 'FundingAmount_USD', 'FundingAmount_USD / CB_InvestorCount']
-    columns = ['FundingRoundID', 'FundingRoundDate', 'FundingAmount_USD', 'FundingAmountPerInvestor_USD']
-    conditions = {'FundingRoundDate': {'>=': min_date, '<': max_date}}
-    frs = pd.DataFrame(db.find(table_name, fields=fields, conditions=conditions), columns=columns)
-
-    # Replace na values with 0
-    frs = frs.fillna(0)
+    fields = ['FundingRoundID', 'FundingRoundDate', 'FundingRoundType', 'FundingAmount_USD', 'FundingAmount_USD / CB_InvestorCount']
+    columns = ['FundingRoundID', 'FundingRoundDate', 'FundingRoundType', 'FundingAmount_USD', 'FundingAmountPerInvestor_USD']
+    frs = pd.DataFrame(db.find(table_name, fields=fields), columns=columns)
 
     return frs
 
 
-def get_investors_frs(db, fr_ids):
+def get_investors_frs(db):
     # Fetch organization investors from database
     table_name = 'graph.Edges_N_Organisation_N_FundingRound'
     fields = ['OrganisationID', 'FundingRoundID']
-    conditions = {'Action': 'Invested in', 'FundingRoundID': fr_ids}
+    conditions = {'Action': 'Invested in'}
     org_investors_frs = pd.DataFrame(db.find(table_name, fields=fields, conditions=conditions),
                                      columns=['InvestorID', 'FundingRoundID'])
 
     # Fetch person investors from database
     table_name = 'graph.Edges_N_Person_N_FundingRound'
     fields = ['PersonID', 'FundingRoundID']
-    conditions = {'Action': 'Invested in', 'FundingRoundID': fr_ids}
+    conditions = {'Action': 'Invested in'}
     person_investors_frs = pd.DataFrame(db.find(table_name, fields=fields, conditions=conditions),
                                         columns=['InvestorID', 'FundingRoundID'])
 
@@ -41,24 +37,22 @@ def get_investors_frs(db, fr_ids):
     return investors_frs
 
 
-def get_frs_investees(db, fr_ids):
-    # Fetch investees from database
+def get_frs_fundraisers(db):
+    # Fetch fundraisers from database
     table_name = 'graph.Edges_N_Organisation_N_FundingRound'
     fields = ['FundingRoundID', 'OrganisationID']
-    conditions = {'Action': 'Raised from', 'FundingRoundID': fr_ids}
-    frs_investees = pd.DataFrame(db.find(table_name, fields=fields, conditions=conditions),
-                                 columns=['FundingRoundID', 'InvesteeID'])
-    return frs_investees
+    conditions = {'Action': 'Raised from'}
+    frs_fundraisers = pd.DataFrame(db.find(table_name, fields=fields, conditions=conditions),
+                                 columns=['FundingRoundID', 'FundraiserID'])
+    return frs_fundraisers
 
 
-def get_investees_concepts(db, investee_ids):
+def get_fundraisers_concepts(db):
     # Fetch concepts from database
     table_name = 'graph.Edges_N_Organisation_N_Concept'
     fields = ['OrganisationID', 'PageID']
-    conditions = {'OrganisationID': investee_ids}
-    investees_concepts = pd.DataFrame(db.find(table_name, fields=fields, conditions=conditions),
-                                      columns=['InvesteeID', 'PageID'])
-    return investees_concepts
+    fundraisers_concepts = pd.DataFrame(db.find(table_name, fields=fields), columns=['FundraiserID', 'PageID'])
+    return fundraisers_concepts
 
 
 ############################################################
@@ -67,8 +61,9 @@ def get_investees_concepts(db, investee_ids):
 def save_frs(db, frs):
     # Drop, recreate table and fill with frs
     table_name = 'ca_temp.Nodes_N_FundingRound'
-    definition = ['FundingRoundID CHAR(64)', 'FundingRoundDate DATE', 'FundingAmount_USD FLOAT',
-                  'FundingAmountPerInvestor_USD FLOAT', 'PRIMARY KEY FundingRoundID (FundingRoundID)']
+    definition = ['FundingRoundID CHAR(64)', 'FundingRoundDate DATE', 'FundingRoundType CHAR(32)',
+                  'FundingAmount_USD FLOAT', 'FundingAmountPerInvestor_USD FLOAT', 'Year SMALLINT',
+                  'PRIMARY KEY FundingRoundID (FundingRoundID)']
     db.drop_create_insert_table(table_name, definition, frs)
 
 
@@ -78,6 +73,7 @@ def save_investors(db, investors):
     definition = [
         'InvestorID CHAR(64)',
         'InvestorType CHAR(32)',
+        'Year SMALLINT',
         'CountAmount FLOAT',
         'MinAmount FLOAT',
         'MaxAmount FLOAT',
@@ -87,18 +83,17 @@ def save_investors(db, investors):
         'ScoreLinAmount FLOAT',
         'ScoreQuadCount FLOAT',
         'ScoreQuadAmount FLOAT',
-        'ScoreConstCount FLOAT',
-        'ScoreConstAmount FLOAT',
-        'PRIMARY KEY InvestorID (InvestorID)'
+        'KEY InvestorID (InvestorID)',
+        'KEY Year (Year)'
     ]
     db.drop_create_insert_table(table_name, definition, investors)
 
 
-def save_investees(db, investees):
+def save_fundraisers(db, fundraisers):
     # Drop, recreate table and fill with df
-    table_name = 'ca_temp.Nodes_N_Investee'
-    definition = ['InvesteeID CHAR(64)', 'PRIMARY KEY InvesteeID (InvesteeID)']
-    db.drop_create_insert_table(table_name, definition, investees)
+    table_name = 'ca_temp.Nodes_N_Fundraiser'
+    definition = ['FundraiserID CHAR(64)', 'PRIMARY KEY FundraiserID (FundraiserID)']
+    db.drop_create_insert_table(table_name, definition, fundraisers)
 
 
 def save_concepts(db, concepts):
@@ -106,6 +101,7 @@ def save_concepts(db, concepts):
     table_name = 'ca_temp.Nodes_N_Concept'
     definition = [
         'PageID INT UNSIGNED',
+        'Year SMALLINT',
         'CountAmount FLOAT',
         'MinAmount FLOAT',
         'MaxAmount FLOAT',
@@ -115,9 +111,8 @@ def save_concepts(db, concepts):
         'ScoreLinAmount FLOAT',
         'ScoreQuadCount FLOAT',
         'ScoreQuadAmount FLOAT',
-        'ScoreConstCount FLOAT',
-        'ScoreConstAmount FLOAT',
-        'PRIMARY KEY PageID (PageID)'
+        'KEY PageID (PageID)',
+        'KEY Year (Year)'
     ]
     db.drop_create_insert_table(table_name, definition, concepts)
 
@@ -130,19 +125,19 @@ def save_investors_frs(db, investors_frs):
     db.drop_create_insert_table(table_name, definition, investors_frs)
 
 
-def save_frs_investees(db, frs_investees):
+def save_frs_fundraisers(db, frs_fundraisers):
     # Drop, recreate table and fill with df
-    table_name = 'ca_temp.Edges_N_FundingRound_N_Investee'
-    definition = ['FundingRoundID CHAR(64)', 'InvesteeID CHAR(64)', 'KEY FundingRoundID (FundingRoundID)',
-                  'KEY InvesteeID (InvesteeID)']
-    db.drop_create_insert_table(table_name, definition, frs_investees)
+    table_name = 'ca_temp.Edges_N_FundingRound_N_Fundraiser'
+    definition = ['FundingRoundID CHAR(64)', 'FundraiserID CHAR(64)', 'KEY FundingRoundID (FundingRoundID)',
+                  'KEY FundraiserID (FundraiserID)']
+    db.drop_create_insert_table(table_name, definition, frs_fundraisers)
 
 
-def save_investees_concepts(db, investees_concepts):
+def save_fundraisers_concepts(db, fundraisers_concepts):
     # Drop, recreate table and fill with df
-    table_name = 'ca_temp.Edges_N_Investee_N_Concept'
-    definition = ['InvesteeID CHAR(64)', 'PageID INT UNSIGNED', 'KEY InvesteeID (InvesteeID)', 'KEY PageID (PageID)']
-    db.drop_create_insert_table(table_name, definition, investees_concepts)
+    table_name = 'ca_temp.Edges_N_Fundraiser_N_Concept'
+    definition = ['FundraiserID CHAR(64)', 'PageID INT UNSIGNED', 'KEY FundraiserID (FundraiserID)', 'KEY PageID (PageID)']
+    db.drop_create_insert_table(table_name, definition, fundraisers_concepts)
 
 
 def save_investors_investors(db, investors_investors):
@@ -151,6 +146,7 @@ def save_investors_investors(db, investors_investors):
     definition = [
         'SourceInvestorID CHAR(64)',
         'TargetInvestorID CHAR(64)',
+        'Year SMALLINT',
         'CountAmount FLOAT',
         'MinAmount FLOAT',
         'MaxAmount FLOAT',
@@ -160,10 +156,9 @@ def save_investors_investors(db, investors_investors):
         'ScoreLinAmount FLOAT',
         'ScoreQuadCount FLOAT',
         'ScoreQuadAmount FLOAT',
-        'ScoreConstCount FLOAT',
-        'ScoreConstAmount FLOAT',
         'KEY SourceInvestorID (SourceInvestorID)',
-        'KEY TargetInvestorID (TargetInvestorID)'
+        'KEY TargetInvestorID (TargetInvestorID)',
+        'KEY Year (Year)'
     ]
     db.drop_create_insert_table(table_name, definition, investors_investors)
 
@@ -174,6 +169,7 @@ def save_investors_concepts(db, investors_concepts):
     definition = [
         'InvestorID CHAR(64)',
         'PageID INT UNSIGNED',
+        'Year SMALLINT',
         'CountAmount FLOAT',
         'MinAmount FLOAT',
         'MaxAmount FLOAT',
@@ -183,10 +179,9 @@ def save_investors_concepts(db, investors_concepts):
         'ScoreLinAmount FLOAT',
         'ScoreQuadCount FLOAT',
         'ScoreQuadAmount FLOAT',
-        'ScoreConstCount FLOAT',
-        'ScoreConstAmount FLOAT',
         'KEY InvestorID (InvestorID)',
-        'KEY PageID (PageID)'
+        'KEY PageID (PageID)',
+        'KEY Year (Year)'
     ]
     db.drop_create_insert_table(table_name, definition, investors_concepts)
 
