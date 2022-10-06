@@ -18,10 +18,8 @@ def rescale(dates, min_date, max_date):
     Dates are assumed to be in format yyyy-mm-dd.
     """
 
-    assert min_date < max_date, f'min_date ({min_date}) should be strictly less than max_date ({max_date})'
-
-    a = pd.to_datetime(min_date)
-    b = pd.to_datetime(max_date)
+    a = pd.to_datetime(min_date, format='%Y-%m-%d')
+    b = pd.to_datetime(max_date, format='%Y-%m-%d')
     x = pd.to_datetime(dates, format='%Y-%m-%d')
 
     return ((x - a) / (b - a)).clip(0, 1)

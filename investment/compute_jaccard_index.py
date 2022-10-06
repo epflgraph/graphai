@@ -3,6 +3,7 @@ import pandas as pd
 
 from interfaces.db import DB
 
+from utils.time.date import *
 from utils.breadcrumb import Breadcrumb
 
 
@@ -27,29 +28,105 @@ def weight(x, epsilon=0.01):
     return np.tanh(k * x)
 
 
+def compute_year_coefficients(min_date, max_date, min_year, max_year):
+    # Create DataFrame with start and end dates per year
+    years = pd.DataFrame({'Year': range(min_year, max_year + 1)})
+    years['StartDate'] = pd.to_datetime(years['Year'].apply(lambda y: f'{y}-01-01'))
+    years['EndDate'] = pd.to_datetime(years['Year'].apply(lambda y: f'{y + 1}-01-01'))
+
+    # Compute ratio of time differences
+    # CoefPresent = number of days in given year / total number of days in time window
+    # CoefPast = number of days in time window before given year / total number of days in time window
+    years['CoefPresent'] = (years['EndDate'] - years['StartDate']) / (pd.to_datetime(max_date) - pd.to_datetime(min_date))
+    years['CoefPast'] = (years['StartDate'] - pd.to_datetime(min_date)) / (pd.to_datetime(max_date) - pd.to_datetime(min_date))
+
+    # Keep only relevant columns
+    years = years[['Year', 'CoefPresent', 'CoefPast']]
+
+    return years
+
+
+def filter_and_combine_years(df, years, groupby_columns):
+    # Define function to aggregate metrics over different years
+    def aggregate_years(group):
+        group = pd.merge(group, years, how='left', on='Year')
+
+        lin_term0 = group['CoefPast'] * group['CountAmount']
+        lin_term1 = group['CoefPresent'] * group['ScoreLinCount']
+
+        score_lin_count = (lin_term0 + lin_term1).sum()
+
+        quad_term0 = (group['CoefPast'] ** 2) * group['CountAmount']
+        quad_term1 = 2 * group['CoefPast'] * group['CoefPresent'] * group['ScoreLinCount']
+        quad_term2 = (group['CoefPresent'] ** 2) * group['ScoreQuadCount']
+
+        score_quad_count = (quad_term0 + quad_term1 + quad_term2).sum()
+
+        return pd.Series({'ScoreLinCount': score_lin_count, 'ScoreQuadCount': score_quad_count})
+
+    # Filter edges older than min_year
+    df = df[df['Year'] >= years['Year'].min()].reset_index(drop=True)
+
+    # Aggregate yearly metrics correctly
+    df = df.groupby(by=groupby_columns).apply(aggregate_years).reset_index()
+
+    return df
+
+
+def normalize_scores(df, score_column):
+    # Normalize weight
+    df['Weight'] = weight(df[score_column])
+    df = df.drop(score_column, axis=1)
+
+    # Filter out edges with 0 weight
+    df = df[df['Weight'] > 0].reset_index(drop=True)
+
+    return df
+
+
 def main():
+
+    ############################################################
+    # INITIALIZATION                                           #
+    ############################################################
+
     # Initialize breadcrumb to log and keep track of time
     bc = Breadcrumb()
 
     # Instantiate db interface to communicate with database
     db = DB()
 
+    # Minimum year to consider for the computation of the Jaccard indices.
+    # Older funding rounds will be ignored.
+    max_date = str(now().date())
+    max_year = int(max_date.split('-')[0])
+    min_year = max_year - 4
+    min_date = f'{min_year}-01-01'
+
+    # Prepare year coefficients to combine metrics from different years
+    years = compute_year_coefficients(min_date, max_date, min_year, max_year)
+
     ############################################################
     # FETCH GRAPH FROM DATABASE                                #
     ############################################################
 
+    bc.log(f'Fetching tables from database...')
+    bc.indent()
+
+    ############################################################
+
     bc.log('Fetching investor-investor edges from database...')
 
+    # Fetch table from database
     table_name = 'ca_temp.Edges_N_Investor_N_Investor'
-    fields = ['SourceInvestorID', 'TargetInvestorID', 'ScoreQuadCount']
+    fields = ['SourceInvestorID', 'TargetInvestorID', 'Year', 'CountAmount', 'ScoreLinCount', 'ScoreQuadCount']
     df = pd.DataFrame(db.find(table_name, fields=fields), columns=fields)
 
-    # Add weight column
-    df['Weight'] = weight(df['ScoreQuadCount'])
-    df = df.drop('ScoreQuadCount', axis=1)
+    # Filter years older than time window and aggregate metrics accordingly
+    df = filter_and_combine_years(df, years, groupby_columns=['SourceInvestorID', 'TargetInvestorID'])
 
-    # Filter out edges with 0 weight
-    df = df[df['Weight'] > 0]
+    # Normalize scores to have them in [0, 1]
+    df = normalize_scores(df[['SourceInvestorID', 'TargetInvestorID', 'ScoreQuadCount']], score_column='ScoreQuadCount')
 
     # Duplicate as to have all edges and not only in one direction
     reversed_df = df.copy()
@@ -62,67 +139,76 @@ def main():
 
     bc.log('Fetching investor-concept edges from database...')
 
+    # Fetch table from database
     table_name = 'ca_temp.Edges_N_Investor_N_Concept'
-    fields = ['InvestorID', 'PageID', 'ScoreQuadCount']
-    investors_concepts = pd.DataFrame(db.find(table_name, fields=fields), columns=fields)
-    investors_concepts['PageID'] = investors_concepts['PageID'].astype(str)
+    fields = ['InvestorID', 'PageID', 'Year', 'CountAmount', 'ScoreLinCount', 'ScoreQuadCount']
+    df = pd.DataFrame(db.find(table_name, fields=fields), columns=fields)
+    df['PageID'] = df['PageID'].astype(str)
 
-    # Add weight column and filter out edges with 0 weight
-    investors_concepts['Weight'] = weight(investors_concepts['ScoreQuadCount'])
-    investors_concepts = investors_concepts.drop('ScoreQuadCount', axis=1)
+    # Filter years older than time window and aggregate metrics accordingly
+    df = filter_and_combine_years(df, years, groupby_columns=['InvestorID', 'PageID'])
 
-    # Filter out edges with 0 weight
-    investors_concepts = investors_concepts[investors_concepts['Weight'] > 0]
+    # Normalize scores to have them in [0, 1]
+    investors_concepts = normalize_scores(df[['InvestorID', 'PageID', 'ScoreQuadCount']], score_column='ScoreQuadCount')
+
+    del df
 
     ############################################################
 
     bc.log('Fetching concept-concept edges from database...')
 
+    # Fetch table from database
     table_name = 'graph.Edges_N_Concept_N_Concept_T_GraphScore'
     fields = ['SourcePageID', 'TargetPageID', 'NormalisedScore']
     concept_ids = list(investors_concepts['PageID'].drop_duplicates().astype(int))
     conditions = {'SourcePageID': concept_ids, 'TargetPageID': concept_ids}
-    concepts_concepts = pd.DataFrame(db.find(table_name, fields=fields, conditions=conditions), columns=fields)
-    concepts_concepts['SourcePageID'] = concepts_concepts['SourcePageID'].astype(str)
-    concepts_concepts['TargetPageID'] = concepts_concepts['TargetPageID'].astype(str)
+    df = pd.DataFrame(db.find(table_name, fields=fields, conditions=conditions), columns=fields)
+    df['SourcePageID'] = df['SourcePageID'].astype(str)
+    df['TargetPageID'] = df['TargetPageID'].astype(str)
 
-    # Add weight column
-    concepts_concepts['Weight'] = weight(concepts_concepts['NormalisedScore'])
-    concepts_concepts = concepts_concepts.drop('NormalisedScore', axis=1)
+    # Normalize scores to have them in [0, 1]
+    concepts_concepts = normalize_scores(df[['SourcePageID', 'TargetPageID', 'NormalisedScore']], score_column='NormalisedScore')
 
-    # Filter out edges with 0 weight
-    concepts_concepts = concepts_concepts[concepts_concepts['Weight'] > 0]
+    del df
 
     ############################################################
 
     bc.log('Fetching investor nodes from database...')
 
+    # Fetch table from database
     table_name = 'ca_temp.Nodes_N_Investor'
-    fields = ['InvestorID', 'ScoreQuadCount']
-    investors = pd.DataFrame(db.find(table_name, fields=fields), columns=fields)
+    fields = ['InvestorID', 'Year', 'CountAmount', 'ScoreLinCount', 'ScoreQuadCount']
+    df = pd.DataFrame(db.find(table_name, fields=fields), columns=fields)
 
-    # Add weight column
-    investors['Weight'] = weight(investors['ScoreQuadCount'])
-    investors = investors.drop('ScoreQuadCount', axis=1)
+    # Filter years older than time window and aggregate metrics accordingly
+    df = filter_and_combine_years(df, years, groupby_columns=['InvestorID'])
 
-    # Filter out nodes with 0 weight
-    investors = investors[investors['Weight'] > 0]
+    # Normalize scores to have them in [0, 1]
+    investors = normalize_scores(df[['InvestorID', 'ScoreQuadCount']], score_column='ScoreQuadCount')
+
+    del df
 
     ############################################################
 
     bc.log('Fetching concept nodes from database...')
 
+    # Fetch table from database
     table_name = 'ca_temp.Nodes_N_Concept'
-    fields = ['PageID', 'ScoreQuadCount']
-    concepts = pd.DataFrame(db.find(table_name, fields=fields), columns=fields)
-    concepts['PageID'] = concepts['PageID'].astype(str)
+    fields = ['PageID', 'Year', 'CountAmount', 'ScoreLinCount', 'ScoreQuadCount']
+    df = pd.DataFrame(db.find(table_name, fields=fields), columns=fields)
+    df['PageID'] = df['PageID'].astype(str)
 
-    # Add weight column
-    concepts['Weight'] = weight(concepts['ScoreQuadCount'])
-    concepts = concepts.drop('ScoreQuadCount', axis=1)
+    # Filter years older than time window and aggregate metrics accordingly
+    df = filter_and_combine_years(df, years, groupby_columns=['PageID'])
 
-    # Filter out nodes with 0 weight
-    concepts = concepts[concepts['Weight'] > 0]
+    # Normalize scores to have them in [0, 1]
+    concepts = normalize_scores(df[['PageID', 'ScoreQuadCount']], score_column='ScoreQuadCount')
+
+    del df
+
+    ############################################################
+
+    bc.outdent()
 
     ############################################################
     # POTENTIAL EDGES - PREPARATION                            #
@@ -134,6 +220,11 @@ def main():
     #       - I(i) is the set of investors j such that (i, j) is an (investor-investor) edge
     #       - C(i) is the set of concepts c such that (i, c) is an (investor-concept) edge
     #       - C(c) is the set of concepts d such that (c, d) is an (concept-concept) edge
+
+    ############################################################
+
+    bc.log(f'Preparing potential edges...')
+    bc.indent()
 
     ############################################################
 
@@ -170,7 +261,16 @@ def main():
     potential_edges = potential_edges.fillna(0)
 
     ############################################################
+
+    bc.outdent()
+
+    ############################################################
     # POTENTIAL EDGES - INTERSECTION TERMS                     #
+    ############################################################
+
+    bc.log(f'Computing intersection terms...')
+    bc.indent()
+
     ############################################################
 
     bc.log('Computing intersection terms W^i(int_I) and W^c(int_I)...')
@@ -206,7 +306,16 @@ def main():
     del df
 
     ############################################################
+
+    bc.outdent()
+
+    ############################################################
     # POTENTIAL EDGES - LATERAL TERMS                          #
+    ############################################################
+
+    bc.log(f'Computing lateral terms...')
+    bc.indent()
+
     ############################################################
 
     bc.log('Adding target node weight to investor-investor edges...')
@@ -360,6 +469,10 @@ def main():
     potential_edges = potential_edges.fillna(0)
 
     del df
+
+    ############################################################
+
+    bc.outdent()
 
     ############################################################
     # POTENTIAL EDGES - WEIGHTED JACCARD INDICES               #
