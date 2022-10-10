@@ -28,7 +28,14 @@ def weight(x, epsilon=0.01):
     return np.tanh(k * x)
 
 
-def compute_year_coefficients(min_date, max_date, min_year, max_year):
+def compute_year_coefficients():
+    # Minimum year to consider for the computation of the Jaccard indices.
+    # Older funding rounds will be ignored.
+    max_date = str(now().date())
+    max_year = int(max_date.split('-')[0])
+    min_year = max_year - 4
+    min_date = f'{min_year}-01-01'
+
     # Create DataFrame with start and end dates per year
     years = pd.DataFrame({'Year': range(min_year, max_year + 1)})
     years['StartDate'] = pd.to_datetime(years['Year'].apply(lambda y: f'{y}-01-01'))
@@ -96,15 +103,8 @@ def main():
     # Instantiate db interface to communicate with database
     db = DB()
 
-    # Minimum year to consider for the computation of the Jaccard indices.
-    # Older funding rounds will be ignored.
-    max_date = str(now().date())
-    max_year = int(max_date.split('-')[0])
-    min_year = max_year - 4
-    min_date = f'{min_year}-01-01'
-
     # Prepare year coefficients to combine metrics from different years
-    years = compute_year_coefficients(min_date, max_date, min_year, max_year)
+    years = compute_year_coefficients()
 
     ############################################################
     # FETCH GRAPH FROM DATABASE                                #
