@@ -179,6 +179,8 @@ def save_investors_concepts(db, investors_concepts):
         'ScoreLinAmount FLOAT',
         'ScoreQuadCount FLOAT',
         'ScoreQuadAmount FLOAT',
+        'SumCountAmount FLOAT',
+        'CountAmountRatio FLOAT',
         'KEY InvestorID (InvestorID)',
         'KEY PageID (PageID)',
         'KEY Year (Year)'
