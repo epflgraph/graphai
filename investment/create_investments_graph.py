@@ -72,11 +72,6 @@ def main():
 
     frs = get_frs(db)
 
-    # TO BE DELETED
-    # # Compute max_date in the funding rounds and define min_date to be 4 years before
-    # max_date = str(frs['FundingRoundDate'].max())
-    # min_date = add_years(max_date, -4)
-
     # Extract year
     dates = pd.to_datetime(frs['FundingRoundDate'], errors='coerce')
     dates = dates.fillna(dates.min())
@@ -147,6 +142,15 @@ def main():
     df = pd.merge(df, frs, how='inner', on='FundingRoundID')
 
     investors_concepts = derive_historical_data(df, groupby_columns=['InvestorID', 'PageID', 'Year'], date_column='FundingRoundDate', amount_column='FundingAmountPerInvestor_USD')
+
+    # Add ratio (number of investments in concept / number of investments)
+    investors_concepts = pd.merge(
+        investors_concepts,
+        investors[['InvestorID', 'Year', 'CountAmount']].rename(columns={'CountAmount': 'SumCountAmount'}),
+        how='left',
+        on=['InvestorID', 'Year']
+    )
+    investors_concepts['CountAmountRatio'] = investors_concepts['CountAmount'] / investors_concepts['SumCountAmount']
 
     ############################################################
     # INSERT UNTREATED DATA INTO DATABASE                      #
