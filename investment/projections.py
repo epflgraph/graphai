@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 
 from interfaces.db import DB
 
@@ -99,11 +100,19 @@ def project(bottom, top, mid):
         # Compute pseudodistance x-top
         x_top_factor = compute_pseudodistance_factor(x, top)
         x_top_ball_factor = compute_pseudodistance_factor(x_ball, top_ball)
-        x_top_pseudodistance = x_top_factor * x_top_ball_factor
+        x_top_pseudodistance = np.sqrt(x_top_factor * x_top_ball_factor)
 
         # The projection is the ratio of x-bottom and (x-bottom + x-top) pseudodistances
         projection = x_bottom_pseudodistance / (x_bottom_pseudodistance + x_top_pseudodistance)
         projections[key] = projection
+
+    return projections
+
+
+def get_affinities(top, mid):
+    bottom = pd.DataFrame({'PageID': pd.Series(dtype='int'), 'Score': pd.Series(dtype='float64')})
+    projections = project(bottom, top, mid)
+    projections = {k: (2 * v - 1) for k, v in projections.items()}
 
     return projections
 
