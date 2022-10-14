@@ -78,7 +78,11 @@ class DB:
         conditions_list = []
         for key in conditions:
             if isinstance(conditions[key], dict):
-                if key in ['AND', 'OR', 'NOT']:
+                if key == 'NOT':
+                    subconditions_list, subvalues = self.build_conditions_list(conditions[key])
+                    conditions_list.append('NOT (' + f' AND '.join(subconditions_list) + ')')
+                    values.extend(subvalues)
+                elif key in ['AND', 'OR']:
                     subconditions_list, subvalues = self.build_conditions_list(conditions[key])
                     conditions_list.append('(' + f' {key} '.join(subconditions_list) + ')')
                     values.extend(subvalues)
@@ -93,7 +97,7 @@ class DB:
 
         return conditions_list, values
 
-    def find(self, table_name, fields=None, conditions=None):
+    def find(self, table_name, fields=None, conditions=None, print_query=False):
         if fields:
             fields_str = ', '.join(fields)
         else:
@@ -110,6 +114,9 @@ class DB:
             FROM {table_name}
             {conditions_str}
         """
+
+        if print_query:
+            print(query)
 
         return self.execute_query(query, values)
 
