@@ -53,31 +53,30 @@ def compute_year_coefficients():
     return years
 
 
-def filter_and_combine_years(df, years, groupby_columns):
-    # Define function to aggregate metrics over different years
-    def aggregate_years(group):
-        group = pd.merge(group, years, how='left', on='Year')
-
-        lin_term0 = group['CoefPast'] * group['CountAmount']
-        lin_term1 = group['CoefPresent'] * group['ScoreLinCount']
-
-        score_lin_count = (lin_term0 + lin_term1).sum()
-
-        quad_term0 = (group['CoefPast'] ** 2) * group['CountAmount']
-        quad_term1 = 2 * group['CoefPast'] * group['CoefPresent'] * group['ScoreLinCount']
-        quad_term2 = (group['CoefPresent'] ** 2) * group['ScoreQuadCount']
-
-        score_quad_count = (quad_term0 + quad_term1 + quad_term2).sum()
-
-        return pd.Series({'ScoreLinCount': score_lin_count, 'ScoreQuadCount': score_quad_count})
-
+def rescale_scores(df, years):
     # Filter edges older than min_year
     df = df[df['Year'] >= years['Year'].min()].reset_index(drop=True)
 
-    # Aggregate yearly metrics correctly
-    df = df.groupby(by=groupby_columns).apply(aggregate_years).reset_index()
+    # Add time coefficients
+    df = pd.merge(df, years, how='left', on='Year')
+
+    # Compute new scores according to time coefficients
+    lin_term0 = df['CoefPast'] * df['CountAmount']
+    lin_term1 = df['CoefPresent'] * df['ScoreLinCount']
+
+    quad_term0 = (df['CoefPast'] ** 2) * df['CountAmount']
+    quad_term1 = 2 * df['CoefPast'] * df['CoefPresent'] * df['ScoreLinCount']
+    quad_term2 = (df['CoefPresent'] ** 2) * df['ScoreQuadCount']
+
+    df['ScoreLinCount'] = lin_term0 + lin_term1
+    df['ScoreQuadCount'] = quad_term0 + quad_term1 + quad_term2
+    df = df.drop(['CoefPast', 'CoefPresent'], axis=1)
 
     return df
+
+
+def aggregate_years(df, groupby_columns):
+    return df.groupby(by=groupby_columns)[['ScoreLinCount', 'ScoreQuadCount']].sum().reset_index()
 
 
 def normalize_scores(df, score_column):
@@ -122,8 +121,9 @@ def main():
     fields = ['SourceInvestorID', 'TargetInvestorID', 'Year', 'CountAmount', 'ScoreLinCount', 'ScoreQuadCount']
     df = pd.DataFrame(db.find(table_name, fields=fields), columns=fields)
 
-    # Filter years older than time window and aggregate metrics accordingly
-    df = filter_and_combine_years(df, years, groupby_columns=['SourceInvestorID', 'TargetInvestorID'])
+    # Rescale scores to fit time window, filter older years and aggregate accordingly
+    df = rescale_scores(df, years)
+    df = aggregate_years(df, groupby_columns=['SourceInvestorID', 'TargetInvestorID'])
 
     # Normalize scores to have them in [0, 1]
     df = normalize_scores(df[['SourceInvestorID', 'TargetInvestorID', 'ScoreQuadCount']], score_column='ScoreQuadCount')
@@ -145,8 +145,9 @@ def main():
     df = pd.DataFrame(db.find(table_name, fields=fields), columns=fields)
     df['PageID'] = df['PageID'].astype(str)
 
-    # Filter years older than time window and aggregate metrics accordingly
-    df = filter_and_combine_years(df, years, groupby_columns=['InvestorID', 'PageID'])
+    # Rescale scores to fit time window, filter older years and aggregate accordingly
+    df = rescale_scores(df, years)
+    df = aggregate_years(df, groupby_columns=['InvestorID', 'PageID'])
 
     # Normalize scores to have them in [0, 1]
     investors_concepts = normalize_scores(df[['InvestorID', 'PageID', 'ScoreQuadCount']], score_column='ScoreQuadCount')
@@ -180,8 +181,9 @@ def main():
     fields = ['InvestorID', 'Year', 'CountAmount', 'ScoreLinCount', 'ScoreQuadCount']
     df = pd.DataFrame(db.find(table_name, fields=fields), columns=fields)
 
-    # Filter years older than time window and aggregate metrics accordingly
-    df = filter_and_combine_years(df, years, groupby_columns=['InvestorID'])
+    # Rescale scores to fit time window, filter older years and aggregate accordingly
+    df = rescale_scores(df, years)
+    df = aggregate_years(df, groupby_columns=['InvestorID'])
 
     # Normalize scores to have them in [0, 1]
     investors = normalize_scores(df[['InvestorID', 'ScoreQuadCount']], score_column='ScoreQuadCount')
@@ -198,8 +200,9 @@ def main():
     df = pd.DataFrame(db.find(table_name, fields=fields), columns=fields)
     df['PageID'] = df['PageID'].astype(str)
 
-    # Filter years older than time window and aggregate metrics accordingly
-    df = filter_and_combine_years(df, years, groupby_columns=['PageID'])
+    # Rescale scores to fit time window, filter older years and aggregate accordingly
+    df = rescale_scores(df, years)
+    df = aggregate_years(df, groupby_columns=['PageID'])
 
     # Normalize scores to have them in [0, 1]
     concepts = normalize_scores(df[['PageID', 'ScoreQuadCount']], score_column='ScoreQuadCount')
