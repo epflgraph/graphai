@@ -13,8 +13,8 @@ def show_trends(unit_concepts, concepts):
     cprint(('#' * 10) + ' INVESTMENT TRENDS ' + ('#' * 10), color='blue')
 
     # Extract concepts to display
-    top_concept_ids = list(unit_concepts.sort_values(by='Score', ascending=False).head(5)['PageID'])
-    concepts = concepts[concepts['PageID'].isin(top_concept_ids)]
+    # top_concept_ids = list(unit_concepts.sort_values(by='Score', ascending=False).head(5)['PageID'])
+    # concepts = concepts[concepts['PageID'].isin(top_concept_ids)].reset_index(drop=True)
 
     # Print summary for last year
     last_year = concepts['Year'].max() - 1
@@ -27,27 +27,38 @@ def show_trends(unit_concepts, concepts):
         cprint(f'\U0001F30D {name[1]}', color='blue')
         cprint(f'    · {last_year_amount / 1e6:.2f} M$ raised in {last_year}, {perc_increment:+.2f}% with respect to {last_year - 1}.', color='blue')
 
-    # Plot Year vs Amounts
-    fig, axs = plt.subplots(3, 1, sharex=True, dpi=300)
+    # Derive extra columns
+    concepts['SumAmount'] /= 1e6
+    concepts['AvgAmountPerInvestment'] = (concepts['SumAmount'] / concepts['CountAmount']).replace([-np.inf, np.inf], 0)
+    concepts['AvgAmountPerInvestor'] = (concepts['SumAmount'] / concepts['CountInvestment']).replace([-np.inf, np.inf], 0)
+    concepts['AvgInvestmentsPerInvestor'] = (concepts['CountInvestment'] / concepts['CountInvestor']).replace([-np.inf, np.inf], 0)
 
-    for name, group in concepts.groupby(by=['PageID', 'PageTitle']):
-        axs[0].plot(group['Year'], group['SumAmount'] / 1e6, label=name[1])
-        axs[1].plot(group['Year'], group['CountAmount'], label=name[1])
-        axs[2].plot(group['Year'], group['CountInvestor'], label=name[1])
+    titles = {
+        'SumAmount': 'Total amount (M$)',
+        'CountAmount': 'Number of funding rounds',
+        'CountInvestor': 'Number of investors',
+        'AvgAmountPerInvestment': 'Average amount (M$) per funding round',
+        'AvgAmountPerInvestor': 'Average amount (M$) per investor',
+        'AvgInvestmentsPerInvestor': 'Average number of funding rounds per investor'
+    }
 
-    axs[0].set_xlabel('Year')
-    axs[0].set_ylabel('M$')
-    axs[0].set_title('Investment amounts')
+    # Line plots Year vs total amount, number of investments and number of investors
+    fig, axs = plt.subplots(2, 3, dpi=100)
+    for i, column in enumerate(['SumAmount', 'CountAmount', 'CountInvestor', 'AvgAmountPerInvestment', 'AvgAmountPerInvestor', 'AvgInvestmentsPerInvestor']):
+        ax = axs.flat[i]
 
-    axs[1].set_xlabel('Year')
-    axs[1].legend(loc='center left', bbox_to_anchor=(1, 0.5))
-    axs[1].set_title('Number of investments')
+        for name, group in concepts.groupby(by=['PageID', 'PageTitle']):
+            x = group['Year']
+            y = group[column]
+            ax.plot(x, y, label=name[1])
 
-    axs[2].set_xlabel('Year')
-    axs[2].set_title('Number of investors')
+        ax.set_xlabel('Year')
+        ax.set_title(titles[column])
 
-    fig.suptitle('INVESTMENT TRENDS (chart view)')
-    fig.set_tight_layout(True)
+        ax.set_ylim(bottom=0, top=ax.get_ylim()[1])
+
+    fig.suptitle(f'INVESTMENT TRENDS (chart view)')
+    axs.flat[0].legend()
 
     plt.show()
 
@@ -254,6 +265,22 @@ def main():
     unit_concepts['Score'] = (unit_concepts['Score'] - min_score) / (max_score - min_score) if max_score != min_score else 0
     unit_concept_ids = list(unit_concepts['PageID'])
 
+    ############
+    # TODO delete this
+
+    # Cherrypicked concepts by most funding rounds
+    unit_concept_ids = [5309, 261925, 36674345, 9611, 4502, 14539, 39388, 433425, 2262333, 1164, 18957]
+    it_concept_ids = [5309, 36674345, 14539, 1164]
+    med_concept_ids = [261925, 4502, 18957]
+    service_concept_ids = [9611, 39388, 433425, 2262333]
+    mix_concept_ids = [5309, 261925, 433425, 1164]
+
+    unit_concept_ids = mix_concept_ids
+
+    unit_concepts = pd.DataFrame({'PageID': unit_concept_ids, 'Score': 1})
+
+    ############
+
     # Add title information
     unit_concepts = pd.merge(unit_concepts, concept_titles, how='left', on='PageID')
 
@@ -272,15 +299,14 @@ def main():
 
     ############################################################
 
-    # Extract diluted investors (investors with low ratio of investments in unit concepts)
     table_name = 'ca_temp.Edges_N_Investor_N_Concept'
-    fields = ['InvestorID', 'PageID', 'Year']
+    fields = ['InvestorID', 'PageID', 'Year', 'CountAmount']
     conditions = {'PageID': unit_concept_ids, 'Year': time_window}
     investors_concepts = pd.DataFrame(db.find(table_name, fields=fields, conditions=conditions), columns=fields)
 
     concepts = pd.merge(
         concepts,
-        investors_concepts.groupby(by=['PageID', 'Year']).agg(CountInvestor=('InvestorID', 'count')).reset_index(),
+        investors_concepts.groupby(by=['PageID', 'Year']).agg(CountInvestor=('InvestorID', 'count'), CountInvestment=('CountAmount', 'sum')).reset_index(),
         how='left',
         on=['PageID', 'Year']
     ).fillna(0)
