@@ -3,51 +3,87 @@ import pandas as pd
 
 from interfaces.db import DB
 
-from investment.data import *
-
 from utils.breadcrumb import Breadcrumb
 from utils.time.date import *
 
 
-def derive_historical_data(df, groupby_columns, date_column, amount_column):
+def get_frs(db):
+    # Fetch funding rounds in time window from database
+    table_name = 'graph.Nodes_N_FundingRound'
+    fields = ['FundingRoundID', 'FundingRoundDate', 'FundingRoundType', 'FundingAmount_USD', 'FundingAmount_USD / CB_InvestorCount']
+    columns = ['FundingRoundID', 'FundingRoundDate', 'FundingRoundType', 'FundingAmount_USD', 'FundingAmountPerInvestor_USD']
+    frs = pd.DataFrame(db.find(table_name, fields=fields), columns=columns)
 
-    # if max_date == 'today':
-    #     max_date = str(now().date())
+    return frs
 
-    def aggregate(group):
-        # Catch warnings from median of series containing only NA values
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore", category=RuntimeWarning)
 
-            count_amount = len(group[amount_column])
-            min_amount = group[amount_column].min()
-            max_amount = group[amount_column].max()
-            median_amount = group[amount_column].median()
-            sum_amount = group[amount_column].sum()
+def get_investors_frs(db):
+    # Fetch organization investors from database
+    table_name = 'graph.Edges_N_Organisation_N_FundingRound'
+    fields = ['OrganisationID', 'FundingRoundID']
+    conditions = {'Action': 'Invested in'}
+    org_investors_frs = pd.DataFrame(db.find(table_name, fields=fields, conditions=conditions),
+                                     columns=['InvestorID', 'FundingRoundID'])
 
-        aggregated_values = {
-            'CountAmount': count_amount,
-            'MinAmount': min_amount,
-            'MaxAmount': max_amount,
-            'MedianAmount': median_amount,
-            'SumAmount': sum_amount
-        }
+    # Fetch person investors from database
+    table_name = 'graph.Edges_N_Person_N_FundingRound'
+    fields = ['PersonID', 'FundingRoundID']
+    conditions = {'Action': 'Invested in'}
+    person_investors_frs = pd.DataFrame(db.find(table_name, fields=fields, conditions=conditions),
+                                        columns=['InvestorID', 'FundingRoundID'])
 
-        # Compute rescaled dates
-        year = group['Year'].min()
-        min_date = f'{year}-01-01'
-        max_date = f'{year + 1}-01-01'
-        rescaled_dates = rescale(group[date_column], min_date, max_date)
+    # Add extra column with investor type
+    org_investors_frs['InvestorType'] = 'Organization'
+    person_investors_frs['InvestorType'] = 'Person'
 
-        # Derive scores using rescaled dates
-        aggregated_values['ScoreLinCount'] = rescaled_dates.sum()
-        aggregated_values['ScoreLinAmount'] = (rescaled_dates * group[amount_column]).sum()
-        aggregated_values['ScoreQuadCount'] = (rescaled_dates ** 2).sum()
-        aggregated_values['ScoreQuadAmount'] = ((rescaled_dates ** 2) * group[amount_column]).sum()
+    # Combine organization investors and person investors in a single DataFrame
+    investors_frs = pd.concat([org_investors_frs, person_investors_frs])
+    investors_frs = investors_frs[['InvestorID', 'InvestorType', 'FundingRoundID']]
 
-        return pd.Series(aggregated_values)
+    return investors_frs
 
-    return df.groupby(groupby_columns).apply(aggregate).reset_index()
+
+def get_frs_fundraisers(db):
+    # Fetch fundraisers from database
+    table_name = 'graph.Edges_N_Organisation_N_FundingRound'
+    fields = ['FundingRoundID', 'OrganisationID']
+    conditions = {'Action': 'Raised from'}
+    frs_fundraisers = pd.DataFrame(db.find(table_name, fields=fields, conditions=conditions),
+                                 columns=['FundingRoundID', 'FundraiserID'])
+    return frs_fundraisers
+
+
+def get_fundraisers_concepts(db):
+    # Fetch concepts from database
+    table_name = 'graph.Edges_N_Organisation_N_Concept'
+    fields = ['OrganisationID', 'PageID']
+    fundraisers_concepts = pd.DataFrame(db.find(table_name, fields=fields), columns=['FundraiserID', 'PageID'])
+    return fundraisers_concepts
+
+
+def derive_yearly_data(df, groupby_columns, date_column, amount_column):
+
+    df['YearMin'] = df['Year'].astype(str) + '-01-01'
+    df['YearMax'] = (df['Year'] + 1).astype(str) + '-01-01'
+
+    df['ScoreLinCount'] = rescale(df[date_column], df['YearMin'], df['YearMax'])
+    df['ScoreLinAmount'] = df['ScoreLinCount'] * df[amount_column]
+    df['ScoreQuadCount'] = df['ScoreLinCount'] ** 2
+    df['ScoreQuadAmount'] = df['ScoreQuadCount'] * df[amount_column]
+
+    df = df.groupby(groupby_columns).aggregate(
+        CountAmount=(amount_column, 'size'),
+        MinAmount=(amount_column, 'min'),
+        MaxAmount=(amount_column, 'max'),
+        MedianAmount=(amount_column, 'median'),
+        SumAmount=(amount_column, 'sum'),
+        ScoreLinCount=('ScoreLinCount', 'sum'),
+        ScoreLinAmount=('ScoreLinAmount', 'sum'),
+        ScoreQuadCount=('ScoreQuadCount', 'sum'),
+        ScoreQuadAmount=('ScoreQuadAmount', 'sum')
+    ).reset_index()
+
+    return df
 
 
 def main():
@@ -77,19 +113,21 @@ def main():
     dates = dates.fillna(dates.min())
     frs['Year'] = dates.dt.year
 
-    # frs = frs[:1000]
-
     ############################################################
 
     bc.log('Retrieving investors...')
 
     investors_frs = get_investors_frs(db)
 
+    investors = investors_frs[['InvestorID', 'InvestorType']].drop_duplicates().reset_index(drop=True)
+
     ############################################################
 
     bc.log('Retrieving fundraisers...')
 
     frs_fundraisers = get_frs_fundraisers(db)
+
+    fundraisers = frs_fundraisers[['FundraiserID']].drop_duplicates().reset_index(drop=True)
 
     ############################################################
 
@@ -101,25 +139,25 @@ def main():
     # COMPUTE DERIVED DATA                                     #
     ############################################################
 
-    bc.log('Computing historical data for investor nodes...')
+    bc.log('Computing yearly data for investor nodes...')
 
     df = pd.merge(investors_frs, frs, how='inner', on='FundingRoundID')
-    investors = derive_historical_data(df, groupby_columns=['InvestorID', 'InvestorType', 'Year'], date_column='FundingRoundDate', amount_column='FundingAmountPerInvestor_USD')
+    investors_years = derive_yearly_data(df, groupby_columns=['InvestorID', 'InvestorType', 'Year'], date_column='FundingRoundDate', amount_column='FundingAmountPerInvestor_USD')
 
     ############################################################
 
-    bc.log('Computing historical data for concept nodes...')
+    bc.log('Computing yearly data for concept nodes...')
 
     df = pd.merge(frs_fundraisers, fundraisers_concepts, how='inner', on='FundraiserID')
     df = pd.merge(df, frs, how='inner', on='FundingRoundID')
-    concepts = derive_historical_data(df, groupby_columns=['PageID', 'Year'], date_column='FundingRoundDate', amount_column='FundingAmount_USD')
+    concepts_years = derive_yearly_data(df, groupby_columns=['PageID', 'Year'], date_column='FundingRoundDate', amount_column='FundingAmount_USD')
 
     ############################################################
 
-    bc.log('Computing historical data for investor-investor edges...')
+    bc.log('Computing yearly data for investor-investor edges...')
 
     # Merge the dataframe investors_frs with itself to obtain all pairs of investors
-    investors_investors = pd.merge(
+    df = pd.merge(
         investors_frs[['InvestorID', 'FundingRoundID']].rename(columns={'InvestorID': 'SourceInvestorID'}),
         investors_frs[['InvestorID', 'FundingRoundID']].rename(columns={'InvestorID': 'TargetInvestorID'}),
         how='inner',
@@ -127,30 +165,30 @@ def main():
     )
 
     # Keep only lexicographically sorted pairs to avoid duplicates
-    investors_investors = investors_investors[investors_investors['SourceInvestorID'] < investors_investors['TargetInvestorID']].reset_index(drop=True)
+    df = df[df['SourceInvestorID'] < df['TargetInvestorID']].reset_index(drop=True)
 
-    # Attach fr info and extract historical data
-    df = pd.merge(investors_investors, frs, how='inner', on='FundingRoundID')
-    investors_investors = derive_historical_data(df, groupby_columns=['SourceInvestorID', 'TargetInvestorID', 'Year'], date_column='FundingRoundDate', amount_column='FundingAmountPerInvestor_USD')
+    # Attach fr info and extract yearly data
+    df = pd.merge(df, frs, how='inner', on='FundingRoundID')
+    investors_investors_years = derive_yearly_data(df, groupby_columns=['SourceInvestorID', 'TargetInvestorID', 'Year'], date_column='FundingRoundDate', amount_column='FundingAmountPerInvestor_USD')
 
     ############################################################
 
-    bc.log('Computing historical data for investor-concept edges...')
+    bc.log('Computing yearly data for investor-concept edges...')
 
     df = pd.merge(investors_frs, frs_fundraisers, how='inner', on='FundingRoundID')
     df = pd.merge(df, fundraisers_concepts, how='inner', on='FundraiserID')
     df = pd.merge(df, frs, how='inner', on='FundingRoundID')
 
-    investors_concepts = derive_historical_data(df, groupby_columns=['InvestorID', 'PageID', 'Year'], date_column='FundingRoundDate', amount_column='FundingAmountPerInvestor_USD')
+    investors_concepts_years = derive_yearly_data(df, groupby_columns=['InvestorID', 'PageID', 'Year'], date_column='FundingRoundDate', amount_column='FundingAmountPerInvestor_USD')
 
-    # Add ratio (number of investments in concept / number of investments)
-    investors_concepts = pd.merge(
-        investors_concepts,
-        investors[['InvestorID', 'Year', 'CountAmount']].rename(columns={'CountAmount': 'SumCountAmount'}),
-        how='left',
-        on=['InvestorID', 'Year']
-    )
-    investors_concepts['CountAmountRatio'] = investors_concepts['CountAmount'] / investors_concepts['SumCountAmount']
+    # # Add ratio (number of investments in concept / number of investments)
+    # investors_concepts = pd.merge(
+    #     investors_concepts,
+    #     investors[['InvestorID', 'Year', 'CountAmount']].rename(columns={'CountAmount': 'SumCountAmount'}),
+    #     how='left',
+    #     on=['InvestorID', 'Year']
+    # )
+    # investors_concepts['CountAmountRatio'] = investors_concepts['CountAmount'] / investors_concepts['SumCountAmount']
 
     ############################################################
     # INSERT UNTREATED DATA INTO DATABASE                      #
@@ -158,32 +196,53 @@ def main():
 
     bc.log('Inserting funding rounds into database...')
 
-    save_frs(db, frs)
+    table_name = 'ca_temp.Nodes_N_FundingRound'
+    definition = ['FundingRoundID CHAR(64)', 'FundingRoundDate DATE', 'FundingRoundType CHAR(32)',
+                  'FundingAmount_USD FLOAT', 'FundingAmountPerInvestor_USD FLOAT', 'Year SMALLINT',
+                  'PRIMARY KEY FundingRoundID (FundingRoundID)']
+    db.drop_create_insert_table(table_name, definition, frs)
+
+    ############################################################
+
+    bc.log('Inserting investors into database...')
+
+    table_name = 'ca_temp.Nodes_N_Investor'
+    definition = ['InvestorID CHAR(64)', 'InvestorType CHAR(32)', 'PRIMARY KEY InvestorID (InvestorID)']
+    db.drop_create_insert_table(table_name, definition, investors)
 
     ############################################################
 
     bc.log('Inserting investors-frs edges into database...')
 
-    save_investors_frs(db, investors_frs[['InvestorID', 'FundingRoundID']])
+    table_name = 'ca_temp.Edges_N_Investor_N_FundingRound'
+    definition = ['InvestorID CHAR(64)', 'FundingRoundID CHAR(64)', 'KEY InvestorID (InvestorID)',
+                  'KEY FundingRoundID (FundingRoundID)']
+    db.drop_create_insert_table(table_name, definition, investors_frs[['InvestorID', 'FundingRoundID']])
 
     ############################################################
 
     bc.log('Inserting frs-fundraisers edges into database...')
 
-    save_frs_fundraisers(db, frs_fundraisers[['FundingRoundID', 'FundraiserID']])
+    table_name = 'ca_temp.Edges_N_FundingRound_N_Fundraiser'
+    definition = ['FundingRoundID CHAR(64)', 'FundraiserID CHAR(64)', 'KEY FundingRoundID (FundingRoundID)',
+                  'KEY FundraiserID (FundraiserID)']
+    db.drop_create_insert_table(table_name, definition, frs_fundraisers)
 
     ############################################################
 
     bc.log('Inserting fundraisers-concepts edges into database...')
 
-    save_fundraisers_concepts(db, fundraisers_concepts)
+    table_name = 'ca_temp.Edges_N_Fundraiser_N_Concept'
+    definition = ['FundraiserID CHAR(64)', 'PageID INT UNSIGNED', 'KEY FundraiserID (FundraiserID)', 'KEY PageID (PageID)']
+    db.drop_create_insert_table(table_name, definition, fundraisers_concepts)
 
     ############################################################
 
     bc.log('Inserting fundraisers into database...')
 
-    fundraisers = frs_fundraisers[['FundraiserID']].drop_duplicates()
-    save_fundraisers(db, fundraisers)
+    table_name = 'ca_temp.Nodes_N_Fundraiser'
+    definition = ['FundraiserID CHAR(64)', 'PRIMARY KEY FundraiserID (FundraiserID)']
+    db.drop_create_insert_table(table_name, definition, fundraisers)
 
     ############################################################
     # INSERT COMPUTED DATA INTO DATABASE                       #
@@ -191,25 +250,96 @@ def main():
 
     bc.log('Inserting investors into database...')
 
-    save_investors(db, investors)
+    table_name = 'ca_temp.Nodes_N_Investor_T_Years'
+    definition = [
+        'InvestorID CHAR(64)',
+        'InvestorType CHAR(32)',
+        'Year SMALLINT',
+        'CountAmount FLOAT',
+        'MinAmount FLOAT',
+        'MaxAmount FLOAT',
+        'MedianAmount FLOAT',
+        'SumAmount FLOAT',
+        'ScoreLinCount FLOAT',
+        'ScoreLinAmount FLOAT',
+        'ScoreQuadCount FLOAT',
+        'ScoreQuadAmount FLOAT',
+        'KEY InvestorID (InvestorID)',
+        'KEY Year (Year)'
+    ]
+    db.drop_create_insert_table(table_name, definition, investors_years)
 
     ############################################################
 
     bc.log('Inserting concepts into database...')
 
-    save_concepts(db, concepts)
+    table_name = 'ca_temp.Nodes_N_Concept_T_Years'
+    definition = [
+        'PageID INT UNSIGNED',
+        'Year SMALLINT',
+        'CountAmount FLOAT',
+        'MinAmount FLOAT',
+        'MaxAmount FLOAT',
+        'MedianAmount FLOAT',
+        'SumAmount FLOAT',
+        'ScoreLinCount FLOAT',
+        'ScoreLinAmount FLOAT',
+        'ScoreQuadCount FLOAT',
+        'ScoreQuadAmount FLOAT',
+        'KEY PageID (PageID)',
+        'KEY Year (Year)'
+    ]
+    db.drop_create_insert_table(table_name, definition, concepts_years)
 
     ############################################################
 
     bc.log('Inserting investor-investor edges into database...')
 
-    save_investors_investors(db, investors_investors)
+    table_name = 'ca_temp.Edges_N_Investor_N_Investor_T_Years'
+    definition = [
+        'SourceInvestorID CHAR(64)',
+        'TargetInvestorID CHAR(64)',
+        'Year SMALLINT',
+        'CountAmount FLOAT',
+        'MinAmount FLOAT',
+        'MaxAmount FLOAT',
+        'MedianAmount FLOAT',
+        'SumAmount FLOAT',
+        'ScoreLinCount FLOAT',
+        'ScoreLinAmount FLOAT',
+        'ScoreQuadCount FLOAT',
+        'ScoreQuadAmount FLOAT',
+        'KEY SourceInvestorID (SourceInvestorID)',
+        'KEY TargetInvestorID (TargetInvestorID)',
+        'KEY Year (Year)'
+    ]
+    db.drop_create_insert_table(table_name, definition, investors_investors_years)
 
     ############################################################
 
     bc.log('Inserting investors-concepts edges into database...')
 
-    save_investors_concepts(db, investors_concepts)
+    table_name = 'ca_temp.Edges_N_Investor_N_Concept_T_Years'
+    definition = [
+        'InvestorID CHAR(64)',
+        'PageID INT UNSIGNED',
+        'Year SMALLINT',
+        'CountAmount FLOAT',
+        'MinAmount FLOAT',
+        'MaxAmount FLOAT',
+        'MedianAmount FLOAT',
+        'SumAmount FLOAT',
+        'ScoreLinCount FLOAT',
+        'ScoreLinAmount FLOAT',
+        'ScoreQuadCount FLOAT',
+        'ScoreQuadAmount FLOAT',
+        # 'SumCountAmount FLOAT',
+        # 'CountAmountRatio FLOAT',
+        'KEY InvestorID (InvestorID)',
+        'KEY PageID (PageID)',
+        'KEY Year (Year)'
+    ]
+    db.drop_create_insert_table(table_name, definition, investors_concepts_years)
 
     ############################################################
 
