@@ -1,4 +1,3 @@
-import warnings
 import pandas as pd
 
 from interfaces.db import DB
