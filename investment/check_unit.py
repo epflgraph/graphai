@@ -2,8 +2,6 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 
-from investment.projections import get_affinities, project
-
 from interfaces.db import DB
 
 from utils.text.io import cprint
