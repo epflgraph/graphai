@@ -12,9 +12,11 @@ from utils.text.io import cprint
 def show_trends(unit_concepts, concepts):
     cprint(('#' * 10) + ' INVESTMENT TRENDS ' + ('#' * 10), color='blue')
 
+    print(unit_concepts)
+
     # Extract concepts to display
-    # top_concept_ids = list(unit_concepts.sort_values(by='Score', ascending=False).head(5)['PageID'])
-    # concepts = concepts[concepts['PageID'].isin(top_concept_ids)].reset_index(drop=True)
+    top_concept_ids = list(unit_concepts.sort_values(by='Score', ascending=False).head(5)['PageID'])
+    concepts = concepts[concepts['PageID'].isin(top_concept_ids)].reset_index(drop=True)
 
     # Print summary for last year
     last_year = concepts['Year'].max() - 1
@@ -73,10 +75,10 @@ def show_matchmaking_list_view(investors_concepts_jaccard, investors_concepts, u
     # Select only investor-concept edges from last year
     investors_concepts = investors_concepts[(investors_concepts['Year'] == last_year) & (investors_concepts['PageID'].isin(unit_concept_ids))]
 
-    # Select top n rows such that they include the top 5 investors
-    top_investors_concepts = investors_concepts.sort_values(by='SumAmount', ascending=False).reset_index(drop=True)
-    idx = top_investors_concepts['InvestorID'].drop_duplicates().head(5).index[-1]
-    top_investors_concepts = top_investors_concepts[:idx + 1]
+    # # Select top n rows such that they include the top 5 investors
+    # top_investors_concepts = investors_concepts.sort_values(by='SumAmount', ascending=False).reset_index(drop=True)
+    # idx = top_investors_concepts['InvestorID'].drop_duplicates().head(5).index[-1]
+    # top_investors_concepts = top_investors_concepts[:idx + 1]
 
     def str_unpack(s):
         if len(s) == 1:
@@ -88,9 +90,11 @@ def show_matchmaking_list_view(investors_concepts_jaccard, investors_concepts, u
         else:
             return f'{s.iloc[0]}, {str_unpack(s.iloc[1:])}'
 
-    for name, group in top_investors_concepts.groupby(by=['InvestorID', 'InvestorName']):
-        active_concepts_str = str_unpack(group['PageTitle'])
-        likely_concepts_str = str_unpack(investors_concepts_jaccard.loc[investors_concepts_jaccard['InvestorID'] == name[0], 'PageTitle'])
+    for name, group in investors_concepts.groupby(by=['InvestorID', 'InvestorName']):
+        group = group.sort_values(by=['CountAmount'], ascending=False).reset_index(drop=True)
+
+        active_concepts_str = str_unpack(group['PageTitle'].head(3))
+        likely_concepts_str = str_unpack(investors_concepts_jaccard.loc[investors_concepts_jaccard['InvestorID'] == name[0], 'PageTitle'].head(3))
 
         cprint(f'\U0001F4BC {name[1]}', color='blue')
         cprint(f'    · Actively invested last year in {active_concepts_str}.', color='blue')
@@ -99,113 +103,69 @@ def show_matchmaking_list_view(investors_concepts_jaccard, investors_concepts, u
     cprint('')
 
 
-def show_matchmaking_chart_view(investors_concepts, unit_concepts, historical_time_window):
+def show_matchmaking_chart_view(investors_concepts, unit_concepts, unit_investors, time_window):
     cprint(('#' * 10) + ' POTENTIAL INVESTORS (chart view) ' + ('#' * 10), color='blue')
     cprint('(see plot...)', color='blue')
-
-    # Normalize unit concepts' scores
-    min_score = unit_concepts['Score'].min()
-    max_score = unit_concepts['Score'].max()
-    unit_concepts['Score'] = ((unit_concepts['Score'] - min_score) / (max_score - min_score)) if min_score < max_score else 0
-    unit_concepts = unit_concepts[unit_concepts['Score'] > 0]
 
     # Sample main unit concepts for display
     unit_sample_concepts = list(unit_concepts.sort_values(by='Score', ascending=False)['PageTitle'].head(3))
 
-    for (investor_id, investor_name), investor_group in investors_concepts.groupby(by=['InvestorID', 'InvestorName']):
-        # Filter concepts in historical time window
-        investor_historical_concepts = investor_group[investor_group['Year'].isin(historical_time_window)].groupby(by=['PageID', 'PageTitle'])['SumAmount'].sum().reset_index()
-        investor_historical_concepts = investor_historical_concepts.rename(columns={'SumAmount': 'Score'})
+    # Renormalise unit concept scores to add to 1
+    sum = unit_concepts['Score'].sum()
+    unit_concepts['Score'] = unit_concepts['Score'] / sum if sum else 0
 
-        # Normalize unit concepts' scores
-        min_score = investor_historical_concepts['Score'].min()
-        max_score = investor_historical_concepts['Score'].max()
-        investor_historical_concepts['Score'] = ((investor_historical_concepts['Score'] - min_score) / (max_score - min_score)) if min_score < max_score else 0
-        investor_historical_concepts = investor_historical_concepts[investor_historical_concepts['Score'] > 0]
+    # Filter investors-concepts by time window and extract relevant columns
+    investors_concepts = investors_concepts[investors_concepts['Year'].isin(time_window)]
+    investors_concepts = investors_concepts[['InvestorID', 'InvestorName', 'Year', 'PageID', 'PageTitle', 'CountAmount']]
 
-        investor_sample_concepts = investor_historical_concepts.sort_values(by='Score', ascending=False)['PageTitle'].head(3)
+    # Add unit concept scores to investors-concepts DataFrame
+    investors_concepts = pd.merge(
+        investors_concepts,
+        unit_concepts.rename(columns={'Score': 'UnitPageScore'}).drop(columns=['PageTitle']),
+        how='inner',
+        on='PageID'
+    )
 
-        yearly_concepts = {}
-        for year, group in investor_group.groupby(by='Year'):
-            year_concepts = group[['PageID', 'SumAmount']]
-            year_concepts = year_concepts.rename(columns={'SumAmount': 'Score'})
+    # Rescale CountAmount according to relevance within unit
+    investors_concepts['NormCountAmount'] = investors_concepts['CountAmount'] * investors_concepts['UnitPageScore']
 
-            min_score = year_concepts['Score'].min()
-            max_score = year_concepts['Score'].max()
-            year_concepts['Score'] = ((year_concepts['Score'] - min_score) / (max_score - min_score)) if min_score < max_score else 0
-            year_concepts = year_concepts[year_concepts['Score'] > 0]
+    # Group by investor and year
+    investors = investors_concepts.groupby(by=['InvestorID', 'InvestorName', 'Year']).aggregate({'NormCountAmount': 'sum'}).reset_index()
 
-            yearly_concepts[year] = year_concepts
+    # Add missing years
+    skeleton = pd.merge(
+        pd.DataFrame({'InvestorID': investors['InvestorID'].drop_duplicates()}),
+        pd.DataFrame({'Year': time_window}),
+        how='cross'
+    )
+    investors = pd.merge(skeleton, investors, how='left', on=['InvestorID', 'Year']).fillna(0)
 
-        hist_year_affinities = get_affinities(investor_historical_concepts[['PageID', 'Score']], yearly_concepts)
-        unit_year_affinities = get_affinities(unit_concepts[['PageID', 'Score']], yearly_concepts)
-        hist_year_affinities = pd.DataFrame({'Year': hist_year_affinities.keys(), 'HistYear': hist_year_affinities.values()})
-        unit_year_affinities = pd.DataFrame({'Year': unit_year_affinities.keys(), 'UnitYear': unit_year_affinities.values()})
-        affinities = pd.merge(hist_year_affinities, unit_year_affinities, how='inner', on='Year')
+    # Create variation column
+    investors['Variation'] = investors['NormCountAmount'].pct_change().fillna(0)
 
-        projections = project(investor_historical_concepts, unit_concepts[['PageID', 'Score']], yearly_concepts)
-        projections = pd.DataFrame({'Year': projections.keys(), 'Projection': projections.values()})
+    # Add investor-unit yearly affinity
+    investors = pd.merge(
+        investors,
+        unit_investors.rename(columns={'Score': 'UnitInvestorScore'}).drop(columns=['InvestorName']),
+        how='left',
+        on=['InvestorID', 'Year']
+    )
 
-        investor_yearly_totals = investor_group.groupby(by='Year')['SumAmount'].sum().reset_index()
-        investor_yearly_totals['Variation'] = investor_yearly_totals['SumAmount'].pct_change().fillna(0)
-
-        ############################################################
-
-        sizes = 200 + 500 * (investor_yearly_totals['SumAmount'] / 1e9)
-        fontsizes = 8 + (investor_yearly_totals['SumAmount'] / 1e9)
-        colors = np.tanh(investor_yearly_totals['Variation'])
-
-        ############################################################
+    for (investor_id, investor_name), investor_group in investors.groupby(by=['InvestorID', 'InvestorName']):
 
         fig, ax = plt.subplots(dpi=150, figsize=(8, 4))
         fig.set_tight_layout(True)
-        ax.scatter(affinities['HistYear'], affinities['UnitYear'], s=sizes, c=colors, cmap='RdYlGn')
 
-        for i, (year, x, y) in enumerate(affinities.itertuples(index=False, name=None)):
-            ax.annotate(year, (x, y), ha='center', va='center', fontsize=fontsizes[i], c='darkgray')
+        x = investor_group['Year']
+        y = investor_group['UnitInvestorScore']
+        sizes = 200 * investor_group['NormCountAmount']
+        colors = np.tanh(investor_group['Variation'])
+        fontsizes = 8 + investor_group['NormCountAmount']
 
-        ax.set_xlim(0, 1)
-        ax.set_ylim(0, 1)
-        ax.set_xticks([])
-        ax.set_yticks([])
+        ax.scatter(x, y, s=sizes, c=colors, cmap='RdYlGn')
 
-        ax.set_xlabel(f"Investor's historical concepts\n({', '.join(investor_sample_concepts)})")
-        ax.set_ylabel(f"Unit's research domain\n({', '.join(unit_sample_concepts)})")
-        ax.set_title(f'POTENTIAL INVESTORS (chart view, amounts)\n{investor_name}')
-
-        ############################################################
-
-        fig, ax = plt.subplots(dpi=150, figsize=(8, 4))
-        fig.set_tight_layout(True)
-        ax.hlines(y=0.5, xmin=(projections['Year'].min() - 1), xmax=(projections['Year'].max() + 1), linewidth=0.5, color='lightgray', zorder=-1)
-        ax.scatter(projections['Year'], projections['Projection'], s=sizes, c=colors, cmap='RdYlGn')
-
-        for i, (year, y) in enumerate(projections.itertuples(index=False, name=None)):
-            ax.annotate(year, (year, y), ha='center', va='center', fontsize=fontsizes[i], c='darkgray')
-
-        ax.set_ylim(0, 1)
-        ax.set_xticks([])
-        ax.set_yticks([])
-
-        unit_sample_concepts_str = '\n'.join(unit_sample_concepts)
-        investor_sample_concepts_str = '\n'.join(investor_sample_concepts)
-        ylabel = f"""
-            Unit's research domain\n({unit_sample_concepts_str})\n\n\n\n\n\n\n\n\n\n
-            Investor's historical concepts\n({investor_sample_concepts_str})
-        """
-
-        ax.set_xlabel(f"Time (years)")
-        ax.set_ylabel(ylabel, rotation=0, ha='right', va='center')
-        ax.set_title(f'POTENTIAL INVESTORS (chart view, projections)\n{investor_name}')
-
-        ###########################################################
-
-        fig, ax = plt.subplots(dpi=150, figsize=(8, 4))
-        fig.set_tight_layout(True)
-        ax.scatter(affinities['Year'], affinities['UnitYear'], s=sizes, c=colors, cmap='RdYlGn')
-
-        for i, (year, _, y) in enumerate(affinities.itertuples(index=False, name=None)):
-            ax.annotate(year, (year, y), ha='center', va='center', fontsize=fontsizes[i], c='darkgray')
+        for i, (year, y) in enumerate(investor_group[['Year', 'UnitInvestorScore']].itertuples(index=False, name=None)):
+            ax.annotate(year, (year, y), ha='center', va='center', fontsize=fontsizes.iloc[i], c='#444444')
 
         ax.set_ylim(0, 1)
         ax.set_xticks([])
@@ -217,11 +177,6 @@ def show_matchmaking_chart_view(investors_concepts, unit_concepts, historical_ti
 
         ###########################################################
 
-        # print(investor_name)
-        # for y, gp in investor_group.groupby('Year'):
-        #     print(y)
-        #     print(gp)
-
     plt.show()
 
     cprint('')
@@ -232,14 +187,13 @@ def main():
     db = DB()
 
     # Define unit for which to produce results
-    unit_id = 'LCAV'
+    unit_id = 'LSRO'
     cprint(('#' * 20) + f' {unit_id} ' + ('#' * 20), color='green')
 
     # Define time window to consider
-    min_year = 1998
+    min_year = 2015
     max_year = 2022
     time_window = list(range(min_year, max_year))
-    historical_time_window = list(range(min_year, min_year + 3))
 
     ############################################################
 
@@ -260,32 +214,17 @@ def main():
     conditions = {'UnitID': unit_id, 'PageID': cb_concept_ids}
     unit_concepts = pd.DataFrame(db.find(table_name, fields=fields, conditions=conditions), columns=fields)
 
-    min_score = unit_concepts['Score'].min()
     max_score = unit_concepts['Score'].max()
-    unit_concepts['Score'] = (unit_concepts['Score'] - min_score) / (max_score - min_score) if max_score != min_score else 0
+    unit_concepts['Score'] = unit_concepts['Score'] / max_score if max_score >= 0 else 0
     unit_concept_ids = list(unit_concepts['PageID'])
 
-    ############
-    # TODO delete this
-
-    # Cherrypicked concepts by most funding rounds
-    unit_concept_ids = [5309, 261925, 36674345, 9611, 4502, 14539, 39388, 433425, 2262333, 1164, 18957]
-    it_concept_ids = [5309, 36674345, 14539, 1164]
-    med_concept_ids = [261925, 4502, 18957]
-    service_concept_ids = [9611, 39388, 433425, 2262333]
-    mix_concept_ids = [5309, 261925, 433425, 1164]
-
-    unit_concept_ids = mix_concept_ids
-
-    unit_concepts = pd.DataFrame({'PageID': unit_concept_ids, 'Score': 1})
-
-    ############
+    ############################################################
 
     # Add title information
     unit_concepts = pd.merge(unit_concepts, concept_titles, how='left', on='PageID')
 
     # Fetch concepts
-    table_name = 'ca_temp.Nodes_N_Concept'
+    table_name = 'ca_temp.Nodes_N_Concept_T_Years'
     fields = ['PageID', 'Year', 'CountAmount', 'MinAmount', 'MaxAmount', 'MedianAmount', 'SumAmount', 'ScoreQuadCount']
     conditions = {'PageID': unit_concept_ids, 'Year': time_window}
     concepts = pd.DataFrame(db.find(table_name, fields=fields, conditions=conditions), columns=fields)
@@ -299,7 +238,7 @@ def main():
 
     ############################################################
 
-    table_name = 'ca_temp.Edges_N_Investor_N_Concept'
+    table_name = 'ca_temp.Edges_N_Investor_N_Concept_T_Years'
     fields = ['InvestorID', 'PageID', 'Year', 'CountAmount']
     conditions = {'PageID': unit_concept_ids, 'Year': time_window}
     investors_concepts = pd.DataFrame(db.find(table_name, fields=fields, conditions=conditions), columns=fields)
@@ -315,71 +254,65 @@ def main():
 
     show_trends(unit_concepts, concepts)
 
-    exit(0)
-
     ############################################################
 
-    # Extract diluted investors (investors with low ratio of investments in unit concepts)
-    table_name = 'ca_temp.Edges_N_Investor_N_Concept'
-    fields = ['InvestorID', 'PageID', 'Year', 'CountAmountRatio']
-    conditions = {'PageID': unit_concept_ids, 'Year': time_window}
-    diluted_investors_concepts = pd.DataFrame(db.find(table_name, fields=fields, conditions=conditions), columns=fields)
+    # Fetch investor-unit table for given unit
+    table_name = 'ca_temp.Edges_N_Investor_N_Unit_T_Years'
+    fields = ['InvestorID', 'Year', 'Score']
+    conditions = {'UnitID': unit_id}
+    unit_investors = pd.DataFrame(db.find(table_name, fields=fields, conditions=conditions), columns=fields)
+    unit_investors = unit_investors.sort_values(by=['InvestorID', 'Year']).reset_index(drop=True)
 
-    diluted_investors_concepts = diluted_investors_concepts.groupby(by=['InvestorID'])['CountAmountRatio'].mean().reset_index()
-    diluted_investors_concepts = diluted_investors_concepts[diluted_investors_concepts['CountAmountRatio'] < 0.2]
-    diluted_investor_ids = list(diluted_investors_concepts['InvestorID'])
+    # Extract unit investor ids
+    unit_investor_ids = list(unit_investors['InvestorID'].drop_duplicates())
 
-    diluted_investor_ids = ['aaa']
-
-    # Compute top potential investors for unit (investors with highest Jaccard index excluding diluted investors)
-    table_name = 'ca_temp.Edges_N_Investor_N_Concept_T_Jaccard'
-    fields = ['InvestorID', 'PageID', 'Jaccard_110']
-    conditions = {'NOT': {'InvestorID': diluted_investor_ids}, 'PageID': unit_concept_ids}
-    investors_concepts_jaccard = pd.DataFrame(db.find(table_name, fields=fields, conditions=conditions), columns=fields)
-    investors_concepts_jaccard = investors_concepts_jaccard.sort_values(by='Jaccard_110', ascending=False).reset_index(drop=True)
-
-    idx = investors_concepts_jaccard['InvestorID'].drop_duplicates().head(5).index[-1]
-    investors_concepts_jaccard = investors_concepts_jaccard[:idx + 1]
-    investor_ids = list(investors_concepts_jaccard['InvestorID'].drop_duplicates())
+    ############################################################
 
     # Fetch investor names
     table_name = 'graph.Nodes_N_Organisation'
     fields = ['OrganisationID', 'OrganisationName']
-    conditions = {'OrganisationID': investor_ids}
+    conditions = {'OrganisationID': unit_investor_ids}
     org_investor_names = pd.DataFrame(db.find(table_name, fields=fields, conditions=conditions), columns=['InvestorID', 'InvestorName'])
 
     table_name = 'graph.Nodes_N_Person'
     fields = ['PersonID', 'FullName']
-    conditions = {'PersonID': investor_ids}
+    conditions = {'PersonID': unit_investor_ids}
     person_investor_names = pd.DataFrame(db.find(table_name, fields=fields, conditions=conditions), columns=['InvestorID', 'InvestorName'])
 
     investor_names = pd.concat([org_investor_names, person_investor_names])
 
-    # Add concept title information
-    investors_concepts_jaccard = pd.merge(investors_concepts_jaccard, concept_titles, how='left', on='PageID')
+    ############################################################
 
-    # Add investor name information
-    investors_concepts_jaccard = pd.merge(investors_concepts_jaccard, investor_names, how='left', on='InvestorID')
-
-    # Fetch investor-concepts table only for top investors
-    table_name = 'ca_temp.Edges_N_Investor_N_Concept'
-    fields = ['InvestorID', 'PageID', 'Year', 'CountAmount', 'MinAmount', 'MaxAmount', 'MedianAmount', 'SumAmount', 'ScoreQuadCount', 'CountAmountRatio']
-    conditions = {'InvestorID': investor_ids, 'Year': time_window}
+    # Fetch investor-concepts table only for unit investors
+    table_name = 'ca_temp.Edges_N_Investor_N_Concept_T_Years'
+    fields = ['InvestorID', 'PageID', 'Year', 'CountAmount', 'MinAmount', 'MaxAmount', 'MedianAmount', 'SumAmount', 'ScoreQuadCount']
+    conditions = {'InvestorID': unit_investor_ids, 'Year': time_window}
     investors_concepts = pd.DataFrame(db.find(table_name, fields=fields, conditions=conditions), columns=fields)
 
-    # Add concept title information
-    investors_concepts = pd.merge(investors_concepts, concept_titles, how='left', on='PageID')
+    ############################################################
 
-    # Add investor name information
+    # Fetch investor-concepts Jaccard table only for unit investors and concepts
+    table_name = 'ca_temp.Edges_N_Investor_N_Concept_T_Jaccard'
+    fields = ['InvestorID', 'PageID', 'Jaccard_110']
+    conditions = {'InvestorID': unit_investor_ids, 'PageID': unit_concept_ids}
+    investors_concepts_jaccard = pd.DataFrame(db.find(table_name, fields=fields, conditions=conditions), columns=fields)
+
+    ############################################################
+
+    # Add investor and concept names to the tables we just fetched
+    unit_investors = pd.merge(unit_investors, investor_names, how='left', on='InvestorID')
+
+    investors_concepts = pd.merge(investors_concepts, concept_titles, how='left', on='PageID')
     investors_concepts = pd.merge(investors_concepts, investor_names, how='left', on='InvestorID')
+
+    investors_concepts_jaccard = pd.merge(investors_concepts_jaccard, concept_titles, how='left', on='PageID')
+    investors_concepts_jaccard = pd.merge(investors_concepts_jaccard, investor_names, how='left', on='InvestorID')
 
     ############################################################
 
     show_matchmaking_list_view(investors_concepts_jaccard, investors_concepts, unit_concept_ids)
 
-    show_matchmaking_chart_view(investors_concepts, unit_concepts, historical_time_window)
-
-    ############################################################
+    show_matchmaking_chart_view(investors_concepts, unit_concepts, unit_investors, time_window)
 
 
 if __name__ == '__main__':
