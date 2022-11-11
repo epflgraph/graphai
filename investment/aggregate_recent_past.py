@@ -146,7 +146,6 @@ def main():
     table_name = 'ca_temp.Nodes_N_Concept_T_Years'
     fields = ['PageID', 'Year', 'CountAmount', 'MinAmount', 'MaxAmount', 'SumAmount', 'ScoreLinCount', 'ScoreLinAmount', 'ScoreQuadCount', 'ScoreQuadAmount']
     df = pd.DataFrame(db.find(table_name, fields=fields), columns=fields)
-    # df['PageID'] = df['PageID'].astype(str)
 
     # Rescale scores to fit time window, filter older years and aggregate accordingly
     df = rescale_scores(df, years)
@@ -186,16 +185,23 @@ def main():
 
     # Fetch table from database
     table_name = 'ca_temp.Edges_N_Investor_N_Concept_T_Years'
-    fields = ['InvestorID', 'PageID', 'Year', 'CountAmount', 'MinAmount', 'MaxAmount', 'SumAmount', 'ScoreLinCount', 'ScoreLinAmount', 'ScoreQuadCount', 'ScoreQuadAmount']
+    fields = ['InvestorID', 'PageID', 'Year', 'CountAmount', 'MinAmount', 'MaxAmount', 'SumAmount', 'ScoreLinCount', 'ScoreLinAmount', 'ScoreQuadCount', 'ScoreQuadAmount', 'Concentration']
     df = pd.DataFrame(db.find(table_name, fields=fields), columns=fields)
-    # df['PageID'] = df['PageID'].astype(str)
+
+    # Extract concentrations and aggregate them per year
+    concentrations = df[['InvestorID', 'PageID', 'Year', 'Concentration']]
+    concentrations = concentrations.groupby(by=['InvestorID', 'PageID']).aggregate({'Concentration': 'mean'})
 
     # Rescale scores to fit time window, filter older years and aggregate accordingly
     df = rescale_scores(df, years)
     df = aggregate_years(df, groupby_columns=['InvestorID', 'PageID'])
 
+    # Add concentrations and use them to dilute big investors who invest in all concepts
+    df = pd.merge(df, concentrations, how='left', on=['InvestorID', 'PageID'])
+    df['DilutedScore'] = df['ScoreQuadCount'] * df['Concentration']
+
     # Normalize scores to have them in [0, 1]
-    investors_concepts = normalize_scores(df[['InvestorID', 'PageID', 'ScoreQuadCount']], score_column='ScoreQuadCount')
+    investors_concepts = normalize_scores(df[['InvestorID', 'PageID', 'DilutedScore']], score_column='DilutedScore')
 
     del df
 
@@ -209,8 +215,6 @@ def main():
     concept_ids = list(investors_concepts['PageID'].drop_duplicates().astype(int))
     conditions = {'SourcePageID': concept_ids, 'TargetPageID': concept_ids}
     df = pd.DataFrame(db.find(table_name, fields=fields, conditions=conditions), columns=fields)
-    # df['SourcePageID'] = df['SourcePageID'].astype(str)
-    # df['TargetPageID'] = df['TargetPageID'].astype(str)
 
     # Normalize scores to have them in [0, 1]
     concepts_concepts = normalize_scores(df[['SourcePageID', 'TargetPageID', 'NormalisedScore']], score_column='NormalisedScore')

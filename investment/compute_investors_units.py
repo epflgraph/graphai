@@ -211,22 +211,22 @@ def main():
     fields = ['UnitID', 'PageID', 'Score']
     units_concepts = pd.DataFrame(db.find(table_name, fields=fields), columns=fields)
 
-    # Normalise units-concepts scores
+    # Renormalise units-concepts scores to add to 1
     units_concepts = pd.merge(
         units_concepts,
-        units_concepts.groupby('UnitID').aggregate(MaxScore=('Score', 'max')).reset_index(),
+        units_concepts.groupby('UnitID').aggregate(SumScore=('Score', 'sum')).reset_index(),
         how='left',
         on='UnitID'
     )
-    units_concepts['Score'] = units_concepts['Score'] / units_concepts['MaxScore']
-    units_concepts = units_concepts.drop(columns='MaxScore')
+    units_concepts['Score'] = units_concepts['Score'] / units_concepts['SumScore']
+    units_concepts = units_concepts.drop(columns='SumScore')
 
     ############################################################
 
     bc.log('Fetching investor-concept Jaccard edges from database...')
 
     table_name = 'ca_temp.Edges_N_Investor_N_Concept_T_Jaccard'
-    fields = ['InvestorID', 'PageID', 'Jaccard_110']
+    fields = ['InvestorID', 'PageID', 'Jaccard_000']
     investors_concepts_jaccard = pd.DataFrame(db.find(table_name, fields=fields), columns=fields)
 
     ############################################################
@@ -234,7 +234,7 @@ def main():
     bc.log('Deriving investors-units edges from investors-concepts and units-concepts...')
 
     investors_units = pd.merge(investors_concepts_jaccard, units_concepts, how='inner', on='PageID')
-    investors_units['Score'] = investors_units['Score'] * investors_units['Jaccard_110']
+    investors_units['Score'] = investors_units['Score'] * investors_units['Jaccard_000']
     investors_units = investors_units.groupby(by=['InvestorID', 'UnitID']).aggregate(Score=('Score', 'sum')).reset_index()
     investors_units = investors_units.sort_values(by=['UnitID', 'Score'], ascending=[True, False])
     investors_units = investors_units.groupby(by='UnitID').head(5)

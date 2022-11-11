@@ -291,9 +291,10 @@ def main():
 
     # Fetch investor-concepts Jaccard table only for unit investors and concepts
     table_name = 'ca_temp.Edges_N_Investor_N_Concept_T_Jaccard'
-    fields = ['InvestorID', 'PageID', 'Jaccard_110']
+    fields = ['InvestorID', 'PageID', 'Jaccard_000']
     conditions = {'InvestorID': unit_investor_ids, 'PageID': unit_concept_ids}
     investors_concepts_jaccard = pd.DataFrame(db.find(table_name, fields=fields, conditions=conditions), columns=fields)
+    investors_concepts_jaccard = investors_concepts_jaccard.sort_values(by=['InvestorID', 'Jaccard_000'], ascending=[True, False]).reset_index(drop=True)
 
     ############################################################
 

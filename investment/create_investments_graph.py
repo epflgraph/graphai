@@ -180,14 +180,15 @@ def main():
 
     investors_concepts_years = derive_yearly_data(df, groupby_columns=['InvestorID', 'PageID', 'Year'], date_column='FundingRoundDate', amount_column='FundingAmountPerInvestor_USD')
 
-    # # Add ratio (number of investments in concept / number of investments)
-    # investors_concepts = pd.merge(
-    #     investors_concepts,
-    #     investors[['InvestorID', 'Year', 'CountAmount']].rename(columns={'CountAmount': 'SumCountAmount'}),
-    #     how='left',
-    #     on=['InvestorID', 'Year']
-    # )
-    # investors_concepts['CountAmountRatio'] = investors_concepts['CountAmount'] / investors_concepts['SumCountAmount']
+    # Add investor-concept concentration (number of investments in concept / number of investments)
+    investors_concepts_years = pd.merge(
+        investors_concepts_years,
+        investors_years[['InvestorID', 'Year', 'CountAmount']].rename(columns={'CountAmount': 'SumCountAmount'}),
+        how='left',
+        on=['InvestorID', 'Year']
+    )
+    investors_concepts_years['Concentration'] = investors_concepts_years['CountAmount'] / investors_concepts_years['SumCountAmount']
+    investors_concepts_years = investors_concepts_years.drop(columns='SumCountAmount')
 
     ############################################################
     # INSERT UNTREATED DATA INTO DATABASE                      #
@@ -332,8 +333,7 @@ def main():
         'ScoreLinAmount FLOAT',
         'ScoreQuadCount FLOAT',
         'ScoreQuadAmount FLOAT',
-        # 'SumCountAmount FLOAT',
-        # 'CountAmountRatio FLOAT',
+        'Concentration FLOAT',
         'KEY InvestorID (InvestorID)',
         'KEY PageID (PageID)',
         'KEY Year (Year)'
