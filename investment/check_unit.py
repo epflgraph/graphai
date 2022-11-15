@@ -10,8 +10,6 @@ from utils.text.io import cprint
 def show_trends(unit_concepts, concepts):
     cprint(('#' * 10) + ' INVESTMENT TRENDS ' + ('#' * 10), color='blue')
 
-    print(unit_concepts)
-
     # Extract concepts to display
     top_concept_ids = list(unit_concepts.sort_values(by='Score', ascending=False).head(5)['PageID'])
     concepts = concepts[concepts['PageID'].isin(top_concept_ids)].reset_index(drop=True)
@@ -185,7 +183,7 @@ def main():
     db = DB()
 
     # Define unit for which to produce results
-    unit_id = 'LSRO'
+    unit_id = 'LCAV'
     cprint(('#' * 20) + f' {unit_id} ' + ('#' * 20), color='green')
 
     # Define time window to consider
