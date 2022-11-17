@@ -5,35 +5,62 @@ from interfaces.db import DB
 from utils.breadcrumb import Breadcrumb
 from utils.time.date import *
 
+import investment.parameters as params
+
 
 def get_frs(db):
-    # Fetch funding rounds in time window from database
+    # Fetch funding rounds from database
     table_name = 'graph.Nodes_N_FundingRound'
     fields = ['FundingRoundID', 'FundingRoundDate', 'FundingRoundType', 'FundingAmount_USD', 'FundingAmount_USD / CB_InvestorCount']
     columns = ['FundingRoundID', 'FundingRoundDate', 'FundingRoundType', 'FundingAmount_USD', 'FundingAmountPerInvestor_USD']
-    frs = pd.DataFrame(db.find(table_name, fields=fields), columns=columns)
+
+    conditions = {}
+
+    if params.countries is not None:
+        conditions['CountryISO3'] = params.countries
+
+    if params.fr_types is not None:
+        conditions['FundingRoundType'] = params.fr_types
+
+    frs = pd.DataFrame(db.find(table_name, fields=fields, conditions=conditions), columns=columns)
 
     return frs
 
 
-def get_investors_frs(db):
-    # Fetch organization investors from database
-    table_name = 'graph.Edges_N_Organisation_N_FundingRound'
-    fields = ['OrganisationID', 'FundingRoundID']
-    conditions = {'Action': 'Invested in'}
-    org_investors_frs = pd.DataFrame(db.find(table_name, fields=fields, conditions=conditions),
-                                     columns=['InvestorID', 'FundingRoundID'])
+def get_investors_frs(db, fr_ids=None):
+    if 'Organization' in params.investor_types:
+        # Fetch organization investors from database
+        table_name = 'graph.Edges_N_Organisation_N_FundingRound'
+        fields = ['OrganisationID', 'FundingRoundID']
 
-    # Fetch person investors from database
-    table_name = 'graph.Edges_N_Person_N_FundingRound'
-    fields = ['PersonID', 'FundingRoundID']
-    conditions = {'Action': 'Invested in'}
-    person_investors_frs = pd.DataFrame(db.find(table_name, fields=fields, conditions=conditions),
-                                        columns=['InvestorID', 'FundingRoundID'])
+        if fr_ids is None:
+            conditions = {'Action': 'Invested in'}
+        else:
+            conditions = {'FundingRoundID': fr_ids, 'Action': 'Invested in'}
 
-    # Add extra column with investor type
-    org_investors_frs['InvestorType'] = 'Organization'
-    person_investors_frs['InvestorType'] = 'Person'
+        org_investors_frs = pd.DataFrame(db.find(table_name, fields=fields, conditions=conditions),
+                                         columns=['InvestorID', 'FundingRoundID'])
+        org_investors_frs['InvestorType'] = 'Organization'
+
+        if 'Person' not in params.investor_types:
+            return org_investors_frs
+
+    if 'Person' in params.investor_types:
+        # Fetch person investors from database
+        table_name = 'graph.Edges_N_Person_N_FundingRound'
+        fields = ['PersonID', 'FundingRoundID']
+
+        if fr_ids is None:
+            conditions = {'Action': 'Invested in'}
+        else:
+            conditions = {'FundingRoundID': fr_ids, 'Action': 'Invested in'}
+
+        person_investors_frs = pd.DataFrame(db.find(table_name, fields=fields, conditions=conditions),
+                                            columns=['InvestorID', 'FundingRoundID'])
+        person_investors_frs['InvestorType'] = 'Person'
+
+        if 'Organization' not in params.investor_types:
+            return person_investors_frs
 
     # Combine organization investors and person investors in a single DataFrame
     investors_frs = pd.concat([org_investors_frs, person_investors_frs])
@@ -42,21 +69,32 @@ def get_investors_frs(db):
     return investors_frs
 
 
-def get_frs_fundraisers(db):
+def get_frs_fundraisers(db, fr_ids=None):
     # Fetch fundraisers from database
     table_name = 'graph.Edges_N_Organisation_N_FundingRound'
     fields = ['FundingRoundID', 'OrganisationID']
-    conditions = {'Action': 'Raised from'}
+
+    if fr_ids is None:
+        conditions = {'Action': 'Raised from'}
+    else:
+        conditions = {'FundingRoundID': fr_ids, 'Action': 'Raised from'}
+
     frs_fundraisers = pd.DataFrame(db.find(table_name, fields=fields, conditions=conditions),
                                  columns=['FundingRoundID', 'FundraiserID'])
     return frs_fundraisers
 
 
-def get_fundraisers_concepts(db):
+def get_fundraisers_concepts(db, fundraiser_ids=None):
     # Fetch concepts from database
     table_name = 'graph.Edges_N_Organisation_N_Concept'
     fields = ['OrganisationID', 'PageID']
-    fundraisers_concepts = pd.DataFrame(db.find(table_name, fields=fields), columns=['FundraiserID', 'PageID'])
+
+    if fundraiser_ids is None:
+        conditions = {}
+    else:
+        conditions = {'OrganisationID': fundraiser_ids}
+
+    fundraisers_concepts = pd.DataFrame(db.find(table_name, fields=fields, conditions=conditions), columns=['FundraiserID', 'PageID'])
     return fundraisers_concepts
 
 
@@ -106,6 +144,7 @@ def main():
     bc.log('Retrieving funding rounds in time window...')
 
     frs = get_frs(db)
+    fr_ids = list(frs['FundingRoundID'])
 
     # Extract year
     dates = pd.to_datetime(frs['FundingRoundDate'], errors='coerce')
@@ -116,7 +155,7 @@ def main():
 
     bc.log('Retrieving investors...')
 
-    investors_frs = get_investors_frs(db)
+    investors_frs = get_investors_frs(db, fr_ids)
 
     investors = investors_frs[['InvestorID', 'InvestorType']].drop_duplicates().reset_index(drop=True)
 
@@ -124,15 +163,16 @@ def main():
 
     bc.log('Retrieving fundraisers...')
 
-    frs_fundraisers = get_frs_fundraisers(db)
+    frs_fundraisers = get_frs_fundraisers(db, fr_ids)
 
     fundraisers = frs_fundraisers[['FundraiserID']].drop_duplicates().reset_index(drop=True)
+    fundraiser_ids = list(fundraisers['FundraiserID'])
 
     ############################################################
 
     bc.log('Retrieving concepts...')
 
-    fundraisers_concepts = get_fundraisers_concepts(db)
+    fundraisers_concepts = get_fundraisers_concepts(db, fundraiser_ids)
 
     ############################################################
     # COMPUTE DERIVED DATA                                     #

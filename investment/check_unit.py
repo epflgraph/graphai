@@ -7,7 +7,7 @@ from interfaces.db import DB
 from utils.text.io import cprint
 
 
-def show_trends(unit_concepts, concepts):
+def show_trends(unit_id, unit_concepts, concepts):
     cprint(('#' * 10) + ' INVESTMENT TRENDS ' + ('#' * 10), color='blue')
 
     # Extract concepts to display
@@ -28,7 +28,7 @@ def show_trends(unit_concepts, concepts):
     # Derive extra columns
     concepts['SumAmount'] /= 1e6
     concepts['AvgAmountPerInvestment'] = (concepts['SumAmount'] / concepts['CountAmount']).replace([-np.inf, np.inf], 0)
-    concepts['AvgAmountPerInvestor'] = (concepts['SumAmount'] / concepts['CountInvestment']).replace([-np.inf, np.inf], 0)
+    concepts['AvgAmountPerInvestor'] = (concepts['SumAmount'] / concepts['CountInvestment']).replace([-np.inf, np.inf, np.nan], 0)
     concepts['AvgInvestmentsPerInvestor'] = (concepts['CountInvestment'] / concepts['CountInvestor']).replace([-np.inf, np.inf], 0)
 
     titles = {
@@ -41,14 +41,14 @@ def show_trends(unit_concepts, concepts):
     }
 
     # Line plots Year vs total amount, number of investments and number of investors
-    fig, axs = plt.subplots(2, 3, dpi=100)
+    fig, axs = plt.subplots(2, 3, dpi=100, figsize=(20, 12))
     for i, column in enumerate(['SumAmount', 'CountAmount', 'CountInvestor', 'AvgAmountPerInvestment', 'AvgAmountPerInvestor', 'AvgInvestmentsPerInvestor']):
         ax = axs.flat[i]
 
         for name, group in concepts.groupby(by=['PageID', 'PageTitle']):
             x = group['Year']
             y = group[column]
-            ax.plot(x, y, label=name[1])
+            ax.plot(x, y, marker='o', markersize=4, label=name[1])
 
         ax.set_xlabel('Year')
         ax.set_title(titles[column])
@@ -58,7 +58,7 @@ def show_trends(unit_concepts, concepts):
     fig.suptitle(f'INVESTMENT TRENDS (chart view)')
     axs.flat[0].legend()
 
-    plt.show()
+    plt.savefig(f'img/{unit_id}')
 
     cprint('')
 
@@ -173,17 +173,16 @@ def show_matchmaking_chart_view(investors_concepts, unit_concepts, unit_investor
 
         ###########################################################
 
-    plt.show()
+        plt.savefig(f'img/{unit_id}-{investor_id}')
 
     cprint('')
 
 
-def main():
+def main(unit_id):
     # Instantiate db interface to communicate with database
     db = DB()
 
-    # Define unit for which to produce results
-    unit_id = 'LCAV'
+    # Unit for which to produce results
     cprint(('#' * 20) + f' {unit_id} ' + ('#' * 20), color='green')
 
     # Define time window to consider
@@ -248,7 +247,7 @@ def main():
 
     ############################################################
 
-    show_trends(unit_concepts, concepts)
+    show_trends(unit_id, unit_concepts, concepts)
 
     ############################################################
 
@@ -317,4 +316,5 @@ if __name__ == '__main__':
     pd.set_option('display.max_columns', 500)
     pd.set_option('display.width', 1000)
 
-    main()
+    for unit_id in ['LCAV', 'CHILI', 'NANOLAB', 'ECOS']:
+        main(unit_id)
