@@ -134,7 +134,8 @@ def main():
     df = aggregate_years(df, groupby_columns=['InvestorID'])
 
     # Normalize scores to have them in [0, 1]
-    investors = normalize_scores(df[['InvestorID', 'ScoreQuadCount']], score_column='ScoreQuadCount')
+    df = df[['InvestorID', 'ScoreQuadCount']]
+    investors = normalize_scores(df, score_column='ScoreQuadCount')
 
     del df
 
@@ -152,7 +153,8 @@ def main():
     df = aggregate_years(df, groupby_columns=['PageID'])
 
     # Normalize scores to have them in [0, 1]
-    concepts = normalize_scores(df[['PageID', 'ScoreQuadCount']], score_column='ScoreQuadCount')
+    df = df[['PageID', 'ScoreQuadCount']]
+    concepts = normalize_scores(df, score_column='ScoreQuadCount')
 
     del df
 
@@ -170,7 +172,8 @@ def main():
     df = aggregate_years(df, groupby_columns=['SourceInvestorID', 'TargetInvestorID'])
 
     # Normalize scores to have them in [0, 1]
-    df = normalize_scores(df[['SourceInvestorID', 'TargetInvestorID', 'ScoreQuadCount']], score_column='ScoreQuadCount')
+    df = df[['SourceInvestorID', 'TargetInvestorID', 'ScoreQuadCount']]
+    df = normalize_scores(df, score_column='ScoreQuadCount')
 
     # Duplicate as to have all edges and not only in one direction
     reversed_df = df.copy()
@@ -201,7 +204,8 @@ def main():
     df['DilutedScore'] = df['ScoreQuadCount'] * df['Concentration']
 
     # Normalize scores to have them in [0, 1]
-    investors_concepts = normalize_scores(df[['InvestorID', 'PageID', 'DilutedScore']], score_column='DilutedScore')
+    df = df[['InvestorID', 'PageID', 'DilutedScore']]
+    investors_concepts = normalize_scores(df, score_column='DilutedScore')
 
     del df
 
@@ -217,7 +221,8 @@ def main():
     df = pd.DataFrame(db.find(table_name, fields=fields, conditions=conditions), columns=fields)
 
     # Normalize scores to have them in [0, 1]
-    concepts_concepts = normalize_scores(df[['SourcePageID', 'TargetPageID', 'NormalisedScore']], score_column='NormalisedScore')
+    df = df[['SourcePageID', 'TargetPageID', 'NormalisedScore']]
+    concepts_concepts = normalize_scores(df, score_column='NormalisedScore')
 
     del df
 
