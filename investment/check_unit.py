@@ -261,6 +261,9 @@ def main(unit_id):
     # Extract unit investor ids
     unit_investor_ids = list(unit_investors['InvestorID'].drop_duplicates())
 
+    if not unit_investor_ids:
+        unit_investor_ids = ['']
+
     ############################################################
 
     # Fetch investor names
