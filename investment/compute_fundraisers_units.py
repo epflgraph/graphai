@@ -1,0 +1,108 @@
+import pandas as pd
+import numpy as np
+
+from interfaces.db import DB
+
+from utils.breadcrumb import Breadcrumb
+
+from compute_investors_units import compute_affinities
+
+
+def main():
+
+    # Initialize breadcrumb to log and keep track of time
+    bc = Breadcrumb()
+
+    # Instantiate db interface to communicate with database
+    db = DB()
+
+    ############################################################
+
+    bc.log('Fetching unit-concept edges from database...')
+
+    table_name = 'graph.Edges_N_Unit_N_Concept_T_Research'
+    fields = ['UnitID', 'PageID', 'Score']
+    units_concepts = pd.DataFrame(db.find(table_name, fields=fields), columns=fields)
+
+    # Renormalise units-concepts scores to add to 1
+    units_concepts = pd.merge(
+        units_concepts,
+        units_concepts.groupby('UnitID').aggregate(SumScore=('Score', 'sum')).reset_index(),
+        how='left',
+        on='UnitID'
+    )
+    units_concepts['Score'] = units_concepts['Score'] / units_concepts['SumScore']
+    units_concepts = units_concepts.drop(columns='SumScore')
+
+    ############################################################
+
+    bc.log('Fetching fundraiser-concept edges from database...')
+
+    table_name = 'ca_temp.Edges_N_Fundraiser_N_Concept'
+    fields = ['FundraiserID', 'PageID']
+    fundraisers_concepts = pd.DataFrame(db.find(table_name, fields=fields), columns=fields)
+
+    # Compute score as 1 / number of concepts (so that it adds to 1)
+    fundraisers_concepts = pd.merge(
+        fundraisers_concepts,
+        fundraisers_concepts.groupby(by=['FundraiserID']).aggregate(Count=('PageID', 'count')).reset_index(),
+        how='left',
+        on='FundraiserID'
+    )
+    fundraisers_concepts['Score'] = 1 / fundraisers_concepts['Count']
+    fundraisers_concepts = fundraisers_concepts[['FundraiserID', 'PageID', 'Score']]
+
+    ############################################################
+
+    unit_concept_ids = list(units_concepts['PageID'].drop_duplicates())
+    fundraisers_concept_ids = list(fundraisers_concepts['PageID'].drop_duplicates())
+    concept_ids = list(set(unit_concept_ids + fundraisers_concept_ids))
+
+    ############################################################
+
+    bc.log('Fetching concept-concept edges from database...')
+
+    table_name = 'graph.Edges_N_Concept_N_Concept_T_GraphScore'
+    fields = ['SourcePageID', 'TargetPageID', 'NormalisedScore']
+    conditions = {'OR': {'SourcePageID': concept_ids, 'TargetPageID': concept_ids}}
+    concepts_concepts = pd.DataFrame(db.find(table_name, fields=fields, conditions=conditions), columns=['SourcePageID', 'TargetPageID', 'Score'])
+
+    ############################################################
+
+    bc.log('Computing affinities fundraisers-units...')
+
+    # We compute affinity fundraiser-unit for pairs sharing at least one concept
+    fundraisers_units = pd.merge(
+        fundraisers_concepts,
+        units_concepts,
+        how='inner',
+        on='PageID'
+    )
+    fundraisers_units = fundraisers_units[['FundraiserID', 'UnitID']].drop_duplicates()
+    fundraisers_units = compute_affinities(fundraisers_concepts, units_concepts, fundraisers_units, concepts_concepts)
+
+    ############################################################
+
+    bc.log('Inserting fundraiser-unit edges into database...')
+
+    table_name = 'ca_temp.Edges_N_Fundraiser_N_Unit'
+    definition = [
+        'FundraiserID CHAR(64)',
+        'UnitID CHAR(32)',
+        'Score FLOAT',
+        'KEY FundraiserID (FundraiserID)',
+        'KEY UnitID (UnitID)'
+    ]
+    db.drop_create_insert_table(table_name, definition, fundraisers_units)
+
+    ############################################################
+
+    bc.report()
+
+
+if __name__ == '__main__':
+    pd.set_option('display.max_rows', 500)
+    pd.set_option('display.max_columns', 500)
+    pd.set_option('display.width', 1000)
+
+    main()
