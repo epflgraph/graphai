@@ -261,14 +261,18 @@ def main():
 
     ############################################################
 
+    unit_concept_ids = list(units_concepts['PageID'].drop_duplicates())
+    investor_concept_ids = list(investors_concepts['PageID'].drop_duplicates())
+    concept_ids = list(set(unit_concept_ids + investor_concept_ids))
+
+    ############################################################
+
     bc.log('Fetching concept-concept edges from database...')
 
     table_name = 'graph.Edges_N_Concept_N_Concept_T_GraphScore'
     fields = ['SourcePageID', 'TargetPageID', 'NormalisedScore']
-    concepts_concepts = pd.DataFrame(db.find(table_name, fields=fields), columns=['SourcePageID', 'TargetPageID', 'Score'])
-
-    # Consider only edges above a threshold to avoid too intensive memory usage
-    # concepts_concepts = concepts_concepts[concepts_concepts['Score'] >= 0.1].reset_index(drop=True)
+    conditions = {'OR': {'SourcePageID': concept_ids, 'TargetPageID': concept_ids}}
+    concepts_concepts = pd.DataFrame(db.find(table_name, fields=fields, conditions=conditions), columns=['SourcePageID', 'TargetPageID', 'Score'])
 
     ############################################################
 
