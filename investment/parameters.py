@@ -18,8 +18,8 @@ countries = switzerland
 # Investor types #
 ##################
 # Only investors whose type is in the list will be considered, the rest will be ignored.
-investor_types = ['Person']
-# investor_types = ['Organization', 'Person']
+# investor_types = ['Person']
+investor_types = ['Organization', 'Person']
 
 #######################
 # Funding round types #

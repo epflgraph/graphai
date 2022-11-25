@@ -87,46 +87,75 @@ def mix(x, edges):
             weighted edges of the concepts graph.
 
     Returns (pd.DataFrame): DataFrame with the same columns as x, containing configurations indexed by the same set as
-        x. The score of a concept in the mixed configuration is the arithmetic mean of the geometric means of the
-        configuration score and the edge score in the neighbourhood of the concept.
+        x. The score of a concept in the mixed configuration is the arithmetic mean of the products of the
+        configuration score and the edge score in the 1-ball of the concept, assuming every concept has a loop
+        with score 1.
     """
 
     # Extract key
     key = [c for c in x.columns if c not in ['PageID', 'Score']]
 
-    mixed = x.copy()
+    mixed = pd.merge(
+        x.rename(columns={'PageID': 'SourcePageID', 'Score': 'VertexScore'}),
+        edges.rename(columns={'TargetPageID': 'PageID', 'Score': 'EdgeScore'}),
+        how='inner',
+        on='SourcePageID'
+    )
 
-    # Merge both DataFrames through concept-concept edges considering both forward and backward edges
-    mixed = pd.concat([
-        pd.merge(
-            mixed,
-            edges.rename(columns={'SourcePageID': 'PageID', 'Score': 'EdgeScore'}),
-            how='inner',
-            on='PageID'
-        ),
-        pd.merge(
-            mixed,
-            edges.rename(columns={'TargetPageID': 'PageID', 'SourcePageID': 'TargetPageID', 'Score': 'EdgeScore'}),
-            how='inner',
-            on='PageID'
-        )
-    ])
+    # Multiply vertex score with edge score
+    mixed['Score'] = mixed['VertexScore'] * mixed['EdgeScore']
 
-    # Take the geometric mean of both scores, from the configuration and from the edge
-    mixed['Score'] = np.sqrt(mixed['Score'] * mixed['EdgeScore'])
+    # Add ball sizes for the average to take all vertices into account
+    ball_sizes = edges.groupby(by='SourcePageID').aggregate(BallSize=('TargetPageID', 'count')).reset_index()
+    ball_sizes = ball_sizes.rename(columns={'SourcePageID': 'PageID'})
+    mixed = pd.merge(
+        mixed,
+        ball_sizes,
+        how='left',
+        on='PageID'
+    )
 
-    # Drop and rename columns to match again the original columns
-    mixed = mixed.drop(columns=['PageID', 'EdgeScore'])
-    mixed = mixed.rename(columns={'TargetPageID': 'PageID'})
-    mixed = mixed[key + ['PageID', 'Score']].reset_index(drop=True)
-
-    # Compute the scores for each of the new pages by averaging out the scores over all neighbours
-    mixed = mixed.groupby(by=(key + ['PageID'])).aggregate(Score=('Score', 'mean')).reset_index()
-
-    # # Filter scores below threshold to avoid memory issues with long tails
-    # mixed = mixed[mixed['Score'] >= 0.2].reset_index(drop=True)
+    # Average all scores in the 1-ball of each vertex
+    mixed['Score'] = mixed['Score'] / mixed['BallSize']
+    mixed = mixed.groupby(by=(key + ['PageID'])).aggregate(Score=('Score', 'sum')).reset_index()
 
     return mixed
+
+
+def normalise_graph(edges):
+    """
+    Adds missing reverse edges and averages scores. Adds loops on each vertex with a score of one.
+
+    Args:
+        edges (pd.DataFrame): DataFrame whose columns are ['SourcePageID', 'TargetPageID', 'Score'], which define the
+            weighted edges of the concepts graph.
+
+    Returns (pd.DataFrame): DataFrame whose columns are ['SourcePageID', 'TargetPageID', 'Score'], with each pair in
+        both directions and with loops on every vertex with a score of 1.
+    """
+
+    # Remove present loops as they will be replaced with a score of one
+    normalised_edges = edges[edges['SourcePageID'] != edges['TargetPageID']].reset_index(drop=True)
+
+    # Extract unique vertices
+    vertices = pd.concat([
+        normalised_edges['SourcePageID'],
+        normalised_edges['TargetPageID']
+    ]).drop_duplicates().reset_index(drop=True)
+
+    # Add reverse edges
+    reverse_edges = normalised_edges.copy()
+    reverse_edges[['SourcePageID', 'TargetPageID']] = normalised_edges[['TargetPageID', 'SourcePageID']]
+    normalised_edges = pd.concat([normalised_edges, reverse_edges]).reset_index(drop=True)
+
+    # Average scores of forward and backward edges
+    normalised_edges = normalised_edges.groupby(by=['SourcePageID', 'TargetPageID']).aggregate({'Score': 'mean'}).reset_index()
+
+    # Add loops with score of 1
+    loops = pd.DataFrame({'SourcePageID': vertices, 'TargetPageID': vertices, 'Score': 1})
+    normalised_edges = pd.concat([normalised_edges, loops]).reset_index(drop=True)
+
+    return normalised_edges
 
 
 def compute_affinities(x, y, pairs, edges):
@@ -157,6 +186,9 @@ def compute_affinities(x, y, pairs, edges):
     # Extract keys
     key_x = [c for c in x.columns if c not in ['PageID', 'Score']]
     key_y = [c for c in y.columns if c not in ['PageID', 'Score']]
+
+    # Make concepts graph undirected
+    edges = normalise_graph(edges)
 
     # Compute mixings BX and BY, combination BX*BY and their norms
     bx = mix(x, edges)
@@ -190,7 +222,7 @@ def compute_affinities(x, y, pairs, edges):
 
     # Compute affinity scores
     pairs = pairs.fillna(0)
-    pairs['Score'] = np.sqrt(np.square(pairs['NormBXBY']) / (pairs['NormBX'] * pairs['NormBY']))
+    pairs['Score'] = np.square(pairs['NormBXBY']) / (pairs['NormBX'] * pairs['NormBY'])
 
     return pairs[key_x + key_y + ['Score']]
 

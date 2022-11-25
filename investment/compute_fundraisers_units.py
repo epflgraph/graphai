@@ -71,10 +71,10 @@ def main():
 
     bc.log('Computing affinities fundraisers-units...')
 
-    # We compute affinity fundraiser-unit for pairs sharing at least one concept
+    # We compute affinity fundraiser-unit for pairs sharing at least one concept with non-negligible unit score
     fundraisers_units = pd.merge(
         fundraisers_concepts,
-        units_concepts,
+        units_concepts.sort_values(by='Score', ascending=False).head(100000),
         how='inner',
         on='PageID'
     )
