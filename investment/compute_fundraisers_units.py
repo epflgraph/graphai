@@ -8,7 +8,7 @@ from utils.breadcrumb import Breadcrumb
 from compute_investors_units import compute_affinities
 
 
-def main():
+def compute_fundraisers_units():
 
     # Initialize breadcrumb to log and keep track of time
     bc = Breadcrumb()
@@ -105,4 +105,4 @@ if __name__ == '__main__':
     pd.set_option('display.max_columns', 500)
     pd.set_option('display.width', 1000)
 
-    main()
+    compute_fundraisers_units()

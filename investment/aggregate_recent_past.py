@@ -7,16 +7,9 @@ from utils.time.date import *
 from utils.breadcrumb import Breadcrumb
 
 
-def compute_year_coefficients():
-    # Minimum year to consider for the computation of the Jaccard indices.
-    # Older funding rounds will be ignored.
-    max_date = str(now().date())
-    max_year = int(max_date.split('-')[0])
-    min_year = max_year - 4
-    min_date = f'{min_year}-01-01'
-
+def compute_year_coefficients(recent_past):
     # Create DataFrame with start and end dates per year
-    years = pd.DataFrame({'Year': range(min_year, max_year + 1)})
+    years = pd.DataFrame({'Year': range(recent_past['min_year'], recent_past['max_year'] + 1)})
 
     years['StartDate'] = pd.to_datetime(years['Year'].astype(str) + '-01-01')
     years['EndDate'] = pd.to_datetime((years['Year'] + 1).astype(str) + '-01-01')
@@ -24,8 +17,8 @@ def compute_year_coefficients():
     # Compute ratio of time differences
     # CoefPresent = number of days in given year / total number of days in time window
     # CoefPast = number of days in time window before given year / total number of days in time window
-    years['CoefPresent'] = (years['EndDate'] - years['StartDate']) / (pd.to_datetime(max_date) - pd.to_datetime(min_date))
-    years['CoefPast'] = (years['StartDate'] - pd.to_datetime(min_date)) / (pd.to_datetime(max_date) - pd.to_datetime(min_date))
+    years['CoefPresent'] = (years['EndDate'] - years['StartDate']) / (pd.to_datetime(recent_past['max_date']) - pd.to_datetime(recent_past['min_date']))
+    years['CoefPast'] = (years['StartDate'] - pd.to_datetime(recent_past['min_date'])) / (pd.to_datetime(recent_past['max_date']) - pd.to_datetime(recent_past['min_date']))
 
     # Keep only relevant columns
     years = years[['Year', 'CoefPresent', 'CoefPast']]
@@ -105,7 +98,7 @@ def normalize_scores(df, score_column, epsilon=0.01):
     return df
 
 
-def main():
+def aggregate_recent_past(params):
 
     ############################################################
     # INITIALIZATION                                           #
@@ -118,7 +111,7 @@ def main():
     db = DB()
 
     # Prepare year coefficients to combine metrics from different years
-    years = compute_year_coefficients()
+    years = compute_year_coefficients(params.recent_past)
 
     ############################################################
 
@@ -300,8 +293,10 @@ def main():
 
 
 if __name__ == '__main__':
+    import investment.parameters as params
+
     pd.set_option('display.max_rows', 400)
     pd.set_option('display.max_columns', 500)
     pd.set_option('display.width', 1000)
 
-    main()
+    aggregate_recent_past(params)

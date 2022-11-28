@@ -7,7 +7,7 @@ from utils.time.date import *
 from utils.breadcrumb import Breadcrumb
 
 
-def main():
+def compute_jaccard_index():
 
     ############################################################
     # INITIALIZATION                                           #
@@ -404,4 +404,4 @@ if __name__ == '__main__':
     pd.set_option('display.max_columns', 500)
     pd.set_option('display.width', 1000)
 
-    main()
+    compute_jaccard_index()

@@ -5,10 +5,8 @@ from interfaces.db import DB
 from utils.breadcrumb import Breadcrumb
 from utils.time.date import *
 
-import investment.parameters as params
 
-
-def get_frs(db):
+def get_frs(db, params):
     # Fetch funding rounds from database
     table_name = 'graph.Nodes_N_FundingRound'
     fields = ['FundingRoundID', 'FundingRoundDate', 'FundingRoundType', 'FundingAmount_USD', 'FundingAmount_USD / CB_InvestorCount']
@@ -27,7 +25,7 @@ def get_frs(db):
     return frs
 
 
-def get_investors_frs(db, fr_ids=None):
+def get_investors_frs(db, params, fr_ids=None):
     if 'Organization' in params.investor_types:
         # Fetch organization investors from database
         table_name = 'graph.Edges_N_Organisation_N_FundingRound'
@@ -123,7 +121,7 @@ def derive_yearly_data(df, groupby_columns, date_column, amount_column):
     return df
 
 
-def main():
+def create_investments_graph(params):
 
     ############################################################
     # INITIALIZATION                                           #
@@ -143,7 +141,7 @@ def main():
 
     bc.log('Retrieving funding rounds in time window...')
 
-    frs = get_frs(db)
+    frs = get_frs(db, params)
     fr_ids = list(frs['FundingRoundID'])
 
     # Extract year
@@ -155,7 +153,7 @@ def main():
 
     bc.log('Retrieving investors...')
 
-    investors_frs = get_investors_frs(db, fr_ids)
+    investors_frs = get_investors_frs(db, params, fr_ids)
 
     investors = investors_frs[['InvestorID', 'InvestorType']].drop_duplicates().reset_index(drop=True)
 
@@ -386,8 +384,10 @@ def main():
 
 
 if __name__ == '__main__':
+    import investment.parameters as params
+
     pd.set_option('display.max_rows', 500)
     pd.set_option('display.max_columns', 500)
     pd.set_option('display.width', 1000)
 
-    main()
+    create_investments_graph(params)

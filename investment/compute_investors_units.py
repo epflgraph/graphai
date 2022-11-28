@@ -227,7 +227,7 @@ def compute_affinities(x, y, pairs, edges):
     return pairs[key_x + key_y + ['Score']]
 
 
-def main():
+def compute_investors_units():
 
     # Initialize breadcrumb to log and keep track of time
     bc = Breadcrumb()
@@ -350,4 +350,4 @@ if __name__ == '__main__':
     pd.set_option('display.max_columns', 500)
     pd.set_option('display.width', 1000)
 
-    main()
+    compute_investors_units()
