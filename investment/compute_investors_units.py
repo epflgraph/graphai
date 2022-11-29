@@ -158,7 +158,7 @@ def normalise_graph(edges):
     return normalised_edges
 
 
-def compute_affinities(x, y, pairs, edges):
+def compute_affinities(x, y, pairs, edges=None, mix_x=False, mix_y=False):
     """
     Computes affinity scores between the pairs configurations in x and y indexed in pairs, according to the concepts
     (edge-weighted) graph specified in edges.
@@ -175,54 +175,75 @@ def compute_affinities(x, y, pairs, edges):
         pairs (pd.DataFrame): DataFrame whose columns are key_x + key_y. Configurations in x and y are compared
             based on the associations in this DataFrame.
         edges (pd.DataFrame): DataFrame whose columns are ['SourcePageID', 'TargetPageID', 'Score'], which define the
-            weighted edges of the concepts graph.
+            weighted edges of the concepts graph. Only required if one of mix_x or mix_y are True.
+        mix_x (bool): Whether to replace x with its mixing before affinity computation. Recommended to set to True if
+            the configurations in x have a low number of concepts. If set to True, then edges is required.
+        mix_y (bool): Whether to replace y with its mixing before affinity computation. Recommended to set to True if
+            the configurations in y have a low number of concepts. If set to True, then edges is required.
 
     Returns (pd.DataFrame): DataFrame with columns key_x + key_y + ['Score'], containing the same rows as pairs.
-        For each pair of configuration X and Y, their score is computed as the square root of the ratio of the norm
-        of BX*BY squared and the product of norms of BX and BY. Here BX and BY denote the mixing of X and Y,
-        respectively, and BX*BY denotes the combination of BX and BY.
+        For each pair of configuration X and Y, their score is computed as the ratio of the norm of
+        U*V squared and the product of norms of U and V.
+        If mix_x is True, then U is defined as the mixing of X with respect to edges, otherwise U is X.
+        If mix_y is True, then V is defined as the mixing of Y with respect to edges, otherwise V is Y.
+        Finally, U*V denotes the combination of U and V.
     """
+
+    if mix_x or mix_y:
+        # Check edges are provided if needed
+        assert edges is not None, 'If mix_x or mix_y are set to True, edges must be provided.'
+
+        # Make concepts graph undirected
+        edges = normalise_graph(edges)
 
     # Extract keys
     key_x = [c for c in x.columns if c not in ['PageID', 'Score']]
     key_y = [c for c in y.columns if c not in ['PageID', 'Score']]
 
-    # Make concepts graph undirected
-    edges = normalise_graph(edges)
+    # Determine U and V by computing mixings if needed
+    if mix_x:
+        u = mix(x, edges)
+    else:
+        u = x
 
-    # Compute mixings BX and BY, combination BX*BY and their norms
-    bx = mix(x, edges)
-    by = mix(y, edges)
-    bxby = combine(bx, by, pairs)
-    norms_bx = norm(bx)
-    norms_by = norm(by)
-    norms_bxby = norm(bxby)
+    if mix_y:
+        v = mix(y, edges)
+    else:
+        v = y
 
-    # Merge norms for BX, BY and BX*BY into pairs DataFrame
+    # Compute combination U*V
+    uv = combine(u, v, pairs)
+
+    # Compute norms
+    norms_u = norm(u)
+    norms_v = norm(v)
+    norms_uv = norm(uv)
+
+    # Merge norms for U, V and U*V into pairs DataFrame
     pairs = pd.merge(
         pairs,
-        norms_bx.rename(columns={'Norm': 'NormBX'}),
+        norms_u.rename(columns={'Norm': 'NormU'}),
         how='left',
         on=key_x
     )
 
     pairs = pd.merge(
         pairs,
-        norms_by.rename(columns={'Norm': 'NormBY'}),
+        norms_v.rename(columns={'Norm': 'NormV'}),
         how='left',
         on=key_y
     )
 
     pairs = pd.merge(
         pairs,
-        norms_bxby.rename(columns={'Norm': 'NormBXBY'}),
+        norms_uv.rename(columns={'Norm': 'NormUV'}),
         how='left',
         on=(key_x + key_y)
     )
 
     # Compute affinity scores
     pairs = pairs.fillna(0)
-    pairs['Score'] = np.square(pairs['NormBXBY']) / (pairs['NormBX'] * pairs['NormBY'])
+    pairs['Score'] = np.square(pairs['NormUV']) / (pairs['NormU'] * pairs['NormV'])
 
     return pairs[key_x + key_y + ['Score']]
 
@@ -322,7 +343,7 @@ def compute_investors_units():
     bc.log('Computing affinities investors-units...')
 
     investors_units = investors_units.drop(columns=['Score'])
-    investors_units = compute_affinities(investors_concepts, units_concepts, investors_units, concepts_concepts)
+    investors_units = compute_affinities(investors_concepts, units_concepts, investors_units, edges=concepts_concepts, mix_x=True, mix_y=True)
 
     ############################################################
 

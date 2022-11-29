@@ -24,7 +24,7 @@ def compute_fundraisers_units():
     fields = ['UnitID', 'PageID', 'Score']
     units_concepts = pd.DataFrame(db.find(table_name, fields=fields), columns=fields)
 
-    # Renormalise units-concepts scores to add to 1
+    # Normalise scores so that they add up to one per unit
     units_concepts = pd.merge(
         units_concepts,
         units_concepts.groupby('UnitID').aggregate(SumScore=('Score', 'sum')).reset_index(),
@@ -42,14 +42,35 @@ def compute_fundraisers_units():
     fields = ['FundraiserID', 'PageID']
     fundraisers_concepts = pd.DataFrame(db.find(table_name, fields=fields), columns=fields)
 
-    # Compute score as 1 / number of concepts (so that it adds to 1)
+    # Add number of pages per fundraiser
     fundraisers_concepts = pd.merge(
         fundraisers_concepts,
-        fundraisers_concepts.groupby(by=['FundraiserID']).aggregate(Count=('PageID', 'count')).reset_index(),
+        fundraisers_concepts.groupby(by='FundraiserID').aggregate(FundraiserPageCount=('PageID', 'count')).reset_index(),
         how='left',
         on='FundraiserID'
     )
-    fundraisers_concepts['Score'] = 1 / fundraisers_concepts['Count']
+
+    # Add number of fundraisers per page
+    fundraisers_concepts = pd.merge(
+        fundraisers_concepts,
+        fundraisers_concepts.groupby(by='PageID').aggregate(PageFundraiserCount=('FundraiserID', 'count')).reset_index(),
+        how='left',
+        on='PageID'
+    )
+
+    # Compute first version of score
+    fundraisers_concepts['Score'] = 1 / (fundraisers_concepts['FundraiserPageCount'] * np.log(1 + fundraisers_concepts['PageFundraiserCount']))
+
+    # Normalise scores so that they add up to one per fundraiser
+    fundraisers_concepts = pd.merge(
+        fundraisers_concepts,
+        fundraisers_concepts.groupby(by='FundraiserID').aggregate(FundraiserScoreSum=('Score', 'sum')).reset_index(),
+        how='left',
+        on='FundraiserID'
+    )
+    fundraisers_concepts['Score'] = fundraisers_concepts['Score'] / fundraisers_concepts['FundraiserScoreSum']
+
+    # Extract only relevant columns
     fundraisers_concepts = fundraisers_concepts[['FundraiserID', 'PageID', 'Score']]
 
     ############################################################
@@ -79,7 +100,7 @@ def compute_fundraisers_units():
         on='PageID'
     )
     fundraisers_units = fundraisers_units[['FundraiserID', 'UnitID']].drop_duplicates()
-    fundraisers_units = compute_affinities(fundraisers_concepts, units_concepts, fundraisers_units, concepts_concepts)
+    fundraisers_units = compute_affinities(fundraisers_concepts, units_concepts, fundraisers_units, edges=concepts_concepts, mix_x=True)
 
     ############################################################
 

@@ -70,4 +70,4 @@ pairs = pd.merge(
 )
 
 
-print(compute_affinities(x, y, pairs, edges))
+print(compute_affinities(x, y, pairs, edges=edges, mix_x=True, mix_y=True))
