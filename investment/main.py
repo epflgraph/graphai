@@ -28,6 +28,8 @@ def main():
     bc.log('Computing fundraiser-unit edges...')
     compute_fundraisers_units()
 
+    bc.report()
+
 
 if __name__ == '__main__':
     main()
