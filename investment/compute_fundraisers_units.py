@@ -24,6 +24,9 @@ def compute_fundraisers_units():
     fields = ['UnitID', 'PageID', 'Score']
     units_concepts = pd.DataFrame(db.find(table_name, fields=fields), columns=fields)
 
+    # Keep top 200 concepts per unit to avoid computational issues
+    # units_concepts = units_concepts.sort_values('Score', ascending=False).groupby('UnitID').head(200)
+
     # Normalise scores so that they add up to one per unit
     units_concepts = pd.merge(
         units_concepts,
@@ -76,8 +79,8 @@ def compute_fundraisers_units():
     ############################################################
 
     unit_concept_ids = list(units_concepts['PageID'].drop_duplicates())
-    fundraisers_concept_ids = list(fundraisers_concepts['PageID'].drop_duplicates())
-    concept_ids = list(set(unit_concept_ids + fundraisers_concept_ids))
+    fundraiser_concept_ids = list(fundraisers_concepts['PageID'].drop_duplicates())
+    concept_ids = list(set(unit_concept_ids + fundraiser_concept_ids))
 
     ############################################################
 
@@ -92,15 +95,27 @@ def compute_fundraisers_units():
 
     bc.log('Computing affinities fundraisers-units...')
 
-    # We compute affinity fundraiser-unit for pairs sharing at least one concept with non-negligible unit score
-    fundraisers_units = pd.merge(
-        fundraisers_concepts,
-        units_concepts.sort_values(by='Score', ascending=False).head(100000),
-        how='inner',
-        on='PageID'
-    )
-    fundraisers_units = fundraisers_units[['FundraiserID', 'UnitID']].drop_duplicates()
-    fundraisers_units = compute_affinities(fundraisers_concepts, units_concepts, fundraisers_units, edges=concepts_concepts, mix_x=True)
+    # We process this by batches to avoid running into memory issues
+    fundraiser_ids = list(fundraisers_concepts['FundraiserID'].drop_duplicates())
+    n = len(fundraiser_ids)
+    batch_size = 1000
+
+    fundraisers_units = None
+    for batch_fundraiser_ids in [fundraiser_ids[i: i + batch_size] for i in range(0, n, batch_size)]:
+        bc.log('New batch')
+        batch_fundraisers_concepts = fundraisers_concepts[fundraisers_concepts['FundraiserID'].isin(batch_fundraiser_ids)]
+
+        # We compute affinity fundraiser-unit for pairs sharing at least one concept with non-negligible unit score
+        batch_fundraisers_units = pd.merge(
+            batch_fundraisers_concepts,
+            units_concepts,
+            how='inner',
+            on='PageID'
+        )
+        batch_fundraisers_units = batch_fundraisers_units[['FundraiserID', 'UnitID']].drop_duplicates()
+        batch_fundraisers_units = compute_affinities(batch_fundraisers_concepts, units_concepts, batch_fundraisers_units, edges=concepts_concepts, mix_x=True)
+
+        fundraisers_units = pd.concat([fundraisers_units, batch_fundraisers_units]).reset_index(drop=True)
 
     ############################################################
 
