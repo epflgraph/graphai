@@ -38,30 +38,16 @@ x = pd.DataFrame({
 })
 
 y = pd.DataFrame({
-    'KeyY': ['U', 'U', 'U', 'V', 'V'],
+    'KeyY': ['P', 'P', 'P', 'Q', 'Q'],
     'PageID': [1, 2, 3, 3, 4],
     'Score': [0.2, 0.1, 0.3, 0.3, 0.5]
 })
-
-# edges = pd.DataFrame({
-#     'SourcePageID': [1, 1, 3, 4],
-#     'TargetPageID': [2, 3, 4, 3],
-#     'Score': [0.7, 0.6, 0.2, 0.9]
-# })
-
-# edges = pd.DataFrame({
-#     'SourcePageID': [1, 1, 2, 3, 3, 4],
-#     'TargetPageID': [2, 3, 1, 1, 4, 3],
-#     'Score': [1, 1, 1, 1, 1, 1]
-# })
 
 edges = pd.DataFrame({
     'SourcePageID': [1, 1, 3],
     'TargetPageID': [2, 3, 4],
     'Score': [1, 1, 1]
 })
-edges = normalise_graph(edges)
-
 
 pairs = pd.merge(
     x['KeyX'].drop_duplicates(),
