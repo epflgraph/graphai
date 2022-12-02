@@ -24,9 +24,6 @@ def compute_fundraisers_units():
     fields = ['UnitID', 'PageID', 'Score']
     units_concepts = pd.DataFrame(db.find(table_name, fields=fields), columns=fields)
 
-    # Keep top 200 concepts per unit to avoid computational issues
-    # units_concepts = units_concepts.sort_values('Score', ascending=False).groupby('UnitID').head(200)
-
     # Normalise scores so that they add up to one per unit
     units_concepts = pd.merge(
         units_concepts,
@@ -116,6 +113,12 @@ def compute_fundraisers_units():
         batch_fundraisers_units = compute_affinities(batch_fundraisers_concepts, units_concepts, batch_fundraisers_units, edges=concepts_concepts, mix_x=True)
 
         fundraisers_units = pd.concat([fundraisers_units, batch_fundraisers_units]).reset_index(drop=True)
+
+    # Filter out zero scores
+    fundraisers_units = fundraisers_units[fundraisers_units['Score'] > 0].reset_index(drop=True)
+
+    # Keep only the top 500 fundraisers per unit, otherwise there are too many
+    fundraisers_units = fundraisers_units.sort_values(by='Score', ascending=False).groupby(by='UnitID').head(500).reset_index(drop=True)
 
     ############################################################
 
