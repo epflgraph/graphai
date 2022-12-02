@@ -37,44 +37,7 @@ def norm(x):
     return norms
 
 
-def combine(x, y, pairs):
-    """
-    Combines the configurations in x and y based on the associations in pairs.
-
-    Args:
-        x (pd.DataFrame): DataFrame whose columns are key_x + ['PageID', 'Score']. Each configuration of scores is
-            given by a unique tuple of values for columns in key_x. For example, if x has columns
-            ['InvestorID', 'PageID', 'Score'], then each value of InvestorID is assumed to index a configuration,
-            given by the columns ['PageID', 'Score'].
-        y (pd.DataFrame): DataFrame whose columns are key_y + ['PageID', 'Score']. Each configuration of scores is
-            given by a unique tuple of values for columns in key_y. For example, if y has columns
-            ['InvestorID', 'PageID', 'Score'], then each value of InvestorID is assumed to index a configuration,
-            given by the columns ['PageID', 'Score'].
-        pairs (pd.DataFrame): DataFrame whose columns are key_x + key_y. Configurations in x and y are compared
-            based on the associations in this DataFrame.
-
-    Returns (pd.DataFrame): DataFrame with columns key_x + key_y + ['PageID', 'Score']. For each row in pairs, there is
-        a configuration of scores in the returned DataFrame. The score for each concept is the geometric mean of the
-        scores in x and y.
-    """
-
-    # Extract keys
-    key_x = [c for c in x.columns if c not in ['PageID', 'Score']]
-    key_y = [c for c in y.columns if c not in ['PageID', 'Score']]
-
-    combination = pairs.copy()
-
-    # Merge x and y
-    combination = pd.merge(combination, x, how='inner', on=key_x)
-    combination = pd.merge(combination, y, how='inner', on=(key_y + ['PageID']))
-
-    # Compute scores
-    combination['Score'] = np.sqrt(combination['Score_x'] * combination['Score_y'])
-
-    return combination[key_x + key_y + ['PageID', 'Score']]
-
-
-def mix(x, edges):
+def mix(x, edges, min_ratio=0.05):
     """
     Mixes the configurations in x according to the edges in edges.
 
@@ -85,6 +48,8 @@ def mix(x, edges):
             by the columns ['PageID', 'Score'].
         edges (pd.DataFrame): DataFrame whose columns are ['SourcePageID', 'TargetPageID', 'Score'], which define the
             weighted edges of the concepts graph.
+        min_ratio (float): For every resulting configuration, only concepts whose ratio of score over maximum score
+            is above min_ratio are kept. If set to 0, then all concepts are kept.
 
     Returns (pd.DataFrame): DataFrame with the same columns as x, containing configurations indexed by the same set as
         x. The score of a concept in the mixed configuration is the arithmetic mean of the products of the
@@ -118,6 +83,17 @@ def mix(x, edges):
     # Average all scores in the 1-ball of each vertex
     mixed['Score'] = mixed['Score'] / mixed['BallSize']
     mixed = mixed.groupby(by=(key + ['PageID'])).aggregate(Score=('Score', 'sum')).reset_index()
+
+    # Filter low scores to avoid memory issues
+    if min_ratio > 0:
+        mixed = pd.merge(
+            mixed,
+            mixed.groupby(by=key).aggregate(MaxScore=('Score', 'max')).reset_index(),
+            how='inner',
+            on=key
+        )
+        mixed = mixed[mixed['Score'] >= min_ratio * mixed['MaxScore']].reset_index(drop=True)
+        mixed = mixed[key + ['PageID', 'Score']]
 
     return mixed
 
@@ -156,6 +132,43 @@ def normalise_graph(edges):
     normalised_edges = pd.concat([normalised_edges, loops]).reset_index(drop=True)
 
     return normalised_edges
+
+
+def combine(x, y, pairs):
+    """
+    Combines the configurations in x and y based on the associations in pairs.
+
+    Args:
+        x (pd.DataFrame): DataFrame whose columns are key_x + ['PageID', 'Score']. Each configuration of scores is
+            given by a unique tuple of values for columns in key_x. For example, if x has columns
+            ['InvestorID', 'PageID', 'Score'], then each value of InvestorID is assumed to index a configuration,
+            given by the columns ['PageID', 'Score'].
+        y (pd.DataFrame): DataFrame whose columns are key_y + ['PageID', 'Score']. Each configuration of scores is
+            given by a unique tuple of values for columns in key_y. For example, if y has columns
+            ['InvestorID', 'PageID', 'Score'], then each value of InvestorID is assumed to index a configuration,
+            given by the columns ['PageID', 'Score'].
+        pairs (pd.DataFrame): DataFrame whose columns are key_x + key_y. Configurations in x and y are compared
+            based on the associations in this DataFrame.
+
+    Returns (pd.DataFrame): DataFrame with columns key_x + key_y + ['PageID', 'Score']. For each row in pairs, there is
+        a configuration of scores in the returned DataFrame. The score for each concept is the geometric mean of the
+        scores in x and y.
+    """
+
+    # Extract keys
+    key_x = [c for c in x.columns if c not in ['PageID', 'Score']]
+    key_y = [c for c in y.columns if c not in ['PageID', 'Score']]
+
+    combination = pairs.copy()
+
+    # Merge x and y
+    combination = pd.merge(combination, x, how='inner', on=key_x)
+    combination = pd.merge(combination, y, how='inner', on=(key_y + ['PageID']))
+
+    # Compute scores
+    combination['Score'] = np.sqrt(combination['Score_x'] * combination['Score_y'])
+
+    return combination[key_x + key_y + ['PageID', 'Score']]
 
 
 def compute_affinities(x, y, pairs, edges=None, mix_x=False, mix_y=False):
