@@ -32,8 +32,8 @@ switzerland = ['CHE']
 switzerland_nbh = ['CHE', 'DEU', 'FRA', 'ITA', 'AUT', 'BEL', 'NLD', 'LUX']
 
 # countries = switzerland
-# countries = switzerland_nbh
-countries = None
+countries = switzerland_nbh
+# countries = None
 
 ##################
 # Investor types #
@@ -47,6 +47,6 @@ investor_types = ['Organization', 'Person']
 #######################
 # Only funding rounds whose type is in the list will be considered, the rest will be ignored.
 # None means no filtering is done and thus all funding rounds are considered.
-# fr_types = ['pre seed']
-fr_types = None
+fr_types = ['pre seed']
+# fr_types = None
 

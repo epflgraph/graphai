@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 
 from interfaces.db import DB
 from utils.breadcrumb import Breadcrumb
@@ -22,7 +23,7 @@ def compute_investors_units():
     fields = ['UnitID', 'PageID', 'Score']
     units_concepts = pd.DataFrame(db.find(table_name, fields=fields), columns=fields)
 
-    # Renormalise units-concepts scores to add to 1
+    # Normalise scores so that they add up to one per unit
     units_concepts = pd.merge(
         units_concepts,
         units_concepts.groupby('UnitID').aggregate(SumScore=('Score', 'sum')).reset_index(),
@@ -34,41 +35,85 @@ def compute_investors_units():
 
     ############################################################
 
-    bc.log('Fetching investor-concept Jaccard edges from database...')
+    bc.log('Fetching fundraiser-concept edges from database...')
 
-    table_name = 'ca_temp.Edges_N_Investor_N_Concept_T_Jaccard'
-    fields = ['InvestorID', 'PageID', 'Jaccard_000']
-    investors_concepts_jaccard = pd.DataFrame(db.find(table_name, fields=fields), columns=fields)
+    table_name = 'ca_temp.Edges_N_Fundraiser_N_Concept'
+    fields = ['FundraiserID', 'PageID']
+    fundraisers_concepts = pd.DataFrame(db.find(table_name, fields=fields), columns=fields)
+
+    # Add number of pages per fundraiser
+    fundraisers_concepts = pd.merge(
+        fundraisers_concepts,
+        fundraisers_concepts.groupby(by='FundraiserID').aggregate(FundraiserPageCount=('PageID', 'count')).reset_index(),
+        how='left',
+        on='FundraiserID'
+    )
+
+    # Add number of fundraisers per page
+    fundraisers_concepts = pd.merge(
+        fundraisers_concepts,
+        fundraisers_concepts.groupby(by='PageID').aggregate(PageFundraiserCount=('FundraiserID', 'count')).reset_index(),
+        how='left',
+        on='PageID'
+    )
+
+    # Compute first version of score
+    fundraisers_concepts['Score'] = 1 / (fundraisers_concepts['FundraiserPageCount'] * np.log(1 + fundraisers_concepts['PageFundraiserCount']))
+
+    # Normalise scores so that they add up to one per fundraiser
+    fundraisers_concepts = pd.merge(
+        fundraisers_concepts,
+        fundraisers_concepts.groupby(by='FundraiserID').aggregate(FundraiserScoreSum=('Score', 'sum')).reset_index(),
+        how='left',
+        on='FundraiserID'
+    )
+    fundraisers_concepts['Score'] = fundraisers_concepts['Score'] / fundraisers_concepts['FundraiserScoreSum']
+
+    # Extract only relevant columns
+    fundraisers_concepts = fundraisers_concepts[['FundraiserID', 'PageID', 'Score']]
 
     ############################################################
 
-    bc.log('Deriving investors-units edges from investors-concepts and units-concepts...')
+    bc.log('Fetching funding round-fundraiser edges from database...')
 
-    investors_units = pd.merge(investors_concepts_jaccard, units_concepts, how='inner', on='PageID')
-    investors_units['Score'] = investors_units['Score'] * investors_units['Jaccard_000']
-    investors_units = investors_units.groupby(by=['InvestorID', 'UnitID']).aggregate(Score=('Score', 'sum')).reset_index()
-    investors_units = investors_units.sort_values(by=['UnitID', 'Score'], ascending=[True, False])
-    investors_units = investors_units.groupby(by='UnitID').head(5)
-    investor_ids = list(investors_units['InvestorID'].drop_duplicates())
+    table_name = 'ca_temp.Edges_N_FundingRound_N_Fundraiser'
+    fields = ['FundingRoundID', 'FundraiserID']
+    frs_fundraisers = pd.DataFrame(db.find(table_name, fields=fields), columns=fields)
+
+    # Merge to obtain funding round-concept edges
+    frs_concepts = pd.merge(
+        frs_fundraisers,
+        fundraisers_concepts,
+        how='inner',
+        on='FundraiserID'
+    )[['FundingRoundID', 'PageID', 'Score']]
 
     ############################################################
 
-    bc.log('Fetching investor-concept yearly edges from database...')
+    bc.log('Fetching investor-funding round edges from database...')
 
-    table_name = 'ca_temp.Edges_N_Investor_N_Concept_T_Years'
-    fields = ['InvestorID', 'PageID', 'Year', 'CountAmount']
-    conditions = {'InvestorID': investor_ids}
-    investors_concepts = pd.DataFrame(db.find(table_name, fields=fields, conditions=conditions), columns=fields)
+    table_name = 'ca_temp.Edges_N_Investor_N_FundingRound'
+    fields = ['InvestorID', 'FundingRoundID']
+    investors_frs = pd.DataFrame(db.find(table_name, fields=fields), columns=fields)
 
-    # Normalise investor-concepts scores
+    # Merge to obtain investor-concept edges
+    investors_concepts = pd.merge(
+        investors_frs,
+        frs_concepts,
+        how='inner',
+        on='FundingRoundID'
+    )
+
+    # Aggregate by averaging scores over all funding rounds of an investor
+    investors_concepts = investors_concepts.groupby(by=['InvestorID', 'PageID']).aggregate({'Score': 'sum'}).reset_index()
     investors_concepts = pd.merge(
         investors_concepts,
-        investors_concepts.groupby(by=['InvestorID', 'Year']).aggregate(MaxScore=('CountAmount', 'max')).reset_index(),
+        investors_frs.groupby(by='InvestorID').aggregate(InvestorFRCount=('FundingRoundID', 'count')).reset_index(),
         how='left',
-        on=['InvestorID', 'Year']
+        on='InvestorID'
     )
-    investors_concepts['Score'] = investors_concepts['CountAmount'] / investors_concepts['MaxScore']
-    investors_concepts = investors_concepts.drop(columns=['CountAmount', 'MaxScore'])
+    investors_concepts['Score'] = investors_concepts['Score'] / investors_concepts['InvestorFRCount']
+    investors_concepts = investors_concepts[['InvestorID', 'PageID', 'Score']]
 
     ############################################################
 
@@ -87,34 +132,74 @@ def compute_investors_units():
 
     ############################################################
 
-    bc.log('Adding year to investors-units...')
-
-    investors_units = pd.merge(
-        investors_concepts[['InvestorID', 'Year']].drop_duplicates(),
-        investors_units,
-        how='left',
-        on='InvestorID'
-    )
-
-    ############################################################
-
     bc.log('Computing affinities investors-units...')
 
-    investors_units = investors_units.drop(columns=['Score'])
-    investors_units = compute_affinities(investors_concepts, units_concepts, investors_units, edges=concepts_concepts, mix_x=True, mix_y=True)
+    # We process this by batches to avoid running into memory issues
+    investor_ids = list(investors_concepts['InvestorID'].drop_duplicates())
+    n = len(investor_ids)
+    batch_size = 1000
+
+    investors_units = None
+    for batch_investor_ids in [investor_ids[i: i + batch_size] for i in range(0, n, batch_size)]:
+        bc.log('New batch')
+        batch_investors_concepts = investors_concepts[investors_concepts['InvestorID'].isin(batch_investor_ids)]
+
+        # We compute affinity investor-unit for pairs sharing at least one concept with non-negligible unit score
+        batch_investors_units = pd.merge(
+            batch_investors_concepts,
+            units_concepts,
+            how='inner',
+            on='PageID'
+        )
+        batch_investors_units = batch_investors_units[['InvestorID', 'UnitID']].drop_duplicates()
+        batch_investors_units = compute_affinities(batch_investors_concepts, units_concepts, batch_investors_units, edges=concepts_concepts, mix_x=True)
+
+        investors_units = pd.concat([investors_units, batch_investors_units]).reset_index(drop=True)
 
     ############################################################
 
-    bc.log('Inserting investors-units edges into database...')
+    # Filter out zero scores
+    investors_units = investors_units[investors_units['Score'] > 0].reset_index(drop=True)
 
-    table_name = 'ca_temp.Edges_N_Investor_N_Unit_T_Years'
+    ############################################################
+
+    # Keep only the top 500 investors per unit, in case there are too many
+    investors_units = investors_units.sort_values(by='Score', ascending=False).groupby(by='UnitID').head(500).reset_index(drop=True)
+
+    ############################################################
+
+    bc.log('Normalising scores...')
+
+    # Square scores to sum them
+    investors_units['SquaredScore'] = np.square(investors_units['Score'])
+
+    # Add squared norms to fundraisers_units DataFrame
+    investors_units = pd.merge(
+        investors_units,
+        investors_units.groupby(by='UnitID').aggregate(SquaredNorm=('SquaredScore', 'sum')).reset_index(),
+        how='inner',
+        on='UnitID'
+    )
+
+    # Compute the norm by taking the sqrt of the squared norm
+    investors_units['Norm'] = np.sqrt(investors_units['SquaredNorm'])
+
+    # Divide each score by the norm of the investor configuration
+    investors_units['Score'] = investors_units['Score'] / investors_units['Norm']
+
+    # Keep only relevant columns
+    investors_units = investors_units[['InvestorID', 'UnitID', 'Score']]
+
+    ############################################################
+
+    bc.log('Inserting investor-unit edges into database...')
+
+    table_name = 'ca_temp.Edges_N_Investor_N_Unit'
     definition = [
         'InvestorID CHAR(64)',
-        'Year SMALLINT',
         'UnitID CHAR(32)',
         'Score FLOAT',
         'KEY InvestorID (InvestorID)',
-        'KEY Year (Year)',
         'KEY UnitID (UnitID)'
     ]
     db.drop_create_insert_table(table_name, definition, investors_units)

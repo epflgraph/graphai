@@ -3,6 +3,7 @@ from investment.aggregate_recent_past import aggregate_recent_past
 from investment.compute_jaccard_index import compute_jaccard_index
 from investment.compute_investors_units import compute_investors_units
 from investment.compute_fundraisers_units import compute_fundraisers_units
+from investment.compute_investors_units_2 import compute_investors_units_2
 
 import investment.parameters as params
 
@@ -22,11 +23,14 @@ def main():
     bc.log('Computing Jaccard index...')
     compute_jaccard_index()
 
+    bc.log('Computing fundraiser-unit edges...')
+    compute_fundraisers_units()
+
     bc.log('Computing investor-unit edges...')
     compute_investors_units()
 
-    bc.log('Computing fundraiser-unit edges...')
-    compute_fundraisers_units()
+    bc.log('Computing investor-unit edges 2...')
+    compute_investors_units_2()
 
     bc.report()
 

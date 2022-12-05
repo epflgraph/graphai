@@ -113,11 +113,39 @@ def compute_fundraisers_units():
 
         fundraisers_units = pd.concat([fundraisers_units, batch_fundraisers_units]).reset_index(drop=True)
 
+    ############################################################
+
     # Filter out zero scores
     fundraisers_units = fundraisers_units[fundraisers_units['Score'] > 0].reset_index(drop=True)
 
-    # Keep only the top 500 fundraisers per unit, otherwise there are too many
+    ############################################################
+
+    # Keep only the top 500 fundraisers per unit, in case there are too many
     fundraisers_units = fundraisers_units.sort_values(by='Score', ascending=False).groupby(by='UnitID').head(500).reset_index(drop=True)
+
+    ############################################################
+
+    bc.log('Normalising scores...')
+
+    # Square scores to sum them
+    fundraisers_units['SquaredScore'] = np.square(fundraisers_units['Score'])
+
+    # Add squared norms to fundraisers_units DataFrame
+    fundraisers_units = pd.merge(
+        fundraisers_units,
+        fundraisers_units.groupby(by='UnitID').aggregate(SquaredNorm=('SquaredScore', 'sum')).reset_index(),
+        how='inner',
+        on='UnitID'
+    )
+
+    # Compute the norm by taking the sqrt of the squared norm
+    fundraisers_units['Norm'] = np.sqrt(fundraisers_units['SquaredNorm'])
+
+    # Divide each score by the norm of the fundraiser configuration
+    fundraisers_units['Score'] = fundraisers_units['Score'] / fundraisers_units['Norm']
+
+    # Keep only relevant columns
+    fundraisers_units = fundraisers_units[['FundraiserID', 'UnitID', 'Score']]
 
     ############################################################
 
