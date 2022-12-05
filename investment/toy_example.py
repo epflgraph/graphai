@@ -1,6 +1,6 @@
 import pandas as pd
 
-from investment.compute_investors_units import *
+from investment.concept_configuration import *
 
 # x = pd.DataFrame({
 #     'InvestorID': ['A', 'A', 'A', 'B', 'B', 'B', 'C', 'C'],
@@ -49,7 +49,7 @@ def base():
         'Score': [1, 1, 1]
     })
 
-    return x, y, edges
+    return x, y, normalise_graph(edges)
 
 
 def path():
@@ -67,7 +67,7 @@ def path():
 
     y = x.rename(columns={'KeyX': 'KeyY'})
 
-    return x, y, edges
+    return x, y, normalise_graph(edges)
 
 
 def complete():
@@ -85,7 +85,7 @@ def complete():
 
     y = x.rename(columns={'KeyX': 'KeyY'})
 
-    return x, y, edges
+    return x, y, normalise_graph(edges)
 
 
 def random(n):
@@ -107,18 +107,20 @@ def random(n):
 
     y = x.rename(columns={'KeyX': 'KeyY'})
 
-    return x, y, edges
+    return x, y, normalise_graph(edges)
 
 
-x, y, edges = random(100)
+x, y, edges = base()
+
+print(x)
+
+print(normalise(x))
+
+print(mix(x, edges))
 
 pairs = pd.merge(
     x['KeyX'].drop_duplicates(),
     y['KeyY'].drop_duplicates(),
     how='cross'
 )
-
-
-mix(x, normalise_graph(edges))
-
 print(compute_affinities(x, y, pairs, edges=edges, mix_x=True, mix_y=True))

@@ -2,10 +2,9 @@ import pandas as pd
 import numpy as np
 
 from interfaces.db import DB
-
 from utils.breadcrumb import Breadcrumb
 
-from compute_investors_units import compute_affinities
+from investment.concept_configuration import compute_affinities
 
 
 def compute_investors_units_2():
