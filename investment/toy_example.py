@@ -123,4 +123,10 @@ pairs = pd.merge(
     y['KeyY'].drop_duplicates(),
     how='cross'
 )
-print(compute_affinities(x, y, pairs, edges=edges, mix_x=True, mix_y=True))
+
+affinities_cosine = compute_affinities(x, y, pairs, edges=edges, mix_x=True, mix_y=True, method='cosine')
+affinities_euclidean = compute_affinities(x, y, pairs, edges=edges, mix_x=True, mix_y=True, method='euclidean')
+
+affinities = pd.merge(affinities_cosine, affinities_euclidean, how='inner', on=['KeyX', 'KeyY'], suffixes=('_cos', '_eucl'))
+
+print(affinities)

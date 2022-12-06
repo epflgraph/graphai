@@ -204,7 +204,7 @@ def combine(x, y, pairs):
     return combination[key_x + key_y + ['PageID', 'Score']]
 
 
-def compute_affinities(x, y, pairs, edges=None, mix_x=False, mix_y=False):
+def compute_affinities(x, y, pairs, edges=None, mix_x=False, mix_y=False, method='euclidean'):
     """
     Computes affinity scores between the pairs configurations in x and y indexed in pairs, according to the concepts
     (edge-weighted) graph specified in edges.
@@ -226,10 +226,15 @@ def compute_affinities(x, y, pairs, edges=None, mix_x=False, mix_y=False):
             the configurations in x have a low number of concepts. If set to True, then edges is required.
         mix_y (bool): Whether to replace y with its mixing before affinity computation. Recommended to set to True if
             the configurations in y have a low number of concepts. If set to True, then edges is required.
+        method (str): Which method to use to compute affinities. 'euclidean' uses a function based on the euclidean
+            distance of each pair of configurations. 'cosine' uses a function based on cosine similarity of each pair
+            of configurations.
 
     Returns (pd.DataFrame): DataFrame with columns key_x + key_y + ['Score'], containing the same rows as pairs.
-        For each pair of configuration X and Y, their score is computed as the ratio of the norm of
-        U*V squared and the product of norms of U and V.
+        For each pair of configuration X and Y, their score is computed as follows:
+            - If method='cosine', the score is the ratio of the norm of U*V squared (equivalently, the scalar product
+                <U, V>) and the product of norms of U and V.
+            - If method='euclidean', the score is 1 - tanh(k * ||U - V||), for some k > 0.
         If mix_x is True, then U is defined as the mixing of X with respect to edges, otherwise U is X.
         If mix_y is True, then V is defined as the mixing of Y with respect to edges, otherwise V is Y.
         Finally, U*V denotes the combination of U and V.
@@ -257,38 +262,51 @@ def compute_affinities(x, y, pairs, edges=None, mix_x=False, mix_y=False):
     else:
         v = y
 
-    # Compute combination U*V
-    uv = combine(u, v, pairs)
+    if method == 'cosine':
+        # Compute combination U*V
+        uv = combine(u, v, pairs)
 
-    # Compute norms
-    norms_u = norm(u)
-    norms_v = norm(v)
-    norms_uv = norm(uv)
+        # Compute norms
+        norms_u = norm(u)
+        norms_v = norm(v)
+        norms_uv = norm(uv)
 
-    # Merge norms for U, V and U*V into pairs DataFrame
-    pairs = pd.merge(
-        pairs,
-        norms_u.rename(columns={'Norm': 'NormU'}),
-        how='left',
-        on=key_x
-    )
+        # Merge norms for U, V and U*V into pairs DataFrame
+        pairs = pd.merge(pairs, norms_u.rename(columns={'Norm': 'NormU'}), how='left', on=key_x)
+        pairs = pd.merge(pairs, norms_v.rename(columns={'Norm': 'NormV'}), how='left', on=key_y)
+        pairs = pd.merge(pairs, norms_uv.rename(columns={'Norm': 'NormUV'}), how='left', on=(key_x + key_y))
+        pairs = pairs.fillna(0)
 
-    pairs = pd.merge(
-        pairs,
-        norms_v.rename(columns={'Norm': 'NormV'}),
-        how='left',
-        on=key_y
-    )
+        # Compute affinity scores
+        pairs['Score'] = np.square(pairs['NormUV']) / (pairs['NormU'] * pairs['NormV'])
 
-    pairs = pd.merge(
-        pairs,
-        norms_uv.rename(columns={'Norm': 'NormUV'}),
-        how='left',
-        on=(key_x + key_y)
-    )
+        # Keep only relevant columns
+        pairs = pairs[key_x + key_y + ['Score']]
 
-    # Compute affinity scores
-    pairs = pairs.fillna(0)
-    pairs['Score'] = np.square(pairs['NormUV']) / (pairs['NormU'] * pairs['NormV'])
+        return pairs
 
-    return pairs[key_x + key_y + ['Score']]
+    elif method == 'euclidean':
+        # Extend pairs with scores from U and V
+        diff_u = pd.merge(pairs, u, how='inner', on=key_x)
+        diff_v = pd.merge(pairs, v, how='inner', on=key_y)
+        diff = pd.merge(diff_u, diff_v, how='outer', on=(key_x + key_y + ['PageID'])).fillna(0)
+
+        # The score of the difference is the difference of scores
+        diff['Score'] = diff['Score_x'] - diff['Score_y']
+
+        # Compute norm of the differences
+        diff = diff[key_x + key_y + ['PageID', 'Score']]
+        pairs = norm(diff)
+
+        # Score = 1 - tanh(||U - V|| / k) = 2 / (1 + exp(2 * ||U - V|| / k))
+        k = 1
+        pairs['Score'] = 2 / (1 + np.exp(2 * pairs['Norm'] / k))
+
+        # Keep only relevant columns
+        pairs = pairs[key_x + key_y + ['Score']]
+
+        return pairs
+
+    else:
+        pairs['Score'] = 0
+        return pairs
