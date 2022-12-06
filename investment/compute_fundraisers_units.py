@@ -41,14 +41,6 @@ def compute_fundraisers_units():
     fields = ['FundraiserID', 'PageID']
     fundraisers_concepts = pd.DataFrame(db.find(table_name, fields=fields), columns=fields)
 
-    # Add number of pages per fundraiser
-    fundraisers_concepts = pd.merge(
-        fundraisers_concepts,
-        fundraisers_concepts.groupby(by='FundraiserID').aggregate(FundraiserPageCount=('PageID', 'count')).reset_index(),
-        how='left',
-        on='FundraiserID'
-    )
-
     # Add number of fundraisers per page
     fundraisers_concepts = pd.merge(
         fundraisers_concepts,
@@ -58,7 +50,7 @@ def compute_fundraisers_units():
     )
 
     # Compute first version of score
-    fundraisers_concepts['Score'] = 1 / (fundraisers_concepts['FundraiserPageCount'] * np.log(1 + fundraisers_concepts['PageFundraiserCount']))
+    fundraisers_concepts['Score'] = 1 / (1 + np.log(fundraisers_concepts['PageFundraiserCount']))
 
     # Normalise scores so that they add up to one per fundraiser
     fundraisers_concepts = pd.merge(
