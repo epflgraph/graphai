@@ -32,8 +32,8 @@ switzerland = ['CHE']
 switzerland_nbh = ['CHE', 'DEU', 'FRA', 'ITA', 'AUT', 'BEL', 'NLD', 'LUX']
 
 # countries = switzerland
-# countries = switzerland_nbh
-countries = None
+countries = switzerland_nbh
+# countries = None
 
 ##################
 # Investor types #
