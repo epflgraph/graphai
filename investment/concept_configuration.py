@@ -204,7 +204,7 @@ def combine(x, y, pairs):
     return combination[key_x + key_y + ['PageID', 'Score']]
 
 
-def compute_affinities(x, y, pairs, edges=None, mix_x=False, mix_y=False, method='euclidean'):
+def compute_affinities(x, y, pairs, edges=None, mix_x=False, mix_y=False, method='cosine', k=1):
     """
     Computes affinity scores between the pairs configurations in x and y indexed in pairs, according to the concepts
     (edge-weighted) graph specified in edges.
@@ -228,7 +228,10 @@ def compute_affinities(x, y, pairs, edges=None, mix_x=False, mix_y=False, method
             the configurations in y have a low number of concepts. If set to True, then edges is required.
         method (str): Which method to use to compute affinities. 'euclidean' uses a function based on the euclidean
             distance of each pair of configurations. 'cosine' uses a function based on cosine similarity of each pair
-            of configurations.
+            of configurations. Notice that 'cosine' performs faster than 'euclidean'.
+        k (float): Coefficient that controls the shape of the affinity function for method='euclidean'. It takes any
+            value in (0, +inf), typical values range from 0.1 to 10. The higher the value of k, the higher the score
+            the same pair of configurations will be assigned. Unused if method='cosine'.
 
     Returns (pd.DataFrame): DataFrame with columns key_x + key_y + ['Score'], containing the same rows as pairs.
         For each pair of configuration X and Y, their score is computed as follows:
@@ -299,7 +302,6 @@ def compute_affinities(x, y, pairs, edges=None, mix_x=False, mix_y=False, method
         pairs = norm(diff)
 
         # Score = 1 - tanh(||U - V|| / k) = 2 / (1 + exp(2 * ||U - V|| / k))
-        k = 1
         pairs['Score'] = 2 / (1 + np.exp(2 * pairs['Norm'] / k))
 
         # Keep only relevant columns
