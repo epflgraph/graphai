@@ -113,10 +113,7 @@ def random(n):
 x, y, edges = base()
 
 print(x)
-
-print(normalise(x))
-
-print(mix(x, edges))
+print(y)
 
 pairs = pd.merge(
     x['KeyX'].drop_duplicates(),
