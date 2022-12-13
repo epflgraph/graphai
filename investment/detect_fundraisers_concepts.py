@@ -8,6 +8,8 @@ from utils.breadcrumb import Breadcrumb
 from api.main import wikify
 from api.schemas.wikify import WikifyRequest
 
+from investment.concept_configuration import normalise
+
 
 def detect_fundraisers_concepts():
 
@@ -64,6 +66,13 @@ def detect_fundraisers_concepts():
 
     fundraisers_concepts_detected = fundraisers_concepts_detected.rename(columns={'page_id': 'PageID'})
     fundraisers_concepts_detected = fundraisers_concepts_detected[['FundraiserID', 'PageID', 'Score']]
+
+    ############################################################
+
+    bc.log('Normalising fundraiser-concept detected edge scores...')
+
+    # Normalise scores so that all fundraisers have a configuration with norm 1
+    fundraisers_concepts_detected = normalise(fundraisers_concepts_detected)
 
     ############################################################
 
