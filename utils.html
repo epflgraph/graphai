@@ -595,8 +595,8 @@ converting to lowercase.</p>
 </dd></dl>
 <dl class="function">
 <dt id="utils.time.date.rescale">
-<code class="sig-prename descclassname">utils.time.date.</code><code class="sig-name descname">rescale</code><span class="sig-paren">(</span><em class="sig-param">dates</em>, <em class="sig-param">min_date</em>, <em class="sig-param">max_date</em><span class="sig-paren">)</span><a class="headerlink" href="#utils.time.date.rescale" title="Permalink to this definition">¶</a></dt>
-<dd><p>Maps a pandas Series between min_date and max_date linearly to [0, 1].
+<code class="sig-prename descclassname">utils.time.date.</code><code class="sig-name descname">rescale</code><span class="sig-paren">(</span><em class="sig-param">date</em>, <em class="sig-param">min_date</em>, <em class="sig-param">max_date</em><span class="sig-paren">)</span><a class="headerlink" href="#utils.time.date.rescale" title="Permalink to this definition">¶</a></dt>
+<dd><p>Maps a date between min_date and max_date linearly to a number in [0, 1].
 Dates below or above the given range are mapped to 0 or 1, respectively.
 Dates are assumed to be in format yyyy-mm-dd.</p>
 </dd></dl>
