@@ -65,7 +65,7 @@ def normalise(x):
     return x
 
 
-def mix(x, edges, min_ratio=0.05, normalise_result=False):
+def mix(x, edges, min_ratio=0.05):
     """
     Mixes the configurations in x according to the edges in edges.
 
@@ -78,7 +78,6 @@ def mix(x, edges, min_ratio=0.05, normalise_result=False):
             weighted edges of the concepts graph.
         min_ratio (float): For every resulting configuration, only concepts whose ratio of score over maximum score
             is above min_ratio are kept. If set to 0, then all concepts are kept.
-        normalise_result (bool): Whether to normalise the resulting configurations (by dividing by their norm).
 
     Returns (pd.DataFrame): DataFrame with the same columns as x, containing configurations indexed by the same set as
         x. The score of a concept in the mixed configuration is the arithmetic mean of the products of the
@@ -123,10 +122,6 @@ def mix(x, edges, min_ratio=0.05, normalise_result=False):
         )
         mixed = mixed[mixed['Score'] >= min_ratio * mixed['MaxScore']].reset_index(drop=True)
         mixed = mixed[key + ['PageID', 'Score']]
-
-    # Normalise result if specified
-    if normalise_result:
-        mixed = normalise(mixed)
 
     return mixed
 
@@ -204,7 +199,7 @@ def combine(x, y, pairs):
     return combination[key_x + key_y + ['PageID', 'Score']]
 
 
-def compute_affinities(x, y, pairs, edges=None, mix_x=False, mix_y=False, method='cosine', k=1):
+def compute_affinities(x, y, pairs, edges=None, mix_x=False, mix_y=False, normalise_before=False, method='cosine', k=1):
     """
     Computes affinity scores between the pairs configurations in x and y indexed in pairs, according to the concepts
     (edge-weighted) graph specified in edges.
@@ -226,6 +221,7 @@ def compute_affinities(x, y, pairs, edges=None, mix_x=False, mix_y=False, method
             the configurations in x have a low number of concepts. If set to True, then edges is required.
         mix_y (bool): Whether to replace y with its mixing before affinity computation. Recommended to set to True if
             the configurations in y have a low number of concepts. If set to True, then edges is required.
+        normalise_before (bool): Whether to normalise score configurations to have norm 1 before computing affinities.
         method (str): Which method to use to compute affinities. 'euclidean' uses a function based on the euclidean
             distance of each pair of configurations. 'cosine' uses a function based on cosine similarity of each pair
             of configurations. Notice that 'cosine' performs faster than 'euclidean'.
@@ -254,7 +250,7 @@ def compute_affinities(x, y, pairs, edges=None, mix_x=False, mix_y=False, method
     key_x = [c for c in x.columns if c not in ['PageID', 'Score']]
     key_y = [c for c in y.columns if c not in ['PageID', 'Score']]
 
-    # Determine U and V by computing mixings if needed
+    # Determine U and V by computing mixings and normalising if needed
     if mix_x:
         u = mix(x, edges)
     else:
@@ -264,6 +260,10 @@ def compute_affinities(x, y, pairs, edges=None, mix_x=False, mix_y=False, method
         v = mix(y, edges)
     else:
         v = y
+
+    if normalise_before:
+        u = normalise(u)
+        v = normalise(v)
 
     if method == 'cosine':
         # Compute combination U*V
