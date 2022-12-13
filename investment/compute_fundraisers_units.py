@@ -4,7 +4,7 @@ import numpy as np
 from interfaces.db import DB
 from utils.breadcrumb import Breadcrumb
 
-from investment.concept_configuration import compute_affinities
+from investment.concept_configuration import compute_affinities, normalise
 
 
 def compute_fundraisers_units():
@@ -23,19 +23,16 @@ def compute_fundraisers_units():
     fields = ['UnitID', 'PageID', 'Score']
     units_concepts = pd.DataFrame(db.find(table_name, fields=fields), columns=fields)
 
-    # Normalise scores so that they add up to one per unit
-    units_concepts = pd.merge(
-        units_concepts,
-        units_concepts.groupby('UnitID').aggregate(SumScore=('Score', 'sum')).reset_index(),
-        how='left',
-        on='UnitID'
-    )
-    units_concepts['Score'] = units_concepts['Score'] / units_concepts['SumScore']
-    units_concepts = units_concepts.drop(columns='SumScore')
+    ############################################################
+
+    bc.log('Normalising unit-concept edge scores...')
+
+    # Normalise scores so that all units have a configuration with norm 1
+    units_concepts = normalise(units_concepts)
 
     ############################################################
 
-    bc.log('Fetching fundraiser-concept edges from database...')
+    bc.log('Fetching fundraiser-concept manual edges from database...')
 
     table_name = 'ca_temp.Edges_N_Fundraiser_N_Concept'
     fields = ['FundraiserID', 'PageID']
@@ -49,20 +46,71 @@ def compute_fundraisers_units():
         on='PageID'
     )
 
-    # Compute first version of score
+    # Compute first version of score based on concept rarity among fundraisers
     fundraisers_concepts['Score'] = 1 / (1 + np.log(fundraisers_concepts['PageFundraiserCount']))
 
-    # Normalise scores so that they add up to one per fundraiser
-    fundraisers_concepts = pd.merge(
-        fundraisers_concepts,
-        fundraisers_concepts.groupby(by='FundraiserID').aggregate(FundraiserScoreSum=('Score', 'sum')).reset_index(),
-        how='left',
-        on='FundraiserID'
-    )
-    fundraisers_concepts['Score'] = fundraisers_concepts['Score'] / fundraisers_concepts['FundraiserScoreSum']
-
-    # Extract only relevant columns
+    # Keep only relevant columns
     fundraisers_concepts = fundraisers_concepts[['FundraiserID', 'PageID', 'Score']]
+
+    ############################################################
+
+    bc.log('Fetching fundraiser-concept NLP edges from database...')
+
+    table_name = 'ca_temp.Edges_N_Fundraiser_N_Concept_T_AutoNLP'
+    fields = ['FundraiserID', 'PageID', 'Score']
+    fundraisers_concepts_nlp = pd.DataFrame(db.find(table_name, fields=fields), columns=fields)
+
+    ############################################################
+
+    bc.log('Merging fundraiser-concept manual and NLP edges...')
+
+    # Merge both manual and NLP edges in a single DataFrame
+    fundraisers_concepts = pd.merge(fundraisers_concepts, fundraisers_concepts_nlp, how='outer', on=['FundraiserID', 'PageID'], suffixes=('Manual', 'NLP'))
+    fundraisers_concepts = fundraisers_concepts.fillna(0)
+
+    ############################################################
+
+    bc.log('Combining fundraiser-concept manual and NLP edge scores...')
+
+    # We do not want to combine both scores symetrically, since manual tagging is a priori more reliable.
+    # However, we don't want to ignore the NLP pages neither.
+    # We define the combined score as follows:
+    #   Let base = max(ScoreManual, 0.9 * ScoreManual, 0.1 * ScoreNLP).
+    #   Let S = base^(1 - ScoreNLP/2).
+    #   If ScoreManual >= 0, then we define Score = S.
+    #   Else,
+    #       If S >= 0.1, then Score = S.
+    #       Else, Score = 0.
+    # We do this because we want the following properties:
+    #   - Score >= ScoreManual always.
+    #   - If ScoreManual = 0, then Score > 0 only for high values of ScoreNLP (greater than ~0.4816777...).
+    #   - If ScoreNLP = 0, then Score = ScoreManual.
+    #   - If ScoreNLP = 1, then we boost Score = sqrt(ScoreManual) (>= ScoreManual).
+    #   - If ScoreNLP = 0.5, then Score is the geometric mean of ScoreManual and sqrt(ScoreManual).
+    #   - In general, Score runs (multiplicatively) from ScoreManual to sqrt(ScoreManual) as ScoreNLP runs from 0 to 1.
+
+    # Extract relevant columns
+    score_manual = fundraisers_concepts['ScoreManual']
+    score_nlp = fundraisers_concepts['ScoreNLP']
+    score_weighted = 0.9 * score_manual + 0.1 * score_nlp
+
+    # Compute combined scores
+    base = pd.concat([score_manual, score_weighted], axis=1).max(axis=1)
+    score = np.power(base, 1 - score_nlp / 2)
+    fundraisers_concepts['Score'] = score.mask((score < 0.1) & (score_manual == 0), 0)
+
+    # Keep only positive scores
+    fundraisers_concepts = fundraisers_concepts[fundraisers_concepts['Score'] > 0].reset_index(drop=True)
+
+    # Keep only relevant columns
+    fundraisers_concepts = fundraisers_concepts[['FundraiserID', 'PageID', 'Score']]
+
+    ############################################################
+
+    bc.log('Normalising fundraiser-concept edge scores...')
+
+    # Normalise scores so that all fundraisers have a configuration with norm 1
+    fundraisers_concepts = normalise(fundraisers_concepts)
 
     ############################################################
 
@@ -87,10 +135,12 @@ def compute_fundraisers_units():
     fundraiser_ids = list(fundraisers_concepts['FundraiserID'].drop_duplicates())
     n = len(fundraiser_ids)
     batch_size = 1000
+    n_batches = np.ceil(n / batch_size).astype(int)
 
     fundraisers_units = None
-    for batch_fundraiser_ids in [fundraiser_ids[i: i + batch_size] for i in range(0, n, batch_size)]:
-        bc.log('New batch')
+    for i in range(0, n_batches):
+        bc.log(f'New batch ({i + 1}/{n_batches})')
+        batch_fundraiser_ids = fundraiser_ids[i * batch_size: (i + 1) * batch_size]
         batch_fundraisers_concepts = fundraisers_concepts[fundraisers_concepts['FundraiserID'].isin(batch_fundraiser_ids)]
 
         # We compute affinity fundraiser-unit for pairs sharing at least one concept with non-negligible unit score
@@ -117,7 +167,7 @@ def compute_fundraisers_units():
 
     ############################################################
 
-    bc.log('Normalising scores...')
+    bc.log('Normalising fundraiser-unit edge scores...')
 
     # Square scores to sum them
     fundraisers_units['SquaredScore'] = np.square(fundraisers_units['Score'])
