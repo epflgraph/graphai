@@ -219,7 +219,7 @@ def main(unit_id):
     unit_concepts = pd.merge(unit_concepts, concept_titles, how='left', on='PageID')
 
     # Fetch concepts
-    table_name = 'ca_temp.Nodes_N_Concept_T_Years'
+    table_name = 'aitor.Nodes_N_Concept_T_Years'
     fields = ['PageID', 'Year', 'CountAmount', 'MinAmount', 'MaxAmount', 'MedianAmount', 'SumAmount', 'ScoreQuadCount']
     conditions = {'PageID': unit_concept_ids, 'Year': time_window}
     concepts = pd.DataFrame(db.find(table_name, fields=fields, conditions=conditions), columns=fields)
@@ -233,7 +233,7 @@ def main(unit_id):
 
     ############################################################
 
-    table_name = 'ca_temp.Edges_N_Investor_N_Concept_T_Years'
+    table_name = 'aitor.Edges_N_Investor_N_Concept_T_Years'
     fields = ['InvestorID', 'PageID', 'Year', 'CountAmount']
     conditions = {'PageID': unit_concept_ids, 'Year': time_window}
     investors_concepts = pd.DataFrame(db.find(table_name, fields=fields, conditions=conditions), columns=fields)
@@ -252,7 +252,7 @@ def main(unit_id):
     ############################################################
 
     # Fetch investor-unit table for given unit
-    table_name = 'ca_temp.Edges_N_Investor_N_Unit_T_Years'
+    table_name = 'aitor.Edges_N_Investor_N_Unit_T_Years'
     fields = ['InvestorID', 'Year', 'Score']
     conditions = {'UnitID': unit_id}
     unit_investors = pd.DataFrame(db.find(table_name, fields=fields, conditions=conditions), columns=fields)
@@ -282,7 +282,7 @@ def main(unit_id):
     ############################################################
 
     # Fetch investor-concepts table only for unit investors
-    table_name = 'ca_temp.Edges_N_Investor_N_Concept_T_Years'
+    table_name = 'aitor.Edges_N_Investor_N_Concept_T_Years'
     fields = ['InvestorID', 'PageID', 'Year', 'CountAmount', 'MinAmount', 'MaxAmount', 'MedianAmount', 'SumAmount', 'ScoreQuadCount']
     conditions = {'InvestorID': unit_investor_ids, 'Year': time_window}
     investors_concepts = pd.DataFrame(db.find(table_name, fields=fields, conditions=conditions), columns=fields)
@@ -290,7 +290,7 @@ def main(unit_id):
     ############################################################
 
     # Fetch investor-concepts Jaccard table only for unit investors and concepts
-    table_name = 'ca_temp.Edges_N_Investor_N_Concept_T_Jaccard'
+    table_name = 'aitor.Edges_N_Investor_N_Concept_T_Jaccard'
     fields = ['InvestorID', 'PageID', 'Jaccard_000']
     conditions = {'InvestorID': unit_investor_ids, 'PageID': unit_concept_ids}
     investors_concepts_jaccard = pd.DataFrame(db.find(table_name, fields=fields, conditions=conditions), columns=fields)

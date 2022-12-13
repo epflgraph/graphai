@@ -34,7 +34,7 @@ def compute_fundraisers_units():
 
     bc.log('Fetching fundraiser-concept manual edges from database...')
 
-    table_name = 'ca_temp.Edges_N_Fundraiser_N_Concept'
+    table_name = 'aitor.Edges_N_Fundraiser_N_Concept'
     fields = ['FundraiserID', 'PageID']
     fundraisers_concepts = pd.DataFrame(db.find(table_name, fields=fields), columns=fields)
 
@@ -56,7 +56,7 @@ def compute_fundraisers_units():
 
     bc.log('Fetching fundraiser-concept NLP edges from database...')
 
-    table_name = 'ca_temp.Edges_N_Fundraiser_N_Concept_T_AutoNLP'
+    table_name = 'aitor.Edges_N_Fundraiser_N_Concept_T_AutoNLP'
     fields = ['FundraiserID', 'PageID', 'Score']
     fundraisers_concepts_nlp = pd.DataFrame(db.find(table_name, fields=fields), columns=fields)
 
@@ -193,7 +193,7 @@ def compute_fundraisers_units():
 
     bc.log('Inserting fundraiser-unit edges into database...')
 
-    table_name = 'ca_temp.Edges_N_Fundraiser_N_Unit'
+    table_name = 'aitor.Edges_N_Fundraiser_N_Unit'
     definition = [
         'FundraiserID CHAR(64)',
         'UnitID CHAR(32)',
