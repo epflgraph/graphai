@@ -8,7 +8,7 @@ from utils.time.date import *
 
 def get_frs(db, params):
     # Fetch funding rounds from database
-    table_name = 'graph.Nodes_N_FundingRound'
+    table_name = 'graph_piper.Nodes_N_FundingRound'
     fields = ['FundingRoundID', 'FundingRoundDate', 'FundingRoundType', 'FundingAmount_USD', 'FundingAmount_USD / CB_InvestorCount']
     columns = ['FundingRoundID', 'FundingRoundDate', 'FundingRoundType', 'FundingAmount_USD', 'FundingAmountPerInvestor_USD']
 
@@ -28,7 +28,7 @@ def get_frs(db, params):
 def get_investors_frs(db, params, fr_ids=None):
     if 'Organization' in params.investor_types:
         # Fetch organization investors from database
-        table_name = 'graph.Edges_N_Organisation_N_FundingRound'
+        table_name = 'graph_piper.Edges_N_Organisation_N_FundingRound'
         fields = ['OrganisationID', 'FundingRoundID']
 
         if fr_ids is None:
@@ -45,7 +45,7 @@ def get_investors_frs(db, params, fr_ids=None):
 
     if 'Person' in params.investor_types:
         # Fetch person investors from database
-        table_name = 'graph.Edges_N_Person_N_FundingRound'
+        table_name = 'graph_piper.Edges_N_Person_N_FundingRound'
         fields = ['PersonID', 'FundingRoundID']
 
         if fr_ids is None:
@@ -69,7 +69,7 @@ def get_investors_frs(db, params, fr_ids=None):
 
 def get_frs_fundraisers(db, fr_ids=None):
     # Fetch fundraisers from database
-    table_name = 'graph.Edges_N_Organisation_N_FundingRound'
+    table_name = 'graph_piper.Edges_N_Organisation_N_FundingRound'
     fields = ['FundingRoundID', 'OrganisationID']
 
     if fr_ids is None:
@@ -84,7 +84,7 @@ def get_frs_fundraisers(db, fr_ids=None):
 
 def get_fundraisers_concepts(db, fundraiser_ids=None):
     # Fetch concepts from database
-    table_name = 'graph.Edges_N_Organisation_N_Concept'
+    table_name = 'graph_piper.Edges_N_Organisation_N_Concept'
     fields = ['OrganisationID', 'PageID']
 
     if fundraiser_ids is None:

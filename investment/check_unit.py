@@ -193,18 +193,18 @@ def main(unit_id):
     ############################################################
 
     # Fetch crunchbase concepts
-    table_name = 'graph.Edges_N_Organisation_N_Concept'
+    table_name = 'graph_piper.Edges_N_Organisation_N_Concept'
     fields = ['DISTINCT PageID']
     cb_concept_ids = list(pd.DataFrame(db.find(table_name, fields=fields), columns=['PageID'])['PageID'])
 
     # Fetch concept title mapping
-    table_name = 'graph.Nodes_N_Concept_T_Title'
+    table_name = 'graph_piper.Nodes_N_Concept_T_Title'
     fields = ['PageID', 'PageTitle']
     conditions = {'PageID': cb_concept_ids}
     concept_titles = pd.DataFrame(db.find(table_name, fields=fields, conditions=conditions), columns=fields)
 
     # Fetch unit concepts and normalize score
-    table_name = 'graph.Edges_N_Unit_N_Concept_T_Research'
+    table_name = 'graph_piper.Edges_N_Unit_N_Concept_T_Research'
     fields = ['PageID', 'Score']
     conditions = {'UnitID': unit_id, 'PageID': cb_concept_ids}
     unit_concepts = pd.DataFrame(db.find(table_name, fields=fields, conditions=conditions), columns=fields)
@@ -267,12 +267,12 @@ def main(unit_id):
     ############################################################
 
     # Fetch investor names
-    table_name = 'graph.Nodes_N_Organisation'
+    table_name = 'graph_piper.Nodes_N_Organisation'
     fields = ['OrganisationID', 'OrganisationName']
     conditions = {'OrganisationID': unit_investor_ids}
     org_investor_names = pd.DataFrame(db.find(table_name, fields=fields, conditions=conditions), columns=['InvestorID', 'InvestorName'])
 
-    table_name = 'graph.Nodes_N_Person'
+    table_name = 'graph_piper.Nodes_N_Person'
     fields = ['PersonID', 'FullName']
     conditions = {'PersonID': unit_investor_ids}
     person_investor_names = pd.DataFrame(db.find(table_name, fields=fields, conditions=conditions), columns=['InvestorID', 'InvestorName'])

@@ -30,7 +30,7 @@ def detect_fundraisers_concepts():
     fundraiser_ids = list(fundraisers_concepts['FundraiserID'].drop_duplicates())
 
     # Fetch fundraiser descriptions
-    table_name = 'graph.Nodes_N_Organisation'
+    table_name = 'graph_piper.Nodes_N_Organisation'
     fields = ['OrganisationID', 'ShortDescription', 'Description']
     conditions = {'OrganisationID': fundraiser_ids}
     fundraisers = pd.DataFrame(db.find(table_name, fields=fields, conditions=conditions), columns=['FundraiserID', 'ShortDescription', 'Description'])

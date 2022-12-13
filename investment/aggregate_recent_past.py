@@ -207,7 +207,7 @@ def aggregate_recent_past(params):
     bc.log('Fetching concept-concept edges from database...')
 
     # Fetch table from database
-    table_name = 'graph.Edges_N_Concept_N_Concept_T_GraphScore'
+    table_name = 'graph_piper.Edges_N_Concept_N_Concept_T_GraphScore'
     fields = ['SourcePageID', 'TargetPageID', 'NormalisedScore']
     concept_ids = list(investors_concepts['PageID'].drop_duplicates().astype(int))
     conditions = {'SourcePageID': concept_ids, 'TargetPageID': concept_ids}
