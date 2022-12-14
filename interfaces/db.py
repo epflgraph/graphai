@@ -68,7 +68,36 @@ class DB:
 
         return results
 
-    def find(self, table_name, fields=None, conditions=None):
+    def build_conditions_list(self, conditions=None, values=None):
+        if conditions is None:
+            return []
+
+        if values is None:
+            values = []
+
+        conditions_list = []
+        for key in conditions:
+            if isinstance(conditions[key], dict):
+                if key == 'NOT':
+                    subconditions_list, subvalues = self.build_conditions_list(conditions[key])
+                    conditions_list.append('NOT (' + f' AND '.join(subconditions_list) + ')')
+                    values.extend(subvalues)
+                elif key in ['AND', 'OR']:
+                    subconditions_list, subvalues = self.build_conditions_list(conditions[key])
+                    conditions_list.append('(' + f' {key} '.join(subconditions_list) + ')')
+                    values.extend(subvalues)
+                else:
+                    for operator in conditions[key]:
+                        conditions_list.append(f'{key} {operator} {quote_value(conditions[key][operator])}')
+            elif isinstance(conditions[key], list):
+                conditions_list.append(f'{key} IN ({", ".join(["%s"] * len(conditions[key]))})')
+                values.extend(conditions[key])
+            else:
+                conditions_list.append(f'{key} = {quote_value(conditions[key])}')
+
+        return conditions_list, values
+
+    def find(self, table_name, fields=None, conditions=None, print_query=False):
         if fields:
             fields_str = ', '.join(fields)
         else:
@@ -77,17 +106,7 @@ class DB:
         conditions_str = ''
         values = []
         if conditions:
-            conditions_list = []
-            for key in conditions:
-                if isinstance(conditions[key], list):
-                    conditions_list.append(f'{key} IN ({", ".join(["%s"] * len(conditions[key]))})')
-                    values.extend(conditions[key])
-                elif isinstance(conditions[key], dict):
-                    for operator in conditions[key]:
-                        conditions_list.append(f'{key} {operator} {quote_value(conditions[key][operator])}')
-                else:
-                    conditions_list.append(f'{key} = {quote_value(conditions[key])}')
-
+            conditions_list, values = self.build_conditions_list(conditions)
             conditions_str = 'WHERE ' + ' AND '.join(conditions_list)
 
         query = f"""
@@ -95,6 +114,9 @@ class DB:
             FROM {table_name}
             {conditions_str}
         """
+
+        if print_query:
+            print(query)
 
         return self.execute_query(query, values)
 
@@ -132,7 +154,7 @@ class DB:
             if e.errno in handled_error_codes:
                 n = len(df)
                 payload_size_bytes = sys.getsizeof(query)
-                print(f'Failed inserting df with {n} rows (query payload size: {payload_size_bytes / 1024} MB). Splitting in two and retrying...')
+                print(f'Failed inserting df with {n} rows (query payload size: {payload_size_bytes / (2**20) :.2f} MB). Splitting in two and retrying...')
 
                 df1 = df.iloc[:(n // 2)]
                 df2 = df.iloc[(n // 2):]

@@ -1,5 +1,7 @@
 import datetime
 
+import pandas as pd
+
 
 def now():
     """
@@ -9,24 +11,28 @@ def now():
     return datetime.datetime.now()
 
 
-def rescale(date, min_date, max_date):
+def rescale(dates, min_date, max_date):
     """
-    Maps a date between min_date and max_date linearly to a number in [0, 1].
+    Maps a pandas Series between min_date and max_date linearly to [0, 1].
     Dates below or above the given range are mapped to 0 or 1, respectively.
     Dates are assumed to be in format yyyy-mm-dd.
     """
 
-    assert min_date < max_date, f'min_date ({min_date}) should be strictly less than max_date ({max_date})'
+    a = pd.to_datetime(min_date, format='%Y-%m-%d')
+    b = pd.to_datetime(max_date, format='%Y-%m-%d')
+    x = pd.to_datetime(dates, format='%Y-%m-%d')
 
-    if date <= min_date:
-        return 0.
+    return ((x - a) / (b - a)).clip(0, 1)
 
-    if date >= max_date:
-        return 1.
+    # # Convert string dates to datetime.date objects
+    # a = datetime.datetime.strptime(min_date, '%Y-%m-%d').date()
+    # b = datetime.datetime.strptime(max_date, '%Y-%m-%d').date()
+    # x = datetime.datetime.strptime(date, '%Y-%m-%d').date()
+    #
+    # return (x-a)/(b-a)
 
-    # Convert string dates to datetime.date objects
-    a = datetime.datetime.strptime(min_date, '%Y-%m-%d').date()
-    b = datetime.datetime.strptime(max_date, '%Y-%m-%d').date()
-    x = datetime.datetime.strptime(date, '%Y-%m-%d').date()
 
-    return (x-a)/(b-a)
+def add_years(date, n_years):
+    [year, month, day] = date.split('-')
+    year = str(int(year) + n_years)
+    return '-'.join([year, month, day])
