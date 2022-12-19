@@ -23,6 +23,8 @@ def create_startups_graph():
                         'es-grz-technologies', 'es-insolight', 'es-kaemco', 'es-power-vision-engineering',
                         'es-solaronix', 'es-swiss-inso', 'es-twentygreen', 'es-urbio']
 
+    gexf_filename = 'startups.gexf'
+
     ############################################################
 
     bc.log('Fetching startup nodes from database...')
@@ -54,6 +56,9 @@ def create_startups_graph():
     fields = ['SCIPER', 'PageID', 'Score']
     conditions = {'SCIPER': founder_ids + professor_ids}
     people_concepts = pd.DataFrame(db.find(table_name, fields=fields, conditions=conditions), columns=fields)
+
+    # Normalise scores
+    people_concepts = normalise(people_concepts)
 
     ############################################################
 
@@ -99,20 +104,54 @@ def create_startups_graph():
     bc.log('Restricting data to concepts subset...')
 
     startups_concepts = startups_concepts[startups_concepts['PageID'].isin(concept_ids)].reset_index(drop=True)
-    startup_ids = list(startups_concepts['EPFLStartupID'].drop_duplicates())
-    startups = startups[startups['EPFLStartupID'].isin(startup_ids)].reset_index(drop=True)
+
+    # Filter edges whose node does not exists and viceversa
+    startups_concepts = pd.merge(startups_concepts, startups[['EPFLStartupID']], how='inner', on='EPFLStartupID')
+    startups = pd.merge(startups, startups_concepts[['EPFLStartupID']].drop_duplicates(), how='inner', on='EPFLStartupID')
 
     ############################################################
 
+    bc.log('Preparing nodes and edges DataFrames...')
+
     # Nodes
-    print(startups)
-    print(concepts)
+    startups['Type'] = 'Startup'
+    concepts['Type'] = 'Concept'
+
+    startups = startups.rename(columns={'EPFLStartupID': 'ID', 'StartupName': 'Name'})
+    concepts = concepts.rename(columns={'PageID': 'ID', 'PageTitle': 'Name'})
+
+    nodes = pd.concat([startups, concepts]).reset_index(drop=True)
 
     # Edges
-    print(startups_concepts)
-    print(concepts_concepts)
+    startups_concepts['Type'] = 'Startup-Concept'
+    concepts_concepts['Type'] = 'Concept-Concept'
 
-    # TODO: concat nodes and edges and add type column
+    startups_concepts = startups_concepts.rename(columns={'EPFLStartupID': 'SourceID', 'PageID': 'TargetID'})
+    concepts_concepts = concepts_concepts.rename(columns={'SourcePageID': 'SourceID', 'TargetPageID': 'TargetID', 'NormalisedScore': 'Score'})
+
+    edges = pd.concat([startups_concepts, concepts_concepts]).reset_index(drop=True)
+
+    ############################################################
+
+    bc.log('Preparing node and edge lists...')
+
+    node_list = [(row['ID'], {'name': row['Name'], 'type': row['Type']}) for row in nodes.to_dict(orient='records')]
+    edge_list = [(row['SourceID'], row['TargetID'], {'weight': row['Score']}) for row in edges.to_dict(orient='records')]
+
+    ############################################################
+
+    bc.log('Building graph...')
+
+    G = nx.Graph()
+
+    G.add_nodes_from(node_list)
+    G.add_edges_from(edge_list)
+
+    ############################################################
+
+    bc.log(f'Exporting in gexf format at {gexf_filename}...')
+
+    nx.write_gexf(G, gexf_filename)
 
     ############################################################
 
