@@ -1,0 +1,2828 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+    "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd" >
+<svg contentScriptType="text/ecmascript" width="2031.0"
+     xmlns:xlink="http://www.w3.org/1999/xlink" zoomAndPan="magnify"
+     contentStyleType="text/css"
+     viewBox="-1013.000000 -940.000000 2031.000000 1944.846313"
+     height="1944.8463" preserveAspectRatio="xMidYMid meet"
+     xmlns="http://www.w3.org/2000/svg" version="1.1">
+    <g id="edges">
+        <path fill="none" stroke-width="0.09661422"
+              d="M 312.200989,189.638092 C 211.833145,214.149857 24.513741,100.365723 0.001981,-0.002124"
+              class="id_es-aeler-technologies id_10779" stroke-opacity="1.0"
+              stroke="#c686e9"/>
+        <path fill="none" stroke-width="0.44384462"
+              d="M -418.787964,183.609390 C -360.809113,-50.555077 77.405907,-314.833435 311.570374,-256.854584"
+              class="id_es-aesyra-aesybyte id_1134" stroke-opacity="1.0"
+              stroke="#5fc613"/>
+        <path fill="none" stroke-width="1.578009"
+              d="M -418.787964,183.609390 C -381.759613,117.112839 -226.472229,72.910538 -159.975677,109.938896"
+              class="id_es-aesyra-aesybyte id_1076662" stroke-opacity="1.0"
+              stroke="#92a67e"/>
+        <path fill="none" stroke-width="1.5330236"
+              d="M -418.787964,183.609390 C -447.595276,234.419708 -567.021667,267.424225 -617.831970,238.616928"
+              class="id_es-aesyra-aesybyte id_1424309" stroke-opacity="1.0"
+              stroke="#5fc613"/>
+        <path fill="none" stroke-width="8.672517"
+              d="M -237.040283,-495.019684 C -243.672440,-492.510620 -257.384277,-498.695221 -259.893341,-505.327393"
+              class="id_es-aica id_10474719" stroke-opacity="1.0"
+              stroke="#ea8615"/>
+        <path fill="none" stroke-width="0.14723943"
+              d="M 494.346100,38.567612 C 398.706512,16.038322 289.041077,-161.214996 311.570374,-256.854584"
+              class="id_es-akselos id_1134" stroke-opacity="1.0"
+              stroke="#5fc613"/>
+        <path fill="none" stroke-width="0.514449"
+              d="M 162.036682,8.317768 C 138.908951,-74.623444 228.629166,-233.726852 311.570374,-256.854584"
+              class="id_es-aleva-neurotherapeutics id_1134" stroke-opacity="1.0"
+              stroke="#92a67e"/>
+        <path fill="none" stroke-width="1.2487785"
+              d="M 162.036682,8.317768 C 127.965767,39.060730 30.744942,34.068794 0.001981,-0.002124"
+              class="id_es-aleva-neurotherapeutics id_10779"
+              stroke-opacity="1.0" stroke="#c686e9"/>
+        <path fill="none" stroke-width="1.4486693"
+              d="M 761.404358,358.442230 C 714.049072,385.615021 602.257080,355.341309 575.084290,307.986084"
+              class="id_es-aqua-tech id_23001" stroke-opacity="1.0"
+              stroke="#2e9072"/>
+        <path fill="none" stroke-width="0.6210252"
+              d="M 761.404358,358.442230 C 706.804504,399.725830 562.979309,379.751404 521.695740,325.151520"
+              class="id_es-aqua-tech id_23872" stroke-opacity="1.0"
+              stroke="#2e9072"/>
+        <path fill="none" stroke-width="0.08536109"
+              d="M 761.404358,358.442230 C 671.781433,188.009872 792.995605,-202.073044 963.427979,-291.695953"
+              class="id_es-aqua-tech id_26833" stroke-opacity="1.0"
+              stroke="#46ab42"/>
+        <path fill="none" stroke-width="3.6437845"
+              d="M 761.404358,358.442230 C 724.530396,360.801025 665.681335,309.028290 663.322510,272.154358"
+              class="id_es-aqua-tech id_144241" stroke-opacity="1.0"
+              stroke="#2e9072"/>
+        <path fill="none" stroke-width="1.2377672"
+              d="M 761.404358,358.442230 C 733.939087,300.375793 779.840759,172.078171 837.907227,144.612869"
+              class="id_es-aqua-tech id_155726" stroke-opacity="1.0"
+              stroke="#2e9072"/>
+        <path fill="none" stroke-width="2.6475403"
+              d="M 761.404358,358.442230 C 776.541443,400.296326 736.466003,485.783203 694.611877,500.920319"
+              class="id_es-aqua-tech id_1225002" stroke-opacity="1.0"
+              stroke="#2e9072"/>
+        <path fill="none" stroke-width="8.152991"
+              d="M 761.404358,358.442230 C 775.925720,384.542328 758.557739,445.474579 732.457642,459.996002"
+              class="id_es-aqua-tech id_1242977" stroke-opacity="1.0"
+              stroke="#2e9072"/>
+        <path fill="none" stroke-width="1.8126261"
+              d="M 761.404358,358.442230 C 810.774902,347.625122 901.056335,405.455292 911.873413,454.825806"
+              class="id_es-aqua-tech id_1277055" stroke-opacity="1.0"
+              stroke="#2e9072"/>
+        <path fill="none" stroke-width="2.3017204"
+              d="M 761.404358,358.442230 C 769.805237,320.975708 838.606262,277.377197 876.072815,285.778046"
+              class="id_es-aqua-tech id_2518458" stroke-opacity="1.0"
+              stroke="#2e9072"/>
+        <path fill="none" stroke-width="0.7968035"
+              d="M 761.404358,358.442230 C 786.488403,283.491608 936.540283,208.691681 1011.490906,233.775665"
+              class="id_es-aqua-tech id_3134585" stroke-opacity="1.0"
+              stroke="#2e9072"/>
+        <path fill="none" stroke-width="0.514449"
+              d="M 82.622696,-102.197601 C 97.480835,-178.918533 234.849426,-271.712708 311.570374,-256.854584"
+              class="id_es-artiria-medical id_1134" stroke-opacity="1.0"
+              stroke="#92a67e"/>
+        <path fill="none" stroke-width="1.2487785"
+              d="M 82.622696,-102.197601 C 86.537651,-65.234367 36.965218,-3.917080 0.001981,-0.002124"
+              class="id_es-artiria-medical id_10779" stroke-opacity="1.0"
+              stroke="#c686e9"/>
+        <path fill="none" stroke-width="1.661639"
+              d="M -84.094116,71.839684 C -81.643257,40.652100 -31.185600,-2.452983 0.001981,-0.002124"
+              class="id_es-artmyn id_10779" stroke-opacity="1.0"
+              stroke="#c686e9"/>
+        <path fill="none" stroke-width="5.3711824"
+              d="M -84.094116,71.839684 C -91.650589,94.635841 -137.179520,117.495369 -159.975677,109.938896"
+              class="id_es-artmyn id_1076662" stroke-opacity="1.0"
+              stroke="#c686e9"/>
+        <path fill="none" stroke-width="0.0076071518"
+              d="M -1002.420715,-35.891567 C -783.815125,-342.882385 4.579556,-475.460205 311.570374,-256.854584"
+              class="id_es-auxenion-research id_1134" stroke-opacity="1.0"
+              stroke="#5fc613"/>
+        <path fill="none" stroke-width="0.8652517"
+              d="M 232.011627,568.661926 C 202.844086,583.112732 137.416580,561.037598 122.965775,531.870117"
+              class="id_es-bluewatt-engineering id_10934212"
+              stroke-opacity="1.0" stroke="#00caff"/>
+        <path fill="none" stroke-width="0.12923776"
+              d="M 629.310303,-134.021439 C 541.195679,-95.040085 350.551727,-168.739960 311.570374,-256.854584"
+              class="id_es-bridgology id_1134" stroke-opacity="1.0"
+              stroke="#5fc613"/>
+        <path fill="none" stroke-width="0.21582536"
+              d="M -113.933472,286.152832 C -158.384705,260.118500 -186.010025,154.390121 -159.975677,109.938896"
+              class="id_es-bright-sensors id_1076662" stroke-opacity="1.0"
+              stroke="#c686e9"/>
+        <path fill="none" stroke-width="0.048704743"
+              d="M 672.152588,-6.498278 C 549.964844,15.546902 333.615570,-134.666870 311.570374,-256.854584"
+              class="id_es-clearspace id_1134" stroke-opacity="1.0"
+              stroke="#5fc613"/>
+        <path fill="none" stroke-width="0.22222093"
+              d="M 276.607788,314.445892 C 169.340210,193.193268 190.317749,-149.587006 311.570374,-256.854584"
+              class="id_es-combo-solutions id_1134" stroke-opacity="1.0"
+              stroke="#2fc889"/>
+        <path fill="none" stroke-width="0.36441448"
+              d="M 276.607788,314.445892 C 289.364227,388.659119 197.179031,519.113647 122.965775,531.870117"
+              class="id_es-combo-solutions id_10934212" stroke-opacity="1.0"
+              stroke="#00caff"/>
+        <path fill="none" stroke-width="0.09661422"
+              d="M 40.436802,-455.445099 C 123.438431,-356.269531 99.177536,-83.003746 0.001981,-0.002124"
+              class="id_es-comppair id_10779" stroke-opacity="1.0"
+              stroke="#c686e9"/>
+        <path fill="none" stroke-width="0.16392821"
+              d="M 256.268768,-668.721680 C 349.702515,-597.408569 382.883453,-350.288330 311.570374,-256.854584"
+              class="id_es-crisalix id_1134" stroke-opacity="1.0"
+              stroke="#5fc613"/>
+        <path fill="none" stroke-width="10.0"
+              d="M -410.395355,-285.599731 C -416.445557,-279.912384 -434.051849,-280.456726 -439.739197,-286.506927"
+              class="id_es-cyberbotics id_20903754" stroke-opacity="1.0"
+              stroke="#ea8615"/>
+        <path fill="none" stroke-width="0.23308738"
+              d="M 263.274872,18.530354 C 217.856964,-46.205734 246.834290,-211.436691 311.570374,-256.854584"
+              class="id_es-daphne-technology id_1134" stroke-opacity="1.0"
+              stroke="#92a67e"/>
+        <path fill="none" stroke-width="0.60715425"
+              d="M 263.274872,18.530354 C 206.913803,67.478439 48.950062,56.358952 0.001981,-0.002124"
+              class="id_es-daphne-technology id_10779" stroke-opacity="1.0"
+              stroke="#c686e9"/>
+        <path fill="none" stroke-width="1.661639"
+              d="M -122.122795,35.646099 C -104.827484,4.091499 -31.552620,-17.297436 0.001981,-0.002124"
+              class="id_es-dartfish id_10779" stroke-opacity="1.0"
+              stroke="#c686e9"/>
+        <path fill="none" stroke-width="5.3711824"
+              d="M -122.122795,35.646099 C -114.834816,58.075237 -137.546539,102.650917 -159.975677,109.938896"
+              class="id_es-dartfish id_1076662" stroke-opacity="1.0"
+              stroke="#c686e9"/>
+        <path fill="none" stroke-width="0.069810465"
+              d="M 214.540375,-929.490540 C 368.473572,-814.369385 426.691559,-410.787781 311.570374,-256.854584"
+              class="id_es-diagnoswiss id_1134" stroke-opacity="1.0"
+              stroke="#5fc613"/>
+        <path fill="none" stroke-width="10.0"
+              d="M -456.002411,-261.324799 C -457.786194,-269.613892 -448.028290,-284.723145 -439.739197,-286.506927"
+              class="id_es-didel id_20903754" stroke-opacity="1.0"
+              stroke="#ea8615"/>
+        <path fill="none" stroke-width="0.12798896"
+              d="M 827.210754,-284.427063 C 853.000427,-313.124268 934.730713,-317.485626 963.427979,-291.695953"
+              class="id_es-earlysight id_26833" stroke-opacity="1.0"
+              stroke="#5fc613"/>
+        <path fill="none" stroke-width="0.13769744"
+              d="M -531.418945,374.380859 C -489.068176,79.535889 16.725410,-299.205353 311.570374,-256.854584"
+              class="id_es-embion-technologies id_1134" stroke-opacity="1.0"
+              stroke="#5fc613"/>
+        <path fill="none" stroke-width="0.53219545"
+              d="M -531.418945,374.380859 C -569.827515,375.094238 -628.510437,318.551483 -629.223816,280.142914"
+              class="id_es-embion-technologies id_1326107" stroke-opacity="1.0"
+              stroke="#5fc613"/>
+        <path fill="none" stroke-width="0.069775894"
+              d="M -859.313843,181.714508 C -888.158020,210.215775 -974.176147,209.701447 -1002.677429,180.857285"
+              class="id_es-enairys-powertech-sa id_13764124"
+              stroke-opacity="1.0" stroke="#00caff"/>
+        <path fill="none" stroke-width="0.3521868"
+              d="M 179.484955,504.933228 C 42.601288,439.842773 -65.088501,136.881546 0.001981,-0.002124"
+              class="id_es-enviroscopy id_10779" stroke-opacity="1.0"
+              stroke="#63a8f4"/>
+        <path fill="none" stroke-width="4.685945"
+              d="M 179.484955,504.933228 C 173.568497,521.624451 139.656982,537.786560 122.965775,531.870117"
+              class="id_es-enviroscopy id_10934212" stroke-opacity="1.0"
+              stroke="#00caff"/>
+        <path fill="none" stroke-width="0.1932269"
+              d="M 392.956055,4.994367 C 324.309143,-31.098288 275.477722,-188.207672 311.570374,-256.854584"
+              class="id_es-epiqr-renovation id_1134" stroke-opacity="1.0"
+              stroke="#5fc613"/>
+        <path fill="none" stroke-width="10.0"
+              d="M -468.867920,-290.263977 C -462.290771,-295.338318 -444.813538,-293.084076 -439.739197,-286.506927"
+              class="id_es-epsitec id_20903754" stroke-opacity="1.0"
+              stroke="#ea8615"/>
+        <path fill="none" stroke-width="0.1932269"
+              d="M 520.456543,-520.938904 C 531.496216,-426.344818 406.164459,-267.894226 311.570374,-256.854584"
+              class="id_es-estia id_1134" stroke-opacity="1.0" stroke="#5fc613"/>
+        <path fill="none" stroke-width="0.069775894"
+              d="M -899.550720,-75.608322 C -868.882935,-3.689859 -930.758911,150.189499 -1002.677429,180.857285"
+              class="id_es-fastcom-technology id_13764124" stroke-opacity="1.0"
+              stroke="#00caff"/>
+        <path fill="none" stroke-width="0.36624908"
+              d="M -247.040390,272.849518 C -262.209564,222.854446 -209.970749,125.108086 -159.975677,109.938896"
+              class="id_es-fiveco id_1076662" stroke-opacity="1.0"
+              stroke="#c686e9"/>
+        <path fill="none" stroke-width="0.36624908"
+              d="M -5.704201,263.461426 C -67.263000,263.611237 -159.825897,171.497696 -159.975677,109.938896"
+              class="id_es-flybotix id_1076662" stroke-opacity="1.0"
+              stroke="#c686e9"/>
+        <path fill="none" stroke-width="2.3829947"
+              d="M -102.539314,473.746643 C -29.776550,514.041138 18.925873,683.626953 -21.368603,756.389709"
+              class="id_es-gaiasens-technologies id_12463" stroke-opacity="1.0"
+              stroke="#00caff"/>
+        <path fill="none" stroke-width="0.36762848"
+              d="M -102.539314,473.746643 C 82.432297,446.273926 401.098755,682.522278 428.571472,867.493896"
+              class="id_es-gaiasens-technologies id_19022" stroke-opacity="1.0"
+              stroke="#00caff"/>
+        <path fill="none" stroke-width="8.284643"
+              d="M -102.539314,473.746643 C -68.103889,447.827637 22.427801,460.602203 48.346832,495.037628"
+              class="id_es-gaiasens-technologies id_22718" stroke-opacity="1.0"
+              stroke="#00caff"/>
+        <path fill="none" stroke-width="1.7917325"
+              d="M -102.539314,473.746643 C -297.087280,426.270020 -517.694214,63.233147 -470.217590,-131.314804"
+              class="id_es-gaiasens-technologies id_41958" stroke-opacity="1.0"
+              stroke="#75a88a"/>
+        <path fill="none" stroke-width="3.5254261"
+              d="M -102.539314,473.746643 C -130.873871,489.901184 -197.607498,471.631134 -213.762039,443.296600"
+              class="id_es-gaiasens-technologies id_44179" stroke-opacity="1.0"
+              stroke="#00caff"/>
+        <path fill="none" stroke-width="1.2246909"
+              d="M -102.539314,473.746643 C -186.788147,412.472382 -221.249954,194.187714 -159.975677,109.938896"
+              class="id_es-gaiasens-technologies id_1076662"
+              stroke-opacity="1.0" stroke="#63a8f4"/>
+        <path fill="none" stroke-width="1.594852"
+              d="M -102.539314,473.746643 C -78.398041,530.097900 -126.712997,650.836670 -183.064240,674.977966"
+              class="id_es-gaiasens-technologies id_1866009"
+              stroke-opacity="1.0" stroke="#00caff"/>
+        <path fill="none" stroke-width="0.28759563"
+              d="M -102.539314,473.746643 C -21.150948,599.810669 -88.164444,910.989258 -214.228470,992.377625"
+              class="id_es-gaiasens-technologies id_4122592"
+              stroke-opacity="1.0" stroke="#63a8f4"/>
+        <path fill="none" stroke-width="1.8506061"
+              d="M -102.539314,473.746643 C -45.813595,440.270325 89.489441,475.144409 122.965775,531.870117"
+              class="id_es-gaiasens-technologies id_10934212"
+              stroke-opacity="1.0" stroke="#00caff"/>
+        <path fill="none" stroke-width="1.5365757"
+              d="M -102.539314,473.746643 C -127.939346,531.276550 -252.334244,579.471313 -309.864136,554.071289"
+              class="id_es-gaiasens-technologies id_17554500"
+              stroke-opacity="1.0" stroke="#00caff"/>
+        <path fill="none" stroke-width="0.092780754"
+              d="M 856.129639,-109.485855 C 841.147278,-167.387543 905.526306,-276.713593 963.427979,-291.695953"
+              class="id_es-gamaya id_26833" stroke-opacity="1.0"
+              stroke="#5fc613"/>
+        <path fill="none" stroke-width="3.434663"
+              d="M -578.338989,-362.313049 C -590.031128,-374.381439 -589.466797,-410.022278 -577.398376,-421.714447"
+              class="id_es-gctronic id_25781" stroke-opacity="1.0"
+              stroke="#ea8615"/>
+        <path fill="none" stroke-width="2.1110039"
+              d="M -578.338989,-362.313049 C -535.457764,-374.871796 -452.297943,-329.388123 -439.739197,-286.506927"
+              class="id_es-gctronic id_20903754" stroke-opacity="1.0"
+              stroke="#ea8615"/>
+        <path fill="none" stroke-width="0.012867251"
+              d="M 31.907866,-922.410645 C 220.951599,-845.231934 388.749084,-445.898315 311.570374,-256.854584"
+              class="id_es-genomsys id_1134" stroke-opacity="1.0"
+              stroke="#5fc613"/>
+        <path fill="none" stroke-width="0.30585086"
+              d="M 559.827393,-304.659882 C 519.737061,-245.447418 370.782837,-216.764252 311.570374,-256.854584"
+              class="id_es-geoeg id_1134" stroke-opacity="1.0" stroke="#5fc613"/>
+        <path fill="none" stroke-width="0.21336018"
+              d="M -187.794434,-10.693436 C -137.153702,-159.798630 162.465179,-307.495300 311.570374,-256.854584"
+              class="id_es-geosatis id_1134" stroke-opacity="1.0"
+              stroke="#92a67e"/>
+        <path fill="none" stroke-width="0.47629115"
+              d="M -187.794434,-10.693436 C -148.096893,-46.114456 -35.419041,-39.699669 0.001981,-0.002124"
+              class="id_es-geosatis id_10779" stroke-opacity="1.0"
+              stroke="#c686e9"/>
+        <path fill="none" stroke-width="4.210646"
+              d="M -187.794434,-10.693436 C -158.104218,7.869280 -141.412964,80.248680 -159.975677,109.938896"
+              class="id_es-geosatis id_1076662" stroke-opacity="1.0"
+              stroke="#c686e9"/>
+        <path fill="none" stroke-width="0.5071858"
+              d="M 95.728554,76.891983 C 72.147598,-33.025696 201.652695,-233.273636 311.570374,-256.854584"
+              class="id_es-gridsteer id_1134" stroke-opacity="1.0"
+              stroke="#92a67e"/>
+        <path fill="none" stroke-width="2.8332818"
+              d="M 95.728554,76.891983 C 61.204414,80.658478 3.768475,34.522011 0.001981,-0.002124"
+              class="id_es-gridsteer id_10779" stroke-opacity="1.0"
+              stroke="#c686e9"/>
+        <path fill="none" stroke-width="0.38356978"
+              d="M 95.728554,76.891983 C 51.197090,134.642212 -102.225449,154.470367 -159.975677,109.938896"
+              class="id_es-gridsteer id_1076662" stroke-opacity="1.0"
+              stroke="#c686e9"/>
+        <path fill="none" stroke-width="0.67646116"
+              d="M 62.221420,159.225540 C 17.931995,139.823898 -19.399666,44.287300 0.001981,-0.002124"
+              class="id_es-grosso-link id_10779" stroke-opacity="1.0"
+              stroke="#c686e9"/>
+        <path fill="none" stroke-width="0.62128013"
+              d="M 62.221420,159.225540 C 7.924673,193.807632 -125.393585,164.235641 -159.975677,109.938896"
+              class="id_es-grosso-link id_1076662" stroke-opacity="1.0"
+              stroke="#c686e9"/>
+        <path fill="none" stroke-width="0.8514106"
+              d="M -258.188293,-128.325104 C -380.708160,-123.160957 -572.234192,-299.194580 -577.398376,-421.714447"
+              class="id_es-hydromea id_25781" stroke-opacity="1.0"
+              stroke="#ea8615"/>
+        <path fill="none" stroke-width="0.6445081"
+              d="M -258.188293,-128.325104 C -190.892975,-100.314827 -131.965393,42.643570 -159.975677,109.938896"
+              class="id_es-hydromea id_1076662" stroke-opacity="1.0"
+              stroke="#d8867f"/>
+        <path fill="none" stroke-width="0.33567291"
+              d="M -258.188293,-128.325104 C -326.134827,-123.651291 -435.065369,-218.560379 -439.739197,-286.506927"
+              class="id_es-hydromea id_20903754" stroke-opacity="1.0"
+              stroke="#ea8615"/>
+        <path fill="none" stroke-width="0.17820379"
+              d="M 22.691748,-310.748749 C 91.246307,-357.745636 264.573486,-325.409149 311.570374,-256.854584"
+              class="id_es-i-dent-sa id_1134" stroke-opacity="1.0"
+              stroke="#92a67e"/>
+        <path fill="none" stroke-width="0.43681145"
+              d="M 22.691748,-310.748749 C 80.303116,-244.061478 66.689255,-57.613495 0.001981,-0.002124"
+              class="id_es-i-dent-sa id_10779" stroke-opacity="1.0"
+              stroke="#c686e9"/>
+        <path fill="none" stroke-width="0.2824183"
+              d="M -58.402134,-141.749329 C -18.371874,-125.080711 16.670597,-40.032387 0.001981,-0.002124"
+              class="id_es-illusonic id_10779" stroke-opacity="1.0"
+              stroke="#c686e9"/>
+        <path fill="none" stroke-width="0.069775894"
+              d="M -828.310852,33.160030 C -833.644714,97.572800 -938.264709,186.191162 -1002.677429,180.857285"
+              class="id_es-imperix id_13764124" stroke-opacity="1.0"
+              stroke="#00caff"/>
+        <path fill="none" stroke-width="0.124351166"
+              d="M 504.477478,-652.702881 C 545.065735,-534.951782 429.321472,-297.442810 311.570374,-256.854584"
+              class="id_es-inait id_1134" stroke-opacity="1.0" stroke="#5fc613"/>
+        <path fill="none" stroke-width="0.057930093"
+              d="M 471.066925,-814.050232 C 550.606750,-670.711792 454.908813,-336.394379 311.570374,-256.854584"
+              class="id_es-innoview id_1134" stroke-opacity="1.0"
+              stroke="#5fc613"/>
+        <path fill="none" stroke-width="10.0"
+              d="M -427.085632,-259.278503 C -435.062012,-262.193481 -442.654175,-278.530548 -439.739197,-286.506927"
+              class="id_es-k-team id_20903754" stroke-opacity="1.0"
+              stroke="#ea8615"/>
+        <path fill="none" stroke-width="0.1932269"
+              d="M 519.974609,-74.048126 C 441.732483,-68.928574 316.689941,-178.612442 311.570374,-256.854584"
+              class="id_es-kaemco id_1134" stroke-opacity="1.0" stroke="#5fc613"/>
+        <path fill="none" stroke-width="0.21582516"
+              d="M 331.136322,-547.539368 C 385.360107,-485.489227 373.620514,-311.078369 311.570374,-256.854584"
+              class="id_es-kandou-technologies id_1134" stroke-opacity="1.0"
+              stroke="#5fc613"/>
+        <path fill="none" stroke-width="0.315466"
+              d="M 485.419037,767.242249 C 494.099854,798.662109 459.991302,858.813049 428.571472,867.493896"
+              class="id_es-l-e-s-s id_19022" stroke-opacity="1.0"
+              stroke="#00caff"/>
+        <path fill="none" stroke-width="0.16826591"
+              d="M 625.621216,-449.130890 C 601.266296,-347.865448 412.835815,-232.499664 311.570374,-256.854584"
+              class="id_es-lantern-solutions-sarl id_1134" stroke-opacity="1.0"
+              stroke="#5fc613"/>
+        <path fill="none" stroke-width="0.044343065"
+              d="M 638.088196,-723.048706 C 666.023438,-564.506287 470.112762,-284.789856 311.570374,-256.854584"
+              class="id_es-largo-films id_1134" stroke-opacity="1.0"
+              stroke="#5fc613"/>
+        <path fill="none" stroke-width="0.09985544"
+              d="M -266.352356,94.748535 C -221.088440,-91.156639 125.665199,-302.118530 311.570374,-256.854584"
+              class="id_es-livelyplanet id_1134" stroke-opacity="1.0"
+              stroke="#92a67e"/>
+        <path fill="none" stroke-width="2.6980968"
+              d="M -266.352356,94.748535 C -242.038956,76.511269 -178.212936,85.625488 -159.975677,109.938896"
+              class="id_es-livelyplanet id_1076662" stroke-opacity="1.0"
+              stroke="#c686e9"/>
+        <path fill="none" stroke-width="7.824088"
+              d="M 505.839874,326.304779 C 508.780396,322.902954 518.293884,322.210999 521.695740,325.151520"
+              class="id_es-lumendo id_23872" stroke-opacity="1.0"
+              stroke="#2e9072"/>
+        <path fill="none" stroke-width="0.3521868"
+              d="M 130.573471,465.362701 C 11.386208,398.404022 -66.956688,119.185143 0.001981,-0.002124"
+              class="id_es-medlight id_10779" stroke-opacity="1.0"
+              stroke="#63a8f4"/>
+        <path fill="none" stroke-width="4.685945"
+              d="M 130.573471,465.362701 C 142.353409,480.185730 137.788788,520.090149 122.965775,531.870117"
+              class="id_es-medlight id_10934212" stroke-opacity="1.0"
+              stroke="#00caff"/>
+        <path fill="none" stroke-width="0.07235089"
+              d="M 814.954224,-453.173126 C 876.944397,-450.572449 966.028625,-353.686157 963.427979,-291.695953"
+              class="id_es-medusoil id_26833" stroke-opacity="1.0"
+              stroke="#5fc613"/>
+        <path fill="none" stroke-width="1.7472684"
+              d="M 24.456839,-67.401718 C 33.045784,-49.030827 18.372871,-8.591072 0.001981,-0.002124"
+              class="id_es-micror-systems id_10779" stroke-opacity="1.0"
+              stroke="#c686e9"/>
+        <path fill="none" stroke-width="2.2674527"
+              d="M -33.864319,-61.493832 C -14.792717,-55.968746 5.527062,-19.073727 0.001981,-0.002124"
+              class="id_es-miraex id_10779" stroke-opacity="1.0"
+              stroke="#c686e9"/>
+        <path fill="none" stroke-width="0.66412205"
+              d="M -137.991928,-613.897705 C -140.658142,-567.803345 -213.798996,-502.661163 -259.893341,-505.327393"
+              class="id_es-mobsya id_10474719" stroke-opacity="1.0"
+              stroke="#ea8615"/>
+        <path fill="none" stroke-width="0.5258592"
+              d="M 201.251221,-439.204742 C 259.785095,-424.798553 325.976563,-315.388458 311.570374,-256.854584"
+              class="id_es-nagi-bioscience id_1134" stroke-opacity="1.0"
+              stroke="#5fc613"/>
+        <path fill="none" stroke-width="0.21692924"
+              d="M -447.981995,56.135906 C -379.620148,9.295242 -206.816330,41.577034 -159.975677,109.938896"
+              class="id_es-nexthink-sa id_1076662" stroke-opacity="1.0"
+              stroke="#c686e9"/>
+        <path fill="none" stroke-width="0.39115205"
+              d="M 138.799667,148.832947 C 81.273117,146.825470 -2.005495,57.524429 0.001981,-0.002124"
+              class="id_es-odyssein-technologies id_10779" stroke-opacity="1.0"
+              stroke="#c686e9"/>
+        <path fill="none" stroke-width="0.977723"
+              d="M 394.307953,837.006409 C 407.258148,836.251160 427.816284,854.543701 428.571472,867.493896"
+              class="id_es-omnisens id_19022" stroke-opacity="1.0"
+              stroke="#00caff"/>
+        <path fill="none" stroke-width="0.514449"
+              d="M 98.843613,-166.134491 C 123.244942,-226.823853 250.881012,-281.255920 311.570374,-256.854584"
+              class="id_es-osmoblue id_1134" stroke-opacity="1.0"
+              stroke="#92a67e"/>
+        <path fill="none" stroke-width="1.2487785"
+              d="M 98.843613,-166.134491 C 112.301758,-113.139694 52.996780,-13.460272 0.001981,-0.002124"
+              class="id_es-osmoblue id_10779" stroke-opacity="1.0"
+              stroke="#c686e9"/>
+        <path fill="none" stroke-width="0.16826591"
+              d="M 376.892731,-648.848816 C 442.227112,-557.385498 403.033691,-322.188934 311.570374,-256.854584"
+              class="id_es-ozwe id_1134" stroke-opacity="1.0" stroke="#5fc613"/>
+        <path fill="none" stroke-width="0.8160647"
+              d="M 211.999573,96.489136 C 161.244995,5.906237 220.987488,-206.100006 311.570374,-256.854584"
+              class="id_es-panoptic-sarl id_1134" stroke-opacity="1.0"
+              stroke="#5fc613"/>
+        <path fill="none" stroke-width="0.37937886"
+              d="M 211.999573,96.489136 C 150.301804,119.590408 23.103245,61.695644 0.001981,-0.002124"
+              class="id_es-panoptic-sarl id_10779" stroke-opacity="1.0"
+              stroke="#92a67e"/>
+        <path fill="none" stroke-width="0.84787285"
+              d="M 211.999573,96.489136 C 140.294479,173.574127 -82.890678,181.643997 -159.975677,109.938896"
+              class="id_es-panoptic-sarl id_1076662" stroke-opacity="1.0"
+              stroke="#92a67e"/>
+        <path fill="none" stroke-width="0.09668666"
+              d="M 369.473389,125.505348 C 270.477600,174.298141 48.794777,98.993660 0.001981,-0.002124"
+              class="id_es-piemacs id_10779" stroke-opacity="1.0"
+              stroke="#c686e9"/>
+        <path fill="none" stroke-width="8.672517"
+              d="M -247.259674,-526.914307 C -245.469025,-520.070190 -253.049225,-507.118042 -259.893341,-505.327393"
+              class="id_es-pomelo id_10474719" stroke-opacity="1.0"
+              stroke="#ea8615"/>
+        <path fill="none" stroke-width="0.046063777"
+              d="M -507.225494,679.273865 C -530.692017,328.289001 -39.414490,-233.388092 311.570374,-256.854584"
+              class="id_es-power-vision-engineering id_1134"
+              stroke-opacity="1.0" stroke="#2fc889"/>
+        <path fill="none" stroke-width="0.20266894"
+              d="M -507.225494,679.273865 C -541.635193,441.973145 -237.298721,34.407593 0.001981,-0.002124"
+              class="id_es-power-vision-engineering id_10779"
+              stroke-opacity="1.0" stroke="#63a8f4"/>
+        <path fill="none" stroke-width="0.5983161"
+              d="M -507.225494,679.273865 C -625.545288,604.463013 -690.808716,314.767242 -615.997864,196.447479"
+              class="id_es-power-vision-engineering id_11180"
+              stroke-opacity="1.0" stroke="#2fc889"/>
+        <path fill="none" stroke-width="2.879661"
+              d="M -507.225494,679.273865 C -403.976807,543.244263 -45.059441,494.072968 90.970131,597.321655"
+              class="id_es-power-vision-engineering id_14073"
+              stroke-opacity="1.0" stroke="#00caff"/>
+        <path fill="none" stroke-width="0.07960923"
+              d="M -507.225494,679.273865 C -616.946716,713.155884 -832.351624,599.397034 -866.233643,489.675751"
+              class="id_es-power-vision-engineering id_146103"
+              stroke-opacity="1.0" stroke="#2fc889"/>
+        <path fill="none" stroke-width="1.3491337"
+              d="M -507.225494,679.273865 C -474.248962,723.059204 -490.462158,838.202026 -534.247498,871.178528"
+              class="id_es-power-vision-engineering id_1105937"
+              stroke-opacity="1.0" stroke="#00caff"/>
+        <path fill="none" stroke-width="0.2208489"
+              d="M -507.225494,679.273865 C -611.451355,623.847351 -684.650330,384.368774 -629.223816,280.142914"
+              class="id_es-power-vision-engineering id_1326107"
+              stroke-opacity="1.0" stroke="#2fc889"/>
+        <path fill="none" stroke-width="9.440862"
+              d="M -507.225494,679.273865 C -509.474487,695.792358 -537.625671,717.196594 -554.144165,714.947632"
+              class="id_es-power-vision-engineering id_1372353"
+              stroke-opacity="1.0" stroke="#00caff"/>
+        <path fill="none" stroke-width="0.37008616"
+              d="M -507.225494,679.273865 C -617.478210,613.263733 -683.842102,348.869629 -617.831970,238.616928"
+              class="id_es-power-vision-engineering id_1424309"
+              stroke-opacity="1.0" stroke="#2fc889"/>
+        <path fill="none" stroke-width="0.40530744"
+              d="M -507.225494,679.273865 C -705.999146,678.680969 -1003.270325,379.630981 -1002.677429,180.857285"
+              class="id_es-power-vision-engineering id_13764124"
+              stroke-opacity="1.0" stroke="#00caff"/>
+        <path fill="none" stroke-width="0.11836855"
+              d="M -126.425522,-186.068024 C -52.983650,-287.824524 209.813873,-330.296448 311.570374,-256.854584"
+              class="id_es-prediva id_1134" stroke-opacity="1.0"
+              stroke="#92a67e"/>
+        <path fill="none" stroke-width="0.4690929"
+              d="M -126.425522,-186.068024 C -73.934174,-120.156609 -94.064255,57.447540 -159.975677,109.938896"
+              class="id_es-prediva id_1076662" stroke-opacity="1.0"
+              stroke="#c686e9"/>
+        <path fill="none" stroke-width="0.27557525"
+              d="M 21.618004,-205.445572 C 69.326675,-273.717834 243.298096,-304.563263 311.570374,-256.854584"
+              class="id_es-program id_1134" stroke-opacity="1.0"
+              stroke="#92a67e"/>
+        <path fill="none" stroke-width="0.8118359"
+              d="M 21.618004,-205.445572 C 58.383492,-160.033661 45.413876,-36.767612 0.001981,-0.002124"
+              class="id_es-program id_10779" stroke-opacity="1.0"
+              stroke="#c686e9"/>
+        <path fill="none" stroke-width="0.06820723"
+              d="M 709.361877,-251.205673 C 628.673828,-172.777145 389.998871,-176.166504 311.570374,-256.854584"
+              class="id_es-rayform-caustics id_1134" stroke-opacity="1.0"
+              stroke="#5fc613"/>
+        <path fill="none" stroke-width="0.7518785"
+              d="M -168.965729,996.647827 C -178.872314,1004.846313 -206.029953,1002.284241 -214.228470,992.377625"
+              class="id_es-routerank id_4122592" stroke-opacity="1.0"
+              stroke="#c686e9"/>
+        <path fill="none" stroke-width="0.9081801"
+              d="M 27.462742,86.057793 C 4.758606,74.337959 -11.717850,22.702011 0.001981,-0.002124"
+              class="id_es-rovenso id_10779" stroke-opacity="1.0"
+              stroke="#c686e9"/>
+        <path fill="none" stroke-width="0.514449"
+              d="M 167.753220,-75.075523 C 160.160843,-140.194763 246.451141,-249.262207 311.570374,-256.854584"
+              class="id_es-seed-biosciences id_1134" stroke-opacity="1.0"
+              stroke="#92a67e"/>
+        <path fill="none" stroke-width="1.2487785"
+              d="M 167.753220,-75.075523 C 149.217651,-26.510597 48.566910,18.533442 0.001981,-0.002124"
+              class="id_es-seed-biosciences id_10779" stroke-opacity="1.0"
+              stroke="#c686e9"/>
+        <path fill="none" stroke-width="0.1912446"
+              d="M -14.293518,183.511459 C -37.193939,30.265472 158.324371,-233.954163 311.570374,-256.854584"
+              class="id_es-senbiosys id_1134" stroke-opacity="1.0"
+              stroke="#92a67e"/>
+        <path fill="none" stroke-width="0.66121453"
+              d="M -14.293518,183.511459 C -48.137135,143.949646 -39.559837,33.841492 0.001981,-0.002124"
+              class="id_es-senbiosys id_10779" stroke-opacity="1.0"
+              stroke="#c686e9"/>
+        <path fill="none" stroke-width="1.8048"
+              d="M -14.293518,183.511459 C -58.144463,197.933380 -145.553757,153.789841 -159.975677,109.938896"
+              class="id_es-senbiosys id_1076662" stroke-opacity="1.0"
+              stroke="#c686e9"/>
+        <path fill="none" stroke-width="0.33059177"
+              d="M -801.721497,511.941742 C -819.077087,520.390991 -857.784424,507.031372 -866.233643,489.675751"
+              class="id_es-senis id_146103" stroke-opacity="1.0"
+              stroke="#5fc613"/>
+        <path fill="none" stroke-width="0.20292178"
+              d="M -128.432510,-491.101715 C -4.525696,-418.568695 72.534996,-123.908936 0.001981,-0.002124"
+              class="id_es-sensars-neuroprosthetics-sarl id_10779"
+              stroke-opacity="1.0" stroke="#d8867f"/>
+        <path fill="none" stroke-width="1.7853885"
+              d="M -128.432510,-491.101715 C -157.569809,-467.654663 -236.446304,-476.190094 -259.893341,-505.327393"
+              class="id_es-sensars-neuroprosthetics-sarl id_10474719"
+              stroke-opacity="1.0" stroke="#ea8615"/>
+        <path fill="none" stroke-width="0.069810465"
+              d="M 797.684570,-650.579407 C 779.206665,-474.611633 487.538177,-238.376709 311.570374,-256.854584"
+              class="id_es-sensasion id_1134" stroke-opacity="1.0"
+              stroke="#5fc613"/>
+        <path fill="none" stroke-width="0.21582536"
+              d="M -341.872864,310.548828 C -345.615417,234.047409 -236.477097,113.681442 -159.975677,109.938896"
+              class="id_es-sensile-technologies-sa id_1076662"
+              stroke-opacity="1.0" stroke="#c686e9"/>
+        <path fill="none" stroke-width="0.33906218"
+              d="M 340.265991,938.204651 C 343.784943,906.401428 396.768219,863.974976 428.571472,867.493896"
+              class="id_es-sensimed id_19022" stroke-opacity="1.0"
+              stroke="#00caff"/>
+        <path fill="none" stroke-width="0.06483921"
+              d="M 1010.791687,-64.047485 C 955.789307,-100.104439 927.370972,-236.693512 963.427979,-291.695953"
+              class="id_es-sensoptic id_26833" stroke-opacity="1.0"
+              stroke="#5fc613"/>
+        <path fill="none" stroke-width="1.661639"
+              d="M -82.751991,123.375710 C -90.876762,82.149345 -41.224380,8.122648 0.001981,-0.002124"
+              class="id_es-sensorscope id_10779" stroke-opacity="1.0"
+              stroke="#c686e9"/>
+        <path fill="none" stroke-width="5.3711824"
+              d="M -82.751991,123.375710 C -100.884094,136.133087 -147.218307,128.070999 -159.975677,109.938896"
+              class="id_es-sensorscope id_1076662" stroke-opacity="1.0"
+              stroke="#c686e9"/>
+        <path fill="none" stroke-width="0.36624908"
+              d="M -351.015961,47.004181 C -300.220947,21.383068 -185.596786,59.143894 -159.975677,109.938896"
+              class="id_es-shockfish id_1076662" stroke-opacity="1.0"
+              stroke="#c686e9"/>
+        <path fill="none" stroke-width="1.4139514"
+              d="M -216.056900,185.825531 C -220.017975,159.431961 -186.369247,113.899979 -159.975677,109.938896"
+              class="id_es-shoelace-wireless id_1076662" stroke-opacity="1.0"
+              stroke="#c686e9"/>
+        <path fill="none" stroke-width="0.8709899"
+              d="M 466.541443,900.435852 C 452.359070,901.441467 429.577087,881.676270 428.571472,867.493896"
+              class="id_es-sonoview-acoustic id_19022" stroke-opacity="1.0"
+              stroke="#00caff"/>
+        <path fill="none" stroke-width="0.1064405"
+              d="M 151.825134,-797.066223 C 291.816528,-720.972900 387.663666,-396.845947 311.570374,-256.854584"
+              class="id_es-spectroswiss id_1134" stroke-opacity="1.0"
+              stroke="#5fc613"/>
+        <path fill="none" stroke-width="0.1932269"
+              d="M 175.456665,-570.671570 C 265.442810,-535.130920 347.111023,-346.840729 311.570374,-256.854584"
+              class="id_es-swiss-inso id_1134" stroke-opacity="1.0"
+              stroke="#5fc613"/>
+        <path fill="none" stroke-width="0.16854131"
+              d="M 118.828629,-676.483337 C 241.302734,-631.105896 356.947784,-379.328674 311.570374,-256.854584"
+              class="id_es-swisssource id_1134" stroke-opacity="1.0"
+              stroke="#5fc613"/>
+        <path fill="none" stroke-width="0.27690557"
+              d="M -53.752323,-232.258453 C 3.449806,-196.558044 35.702385,-57.204254 0.001981,-0.002124"
+              class="id_es-swissto12 id_10779" stroke-opacity="1.0"
+              stroke="#c686e9"/>
+        <path fill="none" stroke-width="0.09785505"
+              d="M 345.300018,-867.608032 C 460.704773,-738.711426 440.466980,-372.259308 311.570374,-256.854584"
+              class="id_es-symple-data id_1134" stroke-opacity="1.0"
+              stroke="#5fc613"/>
+        <path fill="none" stroke-width="0.514449"
+              d="M 106.250313,-41.816231 C 104.306656,-125.887909 227.498672,-254.910919 311.570374,-256.854584"
+              class="id_es-technis id_1134" stroke-opacity="1.0"
+              stroke="#92a67e"/>
+        <path fill="none" stroke-width="1.2487785"
+              d="M 106.250313,-41.816231 C 93.363472,-12.203741 29.614468,12.884720 0.001981,-0.002124"
+              class="id_es-technis id_10779" stroke-opacity="1.0"
+              stroke="#c686e9"/>
+        <path fill="none" stroke-width="0.10376393"
+              d="M 204.623947,228.803436 C 128.881622,110.282547 193.049484,-181.112259 311.570374,-256.854584"
+              class="id_es-thinkee id_1134" stroke-opacity="1.0"
+              stroke="#92a67e"/>
+        <path fill="none" stroke-width="0.20389579"
+              d="M 204.623947,228.803436 C 107.931114,277.950439 -110.828667,206.631729 -159.975677,109.938896"
+              class="id_es-thinkee id_1076662" stroke-opacity="1.0"
+              stroke="#c686e9"/>
+        <path fill="none" stroke-width="0.2669136"
+              d="M 177.086609,763.125305 C 120.011398,727.698425 87.538910,588.945313 122.965775,531.870117"
+              class="id_es-treatech-sarl id_10934212" stroke-opacity="1.0"
+              stroke="#00caff"/>
+        <path fill="none" stroke-width="0.67646116"
+              d="M -107.107651,-79.343185 C -69.817513,-84.896896 -5.551734,-37.292263 0.001981,-0.002124"
+              class="id_es-twentygreen id_10779" stroke-opacity="1.0"
+              stroke="#c686e9"/>
+        <path fill="none" stroke-width="0.62128013"
+              d="M -107.107651,-79.343185 C -79.824844,-30.913164 -111.545654,82.656090 -159.975677,109.938896"
+              class="id_es-twentygreen id_1076662" stroke-opacity="1.0"
+              stroke="#c686e9"/>
+        <path fill="none" stroke-width="3.3010945"
+              d="M -395.444122,-646.288635 C -379.131348,-597.981812 -427.122437,-501.052490 -475.429230,-484.739716"
+              class="id_es-urbio id_713" stroke-opacity="1.0" stroke="#ea8615"/>
+        <path fill="none" stroke-width="1.8821588"
+              d="M -395.444122,-646.288635 C -386.920105,-564.982910 -496.092651,-430.238403 -577.398376,-421.714447"
+              class="id_es-urbio id_25781" stroke-opacity="1.0" stroke="#ea8615"/>
+        <path fill="none" stroke-width="5.855221"
+              d="M -395.444122,-646.288635 C -362.055115,-609.578125 -367.037323,-504.428894 -403.747803,-471.039886"
+              class="id_es-urbio id_48180" stroke-opacity="1.0" stroke="#ea8615"/>
+        <path fill="none" stroke-width="2.692026"
+              d="M -395.444122,-646.288635 C -313.675079,-593.165161 -270.706787,-390.826416 -323.830261,-309.057373"
+              class="id_es-urbio id_308906" stroke-opacity="1.0"
+              stroke="#ea8615"/>
+        <path fill="none" stroke-width="4.245799"
+              d="M -395.444122,-646.288635 C -412.431305,-661.584045 -414.968933,-710.007935 -399.673523,-726.995117"
+              class="id_es-urbio id_453372" stroke-opacity="1.0"
+              stroke="#ea8615"/>
+        <path fill="none" stroke-width="3.7249944"
+              d="M -395.444122,-646.288635 C -340.141693,-645.206543 -258.811249,-560.629822 -259.893341,-505.327393"
+              class="id_es-urbio id_10474719" stroke-opacity="1.0"
+              stroke="#ea8615"/>
+        <path fill="none" stroke-width="0.69739515"
+              d="M -395.444122,-646.288635 C -332.346802,-565.473267 -358.923828,-349.604248 -439.739197,-286.506927"
+              class="id_es-urbio id_20903754" stroke-opacity="1.0"
+              stroke="#ea8615"/>
+        <path fill="none" stroke-width="3.4118748"
+              d="M -395.444122,-646.288635 C -447.070374,-686.375854 -464.378906,-823.946167 -424.291656,-875.572449"
+              class="id_es-urbio id_25997913" stroke-opacity="1.0"
+              stroke="#ea8615"/>
+        <path fill="none" stroke-width="0.514449"
+              d="M 13.425178,-129.842346 C 47.651772,-214.873840 226.538879,-291.081177 311.570374,-256.854584"
+              class="id_es-volumina-medical id_1134" stroke-opacity="1.0"
+              stroke="#92a67e"/>
+        <path fill="none" stroke-width="1.2487785"
+              d="M 13.425178,-129.842346 C 36.708584,-101.189659 28.654667,-23.285532 0.001981,-0.002124"
+              class="id_es-volumina-medical id_10779" stroke-opacity="1.0"
+              stroke="#c686e9"/>
+        <path fill="none" stroke-width="0.8099529"
+              d="M 88.406136,14.319497 C 67.860977,29.136005 14.818487,20.543032 0.001981,-0.002124"
+              class="id_es-xsensio-sarl id_10779" stroke-opacity="1.0"
+              stroke="#c686e9"/>
+        <path fill="none" stroke-width="6.73333"
+              d="M -475.429230,-484.739716 C -483.218018,-451.740845 -544.399475,-413.925659 -577.398376,-421.714447"
+              class="id_713 id_25781" stroke-opacity="1.0" stroke="#ea8615"/>
+        <path fill="none" stroke-width="10.0"
+              d="M -475.429230,-484.739716 C -458.352997,-496.336029 -415.344116,-488.116119 -403.747803,-471.039886"
+              class="id_713 id_48180" stroke-opacity="1.0" stroke="#ea8615"/>
+        <path fill="none" stroke-width="0.39999998"
+              d="M -475.429230,-484.739716 C -409.972961,-479.923035 -319.013580,-374.513641 -323.830261,-309.057373"
+              class="id_713 id_308906" stroke-opacity="1.0" stroke="#ea8615"/>
+        <path fill="none" stroke-width="4.2"
+              d="M -475.429230,-484.739716 C -436.439575,-531.964417 -307.118042,-544.317017 -259.893341,-505.327393"
+              class="id_713 id_10474719" stroke-opacity="1.0" stroke="#ea8615"/>
+        <path fill="none" stroke-width="6.2"
+              d="M -475.429230,-484.739716 C -428.644684,-452.231171 -407.230652,-333.291473 -439.739197,-286.506927"
+              class="id_713 id_20903754" stroke-opacity="1.0" stroke="#ea8615"/>
+        <path fill="none" stroke-width="0.208333"
+              d="M -475.429230,-484.739716 C -543.368286,-573.133789 -512.685730,-807.633423 -424.291656,-875.572449"
+              class="id_713 id_25997913" stroke-opacity="1.0" stroke="#ea8615"/>
+        <path fill="none" stroke-width="6.66667"
+              d="M 311.570374,-256.854584 C 216.717133,19.319489 -339.823792,291.300720 -615.997864,196.447479"
+              class="id_1134 id_11180" stroke-opacity="1.0" stroke="#5fc613"/>
+        <path fill="none" stroke-width="4.0"
+              d="M 311.570374,-256.854584 C 434.973633,-394.194366 826.088196,-415.099213 963.427979,-291.695953"
+              class="id_1134 id_26833" stroke-opacity="1.0" stroke="#5fc613"/>
+        <path fill="none" stroke-width="7.91667"
+              d="M -615.997864,196.447479 C -607.930786,205.248184 -609.031250,230.549866 -617.831970,238.616928"
+              class="id_11180 id_1424309" stroke-opacity="1.0" stroke="#5fc613"/>
+        <path fill="none" stroke-width="0.31446502"
+              d="M -21.368603,756.389709 C -30.714466,702.108337 36.688770,606.667480 90.970131,597.321655"
+              class="id_12463 id_14073" stroke-opacity="1.0" stroke="#00caff"/>
+        <path fill="none" stroke-width="0.155552"
+              d="M -21.368603,756.389709 C -122.465919,732.249756 -237.901978,544.393921 -213.762039,443.296600"
+              class="id_12463 id_44179" stroke-opacity="1.0" stroke="#00caff"/>
+        <path fill="none" stroke-width="0.72470003"
+              d="M -21.368603,756.389709 C -37.405647,682.618896 49.194981,547.907166 122.965775,531.870117"
+              class="id_12463 id_10934212" stroke-opacity="1.0" stroke="#00caff"/>
+        <path fill="none" stroke-width="6.82292"
+              d="M 90.970131,597.321655 C 84.278954,577.832214 103.476334,538.561340 122.965775,531.870117"
+              class="id_14073 id_10934212" stroke-opacity="1.0" stroke="#00caff"/>
+        <path fill="none" stroke-width="0.79602003"
+              d="M 48.346832,495.037628 C 116.284012,352.279846 432.326508,240.048904 575.084290,307.986084"
+              class="id_22718 id_23001" stroke-opacity="1.0" stroke="#17adb8"/>
+        <path fill="none" stroke-width="0.39801002"
+              d="M 48.346832,495.037628 C 178.160675,351.207123 588.627197,330.182159 732.457642,459.996002"
+              class="id_22718 id_1242977" stroke-opacity="1.0" stroke="#17adb8"/>
+        <path fill="none" stroke-width="8.35821"
+              d="M 48.346832,495.037628 C 70.637123,487.480316 115.408485,509.579803 122.965775,531.870117"
+              class="id_22718 id_10934212" stroke-opacity="1.0" stroke="#00caff"/>
+        <path fill="none" stroke-width="4.5205503"
+              d="M 575.084290,307.986084 C 567.839661,322.096863 535.806580,332.396149 521.695740,325.151520"
+              class="id_23001 id_23872" stroke-opacity="1.0" stroke="#2e9072"/>
+        <path fill="none" stroke-width="2.05479"
+              d="M 575.084290,307.986084 C 585.565613,283.172089 638.508545,261.673065 663.322510,272.154358"
+              class="id_23001 id_144241" stroke-opacity="1.0" stroke="#2e9072"/>
+        <path fill="none" stroke-width="0.958904"
+              d="M 575.084290,307.986084 C 637.576660,322.667419 709.293213,438.427948 694.611877,500.920319"
+              class="id_23001 id_1225002" stroke-opacity="1.0" stroke="#2e9072"/>
+        <path fill="none" stroke-width="3.94068"
+              d="M -577.398376,-421.714447 C -552.533386,-466.309631 -448.342987,-495.904907 -403.747803,-471.039886"
+              class="id_25781 id_48180" stroke-opacity="1.0" stroke="#ea8615"/>
+        <path fill="none" stroke-width="2.83898"
+              d="M -577.398376,-421.714447 C -530.619934,-501.938049 -340.116943,-552.105835 -259.893341,-505.327393"
+              class="id_25781 id_10474719" stroke-opacity="1.0" stroke="#ea8615"/>
+        <path fill="none" stroke-width="4.87288"
+              d="M -577.398376,-421.714447 C -522.825012,-422.204773 -440.229523,-341.080261 -439.739197,-286.506927"
+              class="id_25781 id_20903754" stroke-opacity="1.0" stroke="#ea8615"/>
+        <path fill="none" stroke-width="0.16949199"
+              d="M -577.398376,-421.714447 C -637.548645,-543.107422 -545.684570,-815.422180 -424.291656,-875.572449"
+              class="id_25781 id_25997913" stroke-opacity="1.0" stroke="#ea8615"/>
+        <path fill="none" stroke-width="2.17391"
+              d="M -470.217590,-131.314804 C -495.160339,-168.448898 -476.873291,-261.564178 -439.739197,-286.506927"
+              class="id_41958 id_20903754" stroke-opacity="1.0" stroke="#ea8615"/>
+        <path fill="none" stroke-width="0.769231"
+              d="M -403.747803,-471.039886 C -355.367767,-454.626892 -307.417267,-357.437408 -323.830261,-309.057373"
+              class="id_48180 id_308906" stroke-opacity="1.0" stroke="#ea8615"/>
+        <path fill="none" stroke-width="7.0329704"
+              d="M -403.747803,-471.039886 C -381.834412,-506.668304 -295.521759,-527.240784 -259.893341,-505.327393"
+              class="id_48180 id_10474719" stroke-opacity="1.0" stroke="#ea8615"/>
+        <path fill="none" stroke-width="10.0"
+              d="M -403.747803,-471.039886 C -374.039490,-426.935028 -395.634338,-316.215240 -439.739197,-286.506927"
+              class="id_48180 id_20903754" stroke-opacity="1.0" stroke="#ea8615"/>
+        <path fill="none" stroke-width="0.30525002"
+              d="M -403.747803,-471.039886 C -488.763062,-547.837646 -501.089417,-790.557190 -424.291656,-875.572449"
+              class="id_48180 id_25997913" stroke-opacity="1.0" stroke="#ea8615"/>
+        <path fill="none" stroke-width="0.214559"
+              d="M -866.233643,489.675751 C -866.765076,389.783661 -717.724121,239.148376 -617.831970,238.616928"
+              class="id_146103 id_1424309" stroke-opacity="1.0" stroke="#5fc613"/>
+        <path fill="none" stroke-width="5.55556"
+              d="M -323.830261,-309.057373 C -342.501953,-281.365479 -412.047302,-267.835236 -439.739197,-286.506927"
+              class="id_308906 id_20903754" stroke-opacity="1.0"
+              stroke="#ea8615"/>
+        <path fill="none" stroke-width="1.22222"
+              d="M -159.975677,109.938896 C 5.661514,297.277191 -26.890167,826.740479 -214.228470,992.377625"
+              class="id_1076662 id_4122592" stroke-opacity="1.0"
+              stroke="#c686e9"/>
+        <path fill="none" stroke-width="0.969697"
+              d="M -159.975677,109.938896 C -19.001137,137.736847 150.763733,390.895599 122.965775,531.870117"
+              class="id_1076662 id_10934212" stroke-opacity="1.0"
+              stroke="#63a8f4"/>
+        <path fill="none" stroke-width="2.22222"
+              d="M 694.611877,500.920319 C 693.996155,485.166290 716.703613,460.611725 732.457642,459.996002"
+              class="id_1225002 id_1242977" stroke-opacity="1.0"
+              stroke="#2e9072"/>
+        <path fill="none" stroke-width="6.66667"
+              d="M -629.223816,280.142914 C -635.250610,269.559326 -628.415527,244.643753 -617.831970,238.616928"
+              class="id_1326107 id_1424309" stroke-opacity="1.0"
+              stroke="#5fc613"/>
+        <path fill="none" stroke-width="1.26311"
+              d="M -183.064240,674.977966 C -150.479797,585.150391 33.138195,499.285706 122.965775,531.870117"
+              class="id_1866009 id_10934212" stroke-opacity="1.0"
+              stroke="#00caff"/>
+        <path fill="none" stroke-width="0.27972"
+              d="M -183.064240,674.977966 C -232.605560,676.156616 -308.685486,603.612610 -309.864136,554.071289"
+              class="id_1866009 id_17554500" stroke-opacity="1.0"
+              stroke="#00caff"/>
+        <path fill="none" stroke-width="0.15262501"
+              d="M -183.064240,674.977966 C -426.696228,534.015991 -580.701172,-42.874954 -439.739197,-286.506927"
+              class="id_1866009 id_20903754" stroke-opacity="1.0"
+              stroke="#75a88a"/>
+        <path fill="none" stroke-width="10.0"
+              d="M -259.893341,-505.327393 C -252.098419,-425.594116 -360.005920,-294.301849 -439.739197,-286.506927"
+              class="id_10474719 id_20903754" stroke-opacity="1.0"
+              stroke="#ea8615"/>
+        <path fill="none" stroke-width="0.36697203"
+              d="M -439.739197,-286.506927 C -554.462769,-407.409546 -545.194275,-760.848877 -424.291656,-875.572449"
+              class="id_20903754 id_25997913" stroke-opacity="1.0"
+              stroke="#ea8615"/>
+    </g>
+    <g id="nodes">
+        <circle fill-opacity="1.0" fill="#c686e9" r="8.690426" cx="312.201"
+                class="id_es-aeler-technologies" cy="189.63809" stroke="#000000"
+                stroke-opacity="1.0" stroke-width="1.0"/>
+        <circle fill-opacity="1.0" fill="#5fc613" r="12.849543" cx="-418.78796"
+                class="id_es-aesyra-aesybyte" cy="183.60939" stroke="#000000"
+                stroke-opacity="1.0" stroke-width="1.0"/>
+        <circle fill-opacity="1.0" fill="#ea8615" r="5.428444" cx="-237.04028"
+                class="id_es-aica" cy="-495.01968" stroke="#000000"
+                stroke-opacity="1.0" stroke-width="1.0"/>
+        <circle fill-opacity="1.0" fill="#5fc613" r="9.969414" cx="494.3461"
+                class="id_es-akselos" cy="38.56761" stroke="#000000"
+                stroke-opacity="1.0" stroke-width="1.0"/>
+        <circle fill-opacity="1.0" fill="#c686e9" r="12.052979" cx="162.03668"
+                class="id_es-aleva-neurotherapeutics" cy="8.317768"
+                stroke="#000000" stroke-opacity="1.0" stroke-width="1.0"/>
+        <circle fill-opacity="1.0" fill="#2e9072" r="9.552702" cx="761.40436"
+                class="id_es-aqua-tech" cy="358.44223" stroke="#000000"
+                stroke-opacity="1.0" stroke-width="1.0"/>
+        <circle fill-opacity="1.0" fill="#c686e9" r="12.052979" cx="82.622696"
+                class="id_es-artiria-medical" cy="-102.1976" stroke="#000000"
+                stroke-opacity="1.0" stroke-width="1.0"/>
+        <circle fill-opacity="1.0" fill="#c686e9" r="10.903011" cx="-84.09412"
+                class="id_es-artmyn" cy="71.83968" stroke="#000000"
+                stroke-opacity="1.0" stroke-width="1.0"/>
+        <circle fill-opacity="1.0" fill="#5fc613" r="9.969414" cx="-1002.4207"
+                class="id_es-auxenion-research" cy="-35.891567" stroke="#000000"
+                stroke-opacity="1.0" stroke-width="1.0"/>
+        <circle fill-opacity="1.0" fill="#00caff" r="7.8794384" cx="232.01163"
+                class="id_es-bluewatt-engineering" cy="568.6619"
+                stroke="#000000" stroke-opacity="1.0" stroke-width="1.0"/>
+        <circle fill-opacity="1.0" fill="#5fc613" r="9.969414" cx="629.3103"
+                class="id_es-bridgology" cy="-134.02144" stroke="#000000"
+                stroke-opacity="1.0" stroke-width="1.0"/>
+        <circle fill-opacity="1.0" fill="#c686e9" r="8.401131" cx="-113.93347"
+                class="id_es-bright-sensors" cy="286.15283" stroke="#000000"
+                stroke-opacity="1.0" stroke-width="1.0"/>
+        <circle fill-opacity="1.0" fill="#5fc613" r="9.969414" cx="672.1526"
+                class="id_es-clearspace" cy="-6.498278" stroke="#000000"
+                stroke-opacity="1.0" stroke-width="1.0"/>
+        <circle fill-opacity="1.0" fill="#00caff" r="12.148343" cx="276.6078"
+                class="id_es-combo-solutions" cy="314.4459" stroke="#000000"
+                stroke-opacity="1.0" stroke-width="1.0"/>
+        <circle fill-opacity="1.0" fill="#c686e9" r="8.690426" cx="40.436802"
+                class="id_es-comppair" cy="-455.4451" stroke="#000000"
+                stroke-opacity="1.0" stroke-width="1.0"/>
+        <circle fill-opacity="1.0" fill="#5fc613" r="9.969414" cx="256.26877"
+                class="id_es-crisalix" cy="-668.7217" stroke="#000000"
+                stroke-opacity="1.0" stroke-width="1.0"/>
+        <circle fill-opacity="1.0" fill="#ea8615" r="5.8904347" cx="-410.39536"
+                class="id_es-cyberbotics" cy="-285.59973" stroke="#000000"
+                stroke-opacity="1.0" stroke-width="1.0"/>
+        <circle fill-opacity="1.0" fill="#c686e9" r="12.052979" cx="263.27487"
+                class="id_es-daphne-technology" cy="18.530354" stroke="#000000"
+                stroke-opacity="1.0" stroke-width="1.0"/>
+        <circle fill-opacity="1.0" fill="#c686e9" r="10.903011" cx="-122.122795"
+                class="id_es-dartfish" cy="35.6461" stroke="#000000"
+                stroke-opacity="1.0" stroke-width="1.0"/>
+        <circle fill-opacity="1.0" fill="#5fc613" r="9.969414" cx="214.54037"
+                class="id_es-diagnoswiss" cy="-929.49054" stroke="#000000"
+                stroke-opacity="1.0" stroke-width="1.0"/>
+        <circle fill-opacity="1.0" fill="#ea8615" r="5.8904347" cx="-456.0024"
+                class="id_es-didel" cy="-261.3248" stroke="#000000"
+                stroke-opacity="1.0" stroke-width="1.0"/>
+        <circle fill-opacity="1.0" fill="#5fc613" r="6.876522" cx="827.21075"
+                class="id_es-earlysight" cy="-284.42706" stroke="#000000"
+                stroke-opacity="1.0" stroke-width="1.0"/>
+        <circle fill-opacity="1.0" fill="#5fc613" r="10.249895" cx="-531.41895"
+                class="id_es-embion-technologies" cy="374.38086"
+                stroke="#000000" stroke-opacity="1.0" stroke-width="1.0"/>
+        <circle fill-opacity="1.0" fill="#00caff" r="5.394386" cx="-859.31384"
+                class="id_es-enairys-powertech-sa" cy="181.71451"
+                stroke="#000000" stroke-opacity="1.0" stroke-width="1.0"/>
+        <circle fill-opacity="1.0" fill="#00caff" r="10.689847" cx="179.48495"
+                class="id_es-enviroscopy" cy="504.93323" stroke="#000000"
+                stroke-opacity="1.0" stroke-width="1.0"/>
+        <circle fill-opacity="1.0" fill="#5fc613" r="9.969414" cx="392.95605"
+                class="id_es-epiqr-renovation" cy="4.994367" stroke="#000000"
+                stroke-opacity="1.0" stroke-width="1.0"/>
+        <circle fill-opacity="1.0" fill="#ea8615" r="5.8904347" cx="-468.86792"
+                class="id_es-epsitec" cy="-290.26398" stroke="#000000"
+                stroke-opacity="1.0" stroke-width="1.0"/>
+        <circle fill-opacity="1.0" fill="#5fc613" r="9.969414" cx="520.45654"
+                class="id_es-estia" cy="-520.9389" stroke="#000000"
+                stroke-opacity="1.0" stroke-width="1.0"/>
+        <circle fill-opacity="1.0" fill="#00caff" r="5.394386" cx="-899.5507"
+                class="id_es-fastcom-technology" cy="-75.60832" stroke="#000000"
+                stroke-opacity="1.0" stroke-width="1.0"/>
+        <circle fill-opacity="1.0" fill="#c686e9" r="8.401131" cx="-247.04039"
+                class="id_es-fiveco" cy="272.84952" stroke="#000000"
+                stroke-opacity="1.0" stroke-width="1.0"/>
+        <circle fill-opacity="1.0" fill="#c686e9" r="8.401131" cx="-5.704201"
+                class="id_es-flybotix" cy="263.46143" stroke="#000000"
+                stroke-opacity="1.0" stroke-width="1.0"/>
+        <circle fill-opacity="1.0" fill="#00caff" r="12.069809" cx="-102.539314"
+                class="id_es-gaiasens-technologies" cy="473.74664"
+                stroke="#000000" stroke-opacity="1.0" stroke-width="1.0"/>
+        <circle fill-opacity="1.0" fill="#5fc613" r="6.876522" cx="856.12964"
+                class="id_es-gamaya" cy="-109.485855" stroke="#000000"
+                stroke-opacity="1.0" stroke-width="1.0"/>
+        <circle fill-opacity="1.0" fill="#ea8615" r="6.0587225" cx="-578.339"
+                class="id_es-gctronic" cy="-362.31305" stroke="#000000"
+                stroke-opacity="1.0" stroke-width="1.0"/>
+        <circle fill-opacity="1.0" fill="#5fc613" r="9.969414" cx="31.907866"
+                class="id_es-genomsys" cy="-922.41064" stroke="#000000"
+                stroke-opacity="1.0" stroke-width="1.0"/>
+        <circle fill-opacity="1.0" fill="#5fc613" r="9.969414" cx="559.8274"
+                class="id_es-geoeg" cy="-304.65988" stroke="#000000"
+                stroke-opacity="1.0" stroke-width="1.0"/>
+        <circle fill-opacity="1.0" fill="#c686e9" r="13.825613" cx="-187.79443"
+                class="id_es-geosatis" cy="-10.693436" stroke="#000000"
+                stroke-opacity="1.0" stroke-width="1.0"/>
+        <circle fill-opacity="1.0" fill="#c686e9" r="13.825613" cx="95.72855"
+                class="id_es-gridsteer" cy="76.89198" stroke="#000000"
+                stroke-opacity="1.0" stroke-width="1.0"/>
+        <circle fill-opacity="1.0" fill="#c686e9" r="10.903011" cx="62.22142"
+                class="id_es-grosso-link" cy="159.22554" stroke="#000000"
+                stroke-opacity="1.0" stroke-width="1.0"/>
+        <circle fill-opacity="1.0" fill="#ea8615" r="10.095229" cx="-258.1883"
+                class="id_es-hydromea" cy="-128.3251" stroke="#000000"
+                stroke-opacity="1.0" stroke-width="1.0"/>
+        <circle fill-opacity="1.0" fill="#c686e9" r="12.052979" cx="22.691748"
+                class="id_es-i-dent-sa" cy="-310.74875" stroke="#000000"
+                stroke-opacity="1.0" stroke-width="1.0"/>
+        <circle fill-opacity="1.0" fill="#c686e9" r="8.690426" cx="-58.402134"
+                class="id_es-illusonic" cy="-141.74933" stroke="#000000"
+                stroke-opacity="1.0" stroke-width="1.0"/>
+        <circle fill-opacity="1.0" fill="#00caff" r="5.394386" cx="-828.31085"
+                class="id_es-imperix" cy="33.16003" stroke="#000000"
+                stroke-opacity="1.0" stroke-width="1.0"/>
+        <circle fill-opacity="1.0" fill="#5fc613" r="9.969414" cx="504.47748"
+                class="id_es-inait" cy="-652.7029" stroke="#000000"
+                stroke-opacity="1.0" stroke-width="1.0"/>
+        <circle fill-opacity="1.0" fill="#5fc613" r="9.969414" cx="471.06693"
+                class="id_es-innoview" cy="-814.05023" stroke="#000000"
+                stroke-opacity="1.0" stroke-width="1.0"/>
+        <circle fill-opacity="1.0" fill="#ea8615" r="5.8904347" cx="-427.08563"
+                class="id_es-k-team" cy="-259.2785" stroke="#000000"
+                stroke-opacity="1.0" stroke-width="1.0"/>
+        <circle fill-opacity="1.0" fill="#5fc613" r="9.969414" cx="519.9746"
+                class="id_es-kaemco" cy="-74.04813" stroke="#000000"
+                stroke-opacity="1.0" stroke-width="1.0"/>
+        <circle fill-opacity="1.0" fill="#5fc613" r="9.969414" cx="331.13632"
+                class="id_es-kandou-technologies" cy="-547.53937"
+                stroke="#000000" stroke-opacity="1.0" stroke-width="1.0"/>
+        <circle fill-opacity="1.0" fill="#00caff" r="4.6795626" cx="485.41904"
+                class="id_es-l-e-s-s" cy="767.24225" stroke="#000000"
+                stroke-opacity="1.0" stroke-width="1.0"/>
+        <circle fill-opacity="1.0" fill="#5fc613" r="9.969414" cx="625.6212"
+                class="id_es-lantern-solutions-sarl" cy="-449.1309"
+                stroke="#000000" stroke-opacity="1.0" stroke-width="1.0"/>
+        <circle fill-opacity="1.0" fill="#5fc613" r="9.969414" cx="638.0882"
+                class="id_es-largo-films" cy="-723.0487" stroke="#000000"
+                stroke-opacity="1.0" stroke-width="1.0"/>
+        <circle fill-opacity="1.0" fill="#c686e9" r="12.48492" cx="-266.35236"
+                class="id_es-livelyplanet" cy="94.748535" stroke="#000000"
+                stroke-opacity="1.0" stroke-width="1.0"/>
+        <circle fill-opacity="1.0" fill="#2e9072" r="4.0" cx="505.83987"
+                class="id_es-lumendo" cy="326.30478" stroke="#000000"
+                stroke-opacity="1.0" stroke-width="1.0"/>
+        <circle fill-opacity="1.0" fill="#00caff" r="10.689847" cx="130.57347"
+                class="id_es-medlight" cy="465.3627" stroke="#000000"
+                stroke-opacity="1.0" stroke-width="1.0"/>
+        <circle fill-opacity="1.0" fill="#5fc613" r="6.876522" cx="814.9542"
+                class="id_es-medusoil" cy="-453.17313" stroke="#000000"
+                stroke-opacity="1.0" stroke-width="1.0"/>
+        <circle fill-opacity="1.0" fill="#c686e9" r="8.690426" cx="24.456839"
+                class="id_es-micror-systems" cy="-67.40172" stroke="#000000"
+                stroke-opacity="1.0" stroke-width="1.0"/>
+        <circle fill-opacity="1.0" fill="#c686e9" r="8.690426" cx="-33.86432"
+                class="id_es-miraex" cy="-61.49383" stroke="#000000"
+                stroke-opacity="1.0" stroke-width="1.0"/>
+        <circle fill-opacity="1.0" fill="#ea8615" r="5.428444" cx="-137.99193"
+                class="id_es-mobsya" cy="-613.8977" stroke="#000000"
+                stroke-opacity="1.0" stroke-width="1.0"/>
+        <circle fill-opacity="1.0" fill="#5fc613" r="9.969414" cx="201.25122"
+                class="id_es-nagi-bioscience" cy="-439.20474" stroke="#000000"
+                stroke-opacity="1.0" stroke-width="1.0"/>
+        <circle fill-opacity="1.0" fill="#c686e9" r="8.401131" cx="-447.982"
+                class="id_es-nexthink-sa" cy="56.135906" stroke="#000000"
+                stroke-opacity="1.0" stroke-width="1.0"/>
+        <circle fill-opacity="1.0" fill="#c686e9" r="8.690426" cx="138.79967"
+                class="id_es-odyssein-technologies" cy="148.83295"
+                stroke="#000000" stroke-opacity="1.0" stroke-width="1.0"/>
+        <circle fill-opacity="1.0" fill="#00caff" r="4.6795626" cx="394.30795"
+                class="id_es-omnisens" cy="837.0064" stroke="#000000"
+                stroke-opacity="1.0" stroke-width="1.0"/>
+        <circle fill-opacity="1.0" fill="#c686e9" r="12.052979" cx="98.84361"
+                class="id_es-osmoblue" cy="-166.13449" stroke="#000000"
+                stroke-opacity="1.0" stroke-width="1.0"/>
+        <circle fill-opacity="1.0" fill="#5fc613" r="9.969414" cx="376.89273"
+                class="id_es-ozwe" cy="-648.8488" stroke="#000000"
+                stroke-opacity="1.0" stroke-width="1.0"/>
+        <circle fill-opacity="1.0" fill="#5fc613" r="13.825613" cx="211.99957"
+                class="id_es-panoptic-sarl" cy="96.489136" stroke="#000000"
+                stroke-opacity="1.0" stroke-width="1.0"/>
+        <circle fill-opacity="1.0" fill="#c686e9" r="8.690426" cx="369.4734"
+                class="id_es-piemacs" cy="125.50535" stroke="#000000"
+                stroke-opacity="1.0" stroke-width="1.0"/>
+        <circle fill-opacity="1.0" fill="#ea8615" r="5.428444" cx="-247.25967"
+                class="id_es-pomelo" cy="-526.9143" stroke="#000000"
+                stroke-opacity="1.0" stroke-width="1.0"/>
+        <circle fill-opacity="1.0" fill="#00caff" r="14.549252" cx="-507.2255"
+                class="id_es-power-vision-engineering" cy="679.27386"
+                stroke="#000000" stroke-opacity="1.0" stroke-width="1.0"/>
+        <circle fill-opacity="1.0" fill="#c686e9" r="12.48492" cx="-126.42552"
+                class="id_es-prediva" cy="-186.06802" stroke="#000000"
+                stroke-opacity="1.0" stroke-width="1.0"/>
+        <circle fill-opacity="1.0" fill="#c686e9" r="12.052979" cx="21.618004"
+                class="id_es-program" cy="-205.44557" stroke="#000000"
+                stroke-opacity="1.0" stroke-width="1.0"/>
+        <circle fill-opacity="1.0" fill="#5fc613" r="9.969414" cx="709.3619"
+                class="id_es-rayform-caustics" cy="-251.20567" stroke="#000000"
+                stroke-opacity="1.0" stroke-width="1.0"/>
+        <circle fill-opacity="1.0" fill="#c686e9" r="5.729359" cx="-168.96573"
+                class="id_es-routerank" cy="996.6478" stroke="#000000"
+                stroke-opacity="1.0" stroke-width="1.0"/>
+        <circle fill-opacity="1.0" fill="#c686e9" r="8.690426" cx="27.462742"
+                class="id_es-rovenso" cy="86.05779" stroke="#000000"
+                stroke-opacity="1.0" stroke-width="1.0"/>
+        <circle fill-opacity="1.0" fill="#c686e9" r="12.052979" cx="167.75322"
+                class="id_es-seed-biosciences" cy="-75.07552" stroke="#000000"
+                stroke-opacity="1.0" stroke-width="1.0"/>
+        <circle fill-opacity="1.0" fill="#c686e9" r="13.825613" cx="-14.293518"
+                class="id_es-senbiosys" cy="183.51146" stroke="#000000"
+                stroke-opacity="1.0" stroke-width="1.0"/>
+        <circle fill-opacity="1.0" fill="#5fc613" r="5.436057" cx="-801.7215"
+                class="id_es-senis" cy="511.94174" stroke="#000000"
+                stroke-opacity="1.0" stroke-width="1.0"/>
+        <circle fill-opacity="1.0" fill="#ea8615" r="10.064777" cx="-128.43251"
+                class="id_es-sensars-neuroprosthetics-sarl" cy="-491.1017"
+                stroke="#000000" stroke-opacity="1.0" stroke-width="1.0"/>
+        <circle fill-opacity="1.0" fill="#5fc613" r="9.969414" cx="797.6846"
+                class="id_es-sensasion" cy="-650.5794" stroke="#000000"
+                stroke-opacity="1.0" stroke-width="1.0"/>
+        <circle fill-opacity="1.0" fill="#c686e9" r="8.401131" cx="-341.87286"
+                class="id_es-sensile-technologies-sa" cy="310.54883"
+                stroke="#000000" stroke-opacity="1.0" stroke-width="1.0"/>
+        <circle fill-opacity="1.0" fill="#00caff" r="4.6795626" cx="340.266"
+                class="id_es-sensimed" cy="938.20465" stroke="#000000"
+                stroke-opacity="1.0" stroke-width="1.0"/>
+        <circle fill-opacity="1.0" fill="#5fc613" r="6.876522" cx="1010.7917"
+                class="id_es-sensoptic" cy="-64.047485" stroke="#000000"
+                stroke-opacity="1.0" stroke-width="1.0"/>
+        <circle fill-opacity="1.0" fill="#c686e9" r="10.903011" cx="-82.75199"
+                class="id_es-sensorscope" cy="123.37571" stroke="#000000"
+                stroke-opacity="1.0" stroke-width="1.0"/>
+        <circle fill-opacity="1.0" fill="#c686e9" r="8.401131" cx="-351.01596"
+                class="id_es-shockfish" cy="47.00418" stroke="#000000"
+                stroke-opacity="1.0" stroke-width="1.0"/>
+        <circle fill-opacity="1.0" fill="#c686e9" r="8.401131" cx="-216.0569"
+                class="id_es-shoelace-wireless" cy="185.82553" stroke="#000000"
+                stroke-opacity="1.0" stroke-width="1.0"/>
+        <circle fill-opacity="1.0" fill="#00caff" r="4.6795626" cx="466.54144"
+                class="id_es-sonoview-acoustic" cy="900.43585" stroke="#000000"
+                stroke-opacity="1.0" stroke-width="1.0"/>
+        <circle fill-opacity="1.0" fill="#5fc613" r="9.969414" cx="151.82513"
+                class="id_es-spectroswiss" cy="-797.0662" stroke="#000000"
+                stroke-opacity="1.0" stroke-width="1.0"/>
+        <circle fill-opacity="1.0" fill="#5fc613" r="9.969414" cx="175.45667"
+                class="id_es-swiss-inso" cy="-570.6716" stroke="#000000"
+                stroke-opacity="1.0" stroke-width="1.0"/>
+        <circle fill-opacity="1.0" fill="#5fc613" r="9.969414" cx="118.82863"
+                class="id_es-swisssource" cy="-676.48334" stroke="#000000"
+                stroke-opacity="1.0" stroke-width="1.0"/>
+        <circle fill-opacity="1.0" fill="#c686e9" r="8.690426" cx="-53.752323"
+                class="id_es-swissto12" cy="-232.25845" stroke="#000000"
+                stroke-opacity="1.0" stroke-width="1.0"/>
+        <circle fill-opacity="1.0" fill="#5fc613" r="9.969414" cx="345.30002"
+                class="id_es-symple-data" cy="-867.60803" stroke="#000000"
+                stroke-opacity="1.0" stroke-width="1.0"/>
+        <circle fill-opacity="1.0" fill="#c686e9" r="12.052979" cx="106.25031"
+                class="id_es-technis" cy="-41.81623" stroke="#000000"
+                stroke-opacity="1.0" stroke-width="1.0"/>
+        <circle fill-opacity="1.0" fill="#c686e9" r="12.48492" cx="204.62395"
+                class="id_es-thinkee" cy="228.80344" stroke="#000000"
+                stroke-opacity="1.0" stroke-width="1.0"/>
+        <circle fill-opacity="1.0" fill="#00caff" r="7.8794384" cx="177.08661"
+                class="id_es-treatech-sarl" cy="763.1253" stroke="#000000"
+                stroke-opacity="1.0" stroke-width="1.0"/>
+        <circle fill-opacity="1.0" fill="#c686e9" r="10.903011" cx="-107.10765"
+                class="id_es-twentygreen" cy="-79.343185" stroke="#000000"
+                stroke-opacity="1.0" stroke-width="1.0"/>
+        <circle fill-opacity="1.0" fill="#ea8615" r="7.8129244" cx="-395.44412"
+                class="id_es-urbio" cy="-646.28864" stroke="#000000"
+                stroke-opacity="1.0" stroke-width="1.0"/>
+        <circle fill-opacity="1.0" fill="#c686e9" r="12.052979" cx="13.425178"
+                class="id_es-volumina-medical" cy="-129.84235" stroke="#000000"
+                stroke-opacity="1.0" stroke-width="1.0"/>
+        <circle fill-opacity="1.0" fill="#c686e9" r="8.690426" cx="88.406136"
+                class="id_es-xsensio-sarl" cy="14.319497" stroke="#000000"
+                stroke-opacity="1.0" stroke-width="1.0"/>
+        <circle fill-opacity="1.0" fill="#ea8615" r="7.6446366" cx="-475.42923"
+                class="id_713" cy="-484.73972" stroke="#000000"
+                stroke-opacity="1.0" stroke-width="1.0"/>
+        <circle fill-opacity="1.0" fill="#5fc613" r="20.02422" cx="311.57037"
+                class="id_1134" cy="-256.85458" stroke="#000000"
+                stroke-opacity="1.0" stroke-width="1.0"/>
+        <circle fill-opacity="1.0" fill="#c686e9" r="16.67529" cx="0.0019805008"
+                class="id_10779" cy="-0.0021244192" stroke="#000000"
+                stroke-opacity="1.0" stroke-width="1.0"/>
+        <circle fill-opacity="1.0" fill="#5fc613" r="11.508849" cx="-615.99786"
+                class="id_11180" cy="196.44748" stroke="#000000"
+                stroke-opacity="1.0" stroke-width="1.0"/>
+        <circle fill-opacity="1.0" fill="#00caff" r="9.124769" cx="-21.368603"
+                class="id_12463" cy="756.3897" stroke="#000000"
+                stroke-opacity="1.0" stroke-width="1.0"/>
+        <circle fill-opacity="1.0" fill="#00caff" r="10.566436" cx="90.97013"
+                class="id_14073" cy="597.32166" stroke="#000000"
+                stroke-opacity="1.0" stroke-width="1.0"/>
+        <circle fill-opacity="1.0" fill="#00caff" r="7.8121233" cx="428.57147"
+                class="id_19022" cy="867.4939" stroke="#000000"
+                stroke-opacity="1.0" stroke-width="1.0"/>
+        <circle fill-opacity="1.0" fill="#00caff" r="9.573537" cx="48.346832"
+                class="id_22718" cy="495.03763" stroke="#000000"
+                stroke-opacity="1.0" stroke-width="1.0"/>
+        <circle fill-opacity="1.0" fill="#2e9072" r="8.014069" cx="575.0843"
+                class="id_23001" cy="307.98608" stroke="#000000"
+                stroke-opacity="1.0" stroke-width="1.0"/>
+        <circle fill-opacity="1.0" fill="#2e9072" r="6.5459566" cx="521.69574"
+                class="id_23872" cy="325.15152" stroke="#000000"
+                stroke-opacity="1.0" stroke-width="1.0"/>
+        <circle fill-opacity="1.0" fill="#ea8615" r="8.832269" cx="-577.3984"
+                class="id_25781" cy="-421.71445" stroke="#000000"
+                stroke-opacity="1.0" stroke-width="1.0"/>
+        <circle fill-opacity="1.0" fill="#5fc613" r="11.921555" cx="963.428"
+                class="id_26833" cy="-291.69595" stroke="#000000"
+                stroke-opacity="1.0" stroke-width="1.0"/>
+        <circle fill-opacity="1.0" fill="#ea8615" r="8.429179" cx="-470.2176"
+                class="id_41958" cy="-131.3148" stroke="#000000"
+                stroke-opacity="1.0" stroke-width="1.0"/>
+        <circle fill-opacity="1.0" fill="#00caff" r="7.312869" cx="-213.76204"
+                class="id_44179" cy="443.2966" stroke="#000000"
+                stroke-opacity="1.0" stroke-width="1.0"/>
+        <circle fill-opacity="1.0" fill="#ea8615" r="7.6446366" cx="-403.7478"
+                class="id_48180" cy="-471.0399" stroke="#000000"
+                stroke-opacity="1.0" stroke-width="1.0"/>
+        <circle fill-opacity="1.0" fill="#2e9072" r="6.3215723" cx="663.3225"
+                class="id_144241" cy="272.15436" stroke="#000000"
+                stroke-opacity="1.0" stroke-width="1.0"/>
+        <circle fill-opacity="1.0" fill="#5fc613" r="8.849899" cx="-866.23364"
+                class="id_146103" cy="489.67575" stroke="#000000"
+                stroke-opacity="1.0" stroke-width="1.0"/>
+        <circle fill-opacity="1.0" fill="#2e9072" r="5.488948" cx="837.9072"
+                class="id_155726" cy="144.61287" stroke="#000000"
+                stroke-opacity="1.0" stroke-width="1.0"/>
+        <circle fill-opacity="1.0" fill="#ea8615" r="6.451395" cx="-323.83026"
+                class="id_308906" cy="-309.05737" stroke="#000000"
+                stroke-opacity="1.0" stroke-width="1.0"/>
+        <circle fill-opacity="1.0" fill="#ea8615" r="4.4684014" cx="-399.67352"
+                class="id_453372" cy="-726.9951" stroke="#000000"
+                stroke-opacity="1.0" stroke-width="1.0"/>
+        <circle fill-opacity="1.0" fill="#c686e9" r="15.575808" cx="-159.97568"
+                class="id_1076662" cy="109.938896" stroke="#000000"
+                stroke-opacity="1.0" stroke-width="1.0"/>
+        <circle fill-opacity="1.0" fill="#00caff" r="8.210404" cx="-534.2475"
+                class="id_1105937" cy="871.1785" stroke="#000000"
+                stroke-opacity="1.0" stroke-width="1.0"/>
+        <circle fill-opacity="1.0" fill="#2e9072" r="6.4898605" cx="694.6119"
+                class="id_1225002" cy="500.92032" stroke="#000000"
+                stroke-opacity="1.0" stroke-width="1.0"/>
+        <circle fill-opacity="1.0" fill="#2e9072" r="7.6213965" cx="732.45764"
+                class="id_1242977" cy="459.996" stroke="#000000"
+                stroke-opacity="1.0" stroke-width="1.0"/>
+        <circle fill-opacity="1.0" fill="#2e9072" r="5.488948" cx="911.8734"
+                class="id_1277055" cy="454.8258" stroke="#000000"
+                stroke-opacity="1.0" stroke-width="1.0"/>
+        <circle fill-opacity="1.0" fill="#5fc613" r="8.849899" cx="-629.2238"
+                class="id_1326107" cy="280.1429" stroke="#000000"
+                stroke-opacity="1.0" stroke-width="1.0"/>
+        <circle fill-opacity="1.0" fill="#00caff" r="8.210404" cx="-554.14417"
+                class="id_1372353" cy="714.94763" stroke="#000000"
+                stroke-opacity="1.0" stroke-width="1.0"/>
+        <circle fill-opacity="1.0" fill="#5fc613" r="9.803531" cx="-617.832"
+                class="id_1424309" cy="238.61693" stroke="#000000"
+                stroke-opacity="1.0" stroke-width="1.0"/>
+        <circle fill-opacity="1.0" fill="#00caff" r="10.134498" cx="-183.06424"
+                class="id_1866009" cy="674.97797" stroke="#000000"
+                stroke-opacity="1.0" stroke-width="1.0"/>
+        <circle fill-opacity="1.0" fill="#2e9072" r="5.488948" cx="876.0728"
+                class="id_2518458" cy="285.77805" stroke="#000000"
+                stroke-opacity="1.0" stroke-width="1.0"/>
+        <circle fill-opacity="1.0" fill="#2e9072" r="5.488948" cx="1011.4909"
+                class="id_3134585" cy="233.77567" stroke="#000000"
+                stroke-opacity="1.0" stroke-width="1.0"/>
+        <circle fill-opacity="1.0" fill="#c686e9" r="9.478174" cx="-214.22847"
+                class="id_4122592" cy="992.3776" stroke="#000000"
+                stroke-opacity="1.0" stroke-width="1.0"/>
+        <circle fill-opacity="1.0" fill="#ea8615" r="9.410057" cx="-259.89334"
+                class="id_10474719" cy="-505.3274" stroke="#000000"
+                stroke-opacity="1.0" stroke-width="1.0"/>
+        <circle fill-opacity="1.0" fill="#00caff" r="13.71903" cx="122.965775"
+                class="id_10934212" cy="531.8701" stroke="#000000"
+                stroke-opacity="1.0" stroke-width="1.0"/>
+        <circle fill-opacity="1.0" fill="#00caff" r="8.883556" cx="-1002.6774"
+                class="id_13764124" cy="180.85728" stroke="#000000"
+                stroke-opacity="1.0" stroke-width="1.0"/>
+        <circle fill-opacity="1.0" fill="#00caff" r="7.559691" cx="-309.86414"
+                class="id_17554500" cy="554.0713" stroke="#000000"
+                stroke-opacity="1.0" stroke-width="1.0"/>
+        <circle fill-opacity="1.0" fill="#ea8615" r="10.64497" cx="-439.7392"
+                class="id_20903754" cy="-286.50693" stroke="#000000"
+                stroke-opacity="1.0" stroke-width="1.0"/>
+        <circle fill-opacity="1.0" fill="#ea8615" r="6.619683" cx="-424.29166"
+                class="id_25997913" cy="-875.57245" stroke="#000000"
+                stroke-opacity="1.0" stroke-width="1.0"/>
+    </g>
+    <g id="node-labels-outline">
+        <text stroke-linecap="round" font-size="21" x="312.201" y="194.501"
+              fill="#f1087b" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-aeler-technologies"
+              stroke="#ffffff" stroke-opacity="0.8" stroke-width="2.625px">
+            Aeler Technologies
+        </text>
+        <text stroke-linecap="round" font-size="31" x="-418.78796" y="190.78798"
+              fill="#f1087b" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-aesyra-aesybyte" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="3.875px">
+            Aesyra
+        </text>
+        <text stroke-linecap="round" font-size="13" x="-237.04028"
+              y="-492.65518" fill="#f1087b" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-aica" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="1.625px">
+            Aica
+        </text>
+        <text stroke-linecap="round" font-size="24" x="494.3461" y="42.932846"
+              fill="#f1087b" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-akselos" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="3.0px">
+            Akselos
+        </text>
+        <text stroke-linecap="round" font-size="29" x="162.03668" y="14.948261"
+              fill="#f1087b" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-aleva-neurotherapeutics"
+              stroke="#ffffff" stroke-opacity="0.8" stroke-width="3.625px">
+            Aleva Neurotherapeutics
+        </text>
+        <text stroke-linecap="round" font-size="23" x="761.40436" y="363.7009"
+              fill="#f1087b" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-aqua-tech" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="2.875px">
+            Aqua+Tech
+        </text>
+        <text stroke-linecap="round" font-size="29" x="82.622696" y="-96.92294"
+              fill="#f1087b" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-artiria-medical" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="3.625px">
+            Artiria Medical
+        </text>
+        <text stroke-linecap="round" font-size="26" x="-84.09412" y="77.860435"
+              fill="#f1087b" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-artmyn" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="3.25px">
+            Artmyn
+        </text>
+        <text stroke-linecap="round" font-size="24" x="-1002.4207"
+              y="-31.526333" fill="#f1087b" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-auxenion-research"
+              stroke="#ffffff" stroke-opacity="0.8" stroke-width="3.0px">
+            Auxenion Research
+        </text>
+        <text stroke-linecap="round" font-size="19" x="232.01163" y="573.0617"
+              fill="#f1087b" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-bluewatt-engineering"
+              stroke="#ffffff" stroke-opacity="0.8" stroke-width="2.375px">
+            BlueWatt Engineering
+        </text>
+        <text stroke-linecap="round" font-size="24" x="629.3103" y="-128.46382"
+              fill="#f1087b" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-bridgology" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="3.0px">
+            Bridgology
+        </text>
+        <text stroke-linecap="round" font-size="20" x="-113.93347" y="290.8452"
+              fill="#f1087b" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-bright-sensors" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="2.5px">
+            Bright Sensors
+        </text>
+        <text stroke-linecap="round" font-size="24" x="672.1526" y="-0.93773127"
+              fill="#f1087b" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-clearspace" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="3.0px">
+            ClearSpace
+        </text>
+        <text stroke-linecap="round" font-size="29" x="276.6078" y="319.8126"
+              fill="#f1087b" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-combo-solutions" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="3.625px">
+            Combo Solutions
+        </text>
+        <text stroke-linecap="round" font-size="21" x="40.436802" y="-450.57962"
+              fill="#f1087b" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-comppair" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="2.625px">
+            CompPair
+        </text>
+        <text stroke-linecap="round" font-size="24" x="256.26877" y="-664.2803"
+              fill="#f1087b" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-crisalix" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="3.0px">
+            Crisalix
+        </text>
+        <text stroke-linecap="round" font-size="14" x="-410.39536"
+              y="-282.31506" fill="#f1087b" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-cyberbotics" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="1.75px">
+            Cyberbotics
+        </text>
+        <text stroke-linecap="round" font-size="29" x="263.27487" y="25.245808"
+              fill="#f1087b" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-daphne-technology"
+              stroke="#ffffff" stroke-opacity="0.8" stroke-width="3.625px">
+            Daphne Technology
+        </text>
+        <text stroke-linecap="round" font-size="26" x="-122.122795" y="40.45445"
+              fill="#f1087b" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-dartfish" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="3.25px">
+            Dartfish
+        </text>
+        <text stroke-linecap="round" font-size="24" x="214.54037" y="-923.8597"
+              fill="#f1087b" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-diagnoswiss" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="3.0px">
+            DiagnoSwiss
+        </text>
+        <text stroke-linecap="round" font-size="14" x="-456.0024" y="-258.7784"
+              fill="#f1087b" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-didel" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="1.75px">
+            Didel
+        </text>
+        <text stroke-linecap="round" font-size="17" x="827.21075" y="-280.43854"
+              fill="#f1087b" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-earlysight" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="2.125px">
+            EarlySight
+        </text>
+        <text stroke-linecap="round" font-size="25" x="-531.41895" y="380.17004"
+              fill="#f1087b" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-embion-technologies"
+              stroke="#ffffff" stroke-opacity="0.8" stroke-width="3.125px">
+            Embion Technologies
+        </text>
+        <text stroke-linecap="round" font-size="13" x="-859.31384" y="184.76456"
+              fill="#f1087b" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-enairys-powertech-sa"
+              stroke="#ffffff" stroke-opacity="0.8" stroke-width="1.625px">
+            Enairys Powertech SA
+        </text>
+        <text stroke-linecap="round" font-size="26" x="179.48495" y="510.95398"
+              fill="#f1087b" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-enviroscopy" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="3.25px">
+            Enviroscopy
+        </text>
+        <text stroke-linecap="round" font-size="24" x="392.95605" y="9.699446"
+              fill="#f1087b" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-epiqr-renovation"
+              stroke="#ffffff" stroke-opacity="0.8" stroke-width="3.0px">
+            EPIQR Rénov.
+        </text>
+        <text stroke-linecap="round" font-size="14" x="-468.86792"
+              y="-287.06305" fill="#f1087b" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-epsitec" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="1.75px">
+            Epsitec
+        </text>
+        <text stroke-linecap="round" font-size="24" x="520.45654" y="-516.2338"
+              fill="#f1087b" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-estia" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="3.0px">
+            ESTIA / EPIQR
+        </text>
+        <text stroke-linecap="round" font-size="13" x="-899.5507" y="-72.597946"
+              fill="#f1087b" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-fastcom-technology"
+              stroke="#ffffff" stroke-opacity="0.8" stroke-width="1.625px">
+            Fastcom Technology
+        </text>
+        <text stroke-linecap="round" font-size="20" x="-247.04039" y="276.5507"
+              fill="#f1087b" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-fiveco" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="2.5px">
+            FiveCo
+        </text>
+        <text stroke-linecap="round" font-size="20" x="-5.704201" y="268.09277"
+              fill="#f1087b" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-flybotix" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="2.5px">
+            Flybotix
+        </text>
+        <text stroke-linecap="round" font-size="29" x="-102.539314" y="480.5506"
+              fill="#f1087b" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-gaiasens-technologies"
+              stroke="#ffffff" stroke-opacity="0.8" stroke-width="3.625px">
+            Gaiasens Technologies
+        </text>
+        <text stroke-linecap="round" font-size="17" x="856.12964" y="-105.49733"
+              fill="#f1087b" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-gamaya" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="2.125px">
+            Gamaya
+        </text>
+        <text stroke-linecap="round" font-size="15" x="-578.339" y="-359.53717"
+              fill="#f1087b" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-gctronic" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="1.875px">
+            Gctronic
+        </text>
+        <text stroke-linecap="round" font-size="24" x="31.907866" y="-916.7798"
+              fill="#f1087b" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-genomsys" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="3.0px">
+            Genomsys
+        </text>
+        <text stroke-linecap="round" font-size="24" x="559.8274" y="-299.02902"
+              fill="#f1087b" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-geoeg" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="3.0px">
+            GeoEg
+        </text>
+        <text stroke-linecap="round" font-size="33" x="-187.79443" y="-4.586502"
+              fill="#f1087b" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-geosatis" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="4.125px">
+            Geosatis
+        </text>
+        <text stroke-linecap="round" font-size="33" x="95.72855" y="82.99892"
+              fill="#f1087b" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-gridsteer" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="4.125px">
+            GRidSTeer
+        </text>
+        <text stroke-linecap="round" font-size="26" x="62.22142" y="164.03706"
+              fill="#f1087b" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-grosso-link" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="3.25px">
+            Grosso Link
+        </text>
+        <text stroke-linecap="round" font-size="24" x="-258.1883" y="-122.76749"
+              fill="#f1087b" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-hydromea" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="3.0px">
+            Hydromea
+        </text>
+        <text stroke-linecap="round" font-size="29" x="22.691748" y="-305.38205"
+              fill="#f1087b" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-i-dent-sa" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="3.625px">
+            i-Dent SA
+        </text>
+        <text stroke-linecap="round" font-size="21" x="-58.402134"
+              y="-137.92975" fill="#f1087b" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-illusonic" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="2.625px">
+            Illusonic
+        </text>
+        <text stroke-linecap="round" font-size="13" x="-828.31085" y="36.13232"
+              fill="#f1087b" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-imperix" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="1.625px">
+            Imperix
+        </text>
+        <text stroke-linecap="round" font-size="24" x="504.47748" y="-648.33765"
+              fill="#f1087b" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-inait" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="3.0px">
+            Inait
+        </text>
+        <text stroke-linecap="round" font-size="24" x="471.06693" y="-809.685"
+              fill="#f1087b" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-innoview" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="3.0px">
+            Innoview
+        </text>
+        <text stroke-linecap="round" font-size="14" x="-427.08563"
+              y="-256.73212" fill="#f1087b" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-k-team" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="1.75px">
+            K-Team
+        </text>
+        <text stroke-linecap="round" font-size="24" x="519.9746" y="-69.60672"
+              fill="#f1087b" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-kaemco" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="3.0px">
+            Kaemco LLC
+        </text>
+        <text stroke-linecap="round" font-size="24" x="331.13632" y="-543.17413"
+              fill="#f1087b" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-kandou-technologies"
+              stroke="#ffffff" stroke-opacity="0.8" stroke-width="3.0px">
+            Kandou Bus
+        </text>
+        <text stroke-linecap="round" font-size="11" x="485.41904" y="769.2779"
+              fill="#f1087b" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-l-e-s-s" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="1.375px">
+            L. E. S. S.
+        </text>
+        <text stroke-linecap="round" font-size="24" x="625.6212" y="-444.68948"
+              fill="#f1087b" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-lantern-solutions-sarl"
+              stroke="#ffffff" stroke-opacity="0.8" stroke-width="3.0px">
+            Lantern Solutions Sarl
+        </text>
+        <text stroke-linecap="round" font-size="24" x="638.0882" y="-717.4911"
+              fill="#f1087b" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-largo-films" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="3.0px">
+            Largo Films
+        </text>
+        <text stroke-linecap="round" font-size="30" x="-266.35236" y="101.69556"
+              fill="#f1087b" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-livelyplanet" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="3.75px">
+            Livelyplanet
+        </text>
+        <text stroke-linecap="round" font-size="10" x="505.83987" y="328.12363"
+              fill="#f1087b" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-lumendo" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="1.25px">
+            Lumendo
+        </text>
+        <text stroke-linecap="round" font-size="26" x="130.57347" y="471.38345"
+              fill="#f1087b" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-medlight" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="3.25px">
+            Medlight
+        </text>
+        <text stroke-linecap="round" font-size="17" x="814.9542" y="-450.0811"
+              fill="#f1087b" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-medusoil" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="2.125px">
+            Medusoil
+        </text>
+        <text stroke-linecap="round" font-size="21" x="24.456839" y="-62.474716"
+              fill="#f1087b" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-micror-systems" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="2.625px">
+            MicroR Systems
+        </text>
+        <text stroke-linecap="round" font-size="21" x="-33.86432" y="-57.67425"
+              fill="#f1087b" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-miraex" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="2.625px">
+            Miraex
+        </text>
+        <text stroke-linecap="round" font-size="13" x="-137.99193" y="-610.8873"
+              fill="#f1087b" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-mobsya" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="1.625px">
+            Mobsya
+        </text>
+        <text stroke-linecap="round" font-size="24" x="201.25122" y="-433.64713"
+              fill="#f1087b" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-nagi-bioscience" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="3.0px">
+            Nagi Bioscience
+        </text>
+        <text stroke-linecap="round" font-size="20" x="-447.982" y="59.83708"
+              fill="#f1087b" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-nexthink-sa" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="2.5px">
+            NEXThink SA
+        </text>
+        <text stroke-linecap="round" font-size="21" x="138.79967" y="153.76251"
+              fill="#f1087b" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-odyssein-technologies"
+              stroke="#ffffff" stroke-opacity="0.8" stroke-width="2.625px">
+            ODYSSEIN Technologies
+        </text>
+        <text stroke-linecap="round" font-size="11" x="394.30795" y="839.0434"
+              fill="#f1087b" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-omnisens" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="1.375px">
+            Omnisens
+        </text>
+        <text stroke-linecap="round" font-size="29" x="98.84361" y="-160.76425"
+              fill="#f1087b" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-osmoblue" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="3.625px">
+            Osmoblue
+        </text>
+        <text stroke-linecap="round" font-size="24" x="376.89273" y="-644.4045"
+              fill="#f1087b" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-ozwe" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="3.0px">
+            Ozwe
+        </text>
+        <text stroke-linecap="round" font-size="33" x="211.99957" y="104.13489"
+              fill="#f1087b" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-panoptic-sarl" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="4.125px">
+            Panoptic Sarl
+        </text>
+        <text stroke-linecap="round" font-size="21" x="369.4734" y="129.32492"
+              fill="#f1087b" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-piemacs" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="2.625px">
+            Piemacs
+        </text>
+        <text stroke-linecap="round" font-size="13" x="-247.25967" y="-524.5498"
+              fill="#f1087b" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-pomelo" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="1.625px">
+            Pomelo
+        </text>
+        <text stroke-linecap="round" font-size="35" x="-507.2255" y="687.3787"
+              fill="#f1087b" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-power-vision-engineering"
+              stroke="#ffffff" stroke-opacity="0.8" stroke-width="4.375px">
+            Power Vision Engineering
+        </text>
+        <text stroke-linecap="round" font-size="30" x="-126.42552"
+              y="-180.61148" fill="#f1087b" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-prediva" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="3.75px">
+            Prediva
+        </text>
+        <text stroke-linecap="round" font-size="29" x="21.618004" y="-198.72304"
+              fill="#f1087b" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-program" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="3.625px">
+            PROGRAM - Produits et Recherche d&apos;Outils Géométriques et
+            Réalisations en Atelier Mécanique SA
+        </text>
+        <text stroke-linecap="round" font-size="24" x="709.3619" y="-245.57481"
+              fill="#f1087b" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-rayform-caustics"
+              stroke="#ffffff" stroke-opacity="0.8" stroke-width="3.0px">
+            Rayform - Caustics
+        </text>
+        <text stroke-linecap="round" font-size="14" x="-168.96573" y="999.1942"
+              fill="#f1087b" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-routerank" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="1.75px">
+            RouteRank
+        </text>
+        <text stroke-linecap="round" font-size="21" x="27.462742" y="89.87737"
+              fill="#f1087b" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-rovenso" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="2.625px">
+            Rovenso
+        </text>
+        <text stroke-linecap="round" font-size="29" x="167.75322" y="-69.708824"
+              fill="#f1087b" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-seed-biosciences"
+              stroke="#ffffff" stroke-opacity="0.8" stroke-width="3.625px">
+            SEED Biosciences
+        </text>
+        <text stroke-linecap="round" font-size="33" x="-14.293518" y="191.25389"
+              fill="#f1087b" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-senbiosys" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="4.125px">
+            Senbiosys
+        </text>
+        <text stroke-linecap="round" font-size="13" x="-801.7215" y="514.34753"
+              fill="#f1087b" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-senis" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="1.625px">
+            Senis
+        </text>
+        <text stroke-linecap="round" font-size="24" x="-128.43251"
+              y="-485.54117" fill="#f1087b" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-sensars-neuroprosthetics-sarl"
+              stroke="#ffffff" stroke-opacity="0.8" stroke-width="3.0px">
+            SensArs Neuroprosthetics Sarl
+        </text>
+        <text stroke-linecap="round" font-size="24" x="797.6846" y="-646.1351"
+              fill="#f1087b" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-sensasion" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="3.0px">
+            SENSàSION
+        </text>
+        <text stroke-linecap="round" font-size="20" x="-341.87286" y="314.25"
+              fill="#f1087b" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-sensile-technologies-sa"
+              stroke="#ffffff" stroke-opacity="0.8" stroke-width="2.5px">
+            Sensile techn. SA
+        </text>
+        <text stroke-linecap="round" font-size="11" x="340.266" y="940.2403"
+              fill="#f1087b" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-sensimed" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="1.375px">
+            SensiMed
+        </text>
+        <text stroke-linecap="round" font-size="17" x="1010.7917" y="-60.10669"
+              fill="#f1087b" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-sensoptic" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="2.125px">
+            SensOptic
+        </text>
+        <text stroke-linecap="round" font-size="26" x="-82.75199" y="129.39963"
+              fill="#f1087b" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-sensorscope" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="3.25px">
+            Sensorscope
+        </text>
+        <text stroke-linecap="round" font-size="20" x="-351.01596" y="50.705353"
+              fill="#f1087b" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-shockfish" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="2.5px">
+            ShockFish
+        </text>
+        <text stroke-linecap="round" font-size="20" x="-216.0569" y="189.5267"
+              fill="#f1087b" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-shoelace-wireless"
+              stroke="#ffffff" stroke-opacity="0.8" stroke-width="2.5px">
+            Shoelace Wireless
+        </text>
+        <text stroke-linecap="round" font-size="11" x="466.54144" y="902.4715"
+              fill="#f1087b" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-sonoview-acoustic"
+              stroke="#ffffff" stroke-opacity="0.8" stroke-width="1.375px">
+            SonoView Acoustic
+        </text>
+        <text stroke-linecap="round" font-size="24" x="151.82513" y="-791.5057"
+              fill="#f1087b" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-spectroswiss" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="3.0px">
+            SpectroSwiss
+        </text>
+        <text stroke-linecap="round" font-size="24" x="175.45667" y="-566.23016"
+              fill="#f1087b" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-swiss-inso" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="3.0px">
+            Swiss-Inso
+        </text>
+        <text stroke-linecap="round" font-size="24" x="118.82863" y="-672.04193"
+              fill="#f1087b" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-swisssource" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="3.0px">
+            SwissSource
+        </text>
+        <text stroke-linecap="round" font-size="21" x="-53.752323"
+              y="-228.37222" fill="#f1087b" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-swissto12" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="2.625px">
+            SwissTo12
+        </text>
+        <text stroke-linecap="round" font-size="24" x="345.30002" y="-861.9772"
+              fill="#f1087b" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-symple-data" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="3.0px">
+            Symple Data
+        </text>
+        <text stroke-linecap="round" font-size="29" x="106.25031" y="-36.541573"
+              fill="#f1087b" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-technis" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="3.625px">
+            Technis
+        </text>
+        <text stroke-linecap="round" font-size="30" x="204.62395" y="234.25998"
+              fill="#f1087b" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-thinkee" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="3.75px">
+            Thinkee
+        </text>
+        <text stroke-linecap="round" font-size="19" x="177.08661" y="766.5811"
+              fill="#f1087b" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-treatech-sarl" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="2.375px">
+            TreaTech
+        </text>
+        <text stroke-linecap="round" font-size="26" x="-107.10765" y="-73.24309"
+              fill="#f1087b" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-twentygreen" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="3.25px">
+            TwentyGreen
+        </text>
+        <text stroke-linecap="round" font-size="19" x="-395.44412" y="-642.8305"
+              fill="#f1087b" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-urbio" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="2.375px">
+            Urbio
+        </text>
+        <text stroke-linecap="round" font-size="29" x="13.425178" y="-124.56769"
+              fill="#f1087b" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-volumina-medical"
+              stroke="#ffffff" stroke-opacity="0.8" stroke-width="3.625px">
+            Volumina Medical
+        </text>
+        <text stroke-linecap="round" font-size="21" x="88.406136" y="18.205727"
+              fill="#f1087b" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-xsensio-sarl" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="2.625px">
+            Xsensio Sarl
+        </text>
+        <text stroke-linecap="round" font-size="18" x="-475.42923"
+              y="-480.51657" fill="#5fa5fd" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_713" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="2.25px">
+            Android_(robot)
+        </text>
+        <text stroke-linecap="round" font-size="48" x="311.57037" y="-245.73935"
+              fill="#5fa5fd" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_1134" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="6.0px">
+            Analysis
+        </text>
+        <text stroke-linecap="round" font-size="40" x="0.0019805008"
+              y="9.260571" fill="#5fa5fd" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_10779" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="5.0px">
+            Frequency
+        </text>
+        <text stroke-linecap="round" font-size="28" x="-615.99786" y="202.93137"
+              fill="#5fa5fd" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_11180" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="3.5px">
+            Functional_analysis
+        </text>
+        <text stroke-linecap="round" font-size="22" x="-21.368603" y="760.461"
+              fill="#5fa5fd" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_12463" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="2.75px">
+            Glacier
+        </text>
+        <text stroke-linecap="round" font-size="25" x="90.97013" y="603.11084"
+              fill="#5fa5fd" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_14073" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="3.125px">
+            Hydropower
+        </text>
+        <text stroke-linecap="round" font-size="19" x="428.57147" y="870.9497"
+              fill="#5fa5fd" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_19022" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="2.375px">
+            Measurement
+        </text>
+        <text stroke-linecap="round" font-size="23" x="48.346832" y="499.29678"
+              fill="#5fa5fd" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_22718" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="2.875px">
+            Ozone
+        </text>
+        <text stroke-linecap="round" font-size="19" x="575.0843" y="312.38586"
+              fill="#5fa5fd" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_23001" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="2.375px">
+            Polymer
+        </text>
+        <text stroke-linecap="round" font-size="16" x="521.69574" y="328.8566"
+              fill="#5fa5fd" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_23872" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="2.0px">
+            Polymerization
+        </text>
+        <text stroke-linecap="round" font-size="21" x="-577.3984" y="-417.89487"
+              fill="#5fa5fd" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_25781" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="2.625px">
+            Robot
+        </text>
+        <text stroke-linecap="round" font-size="29" x="963.428" y="-284.97696"
+              fill="#5fa5fd" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_26833" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="3.625px">
+            Scientific_method
+        </text>
+        <text stroke-linecap="round" font-size="20" x="-470.2176" y="-127.67711"
+              fill="#5fa5fd" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_41958" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="2.5px">
+            Lidar
+        </text>
+        <text stroke-linecap="round" font-size="18" x="-213.76204" y="447.467"
+              fill="#5fa5fd" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_44179" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="2.25px">
+            Satellite_temperature_measurements
+        </text>
+        <text stroke-linecap="round" font-size="18" x="-403.7478" y="-466.9244"
+              fill="#5fa5fd" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_48180" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="2.25px">
+            Humanoid_robot
+        </text>
+        <text stroke-linecap="round" font-size="15" x="663.3225" y="275.58392"
+              fill="#5fa5fd" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_144241" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="1.875px">
+            Molar_mass
+        </text>
+        <text stroke-linecap="round" font-size="21" x="-866.23364" y="494.53867"
+              fill="#5fa5fd" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_146103" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="2.625px">
+            Nonlinear_system
+        </text>
+        <text stroke-linecap="round" font-size="13" x="837.9072" y="147.62483"
+              fill="#5fa5fd" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_155726" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="1.625px">
+            Sodium_carbonate
+        </text>
+        <text stroke-linecap="round" font-size="15" x="-323.83026" y="-306.3291"
+              fill="#5fa5fd" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_308906" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="1.875px">
+            Humanoid
+        </text>
+        <text stroke-linecap="round" font-size="11" x="-399.67352"
+              y="-724.41296" fill="#5fa5fd" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_453372" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="1.375px">
+            Object
+        </text>
+        <text stroke-linecap="round" font-size="37" x="-159.97568" y="118.39849"
+              fill="#5fa5fd" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_1076662" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="4.625px">
+            Wireless_sensor_network
+        </text>
+        <text stroke-linecap="round" font-size="20" x="-534.2475" y="875.8099"
+              fill="#5fa5fd" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_1105937" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="2.5px">
+            Electrical_wiring
+        </text>
+        <text stroke-linecap="round" font-size="16" x="694.6119" y="504.6254"
+              fill="#5fa5fd" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_1225002" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="2.0px">
+            Polyelectrolyte
+        </text>
+        <text stroke-linecap="round" font-size="18" x="732.45764" y="463.26993"
+              fill="#5fa5fd" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_1242977" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="2.25px">
+            Flocculation
+        </text>
+        <text stroke-linecap="round" font-size="13" x="911.8734" y="457.7981"
+              fill="#5fa5fd" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_1277055" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="1.625px">
+            Micro-encapsulation
+        </text>
+        <text stroke-linecap="round" font-size="21" x="-629.2238" y="285.06992"
+              fill="#5fa5fd" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_1326107" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="2.625px">
+            Steady_state
+        </text>
+        <text stroke-linecap="round" font-size="20" x="-554.14417" y="719.579"
+              fill="#5fa5fd" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_1372353" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="2.5px">
+            Hydraulic_machinery
+        </text>
+        <text stroke-linecap="round" font-size="24" x="-617.832" y="244.17747"
+              fill="#5fa5fd" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_1424309" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="3.0px">
+            Differential_equation
+        </text>
+        <text stroke-linecap="round" font-size="24" x="-183.06424" y="679.3432"
+              fill="#5fa5fd" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_1866009" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="3.0px">
+            Environmentalism
+        </text>
+        <text stroke-linecap="round" font-size="13" x="876.0728" y="288.78842"
+              fill="#5fa5fd" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_2518458" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="1.625px">
+            Thickening_agent
+        </text>
+        <text stroke-linecap="round" font-size="13" x="1011.4909" y="236.82571"
+              fill="#5fa5fd" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_3134585" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="1.625px">
+            Charge_density
+        </text>
+        <text stroke-linecap="round" font-size="23" x="-214.22847" y="997.7065"
+              fill="#5fa5fd" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_4122592" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="2.875px">
+            Computer_network
+        </text>
+        <text stroke-linecap="round" font-size="23" x="-259.89334"
+              y="-500.06873" fill="#5fa5fd" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_10474719" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="2.875px">
+            Robotic_arm
+        </text>
+        <text stroke-linecap="round" font-size="33" x="122.965775" y="539.41516"
+              fill="#5fa5fd" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_10934212" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="4.125px">
+            Air_pollution
+        </text>
+        <text stroke-linecap="round" font-size="21" x="-1002.6774" y="185.65868"
+              fill="#5fa5fd" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_13764124" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="2.625px">
+            Electric_machine
+        </text>
+        <text stroke-linecap="round" font-size="18" x="-309.86414" y="558.2395"
+              fill="#5fa5fd" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_17554500" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="2.25px">
+            Biophysical_environment
+        </text>
+        <text stroke-linecap="round" font-size="26" x="-439.7392" y="-281.77792"
+              fill="#5fa5fd" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_20903754" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="3.25px">
+            Robotics
+        </text>
+        <text stroke-linecap="round" font-size="16" x="-424.29166"
+              y="-871.91425" fill="#5fa5fd" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_25997913" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="2.0px">
+            Tactile_sensor
+        </text>
+    </g>
+    <g id="node-labels">
+        <text font-size="21" x="312.201" y="194.501" fill="#f1087b"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-aeler-technologies">
+            Aeler Technologies
+        </text>
+        <text font-size="31" x="-418.78796" y="190.78798" fill="#f1087b"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-aesyra-aesybyte">
+            Aesyra
+        </text>
+        <text font-size="13" x="-237.04028" y="-492.65518" fill="#f1087b"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-aica">
+            Aica
+        </text>
+        <text font-size="24" x="494.3461" y="42.932846" fill="#f1087b"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-akselos">
+            Akselos
+        </text>
+        <text font-size="29" x="162.03668" y="14.948261" fill="#f1087b"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-aleva-neurotherapeutics">
+            Aleva Neurotherapeutics
+        </text>
+        <text font-size="23" x="761.40436" y="363.7009" fill="#f1087b"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-aqua-tech">
+            Aqua+Tech
+        </text>
+        <text font-size="29" x="82.622696" y="-96.92294" fill="#f1087b"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-artiria-medical">
+            Artiria Medical
+        </text>
+        <text font-size="26" x="-84.09412" y="77.860435" fill="#f1087b"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-artmyn">
+            Artmyn
+        </text>
+        <text font-size="24" x="-1002.4207" y="-31.526333" fill="#f1087b"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-auxenion-research">
+            Auxenion Research
+        </text>
+        <text font-size="19" x="232.01163" y="573.0617" fill="#f1087b"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-bluewatt-engineering">
+            BlueWatt Engineering
+        </text>
+        <text font-size="24" x="629.3103" y="-128.46382" fill="#f1087b"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-bridgology">
+            Bridgology
+        </text>
+        <text font-size="20" x="-113.93347" y="290.8452" fill="#f1087b"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-bright-sensors">
+            Bright Sensors
+        </text>
+        <text font-size="24" x="672.1526" y="-0.93773127" fill="#f1087b"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-clearspace">
+            ClearSpace
+        </text>
+        <text font-size="29" x="276.6078" y="319.8126" fill="#f1087b"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-combo-solutions">
+            Combo Solutions
+        </text>
+        <text font-size="21" x="40.436802" y="-450.57962" fill="#f1087b"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-comppair">
+            CompPair
+        </text>
+        <text font-size="24" x="256.26877" y="-664.2803" fill="#f1087b"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-crisalix">
+            Crisalix
+        </text>
+        <text font-size="14" x="-410.39536" y="-282.31506" fill="#f1087b"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-cyberbotics">
+            Cyberbotics
+        </text>
+        <text font-size="29" x="263.27487" y="25.245808" fill="#f1087b"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-daphne-technology">
+            Daphne Technology
+        </text>
+        <text font-size="26" x="-122.122795" y="40.45445" fill="#f1087b"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-dartfish">
+            Dartfish
+        </text>
+        <text font-size="24" x="214.54037" y="-923.8597" fill="#f1087b"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-diagnoswiss">
+            DiagnoSwiss
+        </text>
+        <text font-size="14" x="-456.0024" y="-258.7784" fill="#f1087b"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-didel">
+            Didel
+        </text>
+        <text font-size="17" x="827.21075" y="-280.43854" fill="#f1087b"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-earlysight">
+            EarlySight
+        </text>
+        <text font-size="25" x="-531.41895" y="380.17004" fill="#f1087b"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-embion-technologies">
+            Embion Technologies
+        </text>
+        <text font-size="13" x="-859.31384" y="184.76456" fill="#f1087b"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-enairys-powertech-sa">
+            Enairys Powertech SA
+        </text>
+        <text font-size="26" x="179.48495" y="510.95398" fill="#f1087b"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-enviroscopy">
+            Enviroscopy
+        </text>
+        <text font-size="24" x="392.95605" y="9.699446" fill="#f1087b"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-epiqr-renovation">
+            EPIQR Rénov.
+        </text>
+        <text font-size="14" x="-468.86792" y="-287.06305" fill="#f1087b"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-epsitec">
+            Epsitec
+        </text>
+        <text font-size="24" x="520.45654" y="-516.2338" fill="#f1087b"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-estia">
+            ESTIA / EPIQR
+        </text>
+        <text font-size="13" x="-899.5507" y="-72.597946" fill="#f1087b"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-fastcom-technology">
+            Fastcom Technology
+        </text>
+        <text font-size="20" x="-247.04039" y="276.5507" fill="#f1087b"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-fiveco">
+            FiveCo
+        </text>
+        <text font-size="20" x="-5.704201" y="268.09277" fill="#f1087b"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-flybotix">
+            Flybotix
+        </text>
+        <text font-size="29" x="-102.539314" y="480.5506" fill="#f1087b"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-gaiasens-technologies">
+            Gaiasens Technologies
+        </text>
+        <text font-size="17" x="856.12964" y="-105.49733" fill="#f1087b"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-gamaya">
+            Gamaya
+        </text>
+        <text font-size="15" x="-578.339" y="-359.53717" fill="#f1087b"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-gctronic">
+            Gctronic
+        </text>
+        <text font-size="24" x="31.907866" y="-916.7798" fill="#f1087b"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-genomsys">
+            Genomsys
+        </text>
+        <text font-size="24" x="559.8274" y="-299.02902" fill="#f1087b"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-geoeg">
+            GeoEg
+        </text>
+        <text font-size="33" x="-187.79443" y="-4.586502" fill="#f1087b"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-geosatis">
+            Geosatis
+        </text>
+        <text font-size="33" x="95.72855" y="82.99892" fill="#f1087b"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-gridsteer">
+            GRidSTeer
+        </text>
+        <text font-size="26" x="62.22142" y="164.03706" fill="#f1087b"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-grosso-link">
+            Grosso Link
+        </text>
+        <text font-size="24" x="-258.1883" y="-122.76749" fill="#f1087b"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-hydromea">
+            Hydromea
+        </text>
+        <text font-size="29" x="22.691748" y="-305.38205" fill="#f1087b"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-i-dent-sa">
+            i-Dent SA
+        </text>
+        <text font-size="21" x="-58.402134" y="-137.92975" fill="#f1087b"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-illusonic">
+            Illusonic
+        </text>
+        <text font-size="13" x="-828.31085" y="36.13232" fill="#f1087b"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-imperix">
+            Imperix
+        </text>
+        <text font-size="24" x="504.47748" y="-648.33765" fill="#f1087b"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-inait">
+            Inait
+        </text>
+        <text font-size="24" x="471.06693" y="-809.685" fill="#f1087b"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-innoview">
+            Innoview
+        </text>
+        <text font-size="14" x="-427.08563" y="-256.73212" fill="#f1087b"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-k-team">
+            K-Team
+        </text>
+        <text font-size="24" x="519.9746" y="-69.60672" fill="#f1087b"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-kaemco">
+            Kaemco LLC
+        </text>
+        <text font-size="24" x="331.13632" y="-543.17413" fill="#f1087b"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-kandou-technologies">
+            Kandou Bus
+        </text>
+        <text font-size="11" x="485.41904" y="769.2779" fill="#f1087b"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-l-e-s-s">
+            L. E. S. S.
+        </text>
+        <text font-size="24" x="625.6212" y="-444.68948" fill="#f1087b"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-lantern-solutions-sarl">
+            Lantern Solutions Sarl
+        </text>
+        <text font-size="24" x="638.0882" y="-717.4911" fill="#f1087b"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-largo-films">
+            Largo Films
+        </text>
+        <text font-size="30" x="-266.35236" y="101.69556" fill="#f1087b"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-livelyplanet">
+            Livelyplanet
+        </text>
+        <text font-size="10" x="505.83987" y="328.12363" fill="#f1087b"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-lumendo">
+            Lumendo
+        </text>
+        <text font-size="26" x="130.57347" y="471.38345" fill="#f1087b"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-medlight">
+            Medlight
+        </text>
+        <text font-size="17" x="814.9542" y="-450.0811" fill="#f1087b"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-medusoil">
+            Medusoil
+        </text>
+        <text font-size="21" x="24.456839" y="-62.474716" fill="#f1087b"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-micror-systems">
+            MicroR Systems
+        </text>
+        <text font-size="21" x="-33.86432" y="-57.67425" fill="#f1087b"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-miraex">
+            Miraex
+        </text>
+        <text font-size="13" x="-137.99193" y="-610.8873" fill="#f1087b"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-mobsya">
+            Mobsya
+        </text>
+        <text font-size="24" x="201.25122" y="-433.64713" fill="#f1087b"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-nagi-bioscience">
+            Nagi Bioscience
+        </text>
+        <text font-size="20" x="-447.982" y="59.83708" fill="#f1087b"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-nexthink-sa">
+            NEXThink SA
+        </text>
+        <text font-size="21" x="138.79967" y="153.76251" fill="#f1087b"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-odyssein-technologies">
+            ODYSSEIN Technologies
+        </text>
+        <text font-size="11" x="394.30795" y="839.0434" fill="#f1087b"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-omnisens">
+            Omnisens
+        </text>
+        <text font-size="29" x="98.84361" y="-160.76425" fill="#f1087b"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-osmoblue">
+            Osmoblue
+        </text>
+        <text font-size="24" x="376.89273" y="-644.4045" fill="#f1087b"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-ozwe">
+            Ozwe
+        </text>
+        <text font-size="33" x="211.99957" y="104.13489" fill="#f1087b"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-panoptic-sarl">
+            Panoptic Sarl
+        </text>
+        <text font-size="21" x="369.4734" y="129.32492" fill="#f1087b"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-piemacs">
+            Piemacs
+        </text>
+        <text font-size="13" x="-247.25967" y="-524.5498" fill="#f1087b"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-pomelo">
+            Pomelo
+        </text>
+        <text font-size="35" x="-507.2255" y="687.3787" fill="#f1087b"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-power-vision-engineering">
+            Power Vision Engineering
+        </text>
+        <text font-size="30" x="-126.42552" y="-180.61148" fill="#f1087b"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-prediva">
+            Prediva
+        </text>
+        <text font-size="29" x="21.618004" y="-198.72304" fill="#f1087b"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-program">
+            PROGRAM - Produits et Recherche d&apos;Outils Géométriques et
+            Réalisations en Atelier Mécanique SA
+        </text>
+        <text font-size="24" x="709.3619" y="-245.57481" fill="#f1087b"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-rayform-caustics">
+            Rayform - Caustics
+        </text>
+        <text font-size="14" x="-168.96573" y="999.1942" fill="#f1087b"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-routerank">
+            RouteRank
+        </text>
+        <text font-size="21" x="27.462742" y="89.87737" fill="#f1087b"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-rovenso">
+            Rovenso
+        </text>
+        <text font-size="29" x="167.75322" y="-69.708824" fill="#f1087b"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-seed-biosciences">
+            SEED Biosciences
+        </text>
+        <text font-size="33" x="-14.293518" y="191.25389" fill="#f1087b"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-senbiosys">
+            Senbiosys
+        </text>
+        <text font-size="13" x="-801.7215" y="514.34753" fill="#f1087b"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-senis">
+            Senis
+        </text>
+        <text font-size="24" x="-128.43251" y="-485.54117" fill="#f1087b"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-sensars-neuroprosthetics-sarl">
+            SensArs Neuroprosthetics Sarl
+        </text>
+        <text font-size="24" x="797.6846" y="-646.1351" fill="#f1087b"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-sensasion">
+            SENSàSION
+        </text>
+        <text font-size="20" x="-341.87286" y="314.25" fill="#f1087b"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-sensile-technologies-sa">
+            Sensile techn. SA
+        </text>
+        <text font-size="11" x="340.266" y="940.2403" fill="#f1087b"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-sensimed">
+            SensiMed
+        </text>
+        <text font-size="17" x="1010.7917" y="-60.10669" fill="#f1087b"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-sensoptic">
+            SensOptic
+        </text>
+        <text font-size="26" x="-82.75199" y="129.39963" fill="#f1087b"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-sensorscope">
+            Sensorscope
+        </text>
+        <text font-size="20" x="-351.01596" y="50.705353" fill="#f1087b"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-shockfish">
+            ShockFish
+        </text>
+        <text font-size="20" x="-216.0569" y="189.5267" fill="#f1087b"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-shoelace-wireless">
+            Shoelace Wireless
+        </text>
+        <text font-size="11" x="466.54144" y="902.4715" fill="#f1087b"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-sonoview-acoustic">
+            SonoView Acoustic
+        </text>
+        <text font-size="24" x="151.82513" y="-791.5057" fill="#f1087b"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-spectroswiss">
+            SpectroSwiss
+        </text>
+        <text font-size="24" x="175.45667" y="-566.23016" fill="#f1087b"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-swiss-inso">
+            Swiss-Inso
+        </text>
+        <text font-size="24" x="118.82863" y="-672.04193" fill="#f1087b"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-swisssource">
+            SwissSource
+        </text>
+        <text font-size="21" x="-53.752323" y="-228.37222" fill="#f1087b"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-swissto12">
+            SwissTo12
+        </text>
+        <text font-size="24" x="345.30002" y="-861.9772" fill="#f1087b"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-symple-data">
+            Symple Data
+        </text>
+        <text font-size="29" x="106.25031" y="-36.541573" fill="#f1087b"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-technis">
+            Technis
+        </text>
+        <text font-size="30" x="204.62395" y="234.25998" fill="#f1087b"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-thinkee">
+            Thinkee
+        </text>
+        <text font-size="19" x="177.08661" y="766.5811" fill="#f1087b"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-treatech-sarl">
+            TreaTech
+        </text>
+        <text font-size="26" x="-107.10765" y="-73.24309" fill="#f1087b"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-twentygreen">
+            TwentyGreen
+        </text>
+        <text font-size="19" x="-395.44412" y="-642.8305" fill="#f1087b"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-urbio">
+            Urbio
+        </text>
+        <text font-size="29" x="13.425178" y="-124.56769" fill="#f1087b"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-volumina-medical">
+            Volumina Medical
+        </text>
+        <text font-size="21" x="88.406136" y="18.205727" fill="#f1087b"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_es-xsensio-sarl">
+            Xsensio Sarl
+        </text>
+        <text font-size="18" x="-475.42923" y="-480.51657" fill="#5fa5fd"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_713">
+            Android_(robot)
+        </text>
+        <text font-size="48" x="311.57037" y="-245.73935" fill="#5fa5fd"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_1134">
+            Analysis
+        </text>
+        <text font-size="40" x="0.0019805008" y="9.260571" fill="#5fa5fd"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_10779">
+            Frequency
+        </text>
+        <text font-size="28" x="-615.99786" y="202.93137" fill="#5fa5fd"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_11180">
+            Functional_analysis
+        </text>
+        <text font-size="22" x="-21.368603" y="760.461" fill="#5fa5fd"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_12463">
+            Glacier
+        </text>
+        <text font-size="25" x="90.97013" y="603.11084" fill="#5fa5fd"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_14073">
+            Hydropower
+        </text>
+        <text font-size="19" x="428.57147" y="870.9497" fill="#5fa5fd"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_19022">
+            Measurement
+        </text>
+        <text font-size="23" x="48.346832" y="499.29678" fill="#5fa5fd"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_22718">
+            Ozone
+        </text>
+        <text font-size="19" x="575.0843" y="312.38586" fill="#5fa5fd"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_23001">
+            Polymer
+        </text>
+        <text font-size="16" x="521.69574" y="328.8566" fill="#5fa5fd"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_23872">
+            Polymerization
+        </text>
+        <text font-size="21" x="-577.3984" y="-417.89487" fill="#5fa5fd"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_25781">
+            Robot
+        </text>
+        <text font-size="29" x="963.428" y="-284.97696" fill="#5fa5fd"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_26833">
+            Scientific_method
+        </text>
+        <text font-size="20" x="-470.2176" y="-127.67711" fill="#5fa5fd"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_41958">
+            Lidar
+        </text>
+        <text font-size="18" x="-213.76204" y="447.467" fill="#5fa5fd"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_44179">
+            Satellite_temperature_measurements
+        </text>
+        <text font-size="18" x="-403.7478" y="-466.9244" fill="#5fa5fd"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_48180">
+            Humanoid_robot
+        </text>
+        <text font-size="15" x="663.3225" y="275.58392" fill="#5fa5fd"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_144241">
+            Molar_mass
+        </text>
+        <text font-size="21" x="-866.23364" y="494.53867" fill="#5fa5fd"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_146103">
+            Nonlinear_system
+        </text>
+        <text font-size="13" x="837.9072" y="147.62483" fill="#5fa5fd"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_155726">
+            Sodium_carbonate
+        </text>
+        <text font-size="15" x="-323.83026" y="-306.3291" fill="#5fa5fd"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_308906">
+            Humanoid
+        </text>
+        <text font-size="11" x="-399.67352" y="-724.41296" fill="#5fa5fd"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_453372">
+            Object
+        </text>
+        <text font-size="37" x="-159.97568" y="118.39849" fill="#5fa5fd"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_1076662">
+            Wireless_sensor_network
+        </text>
+        <text font-size="20" x="-534.2475" y="875.8099" fill="#5fa5fd"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_1105937">
+            Electrical_wiring
+        </text>
+        <text font-size="16" x="694.6119" y="504.6254" fill="#5fa5fd"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_1225002">
+            Polyelectrolyte
+        </text>
+        <text font-size="18" x="732.45764" y="463.26993" fill="#5fa5fd"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_1242977">
+            Flocculation
+        </text>
+        <text font-size="13" x="911.8734" y="457.7981" fill="#5fa5fd"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_1277055">
+            Micro-encapsulation
+        </text>
+        <text font-size="21" x="-629.2238" y="285.06992" fill="#5fa5fd"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_1326107">
+            Steady_state
+        </text>
+        <text font-size="20" x="-554.14417" y="719.579" fill="#5fa5fd"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_1372353">
+            Hydraulic_machinery
+        </text>
+        <text font-size="24" x="-617.832" y="244.17747" fill="#5fa5fd"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_1424309">
+            Differential_equation
+        </text>
+        <text font-size="24" x="-183.06424" y="679.3432" fill="#5fa5fd"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_1866009">
+            Environmentalism
+        </text>
+        <text font-size="13" x="876.0728" y="288.78842" fill="#5fa5fd"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_2518458">
+            Thickening_agent
+        </text>
+        <text font-size="13" x="1011.4909" y="236.82571" fill="#5fa5fd"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_3134585">
+            Charge_density
+        </text>
+        <text font-size="23" x="-214.22847" y="997.7065" fill="#5fa5fd"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_4122592">
+            Computer_network
+        </text>
+        <text font-size="23" x="-259.89334" y="-500.06873" fill="#5fa5fd"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_10474719">
+            Robotic_arm
+        </text>
+        <text font-size="33" x="122.965775" y="539.41516" fill="#5fa5fd"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_10934212">
+            Air_pollution
+        </text>
+        <text font-size="21" x="-1002.6774" y="185.65868" fill="#5fa5fd"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_13764124">
+            Electric_machine
+        </text>
+        <text font-size="18" x="-309.86414" y="558.2395" fill="#5fa5fd"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_17554500">
+            Biophysical_environment
+        </text>
+        <text font-size="26" x="-439.7392" y="-281.77792" fill="#5fa5fd"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_20903754">
+            Robotics
+        </text>
+        <text font-size="16" x="-424.29166" y="-871.91425" fill="#5fa5fd"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Arial" class="id_25997913">
+            Tactile_sensor
+        </text>
+    </g>
+</svg>

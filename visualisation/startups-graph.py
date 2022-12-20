@@ -57,9 +57,6 @@ def create_startups_graph():
     conditions = {'SCIPER': founder_ids + professor_ids}
     people_concepts = pd.DataFrame(db.find(table_name, fields=fields, conditions=conditions), columns=fields)
 
-    # Normalise scores
-    people_concepts = normalise(people_concepts)
-
     ############################################################
 
     bc.log('Merging to obtain startup-concept edges...')
@@ -111,6 +108,38 @@ def create_startups_graph():
 
     ############################################################
 
+    bc.log('Recomputing startup-concept edge score...')
+
+    # Divide score by the frequency of each concept
+    startups_concepts = pd.merge(
+        startups_concepts,
+        startups_concepts.groupby(by='PageID').aggregate(PageStartupCount=('EPFLStartupID', 'count')).reset_index(),
+        how='left',
+        on='PageID'
+    )
+    startups_concepts['Score'] = startups_concepts['Score'] / startups_concepts['PageStartupCount']
+    startups_concepts = startups_concepts[['EPFLStartupID', 'PageID', 'Score']]
+
+    # Keep at most 10 concepts per person
+    startups_concepts = startups_concepts.groupby(by='EPFLStartupID').head(10).reset_index(drop=True)
+
+    # Keep only edges with high score
+    proportion = 0.1    # keep 10% of all edges
+    startups_concepts = startups_concepts.sort_values(by='Score', ascending=False)
+    startups_concepts = startups_concepts.head(int(proportion * len(startups_concepts)))
+    startups_concepts = startups_concepts.reset_index(drop=True)
+
+    # Normalise scores
+    startups_concepts = normalise(startups_concepts)
+
+    ############################################################
+
+    bc.log('Restricting data to filtered subset...')
+
+    startups = pd.merge(startups, startups_concepts[['EPFLStartupID']].drop_duplicates(), how='inner', on='EPFLStartupID')
+
+    ############################################################
+
     bc.log('Preparing nodes and edges DataFrames...')
 
     # Nodes
@@ -130,6 +159,22 @@ def create_startups_graph():
     concepts_concepts = concepts_concepts.rename(columns={'SourcePageID': 'SourceID', 'TargetPageID': 'TargetID', 'NormalisedScore': 'Score'})
 
     edges = pd.concat([startups_concepts, concepts_concepts]).reset_index(drop=True)
+
+    ############################################################
+
+    bc.log('Removing nodes without edges and edges with non-existent nodes...')
+
+    edges = pd.merge(edges, nodes[['ID']].rename(columns={'ID': 'SourceID'}), how='inner', on='SourceID')
+    edges = pd.merge(edges, nodes[['ID']].rename(columns={'ID': 'TargetID'}), how='inner', on='TargetID')
+    nodes = pd.merge(
+        nodes,
+        pd.concat([
+            edges[['SourceID']].rename(columns={'SourceID': 'ID'}),
+            edges[['TargetID']].rename(columns={'TargetID': 'ID'})
+        ]).drop_duplicates(),
+        how='inner',
+        on='ID'
+    )
 
     ############################################################
 
