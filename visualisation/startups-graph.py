@@ -7,6 +7,18 @@ from utils.breadcrumb import Breadcrumb
 from investment.concept_configuration import normalise
 
 
+def print_summary(startups, concepts, startups_concepts, concepts_concepts):
+    n_s = len(startups)
+    n_c = len(concepts)
+    n_sc = len(startups_concepts)
+    n_cc = len(concepts_concepts)
+
+    print(f'Number of startups: {n_s}')
+    print(f'Number of concepts: {n_c}')
+    print(f'Number of startup-concept edges: {n_sc}')
+    print(f'Number of concept-concept edges: {n_cc}')
+
+
 def create_startups_graph():
 
     # Initialize breadcrumb to log and keep track of time
@@ -28,6 +40,7 @@ def create_startups_graph():
     ############################################################
 
     bc.log('Fetching startup nodes from database...')
+
     table_name = 'graph_piper.Nodes_N_EPFLStartup'
     fields = ['EPFLStartupID', 'StartupName']
     conditions = {'Status': 'Private'}
@@ -36,6 +49,7 @@ def create_startups_graph():
     ############################################################
 
     bc.log('Fetching startup-founder edges from database...')
+
     table_name = 'graph_piper.Edges_N_EPFLStartup_N_Person_T_Founder'
     fields = ['EPFLStartupID', 'SCIPER']
     startups_founders = pd.DataFrame(db.find(table_name, fields=fields), columns=fields)
@@ -44,6 +58,7 @@ def create_startups_graph():
     ############################################################
 
     bc.log('Fetching startup-professor edges from database...')
+
     table_name = 'graph_piper.Edges_N_EPFLStartup_N_Person_T_Professor'
     fields = ['EPFLStartupID', 'SCIPER']
     startups_professors = pd.DataFrame(db.find(table_name, fields=fields), columns=fields)
@@ -52,6 +67,7 @@ def create_startups_graph():
     ############################################################
 
     bc.log('Fetching person-concept edges from database...')
+
     table_name = 'graph_piper.Edges_N_Person_N_Concept_T_Research'
     fields = ['SCIPER', 'PageID', 'Score']
     conditions = {'SCIPER': founder_ids + professor_ids}
@@ -60,6 +76,7 @@ def create_startups_graph():
     ############################################################
 
     bc.log('Merging to obtain startup-concept edges...')
+
     startups_founders_concepts = pd.merge(startups_founders, people_concepts, how='inner', on='SCIPER')
     startups_professors_concepts = pd.merge(startups_professors, people_concepts, how='inner', on='SCIPER')
 
@@ -102,7 +119,10 @@ def create_startups_graph():
 
     startups_concepts = startups_concepts[startups_concepts['PageID'].isin(concept_ids)].reset_index(drop=True)
 
-    # Filter edges whose node does not exists and viceversa
+    ############################################################
+
+    bc.log('Filter edges with non-existing nodes and isolated nodes...')
+
     startups_concepts = pd.merge(startups_concepts, startups[['EPFLStartupID']], how='inner', on='EPFLStartupID')
     startups = pd.merge(startups, startups_concepts[['EPFLStartupID']].drop_duplicates(), how='inner', on='EPFLStartupID')
 
@@ -120,7 +140,11 @@ def create_startups_graph():
     startups_concepts['Score'] = startups_concepts['Score'] / startups_concepts['PageStartupCount']
     startups_concepts = startups_concepts[['EPFLStartupID', 'PageID', 'Score']]
 
-    # Keep at most 10 concepts per person
+    ############################################################
+
+    bc.log('Filtering startup-concept edges based on score...')
+
+    # Keep at most 10 concepts per startup
     startups_concepts = startups_concepts.groupby(by='EPFLStartupID').head(10).reset_index(drop=True)
 
     # Keep only edges with high score
@@ -128,6 +152,10 @@ def create_startups_graph():
     startups_concepts = startups_concepts.sort_values(by='Score', ascending=False)
     startups_concepts = startups_concepts.head(int(proportion * len(startups_concepts)))
     startups_concepts = startups_concepts.reset_index(drop=True)
+
+    ############################################################
+
+    bc.log('Normalising startup-concept edge scores...')
 
     # Normalise scores
     startups_concepts = normalise(startups_concepts)
@@ -137,6 +165,12 @@ def create_startups_graph():
     bc.log('Restricting data to filtered subset...')
 
     startups = pd.merge(startups, startups_concepts[['EPFLStartupID']].drop_duplicates(), how='inner', on='EPFLStartupID')
+
+    ############################################################
+
+    bc.log('Printing summary of resulting startups and concepts nodes and edges...')
+
+    print_summary(startups, concepts, startups_concepts, concepts_concepts)
 
     ############################################################
 
@@ -166,6 +200,7 @@ def create_startups_graph():
 
     edges = pd.merge(edges, nodes[['ID']].rename(columns={'ID': 'SourceID'}), how='inner', on='SourceID')
     edges = pd.merge(edges, nodes[['ID']].rename(columns={'ID': 'TargetID'}), how='inner', on='TargetID')
+
     nodes = pd.merge(
         nodes,
         pd.concat([
