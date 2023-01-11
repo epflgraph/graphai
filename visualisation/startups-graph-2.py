@@ -55,7 +55,8 @@ def create_startups_graph():
 
     # gpt_seed_concept_ids = [1055890, 25784]
 
-    seed_concept_ids = [3679268, 5042951, 4538124, 12637359, 23099899, 9528025, 18413531, 29501, 1055890, 25784]
+    seed_concept_ids = [3679268, 5042951, 4538124, 12637359, 23099899, 9528025, 18413531, 29501, 1055890, 25784,
+                        33094374]
 
     # excluded_concept_ids = [66618, 31898, 26515241, 52634071, 30242372, 7726829, 27447253, 21782795, 16775, 326324,
     #                         32178, 3201, 15030, 60779659, 994228, 1021673, 12545698, 1407416, 15143713, 7694290,
@@ -218,10 +219,6 @@ def create_startups_graph():
     bc.log('Printing summary of resulting startups and concepts nodes and edges...')
 
     print_summary(startups, concepts, startups_concepts, concepts_concepts)
-
-    print(startups_concepts[startups_concepts['EPFLStartupID'] == 'es-artmyn'])
-
-    dksjhdkjshjdhsjdhsjdhj
 
     ############################################################
 

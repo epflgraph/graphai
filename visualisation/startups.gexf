@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='utf-8'?>
 <gexf xmlns="http://www.gexf.net/1.2draft" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.gexf.net/1.2draft http://www.gexf.net/1.2draft/gexf.xsd" version="1.2">
-  <meta lastmodifieddate="2022-12-20">
+  <meta lastmodifieddate="2023-01-11">
     <creator>NetworkX 2.8.4</creator>
   </meta>
   <graph defaultedgetype="undirected" mode="static" name="">
@@ -9,12 +9,6 @@
       <attribute id="1" title="type" type="string" />
     </attributes>
     <nodes>
-      <node id="es-aeds" label="es-aeds">
-        <attvalues>
-          <attvalue for="0" value="AEDS" />
-          <attvalue for="1" value="Startup" />
-        </attvalues>
-      </node>
       <node id="es-aica" label="es-aica">
         <attvalues>
           <attvalue for="0" value="Aica" />
@@ -45,39 +39,9 @@
           <attvalue for="1" value="Startup" />
         </attvalues>
       </node>
-      <node id="es-bionomous" label="es-bionomous">
-        <attvalues>
-          <attvalue for="0" value="Bionomous" />
-          <attvalue for="1" value="Startup" />
-        </attvalues>
-      </node>
-      <node id="es-bluewatt-engineering" label="es-bluewatt-engineering">
-        <attvalues>
-          <attvalue for="0" value="BlueWatt Engineering" />
-          <attvalue for="1" value="Startup" />
-        </attvalues>
-      </node>
       <node id="es-bridgology" label="es-bridgology">
         <attvalues>
           <attvalue for="0" value="Bridgology" />
-          <attvalue for="1" value="Startup" />
-        </attvalues>
-      </node>
-      <node id="es-cfs-engineering" label="es-cfs-engineering">
-        <attvalues>
-          <attvalue for="0" value="CFS Engineering" />
-          <attvalue for="1" value="Startup" />
-        </attvalues>
-      </node>
-      <node id="es-clearspace" label="es-clearspace">
-        <attvalues>
-          <attvalue for="0" value="ClearSpace" />
-          <attvalue for="1" value="Startup" />
-        </attvalues>
-      </node>
-      <node id="es-combo-solutions" label="es-combo-solutions">
-        <attvalues>
-          <attvalue for="0" value="Combo Solutions" />
           <attvalue for="1" value="Startup" />
         </attvalues>
       </node>
@@ -93,15 +57,9 @@
           <attvalue for="1" value="Startup" />
         </attvalues>
       </node>
-      <node id="es-enairys-powertech-sa" label="es-enairys-powertech-sa">
+      <node id="es-depoly" label="es-depoly">
         <attvalues>
-          <attvalue for="0" value="Enairys Powertech SA" />
-          <attvalue for="1" value="Startup" />
-        </attvalues>
-      </node>
-      <node id="es-eneftech-corporation" label="es-eneftech-corporation">
-        <attvalues>
-          <attvalue for="0" value="Eneftech" />
+          <attvalue for="0" value="DePoly" />
           <attvalue for="1" value="Startup" />
         </attvalues>
       </node>
@@ -123,12 +81,6 @@
           <attvalue for="1" value="Startup" />
         </attvalues>
       </node>
-      <node id="es-fastcom-technology" label="es-fastcom-technology">
-        <attvalues>
-          <attvalue for="0" value="Fastcom Technology" />
-          <attvalue for="1" value="Startup" />
-        </attvalues>
-      </node>
       <node id="es-fiveco" label="es-fiveco">
         <attvalues>
           <attvalue for="0" value="FiveCo" />
@@ -147,33 +99,9 @@
           <attvalue for="1" value="Startup" />
         </attvalues>
       </node>
-      <node id="es-force-dimension-sarl" label="es-force-dimension-sarl">
+      <node id="es-geoeg" label="es-geoeg">
         <attvalues>
-          <attvalue for="0" value="Force Dimension Sàrl" />
-          <attvalue for="1" value="Startup" />
-        </attvalues>
-      </node>
-      <node id="es-g24-innovations" label="es-g24-innovations">
-        <attvalues>
-          <attvalue for="0" value="G24 Innovations" />
-          <attvalue for="1" value="Startup" />
-        </attvalues>
-      </node>
-      <node id="es-gaiasens-technologies" label="es-gaiasens-technologies">
-        <attvalues>
-          <attvalue for="0" value="Gaiasens Technologies" />
-          <attvalue for="1" value="Startup" />
-        </attvalues>
-      </node>
-      <node id="es-gridsteer" label="es-gridsteer">
-        <attvalues>
-          <attvalue for="0" value="GRidSTeer" />
-          <attvalue for="1" value="Startup" />
-        </attvalues>
-      </node>
-      <node id="es-imperix" label="es-imperix">
-        <attvalues>
-          <attvalue for="0" value="Imperix" />
+          <attvalue for="0" value="GeoEg" />
           <attvalue for="1" value="Startup" />
         </attvalues>
       </node>
@@ -225,12 +153,6 @@
           <attvalue for="1" value="Startup" />
         </attvalues>
       </node>
-      <node id="es-mecartex" label="es-mecartex">
-        <attvalues>
-          <attvalue for="0" value="Mecartex" />
-          <attvalue for="1" value="Startup" />
-        </attvalues>
-      </node>
       <node id="es-medlight" label="es-medlight">
         <attvalues>
           <attvalue for="0" value="Medlight" />
@@ -243,12 +165,6 @@
           <attvalue for="1" value="Startup" />
         </attvalues>
       </node>
-      <node id="es-mirrakoi" label="es-mirrakoi">
-        <attvalues>
-          <attvalue for="0" value="Mirrakoi" />
-          <attvalue for="1" value="Startup" />
-        </attvalues>
-      </node>
       <node id="es-mobsya" label="es-mobsya">
         <attvalues>
           <attvalue for="0" value="Mobsya" />
@@ -258,24 +174,6 @@
       <node id="es-morphogene-sa" label="es-morphogene-sa">
         <attvalues>
           <attvalue for="0" value="MorphoGene SA" />
-          <attvalue for="1" value="Startup" />
-        </attvalues>
-      </node>
-      <node id="es-nanogence" label="es-nanogence">
-        <attvalues>
-          <attvalue for="0" value="Nanogence" />
-          <attvalue for="1" value="Startup" />
-        </attvalues>
-      </node>
-      <node id="es-neural-concept" label="es-neural-concept">
-        <attvalues>
-          <attvalue for="0" value="Neural Concept" />
-          <attvalue for="1" value="Startup" />
-        </attvalues>
-      </node>
-      <node id="es-nrctech" label="es-nrctech">
-        <attvalues>
-          <attvalue for="0" value="NRCtech" />
           <attvalue for="1" value="Startup" />
         </attvalues>
       </node>
@@ -300,12 +198,6 @@
       <node id="es-pomelo" label="es-pomelo">
         <attvalues>
           <attvalue for="0" value="Pomelo" />
-          <attvalue for="1" value="Startup" />
-        </attvalues>
-      </node>
-      <node id="es-power-vision-engineering" label="es-power-vision-engineering">
-        <attvalues>
-          <attvalue for="0" value="Power Vision Engineering" />
           <attvalue for="1" value="Startup" />
         </attvalues>
       </node>
@@ -339,12 +231,6 @@
           <attvalue for="1" value="Startup" />
         </attvalues>
       </node>
-      <node id="es-suriasis" label="es-suriasis">
-        <attvalues>
-          <attvalue for="0" value="Suriasis" />
-          <attvalue for="1" value="Startup" />
-        </attvalues>
-      </node>
       <node id="es-swiss-inso" label="es-swiss-inso">
         <attvalues>
           <attvalue for="0" value="Swiss-Inso" />
@@ -357,9 +243,9 @@
           <attvalue for="1" value="Startup" />
         </attvalues>
       </node>
-      <node id="10474719" label="10474719">
+      <node id="1055890" label="1055890">
         <attvalues>
-          <attvalue for="0" value="Robotic_arm" />
+          <attvalue for="0" value="Sustainable_energy" />
           <attvalue for="1" value="Concept" />
         </attvalues>
       </node>
@@ -381,39 +267,21 @@
           <attvalue for="1" value="Concept" />
         </attvalues>
       </node>
-      <node id="1105937" label="1105937">
-        <attvalues>
-          <attvalue for="0" value="Electrical_wiring" />
-          <attvalue for="1" value="Concept" />
-        </attvalues>
-      </node>
       <node id="11180" label="11180">
         <attvalues>
           <attvalue for="0" value="Functional_analysis" />
           <attvalue for="1" value="Concept" />
         </attvalues>
       </node>
-      <node id="1134" label="1134">
-        <attvalues>
-          <attvalue for="0" value="Analysis" />
-          <attvalue for="1" value="Concept" />
-        </attvalues>
-      </node>
-      <node id="1225002" label="1225002">
-        <attvalues>
-          <attvalue for="0" value="Polyelectrolyte" />
-          <attvalue for="1" value="Concept" />
-        </attvalues>
-      </node>
-      <node id="1242977" label="1242977">
-        <attvalues>
-          <attvalue for="0" value="Flocculation" />
-          <attvalue for="1" value="Concept" />
-        </attvalues>
-      </node>
       <node id="12463" label="12463">
         <attvalues>
           <attvalue for="0" value="Glacier" />
+          <attvalue for="1" value="Concept" />
+        </attvalues>
+      </node>
+      <node id="12637359" label="12637359">
+        <attvalues>
+          <attvalue for="0" value="Carbon_dioxide_scrubber" />
           <attvalue for="1" value="Concept" />
         </attvalues>
       </node>
@@ -426,12 +294,6 @@
       <node id="1372353" label="1372353">
         <attvalues>
           <attvalue for="0" value="Hydraulic_machinery" />
-          <attvalue for="1" value="Concept" />
-        </attvalues>
-      </node>
-      <node id="13764124" label="13764124">
-        <attvalues>
-          <attvalue for="0" value="Electric_machine" />
           <attvalue for="1" value="Concept" />
         </attvalues>
       </node>
@@ -453,21 +315,9 @@
           <attvalue for="1" value="Concept" />
         </attvalues>
       </node>
-      <node id="146103" label="146103">
-        <attvalues>
-          <attvalue for="0" value="Nonlinear_system" />
-          <attvalue for="1" value="Concept" />
-        </attvalues>
-      </node>
       <node id="14909" label="14909">
         <attvalues>
           <attvalue for="0" value="Inertia" />
-          <attvalue for="1" value="Concept" />
-        </attvalues>
-      </node>
-      <node id="154665" label="154665">
-        <attvalues>
-          <attvalue for="0" value="Vortex" />
           <attvalue for="1" value="Concept" />
         </attvalues>
       </node>
@@ -483,45 +333,15 @@
           <attvalue for="1" value="Concept" />
         </attvalues>
       </node>
-      <node id="1638605" label="1638605">
+      <node id="18413531" label="18413531">
         <attvalues>
-          <attvalue for="0" value="Pressure_sensor" />
-          <attvalue for="1" value="Concept" />
-        </attvalues>
-      </node>
-      <node id="17554500" label="17554500">
-        <attvalues>
-          <attvalue for="0" value="Biophysical_environment" />
-          <attvalue for="1" value="Concept" />
-        </attvalues>
-      </node>
-      <node id="1866009" label="1866009">
-        <attvalues>
-          <attvalue for="0" value="Environmentalism" />
-          <attvalue for="1" value="Concept" />
-        </attvalues>
-      </node>
-      <node id="1886820" label="1886820">
-        <attvalues>
-          <attvalue for="0" value="Electronic_component" />
-          <attvalue for="1" value="Concept" />
-        </attvalues>
-      </node>
-      <node id="19022" label="19022">
-        <attvalues>
-          <attvalue for="0" value="Measurement" />
+          <attvalue for="0" value="Sustainability" />
           <attvalue for="1" value="Concept" />
         </attvalues>
       </node>
       <node id="19048" label="19048">
         <attvalues>
           <attvalue for="0" value="Mass" />
-          <attvalue for="1" value="Concept" />
-        </attvalues>
-      </node>
-      <node id="1908142" label="1908142">
-        <attvalues>
-          <attvalue for="0" value="Finite-difference_time-domain_method" />
           <attvalue for="1" value="Concept" />
         </attvalues>
       </node>
@@ -567,12 +387,6 @@
           <attvalue for="1" value="Concept" />
         </attvalues>
       </node>
-      <node id="212253" label="212253">
-        <attvalues>
-          <attvalue for="0" value="Electric_power_distribution" />
-          <attvalue for="1" value="Concept" />
-        </attvalues>
-      </node>
       <node id="21506" label="21506">
         <attvalues>
           <attvalue for="0" value="Numerical_analysis" />
@@ -597,6 +411,12 @@
           <attvalue for="1" value="Concept" />
         </attvalues>
       </node>
+      <node id="23099899" label="23099899">
+        <attvalues>
+          <attvalue for="0" value="Environmental_issues" />
+          <attvalue for="1" value="Concept" />
+        </attvalues>
+      </node>
       <node id="23619" label="23619">
         <attvalues>
           <attvalue for="0" value="Pressure" />
@@ -606,24 +426,6 @@
       <node id="23872" label="23872">
         <attvalues>
           <attvalue for="0" value="Polymerization" />
-          <attvalue for="1" value="Concept" />
-        </attvalues>
-      </node>
-      <node id="241812" label="241812">
-        <attvalues>
-          <attvalue for="0" value="Hydraulic_fluid" />
-          <attvalue for="1" value="Concept" />
-        </attvalues>
-      </node>
-      <node id="24714" label="24714">
-        <attvalues>
-          <attvalue for="0" value="Precession" />
-          <attvalue for="1" value="Concept" />
-        </attvalues>
-      </node>
-      <node id="25065" label="25065">
-        <attvalues>
-          <attvalue for="0" value="Parameter" />
           <attvalue for="1" value="Concept" />
         </attvalues>
       </node>
@@ -645,45 +447,9 @@
           <attvalue for="1" value="Concept" />
         </attvalues>
       </node>
-      <node id="25997913" label="25997913">
+      <node id="29501" label="29501">
         <attvalues>
-          <attvalue for="0" value="Tactile_sensor" />
-          <attvalue for="1" value="Concept" />
-        </attvalues>
-      </node>
-      <node id="26833" label="26833">
-        <attvalues>
-          <attvalue for="0" value="Scientific_method" />
-          <attvalue for="1" value="Concept" />
-        </attvalues>
-      </node>
-      <node id="2769817" label="2769817">
-        <attvalues>
-          <attvalue for="0" value="Motor_drive" />
-          <attvalue for="1" value="Concept" />
-        </attvalues>
-      </node>
-      <node id="277237" label="277237">
-        <attvalues>
-          <attvalue for="0" value="Pumped-storage_hydroelectricity" />
-          <attvalue for="1" value="Concept" />
-        </attvalues>
-      </node>
-      <node id="28748" label="28748">
-        <attvalues>
-          <attvalue for="0" value="Speed" />
-          <attvalue for="1" value="Concept" />
-        </attvalues>
-      </node>
-      <node id="2925093" label="2925093">
-        <attvalues>
-          <attvalue for="0" value="Hydraulic_brake" />
-          <attvalue for="1" value="Concept" />
-        </attvalues>
-      </node>
-      <node id="297672" label="297672">
-        <attvalues>
-          <attvalue for="0" value="Scale_model" />
+          <attvalue for="0" value="Sustainable_development" />
           <attvalue for="1" value="Concept" />
         </attvalues>
       </node>
@@ -693,33 +459,15 @@
           <attvalue for="1" value="Concept" />
         </attvalues>
       </node>
-      <node id="308906" label="308906">
-        <attvalues>
-          <attvalue for="0" value="Humanoid" />
-          <attvalue for="1" value="Concept" />
-        </attvalues>
-      </node>
-      <node id="31146" label="31146">
-        <attvalues>
-          <attvalue for="0" value="Transfer_function" />
-          <attvalue for="1" value="Concept" />
-        </attvalues>
-      </node>
-      <node id="3134585" label="3134585">
-        <attvalues>
-          <attvalue for="0" value="Charge_density" />
-          <attvalue for="1" value="Concept" />
-        </attvalues>
-      </node>
       <node id="316993" label="316993">
         <attvalues>
           <attvalue for="0" value="Emulsion_polymerization" />
           <attvalue for="1" value="Concept" />
         </attvalues>
       </node>
-      <node id="33689817" label="33689817">
+      <node id="33094374" label="33094374">
         <attvalues>
-          <attvalue for="0" value="Life_cycle_thinking" />
+          <attvalue for="0" value="Telecommunications" />
           <attvalue for="1" value="Concept" />
         </attvalues>
       </node>
@@ -729,27 +477,15 @@
           <attvalue for="1" value="Concept" />
         </attvalues>
       </node>
-      <node id="3694602" label="3694602">
+      <node id="3679268" label="3679268">
         <attvalues>
-          <attvalue for="0" value="Natural_frequency" />
-          <attvalue for="1" value="Concept" />
-        </attvalues>
-      </node>
-      <node id="375416" label="375416">
-        <attvalues>
-          <attvalue for="0" value="Computer_simulation" />
+          <attvalue for="0" value="Carbon_capture_and_storage" />
           <attvalue for="1" value="Concept" />
         </attvalues>
       </node>
       <node id="381399" label="381399">
         <attvalues>
           <attvalue for="0" value="Hydroelectricity" />
-          <attvalue for="1" value="Concept" />
-        </attvalues>
-      </node>
-      <node id="395167" label="395167">
-        <attvalues>
-          <attvalue for="0" value="Froude_number" />
           <attvalue for="1" value="Concept" />
         </attvalues>
       </node>
@@ -777,33 +513,27 @@
           <attvalue for="1" value="Concept" />
         </attvalues>
       </node>
-      <node id="44179" label="44179">
-        <attvalues>
-          <attvalue for="0" value="Satellite_temperature_measurements" />
-          <attvalue for="1" value="Concept" />
-        </attvalues>
-      </node>
       <node id="44731" label="44731">
         <attvalues>
           <attvalue for="0" value="Calcium_carbonate" />
           <attvalue for="1" value="Concept" />
         </attvalues>
       </node>
-      <node id="48180" label="48180">
+      <node id="453372" label="453372">
         <attvalues>
-          <attvalue for="0" value="Humanoid_robot" />
+          <attvalue for="0" value="Object" />
           <attvalue for="1" value="Concept" />
         </attvalues>
       </node>
-      <node id="487226" label="487226">
+      <node id="4538124" label="4538124">
         <attvalues>
-          <attvalue for="0" value="Synchronous_motor" />
+          <attvalue for="0" value="Integrated_gasification_combined_cycle" />
           <attvalue for="1" value="Concept" />
         </attvalues>
       </node>
-      <node id="50972" label="50972">
+      <node id="5042951" label="5042951">
         <attvalues>
-          <attvalue for="0" value="Grenoble" />
+          <attvalue for="0" value="Climate_change" />
           <attvalue for="1" value="Concept" />
         </attvalues>
       </node>
@@ -822,12 +552,6 @@
       <node id="52564" label="52564">
         <attvalues>
           <attvalue for="0" value="Partial_differential_equation" />
-          <attvalue for="1" value="Concept" />
-        </attvalues>
-      </node>
-      <node id="548173" label="548173">
-        <attvalues>
-          <attvalue for="0" value="Instability" />
           <attvalue for="1" value="Concept" />
         </attvalues>
       </node>
@@ -855,12 +579,6 @@
           <attvalue for="1" value="Concept" />
         </attvalues>
       </node>
-      <node id="609614" label="609614">
-        <attvalues>
-          <attvalue for="0" value="Continuously_variable_transmission" />
-          <attvalue for="1" value="Concept" />
-        </attvalues>
-      </node>
       <node id="65424" label="65424">
         <attvalues>
           <attvalue for="0" value="Hydraulics" />
@@ -876,12 +594,6 @@
       <node id="713" label="713">
         <attvalues>
           <attvalue for="0" value="Android_(robot)" />
-          <attvalue for="1" value="Concept" />
-        </attvalues>
-      </node>
-      <node id="72576" label="72576">
-        <attvalues>
-          <attvalue for="0" value="Axial_precession" />
           <attvalue for="1" value="Concept" />
         </attvalues>
       </node>
@@ -915,33 +627,21 @@
           <attvalue for="1" value="Concept" />
         </attvalues>
       </node>
-      <node id="8267" label="8267">
-        <attvalues>
-          <attvalue for="0" value="Dimensional_analysis" />
-          <attvalue for="1" value="Concept" />
-        </attvalues>
-      </node>
-      <node id="8286675" label="8286675">
-        <attvalues>
-          <attvalue for="0" value="System" />
-          <attvalue for="1" value="Concept" />
-        </attvalues>
-      </node>
       <node id="8395423" label="8395423">
         <attvalues>
           <attvalue for="0" value="Chain_transfer" />
           <attvalue for="1" value="Concept" />
         </attvalues>
       </node>
-      <node id="9028960" label="9028960">
-        <attvalues>
-          <attvalue for="0" value="Load-following_power_plant" />
-          <attvalue for="1" value="Concept" />
-        </attvalues>
-      </node>
       <node id="9087" label="9087">
         <attvalues>
           <attvalue for="0" value="Dynamical_system" />
+          <attvalue for="1" value="Concept" />
+        </attvalues>
+      </node>
+      <node id="9528025" label="9528025">
+        <attvalues>
+          <attvalue for="0" value="Greenhouse_gas_emissions" />
           <attvalue for="1" value="Concept" />
         </attvalues>
       </node>
@@ -957,12 +657,6 @@
           <attvalue for="1" value="Concept" />
         </attvalues>
       </node>
-      <node id="9559" label="9559">
-        <attvalues>
-          <attvalue for="0" value="Electrical_network" />
-          <attvalue for="1" value="Concept" />
-        </attvalues>
-      </node>
       <node id="9649" label="9649">
         <attvalues>
           <attvalue for="0" value="Energy" />
@@ -971,413 +665,267 @@
       </node>
     </nodes>
     <edges>
-      <edge source="es-aeds" target="21506" id="0" weight="1.0" />
-      <edge source="es-aica" target="9087" id="1" weight="0.5559533471216342" />
-      <edge source="es-aica" target="48180" id="2" weight="0.5246256816265457" />
-      <edge source="es-aica" target="25781" id="3" weight="0.4984008556171066" />
-      <edge source="es-aica" target="308906" id="4" weight="0.2994675323149433" />
-      <edge source="es-aica" target="713" id="5" weight="0.27856696539875014" />
-      <edge source="es-akselos" target="21506" id="6" weight="0.734699191630993" />
-      <edge source="es-akselos" target="12463" id="7" weight="0.6783930260673126" />
-      <edge source="es-anokion" target="768839" id="8" weight="1.0" />
-      <edge source="es-aqua-tech" target="144241" id="9" weight="0.8151016685281296" />
-      <edge source="es-aqua-tech" target="56239" id="10" weight="0.4324536182248155" />
-      <edge source="es-aqua-tech" target="155726" id="11" weight="0.276884141955226" />
-      <edge source="es-aqua-tech" target="604896" id="12" weight="0.19534232021338152" />
-      <edge source="es-aqua-tech" target="44731" id="13" weight="0.18376530661225404" />
-      <edge source="es-artmyn" target="1076662" id="14" weight="1.0" />
-      <edge source="es-bionomous" target="25781" id="15" weight="1.0" />
-      <edge source="es-bluewatt-engineering" target="9649" id="16" weight="0.6752472046438213" />
-      <edge source="es-bluewatt-engineering" target="30848" id="17" weight="0.7375914944064265" />
-      <edge source="es-bridgology" target="19048" id="18" weight="0.9569548841566182" />
-      <edge source="es-bridgology" target="41660" id="19" weight="0.2902367131994043" />
-      <edge source="es-cfs-engineering" target="21506" id="20" weight="1.0" />
-      <edge source="es-clearspace" target="19048" id="21" weight="1.0" />
-      <edge source="es-combo-solutions" target="604896" id="22" weight="1.0" />
-      <edge source="es-crisalix" target="19446" id="23" weight="1.0" />
-      <edge source="es-dartfish" target="1076662" id="24" weight="1.0" />
-      <edge source="es-enairys-powertech-sa" target="7039" id="25" weight="1.0" />
-      <edge source="es-eneftech-corporation" target="58664" id="26" weight="1.0" />
-      <edge source="es-enviroscopy" target="22718" id="27" weight="0.8439145051707981" />
-      <edge source="es-enviroscopy" target="41958" id="28" weight="0.4235974190169287" />
-      <edge source="es-enviroscopy" target="50972" id="29" weight="0.32920135869179407" />
-      <edge source="es-epiqr-renovation" target="9649" id="30" weight="0.45481398626722885" />
-      <edge source="es-epiqr-renovation" target="25784" id="31" weight="0.8905864572829036" />
-      <edge source="es-estia" target="9649" id="32" weight="0.45481398626722885" />
-      <edge source="es-estia" target="25784" id="33" weight="0.8905864572829036" />
-      <edge source="es-fastcom-technology" target="7039" id="34" weight="1.0" />
-      <edge source="es-fiveco" target="25781" id="35" weight="0.8990704931361931" />
-      <edge source="es-fiveco" target="20903754" id="36" weight="0.4378038925955806" />
-      <edge source="es-flyability" target="25781" id="37" weight="0.9824395424607579" />
-      <edge source="es-flyability" target="28748" id="38" weight="0.1865812032587869" />
-      <edge source="es-flybotix" target="25781" id="39" weight="0.8990704931361931" />
-      <edge source="es-flybotix" target="20903754" id="40" weight="0.4378038925955806" />
-      <edge source="es-force-dimension-sarl" target="25781" id="41" weight="1.0" />
-      <edge source="es-g24-innovations" target="25784" id="42" weight="1.0" />
-      <edge source="es-gaiasens-technologies" target="22718" id="43" weight="0.5668834196329456" />
-      <edge source="es-gaiasens-technologies" target="50972" id="44" weight="0.8237980265485332" />
-      <edge source="es-gridsteer" target="21506" id="45" weight="1.0" />
-      <edge source="es-imperix" target="7039" id="46" weight="1.0" />
-      <edge source="es-insolight" target="23872" id="47" weight="1.0" />
-      <edge source="es-ithetis" target="56558" id="48" weight="0.9904581286617666" />
-      <edge source="es-ithetis" target="23619" id="49" weight="0.13781398828795105" />
-      <edge source="es-kaemco" target="9649" id="50" weight="0.45481398626722885" />
-      <edge source="es-kaemco" target="25784" id="51" weight="0.8905864572829036" />
-      <edge source="es-kanyos-bio-inc" target="768839" id="52" weight="1.0" />
-      <edge source="es-lanta-bio-sarl" target="768839" id="53" weight="1.0" />
-      <edge source="es-lantern-solutions-sarl" target="25781" id="54" weight="0.9368797323867383" />
-      <edge source="es-lantern-solutions-sarl" target="20903754" id="55" weight="0.3496517796936741" />
-      <edge source="es-livelyplanet" target="1076662" id="56" weight="0.9023113393368759" />
-      <edge source="es-livelyplanet" target="4122592" id="57" weight="0.4310849648318686" />
-      <edge source="es-lumendo" target="23872" id="58" weight="1.0" />
-      <edge source="es-mecartex" target="25781" id="59" weight="1.0" />
-      <edge source="es-medlight" target="22718" id="60" weight="0.8439145051707981" />
-      <edge source="es-medlight" target="41958" id="61" weight="0.4235974190169287" />
-      <edge source="es-medlight" target="50972" id="62" weight="0.32920135869179407" />
-      <edge source="es-miraex" target="7807" id="63" weight="1.0" />
-      <edge source="es-mirrakoi" target="19446" id="64" weight="1.0" />
-      <edge source="es-mobsya" target="25781" id="65" weight="1.0" />
-      <edge source="es-morphogene-sa" target="768839" id="66" weight="1.0" />
-      <edge source="es-nanogence" target="44731" id="67" weight="1.0" />
-      <edge source="es-neural-concept" target="41958" id="68" weight="1.0" />
-      <edge source="es-nrctech" target="7542417" id="69" weight="1.0" />
-      <edge source="es-online-control" target="9087" id="70" weight="1.0" />
-      <edge source="es-ozwe" target="25781" id="71" weight="0.9368797323867383" />
-      <edge source="es-ozwe" target="20903754" id="72" weight="0.3496517796936741" />
-      <edge source="es-pbandb" target="768839" id="73" weight="0.6894272113688954" />
-      <edge source="es-pbandb" target="23872" id="74" weight="0.6753369459733407" />
-      <edge source="es-pbandb" target="23001" id="75" weight="0.2619353539091456" />
-      <edge source="es-pomelo" target="9087" id="76" weight="0.5559533471216342" />
-      <edge source="es-pomelo" target="48180" id="77" weight="0.5246256816265457" />
-      <edge source="es-pomelo" target="25781" id="78" weight="0.4984008556171066" />
-      <edge source="es-pomelo" target="308906" id="79" weight="0.2994675323149433" />
-      <edge source="es-pomelo" target="713" id="80" weight="0.27856696539875014" />
-      <edge source="es-power-vision-engineering" target="7807" id="81" weight="0.9429529494972967" />
-      <edge source="es-power-vision-engineering" target="8267" id="82" weight="0.33292602036240543" />
-      <edge source="es-program" target="7807" id="83" weight="0.9701511299884782" />
-      <edge source="es-program" target="14073" id="84" weight="0.23848226185105503" />
-      <edge source="es-program" target="8267" id="85" weight="0.04396584770573177" />
-      <edge source="es-rheon-medical" target="56558" id="86" weight="0.9904581286617666" />
-      <edge source="es-rheon-medical" target="23619" id="87" weight="0.13781398828795105" />
-      <edge source="es-rovenso" target="9087" id="88" weight="0.4041287049588466" />
-      <edge source="es-rovenso" target="25781" id="89" weight="0.8664391533668147" />
-      <edge source="es-rovenso" target="28748" id="90" weight="0.29319478737058546" />
-      <edge source="es-sensorscope" target="1076662" id="91" weight="1.0" />
-      <edge source="es-shockfish" target="25781" id="92" weight="0.8990704931361931" />
-      <edge source="es-shockfish" target="20903754" id="93" weight="0.4378038925955806" />
-      <edge source="es-suriasis" target="25784" id="94" weight="1.0" />
-      <edge source="es-swiss-inso" target="9649" id="95" weight="0.45481398626722885" />
-      <edge source="es-swiss-inso" target="25784" id="96" weight="0.8905864572829036" />
-      <edge source="es-treatech-sarl" target="58664" id="97" weight="0.863969041599373" />
-      <edge source="es-treatech-sarl" target="9649" id="98" weight="0.3247161773165034" />
-      <edge source="es-treatech-sarl" target="25784" id="99" weight="0.29569207847317175" />
-      <edge source="es-treatech-sarl" target="207347" id="100" weight="0.19166160092849127" />
-      <edge source="es-treatech-sarl" target="9550" id="101" weight="0.15475440156764958" />
-      <edge source="10474719" target="20903754" id="102" weight="1.0" />
-      <edge source="10474719" target="713" id="103" weight="0.42" />
-      <edge source="10474719" target="25781" id="104" weight="0.283898" />
-      <edge source="10474719" target="51462" id="105" weight="0.102659" />
-      <edge source="10474719" target="48180" id="106" weight="0.703297" />
-      <edge source="1076662" target="4122592" id="107" weight="0.122222" />
-      <edge source="1076662" target="10934212" id="108" weight="0.0969697" />
-      <edge source="10779" target="19048" id="109" weight="0.126136" />
-      <edge source="10779" target="41660" id="110" weight="0.339623" />
-      <edge source="10779" target="28748" id="111" weight="0.06469" />
-      <edge source="10779" target="22522" id="112" weight="0.358491" />
-      <edge source="10779" target="31146" id="113" weight="0.0486594" />
-      <edge source="10779" target="8267" id="114" weight="0.105882" />
-      <edge source="10779" target="9649" id="115" weight="0.0349467" />
-      <edge source="10779" target="157700" id="116" weight="0.0347341" />
-      <edge source="10779" target="24714" id="117" weight="0.0301887" />
-      <edge source="10779" target="25065" id="118" weight="0.0503145" />
-      <edge source="10779" target="487226" id="119" weight="0.0214408" />
-      <edge source="10779" target="3694602" id="120" weight="0.0754717" />
-      <edge source="10934212" target="9649" id="121" weight="0.737113" />
-      <edge source="10934212" target="12463" id="122" weight="0.07247" />
-      <edge source="10934212" target="22718" id="123" weight="0.835821" />
-      <edge source="10934212" target="14073" id="124" weight="0.682292" />
-      <edge source="10934212" target="25784" id="125" weight="0.339695" />
-      <edge source="10934212" target="207347" id="126" weight="0.0198728" />
-      <edge source="10934212" target="1866009" id="127" weight="0.126311" />
-      <edge source="10934212" target="2549543" id="128" weight="0.160401" />
-      <edge source="10934212" target="56558" id="129" weight="0.0205597" />
-      <edge source="1105937" target="9531" id="130" weight="0.0811688" />
-      <edge source="1105937" target="212253" id="131" weight="0.104701" />
-      <edge source="11180" target="21506" id="132" weight="0.625" />
-      <edge source="11180" target="7039" id="133" weight="0.438272" />
-      <edge source="11180" target="1134" id="134" weight="0.666667" />
-      <edge source="11180" target="9087" id="135" weight="0.127273" />
-      <edge source="11180" target="1424309" id="136" weight="0.791667" />
-      <edge source="11180" target="52564" id="137" weight="0.416667" />
-      <edge source="1134" target="21506" id="138" weight="0.387879" />
-      <edge source="1134" target="9531" id="139" weight="0.408333" />
-      <edge source="1134" target="26833" id="140" weight="0.4" />
-      <edge source="1225002" target="1242977" id="141" weight="0.222222" />
-      <edge source="1225002" target="23001" id="142" weight="0.0958904" />
-      <edge source="1242977" target="22718" id="143" weight="0.039801" />
-      <edge source="12463" target="14073" id="144" weight="0.0314465" />
-      <edge source="12463" target="25784" id="145" weight="0.0377808" />
-      <edge source="12463" target="9649" id="146" weight="0.0140972" />
-      <edge source="12463" target="44179" id="147" weight="0.0155552" />
-      <edge source="1326107" target="7039" id="148" weight="0.0493827" />
-      <edge source="1326107" target="9550" id="149" weight="0.0129765" />
-      <edge source="1326107" target="9087" id="150" weight="0.0484848" />
-      <edge source="1326107" target="1424309" id="151" weight="0.666667" />
-      <edge source="1326107" target="8286675" id="152" weight="1.0" />
-      <edge source="1372353" target="7807" id="153" weight="0.285714" />
-      <edge source="1372353" target="65424" id="154" weight="0.818182" />
-      <edge source="1372353" target="241812" id="155" weight="0.177419" />
-      <edge source="1372353" target="521843" id="156" weight="0.303797" />
-      <edge source="1372353" target="2925093" id="157" weight="1.0" />
-      <edge source="13764124" target="9531" id="158" weight="0.0625" />
-      <edge source="13764124" target="9559" id="159" weight="0.0153186" />
-      <edge source="13764124" target="51462" id="160" weight="0.139414" />
-      <edge source="13764124" target="487226" id="161" weight="0.25" />
-      <edge source="13764124" target="2769817" id="162" weight="0.0528471" />
-      <edge source="14073" target="9550" id="163" weight="0.554745" />
-      <edge source="14073" target="9649" id="164" weight="0.93299" />
-      <edge source="14073" target="25784" id="165" weight="0.604167" />
-      <edge source="14073" target="207347" id="166" weight="0.270833" />
-      <edge source="14073" target="30848" id="167" weight="0.0425347" />
-      <edge source="14073" target="51462" id="168" weight="0.0104167" />
-      <edge source="14073" target="212141" id="169" weight="0.0919118" />
-      <edge source="14073" target="381399" id="170" weight="0.5" />
-      <edge source="14073" target="34053" id="171" weight="0.0512821" />
-      <edge source="14073" target="277237" id="172" weight="0.213542" />
-      <edge source="14073" target="751777" id="173" weight="0.104167" />
-      <edge source="14073" target="754560" id="174" weight="0.09375" />
-      <edge source="1424309" target="7039" id="175" weight="0.5" />
-      <edge source="1424309" target="9087" id="176" weight="0.200655" />
-      <edge source="1424309" target="21506" id="177" weight="0.686567" />
-      <edge source="1424309" target="52564" id="178" weight="1.0" />
-      <edge source="1424309" target="43444" id="179" weight="0.16129" />
-      <edge source="1424309" target="146103" id="180" weight="0.0214559" />
-      <edge source="1424309" target="375416" id="181" weight="0.17193" />
-      <edge source="1424309" target="1908142" id="182" weight="0.0299335" />
-      <edge source="144241" target="8267" id="183" weight="0.0411765" />
-      <edge source="144241" target="23001" id="184" weight="0.205479" />
-      <edge source="144241" target="19048" id="185" weight="0.00882353" />
-      <edge source="144241" target="23619" id="186" weight="0.0928976" />
-      <edge source="146103" target="7039" id="187" weight="0.62963" />
-      <edge source="146103" target="9087" id="188" weight="0.545455" />
-      <edge source="146103" target="19048" id="189" weight="0.05" />
-      <edge source="146103" target="52564" id="190" weight="0.0094518" />
-      <edge source="146103" target="8286675" id="191" weight="0.857143" />
-      <edge source="14909" target="19048" id="192" weight="0.505155" />
-      <edge source="14909" target="28748" id="193" weight="0.443299" />
-      <edge source="14909" target="20903754" id="194" weight="0.0132935" />
-      <edge source="14909" target="157700" id="195" weight="0.458763" />
-      <edge source="14909" target="9649" id="196" weight="0.484536" />
-      <edge source="154665" target="30848" id="197" weight="0.277778" />
-      <edge source="155726" target="44731" id="198" weight="0.558824" />
-      <edge source="157700" target="8267" id="199" weight="0.294118" />
-      <edge source="157700" target="9649" id="200" weight="0.479381" />
-      <edge source="157700" target="19048" id="201" weight="0.816667" />
-      <edge source="157700" target="24714" id="202" weight="0.652174" />
-      <edge source="157700" target="28748" id="203" weight="0.902913" />
-      <edge source="157700" target="41660" id="204" weight="0.416667" />
-      <edge source="157700" target="72576" id="205" weight="0.0952381" />
-      <edge source="1638605" target="19951" id="206" weight="0.470588" />
-      <edge source="17554500" target="1866009" id="207" weight="0.027972" />
-      <edge source="1866009" target="20903754" id="208" weight="0.0152625" />
-      <edge source="1866009" target="25784" id="209" weight="0.477099" />
-      <edge source="1886820" target="9531" id="210" weight="0.0502232" />
-      <edge source="1886820" target="9559" id="211" weight="0.166667" />
-      <edge source="1886820" target="25781" id="212" weight="0.00882768" />
-      <edge source="19022" target="19048" id="213" weight="0.0787751" />
-      <edge source="19022" target="8267" id="214" weight="0.235829" />
-      <edge source="19022" target="9649" id="215" weight="0.0618557" />
-      <edge source="19048" target="9550" id="216" weight="0.0231812" />
-      <edge source="19048" target="8267" id="217" weight="0.29969" />
-      <edge source="19048" target="9649" id="218" weight="0.675258" />
-      <edge source="19048" target="41660" id="219" weight="0.116667" />
-      <edge source="19048" target="28748" id="220" weight="0.841667" />
-      <edge source="19048" target="26833" id="221" weight="0.0646552" />
-      <edge source="1908142" target="21506" id="222" weight="0.00746269" />
-      <edge source="1908142" target="52564" id="223" weight="0.048913" />
-      <edge source="19446" target="41660" id="224" weight="0.0382166" />
-      <edge source="19446" target="22522" id="225" weight="0.0203822" />
-      <edge source="19951" target="56558" id="226" weight="0.294118" />
-      <edge source="19951" target="23619" id="227" weight="1.0" />
-      <edge source="20344155" target="9550" id="228" weight="0.172802" />
-      <edge source="20344155" target="9559" id="229" weight="0.0588235" />
-      <edge source="20344155" target="25784" id="230" weight="0.0916294" />
-      <edge source="20344155" target="207347" id="231" weight="0.0377854" />
-      <edge source="20344155" target="212141" id="232" weight="0.97541" />
-      <edge source="20344155" target="212253" id="233" weight="0.990385" />
-      <edge source="20344155" target="277237" id="234" weight="0.787402" />
-      <edge source="20344155" target="381399" id="235" weight="0.744966" />
-      <edge source="20344155" target="604896" id="236" weight="0.0603448" />
-      <edge source="20344155" target="9028960" id="237" weight="1.0" />
-      <edge source="20344155" target="20541773" id="238" weight="0.188679" />
-      <edge source="20541773" target="30848" id="239" weight="0.5" />
-      <edge source="20541773" target="25784" id="240" weight="0.145038" />
-      <edge source="20541773" target="51462" id="241" weight="0.0436426" />
-      <edge source="20541773" target="207347" id="242" weight="0.0608108" />
-      <edge source="20541773" target="58664" id="243" weight="0.148148" />
-      <edge source="20541773" target="212141" id="244" weight="0.0936768" />
-      <edge source="20541773" target="212253" id="245" weight="0.163462" />
-      <edge source="20541773" target="381399" id="246" weight="0.167785" />
-      <edge source="20541773" target="2549543" id="247" weight="0.131579" />
-      <edge source="207347" target="9550" id="248" weight="0.408759" />
-      <edge source="207347" target="9649" id="249" weight="0.309278" />
-      <edge source="207347" target="25784" id="250" weight="0.240458" />
-      <edge source="207347" target="51462" id="251" weight="0.0435669" />
-      <edge source="207347" target="212141" id="252" weight="0.22973" />
-      <edge source="207347" target="212253" id="253" weight="0.0161731" />
-      <edge source="207347" target="381399" id="254" weight="0.0617689" />
-      <edge source="207347" target="9028960" id="255" weight="0.016347" />
-      <edge source="207347" target="277237" id="256" weight="0.155405" />
-      <edge source="207347" target="2549543" id="257" weight="0.101351" />
-      <edge source="20903754" target="7039" id="258" weight="0.216049" />
-      <edge source="20903754" target="9531" id="259" weight="0.839286" />
-      <edge source="20903754" target="713" id="260" weight="0.62" />
-      <edge source="20903754" target="25781" id="261" weight="0.487288" />
-      <edge source="20903754" target="51462" id="262" weight="0.920132" />
-      <edge source="20903754" target="48180" id="263" weight="1.0" />
-      <edge source="20903754" target="43444" id="264" weight="0.114801" />
-      <edge source="20903754" target="521843" id="265" weight="0.987342" />
-      <edge source="20903754" target="375416" id="266" weight="0.109649" />
-      <edge source="20903754" target="308906" id="267" weight="0.555556" />
-      <edge source="20903754" target="41958" id="268" weight="0.217391" />
-      <edge source="20903754" target="25997913" id="269" weight="0.0366972" />
-      <edge source="212141" target="9531" id="270" weight="0.100446" />
-      <edge source="212141" target="9550" id="271" weight="0.255474" />
-      <edge source="212141" target="9649" id="272" weight="0.134021" />
-      <edge source="212141" target="25784" id="273" weight="0.0966142" />
-      <edge source="212141" target="34053" id="274" weight="0.0634921" />
-      <edge source="212141" target="58664" id="275" weight="0.127604" />
-      <edge source="212141" target="212253" id="276" weight="0.860656" />
-      <edge source="212141" target="381399" id="277" weight="0.95082" />
-      <edge source="212141" target="9028960" id="278" weight="0.811475" />
-      <edge source="212141" target="277237" id="279" weight="0.860656" />
-      <edge source="212141" target="2549543" id="280" weight="0.188525" />
-      <edge source="212253" target="9531" id="281" weight="0.0469925" />
-      <edge source="212253" target="25784" id="282" weight="0.0403067" />
-      <edge source="212253" target="381399" id="283" weight="0.942308" />
-      <edge source="212253" target="9028960" id="284" weight="0.913462" />
-      <edge source="212253" target="277237" id="285" weight="0.932692" />
-      <edge source="21506" target="4122592" id="286" weight="0.641791" />
-      <edge source="21506" target="7039" id="287" weight="0.512346" />
-      <edge source="21506" target="52564" id="288" weight="0.320896" />
-      <edge source="22522" target="41660" id="289" weight="1.0" />
-      <edge source="22522" target="7039" id="290" weight="0.0308642" />
-      <edge source="22522" target="9649" id="291" weight="0.0773196" />
-      <edge source="22522" target="9087" id="292" weight="0.0545455" />
-      <edge source="22522" target="3694602" id="293" weight="0.227273" />
-      <edge source="22718" target="23001" id="294" weight="0.079602" />
-      <edge source="22718" target="9550" id="295" weight="0.116788" />
-      <edge source="23001" target="768839" id="296" weight="0.342466" />
-      <edge source="23001" target="23872" id="297" weight="0.452055" />
-      <edge source="23001" target="316993" id="298" weight="0.0190259" />
-      <edge source="23001" target="8395423" id="299" weight="0.0168599" />
-      <edge source="23619" target="56558" id="300" weight="0.0597015" />
-      <edge source="23619" target="8267" id="301" weight="0.282353" />
-      <edge source="23619" target="9649" id="302" weight="0.192242" />
-      <edge source="23619" target="7807" id="303" weight="0.380952" />
-      <edge source="23619" target="65424" id="304" weight="0.0895522" />
-      <edge source="23872" target="768839" id="305" weight="0.611111" />
-      <edge source="23872" target="316993" id="306" weight="0.222222" />
-      <edge source="23872" target="8395423" id="307" weight="0.181481" />
-      <edge source="241812" target="521843" id="308" weight="0.129032" />
-      <edge source="241812" target="58664" id="309" weight="0.0868056" />
-      <edge source="241812" target="65424" id="310" weight="0.848485" />
-      <edge source="241812" target="2925093" id="311" weight="0.139785" />
-      <edge source="24714" target="28748" id="312" weight="0.434783" />
-      <edge source="24714" target="72576" id="313" weight="0.521739" />
-      <edge source="2549543" target="58664" id="314" weight="0.0394737" />
-      <edge source="2549543" target="381399" id="315" weight="0.0391113" />
-      <edge source="25781" target="48180" id="316" weight="0.394068" />
-      <edge source="25781" target="9531" id="317" weight="0.0918367" />
-      <edge source="25781" target="713" id="318" weight="0.673333" />
-      <edge source="25781" target="51462" id="319" weight="0.127119" />
-      <edge source="25781" target="65424" id="320" weight="0.0211864" />
-      <edge source="25781" target="25997913" id="321" weight="0.0169492" />
-      <edge source="25781" target="297672" id="322" weight="0.0230697" />
-      <edge source="25784" target="9550" id="323" weight="0.635036" />
-      <edge source="25784" target="9649" id="324" weight="0.56701" />
-      <edge source="25784" target="381399" id="325" weight="0.599237" />
-      <edge source="25784" target="9028960" id="326" weight="0.0367831" />
-      <edge source="25784" target="44179" id="327" weight="0.0121971" />
-      <edge source="25784" target="277237" id="328" weight="0.244275" />
-      <edge source="25997913" target="713" id="329" weight="0.0208333" />
-      <edge source="25997913" target="48180" id="330" weight="0.030525" />
-      <edge source="26833" target="7039" id="331" weight="0.0695473" />
-      <edge source="26833" target="43444" id="332" weight="0.0370468" />
-      <edge source="26833" target="51462" id="333" weight="0.0212766" />
-      <edge source="2769817" target="487226" id="334" weight="0.934783" />
-      <edge source="2769817" target="609614" id="335" weight="0.125" />
-      <edge source="277237" target="381399" id="336" weight="1.0" />
-      <edge source="277237" target="9028960" id="337" weight="0.740157" />
-      <edge source="277237" target="30848" id="338" weight="0.252525" />
-      <edge source="277237" target="34053" id="339" weight="0.520833" />
-      <edge source="277237" target="751777" id="340" weight="0.149606" />
-      <edge source="277237" target="754560" id="341" weight="0.141732" />
-      <edge source="28748" target="9531" id="342" weight="0.0202922" />
-      <edge source="28748" target="8267" id="343" weight="0.388235" />
-      <edge source="28748" target="9649" id="344" weight="0.479381" />
-      <edge source="2925093" target="65424" id="345" weight="0.818182" />
-      <edge source="2925093" target="521843" id="346" weight="0.303797" />
-      <edge source="30848" target="58664" id="347" weight="1.0" />
-      <edge source="30848" target="9649" id="348" weight="0.0824742" />
-      <edge source="30848" target="34053" id="349" weight="0.666667" />
-      <edge source="30848" target="751777" id="350" weight="0.444444" />
-      <edge source="30848" target="754560" id="351" weight="0.333333" />
-      <edge source="308906" target="713" id="352" weight="0.04" />
-      <edge source="308906" target="48180" id="353" weight="0.0769231" />
-      <edge source="31146" target="41660" id="354" weight="0.103896" />
-      <edge source="31146" target="7039" id="355" weight="0.0864198" />
-      <edge source="3134585" target="9550" id="356" weight="0.70073" />
-      <edge source="3134585" target="9559" id="357" weight="0.882353" />
-      <edge source="33689817" target="604896" id="358" weight="0.0179598" />
-      <edge source="34053" target="51462" id="359" weight="0.104701" />
-      <edge source="34053" target="381399" id="360" weight="1.0" />
-      <edge source="34053" target="7807" id="361" weight="0.238095" />
-      <edge source="34053" target="751777" id="362" weight="1.0" />
-      <edge source="34053" target="754560" id="363" weight="0.833333" />
-      <edge source="3694602" target="9559" id="364" weight="0.0392157" />
-      <edge source="3694602" target="41660" id="365" weight="0.25" />
-      <edge source="375416" target="52564" id="366" weight="0.0126482" />
-      <edge source="375416" target="43444" id="367" weight="0.25109" />
-      <edge source="381399" target="521843" id="368" weight="0.0402685" />
-      <edge source="381399" target="9550" id="369" weight="0.40146" />
-      <edge source="381399" target="9649" id="370" weight="0.35567" />
-      <edge source="381399" target="9028960" id="371" weight="0.644295" />
-      <edge source="381399" target="751777" id="372" weight="0.167785" />
-      <edge source="381399" target="754560" id="373" weight="0.147651" />
-      <edge source="395167" target="8267" id="374" weight="0.0588235" />
-      <edge source="4122592" target="7039" id="375" weight="0.17284" />
-      <edge source="41660" target="9559" id="376" weight="0.070028" />
-      <edge source="43444" target="7039" id="377" weight="0.105263" />
-      <edge source="43444" target="9531" id="378" weight="0.125558" />
-      <edge source="48180" target="713" id="379" weight="1.0" />
-      <edge source="51462" target="58664" id="380" weight="0.0350322" />
-      <edge source="51462" target="9531" id="381" weight="0.151786" />
-      <edge source="51462" target="9550" id="382" weight="0.0084937" />
-      <edge source="51462" target="9649" id="383" weight="0.0412371" />
-      <edge source="521843" target="9531" id="384" weight="0.678571" />
-      <edge source="521843" target="65424" id="385" weight="1.0" />
-      <edge source="52564" target="9087" id="386" weight="0.049495" />
-      <edge source="548173" target="7039" id="387" weight="0.0246914" />
-      <edge source="58664" target="9649" id="388" weight="0.0809054" />
-      <edge source="58664" target="609614" id="389" weight="0.0833333" />
-      <edge source="604896" target="9550" id="390" weight="0.0140371" />
-      <edge source="604896" target="9649" id="391" weight="0.0265096" />
-      <edge source="65424" target="7807" id="392" weight="0.238095" />
-      <edge source="7039" target="9087" id="393" weight="0.604938" />
-      <edge source="7039" target="9531" id="394" weight="0.203704" />
-      <edge source="7039" target="8286675" id="395" weight="0.62963" />
-      <edge source="751777" target="754560" id="396" weight="1.0" />
-      <edge source="8267" target="9649" id="397" weight="0.376471" />
-      <edge source="8286675" target="9531" id="398" weight="0.0891173" />
-      <edge source="8286675" target="9550" id="399" weight="0.0228102" />
-      <edge source="8286675" target="9649" id="400" weight="0.0773196" />
-      <edge source="8286675" target="9087" id="401" weight="0.557576" />
-      <edge source="9028960" target="9550" id="402" weight="0.088476" />
-      <edge source="9531" target="9550" id="403" weight="0.366071" />
-      <edge source="9531" target="9559" id="404" weight="0.3125" />
-      <edge source="9550" target="9649" id="405" weight="0.708029" />
-      <edge source="9550" target="9559" id="406" weight="0.722628" />
+      <edge source="es-aica" target="9087" id="0" weight="0.6686728060252202" />
+      <edge source="es-aica" target="25781" id="1" weight="0.599451555380145" />
+      <edge source="es-aica" target="713" id="2" weight="0.3350463764333801" />
+      <edge source="es-aica" target="20903754" id="3" weight="0.2303381666394722" />
+      <edge source="es-aica" target="453372" id="4" weight="0.16799632693220318" />
+      <edge source="es-akselos" target="21506" id="5" weight="1.0" />
+      <edge source="es-anokion" target="768839" id="6" weight="1.0" />
+      <edge source="es-aqua-tech" target="144241" id="7" weight="0.8833711450610858" />
+      <edge source="es-aqua-tech" target="56239" id="8" weight="0.4686741086015594" />
+      <edge source="es-artmyn" target="1076662" id="9" weight="1.0" />
+      <edge source="es-bridgology" target="19048" id="10" weight="0.9569548841566182" />
+      <edge source="es-bridgology" target="41660" id="11" weight="0.2902367131994043" />
+      <edge source="es-crisalix" target="19446" id="12" weight="1.0" />
+      <edge source="es-dartfish" target="1076662" id="13" weight="1.0" />
+      <edge source="es-depoly" target="3679268" id="14" weight="0.7951727823513559" />
+      <edge source="es-depoly" target="12637359" id="15" weight="0.6063829204451617" />
+      <edge source="es-enviroscopy" target="22718" id="16" weight="0.8144758741460697" />
+      <edge source="es-enviroscopy" target="10934212" id="17" weight="0.41169713534598934" />
+      <edge source="es-enviroscopy" target="41958" id="18" weight="0.4088208888766595" />
+      <edge source="es-epiqr-renovation" target="25784" id="19" weight="1.0" />
+      <edge source="es-estia" target="25784" id="20" weight="1.0" />
+      <edge source="es-fiveco" target="25781" id="21" weight="1.0" />
+      <edge source="es-flyability" target="25781" id="22" weight="0.8523082090885992" />
+      <edge source="es-flyability" target="20903754" id="23" weight="0.5230398806211479" />
+      <edge source="es-flybotix" target="25781" id="24" weight="1.0" />
+      <edge source="es-geoeg" target="3679268" id="25" weight="1.0" />
+      <edge source="es-insolight" target="23872" id="26" weight="1.0" />
+      <edge source="es-ithetis" target="56558" id="27" weight="0.9904581286617666" />
+      <edge source="es-ithetis" target="23619" id="28" weight="0.13781398828795105" />
+      <edge source="es-kaemco" target="25784" id="29" weight="1.0" />
+      <edge source="es-kanyos-bio-inc" target="768839" id="30" weight="1.0" />
+      <edge source="es-lanta-bio-sarl" target="768839" id="31" weight="1.0" />
+      <edge source="es-lantern-solutions-sarl" target="25781" id="32" weight="1.0" />
+      <edge source="es-livelyplanet" target="1076662" id="33" weight="1.0" />
+      <edge source="es-lumendo" target="23872" id="34" weight="1.0" />
+      <edge source="es-medlight" target="22718" id="35" weight="0.8144758741460697" />
+      <edge source="es-medlight" target="10934212" id="36" weight="0.41169713534598934" />
+      <edge source="es-medlight" target="41958" id="37" weight="0.4088208888766595" />
+      <edge source="es-miraex" target="7807" id="38" weight="1.0" />
+      <edge source="es-mobsya" target="25781" id="39" weight="0.9142600376105575" />
+      <edge source="es-mobsya" target="20903754" id="40" weight="0.4051278608394415" />
+      <edge source="es-morphogene-sa" target="768839" id="41" weight="1.0" />
+      <edge source="es-online-control" target="1326107" id="42" weight="1.0" />
+      <edge source="es-ozwe" target="25781" id="43" weight="1.0" />
+      <edge source="es-pbandb" target="768839" id="44" weight="0.7143691078169465" />
+      <edge source="es-pbandb" target="23872" id="45" weight="0.6997690889120638" />
+      <edge source="es-pomelo" target="9087" id="46" weight="0.6686728060252202" />
+      <edge source="es-pomelo" target="25781" id="47" weight="0.599451555380145" />
+      <edge source="es-pomelo" target="713" id="48" weight="0.3350463764333801" />
+      <edge source="es-pomelo" target="20903754" id="49" weight="0.2303381666394722" />
+      <edge source="es-pomelo" target="453372" id="50" weight="0.16799632693220318" />
+      <edge source="es-program" target="51462" id="51" weight="1.0" />
+      <edge source="es-rheon-medical" target="56558" id="52" weight="0.9904581286617666" />
+      <edge source="es-rheon-medical" target="23619" id="53" weight="0.13781398828795105" />
+      <edge source="es-rovenso" target="25781" id="54" weight="0.8270802834288005" />
+      <edge source="es-rovenso" target="20903754" id="55" weight="0.40880206896640087" />
+      <edge source="es-rovenso" target="9087" id="56" weight="0.38577075209523753" />
+      <edge source="es-sensorscope" target="1076662" id="57" weight="1.0" />
+      <edge source="es-shockfish" target="25781" id="58" weight="1.0" />
+      <edge source="es-swiss-inso" target="25784" id="59" weight="1.0" />
+      <edge source="es-treatech-sarl" target="58664" id="60" weight="0.7135869229297602" />
+      <edge source="es-treatech-sarl" target="23099899" id="61" weight="0.450826513499195" />
+      <edge source="es-treatech-sarl" target="604896" id="62" weight="0.39493616901869133" />
+      <edge source="es-treatech-sarl" target="9649" id="63" weight="0.26819620453975096" />
+      <edge source="es-treatech-sarl" target="25784" id="64" weight="0.24422402916402014" />
+      <edge source="1055890" target="14073" id="65" weight="0.194444" />
+      <edge source="1055890" target="207347" id="66" weight="0.375977" />
+      <edge source="1055890" target="25784" id="67" weight="0.527273" />
+      <edge source="1055890" target="29501" id="68" weight="0.100833" />
+      <edge source="1055890" target="381399" id="69" weight="0.375367" />
+      <edge source="1055890" target="3679268" id="70" weight="0.120192" />
+      <edge source="1055890" target="5042951" id="71" weight="0.162338" />
+      <edge source="1055890" target="9528025" id="72" weight="0.08125" />
+      <edge source="1055890" target="10934212" id="73" weight="0.142736" />
+      <edge source="1055890" target="18413531" id="74" weight="0.161184" />
+      <edge source="1055890" target="20344155" id="75" weight="0.115741" />
+      <edge source="1076662" target="4122592" id="76" weight="0.0771605" />
+      <edge source="10779" target="9649" id="77" weight="0.337803" />
+      <edge source="10779" target="22522" id="78" weight="0.477273" />
+      <edge source="10779" target="41660" id="79" weight="0.272727" />
+      <edge source="10779" target="1326107" id="80" weight="0.113636" />
+      <edge source="10779" target="33094374" id="81" weight="0.0884521" />
+      <edge source="10934212" target="14073" id="82" weight="0.194444" />
+      <edge source="10934212" target="22718" id="83" weight="0.569024" />
+      <edge source="10934212" target="2549543" id="84" weight="0.138889" />
+      <edge source="10934212" target="25784" id="85" weight="0.418182" />
+      <edge source="10934212" target="29501" id="86" weight="0.146957" />
+      <edge source="10934212" target="5042951" id="87" weight="0.569444" />
+      <edge source="10934212" target="56558" id="88" weight="0.0387931" />
+      <edge source="10934212" target="18413531" id="89" weight="0.177858" />
+      <edge source="11180" target="9087" id="90" weight="0.193939" />
+      <edge source="11180" target="21506" id="91" weight="0.153846" />
+      <edge source="11180" target="52564" id="92" weight="0.216667" />
+      <edge source="11180" target="1424309" id="93" weight="0.129808" />
+      <edge source="12463" target="41958" id="94" weight="0.093985" />
+      <edge source="12463" target="5042951" id="95" weight="0.446144" />
+      <edge source="12637359" target="3679268" id="96" weight="0.347826" />
+      <edge source="12637359" target="5042951" id="97" weight="0.0555556" />
+      <edge source="1326107" target="22522" id="98" weight="0.1875" />
+      <edge source="1326107" target="41660" id="99" weight="0.126263" />
+      <edge source="1326107" target="7039" id="100" weight="0.310345" />
+      <edge source="1326107" target="9087" id="101" weight="0.181818" />
+      <edge source="1326107" target="9550" id="102" weight="0.128" />
+      <edge source="1326107" target="1424309" id="103" weight="1.0" />
+      <edge source="1372353" target="51462" id="104" weight="0.245098" />
+      <edge source="1372353" target="65424" id="105" weight="0.266667" />
+      <edge source="1372353" target="7807" id="106" weight="0.416667" />
+      <edge source="14073" target="25784" id="107" weight="0.555556" />
+      <edge source="14073" target="30848" id="108" weight="0.0534188" />
+      <edge source="14073" target="34053" id="109" weight="0.160053" />
+      <edge source="14073" target="51462" id="110" weight="0.173077" />
+      <edge source="14073" target="212141" id="111" weight="0.0588235" />
+      <edge source="14073" target="381399" id="112" weight="1.0" />
+      <edge source="14073" target="751777" id="113" weight="0.194444" />
+      <edge source="14073" target="754560" id="114" weight="0.111111" />
+      <edge source="14073" target="5042951" id="115" weight="0.401389" />
+      <edge source="14073" target="9528025" id="116" weight="0.305556" />
+      <edge source="1424309" target="21506" id="117" weight="0.517857" />
+      <edge source="1424309" target="43444" id="118" weight="0.395604" />
+      <edge source="1424309" target="52564" id="119" weight="1.0" />
+      <edge source="1424309" target="9087" id="120" weight="0.5" />
+      <edge source="144241" target="23001" id="121" weight="0.0392157" />
+      <edge source="144241" target="23619" id="122" weight="0.126984" />
+      <edge source="14909" target="9649" id="123" weight="0.0848806" />
+      <edge source="14909" target="157700" id="124" weight="0.296296" />
+      <edge source="155726" target="44731" id="125" weight="0.555556" />
+      <edge source="155726" target="3679268" id="126" weight="0.120301" />
+      <edge source="157700" target="41660" id="127" weight="0.181818" />
+      <edge source="157700" target="51462" id="128" weight="0.352941" />
+      <edge source="18413531" target="25784" id="129" weight="0.363636" />
+      <edge source="18413531" target="29501" id="130" weight="1.0" />
+      <edge source="18413531" target="5042951" id="131" weight="0.0756173" />
+      <edge source="18413531" target="604896" id="132" weight="0.455466" />
+      <edge source="18413531" target="9528025" id="133" weight="0.411765" />
+      <edge source="18413531" target="23099899" id="134" weight="0.548387" />
+      <edge source="19446" target="22522" id="135" weight="0.09375" />
+      <edge source="19446" target="41660" id="136" weight="0.145833" />
+      <edge source="19951" target="23619" id="137" weight="1.0" />
+      <edge source="19951" target="56558" id="138" weight="0.388889" />
+      <edge source="19951" target="65424" id="139" weight="0.231481" />
+      <edge source="20344155" target="207347" id="140" weight="0.478516" />
+      <edge source="20344155" target="212141" id="141" weight="1.0" />
+      <edge source="20344155" target="2549543" id="142" weight="0.355556" />
+      <edge source="20344155" target="25784" id="143" weight="0.545455" />
+      <edge source="20344155" target="381399" id="144" weight="0.844575" />
+      <edge source="20344155" target="5042951" id="145" weight="0.170139" />
+      <edge source="20344155" target="58664" id="146" weight="0.224074" />
+      <edge source="20344155" target="9528025" id="147" weight="0.134454" />
+      <edge source="20344155" target="9531" id="148" weight="0.251488" />
+      <edge source="20344155" target="9550" id="149" weight="0.72" />
+      <edge source="20344155" target="20541773" id="150" weight="0.631579" />
+      <edge source="20541773" target="207347" id="151" weight="0.205078" />
+      <edge source="20541773" target="212141" id="152" weight="0.395604" />
+      <edge source="20541773" target="2549543" id="153" weight="0.75" />
+      <edge source="20541773" target="25784" id="154" weight="0.454545" />
+      <edge source="20541773" target="30848" id="155" weight="0.529412" />
+      <edge source="20541773" target="381399" id="156" weight="0.242424" />
+      <edge source="20541773" target="41958" id="157" weight="0.266667" />
+      <edge source="20541773" target="51462" id="158" weight="0.352941" />
+      <edge source="20541773" target="58664" id="159" weight="0.148148" />
+      <edge source="207347" target="25784" id="160" weight="0.163636" />
+      <edge source="207347" target="51462" id="161" weight="0.235294" />
+      <edge source="207347" target="9550" id="162" weight="0.0757895" />
+      <edge source="207347" target="9649" id="163" weight="0.15674" />
+      <edge source="207347" target="212141" id="164" weight="0.615234" />
+      <edge source="207347" target="2549543" id="165" weight="0.410156" />
+      <edge source="207347" target="3679268" id="166" weight="0.205078" />
+      <edge source="207347" target="9528025" id="167" weight="0.0585938" />
+      <edge source="20903754" target="25781" id="168" weight="0.216949" />
+      <edge source="20903754" target="41958" id="169" weight="0.466667" />
+      <edge source="20903754" target="43444" id="170" weight="0.209402" />
+      <edge source="20903754" target="51462" id="171" weight="0.823529" />
+      <edge source="20903754" target="65424" id="172" weight="0.126316" />
+      <edge source="20903754" target="7039" id="173" weight="0.448276" />
+      <edge source="20903754" target="713" id="174" weight="0.56" />
+      <edge source="20903754" target="9531" id="175" weight="0.52381" />
+      <edge source="212141" target="25784" id="176" weight="0.291375" />
+      <edge source="212141" target="34053" id="177" weight="0.0879121" />
+      <edge source="212141" target="58664" id="178" weight="0.611111" />
+      <edge source="212141" target="9531" id="179" weight="0.108225" />
+      <edge source="212141" target="9550" id="180" weight="0.84" />
+      <edge source="212141" target="9649" id="181" weight="0.155172" />
+      <edge source="212141" target="381399" id="182" weight="0.521696" />
+      <edge source="212141" target="2549543" id="183" weight="0.553191" />
+      <edge source="212141" target="3679268" id="184" weight="0.183258" />
+      <edge source="21506" target="52564" id="185" weight="0.665816" />
+      <edge source="22522" target="7039" id="186" weight="0.172414" />
+      <edge source="22522" target="9087" id="187" weight="0.454545" />
+      <edge source="22522" target="41660" id="188" weight="1.0" />
+      <edge source="22718" target="9550" id="189" weight="0.52" />
+      <edge source="22718" target="23001" id="190" weight="0.407407" />
+      <edge source="22718" target="5042951" id="191" weight="0.583333" />
+      <edge source="23001" target="23872" id="192" weight="0.703704" />
+      <edge source="23001" target="768839" id="193" weight="0.777778" />
+      <edge source="23001" target="8395423" id="194" weight="0.0533769" />
+      <edge source="23099899" target="5042951" id="195" weight="0.0579502" />
+      <edge source="23099899" target="604896" id="196" weight="0.236842" />
+      <edge source="23099899" target="9528025" id="197" weight="0.176471" />
+      <edge source="23619" target="7807" id="198" weight="0.416667" />
+      <edge source="23619" target="9649" id="199" weight="0.253352" />
+      <edge source="23619" target="56558" id="200" weight="0.142857" />
+      <edge source="23619" target="65424" id="201" weight="0.125313" />
+      <edge source="23872" target="316993" id="202" weight="0.222222" />
+      <edge source="23872" target="768839" id="203" weight="1.0" />
+      <edge source="23872" target="8395423" id="204" weight="0.170139" />
+      <edge source="2549543" target="30848" id="205" weight="0.0882353" />
+      <edge source="2549543" target="381399" id="206" weight="0.216578" />
+      <edge source="2549543" target="58664" id="207" weight="0.129274" />
+      <edge source="2549543" target="4538124" id="208" weight="0.333333" />
+      <edge source="25781" target="51462" id="209" weight="0.213333" />
+      <edge source="25784" target="9550" id="210" weight="0.52" />
+      <edge source="25784" target="9649" id="211" weight="0.155172" />
+      <edge source="25784" target="381399" id="212" weight="0.636364" />
+      <edge source="25784" target="5042951" id="213" weight="0.8" />
+      <edge source="25784" target="9528025" id="214" weight="0.636364" />
+      <edge source="29501" target="9649" id="215" weight="0.0275862" />
+      <edge source="29501" target="5042951" id="216" weight="0.255094" />
+      <edge source="29501" target="9528025" id="217" weight="0.231429" />
+      <edge source="30848" target="9649" id="218" weight="0.137931" />
+      <edge source="30848" target="34053" id="219" weight="1.0" />
+      <edge source="30848" target="58664" id="220" weight="1.0" />
+      <edge source="30848" target="751777" id="221" weight="0.411765" />
+      <edge source="30848" target="754560" id="222" weight="0.294118" />
+      <edge source="316993" target="768839" id="223" weight="0.378947" />
+      <edge source="316993" target="8395423" id="224" weight="0.8" />
+      <edge source="33094374" target="4122592" id="225" weight="1.0" />
+      <edge source="33094374" target="9550" id="226" weight="0.16" />
+      <edge source="34053" target="51462" id="227" weight="0.578571" />
+      <edge source="34053" target="65424" id="228" weight="0.5" />
+      <edge source="34053" target="381399" id="229" weight="0.928571" />
+      <edge source="34053" target="751777" id="230" weight="1.0" />
+      <edge source="34053" target="754560" id="231" weight="0.571429" />
+      <edge source="3679268" target="4538124" id="232" weight="0.478261" />
+      <edge source="3679268" target="5042951" id="233" weight="0.652174" />
+      <edge source="3679268" target="9528025" id="234" weight="0.608696" />
+      <edge source="381399" target="9550" id="235" weight="0.48" />
+      <edge source="381399" target="521843" id="236" weight="0.181818" />
+      <edge source="381399" target="751777" id="237" weight="0.684492" />
+      <edge source="381399" target="754560" id="238" weight="0.113636" />
+      <edge source="381399" target="5042951" id="239" weight="0.924825" />
+      <edge source="41660" target="7039" id="240" weight="0.275862" />
+      <edge source="41660" target="7542417" id="241" weight="0.103896" />
+      <edge source="43444" target="7039" id="242" weight="0.183908" />
+      <edge source="43444" target="9531" id="243" weight="0.238095" />
+      <edge source="4538124" target="5042951" id="244" weight="0.320513" />
+      <edge source="5042951" target="604896" id="245" weight="0.172119" />
+      <edge source="5042951" target="9528025" id="246" weight="1.0" />
+      <edge source="51462" target="9531" id="247" weight="0.0541126" />
+      <edge source="51462" target="9550" id="248" weight="0.1225" />
+      <edge source="51462" target="9649" id="249" weight="0.137931" />
+      <edge source="521843" target="65424" id="250" weight="0.533333" />
+      <edge source="52564" target="9087" id="251" weight="0.161616" />
+      <edge source="58664" target="9550" id="252" weight="0.32" />
+      <edge source="58664" target="9649" id="253" weight="0.0698276" />
+      <edge source="604896" target="9528025" id="254" weight="0.18797" />
+      <edge source="65424" target="7807" id="255" weight="0.5" />
+      <edge source="7039" target="9087" id="256" weight="0.150192" />
+      <edge source="7039" target="9531" id="257" weight="0.517241" />
+      <edge source="751777" target="754560" id="258" weight="1.0" />
+      <edge source="9087" target="9531" id="259" weight="0.363636" />
+      <edge source="9531" target="9550" id="260" weight="0.833333" />
     </edges>
   </graph>
 </gexf>
