@@ -1,0 +1,877 @@
+<?xml version='1.0' encoding='utf-8'?>
+<gexf xmlns="http://www.gexf.net/1.2draft" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.gexf.net/1.2draft http://www.gexf.net/1.2draft/gexf.xsd" version="1.2">
+  <meta lastmodifieddate="2023-01-18">
+    <creator>NetworkX 2.8.4</creator>
+  </meta>
+  <graph defaultedgetype="undirected" mode="static" name="">
+    <attributes mode="static" class="node">
+      <attribute id="0" title="name" type="string" />
+      <attribute id="1" title="type" type="string" />
+    </attributes>
+    <nodes>
+      <node id="es-aeler-technologies" label="es-aeler-technologies">
+        <attvalues>
+          <attvalue for="0" value="Aeler Technologies" />
+          <attvalue for="1" value="Startup" />
+        </attvalues>
+      </node>
+      <node id="es-aqua-tech" label="es-aqua-tech">
+        <attvalues>
+          <attvalue for="0" value="Aqua+Tech" />
+          <attvalue for="1" value="Startup" />
+        </attvalues>
+      </node>
+      <node id="es-aurora-s-grid" label="es-aurora-s-grid">
+        <attvalues>
+          <attvalue for="0" value="Aurora's Grid" />
+          <attvalue for="1" value="Startup" />
+        </attvalues>
+      </node>
+      <node id="es-bloom-biorenewables" label="es-bloom-biorenewables">
+        <attvalues>
+          <attvalue for="0" value="Bloom Biorenewables" />
+          <attvalue for="1" value="Startup" />
+        </attvalues>
+      </node>
+      <node id="es-bluewatt-engineering" label="es-bluewatt-engineering">
+        <attvalues>
+          <attvalue for="0" value="BlueWatt Engineering" />
+          <attvalue for="1" value="Startup" />
+        </attvalues>
+      </node>
+      <node id="es-combo-solutions" label="es-combo-solutions">
+        <attvalues>
+          <attvalue for="0" value="Combo Solutions" />
+          <attvalue for="1" value="Startup" />
+        </attvalues>
+      </node>
+      <node id="es-comppair" label="es-comppair">
+        <attvalues>
+          <attvalue for="0" value="CompPair" />
+          <attvalue for="1" value="Startup" />
+        </attvalues>
+      </node>
+      <node id="es-depoly" label="es-depoly">
+        <attvalues>
+          <attvalue for="0" value="DePoly" />
+          <attvalue for="1" value="Startup" />
+        </attvalues>
+      </node>
+      <node id="es-ecointesys" label="es-ecointesys">
+        <attvalues>
+          <attvalue for="0" value="Ecointesys" />
+          <attvalue for="1" value="Startup" />
+        </attvalues>
+      </node>
+      <node id="es-enairys-powertech-sa" label="es-enairys-powertech-sa">
+        <attvalues>
+          <attvalue for="0" value="Enairys Powertech SA" />
+          <attvalue for="1" value="Startup" />
+        </attvalues>
+      </node>
+      <node id="es-eneftech-corporation" label="es-eneftech-corporation">
+        <attvalues>
+          <attvalue for="0" value="Eneftech" />
+          <attvalue for="1" value="Startup" />
+        </attvalues>
+      </node>
+      <node id="es-epiqr-renovation" label="es-epiqr-renovation">
+        <attvalues>
+          <attvalue for="0" value="EPIQR Rénov." />
+          <attvalue for="1" value="Startup" />
+        </attvalues>
+      </node>
+      <node id="es-esmart-technologies" label="es-esmart-technologies">
+        <attvalues>
+          <attvalue for="0" value="eSMART Technologies" />
+          <attvalue for="1" value="Startup" />
+        </attvalues>
+      </node>
+      <node id="es-estia" label="es-estia">
+        <attvalues>
+          <attvalue for="0" value="ESTIA / EPIQR" />
+          <attvalue for="1" value="Startup" />
+        </attvalues>
+      </node>
+      <node id="es-flyability" label="es-flyability">
+        <attvalues>
+          <attvalue for="0" value="Flyability" />
+          <attvalue for="1" value="Startup" />
+        </attvalues>
+      </node>
+      <node id="es-g24-innovations" label="es-g24-innovations">
+        <attvalues>
+          <attvalue for="0" value="G24 Innovations" />
+          <attvalue for="1" value="Startup" />
+        </attvalues>
+      </node>
+      <node id="es-g2e-glass2energy" label="es-g2e-glass2energy">
+        <attvalues>
+          <attvalue for="0" value="G2e glass2energy" />
+          <attvalue for="1" value="Startup" />
+        </attvalues>
+      </node>
+      <node id="es-gaiasens-technologies" label="es-gaiasens-technologies">
+        <attvalues>
+          <attvalue for="0" value="Gaiasens Technologies" />
+          <attvalue for="1" value="Startup" />
+        </attvalues>
+      </node>
+      <node id="es-gamaya" label="es-gamaya">
+        <attvalues>
+          <attvalue for="0" value="Gamaya" />
+          <attvalue for="1" value="Startup" />
+        </attvalues>
+      </node>
+      <node id="es-geoeg" label="es-geoeg">
+        <attvalues>
+          <attvalue for="0" value="GeoEg" />
+          <attvalue for="1" value="Startup" />
+        </attvalues>
+      </node>
+      <node id="es-gridsteer" label="es-gridsteer">
+        <attvalues>
+          <attvalue for="0" value="GRidSTeer" />
+          <attvalue for="1" value="Startup" />
+        </attvalues>
+      </node>
+      <node id="es-grz-technologies" label="es-grz-technologies">
+        <attvalues>
+          <attvalue for="0" value="GRZ Technologies" />
+          <attvalue for="1" value="Startup" />
+        </attvalues>
+      </node>
+      <node id="es-hydromea" label="es-hydromea">
+        <attvalues>
+          <attvalue for="0" value="Hydromea" />
+          <attvalue for="1" value="Startup" />
+        </attvalues>
+      </node>
+      <node id="es-insolight" label="es-insolight">
+        <attvalues>
+          <attvalue for="0" value="Insolight" />
+          <attvalue for="1" value="Startup" />
+        </attvalues>
+      </node>
+      <node id="es-kaemco" label="es-kaemco">
+        <attvalues>
+          <attvalue for="0" value="Kaemco LLC" />
+          <attvalue for="1" value="Startup" />
+        </attvalues>
+      </node>
+      <node id="es-medusoil" label="es-medusoil">
+        <attvalues>
+          <attvalue for="0" value="Medusoil" />
+          <attvalue for="1" value="Startup" />
+        </attvalues>
+      </node>
+      <node id="es-oculight-dynamics" label="es-oculight-dynamics">
+        <attvalues>
+          <attvalue for="0" value="Oculight Dynamics" />
+          <attvalue for="1" value="Startup" />
+        </attvalues>
+      </node>
+      <node id="es-power-vision-engineering" label="es-power-vision-engineering">
+        <attvalues>
+          <attvalue for="0" value="Power Vision Engineering" />
+          <attvalue for="1" value="Startup" />
+        </attvalues>
+      </node>
+      <node id="es-rovenso" label="es-rovenso">
+        <attvalues>
+          <attvalue for="0" value="Rovenso" />
+          <attvalue for="1" value="Startup" />
+        </attvalues>
+      </node>
+      <node id="es-sensima-inspection" label="es-sensima-inspection">
+        <attvalues>
+          <attvalue for="0" value="Sensima Inspection" />
+          <attvalue for="1" value="Startup" />
+        </attvalues>
+      </node>
+      <node id="es-sensorscope" label="es-sensorscope">
+        <attvalues>
+          <attvalue for="0" value="Sensorscope" />
+          <attvalue for="1" value="Startup" />
+        </attvalues>
+      </node>
+      <node id="es-smarthelio" label="es-smarthelio">
+        <attvalues>
+          <attvalue for="0" value="SmartHelio" />
+          <attvalue for="1" value="Startup" />
+        </attvalues>
+      </node>
+      <node id="es-solaronix" label="es-solaronix">
+        <attvalues>
+          <attvalue for="0" value="Solaronix" />
+          <attvalue for="1" value="Startup" />
+        </attvalues>
+      </node>
+      <node id="es-swiss-inso" label="es-swiss-inso">
+        <attvalues>
+          <attvalue for="0" value="Swiss-Inso" />
+          <attvalue for="1" value="Startup" />
+        </attvalues>
+      </node>
+      <node id="es-swisspod-technologies" label="es-swisspod-technologies">
+        <attvalues>
+          <attvalue for="0" value="Swisspod Technologies" />
+          <attvalue for="1" value="Startup" />
+        </attvalues>
+      </node>
+      <node id="es-treatech-sarl" label="es-treatech-sarl">
+        <attvalues>
+          <attvalue for="0" value="TreaTech" />
+          <attvalue for="1" value="Startup" />
+        </attvalues>
+      </node>
+      <node id="es-twentygreen" label="es-twentygreen">
+        <attvalues>
+          <attvalue for="0" value="TwentyGreen" />
+          <attvalue for="1" value="Startup" />
+        </attvalues>
+      </node>
+      <node id="es-urbio" label="es-urbio">
+        <attvalues>
+          <attvalue for="0" value="Urbio" />
+          <attvalue for="1" value="Startup" />
+        </attvalues>
+      </node>
+      <node id="es-valais-perovskite-solar" label="es-valais-perovskite-solar">
+        <attvalues>
+          <attvalue for="0" value="Valais Perovskite Solar" />
+          <attvalue for="1" value="Startup" />
+        </attvalues>
+      </node>
+      <node id="es-volumen" label="es-volumen">
+        <attvalues>
+          <attvalue for="0" value="Volumen" />
+          <attvalue for="1" value="Startup" />
+        </attvalues>
+      </node>
+      <node id="es-zaphiro-technologies" label="es-zaphiro-technologies">
+        <attvalues>
+          <attvalue for="0" value="Zaphiro Technologies" />
+          <attvalue for="1" value="Startup" />
+        </attvalues>
+      </node>
+      <node id="10091" label="10091">
+        <attvalues>
+          <attvalue for="0" value="Environmental law" />
+          <attvalue for="1" value="Concept" />
+        </attvalues>
+      </node>
+      <node id="10934212" label="10934212">
+        <attvalues>
+          <attvalue for="0" value="Air pollution" />
+          <attvalue for="1" value="Concept" />
+        </attvalues>
+      </node>
+      <node id="113728" label="113728">
+        <attvalues>
+          <attvalue for="0" value="Geothermal energy" />
+          <attvalue for="1" value="Concept" />
+        </attvalues>
+      </node>
+      <node id="1164" label="1164">
+        <attvalues>
+          <attvalue for="0" value="Artificial intelligence" />
+          <attvalue for="1" value="Concept" />
+        </attvalues>
+      </node>
+      <node id="12057519" label="12057519">
+        <attvalues>
+          <attvalue for="0" value="Internet of things" />
+          <attvalue for="1" value="Concept" />
+        </attvalues>
+      </node>
+      <node id="12398" label="12398">
+        <attvalues>
+          <attvalue for="0" value="Geographic information system" />
+          <attvalue for="1" value="Concept" />
+        </attvalues>
+      </node>
+      <node id="12581" label="12581">
+        <attvalues>
+          <attvalue for="0" value="Glass" />
+          <attvalue for="1" value="Concept" />
+        </attvalues>
+      </node>
+      <node id="13255" label="13255">
+        <attvalues>
+          <attvalue for="0" value="Hydrogen" />
+          <attvalue for="1" value="Concept" />
+        </attvalues>
+      </node>
+      <node id="14193930" label="14193930">
+        <attvalues>
+          <attvalue for="0" value="Animal feed" />
+          <attvalue for="1" value="Concept" />
+        </attvalues>
+      </node>
+      <node id="14552094" label="14552094">
+        <attvalues>
+          <attvalue for="0" value="Submarine navigation" />
+          <attvalue for="1" value="Concept" />
+        </attvalues>
+      </node>
+      <node id="157616" label="157616">
+        <attvalues>
+          <attvalue for="0" value="Composite material" />
+          <attvalue for="1" value="Concept" />
+        </attvalues>
+      </node>
+      <node id="1804464" label="1804464">
+        <attvalues>
+          <attvalue for="0" value="Consulting firm" />
+          <attvalue for="1" value="Concept" />
+        </attvalues>
+      </node>
+      <node id="184978" label="184978">
+        <attvalues>
+          <attvalue for="0" value="Home automation" />
+          <attvalue for="1" value="Concept" />
+        </attvalues>
+      </node>
+      <node id="18580879" label="18580879">
+        <attvalues>
+          <attvalue for="0" value="Transport" />
+          <attvalue for="1" value="Concept" />
+        </attvalues>
+      </node>
+      <node id="19290728" label="19290728">
+        <attvalues>
+          <attvalue for="0" value="Perovskite" />
+          <attvalue for="1" value="Concept" />
+        </attvalues>
+      </node>
+      <node id="195891" label="195891">
+        <attvalues>
+          <attvalue for="0" value="Pneumatics" />
+          <attvalue for="1" value="Concept" />
+        </attvalues>
+      </node>
+      <node id="20344155" label="20344155">
+        <attvalues>
+          <attvalue for="0" value="Electrical grid" />
+          <attvalue for="1" value="Concept" />
+        </attvalues>
+      </node>
+      <node id="20903754" label="20903754">
+        <attvalues>
+          <attvalue for="0" value="Robotics" />
+          <attvalue for="1" value="Concept" />
+        </attvalues>
+      </node>
+      <node id="210555" label="210555">
+        <attvalues>
+          <attvalue for="0" value="Waste management" />
+          <attvalue for="1" value="Concept" />
+        </attvalues>
+      </node>
+      <node id="21188370" label="21188370">
+        <attvalues>
+          <attvalue for="0" value="Fuel" />
+          <attvalue for="1" value="Concept" />
+        </attvalues>
+      </node>
+      <node id="21296224" label="21296224">
+        <attvalues>
+          <attvalue for="0" value="Architecture" />
+          <attvalue for="1" value="Concept" />
+        </attvalues>
+      </node>
+      <node id="228148" label="228148">
+        <attvalues>
+          <attvalue for="0" value="Remote sensing" />
+          <attvalue for="1" value="Concept" />
+        </attvalues>
+      </node>
+      <node id="22849124" label="22849124">
+        <attvalues>
+          <attvalue for="0" value="Shipping container" />
+          <attvalue for="1" value="Concept" />
+        </attvalues>
+      </node>
+      <node id="23001" label="23001">
+        <attvalues>
+          <attvalue for="0" value="Polymer" />
+          <attvalue for="1" value="Concept" />
+        </attvalues>
+      </node>
+      <node id="233488" label="233488">
+        <attvalues>
+          <attvalue for="0" value="Machine learning" />
+          <attvalue for="1" value="Concept" />
+        </attvalues>
+      </node>
+      <node id="2352910" label="2352910">
+        <attvalues>
+          <attvalue for="0" value="Solar cell" />
+          <attvalue for="1" value="Concept" />
+        </attvalues>
+      </node>
+      <node id="235757" label="235757">
+        <attvalues>
+          <attvalue for="0" value="Sensor" />
+          <attvalue for="1" value="Concept" />
+        </attvalues>
+      </node>
+      <node id="238420" label="238420">
+        <attvalues>
+          <attvalue for="0" value="Power-line communication" />
+          <attvalue for="1" value="Concept" />
+        </attvalues>
+      </node>
+      <node id="239038" label="239038">
+        <attvalues>
+          <attvalue for="0" value="Construction" />
+          <attvalue for="1" value="Concept" />
+        </attvalues>
+      </node>
+      <node id="24130" label="24130">
+        <attvalues>
+          <attvalue for="0" value="Energy storage" />
+          <attvalue for="1" value="Concept" />
+        </attvalues>
+      </node>
+      <node id="252712" label="252712">
+        <attvalues>
+          <attvalue for="0" value="Safety" />
+          <attvalue for="1" value="Concept" />
+        </attvalues>
+      </node>
+      <node id="25784" label="25784">
+        <attvalues>
+          <attvalue for="0" value="Renewable energy" />
+          <attvalue for="1" value="Concept" />
+        </attvalues>
+      </node>
+      <node id="26145195" label="26145195">
+        <attvalues>
+          <attvalue for="0" value="Plastic" />
+          <attvalue for="1" value="Concept" />
+        </attvalues>
+      </node>
+      <node id="26616666" label="26616666">
+        <attvalues>
+          <attvalue for="0" value="Building engineering physics" />
+          <attvalue for="1" value="Concept" />
+        </attvalues>
+      </node>
+      <node id="27643777" label="27643777">
+        <attvalues>
+          <attvalue for="0" value="Measuring instrument" />
+          <attvalue for="1" value="Concept" />
+        </attvalues>
+      </node>
+      <node id="27743" label="27743">
+        <attvalues>
+          <attvalue for="0" value="Solar energy" />
+          <attvalue for="1" value="Concept" />
+        </attvalues>
+      </node>
+      <node id="28191" label="28191">
+        <attvalues>
+          <attvalue for="0" value="Snow" />
+          <attvalue for="1" value="Concept" />
+        </attvalues>
+      </node>
+      <node id="29278" label="29278">
+        <attvalues>
+          <attvalue for="0" value="Safety engineering" />
+          <attvalue for="1" value="Concept" />
+        </attvalues>
+      </node>
+      <node id="29501" label="29501">
+        <attvalues>
+          <attvalue for="0" value="Sustainable development" />
+          <attvalue for="1" value="Concept" />
+        </attvalues>
+      </node>
+      <node id="299871" label="299871">
+        <attvalues>
+          <attvalue for="0" value="Drone" />
+          <attvalue for="1" value="Concept" />
+        </attvalues>
+      </node>
+      <node id="3183830" label="3183830">
+        <attvalues>
+          <attvalue for="0" value="Ecological sanitation" />
+          <attvalue for="1" value="Concept" />
+        </attvalues>
+      </node>
+      <node id="32502" label="32502">
+        <attvalues>
+          <attvalue for="0" value="Vacuum" />
+          <attvalue for="1" value="Concept" />
+        </attvalues>
+      </node>
+      <node id="33172" label="33172">
+        <attvalues>
+          <attvalue for="0" value="Wireless network" />
+          <attvalue for="1" value="Concept" />
+        </attvalues>
+      </node>
+      <node id="33306" label="33306">
+        <attvalues>
+          <attvalue for="0" value="Water" />
+          <attvalue for="1" value="Concept" />
+        </attvalues>
+      </node>
+      <node id="35458904" label="35458904">
+        <attvalues>
+          <attvalue for="0" value="Data science" />
+          <attvalue for="1" value="Concept" />
+        </attvalues>
+      </node>
+      <node id="367397" label="367397">
+        <attvalues>
+          <attvalue for="0" value="Battery" />
+          <attvalue for="1" value="Concept" />
+        </attvalues>
+      </node>
+      <node id="36971117" label="36971117">
+        <attvalues>
+          <attvalue for="0" value="Hyperloop" />
+          <attvalue for="1" value="Concept" />
+        </attvalues>
+      </node>
+      <node id="37039" label="37039">
+        <attvalues>
+          <attvalue for="0" value="Environment" />
+          <attvalue for="1" value="Concept" />
+        </attvalues>
+      </node>
+      <node id="37738" label="37738">
+        <attvalues>
+          <attvalue for="0" value="Soil" />
+          <attvalue for="1" value="Concept" />
+        </attvalues>
+      </node>
+      <node id="381399" label="381399">
+        <attvalues>
+          <attvalue for="0" value="Hydroelectricity" />
+          <attvalue for="1" value="Concept" />
+        </attvalues>
+      </node>
+      <node id="381774" label="381774">
+        <attvalues>
+          <attvalue for="0" value="Compressed air" />
+          <attvalue for="1" value="Concept" />
+        </attvalues>
+      </node>
+      <node id="386407" label="386407">
+        <attvalues>
+          <attvalue for="0" value="Digitization" />
+          <attvalue for="1" value="Concept" />
+        </attvalues>
+      </node>
+      <node id="41684" label="41684">
+        <attvalues>
+          <attvalue for="0" value="Security" />
+          <attvalue for="1" value="Concept" />
+        </attvalues>
+      </node>
+      <node id="43444" label="43444">
+        <attvalues>
+          <attvalue for="0" value="Simulation" />
+          <attvalue for="1" value="Concept" />
+        </attvalues>
+      </node>
+      <node id="44603" label="44603">
+        <attvalues>
+          <attvalue for="0" value="Calcite" />
+          <attvalue for="1" value="Concept" />
+        </attvalues>
+      </node>
+      <node id="4481763" label="4481763">
+        <attvalues>
+          <attvalue for="0" value="Renewable natural gas" />
+          <attvalue for="1" value="Concept" />
+        </attvalues>
+      </node>
+      <node id="51892" label="51892">
+        <attvalues>
+          <attvalue for="0" value="Textile" />
+          <attvalue for="1" value="Concept" />
+        </attvalues>
+      </node>
+      <node id="5199213" label="5199213">
+        <attvalues>
+          <attvalue for="0" value="Phasor measurement unit" />
+          <attvalue for="1" value="Concept" />
+        </attvalues>
+      </node>
+      <node id="5309" label="5309">
+        <attvalues>
+          <attvalue for="0" value="Software" />
+          <attvalue for="1" value="Concept" />
+        </attvalues>
+      </node>
+      <node id="5824713" label="5824713">
+        <attvalues>
+          <attvalue for="0" value="Self-healing material" />
+          <attvalue for="1" value="Concept" />
+        </attvalues>
+      </node>
+      <node id="58890" label="58890">
+        <attvalues>
+          <attvalue for="0" value="Resin" />
+          <attvalue for="1" value="Concept" />
+        </attvalues>
+      </node>
+      <node id="5921" label="5921">
+        <attvalues>
+          <attvalue for="0" value="Color" />
+          <attvalue for="1" value="Concept" />
+        </attvalues>
+      </node>
+      <node id="627" label="627">
+        <attvalues>
+          <attvalue for="0" value="Agriculture" />
+          <attvalue for="1" value="Concept" />
+        </attvalues>
+      </node>
+      <node id="6402491" label="6402491">
+        <attvalues>
+          <attvalue for="0" value="Hydrogen compressor" />
+          <attvalue for="1" value="Concept" />
+        </attvalues>
+      </node>
+      <node id="67973511" label="67973511">
+        <attvalues>
+          <attvalue for="0" value="Indutech" />
+          <attvalue for="1" value="Concept" />
+        </attvalues>
+      </node>
+      <node id="6911" label="6911">
+        <attvalues>
+          <attvalue for="0" value="Cellulose" />
+          <attvalue for="1" value="Concept" />
+        </attvalues>
+      </node>
+      <node id="693334" label="693334">
+        <attvalues>
+          <attvalue for="0" value="Foundation (engineering)" />
+          <attvalue for="1" value="Concept" />
+        </attvalues>
+      </node>
+      <node id="70157" label="70157">
+        <attvalues>
+          <attvalue for="0" value="Recycling" />
+          <attvalue for="1" value="Concept" />
+        </attvalues>
+      </node>
+      <node id="731740" label="731740">
+        <attvalues>
+          <attvalue for="0" value="Probiotic" />
+          <attvalue for="1" value="Concept" />
+        </attvalues>
+      </node>
+      <node id="75987" label="75987">
+        <attvalues>
+          <attvalue for="0" value="Daylighting" />
+          <attvalue for="1" value="Concept" />
+        </attvalues>
+      </node>
+      <node id="77547" label="77547">
+        <attvalues>
+          <attvalue for="0" value="Logistics" />
+          <attvalue for="1" value="Concept" />
+        </attvalues>
+      </node>
+      <node id="7906908" label="7906908">
+        <attvalues>
+          <attvalue for="0" value="Biomass" />
+          <attvalue for="1" value="Concept" />
+        </attvalues>
+      </node>
+      <node id="9251" label="9251">
+        <attvalues>
+          <attvalue for="0" value="Engineering" />
+          <attvalue for="1" value="Concept" />
+        </attvalues>
+      </node>
+      <node id="935041" label="935041">
+        <attvalues>
+          <attvalue for="0" value="Urbanism" />
+          <attvalue for="1" value="Concept" />
+        </attvalues>
+      </node>
+      <node id="9532" label="9532">
+        <attvalues>
+          <attvalue for="0" value="Electromagnetism" />
+          <attvalue for="1" value="Concept" />
+        </attvalues>
+      </node>
+      <node id="9649" label="9649">
+        <attvalues>
+          <attvalue for="0" value="Energy" />
+          <attvalue for="1" value="Concept" />
+        </attvalues>
+      </node>
+    </nodes>
+    <edges>
+      <edge source="es-aeler-technologies" target="77547" id="0" weight="1.0" />
+      <edge source="es-aeler-technologies" target="22849124" id="1" weight="1.0" />
+      <edge source="es-aqua-tech" target="23001" id="2" weight="0.3333333333333333" />
+      <edge source="es-aqua-tech" target="33306" id="3" weight="0.25" />
+      <edge source="es-aurora-s-grid" target="367397" id="4" weight="0.5" />
+      <edge source="es-aurora-s-grid" target="24130" id="5" weight="0.2" />
+      <edge source="es-bloom-biorenewables" target="7906908" id="6" weight="1.0" />
+      <edge source="es-bloom-biorenewables" target="23001" id="7" weight="0.3333333333333333" />
+      <edge source="es-bloom-biorenewables" target="6911" id="8" weight="1.0" />
+      <edge source="es-bluewatt-engineering" target="33306" id="9" weight="0.25" />
+      <edge source="es-bluewatt-engineering" target="5309" id="10" weight="0.3333333333333333" />
+      <edge source="es-combo-solutions" target="239038" id="11" weight="1.0" />
+      <edge source="es-combo-solutions" target="1164" id="12" weight="0.3333333333333333" />
+      <edge source="es-combo-solutions" target="35458904" id="13" weight="1.0" />
+      <edge source="es-comppair" target="67973511" id="14" weight="1.0" />
+      <edge source="es-comppair" target="51892" id="15" weight="1.0" />
+      <edge source="es-comppair" target="157616" id="16" weight="1.0" />
+      <edge source="es-comppair" target="58890" id="17" weight="1.0" />
+      <edge source="es-comppair" target="5824713" id="18" weight="1.0" />
+      <edge source="es-depoly" target="26145195" id="19" weight="1.0" />
+      <edge source="es-depoly" target="70157" id="20" weight="1.0" />
+      <edge source="es-depoly" target="23001" id="21" weight="0.3333333333333333" />
+      <edge source="es-ecointesys" target="10091" id="22" weight="1.0" />
+      <edge source="es-ecointesys" target="29278" id="23" weight="1.0" />
+      <edge source="es-enairys-powertech-sa" target="381774" id="24" weight="1.0" />
+      <edge source="es-enairys-powertech-sa" target="24130" id="25" weight="0.2" />
+      <edge source="es-enairys-powertech-sa" target="195891" id="26" weight="1.0" />
+      <edge source="es-eneftech-corporation" target="24130" id="27" weight="0.2" />
+      <edge source="es-eneftech-corporation" target="25784" id="28" weight="1.0" />
+      <edge source="es-epiqr-renovation" target="21296224" id="29" weight="0.5" />
+      <edge source="es-epiqr-renovation" target="3183830" id="30" weight="1.0" />
+      <edge source="es-epiqr-renovation" target="9649" id="31" weight="0.3333333333333333" />
+      <edge source="es-esmart-technologies" target="184978" id="32" weight="1.0" />
+      <edge source="es-esmart-technologies" target="9649" id="33" weight="0.3333333333333333" />
+      <edge source="es-esmart-technologies" target="238420" id="34" weight="1.0" />
+      <edge source="es-estia" target="26616666" id="35" weight="1.0" />
+      <edge source="es-estia" target="29501" id="36" weight="1.0" />
+      <edge source="es-estia" target="1804464" id="37" weight="1.0" />
+      <edge source="es-estia" target="21296224" id="38" weight="0.5" />
+      <edge source="es-flyability" target="299871" id="39" weight="1.0" />
+      <edge source="es-flyability" target="252712" id="40" weight="0.5" />
+      <edge source="es-g24-innovations" target="2352910" id="41" weight="0.25" />
+      <edge source="es-g24-innovations" target="27743" id="42" weight="0.16666666666666666" />
+      <edge source="es-g2e-glass2energy" target="2352910" id="43" weight="0.25" />
+      <edge source="es-g2e-glass2energy" target="27743" id="44" weight="0.16666666666666666" />
+      <edge source="es-gaiasens-technologies" target="37039" id="45" weight="1.0" />
+      <edge source="es-gaiasens-technologies" target="27643777" id="46" weight="0.5" />
+      <edge source="es-gaiasens-technologies" target="28191" id="47" weight="1.0" />
+      <edge source="es-gaiasens-technologies" target="10934212" id="48" weight="1.0" />
+      <edge source="es-gamaya" target="627" id="49" weight="0.3333333333333333" />
+      <edge source="es-gamaya" target="228148" id="50" weight="1.0" />
+      <edge source="es-gamaya" target="1164" id="51" weight="0.3333333333333333" />
+      <edge source="es-geoeg" target="113728" id="52" weight="1.0" />
+      <edge source="es-geoeg" target="935041" id="53" weight="0.2" />
+      <edge source="es-gridsteer" target="367397" id="54" weight="0.5" />
+      <edge source="es-gridsteer" target="20344155" id="55" weight="0.3333333333333333" />
+      <edge source="es-gridsteer" target="24130" id="56" weight="0.2" />
+      <edge source="es-grz-technologies" target="13255" id="57" weight="1.0" />
+      <edge source="es-grz-technologies" target="24130" id="58" weight="0.2" />
+      <edge source="es-grz-technologies" target="6402491" id="59" weight="1.0" />
+      <edge source="es-hydromea" target="33306" id="60" weight="0.25" />
+      <edge source="es-hydromea" target="20903754" id="61" weight="0.3333333333333333" />
+      <edge source="es-hydromea" target="14552094" id="62" weight="1.0" />
+      <edge source="es-insolight" target="27743" id="63" weight="0.16666666666666666" />
+      <edge source="es-insolight" target="627" id="64" weight="0.3333333333333333" />
+      <edge source="es-insolight" target="20344155" id="65" weight="0.3333333333333333" />
+      <edge source="es-kaemco" target="43444" id="66" weight="0.5" />
+      <edge source="es-kaemco" target="935041" id="67" weight="0.2" />
+      <edge source="es-kaemco" target="5309" id="68" weight="0.3333333333333333" />
+      <edge source="es-kaemco" target="12398" id="69" weight="1.0" />
+      <edge source="es-medusoil" target="37738" id="70" weight="0.5" />
+      <edge source="es-medusoil" target="693334" id="71" weight="1.0" />
+      <edge source="es-medusoil" target="44603" id="72" weight="1.0" />
+      <edge source="es-oculight-dynamics" target="75987" id="73" weight="1.0" />
+      <edge source="es-oculight-dynamics" target="935041" id="74" weight="0.2" />
+      <edge source="es-power-vision-engineering" target="43444" id="75" weight="0.5" />
+      <edge source="es-power-vision-engineering" target="381399" id="76" weight="1.0" />
+      <edge source="es-power-vision-engineering" target="9251" id="77" weight="0.5" />
+      <edge source="es-rovenso" target="20903754" id="78" weight="0.3333333333333333" />
+      <edge source="es-rovenso" target="252712" id="79" weight="0.5" />
+      <edge source="es-rovenso" target="41684" id="80" weight="1.0" />
+      <edge source="es-sensima-inspection" target="9532" id="81" weight="1.0" />
+      <edge source="es-sensima-inspection" target="235757" id="82" weight="0.3333333333333333" />
+      <edge source="es-sensima-inspection" target="21188370" id="83" weight="1.0" />
+      <edge source="es-sensorscope" target="27643777" id="84" weight="0.5" />
+      <edge source="es-sensorscope" target="235757" id="85" weight="0.3333333333333333" />
+      <edge source="es-sensorscope" target="9251" id="86" weight="0.5" />
+      <edge source="es-sensorscope" target="33172" id="87" weight="1.0" />
+      <edge source="es-smarthelio" target="27743" id="88" weight="0.16666666666666666" />
+      <edge source="es-smarthelio" target="1164" id="89" weight="0.3333333333333333" />
+      <edge source="es-smarthelio" target="235757" id="90" weight="0.3333333333333333" />
+      <edge source="es-smarthelio" target="12057519" id="91" weight="1.0" />
+      <edge source="es-solaronix" target="27743" id="92" weight="0.16666666666666666" />
+      <edge source="es-solaronix" target="2352910" id="93" weight="0.25" />
+      <edge source="es-swiss-inso" target="27743" id="94" weight="0.16666666666666666" />
+      <edge source="es-swiss-inso" target="12581" id="95" weight="1.0" />
+      <edge source="es-swiss-inso" target="935041" id="96" weight="0.2" />
+      <edge source="es-swiss-inso" target="5921" id="97" weight="1.0" />
+      <edge source="es-swisspod-technologies" target="18580879" id="98" weight="1.0" />
+      <edge source="es-swisspod-technologies" target="36971117" id="99" weight="1.0" />
+      <edge source="es-swisspod-technologies" target="32502" id="100" weight="1.0" />
+      <edge source="es-treatech-sarl" target="210555" id="101" weight="1.0" />
+      <edge source="es-treatech-sarl" target="4481763" id="102" weight="1.0" />
+      <edge source="es-treatech-sarl" target="37738" id="103" weight="0.5" />
+      <edge source="es-treatech-sarl" target="33306" id="104" weight="0.25" />
+      <edge source="es-twentygreen" target="731740" id="105" weight="1.0" />
+      <edge source="es-twentygreen" target="14193930" id="106" weight="1.0" />
+      <edge source="es-twentygreen" target="627" id="107" weight="0.3333333333333333" />
+      <edge source="es-urbio" target="935041" id="108" weight="0.2" />
+      <edge source="es-urbio" target="9649" id="109" weight="0.3333333333333333" />
+      <edge source="es-urbio" target="233488" id="110" weight="0.5" />
+      <edge source="es-valais-perovskite-solar" target="2352910" id="111" weight="0.25" />
+      <edge source="es-valais-perovskite-solar" target="19290728" id="112" weight="1.0" />
+      <edge source="es-volumen" target="20903754" id="113" weight="0.3333333333333333" />
+      <edge source="es-volumen" target="233488" id="114" weight="0.5" />
+      <edge source="es-volumen" target="386407" id="115" weight="1.0" />
+      <edge source="es-zaphiro-technologies" target="20344155" id="116" weight="0.3333333333333333" />
+      <edge source="es-zaphiro-technologies" target="5199213" id="117" weight="1.0" />
+      <edge source="es-zaphiro-technologies" target="5309" id="118" weight="0.3333333333333333" />
+      <edge source="10091" target="10934212" id="119" weight="0.555556" />
+      <edge source="10091" target="18580879" id="120" weight="0.6" />
+      <edge source="10934212" target="25784" id="121" weight="0.418182" />
+      <edge source="113728" target="25784" id="122" weight="0.418182" />
+      <edge source="1164" target="233488" id="123" weight="1.0" />
+      <edge source="1164" target="20903754" id="124" weight="0.5" />
+      <edge source="12057519" target="184978" id="125" weight="1.0" />
+      <edge source="12057519" target="20903754" id="126" weight="0.407407" />
+      <edge source="12398" target="228148" id="127" weight="1.0" />
+      <edge source="12581" target="23001" id="128" weight="0.852941" />
+      <edge source="13255" target="33306" id="129" weight="0.545455" />
+      <edge source="157616" target="51892" id="130" weight="0.416988" />
+      <edge source="184978" target="238420" id="131" weight="0.642857" />
+      <edge source="18580879" target="239038" id="132" weight="0.65" />
+      <edge source="18580879" target="77547" id="133" weight="0.816667" />
+      <edge source="195891" target="381774" id="134" weight="1.0" />
+      <edge source="20344155" target="24130" id="135" weight="0.64" />
+      <edge source="20344155" target="25784" id="136" weight="0.545455" />
+      <edge source="20344155" target="27743" id="137" weight="0.5" />
+      <edge source="20344155" target="381399" id="138" weight="0.844575" />
+      <edge source="20903754" target="9251" id="139" weight="0.565217" />
+      <edge source="210555" target="70157" id="140" weight="1.0" />
+      <edge source="21188370" target="24130" id="141" weight="0.4" />
+      <edge source="21188370" target="25784" id="142" weight="0.418182" />
+      <edge source="21188370" target="27743" id="143" weight="0.408333" />
+      <edge source="21296224" target="239038" id="144" weight="0.65" />
+      <edge source="21296224" target="935041" id="145" weight="1.0" />
+      <edge source="23001" target="6911" id="146" weight="0.794872" />
+      <edge source="23001" target="58890" id="147" weight="0.407407" />
+      <edge source="23001" target="26145195" id="148" weight="0.944444" />
+      <edge source="2352910" target="25784" id="149" weight="0.581818" />
+      <edge source="2352910" target="27743" id="150" weight="1.0" />
+      <edge source="24130" target="25784" id="151" weight="1.0" />
+      <edge source="25784" target="27743" id="152" weight="0.763636" />
+      <edge source="25784" target="381399" id="153" weight="0.636364" />
+      <edge source="25784" target="7906908" id="154" weight="0.636364" />
+      <edge source="28191" target="33306" id="155" weight="0.689655" />
+      <edge source="32502" target="9532" id="156" weight="0.46" />
+      <edge source="33306" target="37738" id="157" weight="0.816327" />
+      <edge source="37738" target="627" id="158" weight="0.568067" />
+    </edges>
+  </graph>
+</gexf>
