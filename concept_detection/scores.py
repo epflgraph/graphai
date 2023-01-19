@@ -122,8 +122,9 @@ def compute_scores(wikisearch_results, graph_results, logger, debug=False):
     scores_df['levenshtein_score'] = scores_df.apply(lambda r: Levenshtein.ratio(r['keywords'], r['page_title'].lower()), axis=1)
 
     # Calculate mixed score
+    # S-shaped function on [0, 1] that pulls values away from 1/2, exaggerating differences
     def f(x):
-        return 1 / (1 + np.exp(-8 * (x - 1 / 2)))   # f pulls values in [0, 1] away from 1/2, exaggerating differences
+        return 1 / (1 + ((1 - x) / x)**2)
 
     scores_df['mixed_score'] = scores_df['search_graph_ratio'] * f(scores_df['levenshtein_score'])
     log(f'scores_df (with lev and mixed scores): {scores_df}', logger, debug)
