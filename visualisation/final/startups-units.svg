@@ -1,0 +1,2322 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+    "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd" >
+<svg contentScriptType="text/ecmascript" width="3676.8782"
+     xmlns:xlink="http://www.w3.org/1999/xlink" zoomAndPan="magnify"
+     contentStyleType="text/css"
+     viewBox="-1812.484375 -1161.489136 3676.878174 2245.466797"
+     height="2245.4668" preserveAspectRatio="xMidYMid meet"
+     xmlns="http://www.w3.org/2000/svg" version="1.1">
+    <g id="edges">
+        <path stroke-linecap="round" fill="none"
+              class="id_es-aeler-technologies id_77547"
+              d="M 958.522217,875.447266 A 162.226264,162.226264 0,0 1,848.205261,730.112610"
+              stroke="#ff5584" stroke-width="5.0" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none"
+              class="id_es-aeler-technologies id_22849124"
+              d="M 970.454163,879.714600 A 91.009365,91.009365 0,0 1,1024.588867,964.379639"
+              stroke="#ff5584" stroke-width="5.0" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none"
+              class="id_es-aqua-tech id_23001"
+              d="M -836.397522,-377.955872 A 267.118138,267.118138 0,0 1,-1122.052612,-290.766510"
+              stroke="#4c463e" stroke-width="1.6666667" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none"
+              class="id_es-aqua-tech id_33306"
+              d="M -821.088745,-398.274078 A 322.206637,322.206637 0,0 1,-476.350739,-512.028076"
+              stroke="#26859e" stroke-width="1.25" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none"
+              class="id_es-aurora-s-grid id_367397"
+              d="M -865.318542,635.839050 A 118.828934,118.828934 0,0 1,-939.531982,533.500549"
+              stroke="#73c000" stroke-width="2.5" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none"
+              class="id_es-aurora-s-grid id_24130"
+              d="M -848.970398,630.667358 A 197.673014,197.673014 0,0 1,-647.101624,557.282593"
+              stroke="#73c000" stroke-width="1.0" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none"
+              class="id_es-bloom-biorenewables id_7906908"
+              d="M -1095.863647,41.747135 A 209.841059,209.841059 0,0 1,-961.900696,230.016174"
+              stroke="#4c463e" stroke-width="5.0" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none"
+              class="id_es-bloom-biorenewables id_23001"
+              d="M -1114.956909,28.616791 A 278.495193,278.495193 0,0 1,-1142.631226,-283.091766"
+              stroke="#4c463e" stroke-width="1.6666667" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none"
+              class="id_es-bloom-biorenewables id_6911"
+              d="M -1119.151855,38.262787 A 139.103185,139.103185 0,0 1,-1244.908203,-41.218670"
+              stroke="#4c463e" stroke-width="5.0" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none"
+              class="id_es-bluewatt-engineering id_33306"
+              d="M -205.575043,-356.505615 A 255.284490,255.284490 0,0 1,-453.667236,-492.423309"
+              stroke="#00c0c9" stroke-width="1.25" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none"
+              class="id_es-bluewatt-engineering id_5309"
+              d="M -181.378418,-361.434937 A 178.519026,178.519026 0,0 1,2.440297,-301.455811"
+              stroke="#00bd94" stroke-width="1.6666667" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none"
+              class="id_es-combo-solutions id_239038"
+              d="M 802.361084,131.446747 A 218.675859,218.675859 0,0 1,824.601257,371.991241"
+              stroke="#ff8805" stroke-width="5.0" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none"
+              class="id_es-combo-solutions id_1164"
+              d="M 783.602539,114.633232 A 409.231780,409.231780 0,0 1,623.326050,-324.816803"
+              stroke="#ef8882" stroke-width="1.6666667" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none"
+              class="id_es-combo-solutions id_35458904"
+              d="M 801.002930,111.101563 A 176.862659,176.862659 0,0 1,982.119385,39.135181"
+              stroke="#ff8805" stroke-width="5.0" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none" class="id_es-comppair id_51892"
+              d="M -1526.969238,-298.629425 A 150.482451,150.482451 0,0 1,-1585.488770,-139.992981"
+              stroke="#4c463e" stroke-width="5.0" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none"
+              class="id_es-comppair id_157616"
+              d="M -1534.541992,-300.203613 A 168.759517,168.759517 0,0 1,-1719.011719,-250.535522"
+              stroke="#4c463e" stroke-width="5.0" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none" class="id_es-comppair id_58890"
+              d="M -1521.344116,-309.758392 A 166.966686,166.966686 0,0 1,-1341.811890,-263.940308"
+              stroke="#4c463e" stroke-width="5.0" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none"
+              class="id_es-comppair id_5824713"
+              d="M -1533.833862,-313.827698 A 117.876264,117.876264 0,0 1,-1528.177856,-443.877197"
+              stroke="#4c463e" stroke-width="5.0" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none"
+              class="id_es-depoly id_26145195"
+              d="M -1044.587891,-489.470734 A 116.289872,116.289872 0,0 1,-1144.098145,-416.227631"
+              stroke="#4c463e" stroke-width="5.0" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none" class="id_es-depoly id_70157"
+              d="M -1035.610352,-507.023499 A 166.541195,166.541195 0,0 1,-861.244202,-568.711609"
+              stroke="#26859e" stroke-width="5.0" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none" class="id_es-depoly id_23001"
+              d="M -1039.510010,-489.090454 A 186.932862,186.932862 0,0 1,-1123.273438,-302.424591"
+              stroke="#4c463e" stroke-width="1.6666667" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none"
+              class="id_es-ecointesys id_10091"
+              d="M 469.031281,670.745483 A 120.005527,120.005527 0,0 1,438.117554,547.991943"
+              stroke="#ff5584" stroke-width="5.0" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none"
+              class="id_es-ecointesys id_29278"
+              d="M 477.003906,685.148193 A 87.903426,87.903426 0,0 1,437.520050,769.733887"
+              stroke="#ff5584" stroke-width="5.0" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none"
+              class="id_es-enairys-powertech-sa id_381774"
+              d="M -705.427979,764.014954 A 175.099455,175.099455 0,0 1,-749.213013,953.756348"
+              stroke="#d3b3b0" stroke-width="5.0" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none"
+              class="id_es-enairys-powertech-sa id_24130"
+              d="M -712.174927,742.855713 A 172.935454,172.935454 0,0 1,-644.915833,570.869141"
+              stroke="#a3b958" stroke-width="1.0" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none"
+              class="id_es-enairys-powertech-sa id_195891"
+              d="M -714.387634,763.844299 A 190.921064,190.921064 0,0 1,-900.428040,869.072510"
+              stroke="#d3b3b0" stroke-width="5.0" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none"
+              class="id_es-eneftech-corporation id_24130"
+              d="M -389.924255,467.553986 A 224.472444,224.472444 0,0 1,-614.830750,565.064026"
+              stroke="#73c000" stroke-width="1.0" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none"
+              class="id_es-eneftech-corporation id_25784"
+              d="M -370.257080,458.421844 A 223.050401,223.050401 0,0 1,-193.246185,622.041687"
+              stroke="#73c000" stroke-width="5.0" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none"
+              class="id_es-epiqr-renovation id_21296224"
+              d="M 1281.794678,178.266220 A 234.979112,234.979112 0,0 1,1039.021362,277.403870"
+              stroke="#ff8805" stroke-width="2.5" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none"
+              class="id_es-epiqr-renovation id_3183830"
+              d="M 1293.453613,160.998962 A 289.141936,289.141936 0,0 1,1609.428833,56.117775"
+              stroke="#ff8805" stroke-width="5.0" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none"
+              class="id_es-epiqr-renovation id_9649"
+              d="M 1277.761108,165.549240 A 223.925442,223.925442 0,0 1,1143.385010,-47.239037"
+              stroke="#ff8805" stroke-width="1.6666667" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none"
+              class="id_es-esmart-technologies id_184978"
+              d="M 1465.339722,-169.640671 A 237.821875,237.821875 0,0 1,1322.136719,-397.648254"
+              stroke="#df89ff" stroke-width="5.0" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none"
+              class="id_es-esmart-technologies id_9649"
+              d="M 1468.518677,-158.500809 A 289.462676,289.462676 0,0 1,1154.012207,-54.554092"
+              stroke="#ef8882" stroke-width="1.6666667" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none"
+              class="id_es-esmart-technologies id_238420"
+              d="M 1477.843018,-174.639648 A 210.232192,210.232192 0,0 1,1683.964966,-293.970856"
+              stroke="#df89ff" stroke-width="5.0" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none" class="id_es-estia id_26616666"
+              d="M 1179.470825,411.160889 A 234.333945,234.333945 0,0 1,1433.071533,496.009583"
+              stroke="#ff8805" stroke-width="5.0" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none" class="id_es-estia id_29501"
+              d="M 1176.445068,421.966736 A 152.096666,152.096666 0,0 1,1192.815552,589.806885"
+              stroke="#ff8805" stroke-width="5.0" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none" class="id_es-estia id_1804464"
+              d="M 1176.364746,406.465576 A 296.354155,296.354155 0,0 1,1509.202515,328.354309"
+              stroke="#ff8805" stroke-width="5.0" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none" class="id_es-estia id_21296224"
+              d="M 1159.575928,412.635773 A 167.446155,167.446155 0,0 1,1028.306763,287.736786"
+              stroke="#ff8805" stroke-width="2.5" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none"
+              class="id_es-flyability id_299871"
+              d="M 837.928284,-1108.965454 A 49.121305,49.121305 0,0 1,867.111877,-1150.477539"
+              stroke="#df89ff" stroke-width="5.0" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none"
+              class="id_es-flyability id_252712"
+              d="M 838.531189,-1097.221436 A 61.580236,61.580236 0,0 1,810.524231,-1041.532593"
+              stroke="#df89ff" stroke-width="2.5" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none"
+              class="id_es-g24-innovations id_2352910"
+              d="M -449.028625,395.278534 A 296.497537,296.497537 0,0 1,-425.690857,727.144287"
+              stroke="#73c000" stroke-width="1.25" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none"
+              class="id_es-g24-innovations id_27743"
+              d="M -450.041351,374.860474 A 211.464378,211.464378 0,0 1,-239.930084,289.367676"
+              stroke="#73c000" stroke-width="0.8333334" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none"
+              class="id_es-g2e-glass2energy id_2352910"
+              d="M -636.722656,315.012146 A 401.316131,401.316131 0,0 1,-431.356873,725.027283"
+              stroke="#73c000" stroke-width="1.25" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none"
+              class="id_es-g2e-glass2energy id_27743"
+              d="M -637.952271,301.296387 A 356.517523,356.517523 0,0 1,-237.174362,282.911011"
+              stroke="#73c000" stroke-width="0.8333334" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none"
+              class="id_es-gaiasens-technologies id_37039"
+              d="M -154.424896,-110.324844 A 181.119975,181.119975 0,0 1,-251.533737,64.171867"
+              stroke="#00c4ff" stroke-width="5.0" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none"
+              class="id_es-gaiasens-technologies id_27643777"
+              d="M -142.887863,-123.299850 A 339.210726,339.210726 0,0 1,172.253357,102.928230"
+              stroke="#6fa6ff" stroke-width="2.5" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none"
+              class="id_es-gaiasens-technologies id_28191"
+              d="M -168.821365,-122.182121 A 251.521673,251.521673 0,0 1,-410.238708,-266.206390"
+              stroke="#00c4ff" stroke-width="5.0" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none"
+              class="id_es-gaiasens-technologies id_10934212"
+              d="M -144.106110,-117.739319 A 436.913384,436.913384 0,0 1,99.817841,320.805542"
+              stroke="#00c4ff" stroke-width="5.0" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none" class="id_es-gamaya id_627"
+              d="M 292.819244,-715.821777 A 376.010549,376.010549 0,0 1,-131.731018,-775.015686"
+              stroke="#00c0c9" stroke-width="1.6666667" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none" class="id_es-gamaya id_228148"
+              d="M 305.407288,-708.764709 A 150.864239,150.864239 0,0 1,221.362778,-570.595215"
+              stroke="#00bd94" stroke-width="5.0" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none" class="id_es-gamaya id_1164"
+              d="M 317.469055,-718.855042 A 416.819645,416.819645 0,0 1,626.481628,-356.264099"
+              stroke="#6fa3c9" stroke-width="1.6666667" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none" class="id_es-geoeg id_113728"
+              d="M 239.809128,490.569336 A 169.358501,169.358501 0,0 1,84.817596,586.381409"
+              stroke="#73c000" stroke-width="5.0" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none" class="id_es-geoeg id_935041"
+              d="M 247.743225,467.489410 A 348.042055,348.042055 0,0 1,549.072998,212.930557"
+              stroke="#b9a402" stroke-width="1.0" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none"
+              class="id_es-gridsteer id_367397"
+              d="M -824.208984,412.290955 A 143.005048,143.005048 0,0 1,-931.060974,522.787903"
+              stroke="#73c000" stroke-width="2.5" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none"
+              class="id_es-gridsteer id_20344155"
+              d="M -818.666687,387.246155 A 383.009094,383.009094 0,0 1,-478.334106,116.859657"
+              stroke="#73c000" stroke-width="1.6666667" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none"
+              class="id_es-gridsteer id_24130"
+              d="M -809.411865,400.760803 A 208.826909,208.826909 0,0 1,-635.415894,545.643433"
+              stroke="#73c000" stroke-width="1.0" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none"
+              class="id_es-grz-technologies id_13255"
+              d="M -816.991272,128.664688 A 430.342390,430.342390 0,0 1,-609.901489,-322.365601"
+              stroke="#00c4ff" stroke-width="5.0" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none"
+              class="id_es-grz-technologies id_24130"
+              d="M -803.711243,147.325867 A 382.470434,382.470434 0,0 1,-627.614990,545.436401"
+              stroke="#39c27f" stroke-width="1.0" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none"
+              class="id_es-grz-technologies id_6402491"
+              d="M -825.877625,135.651230 A 264.734690,264.734690 0,0 1,-971.653320,-127.402641"
+              stroke="#00c4ff" stroke-width="5.0" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none" class="id_es-hydromea id_33306"
+              d="M 62.999962,-661.787964 A 464.349347,464.349347 0,0 1,-445.295807,-501.926208"
+              stroke="#6fa6ff" stroke-width="1.25" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none"
+              class="id_es-hydromea id_20903754"
+              d="M 82.012779,-681.423157 A 411.402699,411.402699 0,0 1,551.254272,-703.944336"
+              stroke="#df89ff" stroke-width="1.6666667" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none"
+              class="id_es-hydromea id_14552094"
+              d="M 67.989990,-686.233948 A 193.680349,193.680349 0,0 1,147.755463,-884.490540"
+              stroke="#df89ff" stroke-width="5.0" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none"
+              class="id_es-insolight id_27743"
+              d="M -150.822052,-484.070557 A 661.177749,661.177749 0,0 1,-207.467270,278.649078"
+              stroke="#73c000" stroke-width="0.8333334" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none" class="id_es-insolight id_627"
+              d="M -167.011612,-510.247498 A 240.332403,240.332403 0,0 1,-151.254517,-773.693787"
+              stroke="#39c27f" stroke-width="1.6666667" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none"
+              class="id_es-insolight id_20344155"
+              d="M -156.273087,-481.996338 A 569.461495,569.461495 0,0 1,-444.672180,107.713638"
+              stroke="#73c000" stroke-width="1.6666667" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none" class="id_es-kaemco id_43444"
+              d="M 190.363724,-365.331940 A 147.361661,147.361661 0,0 1,146.530182,-215.495193"
+              stroke="#00bd94" stroke-width="2.5" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none" class="id_es-kaemco id_935041"
+              d="M 198.902115,-373.475800 A 584.615760,584.615760 0,0 1,566.285645,195.418060"
+              stroke="#7fa24c" stroke-width="1.0" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none" class="id_es-kaemco id_5309"
+              d="M 179.289124,-366.373474 A 163.542792,163.542792 0,0 1,23.177097,-289.216553"
+              stroke="#00bd94" stroke-width="1.6666667" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none" class="id_es-kaemco id_12398"
+              d="M 188.425446,-392.046936 A 148.289535,148.289535 0,0 1,300.101776,-503.933136"
+              stroke="#00bd94" stroke-width="5.0" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none" class="id_es-medusoil id_37738"
+              d="M -469.373596,-982.006531 A 172.400163,172.400163 0,0 1,-422.981506,-800.386780"
+              stroke="#00c4ff" stroke-width="2.5" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none"
+              class="id_es-medusoil id_693334"
+              d="M -486.189972,-985.492981 A 222.706188,222.706188 0,0 1,-727.179382,-1065.399414"
+              stroke="#00c4ff" stroke-width="5.0" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none" class="id_es-medusoil id_44603"
+              d="M -478.324432,-998.221680 A 149.470514,149.470514 0,0 1,-403.762817,-1146.446655"
+              stroke="#00c4ff" stroke-width="5.0" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none"
+              class="id_es-oculight-dynamics id_75987"
+              d="M 580.182068,431.356079 A 130.891006,130.891006 0,0 1,713.060791,481.904938"
+              stroke="#ff8805" stroke-width="5.0" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none"
+              class="id_es-oculight-dynamics id_935041"
+              d="M 563.328369,425.348358 A 185.325361,185.325361 0,0 1,556.401306,225.343933"
+              stroke="#ff8805" stroke-width="1.0" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none"
+              class="id_es-power-vision-engineering id_43444"
+              d="M 122.321220,-54.289074 A 137.798889,137.798889 0,0 1,130.921967,-199.347549"
+              stroke="#39be4a" stroke-width="2.5" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none"
+              class="id_es-power-vision-engineering id_381399"
+              d="M 125.236382,-30.769423 A 330.070101,330.070101 0,0 1,-171.767044,196.212402"
+              stroke="#73c000" stroke-width="5.0" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none"
+              class="id_es-power-vision-engineering id_9251"
+              d="M 133.246475,-55.453270 A 279.768691,279.768691 0,0 1,389.205933,-238.128311"
+              stroke="#a9a47f" stroke-width="2.5" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none"
+              class="id_es-rovenso id_20903754"
+              d="M 684.436279,-876.366211 A 188.475398,188.475398 0,0 1,578.786499,-701.654785"
+              stroke="#df89ff" stroke-width="1.6666667" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none" class="id_es-rovenso id_252712"
+              d="M 684.506226,-898.516357 A 160.072676,160.072676 0,0 1,795.857178,-1035.432007"
+              stroke="#df89ff" stroke-width="2.5" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none" class="id_es-rovenso id_41684"
+              d="M 673.520569,-891.636414 A 99.832143,99.832143 0,0 1,616.526245,-979.220764"
+              stroke="#df89ff" stroke-width="5.0" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none"
+              class="id_es-sensima-inspection id_9532"
+              d="M 90.153770,720.082581 A 208.336351,208.336351 0,0 1,263.578339,874.098877"
+              stroke="#73c000" stroke-width="5.0" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none"
+              class="id_es-sensima-inspection id_235757"
+              d="M 77.082779,706.132690 A 418.163232,418.163232 0,0 1,343.897858,305.648254"
+              stroke="#a9a47f" stroke-width="1.6666667" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none"
+              class="id_es-sensima-inspection id_21188370"
+              d="M 79.346909,731.259949 A 90.572125,90.572125 0,0 1,45.279640,808.503845"
+              stroke="#73c000" stroke-width="5.0" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none"
+              class="id_es-sensorscope id_27643777"
+              d="M 367.149170,46.946735 A 176.790612,176.790612 0,0 1,185.909225,115.586914"
+              stroke="#df89ff" stroke-width="2.5" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none"
+              class="id_es-sensorscope id_235757"
+              d="M 379.930908,47.241493 A 220.530488,220.530488 0,0 1,363.963989,291.270966"
+              stroke="#df89ff" stroke-width="1.6666667" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none"
+              class="id_es-sensorscope id_9251"
+              d="M 367.959991,26.894117 A 230.645260,230.645260 0,0 1,393.700104,-228.223053"
+              stroke="#df89ff" stroke-width="2.5" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none"
+              class="id_es-sensorscope id_33172"
+              d="M 372.457214,25.439215 A 120.365074,120.365074 0,0 1,433.959656,-87.172279"
+              stroke="#df89ff" stroke-width="5.0" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none"
+              class="id_es-smarthelio id_27743"
+              d="M 654.951355,-119.901123 A 817.690957,817.690957 0,0 1,-200.765671,297.446045"
+              stroke="#a9a47f" stroke-width="0.8333334" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none"
+              class="id_es-smarthelio id_1164"
+              d="M 651.314880,-145.851959 A 174.148909,174.148909 0,0 1,621.038574,-325.662872"
+              stroke="#df89ff" stroke-width="1.6666667" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none"
+              class="id_es-smarthelio id_235757"
+              d="M 662.684326,-118.033356 A 443.759341,443.759341 0,0 1,368.010468,297.079651"
+              stroke="#df89ff" stroke-width="1.6666667" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none"
+              class="id_es-smarthelio id_12057519"
+              d="M 664.445068,-150.226135 A 417.823419,417.823419 0,0 1,989.226257,-500.013763"
+              stroke="#df89ff" stroke-width="5.0" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none"
+              class="id_es-solaronix id_27743"
+              d="M -220.293213,815.337952 A 443.085004,443.085004 0,0 1,-231.839478,310.303802"
+              stroke="#73c000" stroke-width="0.8333334" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none"
+              class="id_es-solaronix id_2352910"
+              d="M -225.001129,828.591553 A 197.519345,197.519345 0,0 1,-425.057495,753.414185"
+              stroke="#73c000" stroke-width="1.25" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none"
+              class="id_es-swiss-inso id_27743"
+              d="M 147.897095,262.110291 A 319.163297,319.163297 0,0 1,-202.895081,303.463593"
+              stroke="#5f831f" stroke-width="0.8333334" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none"
+              class="id_es-swiss-inso id_12581"
+              d="M 144.001190,254.226471 A 1000.460369,1000.460369 0,0 1,-916.411011,-256.123718"
+              stroke="#4c463e" stroke-width="1.0" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none"
+              class="id_es-swiss-inso id_935041"
+              d="M 172.571640,240.341995 A 339.240607,339.240607 0,0 1,551.201843,203.561737"
+              stroke="#a56721" stroke-width="1.0" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none"
+              class="id_es-swiss-inso id_5921"
+              d="M 165.671249,235.641800 A 107.258131,107.258131 0,0 1,250.987030,172.696899"
+              stroke="#4c463e" stroke-width="5.0" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none"
+              class="id_es-swisspod-technologies id_18580879"
+              d="M 680.334595,820.421814 A 174.265308,174.265308 0,0 1,705.325195,630.613953"
+              stroke="#ff5584" stroke-width="5.0" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none"
+              class="id_es-swisspod-technologies id_36971117"
+              d="M 690.535522,835.847961 A 140.459665,140.459665 0,0 1,701.413635,991.357483"
+              stroke="#ff5584" stroke-width="5.0" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none"
+              class="id_es-swisspod-technologies id_32502"
+              d="M 681.146667,837.315002 A 159.188964,159.188964 0,0 1,532.560242,932.963257"
+              stroke="#ff5584" stroke-width="5.0" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none"
+              class="id_es-treatech-sarl id_210555"
+              d="M -686.742432,-721.166443 A 114.941580,114.941580 0,0 1,-780.861023,-646.682373"
+              stroke="#00c4ff" stroke-width="5.0" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none"
+              class="id_es-treatech-sarl id_4481763"
+              d="M -694.218994,-738.717041 A 125.404887,125.404887 0,0 1,-757.295898,-856.344666"
+              stroke="#00c4ff" stroke-width="5.0" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none"
+              class="id_es-treatech-sarl id_37738"
+              d="M -674.615417,-742.254761 A 217.411541,217.411541 0,0 1,-440.650146,-792.872498"
+              stroke="#00c4ff" stroke-width="2.5" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none"
+              class="id_es-treatech-sarl id_33306"
+              d="M -670.795288,-730.937256 A 264.158391,264.158391 0,0 1,-463.451813,-523.232239"
+              stroke="#00c4ff" stroke-width="1.25" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none"
+              class="id_es-twentygreen id_731740"
+              d="M -106.929176,-1016.553833 A 265.384740,265.384740 0,0 1,188.007477,-1091.922363"
+              stroke="#00c4ff" stroke-width="5.0" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none"
+              class="id_es-twentygreen id_14193930"
+              d="M -123.846596,-1009.451660 A 85.638272,85.638272 0,0 1,-192.104538,-1065.588135"
+              stroke="#00c4ff" stroke-width="5.0" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none"
+              class="id_es-twentygreen id_627"
+              d="M -108.666283,-999.417419 A 187.774663,187.774663 0,0 1,-132.502472,-795.873413"
+              stroke="#00c4ff" stroke-width="1.6666667" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none" class="id_es-urbio id_935041"
+              d="M 850.794922,-28.005690 A 319.350548,319.350548 0,0 1,581.562012,210.057404"
+              stroke="#ef8882" stroke-width="1.0" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none" class="id_es-urbio id_9649"
+              d="M 863.872498,-48.770775 A 242.289419,242.289419 0,0 1,1135.084717,-63.361729"
+              stroke="#ef8882" stroke-width="1.6666667" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none" class="id_es-urbio id_233488"
+              d="M 850.487305,-53.221848 A 164.381428,164.381428 0,0 1,911.106934,-218.530670"
+              stroke="#df89ff" stroke-width="2.5" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none"
+              class="id_es-valais-perovskite-solar id_2352910"
+              d="M -345.677734,950.801147 A 197.065129,197.065129 0,0 1,-436.710724,755.897400"
+              stroke="#73c000" stroke-width="1.25" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none"
+              class="id_es-valais-perovskite-solar id_19290728"
+              d="M -330.580444,964.476379 A 96.022424,96.022424 0,0 1,-328.329803,1065.210083"
+              stroke="#73c000" stroke-width="5.0" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none"
+              class="id_es-volumen id_20903754"
+              d="M 910.536011,-610.685181 A 304.766401,304.766401 0,0 1,574.900757,-683.674377"
+              stroke="#df89ff" stroke-width="1.6666667" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none" class="id_es-volumen id_233488"
+              d="M 928.065735,-605.825134 A 324.467583,324.467583 0,0 1,928.973145,-236.258301"
+              stroke="#df89ff" stroke-width="2.5" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none" class="id_es-volumen id_386407"
+              d="M 925.695313,-626.013184 A 147.764925,147.764925 0,0 1,1062.349365,-711.899048"
+              stroke="#df89ff" stroke-width="5.0" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none"
+              class="id_es-zaphiro-technologies id_20344155"
+              d="M -399.791504,-161.649048 A 245.756012,245.756012 0,0 1,-447.711548,103.550697"
+              stroke="#39be4a" stroke-width="1.6666667" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none"
+              class="id_es-zaphiro-technologies id_5199213"
+              d="M -408.762482,-160.932510 A 196.098867,196.098867 0,0 1,-577.736389,-24.109230"
+              stroke="#00bd94" stroke-width="5.0" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none"
+              class="id_es-zaphiro-technologies id_5309"
+              d="M -397.081512,-183.952606 A 359.852484,359.852484 0,0 1,-1.946686,-295.527588"
+              stroke="#00bd94" stroke-width="1.6666667" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none" class="id_10091 id_10934212"
+              d="M 430.156006,537.595947 A 332.308108,332.308108 0,0 1,104.081047,348.969635"
+              stroke="#7f8cc1" stroke-width="2.77778" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none" class="id_10091 id_18580879"
+              d="M 454.276337,532.583679 A 236.889614,236.889614 0,0 1,706.256042,611.796936"
+              stroke="#ff5584" stroke-width="3.0" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none" class="id_10934212 id_25784"
+              d="M 96.085564,350.134644 A 349.471981,349.471981 0,0 1,-170.146057,637.174316"
+              stroke="#39c27f" stroke-width="2.09091" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none" class="id_113728 id_25784"
+              d="M 62.457405,595.431213 A 222.103415,222.103415 0,0 1,-171.218643,648.443542"
+              stroke="#73c000" stroke-width="2.09091" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none" class="id_1164 id_233488"
+              d="M 643.326538,-344.099915 A 262.719538,262.719538 0,0 1,914.529907,-236.566971"
+              stroke="#df89ff" stroke-width="5.0" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none" class="id_1164 id_20903754"
+              d="M 616.293091,-351.520233 A 300.584425,300.584425 0,0 1,557.699463,-681.150330"
+              stroke="#df89ff" stroke-width="2.5" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none" class="id_12057519 id_184978"
+              d="M 1015.297729,-507.094757 A 278.303186,278.303186 0,0 1,1316.369019,-416.423370"
+              stroke="#df89ff" stroke-width="5.0" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none" class="id_12057519 id_20903754"
+              d="M 989.264587,-499.829437 A 398.828796,398.828796 0,0 1,572.376404,-681.824341"
+              stroke="#df89ff" stroke-width="2.037035" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none" class="id_12398 id_228148"
+              d="M 299.924683,-505.488800 A 96.083631,96.083631 0,0 1,216.305344,-557.122070"
+              stroke="#00bd94" stroke-width="5.0" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none" class="id_12581 id_23001"
+              d="M -934.086853,-261.646973 A 178.932234,178.932234 0,0 1,-1124.947998,-285.804291"
+              stroke="#4c463e" stroke-width="4.2647047" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none" class="id_13255 id_33306"
+              d="M -598.556885,-340.715820 A 188.358223,188.358223 0,0 1,-476.317108,-502.114319"
+              stroke="#00c4ff" stroke-width="2.727275" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none" class="id_157616 id_51892"
+              d="M -1718.678101,-252.017029 A 147.658571,147.658571 0,0 1,-1591.496582,-142.302872"
+              stroke="#4c463e" stroke-width="2.08494" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none" class="id_184978 id_238420"
+              d="M 1332.744141,-411.480438 A 322.171109,322.171109 0,0 1,1687.163330,-299.626556"
+              stroke="#df89ff" stroke-width="3.2142851" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none" class="id_18580879 id_239038"
+              d="M 711.219055,609.547852 A 217.012804,217.012804 0,0 1,807.268677,389.700378"
+              stroke="#ff6e44" stroke-width="3.25" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none" class="id_18580879 id_77547"
+              d="M 725.976746,622.087280 A 139.459795,139.459795 0,0 1,845.267822,713.220581"
+              stroke="#ff5584" stroke-width="4.083335" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none" class="id_195891 id_381774"
+              d="M -900.416565,867.663574 A 148.294290,148.294290 0,0 1,-758.094299,951.866211"
+              stroke="#d3b3b0" stroke-width="5.0" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none" class="id_20344155 id_24130"
+              d="M -455.962097,133.356888 A 397.630930,397.630930 0,0 1,-617.220032,552.539734"
+              stroke="#73c000" stroke-width="3.1999998" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none" class="id_20344155 id_25784"
+              d="M -444.528717,124.133011 A 492.447490,492.447490 0,0 1,-186.347168,621.822693"
+              stroke="#73c000" stroke-width="2.727275" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none" class="id_20344155 id_27743"
+              d="M -442.610840,116.597588 A 248.930425,248.930425 0,0 1,-226.922440,274.947052"
+              stroke="#73c000" stroke-width="2.5" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none" class="id_20344155 id_381399"
+              d="M -443.511688,110.434776 A 238.214000,238.214000 0,0 1,-195.201904,185.320129"
+              stroke="#73c000" stroke-width="4.222875" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none" class="id_20903754 id_9251"
+              d="M 568.793823,-680.275452 A 404.247471,404.247471 0,0 1,413.186371,-245.579361"
+              stroke="#df89ff" stroke-width="2.826085" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none" class="id_210555 id_70157"
+              d="M -790.755005,-636.814941 A 84.651168,84.651168 0,0 1,-845.345642,-568.953613"
+              stroke="#00c4ff" stroke-width="5.0" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none" class="id_21188370 id_24130"
+              d="M 16.308561,821.503052 A 592.100959,592.100959 0,0 1,-622.080933,575.626770"
+              stroke="#73c000" stroke-width="2.0" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none" class="id_21188370 id_25784"
+              d="M 15.793242,816.313110 A 235.605714,235.605714 0,0 1,-183.534576,659.640137"
+              stroke="#73c000" stroke-width="2.09091" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none" class="id_21188370 id_27743"
+              d="M 17.689249,809.703369 A 484.245281,484.245281 0,0 1,-223.900589,313.567291"
+              stroke="#73c000" stroke-width="2.041665" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none" class="id_21296224 id_239038"
+              d="M 1019.241516,286.450775 A 195.186175,195.186175 0,0 1,830.910400,384.705261"
+              stroke="#ff8805" stroke-width="3.25" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none" class="id_21296224 id_935041"
+              d="M 1013.435120,280.710663 A 387.076350,387.076350 0,0 1,577.186157,222.904846"
+              stroke="#ff8805" stroke-width="5.0" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none" class="id_23001 id_6911"
+              d="M -1132.944336,-281.352631 A 224.837739,224.837739 0,0 1,-1240.136353,-55.420982"
+              stroke="#4c463e" stroke-width="3.97436" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none" class="id_23001 id_58890"
+              d="M -1145.346924,-285.177368 A 169.705155,169.705155 0,0 1,-1326.178955,-252.184952"
+              stroke="#4c463e" stroke-width="2.037035" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none" class="id_23001 id_26145195"
+              d="M -1144.792603,-305.852142 A 101.666567,101.666567 0,0 1,-1157.626831,-407.399109"
+              stroke="#4c463e" stroke-width="4.72222" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none" class="id_2352910 id_25784"
+              d="M -425.358795,727.354492 A 220.120968,220.120968 0,0 1,-208.182999,636.932007"
+              stroke="#73c000" stroke-width="2.90909" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none" class="id_2352910 id_27743"
+              d="M -436.687836,725.068176 A 412.505655,412.505655 0,0 1,-237.939926,303.556580"
+              stroke="#73c000" stroke-width="5.0" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none" class="id_24130 id_25784"
+              d="M -616.088440,554.548340 A 374.140763,374.140763 0,0 1,-202.795700,627.170959"
+              stroke="#73c000" stroke-width="5.0" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none" class="id_25784 id_27743"
+              d="M -201.706909,626.181458 A 290.485727,290.485727 0,0 1,-230.368378,311.231842"
+              stroke="#73c000" stroke-width="3.81818" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none" class="id_25784 id_381399"
+              d="M -200.331772,625.124756 A 370.358567,370.358567 0,0 1,-194.728424,208.295105"
+              stroke="#73c000" stroke-width="3.18182" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none" class="id_25784 id_7906908"
+              d="M -208.391434,644.043274 A 724.157686,724.157686 0,0 1,-955.902710,255.362198"
+              stroke="#5f831f" stroke-width="3.18182" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none" class="id_28191 id_33306"
+              d="M -424.231201,-286.170624 A 195.013547,195.013547 0,0 1,-467.222107,-492.121368"
+              stroke="#00c4ff" stroke-width="3.448275" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none" class="id_32502 id_9532"
+              d="M 516.860535,936.097900 A 219.347627,219.347627 0,0 1,272.319489,890.249634"
+              stroke="#b98a42" stroke-width="2.3" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none" class="id_33306 id_37738"
+              d="M -468.490723,-521.515442 A 235.215063,235.215063 0,0 1,-437.150909,-777.161133"
+              stroke="#00c4ff" stroke-width="4.081635" stroke-opacity="1.0"/>
+        <path stroke-linecap="round" fill="none" class="id_37738 id_627"
+              d="M -416.547119,-795.343567 A 238.090862,238.090862 0,0 1,-154.031708,-793.528809"
+              stroke="#00c4ff" stroke-width="2.8403351" stroke-opacity="1.0"/>
+    </g>
+    <g id="nodes">
+        <circle fill-opacity="1.0" fill="#ff5584" r="5.833511" cx="964.57086"
+                class="id_es-aeler-technologies" cy="877.3498" stroke="#b23b5c"
+                stroke-opacity="1.0" stroke-width="1.0145236"/>
+        <circle fill-opacity="1.0" fill="#4c463e" r="11.703171" cx="-828.62335"
+                class="id_es-aqua-tech" cy="-388.02472" stroke="#35312b"
+                stroke-opacity="1.0" stroke-width="2.0353339"/>
+        <circle fill-opacity="1.0" fill="#73c000" r="9.861339" cx="-855.204"
+                class="id_es-aurora-s-grid" cy="639.3872" stroke="#508600"
+                stroke-opacity="1.0" stroke-width="1.7150154"/>
+        <circle fill-opacity="1.0" fill="#4c463e" r="11.035007" cx="-1107.1687"
+                class="id_es-bloom-biorenewables" cy="37.73889" stroke="#35312b"
+                stroke-opacity="1.0" stroke-width="1.9191318"/>
+        <circle fill-opacity="1.0" fill="#00bd94" r="11.405898" cx="-193.2527"
+                class="id_es-bluewatt-engineering" cy="-357.87057"
+                stroke="#008467" stroke-opacity="1.0" stroke-width="1.9836345"/>
+        <circle fill-opacity="1.0" fill="#ff8805" r="11.691954" cx="794.1116"
+                class="id_es-combo-solutions" cy="121.779526" stroke="#b25f03"
+                stroke-opacity="1.0" stroke-width="2.0333831"/>
+        <circle fill-opacity="1.0" fill="#4c463e" r="7.761984" cx="-1529.2295"
+                class="id_es-comppair" cy="-306.75797" stroke="#35312b"
+                stroke-opacity="1.0" stroke-width="1.3499103"/>
+        <circle fill-opacity="1.0" fill="#4c463e" r="9.157886" cx="-1041.3303"
+                class="id_es-depoly" cy="-498.87683" stroke="#35312b"
+                stroke-opacity="1.0" stroke-width="1.5926758"/>
+        <circle fill-opacity="1.0" fill="#ff5584" r="8.012729" cx="475.50836"
+                class="id_es-ecointesys" cy="676.56805" stroke="#b23b5c"
+                stroke-opacity="1.0" stroke-width="1.3935181"/>
+        <circle fill-opacity="1.0" fill="#d3b3b0" r="10.253963" cx="-709.71344"
+                class="id_es-enairys-powertech-sa" cy="753.72614"
+                stroke="#937d7b" stroke-opacity="1.0" stroke-width="1.783298"/>
+        <circle fill-opacity="1.0" fill="#73c000" r="11.931735" cx="-383.08804"
+                class="id_es-eneftech-corporation" cy="456.5327"
+                stroke="#508600" stroke-opacity="1.0" stroke-width="2.0750844"/>
+        <circle fill-opacity="1.0" fill="#ff8805" r="9.586968" cx="1287.4089"
+                class="id_es-epiqr-renovation" cy="169.48727" stroke="#b25f03"
+                stroke-opacity="1.0" stroke-width="1.6672988"/>
+        <circle fill-opacity="1.0" fill="#df89ff" r="8.61896" cx="1474.0098"
+                class="id_es-esmart-technologies" cy="-166.09131"
+                stroke="#9c5fb2" stroke-opacity="1.0" stroke-width="1.4989495"/>
+        <circle fill-opacity="1.0" fill="#ff8805" r="9.429919" cx="1169.6978"
+                class="id_es-estia" cy="414.25092" stroke="#b25f03"
+                stroke-opacity="1.0" stroke-width="1.6399859"/>
+        <circle fill-opacity="1.0" fill="#df89ff" r="5.4195333" cx="837.8695"
+                class="id_es-flyability" cy="-1103.075" stroke="#9c5fb2"
+                stroke-opacity="1.0" stroke-width="0.94252753"/>
+        <circle fill-opacity="1.0" fill="#73c000" r="11.704339" cx="-457.10007"
+                class="id_es-g24-innovations" cy="385.44473" stroke="#508600"
+                stroke-opacity="1.0" stroke-width="2.0355372"/>
+        <circle fill-opacity="1.0" fill="#73c000" r="11.704339" cx="-647.99255"
+                class="id_es-g2e-glass2energy" cy="309.1095" stroke="#508600"
+                stroke-opacity="1.0" stroke-width="2.0355372"/>
+        <circle fill-opacity="1.0" fill="#00c4ff" r="11.949029" cx="-155.87576"
+                class="id_es-gaiasens-technologies" cy="-123.23163"
+                stroke="#0089b2" stroke-opacity="1.0" stroke-width="2.078092"/>
+        <circle fill-opacity="1.0" fill="#00bd94" r="12.221764" cx="304.56772"
+                class="id_es-gamaya" cy="-722.0227" stroke="#008467"
+                stroke-opacity="1.0" stroke-width="2.125524"/>
+        <circle fill-opacity="1.0" fill="#73c000" r="11.264273" cx="244.72275"
+                class="id_es-geoeg" cy="479.35477" stroke="#508600"
+                stroke-opacity="1.0" stroke-width="1.9590038"/>
+        <circle fill-opacity="1.0" fill="#73c000" r="11.82166" cx="-822.20874"
+                class="id_es-gridsteer" cy="399.59796" stroke="#508600"
+                stroke-opacity="1.0" stroke-width="2.0559409"/>
+        <circle fill-opacity="1.0" fill="#00c4ff" r="11.537474" cx="-814.5153"
+                class="id_es-grz-technologies" cy="140.95857" stroke="#0089b2"
+                stroke-opacity="1.0" stroke-width="2.0065172"/>
+        <circle fill-opacity="1.0" fill="#df89ff" r="12.67819" cx="71.23154"
+                class="id_es-hydromea" cy="-672.83997" stroke="#9c5fb2"
+                stroke-opacity="1.0" stroke-width="2.2049026"/>
+        <circle fill-opacity="1.0" fill="#73c000" r="14.158247" cx="-158.92151"
+                class="id_es-insolight" cy="-497.15613" stroke="#508600"
+                stroke-opacity="1.0" stroke-width="2.4623036"/>
+        <circle fill-opacity="1.0" fill="#00bd94" r="12.710442" cx="186.01059"
+                class="id_es-kaemco" cy="-378.4439" stroke="#008467"
+                stroke-opacity="1.0" stroke-width="2.2105117"/>
+        <circle fill-opacity="1.0" fill="#00c4ff" r="9.06674" cx="-476.80002"
+                class="id_es-medusoil" cy="-988.48517" stroke="#0089b2"
+                stroke-opacity="1.0" stroke-width="1.5768243"/>
+        <circle fill-opacity="1.0" fill="#ff8805" r="9.933553" cx="569.72534"
+                class="id_es-oculight-dynamics" cy="434.04672" stroke="#b25f03"
+                stroke-opacity="1.0" stroke-width="1.7275745"/>
+        <circle fill-opacity="1.0" fill="#73c000" r="11.939213" cx="129.02965"
+                class="id_es-power-vision-engineering" cy="-43.18007"
+                stroke="#508600" stroke-opacity="1.0" stroke-width="2.0763848"/>
+        <circle fill-opacity="1.0" fill="#df89ff" r="10.208158" cx="683.79364"
+                class="id_es-rovenso" cy="-887.4434" stroke="#9c5fb2"
+                stroke-opacity="1.0" stroke-width="1.7753317"/>
+        <circle fill-opacity="1.0" fill="#73c000" r="11.619505" cx="77.59413"
+                class="id_es-sensima-inspection" cy="718.75226" stroke="#508600"
+                stroke-opacity="1.0" stroke-width="2.0207834"/>
+        <circle fill-opacity="1.0" fill="#df89ff" r="10.86113" cx="373.76886"
+                class="id_es-sensorscope" cy="37.1717" stroke="#9c5fb2"
+                stroke-opacity="1.0" stroke-width="1.8888922"/>
+        <circle fill-opacity="1.0" fill="#df89ff" r="14.863569" cx="662.4942"
+                class="id_es-smarthelio" cy="-134.1883" stroke="#9c5fb2"
+                stroke-opacity="1.0" stroke-width="2.5849686"/>
+        <circle fill-opacity="1.0" fill="#73c000" r="11.704339" cx="-212.65703"
+                class="id_es-solaronix" cy="825.5134" stroke="#508600"
+                stroke-opacity="1.0" stroke-width="2.0355372"/>
+        <circle fill-opacity="1.0" fill="#4c463e" r="15.136303" cx="160.16248"
+                class="id_es-swiss-inso" cy="251.14465" stroke="#35312b"
+                stroke-opacity="1.0" stroke-width="2.6324005"/>
+        <circle fill-opacity="1.0" fill="#ff5584" r="8.556094" cx="684.6069"
+                class="id_es-swisspod-technologies" cy="828.68256"
+                stroke="#b23b5c" stroke-opacity="1.0" stroke-width="1.4880164"/>
+        <circle fill-opacity="1.0" fill="#00c4ff" r="11.477412" cx="-683.08307"
+                class="id_es-treatech-sarl" cy="-733.09314" stroke="#0089b2"
+                stroke-opacity="1.0" stroke-width="1.9960716"/>
+        <circle fill-opacity="1.0" fill="#00c4ff" r="9.530412" cx="-113.52537"
+                class="id_es-twentygreen" cy="-1008.5662" stroke="#0089b2"
+                stroke-opacity="1.0" stroke-width="1.6574628"/>
+        <circle fill-opacity="1.0" fill="#df89ff" r="11.945523" cx="853.73987"
+                class="id_es-urbio" cy="-40.651573" stroke="#9c5fb2"
+                stroke-opacity="1.0" stroke-width="2.0774822"/>
+        <circle fill-opacity="1.0" fill="#73c000" r="9.572478" cx="-336.70087"
+                class="id_es-valais-perovskite-solar" cy="956.062"
+                stroke="#508600" stroke-opacity="1.0" stroke-width="1.6647788"/>
+        <circle fill-opacity="1.0" fill="#df89ff" r="10.710156" cx="921.2421"
+                class="id_es-volumen" cy="-615.25714" stroke="#9c5fb2"
+                stroke-opacity="1.0" stroke-width="1.862636"/>
+        <circle fill-opacity="1.0" fill="#00bd94" r="12.117531" cx="-405.26257"
+                class="id_es-zaphiro-technologies" cy="-173.63022"
+                stroke="#008467" stroke-opacity="1.0" stroke-width="2.1073966"/>
+        <circle fill-opacity="1.0" fill="#ff5584" r="11.398887" cx="442.48807"
+                class="id_10091" cy="536.39825" stroke="#b23b5c"
+                stroke-opacity="1.0" stroke-width="1.982415"/>
+        <circle fill-opacity="1.0" fill="#00c4ff" r="13.600392" cx="98.03291"
+                class="id_10934212" cy="335.48044" stroke="#0089b2"
+                stroke-opacity="1.0" stroke-width="2.3652856"/>
+        <circle fill-opacity="1.0" fill="#73c000" r="12.254248" cx="71.51694"
+                class="id_113728" cy="585.6669" stroke="#508600"
+                stroke-opacity="1.0" stroke-width="2.1311736"/>
+        <circle fill-opacity="1.0" fill="#df89ff" r="14.772426" cx="627.7364"
+                class="id_1164" cy="-340.25623" stroke="#9c5fb2"
+                stroke-opacity="1.0" stroke-width="2.5691173"/>
+        <circle fill-opacity="1.0" fill="#df89ff" r="12.455235" cx="1002.49927"
+                class="id_12057519" cy="-502.68066" stroke="#9c5fb2"
+                stroke-opacity="1.0" stroke-width="2.1661277"/>
+        <circle fill-opacity="1.0" fill="#00bd94" r="9.475491" cx="310.21698"
+                class="id_12398" cy="-505.8726" stroke="#008467"
+                stroke-opacity="1.0" stroke-width="1.6479113"/>
+        <circle fill-opacity="1.0" fill="#4c463e" r="11.994135" cx="-922.51166"
+                class="id_12581" cy="-267.6454" stroke="#35312b"
+                stroke-opacity="1.0" stroke-width="2.0859363"/>
+        <circle fill-opacity="1.0" fill="#00c4ff" r="11.343499" cx="-599.1493"
+                class="id_13255" cy="-328.40018" stroke="#0089b2"
+                stroke-opacity="1.0" stroke-width="1.9727824"/>
+        <circle fill-opacity="1.0" fill="#00c4ff" r="6.430543" cx="-194.16716"
+                class="id_14193930" cy="-1072.2666" stroke="#0089b2"
+                stroke-opacity="1.0" stroke-width="1.1183553"/>
+        <circle fill-opacity="1.0" fill="#df89ff" r="8.38619" cx="155.37837"
+                class="id_14552094" cy="-889.4888" stroke="#9c5fb2"
+                stroke-opacity="1.0" stroke-width="1.4584678"/>
+        <circle fill-opacity="1.0" fill="#4c463e" r="5.2298284" cx="-1724.341"
+                class="id_157616" cy="-252.51405" stroke="#35312b"
+                stroke-opacity="1.0" stroke-width="0.90953535"/>
+        <circle fill-opacity="1.0" fill="#ff8805" r="6.209458" cx="1515.4304"
+                class="id_1804464" cy="330.95587" stroke="#b25f03"
+                stroke-opacity="1.0" stroke-width="1.0799056"/>
+        <circle fill-opacity="1.0" fill="#df89ff" r="9.657547" cx="1322.7976"
+                class="id_184978" cy="-408.12476" stroke="#9c5fb2"
+                stroke-opacity="1.0" stroke-width="1.6795733"/>
+        <circle fill-opacity="1.0" fill="#ff5584" r="11.314753" cx="713.6879"
+                class="id_18580879" cy="621.5961" stroke="#b23b5c"
+                stroke-opacity="1.0" stroke-width="1.967783"/>
+        <circle fill-opacity="1.0" fill="#73c000" r="6.5315037" cx="-332.1427"
+                class="id_19290728" cy="1071.1987" stroke="#508600"
+                stroke-opacity="1.0" stroke-width="1.1359137"/>
+        <circle fill-opacity="1.0" fill="#d3b3b0" r="7.101766" cx="-908.10913"
+                class="id_195891" cy="868.3053" stroke="#937d7b"
+                stroke-opacity="1.0" stroke-width="1.2350897"/>
+        <circle fill-opacity="1.0" fill="#73c000" r="16.444588" cx="-460.47736"
+                class="id_20344155" cy="116.06203" stroke="#508600"
+                stroke-opacity="1.0" stroke-width="2.8599281"/>
+        <circle fill-opacity="1.0" fill="#df89ff" r="14.448509" cx="564.4012"
+                class="id_20903754" cy="-695.3535" stroke="#9c5fb2"
+                stroke-opacity="1.0" stroke-width="2.512784"/>
+        <circle fill-opacity="1.0" fill="#00c4ff" r="8.431061" cx="-789.9957"
+                class="id_210555" cy="-645.94763" stroke="#0089b2"
+                stroke-opacity="1.0" stroke-width="1.4662715"/>
+        <circle fill-opacity="1.0" fill="#73c000" r="14.79556" cx="31.842548"
+                class="id_21188370" cy="817.3401" stroke="#508600"
+                stroke-opacity="1.0" stroke-width="2.5731409"/>
+        <circle fill-opacity="1.0" fill="#ff8805" r="12.690809" cx="1025.6018"
+                class="id_21296224" cy="274.21024" stroke="#b25f03"
+                stroke-opacity="1.0" stroke-width="2.2070973"/>
+        <circle fill-opacity="1.0" fill="#00bd94" r="9.375465" cx="212.07803"
+                class="id_228148" cy="-566.39465" stroke="#008467"
+                stroke-opacity="1.0" stroke-width="1.6305157"/>
+        <circle fill-opacity="1.0" fill="#ff5584" r="3.9814162" cx="1024.4167"
+                class="id_22849124" cy="968.70386" stroke="#b23b5c"
+                stroke-opacity="1.0" stroke-width="0.6924202"/>
+        <circle fill-opacity="1.0" fill="#4c463e" r="12.997432" cx="-1135.4476"
+                class="id_23001" cy="-295.25674" stroke="#35312b"
+                stroke-opacity="1.0" stroke-width="2.260423"/>
+        <circle fill-opacity="1.0" fill="#df89ff" r="11.739396" cx="921.5268"
+                class="id_233488" cy="-225.89612" stroke="#9c5fb2"
+                stroke-opacity="1.0" stroke-width="2.041634"/>
+        <circle fill-opacity="1.0" fill="#73c000" r="14.412752" cx="-433.90384"
+                class="id_2352910" cy="740.48486" stroke="#508600"
+                stroke-opacity="1.0" stroke-width="2.5065656"/>
+        <circle fill-opacity="1.0" fill="#df89ff" r="11.772348" cx="355.89737"
+                class="id_235757" cy="301.20413" stroke="#9c5fb2"
+                stroke-opacity="1.0" stroke-width="2.047365"/>
+        <circle fill-opacity="1.0" fill="#df89ff" r="7.358821" cx="1691.9265"
+                class="id_238420" cy="-293.2007" stroke="#9c5fb2"
+                stroke-opacity="1.0" stroke-width="1.2797949"/>
+        <circle fill-opacity="1.0" fill="#ff8805" r="11.7716465" cx="818.2186"
+                class="id_239038" cy="383.08093" stroke="#b25f03"
+                stroke-opacity="1.0" stroke-width="2.0472429"/>
+        <circle fill-opacity="1.0" fill="#73c000" r="15.277463" cx="-631.0872"
+                class="id_24130" cy="561.6753" stroke="#508600"
+                stroke-opacity="1.0" stroke-width="2.65695"/>
+        <circle fill-opacity="1.0" fill="#df89ff" r="7.3557825" cx="803.543"
+                class="id_252712" cy="-1037.6353" stroke="#9c5fb2"
+                stroke-opacity="1.0" stroke-width="1.2792665"/>
+        <circle fill-opacity="1.0" fill="#73c000" r="17.87907" cx="-189.18997"
+                class="id_25784" cy="641.0474" stroke="#508600"
+                stroke-opacity="1.0" stroke-width="3.1094036"/>
+        <circle fill-opacity="1.0" fill="#4c463e" r="8.686735" cx="-1153.5348"
+                class="id_26145195" cy="-415.90842" stroke="#35312b"
+                stroke-opacity="1.0" stroke-width="1.5107365"/>
+        <circle fill-opacity="1.0" fill="#ff8805" r="6.209458" cx="1437.0277"
+                class="id_26616666" cy="501.47797" stroke="#b25f03"
+                stroke-opacity="1.0" stroke-width="1.0799056"/>
+        <circle fill-opacity="1.0" fill="#df89ff" r="9.75734" cx="175.6281"
+                class="id_27643777" cy="112.982796" stroke="#9c5fb2"
+                stroke-opacity="1.0" stroke-width="1.6969286"/>
+        <circle fill-opacity="1.0" fill="#73c000" r="18.4" cx="-220.44308"
+                class="id_27743" cy="293.8684" stroke="#508600"
+                stroke-opacity="1.0" stroke-width="3.1999998"/>
+        <circle fill-opacity="1.0" fill="#00c4ff" r="11.433708" cx="-415.252"
+                class="id_28191" cy="-277.5783" stroke="#0089b2"
+                stroke-opacity="1.0" stroke-width="1.988471"/>
+        <circle fill-opacity="1.0" fill="#ff5584" r="5.5307984" cx="432.3641"
+                class="id_29278" cy="772.8254" stroke="#b23b5c"
+                stroke-opacity="1.0" stroke-width="0.96187794"/>
+        <circle fill-opacity="1.0" fill="#ff8805" r="6.209458" cx="1189.5055"
+                class="id_29501" cy="595.6889" stroke="#b25f03"
+                stroke-opacity="1.0" stroke-width="1.0799056"/>
+        <circle fill-opacity="1.0" fill="#df89ff" r="3.68" cx="870.8346"
+                class="id_299871" cy="-1151.9409" stroke="#9c5fb2"
+                stroke-opacity="1.0" stroke-width="0.64"/>
+        <circle fill-opacity="1.0" fill="#ff8805" r="6.3847365" cx="1616.0485"
+                class="id_3183830" cy="58.20175" stroke="#b25f03"
+                stroke-opacity="1.0" stroke-width="1.1103889"/>
+        <circle fill-opacity="1.0" fill="#ff5584" r="7.580607" cx="524.3278"
+                class="id_32502" cy="932.6145" stroke="#b23b5c"
+                stroke-opacity="1.0" stroke-width="1.3183664"/>
+        <circle fill-opacity="1.0" fill="#df89ff" r="7.1491876" cx="440.86496"
+                class="id_33172" cy="-90.73638" stroke="#9c5fb2"
+                stroke-opacity="1.0" stroke-width="1.2433369"/>
+        <circle fill-opacity="1.0" fill="#00c4ff" r="15.022724" cx="-460.7755"
+                class="id_33306" cy="-507.124" stroke="#0089b2"
+                stroke-opacity="1.0" stroke-width="2.6126475"/>
+        <circle fill-opacity="1.0" fill="#ff8805" r="7.8238945" cx="990.40094"
+                class="id_35458904" cy="41.068546" stroke="#b25f03"
+                stroke-opacity="1.0" stroke-width="1.3606774"/>
+        <circle fill-opacity="1.0" fill="#73c000" r="8.200862" cx="-939.79083"
+                class="id_367397" cy="524.59033" stroke="#508600"
+                stroke-opacity="1.0" stroke-width="1.4262369"/>
+        <circle fill-opacity="1.0" fill="#ff5584" r="5.715022" cx="698.2169"
+                class="id_36971117" cy="996.6838" stroke="#b23b5c"
+                stroke-opacity="1.0" stroke-width="0.9939168"/>
+        <circle fill-opacity="1.0" fill="#00c4ff" r="7.9087296" cx="-259.25433"
+                class="id_37039" cy="67.95224" stroke="#0089b2"
+                stroke-opacity="1.0" stroke-width="1.3754312"/>
+        <circle fill-opacity="1.0" fill="#00c4ff" r="12.727502" cx="-427.9174"
+                class="id_37738" cy="-787.463" stroke="#0089b2"
+                stroke-opacity="1.0" stroke-width="2.2134786"/>
+        <circle fill-opacity="1.0" fill="#73c000" r="13.291667" cx="-186.20856"
+                class="id_381399" cy="196.62715" stroke="#508600"
+                stroke-opacity="1.0" stroke-width="2.3115942"/>
+        <circle fill-opacity="1.0" fill="#d3b3b0" r="7.101766" cx="-754.9532"
+                class="id_381774" cy="958.91754" stroke="#937d7b"
+                stroke-opacity="1.0" stroke-width="1.2350897"/>
+        <circle fill-opacity="1.0" fill="#df89ff" r="7.1615734" cx="1070.1265"
+                class="id_386407" cy="-711.56445" stroke="#9c5fb2"
+                stroke-opacity="1.0" stroke-width="1.245491"/>
+        <circle fill-opacity="1.0" fill="#df89ff" r="6.815923" cx="616.6078"
+                class="id_41684" cy="-986.6289" stroke="#9c5fb2"
+                stroke-opacity="1.0" stroke-width="1.185378"/>
+        <circle fill-opacity="1.0" fill="#00bd94" r="10.396757" cx="137.81151"
+                class="id_43444" cy="-208.30539" stroke="#008467"
+                stroke-opacity="1.0" stroke-width="1.8081317"/>
+        <circle fill-opacity="1.0" fill="#00c4ff" r="6.084914" cx="-397.94016"
+                class="id_44603" cy="-1149.5839" stroke="#0089b2"
+                stroke-opacity="1.0" stroke-width="1.0582459"/>
+        <circle fill-opacity="1.0" fill="#00c4ff" r="7.5168056" cx="-756.46783"
+                class="id_4481763" cy="-864.473" stroke="#0089b2"
+                stroke-opacity="1.0" stroke-width="1.3072705"/>
+        <circle fill-opacity="1.0" fill="#4c463e" r="5.2298284" cx="-1590.1743"
+                class="id_51892" cy="-136.77419" stroke="#35312b"
+                stroke-opacity="1.0" stroke-width="0.90953535"/>
+        <circle fill-opacity="1.0" fill="#00bd94" r="8.047317" cx="-586.4616"
+                class="id_5199213" cy="-23.491028" stroke="#008467"
+                stroke-opacity="1.0" stroke-width="1.3995334"/>
+        <circle fill-opacity="1.0" fill="#00bd94" r="11.980579" cx="10.286205"
+                class="id_5309" cy="-291.06235" stroke="#008467"
+                stroke-opacity="1.0" stroke-width="2.0835788"/>
+        <circle fill-opacity="1.0" fill="#4c463e" r="4.9353595" cx="-1524.9263"
+                class="id_5824713" cy="-448.144" stroke="#35312b"
+                stroke-opacity="1.0" stroke-width="0.85832334"/>
+        <circle fill-opacity="1.0" fill="#4c463e" r="9.226595" cx="-1335.3304"
+                class="id_58890" cy="-256.28717" stroke="#35312b"
+                stroke-opacity="1.0" stroke-width="1.6046252"/>
+        <circle fill-opacity="1.0" fill="#4c463e" r="9.81787" cx="261.6333"
+                class="id_5921" cy="171.96211" stroke="#35312b"
+                stroke-opacity="1.0" stroke-width="1.7074555"/>
+        <circle fill-opacity="1.0" fill="#00c4ff" r="13.366687" cx="-142.21834"
+                class="id_627" cy="-785.0709" stroke="#0089b2"
+                stroke-opacity="1.0" stroke-width="2.324641"/>
+        <circle fill-opacity="1.0" fill="#00c4ff" r="7.658899" cx="-970.7082"
+                class="id_6402491" cy="-135.6737" stroke="#0089b2"
+                stroke-opacity="1.0" stroke-width="1.3319824"/>
+        <circle fill-opacity="1.0" fill="#4c463e" r="9.256509" cx="-1248.8892"
+                class="id_6911" cy="-50.459053" stroke="#35312b"
+                stroke-opacity="1.0" stroke-width="1.6098275"/>
+        <circle fill-opacity="1.0" fill="#00c4ff" r="6.084914" cx="-731.072"
+                class="id_693334" cy="-1070.7466" stroke="#0089b2"
+                stroke-opacity="1.0" stroke-width="1.0582459"/>
+        <circle fill-opacity="1.0" fill="#00c4ff" r="7.6301746" cx="-853.259"
+                class="id_70157" cy="-566.47095" stroke="#0089b2"
+                stroke-opacity="1.0" stroke-width="1.3269868"/>
+        <circle fill-opacity="1.0" fill="#00c4ff" r="6.430543" cx="194.51454"
+                class="id_731740" cy="-1089.3701" stroke="#0089b2"
+                stroke-opacity="1.0" stroke-width="1.1183553"/>
+        <circle fill-opacity="1.0" fill="#ff8805" r="6.7768946" cx="717.2507"
+                class="id_75987" cy="487.96347" stroke="#b25f03"
+                stroke-opacity="1.0" stroke-width="1.1785903"/>
+        <circle fill-opacity="1.0" fill="#ff5584" r="7.972765" cx="847.9859"
+                class="id_77547" cy="721.44934" stroke="#b23b5c"
+                stroke-opacity="1.0" stroke-width="1.3865678"/>
+        <circle fill-opacity="1.0" fill="#4c463e" r="12.301924" cx="-961.85364"
+                class="id_7906908" cy="243.38774" stroke="#35312b"
+                stroke-opacity="1.0" stroke-width="2.139465"/>
+        <circle fill-opacity="1.0" fill="#df89ff" r="12.097666" cx="402.35556"
+                class="id_9251" cy="-238.12236" stroke="#9c5fb2"
+                stroke-opacity="1.0" stroke-width="2.103942"/>
+        <circle fill-opacity="1.0" fill="#ff8805" r="15.004494" cx="565.3357"
+                class="id_935041" cy="211.6996" stroke="#b25f03"
+                stroke-opacity="1.0" stroke-width="2.6094773"/>
+        <circle fill-opacity="1.0" fill="#73c000" r="8.752406" cx="265.7603"
+                class="id_9532" cy="883.35876" stroke="#508600"
+                stroke-opacity="1.0" stroke-width="1.5221575"/>
+        <circle fill-opacity="1.0" fill="#ff8805" r="9.681619" cx="1143.9843"
+                class="id_9649" cy="-57.74546" stroke="#b25f03"
+                stroke-opacity="1.0" stroke-width="1.6837597"/>
+    </g>
+    <g id="node-labels-outline">
+        <text stroke-linecap="round" font-size="23" x="964.57086" y="882.7601"
+              fill="#ef788e" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_es-aeler-technologies"
+              stroke="#ffffff" stroke-opacity="0.8" stroke-width="1.4375px">
+            Aeler Technologies
+        </text>
+        <text stroke-linecap="round" font-size="46" x="-828.62335"
+              y="-377.35016" fill="#ef788e" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_es-aqua-tech" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="2.875px">
+            Aqua+Tech
+        </text>
+        <text stroke-linecap="round" font-size="39" x="-855.204" y="646.75684"
+              fill="#ef788e" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_es-aurora-s-grid"
+              stroke="#ffffff" stroke-opacity="0.8" stroke-width="2.4375px">
+            Aurora&apos;s Grid
+        </text>
+        <text stroke-linecap="round" font-size="43" x="-1107.1687" y="45.691162"
+              fill="#ef788e" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_es-bloom-biorenewables"
+              stroke="#ffffff" stroke-opacity="0.8" stroke-width="2.6875px">
+            Bloom Biorenewables
+        </text>
+        <text stroke-linecap="round" font-size="45" x="-193.2527" y="-347.3127"
+              fill="#ef788e" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_es-bluewatt-engineering"
+              stroke="#ffffff" stroke-opacity="0.8" stroke-width="2.8125px">
+            BlueWatt Engineering
+        </text>
+        <text stroke-linecap="round" font-size="46" x="794.1116" y="130.49437"
+              fill="#ef788e" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_es-combo-solutions"
+              stroke="#ffffff" stroke-opacity="0.8" stroke-width="2.875px">
+            Combo Solutions
+        </text>
+        <text stroke-linecap="round" font-size="30" x="-1529.2295"
+              y="-299.66812" fill="#ef788e" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_es-comppair" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="1.875px">
+            CompPair
+        </text>
+        <text stroke-linecap="round" font-size="36" x="-1041.3303"
+              y="-490.49207" fill="#ef788e" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_es-depoly" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="2.25px">
+            DePoly
+        </text>
+        <text stroke-linecap="round" font-size="31" x="475.50836" y="683.78827"
+              fill="#ef788e" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_es-ecointesys" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="1.9375px">
+            Ecointesys
+        </text>
+        <text stroke-linecap="round" font-size="40" x="-709.71344" y="763.2232"
+              fill="#ef788e" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_es-enairys-powertech-sa"
+              stroke="#ffffff" stroke-opacity="0.8" stroke-width="2.5px">
+            Enairys Powertech SA
+        </text>
+        <text stroke-linecap="round" font-size="47" x="-383.08804" y="465.29932"
+              fill="#ef788e" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_es-eneftech-corporation"
+              stroke="#ffffff" stroke-opacity="0.8" stroke-width="2.9375px">
+            Eneftech
+        </text>
+        <text stroke-linecap="round" font-size="38" x="1287.4089" y="177.02975"
+              fill="#ef788e" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_es-epiqr-renovation"
+              stroke="#ffffff" stroke-opacity="0.8" stroke-width="2.375px">
+            EPIQR Rénov.
+        </text>
+        <text stroke-linecap="round" font-size="34" x="1474.0098" y="-157.9607"
+              fill="#ef788e" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_es-esmart-technologies"
+              stroke="#ffffff" stroke-opacity="0.8" stroke-width="2.125px">
+            eSMART Technologies
+        </text>
+        <text stroke-linecap="round" font-size="37" x="1169.6978" y="421.5949"
+              fill="#ef788e" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_es-estia" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="2.3125px">
+            ESTIA / EPIQR
+        </text>
+        <text stroke-linecap="round" font-size="21" x="837.8695" y="-1098.171"
+              fill="#ef788e" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_es-flyability" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="1.3125px">
+            Flyability
+        </text>
+        <text stroke-linecap="round" font-size="46" x="-457.10007" y="394.13712"
+              fill="#ef788e" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_es-g24-innovations"
+              stroke="#ffffff" stroke-opacity="0.8" stroke-width="2.875px">
+            G24 Innovations
+        </text>
+        <text stroke-linecap="round" font-size="46" x="-647.99255" y="320.11536"
+              fill="#ef788e" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_es-g2e-glass2energy"
+              stroke="#ffffff" stroke-opacity="0.8" stroke-width="2.875px">
+            G2e glass2energy
+        </text>
+        <text stroke-linecap="round" font-size="47" x="-155.87576"
+              y="-111.98651" fill="#ef788e" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_es-gaiasens-technologies"
+              stroke="#ffffff" stroke-opacity="0.8" stroke-width="2.9375px">
+            Gaiasens Technologies
+        </text>
+        <text stroke-linecap="round" font-size="48" x="304.56772" y="-710.62036"
+              fill="#ef788e" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_es-gamaya" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="3.0px">
+            Gamaya
+        </text>
+        <text stroke-linecap="round" font-size="44" x="244.72275" y="489.8821"
+              fill="#ef788e" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_es-geoeg" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="2.75px">
+            GeoEg
+        </text>
+        <text stroke-linecap="round" font-size="46" x="-822.20874" y="408.30157"
+              fill="#ef788e" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_es-gridsteer" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="2.875px">
+            GRidSTeer
+        </text>
+        <text stroke-linecap="round" font-size="45" x="-814.5153" y="151.72517"
+              fill="#ef788e" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_es-grz-technologies"
+              stroke="#ffffff" stroke-opacity="0.8" stroke-width="2.8125px">
+            GRZ Technologies
+        </text>
+        <text stroke-linecap="round" font-size="50" x="71.23154" y="-661.16394"
+              fill="#ef788e" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_es-hydromea" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="3.125px">
+            Hydromea
+        </text>
+        <text stroke-linecap="round" font-size="55" x="-158.92151" y="-484.2185"
+              fill="#ef788e" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_es-insolight" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="3.4375px">
+            Insolight
+        </text>
+        <text stroke-linecap="round" font-size="50" x="186.01059" y="-368.99567"
+              fill="#ef788e" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_es-kaemco" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="3.125px">
+            Kaemco LLC
+        </text>
+        <text stroke-linecap="round" font-size="35" x="-476.80002" y="-982.0124"
+              fill="#ef788e" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_es-medusoil" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="2.1875px">
+            Medusoil
+        </text>
+        <text stroke-linecap="round" font-size="39" x="569.72534" y="443.3873"
+              fill="#ef788e" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_es-oculight-dynamics"
+              stroke="#ffffff" stroke-opacity="0.8" stroke-width="2.4375px">
+            Oculight Dynamics
+        </text>
+        <text stroke-linecap="round" font-size="47" x="129.02965" y="-32.15297"
+              fill="#ef788e" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_es-power-vision-engineering"
+              stroke="#ffffff" stroke-opacity="0.8" stroke-width="2.9375px">
+            Power Vision Engineering
+        </text>
+        <text stroke-linecap="round" font-size="40" x="683.79364" y="-880.0704"
+              fill="#ef788e" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_es-rovenso" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="2.5px">
+            Rovenso
+        </text>
+        <text stroke-linecap="round" font-size="45" x="77.59413" y="729.37054"
+              fill="#ef788e" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_es-sensima-inspection"
+              stroke="#ffffff" stroke-opacity="0.8" stroke-width="2.8125px">
+            Sensima Inspection
+        </text>
+        <text stroke-linecap="round" font-size="43" x="373.76886" y="47.31806"
+              fill="#ef788e" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_es-sensorscope" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="2.6875px">
+            Sensorscope
+        </text>
+        <text stroke-linecap="round" font-size="58" x="662.4942" y="-123.22125"
+              fill="#ef788e" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_es-smarthelio" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="3.625px">
+            SmartHelio
+        </text>
+        <text stroke-linecap="round" font-size="46" x="-212.65703" y="834.2114"
+              fill="#ef788e" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_es-solaronix" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="2.875px">
+            Solaronix
+        </text>
+        <text stroke-linecap="round" font-size="59" x="160.16248" y="262.30078"
+              fill="#ef788e" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_es-swiss-inso" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="3.6875px">
+            Swiss-Inso
+        </text>
+        <text stroke-linecap="round" font-size="33" x="684.6069" y="836.57404"
+              fill="#ef788e" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_es-swisspod-technologies"
+              stroke="#ffffff" stroke-opacity="0.8" stroke-width="2.0625px">
+            Swisspod Technologies
+        </text>
+        <text stroke-linecap="round" font-size="45" x="-683.08307" y="-724.7875"
+              fill="#ef788e" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_es-treatech-sarl"
+              stroke="#ffffff" stroke-opacity="0.8" stroke-width="2.8125px">
+            TreaTech
+        </text>
+        <text stroke-linecap="round" font-size="37" x="-113.52537" y="-999.7769"
+              fill="#ef788e" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_es-twentygreen" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="2.3125px">
+            TwentyGreen
+        </text>
+        <text stroke-linecap="round" font-size="47" x="853.73987" y="-31.971031"
+              fill="#ef788e" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_es-urbio" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="2.9375px">
+            Urbio
+        </text>
+        <text stroke-linecap="round" font-size="37" x="-336.70087" y="963.0582"
+              fill="#ef788e" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_es-valais-perovskite-solar"
+              stroke="#ffffff" stroke-opacity="0.8" stroke-width="2.3125px">
+            Valais Perovskite Solar
+        </text>
+        <text stroke-linecap="round" font-size="42" x="921.2421" y="-607.5257"
+              fill="#ef788e" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_es-volumen" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="2.625px">
+            Volumen
+        </text>
+        <text stroke-linecap="round" font-size="47" x="-405.26257"
+              y="-162.57443" fill="#ef788e" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_es-zaphiro-technologies"
+              stroke="#ffffff" stroke-opacity="0.8" stroke-width="2.9375px">
+            Zaphiro Technologies
+        </text>
+        <text stroke-linecap="round" font-size="45" x="442.48807" y="544.68195"
+              fill="#37b182" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_10091" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="2.8125px">
+            Environmental law
+        </text>
+        <text stroke-linecap="round" font-size="53" x="98.03291" y="347.74704"
+              fill="#37b182" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_10934212" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="3.3125px">
+            Air pollution
+        </text>
+        <text stroke-linecap="round" font-size="48" x="71.51694" y="597.15125"
+              fill="#37b182" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_113728" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="3.0px">
+            Geothermal energy
+        </text>
+        <text stroke-linecap="round" font-size="58" x="627.7364" y="-326.49963"
+              fill="#37b182" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_1164" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="3.625px">
+            Artificial intelligence
+        </text>
+        <text stroke-linecap="round" font-size="49" x="1002.49927"
+              y="-491.05872" fill="#37b182" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_12057519" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="3.0625px">
+            Internet of things
+        </text>
+        <text stroke-linecap="round" font-size="37" x="310.21698" y="-497.02005"
+              fill="#37b182" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_12398" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="2.3125px">
+            Geographic information system
+        </text>
+        <text stroke-linecap="round" font-size="47" x="-922.51166"
+              y="-258.76404" fill="#37b182" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_12581" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="2.9375px">
+            Glass
+        </text>
+        <text stroke-linecap="round" font-size="44" x="-599.1493" y="-318.05008"
+              fill="#37b182" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_13255" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="2.75px">
+            Hydrogen
+        </text>
+        <text stroke-linecap="round" font-size="25" x="-194.16716"
+              y="-1067.6035" fill="#37b182" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_14193930" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="1.5625px">
+            Animal feed
+        </text>
+        <text stroke-linecap="round" font-size="33" x="155.37837" y="-881.5973"
+              fill="#37b182" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_14552094" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="2.0625px">
+            Submarine navigation
+        </text>
+        <text stroke-linecap="round" font-size="20" x="-1724.341" y="-247.78749"
+              fill="#37b182" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_157616" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="1.25px">
+            Composite material
+        </text>
+        <text stroke-linecap="round" font-size="24" x="1515.4304" y="336.70392"
+              fill="#37b182" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_1804464" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="1.5px">
+            Consulting firm
+        </text>
+        <text stroke-linecap="round" font-size="38" x="1322.7976" y="-401.12964"
+              fill="#37b182" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_184978" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="2.375px">
+            Home automation
+        </text>
+        <text stroke-linecap="round" font-size="44" x="713.6879" y="631.7797"
+              fill="#37b182" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_18580879" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="2.75px">
+            Transport
+        </text>
+        <text stroke-linecap="round" font-size="26" x="-332.1427" y="1075.9912"
+              fill="#37b182" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_19290728" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="1.625px">
+            Perovskite
+        </text>
+        <text stroke-linecap="round" font-size="28" x="-908.10913" y="873.46643"
+              fill="#37b182" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_195891" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="1.75px">
+            Pneumatics
+        </text>
+        <text stroke-linecap="round" font-size="64" x="-460.47736" y="131.11671"
+              fill="#37b182" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_20344155" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="4.0px">
+            Electrical grid
+        </text>
+        <text stroke-linecap="round" font-size="57" x="564.4012" y="-684.81213"
+              fill="#37b182" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_20903754" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="3.5625px">
+            Robotics
+        </text>
+        <text stroke-linecap="round" font-size="33" x="-789.9957" y="-638.2052"
+              fill="#37b182" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_210555" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="2.0625px">
+            Waste management
+        </text>
+        <text stroke-linecap="round" font-size="58" x="31.842548" y="828.00977"
+              fill="#37b182" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_21188370" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="3.625px">
+            Fuel
+        </text>
+        <text stroke-linecap="round" font-size="50" x="1025.6018" y="283.43875"
+              fill="#37b182" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_21296224" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="3.125px">
+            Architecture
+        </text>
+        <text stroke-linecap="round" font-size="37" x="212.07803" y="-557.71375"
+              fill="#37b182" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_228148" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="2.3125px">
+            Remote sensing
+        </text>
+        <text stroke-linecap="round" font-size="16" x="1024.4167" y="972.53"
+              fill="#37b182" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_22849124" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="1.0px">
+            Shipping container
+        </text>
+        <text stroke-linecap="round" font-size="51" x="-1135.4476"
+              y="-283.37833" fill="#37b182" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_23001" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="3.1875px">
+            Polymer
+        </text>
+        <text stroke-linecap="round" font-size="46" x="921.5268" y="-215.07556"
+              fill="#37b182" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_233488" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="2.875px">
+            Machine learning
+        </text>
+        <text stroke-linecap="round" font-size="56" x="-433.90384" y="751.0737"
+              fill="#37b182" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_2352910" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="3.5px">
+            Solar cell
+        </text>
+        <text stroke-linecap="round" font-size="46" x="355.89737" y="309.90213"
+              fill="#37b182" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_235757" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="2.875px">
+            Sensor
+        </text>
+        <text stroke-linecap="round" font-size="29" x="1691.9265" y="-287.86234"
+              fill="#37b182" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_238420" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="1.8125px">
+            Power-line communication
+        </text>
+        <text stroke-linecap="round" font-size="46" x="818.2186" y="391.78455"
+              fill="#37b182" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_239038" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="2.875px">
+            Construction
+        </text>
+        <text stroke-linecap="round" font-size="60" x="-631.0872" y="575.75244"
+              fill="#37b182" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_24130" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="3.75px">
+            Energy storage
+        </text>
+        <text stroke-linecap="round" font-size="29" x="803.543" y="-1030.7499"
+              fill="#37b182" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_252712" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="1.8125px">
+            Safety
+        </text>
+        <text stroke-linecap="round" font-size="70" x="-189.18997" y="657.5135"
+              fill="#37b182" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_25784" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="4.375px">
+            Renewable energy
+        </text>
+        <text stroke-linecap="round" font-size="34" x="-1153.5348"
+              y="-409.64133" fill="#37b182" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_26145195" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="2.125px">
+            Plastic
+        </text>
+        <text stroke-linecap="round" font-size="24" x="1437.0277" y="507.12347"
+              fill="#37b182" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_26616666" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="1.5px">
+            Building engineering physics
+        </text>
+        <text stroke-linecap="round" font-size="38" x="175.6281" y="121.89832"
+              fill="#37b182" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_27643777" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="2.375px">
+            Measuring instrument
+        </text>
+        <text stroke-linecap="round" font-size="72" x="-220.44308" y="311.08618"
+              fill="#37b182" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_27743" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="4.5px">
+            Solar energy
+        </text>
+        <text stroke-linecap="round" font-size="45" x="-415.252" y="-269.0694"
+              fill="#37b182" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_28191" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="2.8125px">
+            Snow
+        </text>
+        <text stroke-linecap="round" font-size="22" x="432.3641" y="778.08636"
+              fill="#37b182" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_29278" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="1.375px">
+            Safety engineering
+        </text>
+        <text stroke-linecap="round" font-size="24" x="1189.5055" y="601.352"
+              fill="#37b182" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_29501" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="1.5px">
+            Sustainable development
+        </text>
+        <text stroke-linecap="round" font-size="14" x="870.8346" y="-1149.3638"
+              fill="#37b182" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_299871" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="0.875px">
+            Drone
+        </text>
+        <text stroke-linecap="round" font-size="25" x="1616.0485" y="64.06723"
+              fill="#37b182" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_3183830" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="1.5625px">
+            Ecological sanitation
+        </text>
+        <text stroke-linecap="round" font-size="30" x="524.3278" y="938.126"
+              fill="#37b182" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_32502" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="1.875px">
+            Vacuum
+        </text>
+        <text stroke-linecap="round" font-size="28" x="440.86496" y="-85.57525"
+              fill="#37b182" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_33172" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="1.75px">
+            Wireless network
+        </text>
+        <text stroke-linecap="round" font-size="59" x="-460.7755" y="-496.27036"
+              fill="#37b182" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_33306" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="3.6875px">
+            Water
+        </text>
+        <text stroke-linecap="round" font-size="31" x="990.40094" y="46.782658"
+              fill="#37b182" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_35458904" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="1.9375px">
+            Data science
+        </text>
+        <text stroke-linecap="round" font-size="32" x="-939.79083" y="532.04346"
+              fill="#37b182" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_367397" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="2.0px">
+            Battery
+        </text>
+        <text stroke-linecap="round" font-size="22" x="698.2169" y="1001.8078"
+              fill="#37b182" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_36971117" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="1.375px">
+            Hyperloop
+        </text>
+        <text stroke-linecap="round" font-size="31" x="-259.25433" y="73.65878"
+              fill="#37b182" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_37039" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="1.9375px">
+            Environment
+        </text>
+        <text stroke-linecap="round" font-size="50" x="-427.9174" y="-778.00867"
+              fill="#37b182" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_37738" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="3.125px">
+            Soil
+        </text>
+        <text stroke-linecap="round" font-size="52" x="-186.20856" y="208.77022"
+              fill="#37b182" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_381399" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="3.25px">
+            Hydroelectricity
+        </text>
+        <text stroke-linecap="round" font-size="28" x="-754.9532" y="965.5347"
+              fill="#37b182" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_381774" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="1.75px">
+            Compressed air
+        </text>
+        <text stroke-linecap="round" font-size="28" x="1070.1265" y="-704.9951"
+              fill="#37b182" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_386407" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="1.75px">
+            Digitization
+        </text>
+        <text stroke-linecap="round" font-size="27" x="616.6078" y="-980.2184"
+              fill="#37b182" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_41684" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="1.6875px">
+            Security
+        </text>
+        <text stroke-linecap="round" font-size="41" x="137.81151" y="-200.55283"
+              fill="#37b182" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_43444" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="2.5625px">
+            Simulation
+        </text>
+        <text stroke-linecap="round" font-size="24" x="-397.94016"
+              y="-1145.0516" fill="#37b182" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_44603" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="1.5px">
+            Calcite
+        </text>
+        <text stroke-linecap="round" font-size="29" x="-756.46783"
+              y="-857.65137" fill="#37b182" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_4481763" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="1.8125px">
+            Renewable natural gas
+        </text>
+        <text stroke-linecap="round" font-size="20" x="-1590.1743"
+              y="-133.09499" fill="#37b182" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_51892" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="1.25px">
+            Textile
+        </text>
+        <text stroke-linecap="round" font-size="31" x="-586.4616" y="-17.757996"
+              fill="#37b182" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_5199213" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="1.9375px">
+            Phasor measurement unit
+        </text>
+        <text stroke-linecap="round" font-size="47" x="10.286205" y="-282.17526"
+              fill="#37b182" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_5309" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="2.9375px">
+            Software
+        </text>
+        <text stroke-linecap="round" font-size="19" x="-1524.9263"
+              y="-443.60043" fill="#37b182" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_5824713" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="1.1875px">
+            Self-healing material
+        </text>
+        <text stroke-linecap="round" font-size="36" x="-1335.3304"
+              y="-249.65143" fill="#37b182" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_58890" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="2.25px">
+            Resin
+        </text>
+        <text stroke-linecap="round" font-size="38" x="261.6333" y="179.14278"
+              fill="#37b182" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_5921" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="2.375px">
+            Color
+        </text>
+        <text stroke-linecap="round" font-size="52" x="-142.21834" y="-772.8707"
+              fill="#37b182" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_627" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="3.25px">
+            Agriculture
+        </text>
+        <text stroke-linecap="round" font-size="30" x="-970.7082" y="-128.61682"
+              fill="#37b182" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_6402491" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="1.875px">
+            Hydrogen compressor
+        </text>
+        <text stroke-linecap="round" font-size="36" x="-1248.8892" y="-43.64753"
+              fill="#37b182" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_6911" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="2.25px">
+            Cellulose
+        </text>
+        <text stroke-linecap="round" font-size="24" x="-731.072" y="-1065.0454"
+              fill="#37b182" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_693334" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="1.5px">
+            Foundation (engineering)
+        </text>
+        <text stroke-linecap="round" font-size="30" x="-853.259" y="-559.4324"
+              fill="#37b182" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_70157" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="1.875px">
+            Recycling
+        </text>
+        <text stroke-linecap="round" font-size="25" x="194.51454" y="-1084.7528"
+              fill="#37b182" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_731740" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="1.5625px">
+            Probiotic
+        </text>
+        <text stroke-linecap="round" font-size="27" x="717.2507" y="494.31467"
+              fill="#37b182" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_75987" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="1.6875px">
+            Daylighting
+        </text>
+        <text stroke-linecap="round" font-size="31" x="847.9859" y="728.72253"
+              fill="#37b182" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_77547" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="1.9375px">
+            Logistics
+        </text>
+        <text stroke-linecap="round" font-size="48" x="-961.85364" y="252.2354"
+              fill="#37b182" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_7906908" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="3.0px">
+            Biomass
+        </text>
+        <text stroke-linecap="round" font-size="47" x="402.35556" y="-227.09526"
+              fill="#37b182" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_9251" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="2.9375px">
+            Engineering
+        </text>
+        <text stroke-linecap="round" font-size="59" x="565.3357" y="222.61086"
+              fill="#37b182" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_935041" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="3.6875px">
+            Urbanism
+        </text>
+        <text stroke-linecap="round" font-size="34" x="265.7603" y="891.3358"
+              fill="#37b182" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_9532" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="2.125px">
+            Electromagnetism
+        </text>
+        <text stroke-linecap="round" font-size="38" x="1143.9843" y="-48.829933"
+              fill="#37b182" stroke-linejoin="round"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_9649" stroke="#ffffff"
+              stroke-opacity="0.8" stroke-width="2.375px">
+            Energy
+        </text>
+    </g>
+    <g id="node-labels">
+        <text font-size="23" x="964.57086" y="882.7601" fill="#ef788e"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_es-aeler-technologies">
+            Aeler Technologies
+        </text>
+        <text font-size="46" x="-828.62335" y="-377.35016" fill="#ef788e"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_es-aqua-tech">
+            Aqua+Tech
+        </text>
+        <text font-size="39" x="-855.204" y="646.75684" fill="#ef788e"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_es-aurora-s-grid">
+            Aurora&apos;s Grid
+        </text>
+        <text font-size="43" x="-1107.1687" y="45.691162" fill="#ef788e"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_es-bloom-biorenewables">
+            Bloom Biorenewables
+        </text>
+        <text font-size="45" x="-193.2527" y="-347.3127" fill="#ef788e"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_es-bluewatt-engineering">
+            BlueWatt Engineering
+        </text>
+        <text font-size="46" x="794.1116" y="130.49437" fill="#ef788e"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_es-combo-solutions">
+            Combo Solutions
+        </text>
+        <text font-size="30" x="-1529.2295" y="-299.66812" fill="#ef788e"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_es-comppair">
+            CompPair
+        </text>
+        <text font-size="36" x="-1041.3303" y="-490.49207" fill="#ef788e"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_es-depoly">
+            DePoly
+        </text>
+        <text font-size="31" x="475.50836" y="683.78827" fill="#ef788e"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_es-ecointesys">
+            Ecointesys
+        </text>
+        <text font-size="40" x="-709.71344" y="763.2232" fill="#ef788e"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_es-enairys-powertech-sa">
+            Enairys Powertech SA
+        </text>
+        <text font-size="47" x="-383.08804" y="465.29932" fill="#ef788e"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_es-eneftech-corporation">
+            Eneftech
+        </text>
+        <text font-size="38" x="1287.4089" y="177.02975" fill="#ef788e"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_es-epiqr-renovation">
+            EPIQR Rénov.
+        </text>
+        <text font-size="34" x="1474.0098" y="-157.9607" fill="#ef788e"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_es-esmart-technologies">
+            eSMART Technologies
+        </text>
+        <text font-size="37" x="1169.6978" y="421.5949" fill="#ef788e"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_es-estia">
+            ESTIA / EPIQR
+        </text>
+        <text font-size="21" x="837.8695" y="-1098.171" fill="#ef788e"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_es-flyability">
+            Flyability
+        </text>
+        <text font-size="46" x="-457.10007" y="394.13712" fill="#ef788e"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_es-g24-innovations">
+            G24 Innovations
+        </text>
+        <text font-size="46" x="-647.99255" y="320.11536" fill="#ef788e"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_es-g2e-glass2energy">
+            G2e glass2energy
+        </text>
+        <text font-size="47" x="-155.87576" y="-111.98651" fill="#ef788e"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_es-gaiasens-technologies">
+            Gaiasens Technologies
+        </text>
+        <text font-size="48" x="304.56772" y="-710.62036" fill="#ef788e"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_es-gamaya">
+            Gamaya
+        </text>
+        <text font-size="44" x="244.72275" y="489.8821" fill="#ef788e"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_es-geoeg">
+            GeoEg
+        </text>
+        <text font-size="46" x="-822.20874" y="408.30157" fill="#ef788e"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_es-gridsteer">
+            GRidSTeer
+        </text>
+        <text font-size="45" x="-814.5153" y="151.72517" fill="#ef788e"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_es-grz-technologies">
+            GRZ Technologies
+        </text>
+        <text font-size="50" x="71.23154" y="-661.16394" fill="#ef788e"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_es-hydromea">
+            Hydromea
+        </text>
+        <text font-size="55" x="-158.92151" y="-484.2185" fill="#ef788e"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_es-insolight">
+            Insolight
+        </text>
+        <text font-size="50" x="186.01059" y="-368.99567" fill="#ef788e"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_es-kaemco">
+            Kaemco LLC
+        </text>
+        <text font-size="35" x="-476.80002" y="-982.0124" fill="#ef788e"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_es-medusoil">
+            Medusoil
+        </text>
+        <text font-size="39" x="569.72534" y="443.3873" fill="#ef788e"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_es-oculight-dynamics">
+            Oculight Dynamics
+        </text>
+        <text font-size="47" x="129.02965" y="-32.15297" fill="#ef788e"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_es-power-vision-engineering">
+            Power Vision Engineering
+        </text>
+        <text font-size="40" x="683.79364" y="-880.0704" fill="#ef788e"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_es-rovenso">
+            Rovenso
+        </text>
+        <text font-size="45" x="77.59413" y="729.37054" fill="#ef788e"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_es-sensima-inspection">
+            Sensima Inspection
+        </text>
+        <text font-size="43" x="373.76886" y="47.31806" fill="#ef788e"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_es-sensorscope">
+            Sensorscope
+        </text>
+        <text font-size="58" x="662.4942" y="-123.22125" fill="#ef788e"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_es-smarthelio">
+            SmartHelio
+        </text>
+        <text font-size="46" x="-212.65703" y="834.2114" fill="#ef788e"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_es-solaronix">
+            Solaronix
+        </text>
+        <text font-size="59" x="160.16248" y="262.30078" fill="#ef788e"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_es-swiss-inso">
+            Swiss-Inso
+        </text>
+        <text font-size="33" x="684.6069" y="836.57404" fill="#ef788e"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_es-swisspod-technologies">
+            Swisspod Technologies
+        </text>
+        <text font-size="45" x="-683.08307" y="-724.7875" fill="#ef788e"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_es-treatech-sarl">
+            TreaTech
+        </text>
+        <text font-size="37" x="-113.52537" y="-999.7769" fill="#ef788e"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_es-twentygreen">
+            TwentyGreen
+        </text>
+        <text font-size="47" x="853.73987" y="-31.971031" fill="#ef788e"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_es-urbio">
+            Urbio
+        </text>
+        <text font-size="37" x="-336.70087" y="963.0582" fill="#ef788e"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_es-valais-perovskite-solar">
+            Valais Perovskite Solar
+        </text>
+        <text font-size="42" x="921.2421" y="-607.5257" fill="#ef788e"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_es-volumen">
+            Volumen
+        </text>
+        <text font-size="47" x="-405.26257" y="-162.57443" fill="#ef788e"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_es-zaphiro-technologies">
+            Zaphiro Technologies
+        </text>
+        <text font-size="45" x="442.48807" y="544.68195" fill="#37b182"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_10091">
+            Environmental law
+        </text>
+        <text font-size="53" x="98.03291" y="347.74704" fill="#37b182"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_10934212">
+            Air pollution
+        </text>
+        <text font-size="48" x="71.51694" y="597.15125" fill="#37b182"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_113728">
+            Geothermal energy
+        </text>
+        <text font-size="58" x="627.7364" y="-326.49963" fill="#37b182"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_1164">
+            Artificial intelligence
+        </text>
+        <text font-size="49" x="1002.49927" y="-491.05872" fill="#37b182"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_12057519">
+            Internet of things
+        </text>
+        <text font-size="37" x="310.21698" y="-497.02005" fill="#37b182"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_12398">
+            Geographic information system
+        </text>
+        <text font-size="47" x="-922.51166" y="-258.76404" fill="#37b182"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_12581">
+            Glass
+        </text>
+        <text font-size="44" x="-599.1493" y="-318.05008" fill="#37b182"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_13255">
+            Hydrogen
+        </text>
+        <text font-size="25" x="-194.16716" y="-1067.6035" fill="#37b182"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_14193930">
+            Animal feed
+        </text>
+        <text font-size="33" x="155.37837" y="-881.5973" fill="#37b182"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_14552094">
+            Submarine navigation
+        </text>
+        <text font-size="20" x="-1724.341" y="-247.78749" fill="#37b182"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_157616">
+            Composite material
+        </text>
+        <text font-size="24" x="1515.4304" y="336.70392" fill="#37b182"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_1804464">
+            Consulting firm
+        </text>
+        <text font-size="38" x="1322.7976" y="-401.12964" fill="#37b182"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_184978">
+            Home automation
+        </text>
+        <text font-size="44" x="713.6879" y="631.7797" fill="#37b182"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_18580879">
+            Transport
+        </text>
+        <text font-size="26" x="-332.1427" y="1075.9912" fill="#37b182"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_19290728">
+            Perovskite
+        </text>
+        <text font-size="28" x="-908.10913" y="873.46643" fill="#37b182"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_195891">
+            Pneumatics
+        </text>
+        <text font-size="64" x="-460.47736" y="131.11671" fill="#37b182"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_20344155">
+            Electrical grid
+        </text>
+        <text font-size="57" x="564.4012" y="-684.81213" fill="#37b182"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_20903754">
+            Robotics
+        </text>
+        <text font-size="33" x="-789.9957" y="-638.2052" fill="#37b182"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_210555">
+            Waste management
+        </text>
+        <text font-size="58" x="31.842548" y="828.00977" fill="#37b182"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_21188370">
+            Fuel
+        </text>
+        <text font-size="50" x="1025.6018" y="283.43875" fill="#37b182"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_21296224">
+            Architecture
+        </text>
+        <text font-size="37" x="212.07803" y="-557.71375" fill="#37b182"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_228148">
+            Remote sensing
+        </text>
+        <text font-size="16" x="1024.4167" y="972.53" fill="#37b182"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_22849124">
+            Shipping container
+        </text>
+        <text font-size="51" x="-1135.4476" y="-283.37833" fill="#37b182"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_23001">
+            Polymer
+        </text>
+        <text font-size="46" x="921.5268" y="-215.07556" fill="#37b182"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_233488">
+            Machine learning
+        </text>
+        <text font-size="56" x="-433.90384" y="751.0737" fill="#37b182"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_2352910">
+            Solar cell
+        </text>
+        <text font-size="46" x="355.89737" y="309.90213" fill="#37b182"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_235757">
+            Sensor
+        </text>
+        <text font-size="29" x="1691.9265" y="-287.86234" fill="#37b182"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_238420">
+            Power-line communication
+        </text>
+        <text font-size="46" x="818.2186" y="391.78455" fill="#37b182"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_239038">
+            Construction
+        </text>
+        <text font-size="60" x="-631.0872" y="575.75244" fill="#37b182"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_24130">
+            Energy storage
+        </text>
+        <text font-size="29" x="803.543" y="-1030.7499" fill="#37b182"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_252712">
+            Safety
+        </text>
+        <text font-size="70" x="-189.18997" y="657.5135" fill="#37b182"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_25784">
+            Renewable energy
+        </text>
+        <text font-size="34" x="-1153.5348" y="-409.64133" fill="#37b182"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_26145195">
+            Plastic
+        </text>
+        <text font-size="24" x="1437.0277" y="507.12347" fill="#37b182"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_26616666">
+            Building engineering physics
+        </text>
+        <text font-size="38" x="175.6281" y="121.89832" fill="#37b182"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_27643777">
+            Measuring instrument
+        </text>
+        <text font-size="72" x="-220.44308" y="311.08618" fill="#37b182"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_27743">
+            Solar energy
+        </text>
+        <text font-size="45" x="-415.252" y="-269.0694" fill="#37b182"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_28191">
+            Snow
+        </text>
+        <text font-size="22" x="432.3641" y="778.08636" fill="#37b182"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_29278">
+            Safety engineering
+        </text>
+        <text font-size="24" x="1189.5055" y="601.352" fill="#37b182"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_29501">
+            Sustainable development
+        </text>
+        <text font-size="14" x="870.8346" y="-1149.3638" fill="#37b182"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_299871">
+            Drone
+        </text>
+        <text font-size="25" x="1616.0485" y="64.06723" fill="#37b182"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_3183830">
+            Ecological sanitation
+        </text>
+        <text font-size="30" x="524.3278" y="938.126" fill="#37b182"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_32502">
+            Vacuum
+        </text>
+        <text font-size="28" x="440.86496" y="-85.57525" fill="#37b182"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_33172">
+            Wireless network
+        </text>
+        <text font-size="59" x="-460.7755" y="-496.27036" fill="#37b182"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_33306">
+            Water
+        </text>
+        <text font-size="31" x="990.40094" y="46.782658" fill="#37b182"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_35458904">
+            Data science
+        </text>
+        <text font-size="32" x="-939.79083" y="532.04346" fill="#37b182"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_367397">
+            Battery
+        </text>
+        <text font-size="22" x="698.2169" y="1001.8078" fill="#37b182"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_36971117">
+            Hyperloop
+        </text>
+        <text font-size="31" x="-259.25433" y="73.65878" fill="#37b182"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_37039">
+            Environment
+        </text>
+        <text font-size="50" x="-427.9174" y="-778.00867" fill="#37b182"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_37738">
+            Soil
+        </text>
+        <text font-size="52" x="-186.20856" y="208.77022" fill="#37b182"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_381399">
+            Hydroelectricity
+        </text>
+        <text font-size="28" x="-754.9532" y="965.5347" fill="#37b182"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_381774">
+            Compressed air
+        </text>
+        <text font-size="28" x="1070.1265" y="-704.9951" fill="#37b182"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_386407">
+            Digitization
+        </text>
+        <text font-size="27" x="616.6078" y="-980.2184" fill="#37b182"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_41684">
+            Security
+        </text>
+        <text font-size="41" x="137.81151" y="-200.55283" fill="#37b182"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_43444">
+            Simulation
+        </text>
+        <text font-size="24" x="-397.94016" y="-1145.0516" fill="#37b182"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_44603">
+            Calcite
+        </text>
+        <text font-size="29" x="-756.46783" y="-857.65137" fill="#37b182"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_4481763">
+            Renewable natural gas
+        </text>
+        <text font-size="20" x="-1590.1743" y="-133.09499" fill="#37b182"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_51892">
+            Textile
+        </text>
+        <text font-size="31" x="-586.4616" y="-17.757996" fill="#37b182"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_5199213">
+            Phasor measurement unit
+        </text>
+        <text font-size="47" x="10.286205" y="-282.17526" fill="#37b182"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_5309">
+            Software
+        </text>
+        <text font-size="19" x="-1524.9263" y="-443.60043" fill="#37b182"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_5824713">
+            Self-healing material
+        </text>
+        <text font-size="36" x="-1335.3304" y="-249.65143" fill="#37b182"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_58890">
+            Resin
+        </text>
+        <text font-size="38" x="261.6333" y="179.14278" fill="#37b182"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_5921">
+            Color
+        </text>
+        <text font-size="52" x="-142.21834" y="-772.8707" fill="#37b182"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_627">
+            Agriculture
+        </text>
+        <text font-size="30" x="-970.7082" y="-128.61682" fill="#37b182"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_6402491">
+            Hydrogen compressor
+        </text>
+        <text font-size="36" x="-1248.8892" y="-43.64753" fill="#37b182"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_6911">
+            Cellulose
+        </text>
+        <text font-size="24" x="-731.072" y="-1065.0454" fill="#37b182"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_693334">
+            Foundation (engineering)
+        </text>
+        <text font-size="30" x="-853.259" y="-559.4324" fill="#37b182"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_70157">
+            Recycling
+        </text>
+        <text font-size="25" x="194.51454" y="-1084.7528" fill="#37b182"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_731740">
+            Probiotic
+        </text>
+        <text font-size="27" x="717.2507" y="494.31467" fill="#37b182"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_75987">
+            Daylighting
+        </text>
+        <text font-size="31" x="847.9859" y="728.72253" fill="#37b182"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_77547">
+            Logistics
+        </text>
+        <text font-size="48" x="-961.85364" y="252.2354" fill="#37b182"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_7906908">
+            Biomass
+        </text>
+        <text font-size="47" x="402.35556" y="-227.09526" fill="#37b182"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_9251">
+            Engineering
+        </text>
+        <text font-size="59" x="565.3357" y="222.61086" fill="#37b182"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_935041">
+            Urbanism
+        </text>
+        <text font-size="34" x="265.7603" y="891.3358" fill="#37b182"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_9532">
+            Electromagnetism
+        </text>
+        <text font-size="38" x="1143.9843" y="-48.829933" fill="#37b182"
+              style="text-anchor: middle; dominant-baseline: central;"
+              font-family="Helvetica" class="id_9649">
+            Energy
+        </text>
+    </g>
+</svg>
