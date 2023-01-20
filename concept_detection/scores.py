@@ -1,4 +1,3 @@
-import numpy as np
 import pandas as pd
 
 import Levenshtein
@@ -53,7 +52,7 @@ def get_graph_df(graph_results):
     return pd.DataFrame(graph_table, columns=columns)
 
 
-def compute_scores(wikisearch_results, graph_results, logger, debug=False):
+def old_compute_scores(wikisearch_results, graph_results, logger, debug=False):
     """
     Takes the results of a wikisearch and a graph search and combines them to produce a list of results aggregating
     them and deriving other new scores.
@@ -63,7 +62,6 @@ def compute_scores(wikisearch_results, graph_results, logger, debug=False):
             a list of Wikipedia pages for those keywords.
         graph_results (list): The results of a graph search. Each element is a dictionary containing the source and the
             anchor page ids and their graph score.
-        page_id_titles (dict): The mapping from page ids to their titles.
         logger (Logger): A logger to use for debugging purposes.
         debug (bool): Whether the function prints the results at each step. Default: False.
 
@@ -92,7 +90,6 @@ def compute_scores(wikisearch_results, graph_results, logger, debug=False):
 
     # Merge graph and wikisearch dataframes, and sort values by keywords, searchrank and graph_score
     merged_df = pd.merge(graph_df, wikisearch_df, how='left', on='page_id')
-    # merged_df = merged_df.sort_values(by=['keywords', 'searchrank', 'graph_score'], ascending=[True, True, False])
     log(f'merged_df: {merged_df}', logger, debug)
 
     # If dataframe is empty, return
@@ -135,6 +132,100 @@ def compute_scores(wikisearch_results, graph_results, logger, debug=False):
     # Replace ' ' with '_' in titles to make it consistent with db
     scores_df['page_title'] = scores_df.apply(lambda r: r['page_title'].replace(' ', '_'), axis=1)
     log(f'scores_df (with page titles): {scores_df}', logger, debug)
+
+    # Generate output dataframe
+    output_columns = ['keywords', 'page_id', 'page_title', 'searchrank',
+                      'median_graph_score', 'search_graph_ratio', 'levenshtein_score', 'mixed_score']
+    scores_df = scores_df[output_columns]
+    log(f'scores_df (output form): {scores_df}', logger, debug)
+
+    # Return it as a dictionary
+    return scores_df.to_dict(orient='records')
+
+
+def compute_scores(wikisearch_results, graph_results, logger, debug=False):
+    """
+    Takes the results of a wikisearch and a graph search and combines them to produce a list of results aggregating
+    them and deriving other new scores.
+
+    Args:
+        wikisearch_results (list): The results of a wikisearch. Each element is a dictionary containing the keywords and
+            a list of Wikipedia pages for those keywords.
+        graph_results (list): The results of a graph search. Each element is a dictionary containing the source and the
+            anchor page ids and their graph score.
+        logger (Logger): A logger to use for debugging purposes.
+        debug (bool): Whether the function prints the results at each step. Default: False.
+
+    Returns:
+        list[dict[str]]: A dictionary representing a pandas dataframe with all the scores. The keys of each element are:
+            * 'keywords' (str): Set of keywords.
+            * 'page_id' (int): Id of a wikipage.
+            * 'page_title' (str): Title of a wikipage.
+            * 'searchrank' (int): Index of the result for the wikisearch.
+            * 'median_graph_score' (float): Median of the graph scores associated with this page.
+            * 'search_graph_ratio' (float): Ratio graph_score / search_score.
+            * 'levenshtein_score' (float): Levenshtein score for keywords and page_title.
+            * 'mixed_score' (float): Combination of all scores.
+    """
+
+    # Convert wikisearch results to DataFrame
+    wikisearch_df = get_wikisearch_df(wikisearch_results)
+    log(f'wikisearch_results: {wikisearch_results}', logger, debug)
+    log(f'wikisearch_df: {wikisearch_df}', logger, debug)
+
+    # Convert graph scores to DataFrame
+    graph_df = get_graph_df(graph_results)
+    log(f'graph_results: {graph_results}', logger, debug)
+    log(f'graph_df: {graph_df}', logger, debug)
+
+    # Filter zero scores
+    graph_df = graph_df[graph_df['graph_score'] > 0]
+
+    # Merge graph and wikisearch dataframes
+    merged_df = pd.merge(wikisearch_df, graph_df, how='inner', on='page_id')
+    log(f'merged_df: {merged_df}', logger, debug)
+
+    # If dataframe is empty, return
+    if len(merged_df) == 0:
+        return []
+
+    # Compute median graph scores over all anchor pages
+    group_columns = ['keywords', 'page_id', 'page_title', 'searchrank']
+    scores_df = merged_df.groupby(by=group_columns).aggregate(
+        median_graph_score=('graph_score', 'median'),
+        search_score=('search_score', 'first')
+    ).reset_index()
+    log(f'scores_df (after aggregation with median scores): {scores_df}', logger, debug)
+
+    # Calculate search-graph score ratio
+    scores_df['search_graph_ratio'] = scores_df['search_score'] * scores_df['median_graph_score']
+    log(f'scores_df (with sr_score and sr_graph_ratio): {scores_df}', logger, debug)
+
+    # Filter rows with low search-graph ratio
+    scores_df = scores_df[scores_df['search_graph_ratio'] >= 0.1]
+    log(f'scores_df (filtering search_graph_ratio >= 0.1): {scores_df}', logger, debug)
+
+    # If dataframe is empty, return
+    if len(scores_df) == 0:
+        return []
+
+    # Calculate Levenshtein score
+    scores_df['levenshtein_score'] = scores_df.apply(lambda row: Levenshtein.ratio(row['keywords'], row['page_title'].lower()), axis=1)
+
+    # Compute mixed score
+    def f(x):
+        # S-shaped function on [0, 1] that pulls values away from 1/2, exaggerating differences
+        return 1 / (1 + ((1 - x) / x)**2)
+
+    scores_df['mixed_score'] = scores_df['search_graph_ratio'] * f(scores_df['levenshtein_score'])
+    log(f'scores_df (with lev and mixed scores): {scores_df}', logger, debug)
+
+    # # Fix page id data type (from int64 to int)
+    # scores_df['page_id'] = scores_df['page_id'].astype(int)
+    #
+    # # Replace ' ' with '_' in titles to make it consistent with db
+    # scores_df['page_title'] = scores_df.apply(lambda r: r['page_title'].replace(' ', '_'), axis=1)
+    # log(f'scores_df (with page titles): {scores_df}', logger, debug)
 
     # Generate output dataframe
     output_columns = ['keywords', 'page_id', 'page_title', 'searchrank',
