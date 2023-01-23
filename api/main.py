@@ -9,7 +9,7 @@ from api.schemas.strip import *
 
 from concept_detection.keyword_extraction import get_keyword_list
 import concept_detection.wikisearch as ws
-from graph.scores import compute_graph_scores
+from graph.scores import ConceptsGraph
 from concept_detection.scores import compute_scores
 
 from utils.text.markdown import strip
@@ -27,6 +27,10 @@ app = FastAPI(
 
 # Get uvicorn logger so we can write on it
 logger = logging.getLogger('uvicorn.error')
+
+# Create a ConceptsGraph instance to hold concepts graph in memory
+logger.info(f'Fetching concepts graph from database...')
+cg = ConceptsGraph()
 
 
 def build_log_msg(msg, seconds, total=False, length=64):
@@ -77,8 +81,11 @@ async def wikify(data: WikifyRequest, method: Optional[str] = None):
 
     # Extract keywords from text
     if raw_text:
+        logger.info(build_log_msg(f'Received raw text "{raw_text[:32]}..."', sw.delta()))
         keyword_list = get_keyword_list(raw_text)
         logger.info(build_log_msg(f'Extracted list of {len(keyword_list)} keywords', sw.delta()))
+    else:
+        logger.info(build_log_msg(f'Received list of {len(keyword_list)} keywords: [{keyword_list[0]}, ...]', sw.delta()))
 
     # Perform wikisearch and extract source_page_ids
     wikisearch_results = ws.wikisearch(keyword_list, method)
@@ -96,7 +103,7 @@ async def wikify(data: WikifyRequest, method: Optional[str] = None):
     logger.info(build_log_msg(f'Finished {f"{method} " if method else ""}wikisearch with {n_source_page_ids} source pages', sw.delta()))
 
     # Compute graph scores
-    graph_results = compute_graph_scores(source_page_ids, anchor_page_ids)
+    graph_results = cg.compute_scores(source_page_ids, anchor_page_ids)
     logger.info(build_log_msg(f'Computed graph scores for {n_source_page_ids * n_anchor_page_ids} pairs', sw.delta()))
 
     # Post-process results and derive the different scores
