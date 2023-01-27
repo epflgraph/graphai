@@ -8,9 +8,15 @@ class ConceptsGraph:
     def __init__(self):
         db = DB()
 
+        table_name = 'graph.Nodes_N_Concept'
+        fields = ['PageID', 'PageTitle']
+        self.concepts = pd.DataFrame(db.find(table_name, fields=fields), columns=fields)
+        concept_ids = list(self.concepts['PageID'])
+
         table_name = 'graph.Edges_N_Concept_N_Concept_T_GraphScore'
         fields = ['SourcePageID', 'TargetPageID']
-        concepts_concepts = pd.DataFrame(db.find(table_name, fields=fields), columns=fields)
+        conditions = {'SourcePageID': concept_ids, 'TargetPageID': concept_ids}
+        concepts_concepts = pd.DataFrame(db.find(table_name, fields=fields, conditions=conditions), columns=fields)
 
         # Store successor and predecessor sets as attributes
         self.successors = concepts_concepts.groupby(by='SourcePageID').aggregate({'TargetPageID': set})
@@ -102,3 +108,79 @@ class ConceptsGraph:
             })
 
         return results
+
+
+class Ontology:
+    def __init__(self):
+        db = DB()
+
+        ################################################
+
+        # Fetch cluster nodes
+        table_name = 'graphontology.Hierarchical_Cluster_Names_HighLevel'
+        fields = ['ClusterIndex', 'ClusterName']
+        self.clusters = pd.DataFrame(db.find(table_name, fields=fields), columns=['ClusterID', 'ClusterName'])
+
+        # Extract cluster ids for faster access
+        self.cluster_ids = set(self.clusters['ClusterID'])
+
+        # Store cluster names indexing by ClusterID for faster access
+        self.cluster_names = self.clusters.set_index('ClusterID')['ClusterName']
+
+        ################################################
+
+        # Fetch cluster-cluster edges
+        table_name = 'graphontology.Predefined_Knowledge_Tree_Hierarchy'
+        fields = ['ChildIndex', 'ParentIndex']
+        self.clusters_clusters = pd.DataFrame(db.find(table_name, fields=fields), columns=['ChildID', 'ParentID'])
+
+        # Extract child cluster ids for faster access
+        self.cluster_child_ids = set(self.clusters_clusters['ChildID'])
+
+        # Store cluster parents indexing by ChildID for faster access
+        self.cluster_parents = self.clusters_clusters.set_index('ChildID')['ParentID']
+
+        ################################################
+
+        # Fetch concept-cluster edges
+        table_name = 'graphontology.Hierarchical_Clusters_Main'
+        fields = ['PageID', 'ClusterLevel1']
+        self.concepts_clusters = pd.DataFrame(db.find(table_name, fields=fields), columns=['PageID', 'ClusterID'])
+
+        # Extract concept and cluster ids for faster access
+        self.concept_ids = set(self.concepts_clusters['PageID'])
+
+        # Store cluster parents indexing by ChildID for faster access
+        self.concept_clusters = self.concepts_clusters.set_index('PageID')['ClusterID']
+
+    def get_concept_cluster(self, page_id):
+        if page_id not in self.concept_ids:
+            # print(f"""Warning! Concept {page_id} doesn't have a cluster in the ontology""")
+            return None
+
+        return self.concept_clusters.at[page_id]
+
+    def compute_scores(self, results):
+        table = []
+        for result in results:
+            cluster = self.get_concept_cluster(result.page_id)
+
+            if cluster is not None:
+                table.append([result.page_id, result.page_title, cluster])
+
+        pages = pd.DataFrame(table, columns=['PageID', 'PageTitle', 'ClusterID'])
+
+        cluster_counts = pages.groupby(by='ClusterID').aggregate(Count=('PageID', 'count')).reset_index()
+        pages = pd.merge(pages, cluster_counts, how='left', on='ClusterID')
+
+        # Function f: [1, N] -> [0, 1] satisfying the following:
+        #   f(1) = 0
+        #   f(N) = 1
+        #   f increasing
+        #   f concave
+        pages['Score'] = np.sin((np.pi / 2) * (pages['Count'] - 1) / (len(pages) - 1))
+
+        pages = pages[['PageID', 'PageTitle', 'Score']]
+
+        return pages.to_dict(orient='records')
+

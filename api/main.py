@@ -9,7 +9,7 @@ from api.schemas.strip import *
 
 from concept_detection.keyword_extraction import get_keyword_list
 import concept_detection.wikisearch as ws
-from graph.scores import ConceptsGraph
+from graph.scores import ConceptsGraph, Ontology
 from concept_detection.scores import compute_scores
 
 from utils.text.markdown import strip
@@ -31,6 +31,10 @@ logger = logging.getLogger('uvicorn.error')
 # Create a ConceptsGraph instance to hold concepts graph in memory
 logger.info(f'Fetching concepts graph from database...')
 cg = ConceptsGraph()
+
+# Create an Ontology instance to hold clusters graph in memory
+logger.info(f'Fetching ontology from database...')
+ontology = Ontology()
 
 
 def build_log_msg(msg, seconds, total=False, length=64):
@@ -54,7 +58,7 @@ async def keywords(data: KeywordsRequest, use_nltk: Optional[bool] = False):
 
 
 @app.post('/wikify', response_model=WikifyResponse)
-async def wikify(data: WikifyRequest, method: Optional[str] = None):
+async def wikify(data: WikifyRequest, method: Optional[str] = None, version: Optional[str] = None):
     """
     Wikifies some text.
 
@@ -90,6 +94,9 @@ async def wikify(data: WikifyRequest, method: Optional[str] = None):
     # Perform wikisearch and extract source_page_ids
     wikisearch_results = ws.wikisearch(keyword_list, method)
 
+    if version == 'new':
+        return new_wikify(wikisearch_results)
+
     # Extract source_page_ids and anchor_page_ids if needed
     source_page_ids = ws.extract_page_ids(wikisearch_results)
     if not anchor_page_ids:
@@ -115,6 +122,31 @@ async def wikify(data: WikifyRequest, method: Optional[str] = None):
     logger.info(build_log_msg(f'Finished all tasks', sw.total(), total=True))
 
     return results
+
+
+def new_wikify(results):
+    import pandas as pd
+    import numpy as np
+
+    # Convert into a pandas DataFrame
+    table = []
+    for result in results:
+        for page in result.pages:
+            table.append([result.keywords, page.page_id, page.page_title, page.searchrank, page.score])
+    results = pd.DataFrame(table, columns=['Keywords', 'PageID', 'PageTitle', 'Searchrank', 'SearchScore'])
+
+    # Function f: [1, N] -> [0, 1] satisfying the following:
+    #   f(1) = 1
+    #   f(N) = 0
+    #   f decreasing
+    #   f concave
+    results['SearchScore2'] = np.cos((np.pi / 2) * (results['Searchrank'] - 1) / (len(results) - 1))
+
+    print(results)
+
+    # results = ontology.compute_scores(results)
+
+    return []
 
 
 @app.post('/markdown_strip')
