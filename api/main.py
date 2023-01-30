@@ -135,16 +135,45 @@ def new_wikify(results):
             table.append([result.keywords, page.page_id, page.page_title, page.searchrank, page.score])
     results = pd.DataFrame(table, columns=['Keywords', 'PageID', 'PageTitle', 'Searchrank', 'SearchScore'])
 
+    # Compute search score
+    results = pd.merge(
+        results,
+        results.groupby(by='Keywords').aggregate(Count=('PageID', 'count')).reset_index(),
+        how='left',
+        on='Keywords'
+    )
+
     # Function f: [1, N] -> [0, 1] satisfying the following:
     #   f(1) = 1
     #   f(N) = 0
     #   f decreasing
     #   f concave
-    results['SearchScore2'] = np.cos((np.pi / 2) * (results['Searchrank'] - 1) / (len(results) - 1))
+    results['SearchScore'] = np.cos((np.pi / 2) * (results['Searchrank'] - 1) / (results['Count'] - 1))
+    results = results.fillna(0)
+    results = results[['Keywords', 'PageID', 'PageTitle', 'Searchrank', 'SearchScore']]
 
+    # Add cluster column
+    results = ontology.add_cluster(results)
+
+    # Compute ontology score
+    results = pd.merge(
+        results,
+        results.groupby(by=['Keywords', 'ClusterID']).aggregate(Count=('PageID', 'count')).reset_index(),
+        how='left',
+        on=['Keywords', 'ClusterID']
+    )
+
+    # Function f: [1, N] -> [0, 1] satisfying the following:
+    #   f(1) = 0
+    #   f(N) = 1
+    #   f increasing
+    #   f concave
+    results['OntologyScore'] = np.sin((np.pi / 2) * (results['Count'] - 1) / (results['Count'] - 1))
+    results = results.fillna(0)
+    results = results[['Keywords', 'PageID', 'PageTitle', 'Searchrank', 'ClusterID', 'SearchScore', 'OntologyScore']]
+
+    # Compute graph score
     print(results)
-
-    # results = ontology.compute_scores(results)
 
     return []
 

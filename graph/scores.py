@@ -160,27 +160,5 @@ class Ontology:
 
         return self.concept_clusters.at[page_id]
 
-    def compute_scores(self, results):
-        table = []
-        for result in results:
-            cluster = self.get_concept_cluster(result.page_id)
-
-            if cluster is not None:
-                table.append([result.page_id, result.page_title, cluster])
-
-        pages = pd.DataFrame(table, columns=['PageID', 'PageTitle', 'ClusterID'])
-
-        cluster_counts = pages.groupby(by='ClusterID').aggregate(Count=('PageID', 'count')).reset_index()
-        pages = pd.merge(pages, cluster_counts, how='left', on='ClusterID')
-
-        # Function f: [1, N] -> [0, 1] satisfying the following:
-        #   f(1) = 0
-        #   f(N) = 1
-        #   f increasing
-        #   f concave
-        pages['Score'] = np.sin((np.pi / 2) * (pages['Count'] - 1) / (len(pages) - 1))
-
-        pages = pages[['PageID', 'PageTitle', 'Score']]
-
-        return pages.to_dict(orient='records')
-
+    def add_cluster(self, results):
+        return pd.merge(results, self.concepts_clusters, how='inner', on='PageID')
