@@ -2,6 +2,9 @@ import logging
 
 from fastapi import FastAPI
 
+import pandas as pd
+import numpy as np
+
 from typing import Optional
 
 from api.schemas.wikify import *
@@ -30,7 +33,7 @@ logger = logging.getLogger('uvicorn.error')
 
 # Create a ConceptsGraph instance to hold concepts graph in memory
 logger.info(f'Fetching concepts graph from database...')
-cg = ConceptsGraph()
+graph = ConceptsGraph()
 
 # Create an Ontology instance to hold clusters graph in memory
 logger.info(f'Fetching ontology from database...')
@@ -110,7 +113,7 @@ async def wikify(data: WikifyRequest, method: Optional[str] = None, version: Opt
     logger.info(build_log_msg(f'Finished {f"{method} " if method else ""}wikisearch with {n_source_page_ids} source pages', sw.delta()))
 
     # Compute graph scores
-    graph_results = cg.compute_scores(source_page_ids, anchor_page_ids)
+    graph_results = graph.compute_scores(source_page_ids, anchor_page_ids)
     logger.info(build_log_msg(f'Computed graph scores for {n_source_page_ids * n_anchor_page_ids} pairs', sw.delta()))
 
     # Post-process results and derive the different scores
@@ -124,9 +127,22 @@ async def wikify(data: WikifyRequest, method: Optional[str] = None, version: Opt
     return results
 
 
+# Function f: [1, N] -> [0, 1] satisfying the following:
+#   f(1) = 1
+#   f(N) = 0
+#   f decreasing
+#   f concave
+def f(x, N):
+    return np.cos((np.pi / 2) * (x - 1) / (N - 1))
+
+
+# S-shaped function on [0, 1] that pulls values away from 1/2, exaggerating differences
+def h(x):
+    return 1 / (1 + ((1 - x) / x)**2)
+
+
 def new_wikify(results):
-    import pandas as pd
-    import numpy as np
+    import Levenshtein
 
     # Convert into a pandas DataFrame
     table = []
@@ -135,47 +151,45 @@ def new_wikify(results):
             table.append([result.keywords, page.page_id, page.page_title, page.searchrank, page.score])
     results = pd.DataFrame(table, columns=['Keywords', 'PageID', 'PageTitle', 'Searchrank', 'SearchScore'])
 
-    # Compute search score
+    # Add search count column
     results = pd.merge(
         results,
-        results.groupby(by='Keywords').aggregate(Count=('PageID', 'count')).reset_index(),
+        results.groupby(by='Keywords').aggregate(SearchCount=('PageID', 'count')).reset_index(),
         how='left',
         on='Keywords'
     )
 
-    # Function f: [1, N] -> [0, 1] satisfying the following:
-    #   f(1) = 1
-    #   f(N) = 0
-    #   f decreasing
-    #   f concave
-    results['SearchScore'] = np.cos((np.pi / 2) * (results['Searchrank'] - 1) / (results['Count'] - 1))
-    results = results.fillna(0)
-    results = results[['Keywords', 'PageID', 'PageTitle', 'Searchrank', 'SearchScore']]
-
-    # Add cluster column
-    results = ontology.add_cluster(results)
+    # Compute search score (+ fix rounding error)
+    results['SearchScore'] = f(results['Searchrank'], results['SearchCount'])
+    results.loc[results['SearchScore'] < 0.001, 'SearchScore'] = 0
+    results = results.drop(columns=['SearchCount'])
 
     # Compute ontology score
-    results = pd.merge(
-        results,
-        results.groupby(by=['Keywords', 'ClusterID']).aggregate(Count=('PageID', 'count')).reset_index(),
-        how='left',
-        on=['Keywords', 'ClusterID']
-    )
-
-    # Function f: [1, N] -> [0, 1] satisfying the following:
-    #   f(1) = 0
-    #   f(N) = 1
-    #   f increasing
-    #   f concave
-    results['OntologyScore'] = np.sin((np.pi / 2) * (results['Count'] - 1) / (results['Count'] - 1))
-    results = results.fillna(0)
-    results = results[['Keywords', 'PageID', 'PageTitle', 'Searchrank', 'ClusterID', 'SearchScore', 'OntologyScore']]
+    results = ontology.add_ontology_score(results)
 
     # Compute graph score
-    print(results)
+    results = graph.add_graph_score(results)
 
-    return []
+    # Compute levenshtein score
+    results['LevenshteinScore'] = results.apply(lambda row: Levenshtein.ratio(row['Keywords'], row['PageTitle'].lower()), axis=1)
+    results['LevenshteinScore'] = h(results['LevenshteinScore'])
+
+    # Compute mixed score
+    results = results.fillna(0)
+    results['MixedScore'] = results[['SearchScore', 'OntologyScore', 'GraphScore', 'LevenshteinScore']].mean(axis=1)
+    results = results.sort_values(by='MixedScore', ascending=False)
+
+    # Filter low scores
+    results = results[results['MixedScore'] >= 0.2]
+
+    print(results)
+    print(results.info())
+    print(results.describe())
+
+    # Return results
+    output_columns = ['Keywords', 'PageID', 'PageTitle', 'Searchrank', 'SearchScore', 'OntologyScore', 'GraphScore', 'LevenshteinScore', 'MixedScore']
+    results = results[output_columns]
+    return results.to_dict(orient='records')
 
 
 @app.post('/markdown_strip')

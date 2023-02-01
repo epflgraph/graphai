@@ -8,21 +8,36 @@ class ConceptsGraph:
     def __init__(self):
         db = DB()
 
+        print('A')
+
         table_name = 'graph.Nodes_N_Concept'
         fields = ['PageID', 'PageTitle']
         self.concepts = pd.DataFrame(db.find(table_name, fields=fields), columns=fields)
         concept_ids = list(self.concepts['PageID'])
 
+        print('B')
+
         table_name = 'graph.Edges_N_Concept_N_Concept_T_GraphScore'
-        fields = ['SourcePageID', 'TargetPageID']
+        fields = ['SourcePageID', 'TargetPageID', 'NormalisedScore']
         conditions = {'SourcePageID': concept_ids, 'TargetPageID': concept_ids}
-        concepts_concepts = pd.DataFrame(db.find(table_name, fields=fields, conditions=conditions), columns=fields)
+        self.concepts_concepts = pd.DataFrame(db.find(table_name, fields=fields, conditions=conditions), columns=fields)
+
+        print('C')
+
+        self.concepts_concepts = pd.concat([
+            self.concepts_concepts,
+            self.concepts_concepts.rename(columns={'SourcePageID': 'TargetPageID', 'TargetPageID': 'SourcePageID'})
+        ]).reset_index(drop=True)
+
+        print('D')
 
         # Store successor and predecessor sets as attributes
-        self.successors = concepts_concepts.groupby(by='SourcePageID').aggregate({'TargetPageID': set})
-        self.predecessors = concepts_concepts.groupby(by='TargetPageID').aggregate({'SourcePageID': set})
+        self.successors = self.concepts_concepts.groupby(by='SourcePageID').aggregate({'TargetPageID': set})
+        self.predecessors = self.concepts_concepts.groupby(by='TargetPageID').aggregate({'SourcePageID': set})
         self.sources = set(self.successors.index)
         self.targets = set(self.predecessors.index)
+
+        print('E')
 
     def compute_scores(self, source_page_ids, target_page_ids):
         """
@@ -109,6 +124,27 @@ class ConceptsGraph:
 
         return results
 
+    def add_graph_score(self, results):
+        concept_ids = list(results['PageID'].drop_duplicates())
+        concepts_concepts = self.concepts_concepts[
+            self.concepts_concepts['SourcePageID'].isin(concept_ids) &
+            self.concepts_concepts['TargetPageID'].isin(concept_ids)
+        ]
+        concepts_concepts = concepts_concepts.groupby(by='SourcePageID').aggregate(GraphScore=('NormalisedScore', 'sum')).reset_index()
+        concepts_concepts['GraphScore'] = concepts_concepts['GraphScore'] / concepts_concepts['GraphScore'].max()
+        concepts_concepts = concepts_concepts.rename(columns={'SourcePageID': 'PageID'})
+
+        return pd.merge(results, concepts_concepts, how='inner', on='PageID')
+
+
+# Function g: [1, N] -> [0, 1] satisfying the following:
+#   g(1) = 0
+#   g(N) = 1
+#   g increasing
+#   g concave
+def g(x, N):
+    return np.sin((np.pi / 2) * (x - 1) / (N - 1))
+
 
 class Ontology:
     def __init__(self):
@@ -160,5 +196,60 @@ class Ontology:
 
         return self.concept_clusters.at[page_id]
 
-    def add_cluster(self, results):
+    def add_concepts_cluster(self, results):
         return pd.merge(results, self.concepts_clusters, how='inner', on='PageID')
+
+    def add_clusters_cluster(self, results):
+        return pd.merge(
+            results,
+            self.clusters_clusters.rename(columns={'ChildID': 'ClusterID', 'ParentID': 'Cluster2ID'}),
+            how='inner',
+            on='ClusterID'
+        )
+
+    def filter_concepts(self, results):
+        return results[results['PageID'].isin(self.concept_ids)]
+
+    def add_ontology_score(self, results):
+        # Add concepts cluster column
+        results = pd.merge(results, self.concepts_clusters, how='inner', on='PageID')
+
+        # Add clusters cluster column
+        results = pd.merge(
+            results,
+            self.clusters_clusters.rename(columns={'ChildID': 'ClusterID', 'ParentID': 'Cluster2ID'}),
+            how='inner',
+            on='ClusterID'
+        )
+
+        # Add cluster counts
+        results = pd.merge(
+            results,
+            results.groupby(by=['ClusterID']).aggregate(ClusterCount=('PageID', 'count')).reset_index(),
+            how='left',
+            on=['ClusterID']
+        )
+
+        # Add cluster2 counts
+        results = pd.merge(
+            results,
+            results.groupby(by=['Cluster2ID']).aggregate(Cluster2Count=('PageID', 'count')).reset_index(),
+            how='left',
+            on=['Cluster2ID']
+        )
+
+        # Compute scores
+        results['ClusterScore'] = g(results['ClusterCount'], len(results))
+        results['Cluster2Score'] = g(results['Cluster2Count'], len(results))
+
+        # Normalise scores
+        results['ClusterScore'] = results['ClusterScore'] / results['ClusterScore'].max()
+        results['Cluster2Score'] = results['Cluster2Score'] / results['Cluster2Score'].max()
+
+        # Combine scores
+        results['OntologyScore'] = 0.8 * results['ClusterScore'] + 0.2 * results['Cluster2Score']
+
+        # Drop temp columns
+        results = results.drop(columns=['ClusterID', 'Cluster2ID', 'ClusterCount', 'Cluster2Count', 'ClusterScore', 'Cluster2Score'])
+
+        return results
