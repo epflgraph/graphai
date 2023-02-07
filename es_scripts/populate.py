@@ -1,14 +1,16 @@
 import ray
 
+import pandas as pd
+
 from interfaces.db import DB
 from interfaces.es import ES
 from utils.text.markdown import strip
-from utils.time.stopwatch import Stopwatch
+from utils.breadcrumb import Breadcrumb
 
 # Init ray
 ray.init(namespace="populate_elasticsearch", include_dashboard=False, log_to_driver=True)
 
-indices = ['wikipages_1_shards', 'wikipages_3_shards', 'wikipages_6_shards', 'wikipages_12_shards']
+indices = ['concepts']
 
 
 @ray.remote
@@ -16,26 +18,30 @@ class PopulateActor:
     def __init__(self):
         self.ess = [ES(index) for index in indices]
 
-    def strip_and_index(self, page_id, page, page_categories):
-        # Strip page content
-        stripped_page = strip(page['content'])
+    # def strip_and_index(self, page_id, page, page_categories):
+    #     # Strip page content
+    #     stripped_page = strip(page['content'])
+    #
+    #     # Prepare document to index
+    #     doc = {
+    #         'id': page_id,
+    #         'title': page['title'],
+    #         'text': stripped_page['text'],
+    #         'heading': stripped_page['heading'],
+    #         'opening_text': stripped_page['opening_text'],
+    #         'auxiliary_text': stripped_page['auxiliary_text'],
+    #         'file_text': '',
+    #         'redirect': page['redirect'],
+    #         'category': page_categories,
+    #         'incoming_links': 1,
+    #         'popularity_score': page['popularity']
+    #     }
+    #
+    #     # Index on elasticsearch
+    #     for es in self.ess:
+    #         es.index_doc(doc)
 
-        # Prepare document to index
-        doc = {
-            'id': page_id,
-            'title': page['title'],
-            'text': stripped_page['text'],
-            'heading': stripped_page['heading'],
-            'opening_text': stripped_page['opening_text'],
-            'auxiliary_text': stripped_page['auxiliary_text'],
-            'file_text': '',
-            'redirect': page['redirect'],
-            'category': page_categories,
-            'incoming_links': 1,
-            'popularity_score': page['popularity']
-        }
-
-        # Index on elasticsearch
+    def index(self, doc):
         for es in self.ess:
             es.index_doc(doc)
 
@@ -44,62 +50,69 @@ class PopulateActor:
 n_actors = 16
 actors = [PopulateActor.remote() for i in range(n_actors)]
 
+# Init breadcrumb to log and time statements
+bc = Breadcrumb()
+
 # Init DB interface
 db = DB()
 
-# Get all page ids filtering orphans
-all_page_ids = db.get_wikipage_ids(filter_orphan=True)
+# Fetch all concepts
+bc.log('Fetching concepts...')
 
-# Init stopwatch to track time
-sw = Stopwatch()
+table_name = 'graph.Nodes_N_Concept'
+fields = ['PageID', 'PageTitle', 'PageContent']
+concepts = pd.DataFrame(db.find(table_name, fields=fields), columns=fields)
+concept_ids = list(concepts['PageID'])
 
-# Define window size to filter page ids
-window_size = 200000
+# Fetch categories
+bc.log('Fetching categories...')
 
-window = 0
-while True:
-    # Get min/max page id for current window
-    min_id = window * window_size
-    max_id = (window + 1) * window_size
+table_name = 'graph.Edges_N_Concept_N_Category'
+fields = ['PageID', 'CategoryID']
+conditions = {'PageID': concept_ids}
+concepts_categories = pd.DataFrame(db.find(table_name, fields=fields, conditions=conditions), columns=fields)
+category_ids = list(concepts_categories['CategoryID'].drop_duplicates())
 
-    # Fetch pages from database
-    sw.tick()
-    pages = db.get_wikipages(ids=all_page_ids, id_min_max=(min_id, max_id))
-    n_pages = len(pages)
-    print(f'Got {n_pages} pages (id in [{min_id}, {max_id}))!')
+table_name = 'graph.Nodes_N_Category'
+fields = ['CategoryID', 'CategoryTitle']
+conditions = {'CategoryID': category_ids}
+categories = pd.DataFrame(db.find(table_name, fields=fields), columns=fields)
 
-    # Fetch categories from database
-    sw.tick()
-    categories = db.get_wikipage_categories(ids=all_page_ids, id_min_max=(min_id, max_id))
-    print(f'Got categories for {len(categories)} pages (id in [{min_id}, {max_id}))!')
+# Merging concepts with categories
+bc.log('Merging concepts with categories...')
+concepts_categories = pd.merge(concepts_categories, categories, how='inner', on='CategoryID')
+concepts_categories = concepts_categories.groupby(by='PageID').aggregate(Categories=('CategoryTitle', list)).reset_index()
+concepts = pd.merge(concepts, concepts_categories, how='left', on='PageID')
 
-    # Print time summary
-    sw.report('Finished fetching from database')
+# Coerce NaN values (pages without categories) to empty lists
+concepts['Categories'] = concepts['Categories'].fillna('').apply(list)
 
-    # Exit if no pages in window
-    if not pages:
-        break
+# Index documents
+bc.log('Indexing documents...')
+results = []
+actor = 0
+for i, concept in concepts.iterrows():
+    # Prepare document
+    doc = {
+        'id': concept['PageID'],
+        'title': concept['PageTitle'],
+        'text': concept['PageContent'],         # TODO change to concept['Text'] when available
+        'heading': [],                          # TODO change to concept['Heading'] when available
+        'opening_text': '',                     # TODO change to concept['OpeningText'] when available
+        'auxiliary_text': '',                   # TODO change to concept['AuxiliaryText'] when available
+        'file_text': '',                        # TODO change to concept['FileText'] when available
+        'redirect': [],                         # TODO change to concept['Redirect'] when available
+        'category': concept['Categories'],
+        'incoming_links': 1,                    # TODO change to concept['IncomingLinks'] when available
+        'popularity_score': 1,                  # TODO change to concept['Popularity'] when available
+    }
 
-    # Reset stopwatch and iterate over all pages
-    sw.reset()
-    actor = 0
-    results = []
-    for page_id in pages:
-        # Extract page data and categories
-        page = pages[page_id]
-        page_categories = categories.get(page_id, [])
 
-        # Execute strip_and_index in parallel
-        results.append(actors[actor].strip_and_index.remote(page_id, page, page_categories))
+    # Index document
+    results.append(actors[actor].index.remote(doc))
 
-        # Update actor index
-        actor = (actor + 1) % n_actors
+    # Update actor index
+    actor = (actor + 1) % n_actors
 
-    # Wait for the results
-    results = ray.get(results)
-
-    # Print time summary
-    sw.report(f'Finished indexing {n_pages} pages on elasticsearch')
-
-    # Update window
-    window += 1
+# Wait for the results
+results = ray.get(results)

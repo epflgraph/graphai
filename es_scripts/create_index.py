@@ -4,7 +4,7 @@ from utils.text.io import read_json
 
 number_of_shards = 12
 
-index = f'wikipages_{number_of_shards}_shards'
+index = 'concepts'
 es = ES(index)
 
 settings = read_json('config/settings.json')
