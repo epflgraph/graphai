@@ -1,3 +1,4 @@
+import pandas as pd
 import ray
 
 from models.wikisearch_result import WikisearchResult
@@ -20,7 +21,7 @@ class WikisearchActor:
     def __init__(self):
         # Instantiate wikipedia-api and elasticsearch interfaces
         self.wp = WP()
-        self.es = ES('wikipages_6_shards')
+        self.es = ES('concepts')
 
     def wikisearch(self, keywords, method):
         """
@@ -33,21 +34,29 @@ class WikisearchActor:
             returning as score the inverse of the searchrank or the actual elasticsearch score, respectively.
 
         Returns:
-            :class:`~models.wikisearch_result.WikisearchResult`: Object containing the given keywords and their associated list of page results.
+            pd.DataFrame: A pandas DataFrame with columns ['Keywords', 'PageID', 'PageTitle', 'Searchrank', 'SearchScore'],
+            constant on 'Keywords' and unique in 'PageID', with the wikisearch results the given keywords set.
         """
 
-        if method == 'es-base':
-            pages = self.es.search(keywords)
-
-            # Replace score with 1/searchrank
-            for page in pages:
-                page.score = 1 / page.searchrank
-        elif method == 'es-score':
-            pages = self.es.search(keywords)
+        if method == 'es-score':
+            results = self.es.search(keywords)
         else:
-            pages = self.wp.search(keywords)
+            if method == 'es-base':
+                results = self.es.search(keywords)
+            else:
+                results = self.wp.search(keywords)
 
-        return WikisearchResult(keywords=keywords, pages=pages)
+            # Replace score with linear function on Searchrank
+            if len(results) >= 2:
+                results['SearchScore'] = 1 - (results['Searchrank'] - 1) / (len(results) - 1)
+            else:
+                results['SearchScore'] = 1
+
+        # Add Keywords column at the beginning
+        results['Keywords'] = keywords
+        results = results[['Keywords', 'PageID', 'PageTitle', 'Searchrank', 'SearchScore']]
+
+        return results
 
 
 # Instantiate ray actor list
@@ -55,29 +64,33 @@ n_actors = 16
 actors = [WikisearchActor.remote() for i in range(n_actors)]
 
 
-def wikisearch(keyword_list, method):
+def wikisearch(keywords, method):
     """
     Retrieves wikipages for all keywords in the list.
 
     Args:
-        keyword_list (list[str]): List of keywords to perform the wikisearch.
+        keywords (pd.DataFrame): A pandas DataFrame with one column 'Keywords'.
         method (str{'wikipedia-api', 'es-base', 'es-score'}): Method to retrieve the wikipedia pages.
             It can be either 'wikipedia-api', to use the Wikipedia API (default), or one of {'es-base', 'es-score'},
             to use elasticsearch, returning as score the inverse of the searchrank or the actual elasticsearch score,
             respectively.
 
     Returns:
-        list[:class:`~models.wikisearch_result.WikisearchResult`]: List of wikisearch results.
+        pd.DataFrame: A pandas DataFrame with columns ['Keywords', 'PageID', 'PageTitle', 'Searchrank', 'SearchScore'],
+        unique on ('Keywords', 'PageID'), with the wikisearch results for each keywords set.
     Examples:
-        >>> wikisearch(['brown baggies', 'platform soles'], method='wikipedia-api')
-        [WikisearchResult(brown baggies, 10), WikisearchResult(platform soles, 10)]
+        >>> keywords = pd.DataFrame(pd.Series(['brown baggies', 'platform soles']), columns=['Keywords'])
+        >>> wikisearch(keywords, method='wikipedia-api')
     """
 
     # Execute wikisearch in parallel
-    results = [actors[i % n_actors].wikisearch.remote(keyword_list[i], method) for i in range(len(keyword_list))]
+    results = [actors[i % n_actors].wikisearch.remote(row['Keywords'], method) for i, row in keywords.iterrows()]
 
     # Wait for the results
     results = ray.get(results)
+
+    # Concatenate all results in a single DataFrame
+    results = pd.concat(results, ignore_index=True)
 
     return results
 

@@ -1,6 +1,9 @@
 import RAKE
 import nltk
 from rake_nltk import Rake
+
+import pandas as pd
+
 from utils.text.clean import normalize
 
 # Download nltk resources
@@ -116,16 +119,16 @@ def rake_extract(text, use_nltk, split_words=False, return_scores=False, thresho
     return list(set([keywords for keywords, score in keyword_list]))
 
 
-def get_keyword_list(text, use_nltk=False):
+def get_keywords(text, use_nltk=False):
     """
-    Normalize raw text and extract keyword list.
+    Normalize raw text and extract keywords.
 
     Args:
         text (str): Text to extract keywords from.
         use_nltk (bool): Whether to use nltk-rake for keyword extraction, otherwise python-rake is used. Default: False.
 
     Returns:
-        list[str]: A list of keywords automatically extracted from the given text.
+        pd.DataFrame: A pandas DataFrame with one column 'Keywords', containing the keywords extracted from the text.
 
     Examples:
         >>> text = ' '.join([
@@ -136,8 +139,13 @@ def get_keyword_list(text, use_nltk=False):
         >>>     "It ain't what they call 'rock and roll'",
         >>>     "</p>"
         >>> ])
-        >>> get_keyword_list(text)
-        ['brown baggies', 'young boys', 'trumpet playin', 'corner drunk', 'platform soles']
+        >>> get_keywords(text)
+                 Keywords
+        0   brown baggies
+        1      young boys
+        2  trumpet playin
+        3    corner drunk
+        4  platform soles
     """
 
     text = normalize(text)
@@ -151,4 +159,6 @@ def get_keyword_list(text, use_nltk=False):
         keyword_list.extend(rake_extract(line, use_nltk))
 
     # Remove duplicates
-    return list(set(keyword_list))
+    keyword_list = list(set(keyword_list))
+
+    return pd.DataFrame(pd.Series(keyword_list), columns=['Keywords'])
