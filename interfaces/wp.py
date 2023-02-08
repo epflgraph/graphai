@@ -1,6 +1,5 @@
 import requests
-
-from models.page_result import PageResult
+import pandas as pd
 
 
 class WP:
@@ -29,24 +28,22 @@ class WP:
             limit (int): Maximum number of returned results.
 
         Returns:
-            list[:class:`~models.page_result.PageResult`]: List of results of the wikisearch.
+            pd.DataFrame: A pandas DataFrame with columns ['PageID', 'PageTitle', 'Searchrank', 'SearchScore'],
+            unique in 'PageID', with the wikisearch results the given keywords set.
         """
 
-        self.params['srsearch'] = text
-        self.params['srlimit'] = limit
-        r = requests.get(self.url, params=self.params, headers=self.headers).json()
+        # Make request
+        try:
+            self.params['srsearch'] = text
+            self.params['srlimit'] = limit
+            r = requests.get(self.url, params=self.params, headers=self.headers, timeout=6).json()
 
-        if 'error' in r:
-            raise Exception(r['error']['info'])
+            top_pages = r['query']['search']
 
-        top_pages = r['query']['search']
+            table = [[top_pages[i]['pageid'], top_pages[i]['title'], (i + 1), 1] for i in range(len(top_pages))]
 
-        return [
-            PageResult(
-                page_id=top_pages[i]['pageid'],
-                page_title=top_pages[i]['title'],
-                searchrank=(i + 1),
-                score=(1 / (i + 1))
-            )
-            for i in range(len(top_pages))
-        ]
+            return pd.DataFrame(table, columns=['PageID', 'PageTitle', 'Searchrank', 'SearchScore'])
+        except Exception as e:
+            # If something goes wrong, avoid crashing and return empty DataFrame
+            return pd.DataFrame(columns=['PageID', 'PageTitle', 'Searchrank', 'SearchScore'])
+

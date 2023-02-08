@@ -1,11 +1,11 @@
 import configparser
 
 from ssl import create_default_context
+
+import pandas as pd
 from elasticsearch import Elasticsearch
 
 from definitions import CONFIG_DIR
-
-from models.page_result import PageResult
 
 
 def es_bool(must=None, must_not=None, should=None, filter=None):
@@ -129,18 +129,13 @@ class ES:
     def _search(self, query, limit=10, source=None, explain=False, rescore=None):
         return self.es.search(index=self.index, query=query, source=source, rescore=rescore, size=limit, explain=explain, profile=True)
 
-    def _results_from_search(self, search):
+    @staticmethod
+    def _to_dataframe(search):
         hits = search['hits']['hits']
 
-        return [
-            PageResult(
-                page_id=hits[i]['_source']['id'],
-                page_title=hits[i]['_source']['title'],
-                searchrank=(i + 1),
-                score=hits[i]['_score']
-            )
-            for i in range(len(hits))
-        ]
+        table = [[hits[i]['_source']['id'], hits[i]['_source']['title'], (i + 1), hits[i]['_score']] for i in range(len(hits))]
+
+        return pd.DataFrame(table, columns=['PageID', 'PageTitle', 'Searchrank', 'SearchScore'])
 
     def search(self, text, limit=10):
         """
@@ -151,7 +146,8 @@ class ES:
             limit (int): Maximum number of returned results.
 
         Returns:
-            list[:class:`~models.page_result.PageResult`]: List of results of the wikisearch.
+            pd.DataFrame: A pandas DataFrame with columns ['PageID', 'PageTitle', 'Searchrank', 'SearchScore'],
+            unique in 'PageID', with the wikisearch results the given keywords set.
         """
 
         return self.search_mediawiki(text, limit=limit)
@@ -165,7 +161,8 @@ class ES:
             limit (int): Maximum number of returned results.
 
         Returns:
-            list[:class:`~models.page_result.PageResult`]: List of results of the wikisearch.
+            pd.DataFrame: A pandas DataFrame with columns ['PageID', 'PageTitle', 'Searchrank', 'SearchScore'],
+            unique in 'PageID', with the wikisearch results the given keywords set.
         """
 
         query = es_bool(
@@ -269,7 +266,7 @@ class ES:
         ]
 
         search = self._search(query, limit=limit, rescore=rescore)
-        return self._results_from_search(search)
+        return ES._to_dataframe(search)
 
     def search_mediawiki_no_rescore(self, text, limit=10):
         """
@@ -280,7 +277,8 @@ class ES:
             limit (int): Maximum number of returned results.
 
         Returns:
-            list[:class:`~models.page_result.PageResult`]: List of results of the wikisearch.
+            pd.DataFrame: A pandas DataFrame with columns ['PageID', 'PageTitle', 'Searchrank', 'SearchScore'],
+            unique in 'PageID', with the wikisearch results the given keywords set.
         """
 
         query = es_bool(
@@ -315,7 +313,7 @@ class ES:
         )
 
         search = self._search(query, limit=limit)
-        return self._results_from_search(search)
+        return ES._to_dataframe(search)
 
     def search_mediawiki_no_plain(self, text, limit=10):
         """
@@ -326,7 +324,8 @@ class ES:
             limit (int): Maximum number of returned results.
 
         Returns:
-            list[:class:`~models.page_result.PageResult`]: List of results of the wikisearch.
+            pd.DataFrame: A pandas DataFrame with columns ['PageID', 'PageTitle', 'Searchrank', 'SearchScore'],
+            unique in 'PageID', with the wikisearch results the given keywords set.
         """
 
         query = es_bool(
@@ -425,7 +424,7 @@ class ES:
         ]
 
         search = self._search(query, limit=limit, rescore=rescore)
-        return self._results_from_search(search)
+        return ES._to_dataframe(search)
 
     def search_mediawiki_restrict_4(self, text, limit=10):
         """
@@ -437,7 +436,8 @@ class ES:
             limit (int): Maximum number of returned results.
 
         Returns:
-            list[:class:`~models.page_result.PageResult`]: List of results of the wikisearch.
+            pd.DataFrame: A pandas DataFrame with columns ['PageID', 'PageTitle', 'Searchrank', 'SearchScore'],
+            unique in 'PageID', with the wikisearch results the given keywords set.
         """
 
         query = es_bool(
@@ -537,7 +537,7 @@ class ES:
         ]
 
         search = self._search(query, limit=limit, rescore=rescore)
-        return self._results_from_search(search)
+        return ES._to_dataframe(search)
 
     def search_mediawiki_restrict_2(self, text, limit=10):
         """
@@ -549,7 +549,8 @@ class ES:
             limit (int): Maximum number of returned results.
 
         Returns:
-            list[:class:`~models.page_result.PageResult`]: List of results of the wikisearch.
+            pd.DataFrame: A pandas DataFrame with columns ['PageID', 'PageTitle', 'Searchrank', 'SearchScore'],
+            unique in 'PageID', with the wikisearch results the given keywords set.
         """
 
         query = es_bool(
@@ -643,7 +644,7 @@ class ES:
         ]
 
         search = self._search(query, limit=limit, rescore=rescore)
-        return self._results_from_search(search)
+        return ES._to_dataframe(search)
 
     def indices(self):
         """
