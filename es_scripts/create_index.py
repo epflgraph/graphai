@@ -2,7 +2,7 @@ from interfaces.es import ES
 
 from utils.text.io import read_json
 
-number_of_shards = 12
+number_of_shards = 1
 
 index = 'concepts'
 es = ES(index)
