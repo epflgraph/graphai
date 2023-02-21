@@ -51,11 +51,11 @@ class WikifyResponseElem(BaseModel):
     Object representing each of the wikify results. It consists of a set of keywords, a Wikipedia page and several
     scores which measure the degree of relevance of the result with respect to the text.
     """
-    Keywords: str = Field(
-        ...,
-        title="Keywords",
-        description="Keywords extracted from the text associated to this result"
-    )
+    # Keywords: str = Field(
+    #     ...,
+    #     title="Keywords",
+    #     description="Keywords extracted from the text associated to this result"
+    # )
 
     PageID: int = Field(
         ...,
@@ -69,16 +69,46 @@ class WikifyResponseElem(BaseModel):
         description="Title of the Wiki page"
     )
 
-    Searchrank: int = Field(
-        ...,
-        title="Searchrank",
-        description="Position in which this Wiki page appears in the list of search results when searching for the keywords"
-    )
+    # Searchrank: int = Field(
+    #     ...,
+    #     title="Searchrank",
+    #     description="Position in which this Wiki page appears in the list of search results when searching for the keywords"
+    # )
 
     SearchScore: float = Field(
         ...,
         title="Search score",
         description="Score that measures the relevance of the given page for the given keywords"
+    )
+
+    LevenshteinScore: float = Field(
+        ...,
+        title="Levenshtein score",
+        description="Score that measures the Levenshtein similarity of the given page title and the given set of keywords"
+    )
+
+    OntologyLocalScore: float = Field(
+        ...,
+        title="OntologyLocalScore",
+        description="Score that measures the relevance of the given page with respect to the rest according to the ontology"
+    )
+
+    OntologyGlobalScore: float = Field(
+        ...,
+        title="OntologyGlobalScore",
+        description="Score that measures the relevance of the given page with respect to the rest according to the ontology"
+    )
+
+    Ontology2LocalScore: float = Field(
+        ...,
+        title="Ontology2LocalScore",
+        description="Score that measures the relevance of the given page with respect to the rest according to the ontology"
+    )
+
+    Ontology2GlobalScore: float = Field(
+        ...,
+        title="Ontology2GlobalScore",
+        description="Score that measures the relevance of the given page with respect to the rest according to the ontology"
     )
 
     OntologyScore: float = Field(
@@ -93,17 +123,17 @@ class WikifyResponseElem(BaseModel):
         description="Score that measures the relevance of the given page with respect to the rest according to the graph"
     )
 
-    LevenshteinScore: float = Field(
+    KeywordsScore: float = Field(
         ...,
-        title="Levenshtein score",
-        description="Score that measures the Levenshtein similarity of the given page title and the given set of keywords"
+        title="KeywordsScore",
+        description="Score that measures the relevance of the given page with respect to the rest according to the graph"
     )
 
-    MixedScore: float = Field(
-        ...,
-        title="Mixed score",
-        description="Score that aggregates the other scores"
-    )
+    # MixedScore: float = Field(
+    #     ...,
+    #     title="Mixed score",
+    #     description="Score that aggregates the other scores"
+    # )
 
     class Config:
         schema_extra = {

@@ -134,7 +134,9 @@ class ConceptsGraph:
         concepts_concepts['GraphScore'] = concepts_concepts['GraphScore'] / concepts_concepts['GraphScore'].max()
         concepts_concepts = concepts_concepts.rename(columns={'SourcePageID': 'PageID'})
 
-        return pd.merge(results, concepts_concepts, how='inner', on='PageID')
+        results = pd.merge(results, concepts_concepts, how='inner', on='PageID')
+
+        return results
 
 
 # Function g: [1, N] -> [0, 1] satisfying the following:
@@ -222,34 +224,66 @@ class Ontology:
             on='ClusterID'
         )
 
-        # Add cluster counts
+        # Add local count: number of pages with the same keywords
         results = pd.merge(
             results,
-            results.groupby(by=['ClusterID']).aggregate(ClusterCount=('PageID', 'count')).reset_index(),
+            results.groupby(by=['Keywords']).aggregate(LocalCount=('PageID', 'count')).reset_index(),
+            how='left',
+            on=['Keywords']
+        )
+
+        # Add local cluster count: number of pages among those with the same keywords sharing the same cluster
+        results = pd.merge(
+            results,
+            results.groupby(by=['Keywords', 'ClusterID']).aggregate(ClusterLocalCount=('PageID', 'count')).reset_index(),
+            how='left',
+            on=['Keywords', 'ClusterID']
+        )
+
+        # Add global cluster count: number of pages among all sharing the same cluster
+        results = pd.merge(
+            results,
+            results.groupby(by=['ClusterID']).aggregate(ClusterGlobalCount=('PageID', 'count')).reset_index(),
             how='left',
             on=['ClusterID']
         )
 
-        # Add cluster2 counts
+        # Add local cluster2 count: number of pages among those with the same keywords sharing the same cluster2
         results = pd.merge(
             results,
-            results.groupby(by=['Cluster2ID']).aggregate(Cluster2Count=('PageID', 'count')).reset_index(),
+            results.groupby(by=['Keywords', 'Cluster2ID']).aggregate(Cluster2LocalCount=('PageID', 'count')).reset_index(),
+            how='left',
+            on=['Keywords', 'Cluster2ID']
+        )
+
+        # Add global cluster2 count: number of pages among all sharing the same cluster2
+        results = pd.merge(
+            results,
+            results.groupby(by=['Cluster2ID']).aggregate(Cluster2GlobalCount=('PageID', 'count')).reset_index(),
             how='left',
             on=['Cluster2ID']
         )
 
         # Compute scores
-        results['ClusterScore'] = g(results['ClusterCount'], len(results))
-        results['Cluster2Score'] = g(results['Cluster2Count'], len(results))
+        results['OntologyLocalScore'] = results['ClusterLocalCount'] / results['LocalCount']
+        results['OntologyGlobalScore'] = results['ClusterGlobalCount'] / len(results)
+        results['Ontology2LocalScore'] = results['Cluster2LocalCount'] / results['LocalCount']
+        results['Ontology2GlobalScore'] = results['Cluster2GlobalCount'] / len(results)
 
         # Normalise scores
-        results['ClusterScore'] = results['ClusterScore'] / results['ClusterScore'].max()
-        results['Cluster2Score'] = results['Cluster2Score'] / results['Cluster2Score'].max()
+        results['OntologyLocalScore'] = results['OntologyLocalScore'] / results['OntologyLocalScore'].max()
+        results['OntologyGlobalScore'] = results['OntologyGlobalScore'] / results['OntologyGlobalScore'].max()
+        results['Ontology2LocalScore'] = results['Ontology2LocalScore'] / results['Ontology2LocalScore'].max()
+        results['Ontology2GlobalScore'] = results['Ontology2GlobalScore'] / results['Ontology2GlobalScore'].max()
 
-        # Combine scores
-        results['OntologyScore'] = 0.8 * results['ClusterScore'] + 0.2 * results['Cluster2Score']
+        # Ontology score
+        results['OntologyScore'] = results['OntologyGlobalScore']
 
-        # Drop temp columns
-        results = results.drop(columns=['ClusterID', 'Cluster2ID', 'ClusterCount', 'Cluster2Count', 'ClusterScore', 'Cluster2Score'])
+        # Drop temporary columns
+        results = results.drop(columns=['LocalCount', 'ClusterLocalCount', 'ClusterGlobalCount', 'Cluster2LocalCount', 'Cluster2GlobalCount'])
+
+        pd.set_option('display.max_rows', 400)
+        pd.set_option('display.max_columns', 500)
+        pd.set_option('display.width', 1000)
 
         return results
