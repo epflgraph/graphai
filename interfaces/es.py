@@ -196,76 +196,77 @@ class ES:
             ]
         )
 
-        rescore = [
-            {
-                "window_size": 8192,
-                "query": {
-                    "query_weight": 1,
-                    "rescore_query_weight": 1,
-                    "score_mode": "total",
-                    "rescore_query": {
-                        "function_score": {
-                            "score_mode": "sum",
-                            "boost_mode": "sum",
-                            "functions": [
-                                {
-                                    "script_score": {
-                                        "script": {
-                                            "source": "pow(doc['popularity_score'].value , 0.8) / ( pow(doc['popularity_score'].value, 0.8) + pow(8.0E-6,0.8))",
-                                            "lang": "expression"
-                                        }
-                                    },
-                                    "weight": 3
-                                },
-                                {
-                                    "script_score": {
-                                        "script": {
-                                            "source": "pow(doc['incoming_links'].value , 0.7) / ( pow(doc['incoming_links'].value, 0.7) + pow(30,0.7))",
-                                            "lang": "expression"
-                                        }
-                                    },
-                                    "weight": 10
-                                }
-                            ]
-                        }
-                    }
-                }
-            },
-            {
-                "window_size": 448,
-                "query": {
-                    "query_weight": 1,
-                    "rescore_query_weight": 10000,
-                    "score_mode": "total",
-                    "rescore_query": {
-                        "bool": {
-                            "should": [
-                                {
-                                    "constant_score": {
-                                        "filter": {
-                                            "match_all": {
+        # rescore = [
+        #     {
+        #         "window_size": 8192,
+        #         "query": {
+        #             "query_weight": 1,
+        #             "rescore_query_weight": 1,
+        #             "score_mode": "total",
+        #             "rescore_query": {
+        #                 "function_score": {
+        #                     "score_mode": "sum",
+        #                     "boost_mode": "sum",
+        #                     "functions": [
+        #                         {
+        #                             "script_score": {
+        #                                 "script": {
+        #                                     "source": "pow(doc['popularity_score'].value , 0.8) / ( pow(doc['popularity_score'].value, 0.8) + pow(8.0E-6,0.8))",
+        #                                     "lang": "expression"
+        #                                 }
+        #                             },
+        #                             "weight": 3
+        #                         },
+        #                         {
+        #                             "script_score": {
+        #                                 "script": {
+        #                                     "source": "pow(doc['incoming_links'].value , 0.7) / ( pow(doc['incoming_links'].value, 0.7) + pow(30,0.7))",
+        #                                     "lang": "expression"
+        #                                 }
+        #                             },
+        #                             "weight": 10
+        #                         }
+        #                     ]
+        #                 }
+        #             }
+        #         }
+        #     },
+        #     {
+        #         "window_size": 448,
+        #         "query": {
+        #             "query_weight": 1,
+        #             "rescore_query_weight": 10000,
+        #             "score_mode": "total",
+        #             "rescore_query": {
+        #                 "bool": {
+        #                     "should": [
+        #                         {
+        #                             "constant_score": {
+        #                                 "filter": {
+        #                                     "match_all": {
+        #
+        #                                     }
+        #                                 },
+        #                                 "boost": 100000
+        #                             }
+        #                         },
+        #                         {
+        #                             "sltr": {
+        #                                 "model": "enwiki-20220421-20180215-query_explorer",
+        #                                 "params": {
+        #                                     "query_string": text
+        #                                 }
+        #                             }
+        #                         }
+        #                     ]
+        #                 }
+        #             }
+        #         }
+        #     }
+        # ]
 
-                                            }
-                                        },
-                                        "boost": 100000
-                                    }
-                                },
-                                {
-                                    "sltr": {
-                                        "model": "enwiki-20220421-20180215-query_explorer",
-                                        "params": {
-                                            "query_string": text
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    }
-                }
-            }
-        ]
-
-        search = self._search(query, limit=limit, rescore=rescore)
+        # search = self._search(query, limit=limit, rescore=rescore)
+        search = self._search(query, limit=limit)
         return ES._to_dataframe(search)
 
     def search_mediawiki_no_rescore(self, text, limit=10):
@@ -354,76 +355,77 @@ class ES:
             ]
         )
 
-        rescore = [
-            {
-                "window_size": 8192,
-                "query": {
-                    "query_weight": 1,
-                    "rescore_query_weight": 1,
-                    "score_mode": "total",
-                    "rescore_query": {
-                        "function_score": {
-                            "score_mode": "sum",
-                            "boost_mode": "sum",
-                            "functions": [
-                                {
-                                    "script_score": {
-                                        "script": {
-                                            "source": "pow(doc['popularity_score'].value , 0.8) / ( pow(doc['popularity_score'].value, 0.8) + pow(8.0E-6,0.8))",
-                                            "lang": "expression"
-                                        }
-                                    },
-                                    "weight": 3
-                                },
-                                {
-                                    "script_score": {
-                                        "script": {
-                                            "source": "pow(doc['incoming_links'].value , 0.7) / ( pow(doc['incoming_links'].value, 0.7) + pow(30,0.7))",
-                                            "lang": "expression"
-                                        }
-                                    },
-                                    "weight": 10
-                                }
-                            ]
-                        }
-                    }
-                }
-            },
-            {
-                "window_size": 448,
-                "query": {
-                    "query_weight": 1,
-                    "rescore_query_weight": 10000,
-                    "score_mode": "total",
-                    "rescore_query": {
-                        "bool": {
-                            "should": [
-                                {
-                                    "constant_score": {
-                                        "filter": {
-                                            "match_all": {
+        # rescore = [
+        #     {
+        #         "window_size": 8192,
+        #         "query": {
+        #             "query_weight": 1,
+        #             "rescore_query_weight": 1,
+        #             "score_mode": "total",
+        #             "rescore_query": {
+        #                 "function_score": {
+        #                     "score_mode": "sum",
+        #                     "boost_mode": "sum",
+        #                     "functions": [
+        #                         {
+        #                             "script_score": {
+        #                                 "script": {
+        #                                     "source": "pow(doc['popularity_score'].value , 0.8) / ( pow(doc['popularity_score'].value, 0.8) + pow(8.0E-6,0.8))",
+        #                                     "lang": "expression"
+        #                                 }
+        #                             },
+        #                             "weight": 3
+        #                         },
+        #                         {
+        #                             "script_score": {
+        #                                 "script": {
+        #                                     "source": "pow(doc['incoming_links'].value , 0.7) / ( pow(doc['incoming_links'].value, 0.7) + pow(30,0.7))",
+        #                                     "lang": "expression"
+        #                                 }
+        #                             },
+        #                             "weight": 10
+        #                         }
+        #                     ]
+        #                 }
+        #             }
+        #         }
+        #     },
+        #     {
+        #         "window_size": 448,
+        #         "query": {
+        #             "query_weight": 1,
+        #             "rescore_query_weight": 10000,
+        #             "score_mode": "total",
+        #             "rescore_query": {
+        #                 "bool": {
+        #                     "should": [
+        #                         {
+        #                             "constant_score": {
+        #                                 "filter": {
+        #                                     "match_all": {
+        #
+        #                                     }
+        #                                 },
+        #                                 "boost": 100000
+        #                             }
+        #                         },
+        #                         {
+        #                             "sltr": {
+        #                                 "model": "enwiki-20220421-20180215-query_explorer",
+        #                                 "params": {
+        #                                     "query_string": text
+        #                                 }
+        #                             }
+        #                         }
+        #                     ]
+        #                 }
+        #             }
+        #         }
+        #     }
+        # ]
 
-                                            }
-                                        },
-                                        "boost": 100000
-                                    }
-                                },
-                                {
-                                    "sltr": {
-                                        "model": "enwiki-20220421-20180215-query_explorer",
-                                        "params": {
-                                            "query_string": text
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    }
-                }
-            }
-        ]
-
-        search = self._search(query, limit=limit, rescore=rescore)
+        # search = self._search(query, limit=limit, rescore=rescore)
+        search = self._search(query, limit=limit)
         return ES._to_dataframe(search)
 
     def search_mediawiki_restrict_4(self, text, limit=10):
@@ -467,76 +469,77 @@ class ES:
             ]
         )
 
-        rescore = [
-            {
-                "window_size": 8192,
-                "query": {
-                    "query_weight": 1,
-                    "rescore_query_weight": 1,
-                    "score_mode": "total",
-                    "rescore_query": {
-                        "function_score": {
-                            "score_mode": "sum",
-                            "boost_mode": "sum",
-                            "functions": [
-                                {
-                                    "script_score": {
-                                        "script": {
-                                            "source": "pow(doc['popularity_score'].value , 0.8) / ( pow(doc['popularity_score'].value, 0.8) + pow(8.0E-6,0.8))",
-                                            "lang": "expression"
-                                        }
-                                    },
-                                    "weight": 3
-                                },
-                                {
-                                    "script_score": {
-                                        "script": {
-                                            "source": "pow(doc['incoming_links'].value , 0.7) / ( pow(doc['incoming_links'].value, 0.7) + pow(30,0.7))",
-                                            "lang": "expression"
-                                        }
-                                    },
-                                    "weight": 10
-                                }
-                            ]
-                        }
-                    }
-                }
-            },
-            {
-                "window_size": 448,
-                "query": {
-                    "query_weight": 1,
-                    "rescore_query_weight": 10000,
-                    "score_mode": "total",
-                    "rescore_query": {
-                        "bool": {
-                            "should": [
-                                {
-                                    "constant_score": {
-                                        "filter": {
-                                            "match_all": {
+        # rescore = [
+        #     {
+        #         "window_size": 8192,
+        #         "query": {
+        #             "query_weight": 1,
+        #             "rescore_query_weight": 1,
+        #             "score_mode": "total",
+        #             "rescore_query": {
+        #                 "function_score": {
+        #                     "score_mode": "sum",
+        #                     "boost_mode": "sum",
+        #                     "functions": [
+        #                         {
+        #                             "script_score": {
+        #                                 "script": {
+        #                                     "source": "pow(doc['popularity_score'].value , 0.8) / ( pow(doc['popularity_score'].value, 0.8) + pow(8.0E-6,0.8))",
+        #                                     "lang": "expression"
+        #                                 }
+        #                             },
+        #                             "weight": 3
+        #                         },
+        #                         {
+        #                             "script_score": {
+        #                                 "script": {
+        #                                     "source": "pow(doc['incoming_links'].value , 0.7) / ( pow(doc['incoming_links'].value, 0.7) + pow(30,0.7))",
+        #                                     "lang": "expression"
+        #                                 }
+        #                             },
+        #                             "weight": 10
+        #                         }
+        #                     ]
+        #                 }
+        #             }
+        #         }
+        #     },
+        #     {
+        #         "window_size": 448,
+        #         "query": {
+        #             "query_weight": 1,
+        #             "rescore_query_weight": 10000,
+        #             "score_mode": "total",
+        #             "rescore_query": {
+        #                 "bool": {
+        #                     "should": [
+        #                         {
+        #                             "constant_score": {
+        #                                 "filter": {
+        #                                     "match_all": {
+        #
+        #                                     }
+        #                                 },
+        #                                 "boost": 100000
+        #                             }
+        #                         },
+        #                         {
+        #                             "sltr": {
+        #                                 "model": "enwiki-20220421-20180215-query_explorer",
+        #                                 "params": {
+        #                                     "query_string": text
+        #                                 }
+        #                             }
+        #                         }
+        #                     ]
+        #                 }
+        #             }
+        #         }
+        #     }
+        # ]
 
-                                            }
-                                        },
-                                        "boost": 100000
-                                    }
-                                },
-                                {
-                                    "sltr": {
-                                        "model": "enwiki-20220421-20180215-query_explorer",
-                                        "params": {
-                                            "query_string": text
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    }
-                }
-            }
-        ]
-
-        search = self._search(query, limit=limit, rescore=rescore)
+        # search = self._search(query, limit=limit, rescore=rescore)
+        search = self._search(query, limit=limit)
         return ES._to_dataframe(search)
 
     def search_mediawiki_restrict_2(self, text, limit=10):
@@ -574,76 +577,77 @@ class ES:
             ]
         )
 
-        rescore = [
-            {
-                "window_size": 8192,
-                "query": {
-                    "query_weight": 1,
-                    "rescore_query_weight": 1,
-                    "score_mode": "total",
-                    "rescore_query": {
-                        "function_score": {
-                            "score_mode": "sum",
-                            "boost_mode": "sum",
-                            "functions": [
-                                {
-                                    "script_score": {
-                                        "script": {
-                                            "source": "pow(doc['popularity_score'].value , 0.8) / ( pow(doc['popularity_score'].value, 0.8) + pow(8.0E-6,0.8))",
-                                            "lang": "expression"
-                                        }
-                                    },
-                                    "weight": 3
-                                },
-                                {
-                                    "script_score": {
-                                        "script": {
-                                            "source": "pow(doc['incoming_links'].value , 0.7) / ( pow(doc['incoming_links'].value, 0.7) + pow(30,0.7))",
-                                            "lang": "expression"
-                                        }
-                                    },
-                                    "weight": 10
-                                }
-                            ]
-                        }
-                    }
-                }
-            },
-            {
-                "window_size": 448,
-                "query": {
-                    "query_weight": 1,
-                    "rescore_query_weight": 10000,
-                    "score_mode": "total",
-                    "rescore_query": {
-                        "bool": {
-                            "should": [
-                                {
-                                    "constant_score": {
-                                        "filter": {
-                                            "match_all": {
+        # rescore = [
+        #     {
+        #         "window_size": 8192,
+        #         "query": {
+        #             "query_weight": 1,
+        #             "rescore_query_weight": 1,
+        #             "score_mode": "total",
+        #             "rescore_query": {
+        #                 "function_score": {
+        #                     "score_mode": "sum",
+        #                     "boost_mode": "sum",
+        #                     "functions": [
+        #                         {
+        #                             "script_score": {
+        #                                 "script": {
+        #                                     "source": "pow(doc['popularity_score'].value , 0.8) / ( pow(doc['popularity_score'].value, 0.8) + pow(8.0E-6,0.8))",
+        #                                     "lang": "expression"
+        #                                 }
+        #                             },
+        #                             "weight": 3
+        #                         },
+        #                         {
+        #                             "script_score": {
+        #                                 "script": {
+        #                                     "source": "pow(doc['incoming_links'].value , 0.7) / ( pow(doc['incoming_links'].value, 0.7) + pow(30,0.7))",
+        #                                     "lang": "expression"
+        #                                 }
+        #                             },
+        #                             "weight": 10
+        #                         }
+        #                     ]
+        #                 }
+        #             }
+        #         }
+        #     },
+        #     {
+        #         "window_size": 448,
+        #         "query": {
+        #             "query_weight": 1,
+        #             "rescore_query_weight": 10000,
+        #             "score_mode": "total",
+        #             "rescore_query": {
+        #                 "bool": {
+        #                     "should": [
+        #                         {
+        #                             "constant_score": {
+        #                                 "filter": {
+        #                                     "match_all": {
+        #
+        #                                     }
+        #                                 },
+        #                                 "boost": 100000
+        #                             }
+        #                         },
+        #                         {
+        #                             "sltr": {
+        #                                 "model": "enwiki-20220421-20180215-query_explorer",
+        #                                 "params": {
+        #                                     "query_string": text
+        #                                 }
+        #                             }
+        #                         }
+        #                     ]
+        #                 }
+        #             }
+        #         }
+        #     }
+        # ]
 
-                                            }
-                                        },
-                                        "boost": 100000
-                                    }
-                                },
-                                {
-                                    "sltr": {
-                                        "model": "enwiki-20220421-20180215-query_explorer",
-                                        "params": {
-                                            "query_string": text
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    }
-                }
-            }
-        ]
-
-        search = self._search(query, limit=limit, rescore=rescore)
+        # search = self._search(query, limit=limit, rescore=rescore)
+        search = self._search(query, limit=limit)
         return ES._to_dataframe(search)
 
     def indices(self):
