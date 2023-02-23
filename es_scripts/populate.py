@@ -4,7 +4,6 @@ import pandas as pd
 
 from interfaces.db import DB
 from interfaces.es import ES
-from utils.text.markdown import strip
 from utils.breadcrumb import Breadcrumb
 
 # Init ray
@@ -17,29 +16,6 @@ indices = ['concepts']
 class PopulateActor:
     def __init__(self):
         self.ess = [ES(index) for index in indices]
-
-    # def strip_and_index(self, page_id, page, page_categories):
-    #     # Strip page content
-    #     stripped_page = strip(page['content'])
-    #
-    #     # Prepare document to index
-    #     doc = {
-    #         'id': page_id,
-    #         'title': page['title'],
-    #         'text': stripped_page['text'],
-    #         'heading': stripped_page['heading'],
-    #         'opening_text': stripped_page['opening_text'],
-    #         'auxiliary_text': stripped_page['auxiliary_text'],
-    #         'file_text': '',
-    #         'redirect': page['redirect'],
-    #         'category': page_categories,
-    #         'incoming_links': 1,
-    #         'popularity_score': page['popularity']
-    #     }
-    #
-    #     # Index on elasticsearch
-    #     for es in self.ess:
-    #         es.index_doc(doc)
 
     def index(self, doc):
         for es in self.ess:
@@ -63,6 +39,23 @@ table_name = 'graph.Nodes_N_Concept'
 fields = ['PageID', 'PageTitle', 'PageContent']
 concepts = pd.DataFrame(db.find(table_name, fields=fields), columns=fields)
 concept_ids = list(concepts['PageID'])
+
+# Fetch concepts extended content
+bc.log('Fetching concepts extended content...')
+table_name = 'Campus_Analytics.Page_Title_and_Content_Reduced_No_Macros'
+fields = ['PageID', 'Headings', 'OpeningText', 'AuxiliaryText', 'Redirects', 'Popularity']
+conditions = {'PageID': concept_ids}
+extended_concepts = pd.DataFrame(db.find(table_name, fields=fields, conditions=conditions), columns=fields)
+
+# Merge concepts with extended_concepts
+concepts = pd.merge(concepts, extended_concepts, how='left', on='PageID')
+
+# Coerce missing values to valid values
+concepts['Headings'] = concepts['Headings'].fillna('').str.split(',').apply(list)
+concepts['OpeningText'] = concepts['OpeningText'].fillna('')
+concepts['AuxiliaryText'] = concepts['AuxiliaryText'].fillna('')
+concepts['Redirects'] = concepts['Redirects'].fillna('').str.split(',').apply(list)
+concepts['Popularity'] = concepts['Popularity'].fillna(0)
 
 # Fetch categories
 bc.log('Fetching categories...')
@@ -88,25 +81,26 @@ concepts = pd.merge(concepts, concepts_categories, how='left', on='PageID')
 concepts['Categories'] = concepts['Categories'].fillna('').apply(list)
 
 # Index documents
-bc.log('Indexing documents...')
 results = []
 actor = 0
 for i, concept in concepts.iterrows():
+    if i % 5000 == 0:
+        bc.log(f'Indexing documents {i}-{min(i + 5000, len(concepts))}...')
+
     # Prepare document
     doc = {
         'id': concept['PageID'],
         'title': concept['PageTitle'],
-        'text': concept['PageContent'],         # TODO change to concept['Text'] when available
-        'heading': [],                          # TODO change to concept['Heading'] when available
-        'opening_text': '',                     # TODO change to concept['OpeningText'] when available
-        'auxiliary_text': '',                   # TODO change to concept['AuxiliaryText'] when available
-        'file_text': '',                        # TODO change to concept['FileText'] when available
-        'redirect': [],                         # TODO change to concept['Redirect'] when available
+        'text': concept['PageContent'],
+        'heading': concept['Headings'],
+        'opening_text': concept['OpeningText'],
+        'auxiliary_text': concept['AuxiliaryText'],
+        'file_text': '',                                # TODO change to concept['FileText'] when available
+        'redirect': concept['Redirects'],
         'category': concept['Categories'],
-        'incoming_links': 1,                    # TODO change to concept['IncomingLinks'] when available
-        'popularity_score': 1,                  # TODO change to concept['Popularity'] when available
+        'incoming_links': 1,                            # TODO change to concept['IncomingLinks'] when available
+        'popularity_score': concept['Popularity']
     }
-
 
     # Index document
     results.append(actors[actor].index.remote(doc))
