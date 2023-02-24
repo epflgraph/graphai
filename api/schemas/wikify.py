@@ -51,11 +51,6 @@ class WikifyResponseElem(BaseModel):
     Object representing each of the wikify results. It consists of a set of keywords, a Wikipedia page and several
     scores which measure the degree of relevance of the result with respect to the text.
     """
-    # Keywords: str = Field(
-    #     ...,
-    #     title="Keywords",
-    #     description="Keywords extracted from the text associated to this result"
-    # )
 
     PageID: int = Field(
         ...,
@@ -68,12 +63,6 @@ class WikifyResponseElem(BaseModel):
         title="Page Title",
         description="Title of the Wiki page"
     )
-
-    # Searchrank: int = Field(
-    #     ...,
-    #     title="Searchrank",
-    #     description="Position in which this Wiki page appears in the list of search results when searching for the keywords"
-    # )
 
     SearchScore: float = Field(
         ...,
@@ -99,24 +88,6 @@ class WikifyResponseElem(BaseModel):
         description="Score that measures the relevance of the given page with respect to the rest according to the ontology"
     )
 
-    Ontology2LocalScore: float = Field(
-        ...,
-        title="Ontology2LocalScore",
-        description="Score that measures the relevance of the given page with respect to the rest according to the ontology"
-    )
-
-    Ontology2GlobalScore: float = Field(
-        ...,
-        title="Ontology2GlobalScore",
-        description="Score that measures the relevance of the given page with respect to the rest according to the ontology"
-    )
-
-    OntologyScore: float = Field(
-        ...,
-        title="Ontology score",
-        description="Score that measures the relevance of the given page with respect to the rest according to the ontology"
-    )
-
     GraphScore: float = Field(
         ...,
         title="Graph score",
@@ -129,227 +100,160 @@ class WikifyResponseElem(BaseModel):
         description="Score that measures the relevance of the given page with respect to the rest according to the graph"
     )
 
-    # MixedScore: float = Field(
-    #     ...,
-    #     title="Mixed score",
-    #     description="Score that aggregates the other scores"
-    # )
+    MixedScore: float = Field(
+        ...,
+        title="Mixed score",
+        description="Score that aggregates the other scores"
+    )
 
     class Config:
         schema_extra = {
             'examples': [],
-            # 'examples': [
-            #     {
-            #         "keywords": "angles",
-            #         "page_id": 1196,
-            #         "page_title": "Angle",
-            #         "searchrank": 2,
-            #         "median_graph_score": 0.5830005813291462,
-            #         "search_graph_ratio": 0.2915002906645731,
-            #         "levenshtein_score": 0.9090909090909091,
-            #         "mixed_score": 0.28085506517034586
-            #     },
-            #     {
-            #         "keywords": "angles",
-            #         "page_id": 76956,
-            #         "page_title": "Right_angle",
-            #         "searchrank": 4,
-            #         "median_graph_score": 0.48551476089734247,
-            #         "search_graph_ratio": 0.12137869022433562,
-            #         "levenshtein_score": 0.5882352941176471,
-            #         "mixed_score": 0.08126190097848535
-            #     },
-            #     {
-            #         "keywords": "angles equal",
-            #         "page_id": 133496,
-            #         "page_title": "Parallelogram",
-            #         "searchrank": 1,
-            #         "median_graph_score": 0.394037640426413,
-            #         "search_graph_ratio": 0.394037640426413,
-            #         "levenshtein_score": 0.32,
-            #         "mixed_score": 0.07547607718181548
-            #     },
-            #     {
-            #         "keywords": "angles equal",
-            #         "page_id": 1196,
-            #         "page_title": "Angle",
-            #         "searchrank": 2,
-            #         "median_graph_score": 0.5830005813291462,
-            #         "search_graph_ratio": 0.2915002906645731,
-            #         "levenshtein_score": 0.5882352941176471,
-            #         "mixed_score": 0.19515672571028433
-            #     },
-            #     {
-            #         "keywords": "angles equal",
-            #         "page_id": 91111,
-            #         "page_title": "Angle_trisection",
-            #         "searchrank": 3,
-            #         "median_graph_score": 0.3476123143066503,
-            #         "search_graph_ratio": 0.1158707714355501,
-            #         "levenshtein_score": 0.5,
-            #         "mixed_score": 0.05793538571777505
-            #     },
-            #     {
-            #         "keywords": "finite straight line",
-            #         "page_id": 946975,
-            #         "page_title": "Line_(geometry)",
-            #         "searchrank": 1,
-            #         "median_graph_score": 0.5915461851792454,
-            #         "search_graph_ratio": 0.5915461851792454,
-            #         "levenshtein_score": 0.34285714285714286,
-            #         "mixed_score": 0.13100744170621825
-            #     },
-            #     {
-            #         "keywords": "finite straight line",
-            #         "page_id": 22634860,
-            #         "page_title": "Line_segment",
-            #         "searchrank": 2,
-            #         "median_graph_score": 0.5379522375359874,
-            #         "search_graph_ratio": 0.2689761187679937,
-            #         "levenshtein_score": 0.4375,
-            #         "mixed_score": 0.10154942377039773
-            #     },
-            #     {
-            #         "keywords": "finite straight line",
-            #         "page_id": 9417,
-            #         "page_title": "Euclidean_geometry",
-            #         "searchrank": 6,
-            #         "median_graph_score": 0.6011022594685048,
-            #         "search_graph_ratio": 0.10018370991141747,
-            #         "levenshtein_score": 0.2631578947368421,
-            #         "mixed_score": 0.013094543912737368
-            #     },
-            #     {
-            #         "keywords": "interior angles",
-            #         "page_id": 13295107,
-            #         "page_title": "Transversal_(geometry)",
-            #         "searchrank": 2,
-            #         "median_graph_score": 0.3276581414375417,
-            #         "search_graph_ratio": 0.16382907071877084,
-            #         "levenshtein_score": 0.32432432432432434,
-            #         "mixed_score": 0.0322677338136873
-            #     },
-            #     {
-            #         "keywords": "interior angles",
-            #         "page_id": 1196,
-            #         "page_title": "Angle",
-            #         "searchrank": 3,
-            #         "median_graph_score": 0.5830005813291462,
-            #         "search_graph_ratio": 0.1943335271097154,
-            #         "levenshtein_score": 0.5,
-            #         "mixed_score": 0.0971667635548577
-            #     },
-            #     {
-            #         "keywords": "interior angles",
-            #         "page_id": 30654,
-            #         "page_title": "Triangle",
-            #         "searchrank": 4,
-            #         "median_graph_score": 0.5166070436540483,
-            #         "search_graph_ratio": 0.12915176091351208,
-            #         "levenshtein_score": 0.6956521739130435,
-            #         "mixed_score": 0.10682151707307275
-            #     },
-            #     {
-            #         "keywords": "straight line",
-            #         "page_id": 946975,
-            #         "page_title": "Line_(geometry)",
-            #         "searchrank": 1,
-            #         "median_graph_score": 0.5915461851792454,
-            #         "search_graph_ratio": 0.5915461851792454,
-            #         "levenshtein_score": 0.2857142857142857,
-            #         "mixed_score": 0.0902750735129564
-            #     },
-            #     {
-            #         "keywords": "straight line",
-            #         "page_id": 22634860,
-            #         "page_title": "Line_segment",
-            #         "searchrank": 3,
-            #         "median_graph_score": 0.5379522375359874,
-            #         "search_graph_ratio": 0.1793174125119958,
-            #         "levenshtein_score": 0.32,
-            #         "mixed_score": 0.03434741628275069
-            #     },
-            #     {
-            #         "keywords": "straight line falling",
-            #         "page_id": 20110824,
-            #         "page_title": "Infinity",
-            #         "searchrank": 2,
-            #         "median_graph_score": 0.5035806444244773,
-            #         "search_graph_ratio": 0.2517903222122386,
-            #         "levenshtein_score": 0.3448275862068966,
-            #         "mixed_score": 0.056450380072210773
-            #     },
-            #     {
-            #         "keywords": "straight line falling",
-            #         "page_id": 33731493,
-            #         "page_title": "Parallel_postulate",
-            #         "searchrank": 3,
-            #         "median_graph_score": 0.5147619767637447,
-            #         "search_graph_ratio": 0.1715873255879149,
-            #         "levenshtein_score": 0.3076923076923077,
-            #         "mixed_score": 0.030329609766357013
-            #     },
-            #     {
-            #         "keywords": "straight line falling",
-            #         "page_id": 928,
-            #         "page_title": "Axiom",
-            #         "searchrank": 4,
-            #         "median_graph_score": 0.5594457017244829,
-            #         "search_graph_ratio": 0.13986142543112073,
-            #         "levenshtein_score": 0.15384615384615385,
-            #         "mixed_score": 0.008253182503235177
-            #     },
-            #     {
-            #         "keywords": "straight line falling",
-            #         "page_id": 9417,
-            #         "page_title": "Euclidean_geometry",
-            #         "searchrank": 5,
-            #         "median_graph_score": 0.6011022594685048,
-            #         "search_graph_ratio": 0.12022045189370097,
-            #         "levenshtein_score": 0.3076923076923077,
-            #         "mixed_score": 0.0212500508378333
-            #     },
-            #     {
-            #         "keywords": "straight lines",
-            #         "page_id": 946975,
-            #         "page_title": "Line_(geometry)",
-            #         "searchrank": 1,
-            #         "median_graph_score": 0.5915461851792454,
-            #         "search_graph_ratio": 0.5915461851792454,
-            #         "levenshtein_score": 0.27586206896551724,
-            #         "mixed_score": 0.08440929451917713
-            #     },
-            #     {
-            #         "keywords": "straight lines makes",
-            #         "page_id": 20110824,
-            #         "page_title": "Infinity",
-            #         "searchrank": 2,
-            #         "median_graph_score": 0.5035806444244773,
-            #         "search_graph_ratio": 0.2517903222122386,
-            #         "levenshtein_score": 0.21428571428571427,
-            #         "mixed_score": 0.023243527253928767
-            #     },
-            #     {
-            #         "keywords": "straight lines makes",
-            #         "page_id": 946975,
-            #         "page_title": "Line_(geometry)",
-            #         "searchrank": 3,
-            #         "median_graph_score": 0.5915461851792454,
-            #         "search_graph_ratio": 0.19718206172641511,
-            #         "levenshtein_score": 0.4,
-            #         "mixed_score": 0.061131470999058996
-            #     },
-            #     {
-            #         "keywords": "straight lines makes",
-            #         "page_id": 33731493,
-            #         "page_title": "Parallel_postulate",
-            #         "searchrank": 5,
-            #         "median_graph_score": 0.5147619767637447,
-            #         "search_graph_ratio": 0.10295239535274894,
-            #         "levenshtein_score": 0.3684210526315789,
-            #         "mixed_score": 0.026635852549379505
-            #     }
-            # ]
+            'examples': [
+                {
+                    "PageID": 1196,
+                    "PageTitle": "Angle",
+                    "SearchScore": 0.8055555555555556,
+                    "LevenshteinScore": 1,
+                    "OntologyLocalScore": 1,
+                    "OntologyGlobalScore": 1,
+                    "GraphScore": 0.44735199351890065,
+                    "KeywordsScore": 1,
+                    "MixedScore": 0.9058463104630012
+                },
+                {
+                    "PageID": 152547,
+                    "PageTitle": "Bisection",
+                    "SearchScore": 0.3333333333333333,
+                    "LevenshteinScore": 0.16661245633224378,
+                    "OntologyLocalScore": 0.6666666666666667,
+                    "OntologyGlobalScore": 0.5,
+                    "GraphScore": 0.22717425120724127,
+                    "KeywordsScore": 0.609271523178808,
+                    "MixedScore": 0.44715741719086977
+                },
+                {
+                    "PageID": 23972889,
+                    "PageTitle": "Distance_from_a_point_to_a_line",
+                    "SearchScore": 0.16666666666666669,
+                    "LevenshteinScore": 0.2134432477817427,
+                    "OntologyLocalScore": 0.21885521885521886,
+                    "OntologyGlobalScore": 0.19791666666666666,
+                    "GraphScore": 0.003590346636521923,
+                    "KeywordsScore": 0.19828593689131283,
+                    "MixedScore": 0.17781458572659029
+                },
+                {
+                    "PageID": 946975,
+                    "PageTitle": "Line_(geometry)",
+                    "SearchScore": 1,
+                    "LevenshteinScore": 0.33567080901262164,
+                    "OntologyLocalScore": 0.8232323232323234,
+                    "OntologyGlobalScore": 0.7916666666666666,
+                    "GraphScore": 1,
+                    "KeywordsScore": 0.7855473315153876,
+                    "MixedScore": 0.7886663359580247
+                },
+                {
+                    "PageID": 22634860,
+                    "PageTitle": "Line_segment",
+                    "SearchScore": 0.5555555555555556,
+                    "LevenshteinScore": 0.3582111602475977,
+                    "OntologyLocalScore": 0.43097643097643096,
+                    "OntologyGlobalScore": 0.75,
+                    "GraphScore": 0.42461810549112244,
+                    "KeywordsScore": 0.6026490066225165,
+                    "MixedScore": 0.5277457623305826
+                },
+                {
+                    "PageID": 2175469,
+                    "PageTitle": "Non-line-of-sight_propagation",
+                    "SearchScore": 0.19444444444444448,
+                    "LevenshteinScore": 0.39019342923035233,
+                    "OntologyLocalScore": 0.21212121212121213,
+                    "OntologyGlobalScore": 0.11647727272727273,
+                    "GraphScore": 0.01572170017309725,
+                    "KeywordsScore": 0.5087650954421504,
+                    "MixedScore": 0.2950855110143057
+                },
+                {
+                    "PageID": 133496,
+                    "PageTitle": "Parallelogram",
+                    "SearchScore": 0.3055555555555556,
+                    "LevenshteinScore": 0.13627674782665528,
+                    "OntologyLocalScore": 0.6666666666666667,
+                    "OntologyGlobalScore": 0.5,
+                    "GraphScore": 0.14484503981375635,
+                    "KeywordsScore": 0.609271523178808,
+                    "MixedScore": 0.4288185842201275
+                },
+                {
+                    "PageID": 76944,
+                    "PageTitle": "Perpendicular",
+                    "SearchScore": 0.19444444444444445,
+                    "LevenshteinScore": 0.039652736888335365,
+                    "OntologyLocalScore": 0.21212121212121213,
+                    "OntologyGlobalScore": 0.25,
+                    "GraphScore": 0.15017752515904018,
+                    "KeywordsScore": 0.2584729255940787,
+                    "MixedScore": 0.19421461143444865
+                },
+                {
+                    "PageID": 25278,
+                    "PageTitle": "Quadrilateral",
+                    "SearchScore": 0.02777777777777779,
+                    "LevenshteinScore": 0.15367913840285474,
+                    "OntologyLocalScore": 0.36363636363636365,
+                    "OntologyGlobalScore": 0.25,
+                    "GraphScore": 0.12360559235107477,
+                    "KeywordsScore": 0.3307362680171406,
+                    "MixedScore": 0.21973432050168798
+                },
+                {
+                    "PageID": 76956,
+                    "PageTitle": "Right_angle",
+                    "SearchScore": 0.4166666666666667,
+                    "LevenshteinScore": 0.4451948682556247,
+                    "OntologyLocalScore": 0.42424242424242425,
+                    "OntologyGlobalScore": 0.5,
+                    "GraphScore": 0.12678424818870415,
+                    "KeywordsScore": 0.4107908063887807,
+                    "MixedScore": 0.3996645939435453
+                },
+                {
+                    "PageID": 94102,
+                    "PageTitle": "Solid_angle",
+                    "SearchScore": 0.3888888888888889,
+                    "LevenshteinScore": 0.6912823774628103,
+                    "OntologyLocalScore": 0.196969696969697,
+                    "OntologyGlobalScore": 0.15909090909090912,
+                    "GraphScore": 0.08695255651117278,
+                    "KeywordsScore": 0.7415270744059212,
+                    "MixedScore": 0.4580780578246384
+                },
+                {
+                    "PageID": 31482,
+                    "PageTitle": "Tangent",
+                    "SearchScore": 0.4722222222222222,
+                    "LevenshteinScore": 0.29631455223594527,
+                    "OntologyLocalScore": 0.6414141414141414,
+                    "OntologyGlobalScore": 0.59375,
+                    "GraphScore": 0.3573397570845174,
+                    "KeywordsScore": 0.5087650954421504,
+                    "MixedScore": 0.48284225283305426
+                },
+                {
+                    "PageID": 30654,
+                    "PageTitle": "Triangle",
+                    "SearchScore": 0.16666666666666669,
+                    "LevenshteinScore": 0.5717479784842091,
+                    "OntologyLocalScore": 0.6666666666666667,
+                    "OntologyGlobalScore": 0.5,
+                    "GraphScore": 0.2535403349997643,
+                    "KeywordsScore": 0.609271523178808,
+                    "MixedScore": 0.47723102055958355
+                }
+            ]
         }
 
 
