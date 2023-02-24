@@ -154,74 +154,73 @@ class Ontology:
 
         ################################################
 
-        # Fetch cluster nodes
+        # Fetch category nodes
         table_name = 'graphontology.Hierarchical_Cluster_Names_HighLevel'
-        fields = ['ClusterIndex', 'ClusterName']
-        self.clusters = pd.DataFrame(db.find(table_name, fields=fields), columns=['ClusterID', 'ClusterName'])
+        fields = ['CategoryID', 'CategoryName']
+        self.categories = pd.DataFrame(db.find(table_name, fields=fields), columns=fields)
 
-        # Extract cluster ids for faster access
-        self.cluster_ids = set(self.clusters['ClusterID'])
+        # Extract category ids for faster access
+        self.category_ids = set(self.categories['CategoryID'])
 
-        # Store cluster names indexing by ClusterID for faster access
-        self.cluster_names = self.clusters.set_index('ClusterID')['ClusterName']
+        # Store category names indexing by CategoryID for faster access
+        self.category_names = self.categories.set_index('CategoryID')['CategoryName']
 
         ################################################
 
-        # Fetch cluster-cluster edges
+        # Fetch category-category edges
         table_name = 'graphontology.Predefined_Knowledge_Tree_Hierarchy'
-        fields = ['ChildIndex', 'ParentIndex']
-        self.clusters_clusters = pd.DataFrame(db.find(table_name, fields=fields), columns=['ChildID', 'ParentID'])
+        fields = ['ChildCategoryID', 'ParentCategoryID']
+        self.categories_categories = pd.DataFrame(db.find(table_name, fields=fields), columns=fields)
 
-        # Extract child cluster ids for faster access
-        self.cluster_child_ids = set(self.clusters_clusters['ChildID'])
+        # Extract child category ids for faster access
+        self.category_child_ids = set(self.categories_categories['ChildCategoryID'])
 
-        # Store cluster parents indexing by ChildID for faster access
-        self.cluster_parents = self.clusters_clusters.set_index('ChildID')['ParentID']
+        # Store category parents indexing by ChildCategoryID for faster access
+        self.category_parents = self.categories_categories.set_index('ChildCategoryID')['ParentCategoryID']
 
         ################################################
 
-        # Fetch concept-cluster edges
+        # Fetch concept-category edges
         table_name = 'graphontology.Hierarchical_Clusters_Main'
-        fields = ['PageID', 'ClusterLevel1']
-        self.concepts_clusters = pd.DataFrame(db.find(table_name, fields=fields), columns=['PageID', 'ClusterID'])
+        fields = ['PageID', 'CategoryID']
+        self.concepts_categories = pd.DataFrame(db.find(table_name, fields=fields), columns=['PageID', 'CategoryID'])
 
-        # Extract concept and cluster ids for faster access
-        self.concept_ids = set(self.concepts_clusters['PageID'])
+        # Extract concept and category ids for faster access
+        self.concept_ids = set(self.concepts_categories['PageID'])
 
-        # Store cluster parents indexing by ChildID for faster access
-        self.concept_clusters = self.concepts_clusters.set_index('PageID')['ClusterID']
+        # Store category ids indexing by PageID for faster access
+        self.concept_categories = self.concepts_categories.set_index('PageID')['CategoryID']
 
-    def get_concept_cluster(self, page_id):
+    def get_concept_category(self, page_id):
         if page_id not in self.concept_ids:
-            # print(f"""Warning! Concept {page_id} doesn't have a cluster in the ontology""")
             return None
 
-        return self.concept_clusters.at[page_id]
+        return self.concept_categories.at[page_id]
 
-    def add_concepts_cluster(self, results):
-        return pd.merge(results, self.concepts_clusters, how='inner', on='PageID')
+    def add_concepts_category(self, results):
+        return pd.merge(results, self.concept_categories, how='inner', on='PageID')
 
-    def add_clusters_cluster(self, results):
+    def add_categories_category(self, results):
         return pd.merge(
             results,
-            self.clusters_clusters.rename(columns={'ChildID': 'ClusterID', 'ParentID': 'Cluster2ID'}),
+            self.categories_categories.rename(columns={'ChildCategoryID': 'CategoryID', 'ParentCategoryID': 'Category2ID'}),
             how='inner',
-            on='ClusterID'
+            on='CategoryID'
         )
 
     def filter_concepts(self, results):
         return results[results['PageID'].isin(self.concept_ids)]
 
     def add_ontology_score(self, results):
-        # Add concepts cluster column
-        results = pd.merge(results, self.concepts_clusters, how='inner', on='PageID')
+        # Add concepts category column
+        results = pd.merge(results, self.concepts_categories, how='inner', on='PageID')
 
-        # Add clusters cluster column
+        # Add categories category column
         results = pd.merge(
             results,
-            self.clusters_clusters.rename(columns={'ChildID': 'ClusterID', 'ParentID': 'Cluster2ID'}),
+            self.categories_categories.rename(columns={'ChildCategoryID': 'CategoryID', 'ParentCategoryID': 'Category2ID'}),
             how='inner',
-            on='ClusterID'
+            on='CategoryID'
         )
 
         # Add local count: number of pages with the same keywords
@@ -232,43 +231,43 @@ class Ontology:
             on=['Keywords']
         )
 
-        # Add local cluster count: number of pages among those with the same keywords sharing the same cluster
+        # Add local category count: number of pages among those with the same keywords sharing the same category
         results = pd.merge(
             results,
-            results.groupby(by=['Keywords', 'ClusterID']).aggregate(ClusterLocalCount=('PageID', 'count')).reset_index(),
+            results.groupby(by=['Keywords', 'CategoryID']).aggregate(CategoryLocalCount=('PageID', 'count')).reset_index(),
             how='left',
-            on=['Keywords', 'ClusterID']
+            on=['Keywords', 'CategoryID']
         )
 
-        # Add global cluster count: number of pages among all sharing the same cluster
+        # Add global category count: number of pages among all sharing the same category
         results = pd.merge(
             results,
-            results.groupby(by=['ClusterID']).aggregate(ClusterGlobalCount=('PageID', 'count')).reset_index(),
+            results.groupby(by=['CategoryID']).aggregate(CategoryGlobalCount=('PageID', 'count')).reset_index(),
             how='left',
-            on=['ClusterID']
+            on=['CategoryID']
         )
 
-        # Add local cluster2 count: number of pages among those with the same keywords sharing the same cluster2
+        # Add local category2 count: number of pages among those with the same keywords sharing the same category2
         results = pd.merge(
             results,
-            results.groupby(by=['Keywords', 'Cluster2ID']).aggregate(Cluster2LocalCount=('PageID', 'count')).reset_index(),
+            results.groupby(by=['Keywords', 'Category2ID']).aggregate(Category2LocalCount=('PageID', 'count')).reset_index(),
             how='left',
-            on=['Keywords', 'Cluster2ID']
+            on=['Keywords', 'Category2ID']
         )
 
-        # Add global cluster2 count: number of pages among all sharing the same cluster2
+        # Add global category2 count: number of pages among all sharing the same category2
         results = pd.merge(
             results,
-            results.groupby(by=['Cluster2ID']).aggregate(Cluster2GlobalCount=('PageID', 'count')).reset_index(),
+            results.groupby(by=['Category2ID']).aggregate(Category2GlobalCount=('PageID', 'count')).reset_index(),
             how='left',
-            on=['Cluster2ID']
+            on=['Category2ID']
         )
 
         # Compute scores
-        results['OntologyLocalScore'] = results['ClusterLocalCount'] / results['LocalCount']
-        results['OntologyGlobalScore'] = results['ClusterGlobalCount'] / len(results)
-        results['Ontology2LocalScore'] = results['Cluster2LocalCount'] / results['LocalCount']
-        results['Ontology2GlobalScore'] = results['Cluster2GlobalCount'] / len(results)
+        results['OntologyLocalScore'] = results['CategoryLocalCount'] / results['LocalCount']
+        results['OntologyGlobalScore'] = results['CategoryGlobalCount'] / len(results)
+        results['Ontology2LocalScore'] = results['Category2LocalCount'] / results['LocalCount']
+        results['Ontology2GlobalScore'] = results['Category2GlobalCount'] / len(results)
 
         # Normalise scores
         results['OntologyLocalScore'] = results['OntologyLocalScore'] / results['OntologyLocalScore'].max()
@@ -280,7 +279,7 @@ class Ontology:
         results['OntologyScore'] = results['OntologyGlobalScore']
 
         # Drop temporary columns
-        results = results.drop(columns=['LocalCount', 'ClusterLocalCount', 'ClusterGlobalCount', 'Cluster2LocalCount', 'Cluster2GlobalCount'])
+        results = results.drop(columns=['LocalCount', 'CategoryLocalCount', 'CategoryGlobalCount', 'Category2LocalCount', 'Category2GlobalCount'])
 
         pd.set_option('display.max_rows', 400)
         pd.set_option('display.max_columns', 500)
