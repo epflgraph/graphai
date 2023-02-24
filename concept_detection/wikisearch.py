@@ -1,13 +1,8 @@
 import pandas as pd
 import ray
 
-from models.wikisearch_result import WikisearchResult
-
 from interfaces.wp import WP
 from interfaces.es import ES
-
-API_URL = 'http://en.wikipedia.org/w/api.php'
-HEADERS = {'User-Agent': 'graphai (https://github.com/epflgraph/graphai)'}
 
 # Init ray
 ray.init(namespace="wikisearch", include_dashboard=False, log_to_driver=True)
@@ -29,24 +24,28 @@ class WikisearchActor:
 
         Args:
             keywords (str): Text to search for among Wikipedia pages.
-            method (str): Method to retrieve the wikipedia pages. It can be either "wikipedia-api",
-            to use the Wikipedia API (default), or one of {"es-base", "es-score"}, to use elasticsearch,
-            returning as score the inverse of the searchrank or the actual elasticsearch score, respectively.
+            method (str): Method to retrieve the wikipedia pages. It can be either "wikipedia-api", to use the
+            Wikipedia API, or one of {"es-base", "es-score"}, to use elasticsearch, returning as score the inverse
+            of the searchrank or the actual elasticsearch score, respectively. Default: 'es-base'.
+            Fallback: 'wikipedia-api'.
 
         Returns:
             pd.DataFrame: A pandas DataFrame with columns ['Keywords', 'PageID', 'PageTitle', 'Searchrank', 'SearchScore'],
             constant on 'Keywords' and unique in 'PageID', with the wikisearch results the given keywords set.
         """
 
-        if method == 'es-score':
-            results = self.es.search(keywords)
+        # Request results
+        if method == 'wikipedia-api':
+            results = self.wp.search(keywords)
         else:
-            if method == 'es-base':
-                results = self.es.search(keywords)
-            else:
+            results = self.es.search(keywords)
+
+            # Fallback to Wikipedia API
+            if len(results) == 0:
                 results = self.wp.search(keywords)
 
-            # Replace score with linear function on Searchrank
+        # Replace score with linear function on Searchrank if needed
+        if method != 'es-score':
             if len(results) >= 2:
                 results['SearchScore'] = 1 - (results['Searchrank'] - 1) / (len(results) - 1)
             else:
@@ -71,9 +70,9 @@ def wikisearch(keywords, method):
     Args:
         keywords (pd.DataFrame): A pandas DataFrame with one column 'Keywords'.
         method (str{'wikipedia-api', 'es-base', 'es-score'}): Method to retrieve the wikipedia pages.
-            It can be either 'wikipedia-api', to use the Wikipedia API (default), or one of {'es-base', 'es-score'},
+            It can be either 'wikipedia-api', to use the Wikipedia API, or one of {'es-base', 'es-score'},
             to use elasticsearch, returning as score the inverse of the searchrank or the actual elasticsearch score,
-            respectively.
+            respectively. Default: 'es-base'.
 
     Returns:
         pd.DataFrame: A pandas DataFrame with columns ['Keywords', 'PageID', 'PageTitle', 'Searchrank', 'SearchScore'],
