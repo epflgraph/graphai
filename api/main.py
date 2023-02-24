@@ -63,11 +63,132 @@ def build_log_msg(msg, seconds, total=False, length=64):
 
 @app.post('/keywords')
 async def keywords(data: KeywordsRequest, use_nltk: Optional[bool] = False):
-    return get_keyword_list(data.raw_text, use_nltk)
+    return get_keywords(data.raw_text, use_nltk)
 
 
 @app.post('/wikify', response_model=WikifyResponse)
-async def wikify(data: WikifyRequest, method: Optional[str] = None, version: Optional[str] = None):
+async def wikify(data: WikifyRequest, method: Optional[str] = None):
+    """
+    Processes raw text (e.g. from an abstract of a publication, a course description or a lecture slide) and returns a
+    list of concepts (Wikipedia pages) that are relevant to the text, each with a set of scores in [0, 1]
+    quantifying their relevance. This is done as follows:
+        1. Keyword extraction: Automatic extraction of keywords from the text. Omitted if keyword_list is provided as
+            input instead of raw_text.
+        2. Wikisearch: For each set of keywords, a set of 10 concepts (Wikipedia pages) is retrieved. This can be done
+            through requests to the Wikipedia API or through elasticsearch requests.
+        3. Scores: For each pair of keywords and concept, several scores are derived, taking into account the ontology
+            of concepts and the concepts graph, among others.
+        4. Aggregation and filter: For each concept, their scores are aggregated and filtered according to some rules,
+            to keep only the most relevant results.
+    """
+
+    # Initialize stopwatch to track time
+    sw = Stopwatch()
+
+    # Get input parameters
+    raw_text = data.raw_text
+
+    # Return if no input
+    if not raw_text:
+        return []
+
+    logger.info(build_log_msg(f'Received raw text "{raw_text[:32]}..."', sw.delta()))
+
+    # Extract keywords from text
+    keywords = get_keywords(raw_text)
+    logger.info(build_log_msg(f'Extracted list of {len(keywords)} keywords', sw.delta()))
+
+    # Perform wikisearch to get concepts for all sets of keywords
+    results = ws.wikisearch(keywords, method)
+    logger.info(build_log_msg(f"""Finished {method if method else 'es-base'} wikisearch with {len(results)} results""", sw.delta()))
+
+    ############################################################
+
+    # Compute levenshtein score
+    # S-shaped function on [0, 1] that pulls values away from 1/2, exaggerating differences
+    def f(x):
+        return 1 / (1 + ((1 - x) / x) ** 2)
+
+    results['LevenshteinScore'] = results.apply(lambda row: Levenshtein.ratio(row['Keywords'], row['PageTitle'].replace('_', ' ').lower()), axis=1)
+    results['LevenshteinScore'] = f(results['LevenshteinScore'])
+
+    ############################################################
+
+    # Compute ontology score
+    results = ontology.add_ontology_scores(results)
+
+    # Compute graph score
+    results = graph.add_graph_score(results)
+
+    ############################################################
+
+    # Compute keywords score aggregating ontology global score over Keywords as an indicator for low-quality keywords
+    results = pd.merge(
+        results,
+        results.groupby(by=['Keywords']).aggregate(KeywordsScore=('OntologyGlobalScore', 'sum')).reset_index(),
+        how='left',
+        on=['Keywords']
+    )
+    results['KeywordsScore'] = results['KeywordsScore'] / results['KeywordsScore'].max()
+
+    logger.info(build_log_msg(f"""Computed scores for {len(results)} results""", sw.delta()))
+
+    ############################################################
+
+    # Aggregate over pages
+    results = results.groupby(by=['PageID', 'PageTitle']).aggregate(
+        SearchScore=('SearchScore', 'sum'),
+        LevenshteinScore=('LevenshteinScore', 'sum'),
+        OntologyLocalScore=('OntologyLocalScore', 'sum'),
+        OntologyGlobalScore=('OntologyGlobalScore', 'sum'),
+        GraphScore=('GraphScore', 'sum'),
+        KeywordsScore=('KeywordsScore', 'sum')
+    ).reset_index()
+    score_columns = ['SearchScore', 'LevenshteinScore', 'OntologyLocalScore', 'OntologyGlobalScore', 'GraphScore', 'KeywordsScore']
+
+    # Normalise scores to [0, 1]
+    for column in score_columns:
+        results[column] = results[column] / results[column].max()
+
+    logger.info(build_log_msg(f"""Aggregated results, got {len(results)} concepts""", sw.delta()))
+
+    ############################################################
+
+    # Filter results with low scores through a majority vote among all scores
+    # To be kept, we require a concept to have at least 5 out of 6 scores to be significant (>= epsilon)
+    epsilon = 0.1
+    votes = pd.DataFrame()
+    for column in score_columns:
+        votes[column] = (results[column] >= epsilon).astype(int)
+    votes = votes.sum(axis=1)
+    results = results[votes >= 5]
+    results = results.sort_values(by='PageTitle')
+
+    logger.info(build_log_msg(f"""Filtered concepts with low scores, kept {len(results)} concepts""", sw.delta()))
+
+    ############################################################
+
+    # Compute mixed score as a convex combination of the different scores,
+    # with prescribed coefficients found after running some analyses on manually tagged data.
+    coefficients = pd.DataFrame({
+        'SearchScore': [0.2],
+        'LevenshteinScore': [0.15],
+        'OntologyLocalScore': [0.15],
+        'OntologyGlobalScore': [0.1],
+        'GraphScore': [0.1],
+        'KeywordsScore': [0.3]
+    })
+    results['MixedScore'] = results[score_columns] @ coefficients.transpose()
+
+    logger.info(build_log_msg(f'Finished all tasks', sw.total(), total=True))
+
+    ############################################################
+
+    return results.to_dict(orient='records')
+
+
+@app.post('/legacy_wikify', response_model=WikifyResponse)
+async def legacy_wikify(data: WikifyRequest, method: Optional[str] = None):
     """
     Wikifies some text.
 
@@ -79,9 +200,6 @@ async def wikify(data: WikifyRequest, method: Optional[str] = None, version: Opt
     * Postprocessing: For each set of keywords and Wikipedia page, the graph scores are aggregated over all anchor pages
         and several other scores are computed.
     """
-
-    if version == 'new':
-        return new_wikify(data, method)
 
     # Get input parameters
     raw_text = data.raw_text
@@ -98,21 +216,14 @@ async def wikify(data: WikifyRequest, method: Optional[str] = None, version: Opt
     # Extract keywords from text
     if raw_text:
         logger.info(build_log_msg(f'Received raw text "{raw_text[:32]}..."', sw.delta()))
-        keyword_list = get_keyword_list(raw_text)
+        keyword_list = get_keywords(raw_text)
         logger.info(build_log_msg(f'Extracted list of {len(keyword_list)} keywords', sw.delta()))
     else:
         logger.info(build_log_msg(f'Received list of {len(keyword_list)} keywords: [{keyword_list[0]}, ...]', sw.delta()))
 
     # Perform wikisearch and extract source_page_ids
     wikisearch_results = ws.wikisearch(keyword_list, method)
-    logger.info(build_log_msg(f'Finished Wikipedia API wikisearch with {len(wikisearch_results)} source pages', sw.delta()))
-
-    wikisearch_results_2 = ws.wikisearch(keyword_list, 'es-base')
-    logger.info(build_log_msg(f'Finished elasticsearch wikisearch with {len(wikisearch_results_2)} source pages', sw.delta()))
-
-    if version == 'new':
-        return new_wikify(wikisearch_results) + new_wikify(wikisearch_results_2)
-        # return new_wikify(wikisearch_results_2)
+    logger.info(build_log_msg(f"""Finished {method if method else 'es-base'} wikisearch with {len(wikisearch_results)} results""", sw.delta()))
 
     # Extract source_page_ids and anchor_page_ids if needed
     source_page_ids = ws.extract_page_ids(wikisearch_results)
@@ -139,166 +250,6 @@ async def wikify(data: WikifyRequest, method: Optional[str] = None, version: Opt
     logger.info(build_log_msg(f'Finished all tasks', sw.total(), total=True))
 
     return results
-
-
-# Function f: [1, N] -> [0, 1] satisfying the following:
-#   f(1) = 1
-#   f(N) = 0
-#   f decreasing
-#   f concave
-def f(x, N):
-    return np.cos((np.pi / 2) * (x - 1) / (N - 1))
-
-
-# S-shaped function on [0, 1] that pulls values away from 1/2, exaggerating differences
-def h(x):
-    return 1 / (1 + ((1 - x) / x)**2)
-
-
-def new_wikify(data, method):
-    # Initialize stopwatch to track time
-    sw = Stopwatch()
-
-    # Get input parameters
-    raw_text = data.raw_text
-
-    # Return if no input
-    if not raw_text:
-        return []
-
-    logger.info(build_log_msg(f'Received raw text "{raw_text[:32]}..."', sw.delta()))
-
-    # Extract keywords from text
-    keywords = get_keywords(raw_text)
-    logger.info(build_log_msg(f'Extracted list of {len(keywords)} keywords', sw.delta()))
-
-    # Perform wikisearch to get concepts for all sets of keywords
-    results = ws.wikisearch(keywords, 'es-base')
-    logger.info(build_log_msg(f'Finished elasticsearch wikisearch with {len(results)} source pages', sw.delta()))
-
-    results_2 = ws.wikisearch(keywords, 'wikipedia-api')
-    logger.info(build_log_msg(f'Finished Wikipedia API wikisearch with {len(results_2)} source pages', sw.delta()))
-
-    ############################################################
-
-    # Compute levenshtein score
-    results['LevenshteinScore'] = results.apply(lambda row: Levenshtein.ratio(row['Keywords'], row['PageTitle'].replace('_', ' ').lower()), axis=1)
-    results['LevenshteinScore'] = h(results['LevenshteinScore'])
-
-    ############################################################
-
-    # Compute ontology score
-    results = ontology.add_ontology_score(results)
-
-    # Compute graph score
-    results = graph.add_graph_score(results)
-
-    # Compute keywords score aggregating ontology score to detect low-quality keywords
-    results = pd.merge(
-        results,
-        results.groupby(by=['Keywords']).aggregate(KeywordsScore=('OntologyScore', 'sum')).reset_index(),
-        how='left',
-        on=['Keywords']
-    )
-    results['KeywordsScore'] = results['KeywordsScore'] / results['KeywordsScore'].max()
-
-    print(results.sort_values(by='PageTitle'))
-
-    # Aggregate over pages
-    results = results.groupby(by=['PageID', 'PageTitle']).aggregate(
-        SearchScore=('SearchScore', 'sum'),
-        LevenshteinScore=('LevenshteinScore', 'sum'),
-        OntologyLocalScore=('OntologyLocalScore', 'sum'),
-        OntologyGlobalScore=('OntologyGlobalScore', 'sum'),
-        Ontology2LocalScore=('Ontology2LocalScore', 'sum'),
-        Ontology2GlobalScore=('Ontology2GlobalScore', 'sum'),
-        OntologyScore=('OntologyScore', 'sum'),
-        GraphScore=('GraphScore', 'sum'),
-        KeywordsScore=('KeywordsScore', 'sum'),
-    ).reset_index()
-
-    # Normalise scores to [0, 1]
-    results['SearchScore'] = results['SearchScore'] / results['SearchScore'].max()
-    results['LevenshteinScore'] = results['LevenshteinScore'] / results['LevenshteinScore'].max()
-    results['OntologyLocalScore'] = results['OntologyLocalScore'] / results['OntologyLocalScore'].max()
-    results['OntologyGlobalScore'] = results['OntologyGlobalScore'] / results['OntologyGlobalScore'].max()
-    results['Ontology2LocalScore'] = results['Ontology2LocalScore'] / results['Ontology2LocalScore'].max()
-    results['Ontology2GlobalScore'] = results['Ontology2GlobalScore'] / results['Ontology2GlobalScore'].max()
-    results['OntologyScore'] = results['OntologyScore'] / results['OntologyScore'].max()
-    results['GraphScore'] = results['GraphScore'] / results['GraphScore'].max()
-    results['KeywordsScore'] = results['KeywordsScore'] / results['KeywordsScore'].max()
-
-    results = results.sort_values(by='PageTitle')
-    print(results)
-
-    # Filter results with low scores
-    epsilon = 0.1
-    search_vote = results['SearchScore'] >= epsilon
-    levenshtein_vote = results['LevenshteinScore'] >= epsilon
-    ontology_vote = results['OntologyScore'] >= epsilon
-    graph_vote = results['GraphScore'] >= epsilon
-    keywords_vote = results['KeywordsScore'] >= epsilon
-    votes = search_vote.astype(int) + levenshtein_vote.astype(int) + ontology_vote.astype(int) + graph_vote.astype(int) + keywords_vote.astype(int)
-    results = results[votes >= 4]
-
-    results = results.sort_values(by='PageTitle')
-
-    # Compute mixed score
-    results['MixedScore'] = 0.15 * results['SearchScore'] + 0.25 * results['LevenshteinScore'] + 0.15 * results['OntologyGlobalScore'] + 0.15 * results['OntologyLocalScore'] + 0.15 * results['GraphScore'] + 0.15 * results['KeywordsScore']
-    # results = results.sort_values(by='MixedScore', ascending=False)
-
-    print(results)
-
-    # Return results
-    # output_columns = ['Keywords', 'PageID', 'PageTitle', 'Searchrank', 'SearchScore', 'OntologyScore', 'GraphScore', 'LevenshteinScore', 'MixedScore']
-    # results = results[output_columns]
-    return results.to_dict(orient='records')
-
-
-def scores(results):
-    # Add search count column
-    results = pd.merge(
-        results,
-        results.groupby(by='Keywords').aggregate(SearchCount=('PageID', 'count')).reset_index(),
-        how='left',
-        on='Keywords'
-    )
-
-    # Compute search score (+ fix rounding error)
-    results['SearchScore'] = f(results['Searchrank'], results['SearchCount'])
-    results.loc[results['SearchScore'] < 0.001, 'SearchScore'] = 0
-    results = results.drop(columns=['SearchCount'])
-
-    # Compute ontology score
-    results = ontology.add_ontology_score(results)
-
-    # Compute graph score
-    results = graph.add_graph_score(results)
-
-    # Compute levenshtein score
-    results['LevenshteinScore'] = results.apply(
-        lambda row: Levenshtein.ratio(row['Keywords'], row['PageTitle'].lower()), axis=1)
-    results['LevenshteinScore'] = h(results['LevenshteinScore'])
-
-    # Compute mixed score
-    results = results.fillna(0)
-    # results['MixedScore'] = results[['SearchScore', 'OntologyScore', 'GraphScore', 'LevenshteinScore']].mean(axis=1)
-    results['MixedScore'] = 0.3 * results['SearchScore'] + 0.5 * results['OntologyScore'] + 0.1 * results[
-        'GraphScore'] + 0.1 * results['LevenshteinScore']
-    results = results.sort_values(by='MixedScore', ascending=False)
-
-    # Filter low scores
-    # results = results[results['MixedScore'] >= 0.2]
-
-    # print(results.head(20))
-    # print(results.info())
-    # print(results.describe())
-
-    # Return results
-    output_columns = ['Keywords', 'PageID', 'PageTitle', 'Searchrank', 'SearchScore', 'OntologyScore', 'GraphScore',
-                      'LevenshteinScore', 'MixedScore']
-    results = results[output_columns]
-    return results.to_dict(orient='records')
 
 
 @app.post('/markdown_strip')
