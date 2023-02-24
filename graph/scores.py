@@ -8,36 +8,26 @@ class ConceptsGraph:
     def __init__(self):
         db = DB()
 
-        print('A')
-
         table_name = 'graph.Nodes_N_Concept'
         fields = ['PageID', 'PageTitle']
         self.concepts = pd.DataFrame(db.find(table_name, fields=fields), columns=fields)
         concept_ids = list(self.concepts['PageID'])
-
-        print('B')
 
         table_name = 'graph.Edges_N_Concept_N_Concept_T_GraphScore'
         fields = ['SourcePageID', 'TargetPageID', 'NormalisedScore']
         conditions = {'SourcePageID': concept_ids, 'TargetPageID': concept_ids}
         self.concepts_concepts = pd.DataFrame(db.find(table_name, fields=fields, conditions=conditions), columns=fields)
 
-        print('C')
-
         self.concepts_concepts = pd.concat([
             self.concepts_concepts,
             self.concepts_concepts.rename(columns={'SourcePageID': 'TargetPageID', 'TargetPageID': 'SourcePageID'})
         ]).reset_index(drop=True)
-
-        print('D')
 
         # Store successor and predecessor sets as attributes
         self.successors = self.concepts_concepts.groupby(by='SourcePageID').aggregate({'TargetPageID': set})
         self.predecessors = self.concepts_concepts.groupby(by='TargetPageID').aggregate({'SourcePageID': set})
         self.sources = set(self.successors.index)
         self.targets = set(self.predecessors.index)
-
-        print('E')
 
     def compute_scores(self, source_page_ids, target_page_ids):
         """
@@ -139,15 +129,6 @@ class ConceptsGraph:
         return results
 
 
-# Function g: [1, N] -> [0, 1] satisfying the following:
-#   g(1) = 0
-#   g(N) = 1
-#   g increasing
-#   g concave
-def g(x, N):
-    return np.sin((np.pi / 2) * (x - 1) / (N - 1))
-
-
 class Ontology:
     def __init__(self):
         db = DB()
@@ -211,7 +192,7 @@ class Ontology:
     def filter_concepts(self, results):
         return results[results['PageID'].isin(self.concept_ids)]
 
-    def add_ontology_score(self, results):
+    def add_ontology_scores(self, results):
         # Add concepts category column
         results = pd.merge(results, self.concepts_categories, how='inner', on='PageID')
 
@@ -234,17 +215,9 @@ class Ontology:
         # Add local category count: number of pages among those with the same keywords sharing the same category
         results = pd.merge(
             results,
-            results.groupby(by=['Keywords', 'CategoryID']).aggregate(CategoryLocalCount=('PageID', 'count')).reset_index(),
+            results.groupby(by=['Keywords', 'CategoryID']).aggregate(Category1LocalCount=('PageID', 'count')).reset_index(),
             how='left',
             on=['Keywords', 'CategoryID']
-        )
-
-        # Add global category count: number of pages among all sharing the same category
-        results = pd.merge(
-            results,
-            results.groupby(by=['CategoryID']).aggregate(CategoryGlobalCount=('PageID', 'count')).reset_index(),
-            how='left',
-            on=['CategoryID']
         )
 
         # Add local category2 count: number of pages among those with the same keywords sharing the same category2
@@ -253,6 +226,14 @@ class Ontology:
             results.groupby(by=['Keywords', 'Category2ID']).aggregate(Category2LocalCount=('PageID', 'count')).reset_index(),
             how='left',
             on=['Keywords', 'Category2ID']
+        )
+
+        # Add global category count: number of pages among all sharing the same category
+        results = pd.merge(
+            results,
+            results.groupby(by=['CategoryID']).aggregate(Category1GlobalCount=('PageID', 'count')).reset_index(),
+            how='left',
+            on=['CategoryID']
         )
 
         # Add global category2 count: number of pages among all sharing the same category2
@@ -264,25 +245,22 @@ class Ontology:
         )
 
         # Compute scores
-        results['OntologyLocalScore'] = results['CategoryLocalCount'] / results['LocalCount']
-        results['OntologyGlobalScore'] = results['CategoryGlobalCount'] / len(results)
+        results['Ontology1LocalScore'] = results['Category1LocalCount'] / results['LocalCount']
         results['Ontology2LocalScore'] = results['Category2LocalCount'] / results['LocalCount']
+        results['Ontology1GlobalScore'] = results['Category1GlobalCount'] / len(results)
         results['Ontology2GlobalScore'] = results['Category2GlobalCount'] / len(results)
 
         # Normalise scores
-        results['OntologyLocalScore'] = results['OntologyLocalScore'] / results['OntologyLocalScore'].max()
-        results['OntologyGlobalScore'] = results['OntologyGlobalScore'] / results['OntologyGlobalScore'].max()
+        results['Ontology1LocalScore'] = results['Ontology1LocalScore'] / results['Ontology1LocalScore'].max()
         results['Ontology2LocalScore'] = results['Ontology2LocalScore'] / results['Ontology2LocalScore'].max()
+        results['Ontology1GlobalScore'] = results['Ontology1GlobalScore'] / results['Ontology1GlobalScore'].max()
         results['Ontology2GlobalScore'] = results['Ontology2GlobalScore'] / results['Ontology2GlobalScore'].max()
 
-        # Ontology score
-        results['OntologyScore'] = results['OntologyGlobalScore']
+        # Combine scores for 1 and 2 categories
+        results['OntologyLocalScore'] = 0.75 * results['Ontology1LocalScore'] + 0.25 * results['Ontology2LocalScore']
+        results['OntologyGlobalScore'] = 0.75 * results['Ontology1GlobalScore'] + 0.25 * results['Ontology2GlobalScore']
 
         # Drop temporary columns
-        results = results.drop(columns=['LocalCount', 'CategoryLocalCount', 'CategoryGlobalCount', 'Category2LocalCount', 'Category2GlobalCount'])
-
-        pd.set_option('display.max_rows', 400)
-        pd.set_option('display.max_columns', 500)
-        pd.set_option('display.width', 1000)
+        results = results.drop(columns=['LocalCount', 'Category1LocalCount', 'Category2LocalCount', 'Category1GlobalCount', 'Category2GlobalCount', 'Ontology1LocalScore', 'Ontology2LocalScore', 'Ontology1GlobalScore', 'Ontology2GlobalScore'])
 
         return results
