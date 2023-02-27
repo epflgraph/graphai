@@ -2,9 +2,9 @@ from pydantic import BaseModel, Field, root_validator
 from typing import List, Optional
 
 
-class KeywordsRequest(BaseModel):
+class WikifyRequest(BaseModel):
     """
-    Object containing the raw text to extract keywords.
+    Object containing the information to be wikified and the list of anchor page ids to define the search space in the graph.
     """
     raw_text: str = Field(
         ...,
@@ -13,37 +13,11 @@ class KeywordsRequest(BaseModel):
         example="To draw a straight line from any point to any point.\nTo produce a finite straight line continuously in a straight line.\nTo describe a circle with any center and radius.\nThat all right angles equal one another.\nThat, if a straight line falling on two straight lines makes the interior angles on the same side less than two right angles, the two straight lines, if produced indefinitely, meet on that side on which are the angles less than the two right angles."
     )
 
-
-class WikifyRequest(BaseModel):
-    """
-    Object containing the information to be wikified and the list of anchor page ids to define the search space in the graph.
-    """
-    raw_text: Optional[str] = Field(
-        None,
-        title="Raw Text",
-        description="Raw text to be wikified",
-        example="To draw a straight line from any point to any point.\nTo produce a finite straight line continuously in a straight line.\nTo describe a circle with any center and radius.\nThat all right angles equal one another.\nThat, if a straight line falling on two straight lines makes the interior angles on the same side less than two right angles, the two straight lines, if produced indefinitely, meet on that side on which are the angles less than the two right angles."
-    )
-
-    keyword_list: Optional[List[str]] = Field(
-        [],
-        title="Keyword List",
-        description="Keywords to be wikified",
-        example=["straight line", "describe a circle", "right angles", "straight line falling", "interior angles"]
-    )
-
-    anchor_page_ids: Optional[List[int]] = Field(
-        [],
-        title="Anchor Page IDs",
-        description="List of IDs of Wikipedia pages definining the search space in the graph",
-        example=[18973446, 9417, 946975]
-    )
-
-    @root_validator
-    def has_input(cls, values):
-        if 'raw_text' not in values and 'keyword_list' not in values:
-            raise ValueError('At least one of {raw_text, keyword_list} must be provided.')
-        return values
+    # @root_validator
+    # def has_input(cls, values):
+    #     if 'raw_text' not in values and 'keyword_list' not in values:
+    #         raise ValueError('At least one of {raw_text, keyword_list} must be provided.')
+    #     return values
 
 
 class WikifyResponseElem(BaseModel):
@@ -258,3 +232,42 @@ class WikifyResponseElem(BaseModel):
 
 
 WikifyResponse = List[WikifyResponseElem]
+
+
+class KeywordsRequest(BaseModel):
+    """
+    Object containing the raw text to extract keywords.
+    """
+    raw_text: str = Field(
+        ...,
+        title="Raw Text",
+        description="Raw text to be wikified",
+        example="To draw a straight line from any point to any point.\nTo produce a finite straight line continuously in a straight line.\nTo describe a circle with any center and radius.\nThat all right angles equal one another.\nThat, if a straight line falling on two straight lines makes the interior angles on the same side less than two right angles, the two straight lines, if produced indefinitely, meet on that side on which are the angles less than the two right angles."
+    )
+
+
+KeywordsResponse = List[WikifyResponseElem]
+
+
+class StripRequest(BaseModel):
+    """
+    Object containing the wikimarkdown code to be stripped.
+    """
+    markdown_code: str = Field(
+        ...,
+        title="Markdown code",
+        description="Markdown code to be stripped",
+        example="""'''Euclid''' ({{IPAc-en|ˈ|juː|k|l|ɪ|d}}; {{lang-grc-gre|[[Wikt:Εὐκλείδης|Εὐκλείδης]]}} {{transl|grc|Eukleides}}; {{fl.}} 300 BC), sometimes called '''Euclid of Alexandria'''<ref name=":0">{{Cite book|title=Math and Mathematicians: The History of Math Discoveries Around the World|last=Bruno|first=Leonard C.|date=2003|orig-year=1999|publisher=U X L|others=Baker, Lawrence W.|isbn=978-0-7876-3813-9|location=Detroit, Mich.|pages=[https://archive.org/details/mathmathematicia00brun/page/125 125]|oclc=41497065|url=https://archive.org/details/mathmathematicia00brun/page/125}}</ref> to distinguish him from [[Euclid of Megara]], was a [[Greek mathematics|Greek mathematician]], often referred to as the "founder of [[geometry]]"<ref name=":0" /> or the "father of geometry"."""
+    )
+
+
+class StripResponse(BaseModel):
+    """
+    Object representing the response of the markdown strip endpoint.
+    """
+
+    stripped_code: str = Field(
+        ...,
+        title="Stripped code",
+        description="Human-readable text after stripping markdown syntax"
+    )
