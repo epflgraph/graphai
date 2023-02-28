@@ -7,14 +7,14 @@ from typing import Optional
 from api.schemas.text import *
 from api.common import log
 
-from concept_detection.keyword_extraction import get_keywords
-import concept_detection.wikisearch as ws
-from graph.scores import ConceptsGraph, Ontology
-from concept_detection.scores import compute_scores
+from core.text.keywords import get_keywords
+import core.text.wikisearch as ws
+from core.graph import ConceptsGraph
+from core.ontology import Ontology
 
-from utils.text.markdown import strip
+from core.utils.text.markdown import strip
 
-from utils.time.stopwatch import Stopwatch
+from core.utils.time.stopwatch import Stopwatch
 
 import Levenshtein
 
