@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.responses import RedirectResponse
 
+from api.routers import ontology
 from api.routers import text
 
 # Initialise FastAPI
@@ -12,9 +13,11 @@ app = FastAPI(
 )
 
 # Include all routers in the app
+app.include_router(ontology.router)
 app.include_router(text.router)
 
 
+# Root endpoint redirects to docs
 @app.get("/")
 async def redirect_docs():
     return RedirectResponse(url='/docs')

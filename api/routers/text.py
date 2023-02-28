@@ -1,22 +1,22 @@
-from fastapi import APIRouter
-
 import pandas as pd
+
+import Levenshtein
+
+from fastapi import APIRouter
 
 from typing import Optional
 
 from api.schemas.text import *
-from api.common import log
+from api.common.log import log
+from api.common.graph import graph
+from api.common.ontology import ontology
 
 from core.text.keywords import get_keywords
 import core.text.wikisearch as ws
-from core.graph import ConceptsGraph
-from core.ontology import Ontology
 
 from core.utils.text.markdown import strip
 
 from core.utils.time.stopwatch import Stopwatch
-
-import Levenshtein
 
 pd.set_option('display.max_rows', 400)
 pd.set_option('display.max_columns', 500)
@@ -27,14 +27,6 @@ router = APIRouter(
     tags=['text'],
     responses={404: {'description': 'Not found'}}
 )
-
-# Create a ConceptsGraph instance to hold concepts graph in memory
-log(f'Fetching concepts graph from database...')
-graph = ConceptsGraph()
-
-# Create an Ontology instance to hold ontology graph in memory
-log(f'Fetching ontology from database...')
-ontology = Ontology()
 
 
 @router.post('/keywords', response_model=KeywordsResponse)
