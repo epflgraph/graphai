@@ -4,7 +4,7 @@ from api.schemas.ontology import *
 from api.common.log import log
 from api.common.ontology import ontology
 
-
+# Initialise ontology router
 router = APIRouter(
     prefix='/ontology',
     tags=['ontology'],

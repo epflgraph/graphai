@@ -3,6 +3,7 @@ from fastapi.responses import RedirectResponse
 
 from api.routers import ontology
 from api.routers import text
+from api.routers import video
 
 # Initialise FastAPI
 app = FastAPI(
@@ -15,6 +16,7 @@ app = FastAPI(
 # Include all routers in the app
 app.include_router(ontology.router)
 app.include_router(text.router)
+app.include_router(video.router)
 
 
 # Root endpoint redirects to docs
