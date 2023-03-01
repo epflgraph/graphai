@@ -4,9 +4,6 @@ import ray
 from core.interfaces.wp import WP
 from core.interfaces.es import ES
 
-# Init ray
-ray.init(namespace="wikisearch", include_dashboard=False, log_to_driver=True)
-
 
 @ray.remote
 class WikisearchActor:

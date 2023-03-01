@@ -7,7 +7,7 @@ from core.interfaces.es import ES
 from core.utils.breadcrumb import Breadcrumb
 
 # Init ray
-ray.init(namespace="populate_elasticsearch", include_dashboard=False, log_to_driver=True)
+# ray.init(namespace="populate_elasticsearch", include_dashboard=False, log_to_driver=True)
 
 indices = ['concepts']
 
