@@ -24,7 +24,7 @@ class VideoActor:
     """
 
     def do_something(self, x):
-        # Perform som time-consuming task
+        # Perform some time-consuming task
         time.sleep(x)
 
         return True
