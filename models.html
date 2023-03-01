@@ -213,11 +213,11 @@
   <ul class="md-nav__list" data-md-scrollfix="">
         <li class="md-nav__item"><a href="#models--page-root" class="md-nav__link">Models</a><nav class="md-nav">
               <ul class="md-nav__list">
-        <li class="md-nav__item"><a href="#module-models.page_result" class="md-nav__link"><code class="xref py py-mod docutils literal notranslate"><span class="pre">models.page_result</span></code> Module</a>
+        <li class="md-nav__item"><a href="#models-page-result-module" class="md-nav__link"><code class="xref py py-mod docutils literal notranslate"><span class="pre">models.page_result</span></code> Module</a>
         </li>
-        <li class="md-nav__item"><a href="#module-models.wikify_result" class="md-nav__link"><code class="xref py py-mod docutils literal notranslate"><span class="pre">models.wikify_result</span></code> Module</a>
+        <li class="md-nav__item"><a href="#models-wikify-result-module" class="md-nav__link"><code class="xref py py-mod docutils literal notranslate"><span class="pre">models.wikify_result</span></code> Module</a>
         </li>
-        <li class="md-nav__item"><a href="#module-models.wikisearch_result" class="md-nav__link"><code class="xref py py-mod docutils literal notranslate"><span class="pre">models.wikisearch_result</span></code> Module</a>
+        <li class="md-nav__item"><a href="#models-wikisearch-result-module" class="md-nav__link"><code class="xref py py-mod docutils literal notranslate"><span class="pre">models.wikisearch_result</span></code> Module</a>
         </li></ul>
             </nav>
         </li>
@@ -259,11 +259,11 @@
   <ul class="md-nav__list" data-md-scrollfix="">
         <li class="md-nav__item"><a href="#models--page-root" class="md-nav__link">Models</a><nav class="md-nav">
               <ul class="md-nav__list">
-        <li class="md-nav__item"><a href="#module-models.page_result" class="md-nav__link"><code class="xref py py-mod docutils literal notranslate"><span class="pre">models.page_result</span></code> Module</a>
+        <li class="md-nav__item"><a href="#models-page-result-module" class="md-nav__link"><code class="xref py py-mod docutils literal notranslate"><span class="pre">models.page_result</span></code> Module</a>
         </li>
-        <li class="md-nav__item"><a href="#module-models.wikify_result" class="md-nav__link"><code class="xref py py-mod docutils literal notranslate"><span class="pre">models.wikify_result</span></code> Module</a>
+        <li class="md-nav__item"><a href="#models-wikify-result-module" class="md-nav__link"><code class="xref py py-mod docutils literal notranslate"><span class="pre">models.wikify_result</span></code> Module</a>
         </li>
-        <li class="md-nav__item"><a href="#module-models.wikisearch_result" class="md-nav__link"><code class="xref py py-mod docutils literal notranslate"><span class="pre">models.wikisearch_result</span></code> Module</a>
+        <li class="md-nav__item"><a href="#models-wikisearch-result-module" class="md-nav__link"><code class="xref py py-mod docutils literal notranslate"><span class="pre">models.wikisearch_result</span></code> Module</a>
         </li></ul>
             </nav>
         </li>
@@ -285,58 +285,13 @@
 <h1 id="models--page-root">Models<a class="headerlink" href="#models--page-root" title="Permalink to this headline">¶</a></h1>
 <p>The <cite>models</cite> package contains classes representing actual pieces of data which have a real-world meaning and possess relations among them.</p>
 
-<span id="models-page-result-module"></span><h2 id="module-models.page_result"><a class="reference internal" href="#module-models.page_result" title="models.page_result"><code class="xref py py-mod docutils literal notranslate"><span class="pre">models.page_result</span></code></a> Module<a class="headerlink" href="#module-models.page_result" title="Permalink to this headline">¶</a></h2>
-<dl class="class">
-<dt id="models.page_result.PageResult">
-<em class="property">class </em><code class="sig-prename descclassname">models.page_result.</code><code class="sig-name descname">PageResult</code><span class="sig-paren">(</span><em class="sig-param">page_id</em>, <em class="sig-param">page_title</em>, <em class="sig-param">searchrank</em>, <em class="sig-param">score</em><span class="sig-paren">)</span><a class="headerlink" href="#models.page_result.PageResult" title="Permalink to this definition">¶</a></dt>
-<dd><p>Class representing a wikipage in the context of a search result.</p>
-<dl class="method">
-<dt id="models.page_result.PageResult.equivalent">
-<code class="sig-name descname">equivalent</code><span class="sig-paren">(</span><em class="sig-param">other</em><span class="sig-paren">)</span><a class="headerlink" href="#models.page_result.PageResult.equivalent" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return whether self and other results have the same wikipage id.</p>
-</dd></dl>
-<dl class="method">
-<dt id="models.page_result.PageResult.equal">
-<code class="sig-name descname">equal</code><span class="sig-paren">(</span><em class="sig-param">other</em><span class="sig-paren">)</span><a class="headerlink" href="#models.page_result.PageResult.equal" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return whether self and other results have the same wikipage id and score.</p>
-</dd></dl>
-<dl class="method">
-<dt id="models.page_result.PageResult.to_tuple">
-<code class="sig-name descname">to_tuple</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#models.page_result.PageResult.to_tuple" title="Permalink to this definition">¶</a></dt>
-<dd><p>Convert result to tuple.</p>
-</dd></dl>
-</dd></dl>
+<h2 id="models-page-result-module"><code class="xref py py-mod docutils literal notranslate"><span class="pre">models.page_result</span></code> Module<a class="headerlink" href="#models-page-result-module" title="Permalink to this headline">¶</a></h2>
 
 
-<span id="models-wikify-result-module"></span><h2 id="module-models.wikify_result"><a class="reference internal" href="#module-models.wikify_result" title="models.wikify_result"><code class="xref py py-mod docutils literal notranslate"><span class="pre">models.wikify_result</span></code></a> Module<a class="headerlink" href="#module-models.wikify_result" title="Permalink to this headline">¶</a></h2>
-<dl class="class">
-<dt id="models.wikify_result.WikifyResult">
-<em class="property">class </em><code class="sig-prename descclassname">models.wikify_result.</code><code class="sig-name descname">WikifyResult</code><span class="sig-paren">(</span><em class="sig-param">keywords</em>, <em class="sig-param">page_id</em>, <em class="sig-param">page_title</em>, <em class="sig-param">searchrank=0</em>, <em class="sig-param">median_graph_score=0</em>, <em class="sig-param">search_graph_ratio=0</em>, <em class="sig-param">levenshtein_score=0</em>, <em class="sig-param">mixed_score=0</em><span class="sig-paren">)</span><a class="headerlink" href="#models.wikify_result.WikifyResult" title="Permalink to this definition">¶</a></dt>
-<dd><p>Class representing a keywords and wikipage match, with all its associated scores.</p>
-<dl class="method">
-<dt id="models.wikify_result.WikifyResult.equivalent">
-<code class="sig-name descname">equivalent</code><span class="sig-paren">(</span><em class="sig-param">other</em><span class="sig-paren">)</span><a class="headerlink" href="#models.wikify_result.WikifyResult.equivalent" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return whether self and other result have the same keywords and wikipage id.</p>
-</dd></dl>
-<dl class="method">
-<dt id="models.wikify_result.WikifyResult.equal">
-<code class="sig-name descname">equal</code><span class="sig-paren">(</span><em class="sig-param">other</em><span class="sig-paren">)</span><a class="headerlink" href="#models.wikify_result.WikifyResult.equal" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return whether self and other result have the same keywords, wikipage id and graph score.</p>
-</dd></dl>
-<dl class="method">
-<dt id="models.wikify_result.WikifyResult.from_dict">
-<em class="property">static </em><code class="sig-name descname">from_dict</code><span class="sig-paren">(</span><em class="sig-param">d</em><span class="sig-paren">)</span><a class="headerlink" href="#models.wikify_result.WikifyResult.from_dict" title="Permalink to this definition">¶</a></dt>
-<dd><p>Create a WikifyResult from a dictionary.</p>
-</dd></dl>
-</dd></dl>
+<h2 id="models-wikify-result-module"><code class="xref py py-mod docutils literal notranslate"><span class="pre">models.wikify_result</span></code> Module<a class="headerlink" href="#models-wikify-result-module" title="Permalink to this headline">¶</a></h2>
 
 
-<span id="models-wikisearch-result-module"></span><h2 id="module-models.wikisearch_result"><a class="reference internal" href="#module-models.wikisearch_result" title="models.wikisearch_result"><code class="xref py py-mod docutils literal notranslate"><span class="pre">models.wikisearch_result</span></code></a> Module<a class="headerlink" href="#module-models.wikisearch_result" title="Permalink to this headline">¶</a></h2>
-<dl class="class">
-<dt id="models.wikisearch_result.WikisearchResult">
-<em class="property">class </em><code class="sig-prename descclassname">models.wikisearch_result.</code><code class="sig-name descname">WikisearchResult</code><span class="sig-paren">(</span><em class="sig-param">keywords</em>, <em class="sig-param">pages</em><span class="sig-paren">)</span><a class="headerlink" href="#models.wikisearch_result.WikisearchResult" title="Permalink to this definition">¶</a></dt>
-<dd><p>Class representing the result of a wikisearch for a given set of keywords.</p>
-</dd></dl>
+<h2 id="models-wikisearch-result-module"><code class="xref py py-mod docutils literal notranslate"><span class="pre">models.wikisearch_result</span></code> Module<a class="headerlink" href="#models-wikisearch-result-module" title="Permalink to this headline">¶</a></h2>
 
 
 
