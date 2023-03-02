@@ -1,38 +1,33 @@
 from setuptools import setup, find_packages
-
 setup(
     name='graphai',
     version='0.2.0',
-    description='CEDE EPFL Graph AI',
+    description='EPFL Graph AI',
     author='Aitor Pérez',
     author_email='aitor.perez@epfl.ch',
-    url='',
+    url='graphai.epfl.ch',
     packages=find_packages(),
     include_package_data=True,
     install_requires=[
         'numpy',
-        'requests'
-    ],
-    extras_require={
-        'main': [
-            'uvicorn',
-            'fastapi',
-            'elasticsearch',
-            'pandas',
-            'matplotlib',
-            'python-rake',
-            'requests-futures',
-            'nltk',
-            'rake-nltk',
-            'clean-text',
-            'ray',
-            'pydantic',
-            'python-Levenshtein',
-            'mysql-connector-python',
-            'mwparserfromhell',
-            'unidecode'
-        ],
-        'docs': ['sphinx', 'sphinx-material']
-    },
-    license=''
+        'pandas',
+        'matplotlib',
+        'fastapi',
+        'uvicorn',
+        'pydantic',
+        'requests',
+        'ray',
+        'mysql-connector-python',
+        'elasticsearch',
+        'unidecode',
+        'clean-text',
+        'python-rake',
+        'nltk',
+        'rake-nltk',
+        'levenshtein',
+        'mwparserfromhell',
+        'sphinx',
+        'sphinx-material'
+    ]
 )
+
