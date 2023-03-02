@@ -3,22 +3,16 @@
 This module contains projects and services enhancing the [EPFL Graph](https://www.epfl.ch/education/educational-initiatives/cede/campusanalytics/epfl-graph/) project with AI-based utilities.
 
 * [Setup](#setup)
-* [Concept Detection](#concept-detection)
-* [Wikitext](wikitext)
+* [API](#api)
+* [Documentation](#documentation)
 
 ## Setup
 The GraphAI module may be installed as a regular python package. To install it, simply run
 ```
-pip install -r requirements.txt
-pip install -e .[main]
+pip install -e .
 ```
 
-Finally, create and populate the ``data`` and ``config`` folders. The code expects ``data`` to contain the following files:
-
-* **predecessors.json**: JSON file containing a dictionary whose keys are Wikipedia page ids and whose values are the list of predecessors of that page in the concepts graph.
-* **successors.json**: JSON file containing a dictionary whose keys are Wikipedia page ids and whose values are the list of successors of that page in the concepts graph.
-
-And it expects ``config`` to contain the following files:
+Finally, create and populate the ``config`` folder. The code expects ``config`` to contain the following files:
 
 * **db.ini**: Database config file, a file with this information:
 ```
@@ -37,14 +31,42 @@ port: <es port>
 index: <es index>
 ```
 
-## Concept detection
-The concept detection submodule contains several tools to automate concept detection and extraction in the form of Wikipedia pages.
+## API
+The GraphAI module includes an API that leverages the [FastAPI](https://fastapi.tiangolo.com/) package.
 
-### Text wikification
-The main tool available is text wikification, namely the extraction from raw text of a list of Wikipedia pages associated to keywords in the text which are relevant, together with several scores measuring this relevance.
+### Deployment
+To deploy it, run the ``deploy.sh`` script in the [api](api) folder specifying the host. The app will be listening to the port 28800 by default. For more information about the API endpoints, check its own documentation.
 
-### Wikimarkup stripper
-Another tool which is available is to remove wikimarkup from a text. Its implementation relies on the [mwparserfromhell](https://github.com/earwig/mwparserfromhell) python package, but responds to the custom needs of the EPFL graph project.
+### Development
+New endpoints can be added either to an existing router or to a new one.
 
-### FastAPI app
-In order to make the services in the concept detection submodule easily available from anywhere, it includes a [FastAPI](https://fastapi.tiangolo.com/) app. To deploy it, run any of the ``deploy-*.sh`` scripts in [concept_detection/api](concept_detection/api) depending on your environment. The app will be listening to the port 28800 by default. For more information about the API, check its own documentation.
+To add an endpoint to an existing router:
+1. Create an async function in the corresponding router file (e.g. [api/routers/video.py](api/routers/video.py)), decorated with fastapi's decorator specifying the HTTP method and endpoint name.
+2. Create also input and output schemas as classes in the corresponding schema file (e.g. [api/schemas/video.py](api/schemas/video.py)). These classes should inherit from [pydantic](https://docs.pydantic.dev/)'s ``BaseModel``, and be named by convention like ``CamelCasedEndpointNameRequest`` and either ``CamelCasedEndpointNameResponse`` or ``CamelCasedEndpointNameResponseElem`` with ``CamelCasedEndpointNameResponse = List[CamelCasedEndpointNameResponseElem]``.
+3. Specify these classes as input and output schemas in the function definition in the router.
+4. Populate the function with the needed logic.
+
+To add an endpoint to a new router:
+1. Create an empty schema file (e.g. [api/schemas/newrouter.py](api/schemas/newrouter.py)).
+2. Create a router file (e.g. [api/routers/newrouter.py](api/routers/newrouter.py)), instantiating a fastapi ``APIRouter`` as follows
+
+        router = APIRouter(
+            prefix='/newrouter',
+            tags=['newrouter'],
+            responses={404: {'description': 'Not found'}}
+        )
+3. Register the router in the fastapi application by adding to the [api/main.py](api/main.py) file the lines
+
+        from api.routers import newrouter
+
+        [...]
+
+        app.include_router(newrouter.router)
+4. At this point, the new router is already created. Create and endpoint on the new router by following the instructions above.
+
+**Note**: New functionalities should be developed in the [core](core) submodule, to make them modular and reusable. API endpoints should be limited to the management of input and output and the orchestration of the different tasks, and should generally rely on functions from that submodule for the actual computation of results.
+
+## Documentation
+Documentation of the GraphAI python package is available [here](https://epflgraph.github.io/graphai/).
+
+Documentation of the GraphAI API endpoints is available on the ``/docs`` endpoint of the API.
