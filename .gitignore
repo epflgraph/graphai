@@ -24,9 +24,3 @@ venv
 
 # Jupyter-lab files
 **/.ipynb_checkpoints
-
-# Challenge files
-investment/challenge
-
-# Image files
-investment/img
