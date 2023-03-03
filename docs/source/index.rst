@@ -1,15 +1,24 @@
-EPFL Graph documentation
-========================
+EPFL Graph AI documentation
+===========================
 
-The **graphai** package contains tools and services enhancing the EPFL Graph project with AI-based utilities.
+:mod:`graphai` Package
+----------------------
+
+.. automodule:: __init__
+    :members:
+    :undoc-members:
+
+:mod:`definitions` Module
+-------------------------
+
+.. automodule:: definitions
+    :members:
+    :undoc-members:
+
+Subpackages
+-----------
 
 .. toctree::
-    :maxdepth: 2
-    :caption: Contents:
 
-    concept_detection
-    graph
-    interfaces
-    models
-    utils
-    wikitext
+    api
+    core
