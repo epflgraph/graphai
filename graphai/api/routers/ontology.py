@@ -1,8 +1,9 @@
 from fastapi import APIRouter
 
-from api.schemas.ontology import *
-from api.common.log import log
-from api.common.ontology import ontology
+from graphai.api.schemas.ontology import *
+
+from graphai.api.common import log
+from graphai.api.common import ontology
 
 # Initialise ontology router
 router = APIRouter(

@@ -1,7 +1,7 @@
 """
 Parameters that define the creation of the investment tables
 """
-from core.utils.time.date import *
+from graphai.core.utils.time.date import now
 
 
 ###########################

@@ -1,6 +1,6 @@
-from core.interfaces.es import ES
+from graphai.core.interfaces import ES
 
-from core.utils.text.io import read_json
+from graphai.core.utils.text import read_json
 
 number_of_shards = 1
 

@@ -6,17 +6,16 @@ from fastapi import APIRouter
 
 from typing import Optional
 
-from api.schemas.text import *
-from api.common.log import log
-from api.common.graph import graph
-from api.common.ontology import ontology
+from graphai.api.schemas.text import *
 
-from core.text.keywords import get_keywords
-import core.text.wikisearch as ws
+from graphai.api.common import log
+from graphai.api.common import graph
+from graphai.api.common import ontology
 
-from core.utils.text.markdown import strip
+from graphai.core.text import get_keywords, wikisearch
 
-from core.utils.time.stopwatch import Stopwatch
+from graphai.core.utils.text import strip
+from graphai.core.utils.time import Stopwatch
 
 pd.set_option('display.max_rows', 400)
 pd.set_option('display.max_columns', 500)
@@ -68,7 +67,7 @@ async def wikify(data: WikifyRequest, method: Optional[str] = None):
     log(f'Extracted list of {len(keywords)} keywords', sw.delta())
 
     # Perform wikisearch to get concepts for all sets of keywords
-    results = ws.wikisearch(keywords, method)
+    results = wikisearch(keywords, method)
     log(f"""Finished {method if method else 'es-base'} wikisearch with {len(results)} results""", sw.delta())
 
     ############################################################
@@ -191,13 +190,13 @@ async def legacy_wikify(data: WikifyRequest, method: Optional[str] = None):
         log(f'Received list of {len(keyword_list)} keywords: [{keyword_list[0]}, ...]', sw.delta())
 
     # Perform wikisearch and extract source_page_ids
-    wikisearch_results = ws.wikisearch(keyword_list, method)
+    wikisearch_results = wikisearch(keyword_list, method)
     log(f"""Finished {method if method else 'es-base'} wikisearch with {len(wikisearch_results)} results""", sw.delta())
 
     # Extract source_page_ids and anchor_page_ids if needed
-    source_page_ids = ws.extract_page_ids(wikisearch_results)
+    source_page_ids = extract_page_ids(wikisearch_results)
     if not anchor_page_ids:
-        anchor_page_ids = ws.extract_anchor_page_ids(wikisearch_results)
+        anchor_page_ids = extract_anchor_page_ids(wikisearch_results)
 
     # Filter None values from source and anchor page ids, due to pages not found in the page title ids mapping
     source_page_ids = list(filter(None, source_page_ids))

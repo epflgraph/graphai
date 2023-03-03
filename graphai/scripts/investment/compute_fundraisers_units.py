@@ -1,10 +1,10 @@
 import pandas as pd
 import numpy as np
 
-from core.interfaces.db import DB
-from core.utils.breadcrumb import Breadcrumb
+from graphai.core.interfaces import DB
+from graphai.core.utils import Breadcrumb
 
-from scripts.investment.concept_configuration import compute_affinities, normalise
+from graphai.scripts.investment.concept_configuration import compute_affinities, normalise
 
 
 def compute_fundraisers_units():

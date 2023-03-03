@@ -2,9 +2,9 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 
-from core.interfaces.db import DB
+from graphai.core.interfaces import DB
 
-from core.utils.text.io import cprint
+from graphai.core.utils.text import cprint
 
 
 def show_trends(unit_id, unit_concepts, concepts):

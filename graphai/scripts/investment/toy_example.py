@@ -1,6 +1,6 @@
 import pandas as pd
 
-from scripts.investment.concept_configuration import *
+from graphai.scripts.investment.concept_configuration import *
 
 # x = pd.DataFrame({
 #     'InvestorID': ['A', 'A', 'A', 'B', 'B', 'B', 'C', 'C'],

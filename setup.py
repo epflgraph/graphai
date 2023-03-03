@@ -1,4 +1,5 @@
 from setuptools import setup, find_packages
+
 setup(
     name='graphai',
     version='0.2.0',

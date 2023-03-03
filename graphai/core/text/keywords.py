@@ -4,7 +4,7 @@ from rake_nltk import Rake
 
 import pandas as pd
 
-from core.utils.text.clean import normalize
+from graphai.core.utils.text import normalize
 
 # Download nltk resources
 nltk.download('stopwords', quiet=True)

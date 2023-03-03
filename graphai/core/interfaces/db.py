@@ -3,7 +3,7 @@ import sys
 import mysql.connector
 import configparser
 
-from definitions import CONFIG_DIR
+from graphai.definitions import CONFIG_DIR
 
 
 def quote_value(v):

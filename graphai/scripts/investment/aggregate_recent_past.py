@@ -1,10 +1,9 @@
 import numpy as np
 import pandas as pd
 
-from core.interfaces.db import DB
+from graphai.core.interfaces import DB
 
-from core.utils.time.date import *
-from core.utils.breadcrumb import Breadcrumb
+from graphai.core.utils import Breadcrumb
 
 
 def compute_year_coefficients(recent_past):

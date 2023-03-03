@@ -1,5 +1,5 @@
-from core.interfaces.es import ES
-from core.utils.text.io import pprint
+from graphai.core.interfaces import ES
+from graphai.core.utils.text import pprint
 
 es = ES('wikipages')
 

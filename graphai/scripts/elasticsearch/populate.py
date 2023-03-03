@@ -2,9 +2,9 @@ import ray
 
 import pandas as pd
 
-from core.interfaces.db import DB
-from core.interfaces.es import ES
-from core.utils.breadcrumb import Breadcrumb
+from graphai.core.interfaces import DB
+from graphai.core.interfaces import ES
+from graphai.core.utils import Breadcrumb
 
 # Init ray
 # ray.init(namespace="populate_elasticsearch", include_dashboard=False, log_to_driver=True)

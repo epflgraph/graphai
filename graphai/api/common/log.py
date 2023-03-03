@@ -1,6 +1,6 @@
 import logging
 
-from core.utils.time.date import now
+from graphai.core.utils.time import now
 
 # Get uvicorn logger so we can write on it
 logger = logging.getLogger('uvicorn.error')

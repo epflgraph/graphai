@@ -2,10 +2,11 @@ from fastapi import APIRouter
 import ray
 import time
 
-from api.schemas.video import *
-from api.common.log import log
+from graphai.api.schemas.video import *
 
-from core.utils.time.stopwatch import Stopwatch
+from graphai.api.common import log
+
+from graphai.core.utils.time import Stopwatch
 
 
 # Initialise video router

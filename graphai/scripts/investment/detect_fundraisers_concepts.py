@@ -2,13 +2,13 @@ import asyncio
 
 import pandas as pd
 
-from core.interfaces.db import DB
-from core.utils.breadcrumb import Breadcrumb
+from graphai.core.interfaces import DB
+from graphai.core.utils import Breadcrumb
 
-from api.routers.text import wikify
-from api.schemas.text import WikifyRequest
+from graphai.api.routers.text import wikify
+from graphai.api.schemas.text import WikifyRequest
 
-from scripts.investment.concept_configuration import normalise
+from graphai.scripts.investment.concept_configuration import normalise
 
 
 def detect_fundraisers_concepts():

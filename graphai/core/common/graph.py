@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 
-from core.interfaces.db import DB
+from graphai.core.interfaces import DB
 
 
 class ConceptsGraph:

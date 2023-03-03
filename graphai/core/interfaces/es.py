@@ -5,7 +5,7 @@ from ssl import create_default_context
 import pandas as pd
 from elasticsearch import Elasticsearch
 
-from definitions import CONFIG_DIR
+from graphai.definitions import CONFIG_DIR
 
 
 def es_bool(must=None, must_not=None, should=None, filter=None):

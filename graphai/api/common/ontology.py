@@ -1,6 +1,6 @@
-from api.common.log import log
+from graphai.api.common import log
 
-from core.common.ontology import Ontology
+from graphai.core.common import Ontology
 
 # Create an Ontology instance to hold ontology graph in memory
 log(f'Fetching ontology from database...')

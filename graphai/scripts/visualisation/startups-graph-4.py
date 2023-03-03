@@ -1,10 +1,10 @@
 import pandas as pd
 import networkx as nx
 
-from interfaces.db import DB
-from utils.breadcrumb import Breadcrumb
+from graphai.core.interfaces import DB
+from graphai.core.utils import Breadcrumb
 
-from investment.concept_configuration import normalise
+from graphai.scripts.investment.concept_configuration import normalise
 
 
 def print_summary(startups, concepts, startups_concepts, concepts_concepts):

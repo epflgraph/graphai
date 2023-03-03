@@ -1,5 +1,5 @@
-from core.utils.text.io import log
-from core.utils.time.stopwatch import Stopwatch
+from graphai.core.utils.text import log
+from graphai.core.utils.time import Stopwatch
 
 
 class Breadcrumb:

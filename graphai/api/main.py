@@ -1,9 +1,9 @@
 from fastapi import FastAPI
 from fastapi.responses import RedirectResponse
 
-from api.routers import ontology
-from api.routers import text
-from api.routers import video
+from graphai.api.routers import ontology
+from graphai.api.routers import text
+from graphai.api.routers import video
 
 # Initialise FastAPI
 app = FastAPI(

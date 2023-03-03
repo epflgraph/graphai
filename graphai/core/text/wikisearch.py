@@ -1,8 +1,8 @@
 import pandas as pd
 import ray
 
-from core.interfaces.wp import WP
-from core.interfaces.es import ES
+from graphai.core.interfaces import WP
+from graphai.core.interfaces import ES
 
 
 @ray.remote
