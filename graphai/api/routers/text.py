@@ -41,14 +41,15 @@ async def wikify(data: WikifyRequest, method: Optional[str] = None):
     Processes raw text (e.g. from an abstract of a publication, a course description or a lecture slide) and returns a
     list of concepts (Wikipedia pages) that are relevant to the text, each with a set of scores in [0, 1]
     quantifying their relevance. This is done as follows:
-        1. Keyword extraction: Automatic extraction of keywords from the text. Omitted if keyword_list is provided as
-            input instead of raw_text.
-        2. Wikisearch: For each set of keywords, a set of 10 concepts (Wikipedia pages) is retrieved. This can be done
-            through requests to the Wikipedia API or through elasticsearch requests.
-        3. Scores: For each pair of keywords and concept, several scores are derived, taking into account the ontology
-            of concepts and the concepts graph, among others.
-        4. Aggregation and filter: For each concept, their scores are aggregated and filtered according to some rules,
-            to keep only the most relevant results.
+
+    1. Keyword extraction: Automatic extraction of keywords from the text. Omitted if keyword_list is provided as
+        input instead of raw_text.
+    2. Wikisearch: For each set of keywords, a set of 10 concepts (Wikipedia pages) is retrieved. This can be done
+        through requests to the Wikipedia API or through elasticsearch requests.
+    3. Scores: For each pair of keywords and concept, several scores are derived, taking into account the ontology
+        of concepts and the concepts graph, among others.
+    4. Aggregation and filter: For each concept, their scores are aggregated and filtered according to some rules,
+        to keep only the most relevant results.
     """
 
     # Initialize stopwatch to track time
@@ -162,6 +163,7 @@ async def legacy_wikify(data: WikifyRequest, method: Optional[str] = None):
     Wikifies some text.
 
     Wikifying a text is the composition of the following steps:
+
     * Keyword extraction: Automatic extraction of keywords from the text. Omitted if keyword_list is provided as input instead of raw_text.
     * Wikisearch: For each set of keywords, we call the Wikipedia API to search the 10 most related Wikipedia pages.
     * Graph scores: For each such page and each anchor page specified in the parameters, we search the graph and
