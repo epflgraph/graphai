@@ -16,4 +16,4 @@ router = APIRouter(
 @router.get('/tree', response_model=TreeResponse)
 async def tree():
     log('Returning the ontology tree')
-    return ont.categories_categories.to_dict(orient='records')
+    return ontology.categories_categories.to_dict(orient='records')

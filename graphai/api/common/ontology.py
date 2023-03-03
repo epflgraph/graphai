@@ -1,4 +1,4 @@
-from graphai.api.common import log
+from graphai.api.common.log import log
 
 from graphai.core.common.ontology import Ontology
 

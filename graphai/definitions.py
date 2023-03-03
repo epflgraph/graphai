@@ -2,15 +2,13 @@ import os
 import platform
 
 # Directories
-ROOT_DIR = os.path.dirname(__file__)
-
-CONCEPT_DETECTION_DIR = f'{ROOT_DIR}/concept_detection'
-FUNDING_DIR = f'{ROOT_DIR}/funding'
-WIKITEXT_DIR = f'{ROOT_DIR}/wikitext'
+PKG_DIR = os.path.dirname(__file__)
+ROOT_DIR = os.path.dirname(PKG_DIR)
 
 CONFIG_DIR = f'{ROOT_DIR}/config'
 DOCS_DIR = f'{ROOT_DIR}/docs'
 DATA_DIR = f'{ROOT_DIR}/data'
+TESTS_DIR = f'{ROOT_DIR}/tests'
 
 # IPs
 GRAPH_AI_TEST_IP = '192.168.142.120'

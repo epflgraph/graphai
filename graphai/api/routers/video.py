@@ -4,7 +4,7 @@ import time
 
 from graphai.api.schemas.video import *
 
-from graphai.api.common import log
+from graphai.api.common.log import log
 
 from graphai.core.utils.time.stopwatch import Stopwatch
 
