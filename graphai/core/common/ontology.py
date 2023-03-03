@@ -1,6 +1,6 @@
 import pandas as pd
 
-from graphai.core.interfaces import DB
+from graphai.core.interfaces.db import DB
 
 
 class Ontology:

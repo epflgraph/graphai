@@ -8,14 +8,15 @@ from typing import Optional
 
 from graphai.api.schemas.text import *
 
-from graphai.api.common import log
-from graphai.api.common import graph
-from graphai.api.common import ontology
+from graphai.api.common.log import log
+from graphai.api.common.graph import graph
+from graphai.api.common.ontology import ontology
 
-from graphai.core.text import get_keywords, wikisearch
+from graphai.core.text.keywords import get_keywords
+from graphai.core.text.wikisearch import wikisearch
 
-from graphai.core.utils.text import strip
-from graphai.core.utils.time import Stopwatch
+from graphai.core.utils.text.markdown import strip
+from graphai.core.utils.time.stopwatch import Stopwatch
 
 pd.set_option('display.max_rows', 400)
 pd.set_option('display.max_columns', 500)

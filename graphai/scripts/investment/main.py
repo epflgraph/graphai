@@ -8,7 +8,7 @@ from graphai.scripts.investment.compute_investors_units_2 import compute_investo
 
 import graphai.scripts.investment.parameters as params
 
-from graphai.core.utils import Breadcrumb
+from graphai.core.utils.breadcrumb import Breadcrumb
 
 
 def main():

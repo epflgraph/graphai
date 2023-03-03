@@ -2,8 +2,9 @@ import asyncio
 
 import pandas as pd
 
-from graphai.core.interfaces import DB
-from graphai.core.utils import Breadcrumb
+from graphai.core.interfaces.db import DB
+
+from graphai.core.utils.breadcrumb import Breadcrumb
 
 from graphai.api.routers.text import wikify
 from graphai.api.schemas.text import WikifyRequest

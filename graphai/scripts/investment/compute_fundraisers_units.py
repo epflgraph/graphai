@@ -1,8 +1,9 @@
 import pandas as pd
 import numpy as np
 
-from graphai.core.interfaces import DB
-from graphai.core.utils import Breadcrumb
+from graphai.core.interfaces.db import DB
+
+from graphai.core.utils.breadcrumb import Breadcrumb
 
 from graphai.scripts.investment.concept_configuration import compute_affinities, normalise
 

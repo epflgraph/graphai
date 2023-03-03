@@ -1,6 +1,6 @@
-from graphai.core.interfaces import ES
-from graphai.core.utils import ProgressBar
-from graphai.core.utils.time import Stopwatch
+from graphai.core.interfaces.es import ES
+from graphai.core.utils.progress_bar import ProgressBar
+from graphai.core.utils.time.stopwatch import Stopwatch
 
 from graphai.scripts.elasticsearch.dummy import gen_random_docs
 

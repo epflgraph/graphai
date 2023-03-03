@@ -1,9 +1,9 @@
 import pandas as pd
 
-from graphai.core.interfaces import DB
+from graphai.core.interfaces.db import DB
 
-from graphai.core.utils import Breadcrumb
-from graphai.core.utils.time import rescale
+from graphai.core.utils.breadcrumb import Breadcrumb
+from graphai.core.utils.time.date import rescale
 
 
 def get_frs(db, params):

@@ -1,6 +1,6 @@
 import time
 
-from graphai.core.utils.text import cprint
+from graphai.core.utils.text.io import cprint
 
 
 class Stopwatch:
