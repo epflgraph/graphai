@@ -1,0 +1,25 @@
+# This is a basic workflow to help you get started with Actions
+
+name: "Hello world"
+
+# Controls when the workflow will run
+on:
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+  # Triggers the workflow on push or pull request events
+  push:
+    branches:
+      - "master"
+  pull_request:
+    branches:
+      - "**"
+
+jobs:
+  greet:
+    runs-on: self-hosted
+    steps:
+    - name: Say hello
+      run: |
+        ls
+        echo "Hello!"
