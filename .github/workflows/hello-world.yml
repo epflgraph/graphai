@@ -21,5 +21,10 @@ jobs:
     steps:
     - name: Say hello
       run: |
+        echo "Content of current directory: $PWD"
+        ls ./
+        echo "Content of current directory: $PWD 2"
+        ls
+        echo "Content of current directory: $PWD 3"
         ls
         echo "Hello!"
