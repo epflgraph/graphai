@@ -10,7 +10,7 @@ app = FastAPI(
     title="EPFL Graph AI API",
     description="This API offers several tools related with AI in the context of the EPFL Graph project, "
                 "such as automatized concept detection from a given text.",
-    version="0.2.0"
+    version="0.2.1"
 )
 
 # Include all routers in the app
