@@ -15,6 +15,7 @@ data
 
 # Documentation build files
 docs/build
+docs/source/graphai*.rst
 
 # Python package egg folder
 *egg-info

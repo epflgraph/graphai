@@ -18,8 +18,8 @@ sys.path.insert(0, os.path.abspath('../..'))
 # -- Project information -----------------------------------------------------
 
 project = 'graphai'
-copyright = '2022, Aitor Pérez, Francisco Pinto'
-author = 'Aitor Pérez, Francisco Pinto'
+copyright = '2023, Aitor Pérez'
+author = 'Aitor Pérez'
 
 
 # -- General configuration ---------------------------------------------------
@@ -28,8 +28,8 @@ author = 'Aitor Pérez, Francisco Pinto'
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-'sphinx.ext.autodoc',
-'sphinx.ext.napoleon'
+    'sphinx.ext.napoleon',
+    'sphinx.ext.autodoc'
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -40,7 +40,7 @@ templates_path = ['_templates']
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = []
 
-master_doc = 'index'
+master_doc = 'graphai'
 
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = 'sphinx'
@@ -53,13 +53,14 @@ keep_warnings = True
 # a list of builtin themes.
 #
 # html_theme = 'alabaster'
-html_theme = 'sphinx_material'
+# html_theme = 'sphinx_material'
+html_theme = 'sphinx_rtd_theme'
 
 html_title = 'EPFL Graph AI'
 
-html_sidebars = {
-    "**": ["logo-text.html", "globaltoc.html", "localtoc.html", "searchbox.html"]
-}
+# html_sidebars = {
+#     "**": ["logo-text.html", "globaltoc.html", "localtoc.html", "searchbox.html"]
+# }
 
 
 # Add any paths that contain custom static files (such as style sheets) here,
@@ -70,4 +71,3 @@ html_static_path = ['_static']
 # -- Options for autodoc -----------------------------------------------------
 
 autodoc_member_order = 'bysource'
-
