@@ -5,6 +5,39 @@ from graphai.core.interfaces.db import DB
 
 class Ontology:
     def __init__(self):
+        # Object of type pd.DataFrame with columns ['CategoryID', 'CategoryName'] holding the categories
+        self.categories = None
+
+        # Set containing the CategoryID of all categories
+        self.category_ids = None
+
+        # Object of type pd.Series containing 'CategoryName' indexed by 'CategoryID'
+        self.category_names = None
+
+        ################################################
+
+        # Object of type pd.DataFrame with columns ['ChildCategoryID', 'ParentCategoryID'] holding the
+        # category-category (parent-child) edges
+        self.categories_categories = None
+
+        # Set containing the CategoryID of all children categories
+        self.category_child_ids = None
+
+        # Object of type pd.Series containing 'ParentCategoryID' indexed by 'ChildCategoryID'
+        self.category_parents = None
+
+        ################################################
+
+        # Object of type pd.DataFrame with columns ['PageID', 'CategoryID'] holding the concept-category edges
+        self.concepts_categories = None
+
+        # Set containing the PageID of all concepts that have a category
+        self.concept_ids = None
+
+        # Object of type pd.Series containing 'CategoryID' indexed by 'PageID'
+        self.concept_categories = None
+
+    def fetch_from_db(self):
         db = DB()
 
         ################################################

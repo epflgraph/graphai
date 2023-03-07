@@ -1,9 +1,14 @@
 from fastapi import FastAPI
 from fastapi.responses import RedirectResponse
 
-from graphai.api.routers import ontology
-from graphai.api.routers import text
-from graphai.api.routers import video
+import graphai.api.routers.ontology as ontology_router
+import graphai.api.routers.text as text_router
+import graphai.api.routers.video as video_router
+
+from graphai.api.common.log import log
+
+from graphai.api.common.graph import graph
+from graphai.api.common.ontology import ontology
 
 # Initialise FastAPI
 app = FastAPI(
@@ -14,9 +19,18 @@ app = FastAPI(
 )
 
 # Include all routers in the app
-app.include_router(ontology.router)
-app.include_router(text.router)
-app.include_router(video.router)
+app.include_router(ontology_router.router)
+app.include_router(text_router.router)
+app.include_router(video_router.router)
+
+
+# On startup, we instantiate concepts graph and ontology, so they are held into memory
+@app.on_event("startup")
+async def instantiate_graph_and_ontology():
+    log(f'Fetching concepts graph from database...')
+    graph.fetch_from_db()
+    log(f'Fetching ontology from database...')
+    ontology.fetch_from_db()
 
 
 # Root endpoint redirects to docs
