@@ -15,8 +15,34 @@ jobs:
     runs-on: self-hosted
 
     steps:
+      - name: Print pwd
+        run: pwd
+
       - name: Checkout repository code
         uses: actions/checkout@v3
+
+      - name: Print pwd
+        run: pwd
+
+      - name: Create config files
+        run: |
+          mkdir config
+          cd config
+          
+          echo "[DB]" >> db.ini
+          echo "host: ${{ vars.db_host }}" >> db.ini
+          echo "port: ${{ vars.db_port }}" >> db.ini
+          echo "user: ${{ vars.db_user }}" >> db.ini
+          echo "password: ${{ secrets.db_password }}" >> db.ini
+          
+          echo "[ES]" >> es.ini
+          echo "host: ${{ vars.es_host }}" >> es.ini
+          echo "port: ${{ vars.es_port }}" >> es.ini
+          echo "username: ${{ vars.es_username }}" >> es.ini
+          echo "password: ${{ secrets.es_password }}" >> es.ini
+          echo "cafile: ${{ vars.es_cafile }}" >> es.ini
+          
+          cd ..
 
       - name: Create virtualenv and activate it
         run: |
@@ -30,4 +56,4 @@ jobs:
       - name: Deploy GraphAI API
         run: |
           cd graphai/api
-          ./deploy.sh -p ${{ vars.api_test_port }}
+          #./deploy.sh -p ${{ vars.api_test_port }}
