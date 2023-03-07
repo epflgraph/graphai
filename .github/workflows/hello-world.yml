@@ -45,7 +45,7 @@ jobs:
 
       - name: Install python package in editable mode along with dependencies
         run: |
-          pip install . -e
+          pip install -e .
 
       - name: Create docs source files with sphinx-apidoc
         run: |
