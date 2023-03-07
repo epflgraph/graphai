@@ -6,6 +6,32 @@ from graphai.core.interfaces.db import DB
 
 class ConceptsGraph:
     def __init__(self):
+        # Object of type pd.DataFrame with columns ['PageID', 'PageTitle'] holding the concepts
+        self.concepts = None
+
+        # Object of type pd.DataFrame with columns ['SourcePageID', 'TargetPageID', 'NormalisedScore']
+        # holding the scored, undirected concept-concept edges
+        self.concepts_concepts = None
+
+        ################################################
+
+        # Object of type pd.DataFrame with columns ['SourcePageID', 'TargetPageID'] holding, for each SourcePageID,
+        # a set of all its successors (TargetPageIDs).
+        self.successors = None
+
+        # Object of type pd.DataFrame with columns ['SourcePageID', 'TargetPageID'] holding, for each TargetPageID,
+        # a set of all its predecessors (SourcePageID).
+        self.predecessors = None
+
+        ################################################
+
+        # Set containing the PageIDs of all concepts having an outgoing edge
+        self.sources = None
+
+        # Set containing the PageIDs of all concepts having an ingoing edge
+        self.targets = None
+
+    def fetch_from_db(self):
         db = DB()
 
         table_name = 'graph.Nodes_N_Concept'
