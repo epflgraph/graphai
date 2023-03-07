@@ -30,4 +30,4 @@ jobs:
       - name: Deploy GraphAI API
         run: |
           cd graphai/api
-          ./deploy.sh
+          ./deploy.sh -p ${{ vars.api_test_port }}
