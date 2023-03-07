@@ -15,17 +15,12 @@ jobs:
     runs-on: self-hosted
 
     steps:
-      - name: Print pwd
-        run: pwd
-
       - name: Checkout repository code
         uses: actions/checkout@v3
 
-      - name: Print pwd
-        run: pwd
-
       - name: Create config files
         run: |
+          rm -r config
           mkdir config
           cd config
           
@@ -53,7 +48,16 @@ jobs:
         run: |
           pip install .
 
+      - name: Create docs source files with sphinx-apidoc
+        run: |
+          sphinx-apidoc -o docs/source graphai -d 1 -TMe
+
+      - name: Build html docs with sphinx
+        run: |
+          cd docs
+          make html
+          cd ..
+
       - name: Deploy GraphAI API
         run: |
-          cd graphai/api
-          #./deploy.sh -p ${{ vars.api_test_port }}
+          # graphai/api/deploy.sh -p ${{ vars.api_test_port }}
