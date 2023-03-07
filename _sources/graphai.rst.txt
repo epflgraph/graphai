@@ -1,0 +1,24 @@
+graphai package
+===============
+
+.. automodule:: graphai
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Subpackages
+-----------
+
+.. toctree::
+   :maxdepth: 1
+
+   graphai.api
+   graphai.core
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 1
+
+   graphai.definitions

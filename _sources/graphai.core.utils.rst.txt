@@ -1,0 +1,25 @@
+graphai.core.utils package
+==========================
+
+.. automodule:: graphai.core.utils
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Subpackages
+-----------
+
+.. toctree::
+   :maxdepth: 1
+
+   graphai.core.utils.text
+   graphai.core.utils.time
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 1
+
+   graphai.core.utils.breadcrumb
+   graphai.core.utils.progress_bar

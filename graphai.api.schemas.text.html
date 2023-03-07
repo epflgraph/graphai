@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>graphai.api.schemas.text module &mdash; EPFL Graph AI</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="graphai.api.schemas.video module" href="graphai.api.schemas.video.html" />
+    <link rel="prev" title="graphai.api.schemas.ontology module" href="graphai.api.schemas.ontology.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="graphai.html" class="icon icon-home">
+            graphai
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="graphai.api.html">graphai.api package</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="graphai.api.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="graphai.api.common.html">graphai.api.common package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="graphai.api.routers.html">graphai.api.routers package</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="graphai.api.schemas.html">graphai.api.schemas package</a><ul class="current">
+<li class="toctree-l4 current"><a class="reference internal" href="graphai.api.schemas.html#submodules">Submodules</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="graphai.api.html#submodules">Submodules</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="graphai.core.html">graphai.core package</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="graphai.definitions.html">graphai.definitions module</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="graphai.html">graphai</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="graphai.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="graphai.api.html">graphai.api package</a></li>
+          <li class="breadcrumb-item"><a href="graphai.api.schemas.html">graphai.api.schemas package</a></li>
+      <li class="breadcrumb-item active">graphai.api.schemas.text module</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/graphai.api.schemas.text.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-graphai.api.schemas.text">
+<span id="graphai-api-schemas-text-module"></span><h1>graphai.api.schemas.text module<a class="headerlink" href="#module-graphai.api.schemas.text" title="Permalink to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="graphai.api.schemas.text.WikifyRequest">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">graphai.api.schemas.text.</span></span><span class="sig-name descname"><span class="pre">WikifyRequest</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">raw_text</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.api.schemas.text.WikifyRequest" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseModel</span></code></p>
+<p>Object containing the information to be wikified and the list of anchor page ids to define the search space in the graph.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="graphai.api.schemas.text.WikifyRequest.raw_text">
+<span class="sig-name descname"><span class="pre">raw_text</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#graphai.api.schemas.text.WikifyRequest.raw_text" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="graphai.api.schemas.text.WikifyResponseElem">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">graphai.api.schemas.text.</span></span><span class="sig-name descname"><span class="pre">WikifyResponseElem</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">PageID</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">PageTitle</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">SearchScore</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">LevenshteinScore</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">OntologyLocalScore</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">OntologyGlobalScore</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">GraphScore</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">KeywordsScore</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">MixedScore</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.api.schemas.text.WikifyResponseElem" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseModel</span></code></p>
+<p>Object representing each of the wikify results. It consists of a set of keywords, a Wikipedia page and several
+scores which measure the degree of relevance of the result with respect to the text.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="graphai.api.schemas.text.WikifyResponseElem.PageID">
+<span class="sig-name descname"><span class="pre">PageID</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#graphai.api.schemas.text.WikifyResponseElem.PageID" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="graphai.api.schemas.text.WikifyResponseElem.PageTitle">
+<span class="sig-name descname"><span class="pre">PageTitle</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#graphai.api.schemas.text.WikifyResponseElem.PageTitle" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="graphai.api.schemas.text.WikifyResponseElem.SearchScore">
+<span class="sig-name descname"><span class="pre">SearchScore</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#graphai.api.schemas.text.WikifyResponseElem.SearchScore" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="graphai.api.schemas.text.WikifyResponseElem.LevenshteinScore">
+<span class="sig-name descname"><span class="pre">LevenshteinScore</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#graphai.api.schemas.text.WikifyResponseElem.LevenshteinScore" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="graphai.api.schemas.text.WikifyResponseElem.OntologyLocalScore">
+<span class="sig-name descname"><span class="pre">OntologyLocalScore</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#graphai.api.schemas.text.WikifyResponseElem.OntologyLocalScore" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="graphai.api.schemas.text.WikifyResponseElem.OntologyGlobalScore">
+<span class="sig-name descname"><span class="pre">OntologyGlobalScore</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#graphai.api.schemas.text.WikifyResponseElem.OntologyGlobalScore" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="graphai.api.schemas.text.WikifyResponseElem.GraphScore">
+<span class="sig-name descname"><span class="pre">GraphScore</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#graphai.api.schemas.text.WikifyResponseElem.GraphScore" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="graphai.api.schemas.text.WikifyResponseElem.KeywordsScore">
+<span class="sig-name descname"><span class="pre">KeywordsScore</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#graphai.api.schemas.text.WikifyResponseElem.KeywordsScore" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="graphai.api.schemas.text.WikifyResponseElem.MixedScore">
+<span class="sig-name descname"><span class="pre">MixedScore</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#graphai.api.schemas.text.WikifyResponseElem.MixedScore" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="graphai.api.schemas.text.WikifyResponseElem.Config">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Config</span></span><a class="headerlink" href="#graphai.api.schemas.text.WikifyResponseElem.Config" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="graphai.api.schemas.text.WikifyResponseElem.Config.schema_extra">
+<span class="sig-name descname"><span class="pre">schema_extra</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'examples':</span> <span class="pre">[{'PageID':</span> <span class="pre">1196,</span> <span class="pre">'PageTitle':</span> <span class="pre">'Angle',</span> <span class="pre">'SearchScore':</span> <span class="pre">0.8055555555555556,</span> <span class="pre">'LevenshteinScore':</span> <span class="pre">1,</span> <span class="pre">'OntologyLocalScore':</span> <span class="pre">1,</span> <span class="pre">'OntologyGlobalScore':</span> <span class="pre">1,</span> <span class="pre">'GraphScore':</span> <span class="pre">0.44735199351890065,</span> <span class="pre">'KeywordsScore':</span> <span class="pre">1,</span> <span class="pre">'MixedScore':</span> <span class="pre">0.9058463104630012},</span> <span class="pre">{'PageID':</span> <span class="pre">152547,</span> <span class="pre">'PageTitle':</span> <span class="pre">'Bisection',</span> <span class="pre">'SearchScore':</span> <span class="pre">0.3333333333333333,</span> <span class="pre">'LevenshteinScore':</span> <span class="pre">0.16661245633224378,</span> <span class="pre">'OntologyLocalScore':</span> <span class="pre">0.6666666666666667,</span> <span class="pre">'OntologyGlobalScore':</span> <span class="pre">0.5,</span> <span class="pre">'GraphScore':</span> <span class="pre">0.22717425120724127,</span> <span class="pre">'KeywordsScore':</span> <span class="pre">0.609271523178808,</span> <span class="pre">'MixedScore':</span> <span class="pre">0.44715741719086977},</span> <span class="pre">{'PageID':</span> <span class="pre">23972889,</span> <span class="pre">'PageTitle':</span> <span class="pre">'Distance_from_a_point_to_a_line',</span> <span class="pre">'SearchScore':</span> <span class="pre">0.16666666666666669,</span> <span class="pre">'LevenshteinScore':</span> <span class="pre">0.2134432477817427,</span> <span class="pre">'OntologyLocalScore':</span> <span class="pre">0.21885521885521886,</span> <span class="pre">'OntologyGlobalScore':</span> <span class="pre">0.19791666666666666,</span> <span class="pre">'GraphScore':</span> <span class="pre">0.003590346636521923,</span> <span class="pre">'KeywordsScore':</span> <span class="pre">0.19828593689131283,</span> <span class="pre">'MixedScore':</span> <span class="pre">0.17781458572659029},</span> <span class="pre">{'PageID':</span> <span class="pre">946975,</span> <span class="pre">'PageTitle':</span> <span class="pre">'Line_(geometry)',</span> <span class="pre">'SearchScore':</span> <span class="pre">1,</span> <span class="pre">'LevenshteinScore':</span> <span class="pre">0.33567080901262164,</span> <span class="pre">'OntologyLocalScore':</span> <span class="pre">0.8232323232323234,</span> <span class="pre">'OntologyGlobalScore':</span> <span class="pre">0.7916666666666666,</span> <span class="pre">'GraphScore':</span> <span class="pre">1,</span> <span class="pre">'KeywordsScore':</span> <span class="pre">0.7855473315153876,</span> <span class="pre">'MixedScore':</span> <span class="pre">0.7886663359580247},</span> <span class="pre">{'PageID':</span> <span class="pre">22634860,</span> <span class="pre">'PageTitle':</span> <span class="pre">'Line_segment',</span> <span class="pre">'SearchScore':</span> <span class="pre">0.5555555555555556,</span> <span class="pre">'LevenshteinScore':</span> <span class="pre">0.3582111602475977,</span> <span class="pre">'OntologyLocalScore':</span> <span class="pre">0.43097643097643096,</span> <span class="pre">'OntologyGlobalScore':</span> <span class="pre">0.75,</span> <span class="pre">'GraphScore':</span> <span class="pre">0.42461810549112244,</span> <span class="pre">'KeywordsScore':</span> <span class="pre">0.6026490066225165,</span> <span class="pre">'MixedScore':</span> <span class="pre">0.5277457623305826},</span> <span class="pre">{'PageID':</span> <span class="pre">2175469,</span> <span class="pre">'PageTitle':</span> <span class="pre">'Non-line-of-sight_propagation',</span> <span class="pre">'SearchScore':</span> <span class="pre">0.19444444444444448,</span> <span class="pre">'LevenshteinScore':</span> <span class="pre">0.39019342923035233,</span> <span class="pre">'OntologyLocalScore':</span> <span class="pre">0.21212121212121213,</span> <span class="pre">'OntologyGlobalScore':</span> <span class="pre">0.11647727272727273,</span> <span class="pre">'GraphScore':</span> <span class="pre">0.01572170017309725,</span> <span class="pre">'KeywordsScore':</span> <span class="pre">0.5087650954421504,</span> <span class="pre">'MixedScore':</span> <span class="pre">0.2950855110143057},</span> <span class="pre">{'PageID':</span> <span class="pre">133496,</span> <span class="pre">'PageTitle':</span> <span class="pre">'Parallelogram',</span> <span class="pre">'SearchScore':</span> <span class="pre">0.3055555555555556,</span> <span class="pre">'LevenshteinScore':</span> <span class="pre">0.13627674782665528,</span> <span class="pre">'OntologyLocalScore':</span> <span class="pre">0.6666666666666667,</span> <span class="pre">'OntologyGlobalScore':</span> <span class="pre">0.5,</span> <span class="pre">'GraphScore':</span> <span class="pre">0.14484503981375635,</span> <span class="pre">'KeywordsScore':</span> <span class="pre">0.609271523178808,</span> <span class="pre">'MixedScore':</span> <span class="pre">0.4288185842201275},</span> <span class="pre">{'PageID':</span> <span class="pre">76944,</span> <span class="pre">'PageTitle':</span> <span class="pre">'Perpendicular',</span> <span class="pre">'SearchScore':</span> <span class="pre">0.19444444444444445,</span> <span class="pre">'LevenshteinScore':</span> <span class="pre">0.039652736888335365,</span> <span class="pre">'OntologyLocalScore':</span> <span class="pre">0.21212121212121213,</span> <span class="pre">'OntologyGlobalScore':</span> <span class="pre">0.25,</span> <span class="pre">'GraphScore':</span> <span class="pre">0.15017752515904018,</span> <span class="pre">'KeywordsScore':</span> <span class="pre">0.2584729255940787,</span> <span class="pre">'MixedScore':</span> <span class="pre">0.19421461143444865},</span> <span class="pre">{'PageID':</span> <span class="pre">25278,</span> <span class="pre">'PageTitle':</span> <span class="pre">'Quadrilateral',</span> <span class="pre">'SearchScore':</span> <span class="pre">0.02777777777777779,</span> <span class="pre">'LevenshteinScore':</span> <span class="pre">0.15367913840285474,</span> <span class="pre">'OntologyLocalScore':</span> <span class="pre">0.36363636363636365,</span> <span class="pre">'OntologyGlobalScore':</span> <span class="pre">0.25,</span> <span class="pre">'GraphScore':</span> <span class="pre">0.12360559235107477,</span> <span class="pre">'KeywordsScore':</span> <span class="pre">0.3307362680171406,</span> <span class="pre">'MixedScore':</span> <span class="pre">0.21973432050168798},</span> <span class="pre">{'PageID':</span> <span class="pre">76956,</span> <span class="pre">'PageTitle':</span> <span class="pre">'Right_angle',</span> <span class="pre">'SearchScore':</span> <span class="pre">0.4166666666666667,</span> <span class="pre">'LevenshteinScore':</span> <span class="pre">0.4451948682556247,</span> <span class="pre">'OntologyLocalScore':</span> <span class="pre">0.42424242424242425,</span> <span class="pre">'OntologyGlobalScore':</span> <span class="pre">0.5,</span> <span class="pre">'GraphScore':</span> <span class="pre">0.12678424818870415,</span> <span class="pre">'KeywordsScore':</span> <span class="pre">0.4107908063887807,</span> <span class="pre">'MixedScore':</span> <span class="pre">0.3996645939435453},</span> <span class="pre">{'PageID':</span> <span class="pre">94102,</span> <span class="pre">'PageTitle':</span> <span class="pre">'Solid_angle',</span> <span class="pre">'SearchScore':</span> <span class="pre">0.3888888888888889,</span> <span class="pre">'LevenshteinScore':</span> <span class="pre">0.6912823774628103,</span> <span class="pre">'OntologyLocalScore':</span> <span class="pre">0.196969696969697,</span> <span class="pre">'OntologyGlobalScore':</span> <span class="pre">0.15909090909090912,</span> <span class="pre">'GraphScore':</span> <span class="pre">0.08695255651117278,</span> <span class="pre">'KeywordsScore':</span> <span class="pre">0.7415270744059212,</span> <span class="pre">'MixedScore':</span> <span class="pre">0.4580780578246384},</span> <span class="pre">{'PageID':</span> <span class="pre">31482,</span> <span class="pre">'PageTitle':</span> <span class="pre">'Tangent',</span> <span class="pre">'SearchScore':</span> <span class="pre">0.4722222222222222,</span> <span class="pre">'LevenshteinScore':</span> <span class="pre">0.29631455223594527,</span> <span class="pre">'OntologyLocalScore':</span> <span class="pre">0.6414141414141414,</span> <span class="pre">'OntologyGlobalScore':</span> <span class="pre">0.59375,</span> <span class="pre">'GraphScore':</span> <span class="pre">0.3573397570845174,</span> <span class="pre">'KeywordsScore':</span> <span class="pre">0.5087650954421504,</span> <span class="pre">'MixedScore':</span> <span class="pre">0.48284225283305426},</span> <span class="pre">{'PageID':</span> <span class="pre">30654,</span> <span class="pre">'PageTitle':</span> <span class="pre">'Triangle',</span> <span class="pre">'SearchScore':</span> <span class="pre">0.16666666666666669,</span> <span class="pre">'LevenshteinScore':</span> <span class="pre">0.5717479784842091,</span> <span class="pre">'OntologyLocalScore':</span> <span class="pre">0.6666666666666667,</span> <span class="pre">'OntologyGlobalScore':</span> <span class="pre">0.5,</span> <span class="pre">'GraphScore':</span> <span class="pre">0.2535403349997643,</span> <span class="pre">'KeywordsScore':</span> <span class="pre">0.609271523178808,</span> <span class="pre">'MixedScore':</span> <span class="pre">0.47723102055958355}]}</span></em><a class="headerlink" href="#graphai.api.schemas.text.WikifyResponseElem.Config.schema_extra" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="graphai.api.schemas.text.KeywordsRequest">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">graphai.api.schemas.text.</span></span><span class="sig-name descname"><span class="pre">KeywordsRequest</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">raw_text</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.api.schemas.text.KeywordsRequest" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseModel</span></code></p>
+<p>Object containing the raw text to extract keywords.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="graphai.api.schemas.text.KeywordsRequest.raw_text">
+<span class="sig-name descname"><span class="pre">raw_text</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#graphai.api.schemas.text.KeywordsRequest.raw_text" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="graphai.api.schemas.text.StripRequest">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">graphai.api.schemas.text.</span></span><span class="sig-name descname"><span class="pre">StripRequest</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">markdown_code</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.api.schemas.text.StripRequest" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseModel</span></code></p>
+<p>Object containing the wikimarkdown code to be stripped.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="graphai.api.schemas.text.StripRequest.markdown_code">
+<span class="sig-name descname"><span class="pre">markdown_code</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#graphai.api.schemas.text.StripRequest.markdown_code" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="graphai.api.schemas.text.StripResponse">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">graphai.api.schemas.text.</span></span><span class="sig-name descname"><span class="pre">StripResponse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stripped_code</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.api.schemas.text.StripResponse" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseModel</span></code></p>
+<p>Object representing the response of the markdown strip endpoint.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="graphai.api.schemas.text.StripResponse.stripped_code">
+<span class="sig-name descname"><span class="pre">stripped_code</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#graphai.api.schemas.text.StripResponse.stripped_code" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="graphai.api.schemas.ontology.html" class="btn btn-neutral float-left" title="graphai.api.schemas.ontology module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="graphai.api.schemas.video.html" class="btn btn-neutral float-right" title="graphai.api.schemas.video module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Aitor Pérez.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

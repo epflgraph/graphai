@@ -1,0 +1,7 @@
+graphai.core.utils.breadcrumb module
+====================================
+
+.. automodule:: graphai.core.utils.breadcrumb
+   :members:
+   :undoc-members:
+   :show-inheritance:

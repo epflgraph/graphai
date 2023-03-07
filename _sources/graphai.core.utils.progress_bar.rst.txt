@@ -1,0 +1,7 @@
+graphai.core.utils.progress\_bar module
+=======================================
+
+.. automodule:: graphai.core.utils.progress_bar
+   :members:
+   :undoc-members:
+   :show-inheritance:

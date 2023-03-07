@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>graphai.core.utils.text.clean module &mdash; EPFL Graph AI</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="graphai.core.utils.text.io module" href="graphai.core.utils.text.io.html" />
+    <link rel="prev" title="graphai.core.utils.text package" href="graphai.core.utils.text.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="graphai.html" class="icon icon-home">
+            graphai
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="graphai.api.html">graphai.api package</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="graphai.core.html">graphai.core package</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="graphai.core.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="graphai.core.common.html">graphai.core.common package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="graphai.core.interfaces.html">graphai.core.interfaces package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="graphai.core.text.html">graphai.core.text package</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="graphai.core.utils.html">graphai.core.utils package</a><ul class="current">
+<li class="toctree-l4 current"><a class="reference internal" href="graphai.core.utils.html#subpackages">Subpackages</a></li>
+<li class="toctree-l4"><a class="reference internal" href="graphai.core.utils.html#submodules">Submodules</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="graphai.definitions.html">graphai.definitions module</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="graphai.html">graphai</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="graphai.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="graphai.core.html">graphai.core package</a></li>
+          <li class="breadcrumb-item"><a href="graphai.core.utils.html">graphai.core.utils package</a></li>
+          <li class="breadcrumb-item"><a href="graphai.core.utils.text.html">graphai.core.utils.text package</a></li>
+      <li class="breadcrumb-item active">graphai.core.utils.text.clean module</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/graphai.core.utils.text.clean.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-graphai.core.utils.text.clean">
+<span id="graphai-core-utils-text-clean-module"></span><h1>graphai.core.utils.text.clean module<a class="headerlink" href="#module-graphai.core.utils.text.clean" title="Permalink to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="graphai.core.utils.text.clean.HTMLCleaner">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">graphai.core.utils.text.clean.</span></span><span class="sig-name descname"><span class="pre">HTMLCleaner</span></span><a class="headerlink" href="#graphai.core.utils.text.clean.HTMLCleaner" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">HTMLParser</span></code></p>
+<p>Class to parse and clean HTML tags from raw text.</p>
+<p class="rubric">Examples</p>
+<p>Use as follows:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">text</span> <span class="o">=</span> <span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="s2">&quot;&lt;p&gt;You get a &lt;i&gt;shiver&lt;/i&gt; in the &lt;strong&gt;dark&lt;/strong&gt;&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="s2">&quot;&lt;br/&gt;&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="s2">&quot;It&#39;s a raining in the &lt;a&gt;park&lt;/a&gt; but meantime&lt;/p&gt;&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">c</span> <span class="o">=</span> <span class="n">HTMLCleaner</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">c</span><span class="o">.</span><span class="n">feed</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">get_data</span><span class="p">())</span>
+</pre></div>
+</div>
+<p>You get a shiver in the dark</p>
+<p>It’s a raining in the</p>
+<p>park</p>
+<p>but meantime</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="graphai.core.utils.text.clean.HTMLCleaner.handle_starttag">
+<span class="sig-name descname"><span class="pre">handle_starttag</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tag</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attrs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.utils.text.clean.HTMLCleaner.handle_starttag" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="graphai.core.utils.text.clean.HTMLCleaner.handle_endtag">
+<span class="sig-name descname"><span class="pre">handle_endtag</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tag</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.utils.text.clean.HTMLCleaner.handle_endtag" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="graphai.core.utils.text.clean.HTMLCleaner.handle_data">
+<span class="sig-name descname"><span class="pre">handle_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">d</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.utils.text.clean.HTMLCleaner.handle_data" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="graphai.core.utils.text.clean.HTMLCleaner.get_data">
+<span class="sig-name descname"><span class="pre">get_data</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.utils.text.clean.HTMLCleaner.get_data" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.core.utils.text.clean.normalize">
+<span class="sig-prename descclassname"><span class="pre">graphai.core.utils.text.clean.</span></span><span class="sig-name descname"><span class="pre">normalize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.utils.text.clean.normalize" title="Permalink to this definition"></a></dt>
+<dd><p>Normalizes the given text by solving encoding problems, deleting URLs, emails, cleaning HTML tags and
+converting to lowercase.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>text</strong> (<em>str</em>) – Text to be normalized.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Normalized text.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">text</span> <span class="o">=</span> <span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="s2">&quot;&lt;p&gt;You get a &lt;i&gt;shiver&lt;/i&gt; in the &lt;strong&gt;dark&lt;/strong&gt;&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="s2">&quot;&lt;br/&gt;&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="s2">&quot;It&#39;s a </span><span class="se">\u2018</span><span class="s2">raining</span><span class="se">\u2019</span><span class="s2"> in the &lt;a&gt;park&lt;/a&gt; but »meantime«&lt;/p&gt;&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="s2">&quot;&amp;lt;3&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">normalize</span><span class="p">(</span><span class="n">text</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>you get a shiver in the dark</p>
+<p>it’s a ‘raining’ in the</p>
+<p>park</p>
+<p>but meantime</p>
+<p>&lt;3</p>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="graphai.core.utils.text.html" class="btn btn-neutral float-left" title="graphai.core.utils.text package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="graphai.core.utils.text.io.html" class="btn btn-neutral float-right" title="graphai.core.utils.text.io module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Aitor Pérez.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

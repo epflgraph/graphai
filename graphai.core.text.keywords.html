@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>graphai.core.text.keywords module &mdash; EPFL Graph AI</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="graphai.core.text.wikisearch module" href="graphai.core.text.wikisearch.html" />
+    <link rel="prev" title="graphai.core.text package" href="graphai.core.text.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="graphai.html" class="icon icon-home">
+            graphai
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="graphai.api.html">graphai.api package</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="graphai.core.html">graphai.core package</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="graphai.core.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="graphai.core.common.html">graphai.core.common package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="graphai.core.interfaces.html">graphai.core.interfaces package</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="graphai.core.text.html">graphai.core.text package</a><ul class="current">
+<li class="toctree-l4 current"><a class="reference internal" href="graphai.core.text.html#submodules">Submodules</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="graphai.core.utils.html">graphai.core.utils package</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="graphai.definitions.html">graphai.definitions module</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="graphai.html">graphai</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="graphai.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="graphai.core.html">graphai.core package</a></li>
+          <li class="breadcrumb-item"><a href="graphai.core.text.html">graphai.core.text package</a></li>
+      <li class="breadcrumb-item active">graphai.core.text.keywords module</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/graphai.core.text.keywords.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-graphai.core.text.keywords">
+<span id="graphai-core-text-keywords-module"></span><h1>graphai.core.text.keywords module<a class="headerlink" href="#module-graphai.core.text.keywords" title="Permalink to this heading"></a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.core.text.keywords.word_tokens">
+<span class="sig-prename descclassname"><span class="pre">graphai.core.text.keywords.</span></span><span class="sig-name descname"><span class="pre">word_tokens</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.text.keywords.word_tokens" title="Permalink to this definition"></a></dt>
+<dd><p>Generates all possible word tokens from a sentence.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>text</strong> (<em>str</em>) – String containing words separated by spaces.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A list with all the possible word tokens for the given sentence.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list[str]</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">word_tokens</span><span class="p">(</span><span class="s1">&#39;how are you&#39;</span><span class="p">)</span>
+<span class="go">[&#39;how&#39;, &#39;are&#39;, &#39;you&#39;, &#39;how are&#39;, &#39;are you&#39;, &#39;how are you&#39;]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.core.text.keywords.rake_extract">
+<span class="sig-prename descclassname"><span class="pre">graphai.core.text.keywords.</span></span><span class="sig-name descname"><span class="pre">rake_extract</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_nltk</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">split_words</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_scores</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.text.keywords.rake_extract" title="Permalink to this definition"></a></dt>
+<dd><p>Extracts keywords from unconstrained text using python-rake or nltk-rake.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>text</strong> (<em>str</em>) – Text from which to extract the keywords.</p></li>
+<li><p><strong>use_nltk</strong> (<em>bool</em>) – Whether to use nltk-rake for keyword extraction, otherwise python-rake is used.</p></li>
+<li><p><strong>split_words</strong> (<em>bool</em>) – If True, keywords with more than one word are split. Default: False.</p></li>
+<li><p><strong>return_scores</strong> (<em>bool</em>) – If True, keywords are retured in a tuple with their RAKE score. Default: False.</p></li>
+<li><p><strong>threshold</strong> (<em>float</em>) – Minimal RAKE score below which extracted keywords are ignored. Default: 1.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>A list of</dt><dd><ul class="simple">
+<li><p>str: Keywords, if split_words is True or return_scores is False.</p></li>
+<li><p>tuple(str, float): A pair representing keywords and score, otherwise.</p></li>
+</ul>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list[str] or list[tuple(str, float)]</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">text</span> <span class="o">=</span> <span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="s2">&quot;Then a crowd a young boys they&#39;re a foolin&#39; around in the corner&quot;</span><span class="p">,</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="s2">&quot;Drunk and dressed in their best brown baggies and their platform soles&quot;</span><span class="p">,</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="s2">&quot;They don&#39;t give a damn about any trumpet playin&#39; band&quot;</span><span class="p">,</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="s2">&quot;It ain&#39;t what they call &#39;rock and roll&#39;&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rake_extract</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">use_nltk</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="go">[&#39;brown baggies&#39;, &#39;young boys&#39;, &#39;trumpet playin&#39;, &#39;corner drunk&#39;, &#39;platform soles&#39;]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.core.text.keywords.get_keywords">
+<span class="sig-prename descclassname"><span class="pre">graphai.core.text.keywords.</span></span><span class="sig-name descname"><span class="pre">get_keywords</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_nltk</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.text.keywords.get_keywords" title="Permalink to this definition"></a></dt>
+<dd><p>Normalize raw text and extract keywords.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>text</strong> (<em>str</em>) – Text to extract keywords from.</p></li>
+<li><p><strong>use_nltk</strong> (<em>bool</em>) – Whether to use nltk-rake for keyword extraction, otherwise python-rake is used. Default: False.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A pandas DataFrame with one column ‘Keywords’, containing the keywords extracted from the text.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">text</span> <span class="o">=</span> <span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="s2">&quot;&lt;p&gt;&quot;</span><span class="p">,</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="s2">&quot;Then a crowd a young boys they&#39;re a foolin&#39; around in the corner&quot;</span><span class="p">,</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="s2">&quot;Drunk and dressed in their best brown baggies and their platform soles&quot;</span><span class="p">,</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="s2">&quot;They don&#39;t give a damn about any trumpet playin&#39; band&quot;</span><span class="p">,</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="s2">&quot;It ain&#39;t what they call &#39;rock and roll&#39;&quot;</span><span class="p">,</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="s2">&quot;&lt;/p&gt;&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">get_keywords</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+<span class="go">         Keywords</span>
+<span class="go">0   brown baggies</span>
+<span class="go">1      young boys</span>
+<span class="go">2  trumpet playin</span>
+<span class="go">3    corner drunk</span>
+<span class="go">4  platform soles</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="graphai.core.text.html" class="btn btn-neutral float-left" title="graphai.core.text package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="graphai.core.text.wikisearch.html" class="btn btn-neutral float-right" title="graphai.core.text.wikisearch module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Aitor Pérez.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

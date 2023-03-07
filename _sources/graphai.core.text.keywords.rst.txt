@@ -1,0 +1,7 @@
+graphai.core.text.keywords module
+=================================
+
+.. automodule:: graphai.core.text.keywords
+   :members:
+   :undoc-members:
+   :show-inheritance:

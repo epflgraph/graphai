@@ -1,0 +1,16 @@
+graphai.core.text package
+=========================
+
+.. automodule:: graphai.core.text
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 1
+
+   graphai.core.text.keywords
+   graphai.core.text.wikisearch

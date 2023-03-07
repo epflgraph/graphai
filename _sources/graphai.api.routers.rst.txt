@@ -1,0 +1,17 @@
+graphai.api.routers package
+===========================
+
+.. automodule:: graphai.api.routers
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 1
+
+   graphai.api.routers.ontology
+   graphai.api.routers.text
+   graphai.api.routers.video

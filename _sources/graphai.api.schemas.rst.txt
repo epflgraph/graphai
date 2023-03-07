@@ -1,0 +1,17 @@
+graphai.api.schemas package
+===========================
+
+.. automodule:: graphai.api.schemas
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 1
+
+   graphai.api.schemas.ontology
+   graphai.api.schemas.text
+   graphai.api.schemas.video

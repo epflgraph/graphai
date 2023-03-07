@@ -1,0 +1,16 @@
+graphai.core.common package
+===========================
+
+.. automodule:: graphai.core.common
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 1
+
+   graphai.core.common.graph
+   graphai.core.common.ontology

@@ -1,0 +1,7 @@
+graphai.core.interfaces.es module
+=================================
+
+.. automodule:: graphai.core.interfaces.es
+   :members:
+   :undoc-members:
+   :show-inheritance:

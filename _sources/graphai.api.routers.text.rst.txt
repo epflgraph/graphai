@@ -1,0 +1,7 @@
+graphai.api.routers.text module
+===============================
+
+.. automodule:: graphai.api.routers.text
+   :members:
+   :undoc-members:
+   :show-inheritance:

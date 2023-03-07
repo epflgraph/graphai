@@ -1,0 +1,7 @@
+graphai.core.utils.time.stopwatch module
+========================================
+
+.. automodule:: graphai.core.utils.time.stopwatch
+   :members:
+   :undoc-members:
+   :show-inheritance:
