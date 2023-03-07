@@ -25,9 +25,12 @@ jobs:
 
       - name: Create config files
         run: |
+          pwd
           cd main
+          pwd
           mkdir config
           cd config
+          pwd
           
           echo "[DB]" >> db.ini
           echo "host: ${{ vars.db_host }}" >> db.ini
@@ -42,7 +45,9 @@ jobs:
           echo "password: ${{ secrets.es_password }}" >> es.ini
           echo "cafile: ${{ vars.es_cafile }}" >> es.ini
           
+          pwd
           cd ..
+          pwd
 
       - name: PWD
         run: pwd
