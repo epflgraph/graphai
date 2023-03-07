@@ -38,8 +38,6 @@ jobs:
           echo "username: ${{ vars.es_username }}" >> es.ini
           echo "password: ${{ secrets.es_password }}" >> es.ini
           echo "cafile: ${{ vars.es_cafile }}" >> es.ini
-          
-          cd ..
 
       - name: Create virtualenv and activate it
         run: |
@@ -49,18 +47,18 @@ jobs:
 
       - name: Install python package in editable mode along with dependencies
         run: |
+          cd main
           pip install -e .
 
       - name: Create docs source files with sphinx-apidoc
         run: |
+          cd main
           sphinx-apidoc -o docs/source graphai -d 1 -TMe
 
       - name: Build html docs with sphinx
         run: |
-          cd docs
+          cd main/docs
           make html
-          cd ..
-          cd ..
 
       - name: Upload artifact of the html output
         uses: actions/upload-artifact@v3
