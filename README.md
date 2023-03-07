@@ -28,7 +28,9 @@ password: <db password>
 [ES]
 host: <es host>
 port: <es port>
-index: <es index>
+username: <es username>
+password: <es password>
+cafile: <path to es cluster certificate> 
 ```
 
 ## API
@@ -47,22 +49,22 @@ To add an endpoint to an existing router:
 4. Populate the function with the needed logic.
 
 To add an endpoint to a new router:
-1. Create an empty schema file (e.g. [api/schemas/newrouter.py](api/schemas/newrouter.py)).
-2. Create a router file (e.g. [api/routers/newrouter.py](api/routers/newrouter.py)), instantiating a fastapi ``APIRouter`` as follows
+1. Create an empty schema file (e.g. [api/schemas/new.py](api/schemas/new.py)).
+2. Create a router file (e.g. [api/routers/new.py](api/routers/new.py)), instantiating a fastapi ``APIRouter`` as follows
 
         router = APIRouter(
-            prefix='/newrouter',
-            tags=['newrouter'],
+            prefix='/new',
+            tags=['new'],
             responses={404: {'description': 'Not found'}}
         )
 3. Register the router in the fastapi application by adding to the [api/main.py](api/main.py) file the lines
 
-        from api.routers import newrouter
+        import graphai.api.routers.new as new_router
 
         [...]
 
-        app.include_router(newrouter.router)
-4. At this point, the new router is already created. Create and endpoint on the new router by following the instructions above.
+        app.include_router(new_router.router)
+4. At this point, the new router is already created. Create and endpoint on the new router by following the instructions above. Endpoints on this router are available under the ``/new`` prefix.
 
 **Note**: New functionalities should be developed in the [core](core) submodule, to make them modular and reusable. API endpoints should be limited to the management of input and output and the orchestration of the different tasks, and should generally rely on functions from that submodule for the actual computation of results.
 
