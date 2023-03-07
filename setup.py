@@ -28,7 +28,8 @@ setup(
         'levenshtein',
         'mwparserfromhell',
         'sphinx',
-        'sphinx-material'
+        'sphinx-material',
+        'sphinx-rtd-theme'
     ]
 )
 
