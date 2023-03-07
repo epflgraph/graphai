@@ -1,11 +1,23 @@
 #!/bin/bash
-if [ "$#" -ge 2 ]; then
-    printf "Too many parameters. Usage: deploy.sh [host]. Example: deploy.sh 0.0.0.0\n";
-    exit
-fi
+host="0.0.0.0"
+port=28800
 
-if [ "$#" -ge 1 ]; then
-    uvicorn main:app --host $1 --port 28800 --reload
-else
-    uvicorn main:app --host 0.0.0.0 --port 28800 --reload
-fi
+while getopts ":h:p:" opt; do
+  case $opt in
+    h) host="$OPTARG"
+    ;;
+    p) port="$OPTARG"
+    ;;
+    \?) echo "Invalid option -$OPTARG. Usage: deploy.sh -h 0.0.0.0 -p 28800" >&2
+    exit 1
+    ;;
+  esac
+
+  case $OPTARG in
+    -*) echo "Option $opt needs a valid argument"
+    exit 1
+    ;;
+  esac
+done
+
+uvicorn main:app --host $host --port $port --reload
