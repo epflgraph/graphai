@@ -4,8 +4,10 @@ if [ "$#" -ge 2 ]; then
     exit
 fi
 
+celery -A main.celery_instance worker --loglevel=info -Q text,video,ontology --detach
+
 if [ "$#" -ge 1 ]; then
-    uvicorn main:app --host $1 --port 28800 --reload
+    uvicorn main:app --host $1 --port 28800
 else
-    uvicorn main:app --host 0.0.0.0 --port 28800 --reload
+    uvicorn main:app --host 0.0.0.0 --port 28800
 fi
