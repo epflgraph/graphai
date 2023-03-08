@@ -1,0 +1,16 @@
+name: "Run tests"
+
+on:
+  workflow_dispatch:
+
+  workflow_call:
+
+jobs:
+  run-tests:
+    runs-on: self-hosted
+
+    steps:
+      - name: Run tests
+        run: |
+          cd main/tests
+          pytest

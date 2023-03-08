@@ -15,6 +15,10 @@ jobs:
   install-repo:
     uses: ./.github/workflows/install-repo.yml
 
+  run-tests:
+    needs: [install-repo]
+    uses: ./.github/workflows/run-tests.yml
+
   build-docs:
     if: github.event_name == 'push'
     needs: [install-repo]
@@ -24,3 +28,8 @@ jobs:
     if: github.event_name == 'push'
     needs: [build-docs]
     uses: ./.github/workflows/update-gh-pages.yml
+
+  deploy-api:
+    if: github.event_name == 'push'
+    needs: [install-repo]
+    uses: ./.github/workflows/deploy-api.yml
