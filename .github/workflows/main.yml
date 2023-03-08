@@ -1,0 +1,24 @@
+name: "Run tests, build docs and deploy API"
+
+on:
+  workflow_dispatch:
+
+  push:
+    branches:
+      - "master"
+
+  pull_request:
+    branches:
+      - "**"
+
+jobs:
+  install-repo:
+    uses: ./.github/workflows/install-repo.yml
+
+  build-docs:
+    needs: [install-repo]
+    uses: ./.github/workflows/build-docs.yml
+
+  update-gh-pages:
+    needs: [build-docs]
+    uses: ./.github/workflows/update-gh-pages.yml
