@@ -23,8 +23,8 @@ async def tree():
     task = get_ontology_tree_task.apply_async(args=[ontology], priority=6)
     return JSONResponse({"TaskID": task.id})
 
-@router.get('/task_status/{task_id}')
-async def get_task_status(task_id: str):
+@router.get('/tree_status/{task_id}', response_model=TreeResponse)
+async def get_tree_status(task_id: str):
     return get_task_info(task_id)
 
 @router.get('/whatever')
