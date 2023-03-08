@@ -28,3 +28,7 @@ jobs:
     if: github.event_name == 'push'
     needs: [build-docs]
     uses: ./.github/workflows/update-gh-pages.yml
+
+  deploy-api:
+    needs: [install-repo]
+    uses: ./.github/workflows/deploy-api.yml
