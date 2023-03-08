@@ -20,4 +20,4 @@ while getopts ":h:p:" opt; do
   esac
 done
 
-uvicorn main:app --host $host --port $port --reload
+uvicorn main:app --host $host --port $port
