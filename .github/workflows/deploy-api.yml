@@ -13,4 +13,4 @@ jobs:
       - name: Deploy API
         run: |
           cd main/graphai/api
-          ./deploy.sh -p ${{ vars.api_test_port }}
+          # ./deploy.sh -p ${{ vars.api_test_port }}
