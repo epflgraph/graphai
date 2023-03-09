@@ -12,6 +12,7 @@ Subpackages
 .. toctree::
    :maxdepth: 1
 
+   graphai.core.celery_utils
    graphai.core.common
    graphai.core.interfaces
    graphai.core.text

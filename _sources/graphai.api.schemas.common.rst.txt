@@ -1,0 +1,7 @@
+graphai.api.schemas.common module
+=================================
+
+.. automodule:: graphai.api.schemas.common
+   :members:
+   :undoc-members:
+   :show-inheritance:
