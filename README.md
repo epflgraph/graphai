@@ -44,7 +44,7 @@ cafile: <path to es cluster certificate>
 The GraphAI module includes an API that leverages the [FastAPI](https://fastapi.tiangolo.com/) package.
 
 ### Deployment
-To deploy it, run the ``deploy.sh`` script in the [api](api) folder specifying the host. The app will be listening to the port 28800 by default. For more information about the API endpoints, check its own documentation.
+To deploy it, first run the ``deploy_celery.sh`` script in the [api](api) folder and then run the ``deploy.sh`` script specifying the host. The app will be listening to the port 28800 by default. For more information about the API endpoints, check its own documentation.
 
 ### Development
 New endpoints can be added either to an existing router or to a new one.
