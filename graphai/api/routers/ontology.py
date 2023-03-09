@@ -6,7 +6,7 @@ from graphai.api.common.ontology import ontology
 
 from graphai.api.common.log import log
 from graphai.core.celery_utils.celery_utils import get_task_info, format_results
-from graphai.api.celery_tasks.ontology import get_ontology_tree_task, get_whatever
+from graphai.api.celery_tasks.ontology import get_ontology_tree_task
 from starlette.responses import JSONResponse
 
 # Initialise ontology router
