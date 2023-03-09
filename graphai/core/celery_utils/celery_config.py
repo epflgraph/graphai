@@ -4,10 +4,8 @@ from kombu import Queue
 
 
 def route_task(name, args, kwargs, options, task=None, **kw):
-    print(name)
     if "." in name:
         queue, _ = name.split(".")
-        print(queue)
         return {"queue": queue}
     return {"queue": "celery"}
 
