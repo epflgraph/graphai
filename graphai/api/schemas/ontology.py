@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from typing import List, Dict
+from typing import List, Dict, Union
 from .common import TaskStatusResponse
 
 
@@ -20,9 +20,8 @@ class TreeResponseElem(BaseModel):
         description="ID of the parent category"
     )
 
-
 class TreeResponse(TaskStatusResponse):
-    task_result: List[TreeResponseElem] = Field(
+    task_result: Union[Dict[str, List[TreeResponseElem]], None] = Field(
         title="Ontology tree results",
         description="The child-parent relationships of the ontology's predefined tree as a list of dicts."
     )

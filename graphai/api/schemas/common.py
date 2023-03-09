@@ -14,13 +14,17 @@ class TaskIDResponse(BaseModel):
     )
 
 # This class follows the response model of our celery get_task_info function:
-# task_id, task_status, and task_result (the latter of which is implemented by child classes).
+# task_id, task_name, task_status, and task_result (the latter of which must be overwritten by child classes).
 
-# You need one child of this class for each "status" endpoint. Be sure to override the `task_result` attribute.
+# Create one child of this class per endpoint. Be sure to override the `task_result` attribute.
 class TaskStatusResponse(BaseModel, abc.ABC):
     task_id: str = Field(
         title="Task ID",
         description="ID of the task created as a response to an API request"
+    )
+    task_name: str = Field(
+        title="Task name",
+        description="Name of the task"
     )
     task_status: str = Field(
         title="Task status",
