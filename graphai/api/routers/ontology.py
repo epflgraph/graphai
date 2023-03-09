@@ -21,7 +21,7 @@ router = APIRouter(
 async def tree():
     log('Returning the ontology tree')
     task = get_ontology_tree_task.apply_async(args=[ontology], priority=6)
-    return JSONResponse({"TaskID": task.id})
+    return JSONResponse({"task_id": task.id})
 
 @router.get('/tree_status/{task_id}', response_model=TreeResponse)
 async def get_tree_status(task_id: str):
