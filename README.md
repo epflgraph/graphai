@@ -7,7 +7,14 @@ This module contains projects and services enhancing the [EPFL Graph](https://ww
 * [Documentation](#documentation)
 
 ## Setup
-The GraphAI module may be installed as a regular python package. To install it, simply run
+GraphAI requires both RabbitMQ (as the message broker backend) and Redis (as the results backend) to be installed. 
+To ensure the requirements are met, run:
+```
+sudo apt-get install redis
+sudo apt-get install rabbitmq
+```
+
+The GraphAI module may then be installed as a regular python package. To install it, simply run
 ```
 pip install -e .
 ```
