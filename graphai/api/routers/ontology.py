@@ -24,9 +24,3 @@ async def tree():
     results = task.get()
     print(task.name)
     return format_results(task.id, task.name, task.status, results)
-
-
-@router.get('/whatever')
-async def whatever():
-    task = get_whatever.apply_async(priority=3)
-    return task.get()
