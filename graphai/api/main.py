@@ -10,6 +10,8 @@ from graphai.api.common.log import log
 from graphai.api.common.graph import graph
 from graphai.api.common.ontology import ontology
 
+from graphai.core.celery_utils.celery_utils import create_celery
+
 from graphai.api.routers.video import video_actor_list
 from graphai.core.text.wikisearch import ws_actor_list
 
@@ -25,6 +27,8 @@ app = FastAPI(
 app.include_router(ontology_router.router)
 app.include_router(text_router.router)
 app.include_router(video_router.router)
+app.celery_app = create_celery()
+celery_instance = app.celery_app
 
 
 # On startup, we instantiate concepts graph and ontology, so they are held into memory

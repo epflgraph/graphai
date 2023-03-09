@@ -7,7 +7,14 @@ This module contains projects and services enhancing the [EPFL Graph](https://ww
 * [Documentation](#documentation)
 
 ## Setup
-The GraphAI module may be installed as a regular python package. To install it, simply run
+GraphAI requires both RabbitMQ (as the message broker backend) and Redis (as the results backend) to be installed. 
+To ensure the requirements are met, run:
+```
+sudo apt-get install redis
+sudo apt-get install rabbitmq
+```
+
+The GraphAI module may then be installed as a regular python package. To install it, simply run
 ```
 pip install -e .
 ```
@@ -37,7 +44,7 @@ cafile: <path to es cluster certificate>
 The GraphAI module includes an API that leverages the [FastAPI](https://fastapi.tiangolo.com/) package.
 
 ### Deployment
-To deploy it, run the ``deploy.sh`` script in the [graphai/api](graphai/api) folder specifying the host. The app will be listening to the port 28800 by default. For more information about the API endpoints, check its own documentation.
+To deploy it, first run the ``deploy_celery.sh`` script in the [graphai/api](graphai/api) folder and then run the ``deploy.sh`` script specifying the host. The app will be listening to the port 28800 by default. For more information about the API endpoints, check its own documentation.
 
 ### Development
 New endpoints can be added either to an existing router or to a new one.

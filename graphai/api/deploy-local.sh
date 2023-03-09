@@ -5,7 +5,7 @@ if [ "$#" -ge 2 ]; then
 fi
 
 if [ "$#" -ge 1 ]; then
-    uvicorn main:app --host $1 --port 28800 --reload
+    uvicorn main:app --host $1 --port 28800
 else
-    uvicorn main:app --host 0.0.0.0 --port 28800 --reload
+    uvicorn main:app --host 0.0.0.0 --port 28800
 fi
