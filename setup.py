@@ -14,6 +14,7 @@ setup(
         'pandas',
         'matplotlib',
         'fastapi',
+        'gunicorn',
         'uvicorn',
         'pydantic',
         'requests',
