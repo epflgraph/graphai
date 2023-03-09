@@ -18,6 +18,8 @@ setup(
         'pydantic',
         'requests',
         'ray',
+        'celery[redis]',
+        'kombu',
         'mysql-connector-python',
         'elasticsearch',
         'unidecode',
