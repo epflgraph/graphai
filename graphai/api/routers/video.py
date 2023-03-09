@@ -31,9 +31,24 @@ class VideoActor:
         return True
 
 
+class VideoActorList:
+
+    def __init__(self, n):
+        self.n = n
+        self.actors = []
+
+    def instantiate_actors(self):
+        self.actors = [VideoActor.remote() for i in range(self.n)]
+
+    def free_actors(self):
+        self.actors = []
+
+    def get_actor(self, i):
+        return self.actors[i % self.n]
+
+
 # Instantiate ray actor list
-n_actors = 16
-actors = [VideoActor.remote() for i in range(n_actors)]
+video_actor_list = VideoActorList(16)
 
 
 @router.post('/multiprocessing_example', response_model=MultiprocessingExampleResponse)
@@ -48,7 +63,7 @@ async def multiprocessing_example(data: MultiprocessingExampleRequest):
     log(f'Got input parameters ({foo}, {bar})', sw.delta())
 
     # Execute tasks in parallel
-    results = [actors[i % n_actors].do_something.remote(foo) for i in range(bar)]
+    results = [video_actor_list.get_actor(i).do_something.remote(foo) for i in range(bar)]
     log(f'Dispatched all tasks in parallel to the actors', sw.delta())
 
     # Wait for the results
