@@ -14,6 +14,7 @@ setup(
         'pandas',
         'matplotlib',
         'fastapi',
+        'gunicorn',
         'uvicorn',
         'pydantic',
         'requests',
@@ -30,7 +31,8 @@ setup(
         'levenshtein',
         'mwparserfromhell',
         'sphinx',
-        'sphinx-material'
+        'sphinx-material',
+        'sphinx-rtd-theme'
     ]
 )
 

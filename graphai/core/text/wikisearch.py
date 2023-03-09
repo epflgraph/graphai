@@ -55,9 +55,24 @@ class WikisearchActor:
         return results
 
 
+class WikisearchActorList:
+
+    def __init__(self, n):
+        self.n = n
+        self.actors = []
+
+    def instantiate_actors(self):
+        self.actors = [WikisearchActor.remote() for i in range(self.n)]
+
+    def free_actors(self):
+        self.actors = []
+
+    def get_actor(self, i):
+        return self.actors[i % self.n]
+
+
 # Instantiate ray actor list
-n_actors = 16
-actors = [WikisearchActor.remote() for i in range(n_actors)]
+ws_actor_list = WikisearchActorList(16)
 
 
 def wikisearch(keywords, method):
@@ -80,7 +95,7 @@ def wikisearch(keywords, method):
     """
 
     # Execute wikisearch in parallel
-    results = [actors[i % n_actors].wikisearch.remote(row['Keywords'], method) for i, row in keywords.iterrows()]
+    results = [ws_actor_list.get_actor(i).wikisearch.remote(row['Keywords'], method) for i, row in keywords.iterrows()]
 
     # Wait for the results
     results = ray.get(results)

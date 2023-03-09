@@ -1,0 +1,14 @@
+name: "Deploy API"
+
+on:
+  workflow_dispatch:
+
+  workflow_call:
+
+jobs:
+  deploy-api:
+    runs-on: self-hosted
+
+    steps:
+      - name: Deploy API
+        run: systemctl --user restart api-test

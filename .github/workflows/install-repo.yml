@@ -1,0 +1,46 @@
+name: "Install repo"
+
+on:
+  workflow_dispatch:
+
+  workflow_call:
+
+jobs:
+  install-repo:
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout repository code
+        uses: actions/checkout@v3
+        with:
+          path: main
+
+      - name: Create config files
+        run: |
+          cd main
+          mkdir config
+          cd config
+          
+          echo "[DB]" >> db.ini
+          echo "host: ${{ vars.db_host }}" >> db.ini
+          echo "port: ${{ vars.db_port }}" >> db.ini
+          echo "user: ${{ vars.db_user }}" >> db.ini
+          echo "password: ${{ secrets.db_password }}" >> db.ini
+          
+          echo "[ES]" >> es.ini
+          echo "host: ${{ vars.es_host }}" >> es.ini
+          echo "port: ${{ vars.es_port }}" >> es.ini
+          echo "username: ${{ vars.es_username }}" >> es.ini
+          echo "password: ${{ secrets.es_password }}" >> es.ini
+          echo "cafile: ${{ vars.es_cafile }}" >> es.ini
+
+      - name: Create virtualenv and activate it
+        run: |
+          cd main
+          virtualenv venv
+          source venv/bin/activate
+
+      - name: Install python package in editable mode along with dependencies
+        run: |
+          cd main
+          pip install -e .

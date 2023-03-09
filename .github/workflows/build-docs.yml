@@ -1,0 +1,21 @@
+name: "Build docs"
+
+on:
+  workflow_dispatch:
+
+  workflow_call:
+
+jobs:
+  build-docs:
+    runs-on: self-hosted
+
+    steps:
+      - name: Create docs source files with sphinx-apidoc
+        run: |
+          cd main
+          sphinx-apidoc -o docs/source graphai -d 1 -TMe
+
+      - name: Build html docs with sphinx
+        run: |
+          cd main/docs
+          make html
