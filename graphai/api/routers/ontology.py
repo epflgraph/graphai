@@ -5,7 +5,7 @@ from graphai.api.schemas.common import *
 from graphai.api.common.ontology import ontology
 
 from graphai.api.common.log import log
-from graphai.core.celery_utils.celery_utils import get_task_info
+from graphai.core.celery_utils.celery_utils import get_task_info, format_results
 from graphai.api.celery_tasks.ontology import get_ontology_tree_task, get_whatever
 from starlette.responses import JSONResponse
 
@@ -17,16 +17,13 @@ router = APIRouter(
 )
 
 
-@router.get('/tree', response_model=TaskIDResponse)
+@router.get('/tree', response_model=TreeResponse)
 async def tree():
     log('Returning the ontology tree')
     task = get_ontology_tree_task.apply_async(args=[ontology], priority=6)
-    return JSONResponse({"task_id": task.id})
-
-
-@router.get('/tree_status/{task_id}', response_model=TreeResponse)
-async def get_tree_status(task_id: str):
-    return get_task_info(task_id)
+    results = task.get()
+    print(task.name)
+    return format_results(task.id, task.name, task.status, results)
 
 
 @router.get('/whatever')
