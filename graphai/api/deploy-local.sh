@@ -4,6 +4,7 @@ if [ "$#" -ge 2 ]; then
     exit
 fi
 
+# If you want to see celery logs, run the following without --detach in a separate command line and then deploy
 celery -A main.celery_instance worker --loglevel=info -Q text,video,ontology --detach
 
 if [ "$#" -ge 1 ]; then
