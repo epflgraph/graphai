@@ -1,5 +1,4 @@
 from celery import shared_task, chord, group
-import ray
 import time
 from graphai.api.common.log import log
 from graphai.core.utils.time.stopwatch import Stopwatch
