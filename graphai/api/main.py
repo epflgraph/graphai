@@ -12,7 +12,6 @@ from graphai.api.common.ontology import ontology
 
 from graphai.core.celery_utils.celery_utils import create_celery
 
-from graphai.api.routers.video import video_actor_list
 from graphai.core.text.wikisearch import ws_actor_list
 
 # Initialise FastAPI
@@ -41,15 +40,13 @@ async def instantiate_graph_and_ontology():
 
     log(f'Instantiating actor lists...')
     ws_actor_list.instantiate_actors()
-    video_actor_list.instantiate_actors()
 
 
-# On shutdown, we free ray actors so theuy can be garbage collected
+# On shutdown, we free ray actors so they can be garbage collected
 @app.on_event("shutdown")
 async def instantiate_graph_and_ontology():
     log(f'Freeing ray actors...')
     ws_actor_list.free_actors()
-    video_actor_list.free_actors()
 
 
 # Root endpoint redirects to docs
