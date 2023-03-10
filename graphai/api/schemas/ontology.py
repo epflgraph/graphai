@@ -20,8 +20,9 @@ class TreeResponseElem(BaseModel):
         description="ID of the parent category"
     )
 
+
 class TreeResponse(TaskStatusResponse):
     task_result: Union[Dict[str, List[TreeResponseElem]], None] = Field(
         title="Ontology tree results",
-        description="The child-parent relationships of the ontology's predefined tree as a list of dicts."
+        description="Child-parent relationships in the ontology's predefined tree as a list of dicts."
     )
