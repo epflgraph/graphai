@@ -6,6 +6,7 @@ from celery import shared_task
 def get_ontology_tree_task(self, ontology):
     return {'child_to_parent': ontology.categories_categories.to_dict(orient='records')}
 
+
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 5},
              name='ontology.parent', ignore_result=False)
 def get_category_parent_task(self, ontology, child_id):
@@ -17,6 +18,7 @@ def get_category_parent_task(self, ontology, child_id):
                     'ChildCategoryID': child_id
                 }]
             }
+
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 5},
              name='ontology.children', ignore_result=False)
