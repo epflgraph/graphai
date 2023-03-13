@@ -23,7 +23,6 @@ async def tree():
     log('Returning the ontology tree')
     task = get_ontology_tree_task.apply_async(args=[ontology], priority=6)
     results = task.get()
-    print(task.name)
     return format_results(task.id, task.name, task.status, results)
 
 
@@ -32,7 +31,6 @@ async def parent(category_id):
     log('Returning the parent of category %s' % category_id)
     task = get_category_parent_task.apply_async(args=[ontology, int(category_id)], priority=6)
     results = task.get()
-    print(task.name)
     return format_results(task.id, task.name, task.status, results)
 
 
@@ -41,5 +39,4 @@ async def children(category_id):
     log('Returning the children of category %s' % category_id)
     task = get_category_children_task.apply_async(args=[ontology, int(category_id)], priority=6)
     results = task.get()
-    print(task.name)
     return format_results(task.id, task.name, task.status, results)
