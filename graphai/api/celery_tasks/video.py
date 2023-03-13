@@ -22,6 +22,9 @@ def example_callback_task(self, l):
 # The function that creates and calls the celery task
 def celery_multiproc_example_task(data):
     sw = Stopwatch()
+    # Note: If you have some large dataset that you don't want to individually copy to every single task,
+    # take a look at custom Manager classes based on multiprocessing.managers.BaseManager, which enables you
+    # to create one Manager object and share it among all the tasks.
     # Getting the parameters
     foo = data.foo
     bar = data.bar
