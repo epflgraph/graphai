@@ -33,17 +33,38 @@ class MultiprocessingExampleResponse(BaseModel):
     )
 
 
-class RetrieveFileRequest(BaseModel):
+class RetrieveURLRequest(BaseModel):
     url: str = Field(
-        ...,
         title="URL",
         description="The URL to be retrieved and stored for further processing"
     )
 
 
-class RetrieveFileResponse(TaskStatusResponse):
+class RetrieveURLResponse(TaskStatusResponse):
     task_result: Union[Dict[str, Union[str, bool, None]], None] = Field(
         title="File retrieval response",
-        description="A dict containing a flag for whether or not the retrieval was successful, plus a token "
-                    "that refers to the now-retrieved file if it was (and null if it wasn't)."
+        description="A dict containing a flag for whether the retrieval was successful, plus a token "
+                    "that refers to the now-retrieved file if so (and null if not)."
+    )
+
+
+class ComputeSignatureRequest(BaseModel):
+    token: str = Field(
+        title="Token",
+        description="The token that identifies the requested file"
+    )
+
+
+class ComputeSignatureResponse(TaskStatusResponse):
+    task_result: Union[Dict[str, Union[str, bool, None]], None] = Field(
+        title="Calculate fingerprint response",
+        description="A dict containing a flag for whether the fingerprint calculation was successful, plus a token "
+                    "that refers to the now-retrieved file if so (and null if not)."
+    )
+
+
+class FileRequest(BaseModel):
+    filename: str = Field(
+        title="File name",
+        description="The name of the file to be downloaded (received as a response from another endpoint)."
     )

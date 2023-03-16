@@ -28,9 +28,22 @@ def retrieve_file_from_url_task(self, url, filename):
             'successful': results is not None}
 
 
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
+             name='video.compute_signature', ignore_result=False)
+def compute_signature_task(self, filename):
+    results = compute_signature(filename)
+    return {'token': results,
+            'successful': results is not None}
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
+             name='video.get_file', ignore_result=False)
+def get_file_task(self, filename):
+    return generate_filename(filename)
+
 
 # The function that creates and calls the celery task
-def celery_multiproc_example_task(data):
+def celery_multiproc_example_master(data):
     sw = Stopwatch()
     # Note: If you have some large dataset that you don't want to individually copy to every single task,
     # take a look at custom Manager classes based on multiprocessing.managers.BaseManager, which enables you
@@ -48,8 +61,18 @@ def celery_multiproc_example_task(data):
     return {'baz': t}
 
 
-def retrieve_and_generate_token(url):
+def retrieve_and_generate_token_master(url):
     token = generate_random_token()
     out_filename = token + '.' + url.split('.')[-1]
     task = retrieve_file_from_url_task.apply_async(args=[url, out_filename], priority=2)
     return {'task_id': task.id}
+
+
+def compute_signature_master(token):
+    task = compute_signature_task.apply_async(args=[token],  priority=2)
+    return {'task_id': task.id}
+
+
+def get_file_master(filename):
+    return get_file_task.apply_async(args=[filename], priority=2).get()
+
