@@ -1,5 +1,7 @@
 import os
 import time
+from urllib.error import HTTPError
+import random
 import xml.etree.cElementTree as ET
 import wget
 import re
@@ -9,11 +11,23 @@ ROOT_VIDEO_DIR = os.path.normpath(os.path.join(os.path.dirname(__file__), '../..
 STANDARD_FPS = 30
 
 
+def generate_file_path(filename):
+    return os.path.join(ROOT_VIDEO_DIR, filename)
+
+
+def generate_random_token():
+    return ('%.06f' % time.time()).replace('.','') + '%08d'%random.randint(0,int(1e7))
+
+
 def retrieve_file_from_url(url, out_filename=None):
     if out_filename is None:
         out_filename = url.split('/')[-1]
-    response = wget.download(url, out_filename)
-    return response
+    try:
+        response = wget.download(url, generate_file_path(out_filename))
+    except HTTPError as e:
+        print(e)
+        return None
+    return out_filename
 
 
 def hash_video_or_audio(input_filename, video=True):

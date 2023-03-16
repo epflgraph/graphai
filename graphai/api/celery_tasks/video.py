@@ -2,6 +2,7 @@ from celery import shared_task, chord, group
 import time
 from graphai.api.common.log import log
 from graphai.core.utils.time.stopwatch import Stopwatch
+from graphai.core.common.video import *
 
 
 # A task that will have several instances run in parallel
@@ -17,6 +18,15 @@ def example_parallel_task(self, x):
              name='video.example_callback', ignore_result=False)
 def example_callback_task(self, l):
     return all(l)
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
+             name='video.retrieve_url', ignore_result=False)
+def retrieve_file_from_url_task(self, url, filename):
+    results = retrieve_file_from_url(url, filename)
+    return {'token': results,
+            'successful': results is not None}
+
 
 
 # The function that creates and calls the celery task
@@ -36,3 +46,10 @@ def celery_multiproc_example_task(data):
          example_callback_task.signature(args=[])).apply_async(priority=2).get()
     log(f'Got all results', sw.delta())
     return {'baz': t}
+
+
+def retrieve_and_generate_token(url):
+    token = generate_random_token()
+    out_filename = token + '.' + url.split('.')[-1]
+    task = retrieve_file_from_url_task.apply_async(args=[url, out_filename], priority=2)
+    return {'task_id': task.id}
