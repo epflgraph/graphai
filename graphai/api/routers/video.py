@@ -37,7 +37,7 @@ async def get_retrieve_file_status(task_id):
 
 @router.post('/calculate_fingerprint', response_model=TaskIDResponse)
 async def calculate_fingerprint(data: ComputeSignatureRequest):
-    result = compute_signature_master(data.token)
+    result = compute_signature_master(data.token, force=data.force)
     return result
 
 
@@ -48,12 +48,12 @@ async def calculate_fingerprint_status(task_id):
 
 @router.post('/get_file/')
 async def get_file(data: FileRequest):
-    return FileResponse(get_file_master(data.filename))
+    return FileResponse(get_file_master(data.token))
 
 
 @router.post('/extract_audio', response_model=TaskIDResponse)
 async def extract_audio(data: ExtractAudioRequest):
-    result = extract_audio_master(data.token)
+    result = extract_audio_master(data.token, force=data.force)
     return result
 
 

@@ -40,11 +40,37 @@ class RetrieveURLRequest(BaseModel):
     )
 
 
+class RetrieveURLResponseInner(BaseModel):
+    token: Union[str, None] = Field(
+        title="Token",
+        description="Result token, null if task has failed"
+    )
+    successful: bool = Field(
+        title="Success flag",
+        description="True if task successful, False otherwise"
+    )
+
+
 class RetrieveURLResponse(TaskStatusResponse):
-    task_result: Union[Dict[str, Union[str, bool, None]], None] = Field(
+    task_result: Union[RetrieveURLResponseInner, None] = Field(
         title="File retrieval response",
         description="A dict containing a flag for whether the retrieval was successful, plus a token "
                     "that refers to the now-retrieved file if so (and null if not)."
+    )
+
+
+class PerformFileCachableComputationResponse(BaseModel):
+    token: Union[str, None] = Field(
+        title="Token",
+        description="Result token, null if task has failed"
+    )
+    successful: bool = Field(
+        title="Success flag",
+        description="True if task successful, False otherwise"
+    )
+    fresh: bool = Field(
+        title="Freshness flag",
+        description="Whether the result was computed freshly or an existing cached result was returned."
     )
 
 
@@ -54,17 +80,23 @@ class ComputeSignatureRequest(BaseModel):
         description="The token that identifies the requested file"
     )
 
+    force: bool = Field(
+        title="Force",
+        description="Whether to force a recomputation",
+        default=False
+    )
+
 
 class ComputeSignatureResponse(TaskStatusResponse):
-    task_result: Union[Dict[str, Union[str, bool, None]], None] = Field(
+    task_result: Union[PerformFileCachableComputationResponse, None] = Field(
         title="Calculate fingerprint response",
-        description="A dict containing a flag for whether the fingerprint calculation was successful, plus a token "
-                    "that refers to the now-computed file if so (and null if not)."
+        description="A dict containing a flag for whether the fingerprint calculation was successful and "
+                    "a freshness flag, plus a token that refers to the now-computed file if so (and null if not)."
     )
 
 
 class FileRequest(BaseModel):
-    filename: str = Field(
+    token: str = Field(
         title="File name",
         description="The name of the file to be downloaded (received as a response from another endpoint)."
     )
@@ -76,10 +108,16 @@ class ExtractAudioRequest(BaseModel):
         description="The token that identifies the requested file"
     )
 
+    force: bool = Field(
+        title="Force",
+        description="Whether to force a recomputation",
+        default=False
+    )
+
 
 class ExtractAudioResponse(TaskStatusResponse):
-    task_result: Union[Dict[str, Union[str, bool, None]], None] = Field(
+    task_result: Union[PerformFileCachableComputationResponse, None] = Field(
         title="Extract audio response",
-        description="A dict containing a flag for whether the audio extraction was successful, plus a token "
-                    "that refers to the now-computed file if so (and null if not)."
+        description="A dict containing a flag for whether the audio extraction was successful and a freshness flag, "
+                    "plus a token that refers to the now-computed file if so (and null if not)."
     )

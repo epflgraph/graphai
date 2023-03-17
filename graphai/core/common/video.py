@@ -66,8 +66,8 @@ def retrieve_file_from_url(url, out_filename=None):
     out_filename_with_path = generate_filename(out_filename)
     try:
         response = wget.download(url, out_filename_with_path)
-    except HTTPError as e:
-        print(e)
+    except Exception as e:
+        print(e, file=sys.stderr)
         return None
     return out_filename
 
@@ -99,42 +99,53 @@ def hash_video_or_audio(input_filename, video=True):
     return (result.decode('utf8').strip())[4:]
 
 
-def extract_audio_from_video(input_filename):
-    # TODO Make sure we haven't already computed it, and return the old result if we have
+def extract_audio_from_video(input_filename, force=False):
     try:
         probe_results = perform_probe(input_filename)
     except Exception as e:
         print(e, file=sys.stderr)
         return None
     audio_type = probe_results['streams'][1]['codec_name']
-    # TODO maybe we should skip the probing and just put this in an aac file in any case
+    # note to self: maybe we should skip the probing and just put this in an aac file in any case
     output_suffix='_audio.' + audio_type
     input_filename_with_path = generate_filename(input_filename)
     output_filename = input_filename + output_suffix
     output_filename_with_path = generate_filename(output_filename)
+
+    # If force=False, check whether the file has already been computed, return existing result if so
+    if not force and file_exists(output_filename_with_path):
+        print('Result already exists, returning cached result')
+        return output_filename, False
+
     try:
         ffmpeg.input(input_filename_with_path).audio. \
             output(output_filename_with_path, c='copy', ss='0').overwrite_output().run(capture_stdout=False)
     except Exception as e:
         print(e, file=sys.stderr)
-        return None
+
     if file_exists(output_filename_with_path):
-        return output_filename
+        return output_filename, True
     else:
-        return None
+        return None, False
 
 
-def compute_signature(input_filename, output_suffix='_sig.xml'):
+def compute_signature(input_filename, output_suffix='_sig.xml', force=False):
     input_filename_with_path = generate_filename(input_filename)
     output_filename = input_filename + output_suffix
     output_filename_with_path = generate_filename(output_filename)
+
+    # If force=False, check whether the file has already been computed, return existing result if so
+    if not force and file_exists(output_filename_with_path):
+        print('Result already exists, returning cached result')
+        return output_filename, False
+
     ffmpeg.input(input_filename_with_path).video.filter('fps', STANDARD_FPS).\
         filter('signature', format='xml', filename=output_filename_with_path). \
         output('pipe:', format='null').run(capture_stdout=False)
     if file_exists(output_filename_with_path):
-        return output_filename
+        return output_filename, True
     else:
-        return None
+        return None, False
 
 
 def compare_signatures(input_filename_1, input_filename_2, output_template='comparison%d_sig.xml'):

@@ -30,10 +30,11 @@ def retrieve_file_from_url_task(self, url, filename):
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='video.compute_signature', ignore_result=False)
-def compute_signature_task(self, filename):
-    results = compute_signature(filename)
+def compute_signature_task(self, filename, force=False):
+    results, fresh = compute_signature(filename, force=force)
     return {'token': results,
-            'successful': results is not None}
+            'successful': results is not None,
+            'fresh': fresh}
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
@@ -44,10 +45,11 @@ def get_file_task(self, filename):
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='video.extract_audio', ignore_result=False)
-def extract_audio_task(self, filename):
-    results = extract_audio_from_video(filename)
+def extract_audio_task(self, filename, force=False):
+    results, fresh = extract_audio_from_video(filename, force=force)
     return {'token': results,
-            'successful': results is not None}
+            'successful': results is not None,
+            'fresh': fresh}
 
 
 # The function that creates and calls the celery task
@@ -76,16 +78,16 @@ def retrieve_and_generate_token_master(url):
     return {'task_id': task.id}
 
 
-def compute_signature_master(token):
-    task = compute_signature_task.apply_async(args=[token],  priority=2)
+def compute_signature_master(token, force=False):
+    task = compute_signature_task.apply_async(args=[token, force],  priority=2)
     return {'task_id': task.id}
 
 
-def get_file_master(filename):
-    return get_file_task.apply_async(args=[filename], priority=2).get()
+def get_file_master(token):
+    return get_file_task.apply_async(args=[token], priority=2).get()
 
 
-def extract_audio_master(filename):
-    task = extract_audio_task.apply_async(args=[filename], priority=2)
+def extract_audio_master(token, force=False):
+    task = extract_audio_task.apply_async(args=[token, force], priority=2)
     return {'task_id': task.id}
 
