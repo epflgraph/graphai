@@ -42,6 +42,14 @@ def get_file_task(self, filename):
     return generate_filename(filename)
 
 
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
+             name='video.extract_audio', ignore_result=False)
+def extract_audio_task(self, filename):
+    results = extract_audio_from_video(filename)
+    return {'token': results,
+            'successful': results is not None}
+
+
 # The function that creates and calls the celery task
 def celery_multiproc_example_master(data):
     sw = Stopwatch()
@@ -75,4 +83,9 @@ def compute_signature_master(token):
 
 def get_file_master(filename):
     return get_file_task.apply_async(args=[filename], priority=2).get()
+
+
+def extract_audio_master(filename):
+    task = extract_audio_task.apply_async(args=[filename], priority=2)
+    return {'task_id': task.id}
 

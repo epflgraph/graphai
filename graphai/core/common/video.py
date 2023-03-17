@@ -1,4 +1,5 @@
 import os
+import sys
 import time
 from urllib.error import HTTPError
 import random
@@ -10,9 +11,9 @@ import ffmpeg
 
 ROOT_VIDEO_DIR = os.path.normpath(os.path.join(os.path.dirname(__file__), '../../../Storage/'))
 VIDEO_SUBFOLDER = 'Video'
-VIDEO_FORMATS = ['.mkv', '.mp4', '.avi']
+VIDEO_FORMATS = ['.mkv', '.mp4', '.avi', '.mov', '.flv']
 AUDIO_SUBFOLDER = 'Audio'
-AUDIO_FORMATS = ['.mp3', '.flac', '.wav']
+AUDIO_FORMATS = ['.mp3', '.flac', '.wav', '.aac']
 OTHER_SUBFOLDER = 'Other'
 SIGNATURE_SUBFOLDER = 'Signatures'
 SIGNATURE_FORMATS = ['_sig.xml']
@@ -71,6 +72,10 @@ def retrieve_file_from_url(url, out_filename=None):
     return out_filename
 
 
+def perform_probe(filename):
+    return ffmpeg.probe(generate_filename(filename), cmd='ffprobe')
+
+
 def hash_video_or_audio(input_filename, video=True):
     input_filename_with_path = generate_filename(input_filename)
     in_stream = ffmpeg.input(input_filename_with_path)
@@ -92,6 +97,31 @@ def hash_video_or_audio(input_filename, video=True):
     result, _ = ffmpeg.output(in_stream, 'pipe:', format='md5').run(capture_stdout=True)
     # The result looks like 'MD5=9735151f36a3e628b0816b1bba3b9640\n' so we clean it up
     return (result.decode('utf8').strip())[4:]
+
+
+def extract_audio_from_video(input_filename):
+    # TODO Make sure we haven't already computed it, and return the old result if we have
+    try:
+        probe_results = perform_probe(input_filename)
+    except Exception as e:
+        print(e, file=sys.stderr)
+        return None
+    audio_type = probe_results['streams'][1]['codec_name']
+    # TODO maybe we should skip the probing and just put this in an aac file in any case
+    output_suffix='_audio.' + audio_type
+    input_filename_with_path = generate_filename(input_filename)
+    output_filename = input_filename + output_suffix
+    output_filename_with_path = generate_filename(output_filename)
+    try:
+        ffmpeg.input(input_filename_with_path).audio. \
+            output(output_filename_with_path, c='copy', ss='0').overwrite_output().run(capture_stdout=False)
+    except Exception as e:
+        print(e, file=sys.stderr)
+        return None
+    if file_exists(output_filename_with_path):
+        return output_filename
+    else:
+        return None
 
 
 def compute_signature(input_filename, output_suffix='_sig.xml'):

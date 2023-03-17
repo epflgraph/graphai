@@ -59,7 +59,7 @@ class ComputeSignatureResponse(TaskStatusResponse):
     task_result: Union[Dict[str, Union[str, bool, None]], None] = Field(
         title="Calculate fingerprint response",
         description="A dict containing a flag for whether the fingerprint calculation was successful, plus a token "
-                    "that refers to the now-retrieved file if so (and null if not)."
+                    "that refers to the now-computed file if so (and null if not)."
     )
 
 
@@ -67,4 +67,19 @@ class FileRequest(BaseModel):
     filename: str = Field(
         title="File name",
         description="The name of the file to be downloaded (received as a response from another endpoint)."
+    )
+
+
+class ExtractAudioRequest(BaseModel):
+    token: str = Field(
+        title="Token",
+        description="The token that identifies the requested file"
+    )
+
+
+class ExtractAudioResponse(TaskStatusResponse):
+    task_result: Union[Dict[str, Union[str, bool, None]], None] = Field(
+        title="Extract audio response",
+        description="A dict containing a flag for whether the audio extraction was successful, plus a token "
+                    "that refers to the now-computed file if so (and null if not)."
     )
