@@ -61,7 +61,7 @@ def extract_audio_from_video(input_filename, force=False):
         probe_results = perform_probe(input_filename)
     except Exception as e:
         print(e, file=sys.stderr)
-        return None
+        return None, False
     audio_type = probe_results['streams'][1]['codec_name']
     # note to self: maybe we should skip the probing and just put this in an aac file in any case
     output_suffix='_audio.' + audio_type
