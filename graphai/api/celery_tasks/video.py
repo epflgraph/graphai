@@ -1,8 +1,9 @@
-from celery import shared_task, chord, group
+from celery import shared_task, group
 import time
 from graphai.api.common.log import log
+from graphai.api.common.video import generate_random_token, retrieve_file_from_url, extract_audio_from_video, \
+    compute_signature, video_config
 from graphai.core.utils.time.stopwatch import Stopwatch
-from graphai.core.common.video import *
 
 
 # A task that will have several instances run in parallel
@@ -40,7 +41,7 @@ def compute_signature_task(self, filename, force=False):
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='video.get_file', ignore_result=False)
 def get_file_task(self, filename):
-    return generate_filename(filename)
+    return video_config.generate_filename(filename)
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},

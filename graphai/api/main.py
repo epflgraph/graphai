@@ -9,6 +9,7 @@ from graphai.api.common.log import log
 
 from graphai.api.common.graph import graph
 from graphai.api.common.ontology import ontology
+from graphai.api.common.video import video_config
 
 from graphai.core.celery_utils.celery_utils import create_celery
 
@@ -33,10 +34,12 @@ celery_instance = app.celery_app
 # On startup, we instantiate concepts graph and ontology, so they are held into memory
 @app.on_event("startup")
 async def instantiate_graph_and_ontology():
+    # Fetching concepts graph, ontology graph, and the root directory for videos and other files
     log(f'Fetching concepts graph from database...')
     graph.fetch_from_db()
     log(f'Fetching ontology from database...')
     ontology.fetch_from_db()
+    # video_config
 
     log(f'Instantiating actor lists...')
     ws_actor_list.instantiate_actors()
