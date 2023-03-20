@@ -7,7 +7,7 @@ import ffmpeg
 import wget
 
 from graphai.core.common.video import file_exists, \
-    STANDARD_FPS, TEMP_SUBFOLDER, VideoConfig
+    STANDARD_FPS, TEMP_SUBFOLDER, VideoConfig, count_files
 
 
 video_config = VideoConfig()
@@ -105,7 +105,7 @@ def compute_signature(input_filename, output_suffix='_sig.xml', force=False):
         return None, False
 
 
-def compute_slides(input_filename, output_format='_slides/slide_%05d.png', force=False):
+def compute_video_slides(input_filename, output_format='_slides/slide_%05d.png', force=False):
     probe_results = perform_probe(input_filename)
     video_stream = [x for x in probe_results['streams'] if x['codec_type'] == 'video'][0]
     width = video_stream['width']
@@ -119,9 +119,10 @@ def compute_slides(input_filename, output_format='_slides/slide_%05d.png', force
     first_slide = output_template_with_path % 1
     if not force and file_exists(first_slide):
         print('Result already exists, returning cached result')
-        return output_template_dirs_only, False
+        return output_template_dirs_only.split('/')[-1], False, count_files(output_template_dirs_only)
 
     try:
+        # extract all the keyframes (i-frames) and store them as image files
         ffmpeg.input(input_filename_with_path).video. \
             filter('select', "eq(pict_type,PICT_TYPE_I)").\
             output(output_template_with_path, format='image2', fps_mode='vfr', s=f'{width}x{height}').\
@@ -130,9 +131,9 @@ def compute_slides(input_filename, output_format='_slides/slide_%05d.png', force
         print(e, file=sys.stderr)
 
     if file_exists(first_slide):
-        return output_template_dirs_only, True
+        return output_template_dirs_only.split('/')[-1], True, count_files(output_template_dirs_only)
     else:
-        return None, False
+        return None, False, 0
 
 
 

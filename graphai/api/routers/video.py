@@ -5,7 +5,8 @@ from graphai.api.schemas.video import *
 from graphai.api.schemas.common import *
 
 from graphai.api.celery_tasks.video import celery_multiproc_example_master, \
-    retrieve_and_generate_token_master, compute_signature_master, get_file_master, extract_audio_master
+    retrieve_and_generate_token_master, compute_signature_master, get_file_master, extract_audio_master, \
+    detect_slides_master
 from graphai.core.celery_utils.celery_utils import get_task_info
 
 
@@ -58,5 +59,16 @@ async def extract_audio(data: ExtractAudioRequest):
 
 
 @router.get('/extract_audio/status/{task_id}', response_model=ExtractAudioResponse)
+async def calculate_fingerprint_status(task_id):
+    return get_task_info(task_id)
+
+
+@router.post('/detect_slides', response_model=TaskIDResponse)
+async def detect_slides(data: DetectSlidesRequest):
+    result = detect_slides_master(data.token, force=data.force)
+    return result
+
+
+@router.get('/detect_slides/status/{task_id}', response_model=DetectSlidesResponse)
 async def calculate_fingerprint_status(task_id):
     return get_task_info(task_id)

@@ -2,12 +2,13 @@ import os
 import errno
 
 ROOT_VIDEO_DIR = os.path.normpath(os.path.join(os.path.dirname(__file__), '../../../Storage/'))
+# Formats with a . in their name indicate single files, whereas formats without a . indicate folders (e.g. '_slides')
 VIDEO_SUBFOLDER = 'Video'
 VIDEO_FORMATS = ['.mkv', '.mp4', '.avi', '.mov', '.flv']
 AUDIO_SUBFOLDER = 'Audio'
 AUDIO_FORMATS = ['.mp3', '.flac', '.wav', '.aac']
 IMAGE_SUBFOLDER = 'Image'
-IMAGE_FORMATS = ['.png', '.tiff', '.jpg', '.jpeg', '.bmp']
+IMAGE_FORMATS = ['.png', '.tiff', '.jpg', '.jpeg', '.bmp', '_slides']
 OTHER_SUBFOLDER = 'Other'
 SIGNATURE_SUBFOLDER = 'Signatures'
 SIGNATURE_FORMATS = ['_sig.xml']
@@ -29,6 +30,14 @@ def make_sure_path_exists(path, file_at_the_end=False):
 
 def file_exists(file_path):
     return os.path.exists(file_path)
+
+
+def count_files(root_dir):
+    count = 0
+    for sub_path in os.listdir(root_dir):
+        if os.path.isfile(os.path.join(root_dir, sub_path)):
+            count += 1
+    return count
 
 
 class VideoConfig():

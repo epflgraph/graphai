@@ -2,7 +2,7 @@ from celery import shared_task, group
 import time
 from graphai.api.common.log import log
 from graphai.api.common.video import generate_random_token, retrieve_file_from_url, extract_audio_from_video, \
-    compute_signature, video_config
+    compute_signature, video_config, compute_video_slides
 from graphai.core.utils.time.stopwatch import Stopwatch
 
 
@@ -53,6 +53,16 @@ def extract_audio_task(self, filename, force=False):
             'fresh': fresh}
 
 
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
+             name='video.detect_slides', ignore_result=False)
+def detect_slides_task(self, filename, force=False):
+    results, fresh, n_slides = compute_video_slides(filename, force=force)
+    return {'token': results,
+            'successful': results is not None,
+            'fresh': fresh,
+            'n_slides': n_slides}
+
+
 # The function that creates and calls the celery task
 def celery_multiproc_example_master(data):
     sw = Stopwatch()
@@ -90,5 +100,10 @@ def get_file_master(token):
 
 def extract_audio_master(token, force=False):
     task = extract_audio_task.apply_async(args=[token, force], priority=2)
+    return {'task_id': task.id}
+
+
+def detect_slides_master(token, force=False):
+    task = detect_slides_task.apply_async(args=[token, force], priority=2)
     return {'task_id': task.id}
 

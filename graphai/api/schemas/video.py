@@ -121,3 +121,32 @@ class ExtractAudioResponse(TaskStatusResponse):
         description="A dict containing a flag for whether the audio extraction was successful and a freshness flag, "
                     "plus a token that refers to the now-computed file if so (and null if not)."
     )
+
+
+class DetectSlidesRequest(BaseModel):
+    token: str = Field(
+        title="Token",
+        description="The token that identifies the requested file"
+    )
+
+    force: bool = Field(
+        title="Force",
+        description="Whether to force a recomputation",
+        default=False
+    )
+
+
+class DetectSlidesTaskResponse(PerformFileCachableComputationResponse):
+    n_slides: int = Field(
+        title="# of slides",
+        description="Number of detected slides in given video file"
+    )
+
+
+class DetectSlidesResponse(TaskStatusResponse):
+    task_result: Union[DetectSlidesTaskResponse, None] = Field(
+        title="Detect slides response",
+        description="A dict containing a flag for whether the slide detection was successful and a freshness flag, "
+                    "a token that refers to the now-computed file if so (and null if not), "
+                    "and the number of detected slides."
+    )
