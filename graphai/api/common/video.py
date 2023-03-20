@@ -7,7 +7,7 @@ import ffmpeg
 import wget
 
 from graphai.core.common.video import file_exists, \
-    STANDARD_FPS, TEMP_SUBFOLDER, VideoConfig, count_files
+    STANDARD_FPS, TEMP_SUBFOLDER, VideoConfig, count_files, get_dir_files, SLIDE_OUTPUT_FORMAT
 
 
 video_config = VideoConfig()
@@ -105,21 +105,22 @@ def compute_signature(input_filename, output_suffix='_sig.xml', force=False):
         return None, False
 
 
-def compute_video_slides(input_filename, output_format='_slides/slide_%05d.png', force=False):
+def compute_video_slides(input_filename, force=False):
     probe_results = perform_probe(input_filename)
     video_stream = [x for x in probe_results['streams'] if x['codec_type'] == 'video'][0]
     width = video_stream['width']
     height = video_stream['height']
 
     input_filename_with_path = video_config.generate_filename(input_filename)
-    output_template = input_filename + output_format
+    output_template = input_filename + SLIDE_OUTPUT_FORMAT
     output_template_with_path = video_config.generate_filename(output_template)
     output_template_dirs_only = '/'.join(output_template_with_path.split('/')[:-1])
 
     first_slide = output_template_with_path % 1
     if not force and file_exists(first_slide):
         print('Result already exists, returning cached result')
-        return output_template_dirs_only.split('/')[-1], False, count_files(output_template_dirs_only)
+        return output_template_dirs_only.split('/')[-1], False, count_files(output_template_dirs_only), \
+               get_dir_files(output_template_dirs_only)
 
     try:
         # extract all the keyframes (i-frames) and store them as image files
@@ -131,9 +132,10 @@ def compute_video_slides(input_filename, output_format='_slides/slide_%05d.png',
         print(e, file=sys.stderr)
 
     if file_exists(first_slide):
-        return output_template_dirs_only.split('/')[-1], True, count_files(output_template_dirs_only)
+        return output_template_dirs_only.split('/')[-1], True, count_files(output_template_dirs_only), \
+               get_dir_files(output_template_dirs_only)
     else:
-        return None, False, 0
+        return None, False, 0, []
 
 
 

@@ -142,6 +142,11 @@ class DetectSlidesTaskResponse(PerformFileCachableComputationResponse):
         description="Number of detected slides in given video file"
     )
 
+    files: List[str] = Field(
+        title="Names of slide files",
+        description="The names of the slide files extracted from video"
+    )
+
 
 class DetectSlidesResponse(TaskStatusResponse):
     task_result: Union[DetectSlidesTaskResponse, None] = Field(

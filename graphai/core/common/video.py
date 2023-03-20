@@ -13,6 +13,9 @@ OTHER_SUBFOLDER = 'Other'
 SIGNATURE_SUBFOLDER = 'Signatures'
 SIGNATURE_FORMATS = ['_sig.xml']
 TEMP_SUBFOLDER = 'Temp'
+
+SLIDE_OUTPUT_FORMAT = '_slides/slide_%05d.png'
+
 STANDARD_FPS = 30
 
 
@@ -30,6 +33,10 @@ def make_sure_path_exists(path, file_at_the_end=False):
 
 def file_exists(file_path):
     return os.path.exists(file_path)
+
+
+def get_dir_files(root_dir):
+    return [sub_path for sub_path in os.listdir(root_dir) if os.path.isfile(os.path.join(root_dir, sub_path))]
 
 
 def count_files(root_dir):

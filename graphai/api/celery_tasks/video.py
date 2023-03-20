@@ -56,11 +56,12 @@ def extract_audio_task(self, filename, force=False):
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='video.detect_slides', ignore_result=False)
 def detect_slides_task(self, filename, force=False):
-    results, fresh, n_slides = compute_video_slides(filename, force=force)
+    results, fresh, n_slides, result_filenames = compute_video_slides(filename, force=force)
     return {'token': results,
             'successful': results is not None,
             'fresh': fresh,
-            'n_slides': n_slides}
+            'n_slides': n_slides,
+            'files': result_filenames}
 
 
 # The function that creates and calls the celery task
