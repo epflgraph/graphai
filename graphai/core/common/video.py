@@ -6,6 +6,8 @@ VIDEO_SUBFOLDER = 'Video'
 VIDEO_FORMATS = ['.mkv', '.mp4', '.avi', '.mov', '.flv']
 AUDIO_SUBFOLDER = 'Audio'
 AUDIO_FORMATS = ['.mp3', '.flac', '.wav', '.aac']
+IMAGE_SUBFOLDER = 'Image'
+IMAGE_FORMATS = ['.png', '.tiff', '.jpg', '.jpeg', '.bmp']
 OTHER_SUBFOLDER = 'Other'
 SIGNATURE_SUBFOLDER = 'Signatures'
 SIGNATURE_FORMATS = ['_sig.xml']
@@ -35,8 +37,9 @@ class VideoConfig():
 
 
     def concat_file_path(self, filename, subfolder):
-        make_sure_path_exists(os.path.join(self.root_dir, subfolder))
-        return os.path.join(self.root_dir, subfolder, filename)
+        result = os.path.join(self.root_dir, subfolder, filename)
+        make_sure_path_exists(result, file_at_the_end=True)
+        return result
 
 
     def set_root_dir(self, new_root_dir):
@@ -52,6 +55,8 @@ class VideoConfig():
             filename_with_path = self.concat_file_path(filename, AUDIO_SUBFOLDER)
         elif any([filename.endswith(x) for x in SIGNATURE_FORMATS]):
             filename_with_path = self.concat_file_path(filename, SIGNATURE_SUBFOLDER)
+        elif any([filename.endswith(x) for x in IMAGE_FORMATS]):
+            filename_with_path = self.concat_file_path(filename, IMAGE_SUBFOLDER)
         else:
             filename_with_path = self.concat_file_path(filename, OTHER_SUBFOLDER)
         return filename_with_path

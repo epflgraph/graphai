@@ -105,6 +105,37 @@ def compute_signature(input_filename, output_suffix='_sig.xml', force=False):
         return None, False
 
 
+def compute_slides(input_filename, output_format='_slides/slide_%05d.png', force=False):
+    probe_results = perform_probe(input_filename)
+    video_stream = [x for x in probe_results['streams'] if x['codec_type'] == 'video'][0]
+    width = video_stream['width']
+    height = video_stream['height']
+
+    input_filename_with_path = video_config.generate_filename(input_filename)
+    output_template = input_filename + output_format
+    output_template_with_path = video_config.generate_filename(output_template)
+    output_template_dirs_only = '/'.join(output_template_with_path.split('/')[:-1])
+
+    first_slide = output_template_with_path % 1
+    if not force and file_exists(first_slide):
+        print('Result already exists, returning cached result')
+        return output_template_dirs_only, False
+
+    try:
+        ffmpeg.input(input_filename_with_path).video. \
+            filter('select', "eq(pict_type,PICT_TYPE_I)").\
+            output(output_template_with_path, format='image2', fps_mode='vfr', s=f'{width}x{height}').\
+            overwrite_output().run(capture_stdout=False)
+    except Exception as e:
+        print(e, file=sys.stderr)
+
+    if file_exists(first_slide):
+        return output_template_dirs_only, True
+    else:
+        return None, False
+
+
+
 def compare_signatures(input_filename_1, input_filename_2, output_template='comparison%d_sig.xml'):
     input_filename_with_path_1 = video_config.generate_filename(input_filename_1)
     input_filename_with_path_2 = video_config.generate_filename(input_filename_2)
