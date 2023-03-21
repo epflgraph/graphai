@@ -79,8 +79,7 @@ def extract_audio_from_video(input_filename, force=False):
         return output_filename, False, float(probe_results['format']['duration'])
     try:
         err = ffmpeg.input(input_filename_with_path).audio. \
-            output(output_filename_with_path, c='copy',
-                   ss='0', t=probe_results['format']['duration']).\
+            output(output_filename_with_path, c='copy').\
             overwrite_output().run(capture_stdout=True)
     except Exception as e:
         print(e, file=sys.stderr)
@@ -88,6 +87,35 @@ def extract_audio_from_video(input_filename, force=False):
 
     if file_exists(output_filename_with_path) and ('ffmpeg error' not in err):
         return output_filename, True, float(probe_results['format']['duration'])
+    else:
+        return None, False, 0.0
+
+
+def remove_silence_doublesided(input_filename, force=False):
+    audio_type = input_filename.split('.')[-1]
+    # note to self: maybe we should skip the probing and just put this in an aac file in any case
+    output_suffix = '_nosilence.' + audio_type
+    input_filename_with_path = video_config.generate_filename(input_filename)
+    output_filename = input_filename + output_suffix
+    output_filename_with_path = video_config.generate_filename(output_filename)
+
+    # If force=False, check whether the file has already been computed, return existing result if so
+    if not force and file_exists(output_filename_with_path):
+        print('Result already exists, returning cached result')
+        output_probe = perform_probe(output_filename)
+        return output_filename, False, float(output_probe['format']['duration'])
+    try:
+        err = ffmpeg.input(input_filename_with_path).audio.\
+            filter('silenceremove', start_periods=1, start_threshold=0.0, detection='peak', window=0).\
+            filter('silenceremove', stop_periods=-1, stop_threshold=0.0, detection='peak', window=0).\
+            output(output_filename_with_path).overwrite_output().run(capture_stdout=True)
+    except Exception as e:
+        print(e, file=sys.stderr)
+        err = str(e)
+
+    if file_exists(output_filename_with_path) and ('ffmpeg error' not in err):
+        output_probe = perform_probe(output_filename)
+        return output_filename, True, float(output_probe['format']['duration'])
     else:
         return None, False, 0.0
 
