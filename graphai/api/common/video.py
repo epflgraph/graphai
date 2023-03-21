@@ -4,7 +4,11 @@ import sys
 import time
 
 import ffmpeg
+
+import chromaprint
 import wget
+import acoustid
+from fuzzywuzzy import fuzz
 
 from graphai.core.common.video import file_exists, \
     STANDARD_FPS, TEMP_SUBFOLDER, VideoConfig, count_files, get_dir_files, SLIDE_OUTPUT_FORMAT
@@ -33,7 +37,7 @@ def perform_probe(filename):
     return ffmpeg.probe(video_config.generate_filename(filename), cmd='ffprobe')
 
 
-def hash_video_or_audio(input_filename, video=True):
+def md5_video_or_audio(input_filename, video=True):
     input_filename_with_path = video_config.generate_filename(input_filename)
     in_stream = ffmpeg.input(input_filename_with_path)
     if video:
@@ -72,18 +76,33 @@ def extract_audio_from_video(input_filename, force=False):
     # If force=False, check whether the file has already been computed, return existing result if so
     if not force and file_exists(output_filename_with_path):
         print('Result already exists, returning cached result')
-        return output_filename, False
-
+        return output_filename, False, float(probe_results['format']['duration'])
     try:
-        ffmpeg.input(input_filename_with_path).audio. \
-            output(output_filename_with_path, c='copy', ss='0').overwrite_output().run(capture_stdout=False)
+        err = ffmpeg.input(input_filename_with_path).audio. \
+            output(output_filename_with_path, c='copy',
+                   ss='0', t=probe_results['format']['duration']).\
+            overwrite_output().run(capture_stdout=True)
     except Exception as e:
         print(e, file=sys.stderr)
+        err = str(e)
 
-    if file_exists(output_filename_with_path):
-        return output_filename, True
+    if file_exists(output_filename_with_path) and ('ffmpeg error' not in err):
+        return output_filename, True, float(probe_results['format']['duration'])
     else:
-        return None, False
+        return None, False, 0.0
+
+
+def compare_audio_fingerprints(decoded_1, decoded_2):
+    return fuzz.ratio(decoded_1, decoded_2)
+
+
+def perceptual_hash_audio(input_filename, max_length=3600):
+    input_filename_with_path = video_config.generate_filename(input_filename)
+    results = acoustid.fingerprint_file(input_filename_with_path, maxlength=max_length)
+    length = results[0]
+    fingerprint = results[1]
+    decoded = chromaprint.decode_fingerprint(fingerprint)
+    return fingerprint, decoded, length
 
 
 def compute_signature(input_filename, output_suffix='_sig.xml', force=False):
