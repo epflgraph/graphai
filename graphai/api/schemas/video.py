@@ -115,11 +115,19 @@ class ExtractAudioRequest(BaseModel):
     )
 
 
+class ExtractAudioTaskResponse(PerformFileCachableComputationResponse):
+    duration: float = Field(
+        title="Audio duration",
+        description="Duration of audio based on the length of its video file"
+    )
+
+
 class ExtractAudioResponse(TaskStatusResponse):
-    task_result: Union[PerformFileCachableComputationResponse, None] = Field(
+    task_result: Union[ExtractAudioTaskResponse, None] = Field(
         title="Extract audio response",
-        description="A dict containing a flag for whether the audio extraction was successful and a freshness flag, "
-                    "plus a token that refers to the now-computed file if so (and null if not)."
+        description="A dict containing a flag for whether the audio extraction was successful, a freshness flag, "
+                    "a token that refers to the now-computed file if so (and null if not), and the duration of "
+                    "the audio file."
     )
 
 

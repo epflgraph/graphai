@@ -47,10 +47,11 @@ def get_file_task(self, filename):
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='video.extract_audio', ignore_result=False)
 def extract_audio_task(self, filename, force=False):
-    results, fresh = extract_audio_from_video(filename, force=force)
+    results, fresh, duration = extract_audio_from_video(filename, force=force)
     return {'token': results,
             'successful': results is not None,
-            'fresh': fresh}
+            'fresh': fresh,
+            'duration': duration}
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
