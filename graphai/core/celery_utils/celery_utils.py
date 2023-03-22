@@ -33,4 +33,5 @@ def get_task_info(task_id):
     """
     task_result = AsyncResult(task_id)
     result = format_results(task_id, task_result.name, task_result.status, task_result.result)
+    print(result)
     return result

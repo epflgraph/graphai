@@ -59,7 +59,7 @@ async def extract_audio(data: ExtractAudioRequest):
 
 
 @router.get('/extract_audio/status/{task_id}', response_model=ExtractAudioResponse)
-async def calculate_fingerprint_status(task_id):
+async def extract_audio_status(task_id):
     return get_task_info(task_id)
 
 
@@ -70,5 +70,5 @@ async def detect_slides(data: DetectSlidesRequest):
 
 
 @router.get('/detect_slides/status/{task_id}', response_model=DetectSlidesResponse)
-async def calculate_fingerprint_status(task_id):
+async def detect_slides_status(task_id):
     return get_task_info(task_id)

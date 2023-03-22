@@ -4,6 +4,7 @@ from fastapi.responses import RedirectResponse
 import graphai.api.routers.ontology as ontology_router
 import graphai.api.routers.text as text_router
 import graphai.api.routers.video as video_router
+import graphai.api.routers.voice as audio_router
 
 from graphai.api.common.log import log
 
@@ -27,6 +28,7 @@ app = FastAPI(
 app.include_router(ontology_router.router)
 app.include_router(text_router.router)
 app.include_router(video_router.router)
+app.include_router(audio_router.router)
 app.celery_app = create_celery()
 celery_instance = app.celery_app
 
