@@ -92,10 +92,10 @@ def extract_audio_from_video(input_filename, force=False):
         return None, False, 0.0
 
 
-def find_beginning_and_ending_silences(input_filename_with_path, tol=0.01):
+def find_beginning_and_ending_silences(input_filename_with_path, distance_from_end_tol=0.01, noise_thresh=0.0001):
     if not file_exists(input_filename_with_path):
         raise Exception(f'File {input_filename_with_path} does not exist')
-    _, results = ffmpeg.input(input_filename_with_path).filter('silencedetect').\
+    _, results = ffmpeg.input(input_filename_with_path).filter('silencedetect', n=noise_thresh).\
                 output('pipe:', format='null').run(capture_stderr=True)
     results = results.decode('utf8')
     # the audio length will be accurate since the filter forces a decoding of the audio file
@@ -110,9 +110,9 @@ def find_beginning_and_ending_silences(input_filename_with_path, tol=0.01):
         if len(results) == 2:
             silence_start = silence_beginnings_and_ends[0]
             silence_end = silence_beginnings_and_ends[1]
-            if silence_start <= tol:
+            if silence_start <= distance_from_end_tol:
                 return_dict = {'ss': silence_end, 'to': audio_length}
-            elif silence_end >= audio_length - tol:
+            elif silence_end >= audio_length - distance_from_end_tol:
                 return_dict = {'ss': 0, 'to': silence_start}
             else:
                 return_dict = {'ss': 0, 'to': audio_length}
@@ -122,11 +122,11 @@ def find_beginning_and_ending_silences(input_filename_with_path, tol=0.01):
             last_silence_start = silence_beginnings_and_ends[-2]
             last_silence_end = silence_beginnings_and_ends[-1]
             return_dict = dict()
-            if first_silence_start <= tol:
+            if first_silence_start <= distance_from_end_tol:
                 return_dict['ss'] = first_silence_end
             else:
                 return_dict['ss'] = 0
-            if last_silence_end >= audio_length - tol:
+            if last_silence_end >= audio_length - distance_from_end_tol:
                 return_dict['to'] = last_silence_start
             else:
                 return_dict['to'] = audio_length
@@ -135,7 +135,7 @@ def find_beginning_and_ending_silences(input_filename_with_path, tol=0.01):
     return return_dict
 
 
-def remove_silence_doublesided(input_filename, force=False, threshold=0.0):
+def remove_silence_doublesided(input_filename, force=False, threshold=0.0001):
     audio_type = input_filename.split('.')[-1]
     output_suffix = '_nosilence.' + audio_type
     input_filename_with_path = video_config.generate_filename(input_filename)
@@ -149,7 +149,7 @@ def remove_silence_doublesided(input_filename, force=False, threshold=0.0):
         # the audio length is approximate since the bitrate is used to estimate it
         return output_filename, False, float(output_probe['format']['duration'])
     try:
-        from_and_to = find_beginning_and_ending_silences(input_filename_with_path)
+        from_and_to = find_beginning_and_ending_silences(input_filename_with_path, noise_thresh=threshold)
         err = ffmpeg.input(input_filename_with_path).audio. \
             output(output_filename_with_path, c='copy', ss=from_and_to['ss'], to=from_and_to['to']).\
             overwrite_output().run(capture_stdout=True)
