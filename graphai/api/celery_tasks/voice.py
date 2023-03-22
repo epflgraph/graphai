@@ -13,7 +13,7 @@ def compute_audio_fingerprint_task(self, filename, force=False, threshold=0.0):
         }
     fingerprint, decoded, new_duration = perceptual_hash_audio(nosilence_token)
     return {
-        'result': fingerprint.decode('utf8'),
+        'result': fingerprint,
         'fresh': fresh,
         'duration_nosilence': new_duration
     }
