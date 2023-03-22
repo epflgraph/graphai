@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field
-from typing import List, Dict, Union
-from .common import TaskStatusResponse
+from typing import List, Union
+from .common import TaskStatusResponse, FileCachableComputationResponse
 
 
 class MultiprocessingExampleRequest(BaseModel):
@@ -59,21 +59,6 @@ class RetrieveURLResponse(TaskStatusResponse):
     )
 
 
-class PerformFileCachableComputationResponse(BaseModel):
-    token: Union[str, None] = Field(
-        title="Token",
-        description="Result token, null if task has failed"
-    )
-    successful: bool = Field(
-        title="Success flag",
-        description="True if task successful, False otherwise"
-    )
-    fresh: bool = Field(
-        title="Freshness flag",
-        description="Whether the result was computed freshly or an existing cached result was returned."
-    )
-
-
 class ComputeSignatureRequest(BaseModel):
     token: str = Field(
         title="Token",
@@ -88,17 +73,10 @@ class ComputeSignatureRequest(BaseModel):
 
 
 class ComputeSignatureResponse(TaskStatusResponse):
-    task_result: Union[PerformFileCachableComputationResponse, None] = Field(
+    task_result: Union[FileCachableComputationResponse, None] = Field(
         title="Calculate fingerprint response",
         description="A dict containing a flag for whether the fingerprint calculation was successful and "
                     "a freshness flag, plus a token that refers to the now-computed file if so (and null if not)."
-    )
-
-
-class FileRequest(BaseModel):
-    token: str = Field(
-        title="File name",
-        description="The name of the file to be downloaded (received as a response from another endpoint)."
     )
 
 
@@ -115,10 +93,11 @@ class ExtractAudioRequest(BaseModel):
     )
 
 
-class ExtractAudioTaskResponse(PerformFileCachableComputationResponse):
+class ExtractAudioTaskResponse(FileCachableComputationResponse):
     duration: float = Field(
         title="Audio duration",
-        description="Duration of audio based on the length of its video file"
+        description="Duration of audio based on the length of its video file. This value is exact as it is based "
+                    "on video metadata."
     )
 
 
@@ -144,7 +123,7 @@ class DetectSlidesRequest(BaseModel):
     )
 
 
-class DetectSlidesTaskResponse(PerformFileCachableComputationResponse):
+class DetectSlidesTaskResponse(FileCachableComputationResponse):
     n_slides: int = Field(
         title="# of slides",
         description="Number of detected slides in given video file"
