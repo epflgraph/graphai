@@ -2,6 +2,7 @@ import random
 import re
 import sys
 import time
+from datetime import datetime
 
 import ffmpeg
 
@@ -91,9 +92,51 @@ def extract_audio_from_video(input_filename, force=False):
         return None, False, 0.0
 
 
-def remove_silence_doublesided(input_filename, force=False):
+def find_beginning_and_ending_silences(input_filename_with_path, tol=0.01):
+    if not file_exists(input_filename_with_path):
+        raise Exception(f'File {input_filename_with_path} does not exist')
+    _, results = ffmpeg.input(input_filename_with_path).filter('silencedetect').\
+                output('pipe:', format='null').run(capture_stderr=True)
+    results = results.decode('utf8')
+    # the audio length will be accurate since the filter forces a decoding of the audio file
+    audio_length = re.findall(r'time=\d{2}:\d{2}:\d{2}.\d+', results)
+    audio_length = [datetime.strptime(x.strip('time=').strip(), '%H:%M:%S.%f') for x in audio_length]
+    audio_length = max([t.hour*3600+t.minute*60+t.second+t.microsecond/1e6 for t in audio_length])
+    results = re.split(r'[\n\r]', results)
+    results = [x for x in results if '[silencedetect' in x]
+    results = [x.split(']')[1].strip() for x in results]
+    if len(results) > 0:
+        silence_beginnings_and_ends = [float(result.split('|')[0].split(':')[1].strip()) for result in results]
+        if len(results) == 2:
+            silence_start = silence_beginnings_and_ends[0]
+            silence_end = silence_beginnings_and_ends[1]
+            if silence_start <= tol:
+                return_dict = {'ss': silence_end, 'to': audio_length}
+            elif silence_end >= audio_length - tol:
+                return_dict = {'ss': 0, 'to': silence_start}
+            else:
+                return_dict = {'ss': 0, 'to': audio_length}
+        else:
+            first_silence_start = silence_beginnings_and_ends[0]
+            first_silence_end = silence_beginnings_and_ends[1]
+            last_silence_start = silence_beginnings_and_ends[-2]
+            last_silence_end = silence_beginnings_and_ends[-1]
+            return_dict = dict()
+            if first_silence_start <= tol:
+                return_dict['ss'] = first_silence_end
+            else:
+                return_dict['ss'] = 0
+            if last_silence_end >= audio_length - tol:
+                return_dict['to'] = last_silence_start
+            else:
+                return_dict['to'] = audio_length
+    else:
+        return_dict = {'ss': 0, 'to': audio_length}
+    return return_dict
+
+
+def remove_silence_doublesided(input_filename, force=False, threshold=0.0):
     audio_type = input_filename.split('.')[-1]
-    # note to self: maybe we should skip the probing and just put this in an aac file in any case
     output_suffix = '_nosilence.' + audio_type
     input_filename_with_path = video_config.generate_filename(input_filename)
     output_filename = input_filename + output_suffix
@@ -103,18 +146,20 @@ def remove_silence_doublesided(input_filename, force=False):
     if not force and file_exists(output_filename_with_path):
         print('Result already exists, returning cached result')
         output_probe = perform_probe(output_filename)
+        # the audio length is approximate since the bitrate is used to estimate it
         return output_filename, False, float(output_probe['format']['duration'])
     try:
-        err = ffmpeg.input(input_filename_with_path).audio.\
-            filter('silenceremove', start_periods=1, start_threshold=0.0, detection='peak', window=0).\
-            filter('silenceremove', stop_periods=-1, stop_threshold=0.0, detection='peak', window=0).\
-            output(output_filename_with_path).overwrite_output().run(capture_stdout=True)
+        from_and_to = find_beginning_and_ending_silences(input_filename_with_path)
+        err = ffmpeg.input(input_filename_with_path).audio. \
+            output(output_filename_with_path, c='copy', ss=from_and_to['ss'], to=from_and_to['to']).\
+            overwrite_output().run(capture_stdout=True)
     except Exception as e:
         print(e, file=sys.stderr)
         err = str(e)
 
     if file_exists(output_filename_with_path) and ('ffmpeg error' not in err):
         output_probe = perform_probe(output_filename)
+        # the audio length is approximate since the bitrate is used to estimate it
         return output_filename, True, float(output_probe['format']['duration'])
     else:
         return None, False, 0.0
