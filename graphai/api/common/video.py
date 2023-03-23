@@ -178,9 +178,9 @@ def perceptual_hash_audio(input_filename, max_length=3600):
     return fingerprint.decode('utf8'), decoded, length
 
 
-def compare_string_audio_fingerprints(s1, s2):
-    return fuzz.ratio(chromaprint.decode_fingerprint(s1.encode('utf8')),
-                      chromaprint.decode_fingerprint(s2.encode('utf8')))
+def compare_encoded_audio_fingerprints(f1, f2):
+    return fuzz.ratio(chromaprint.decode_fingerprint(f1.encode('utf8')),
+                      chromaprint.decode_fingerprint(f2.encode('utf8')))
 
 
 def compute_signature(input_filename, output_suffix='_sig.xml', force=False):
