@@ -179,6 +179,8 @@ def perceptual_hash_audio(input_filename, max_length=3600):
 
 
 def compare_encoded_audio_fingerprints(f1, f2):
+    # when fuzzywuzzy is used in combination with python-Levenshtein (fuzzywuzzy[speedup],
+    # there's a 10-fold speedup here.
     return fuzz.ratio(chromaprint.decode_fingerprint(f1.encode('utf8')),
                       chromaprint.decode_fingerprint(f2.encode('utf8')))
 

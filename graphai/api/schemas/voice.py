@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field
 from typing import List, Union
-from .common import FileCachableComputationResponse, TaskStatusResponse
+from .common import FileCachableComputationResponse, TaskStatusResponse, OngoingTaskResponse
 
 
 class AudioFingerprintRequest(BaseModel):
@@ -41,7 +41,7 @@ class AudioFingerprintTaskResponse(BaseModel):
 
 
 class AudioFingerprintResponse(TaskStatusResponse):
-    task_result: Union[AudioFingerprintTaskResponse, None] = Field(
+    task_result: Union[AudioFingerprintTaskResponse, OngoingTaskResponse, None] = Field(
         title="Audio fingerprinting response",
         description="A dict containing the resulting audio fingerprint, a freshness flag, and no-silence audio length."
     )
