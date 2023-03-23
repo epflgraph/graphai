@@ -3,22 +3,26 @@ from graphai.api.common.video import remove_silence_doublesided, perceptual_hash
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='video.audio_fingerprint', ignore_result=False)
-def compute_audio_fingerprint_task(self, filename, force=False, threshold=0.0):
-    nosilence_token, fresh, duration = remove_silence_doublesided(filename, force=force, threshold=threshold)
-    if nosilence_token is None:
-        return {
-            'result': None,
-            'fresh': False,
-            'duration_nosilence': 0.0
-        }
-    fingerprint, decoded, new_duration = perceptual_hash_audio(nosilence_token)
+def compute_audio_fingerprint_task(self, filename, force=False, remove_silence=False, threshold=0.0):
+    if remove_silence:
+        fp_token, fresh, duration = remove_silence_doublesided(filename, force=force, threshold=threshold)
+        if fp_token is None:
+            return {
+                'result': None,
+                'fresh': False,
+                'duration': 0.0
+            }
+    else:
+        fp_token = filename
+        fresh = True
+    fingerprint, decoded, new_duration = perceptual_hash_audio(fp_token)
     return {
         'result': fingerprint,
         'fresh': fresh,
-        'duration_nosilence': new_duration
+        'duration': new_duration
     }
 
 
-def compute_audio_fingerprint_master(token, force=False, threshold=0.0):
-    task = compute_audio_fingerprint_task.apply_async(args=[token, force, threshold], priority=2)
+def compute_audio_fingerprint_master(token, force=False, remove_silence=False, threshold=0.0):
+    task = compute_audio_fingerprint_task.apply_async(args=[token, force, remove_silence, threshold], priority=2)
     return {'task_id': task.id}

@@ -17,7 +17,8 @@ router = APIRouter(
 
 @router.post('/calculate_fingerprint', response_model=TaskIDResponse)
 async def calculate_audio_fingerprint(data: AudioFingerprintRequest):
-    result = compute_audio_fingerprint_master(data.token, force=data.force, threshold=data.threshold)
+    result = compute_audio_fingerprint_master(data.token, force=data.force,
+                                              remove_silence=data.remove_silence, threshold=data.threshold)
     return result
 
 

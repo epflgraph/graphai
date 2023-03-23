@@ -15,11 +15,19 @@ class AudioFingerprintRequest(BaseModel):
         default=False
     )
 
+    remove_silence: bool = Field(
+        title="Remove silence",
+        description="Boolean flag for choosing whether or not to remove silence from the beginning and the "
+                    "end of the audio. False by default, setting it to True will reduce performance by a factor of ~2.",
+        default=False
+    )
+
     threshold: float = Field(
         title="Silence threshold",
         description="Threshold for silence removal at the beginning and end of the video",
         default=0.0
     )
+
 
 
 class AudioFingerprintTaskResponse(BaseModel):
@@ -33,9 +41,10 @@ class AudioFingerprintTaskResponse(BaseModel):
         description="Whether the result was computed freshly or an existing cached result was returned."
     )
 
-    duration_nosilence: float = Field(
-        title="Silence-less duration",
-        description="Length of audio with beginning and ending silence removed. This value is an approximation "
+    duration: float = Field(
+        title="Duration of audio file",
+        description="Length of audio. If the remove_silence flag was set, this is the length of the audio "
+                    "with beginning and ending silence removed. This value is an approximation "
                     "based on the audio file's bitrate."
     )
 
