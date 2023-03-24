@@ -13,8 +13,8 @@ from mwparserfromhell.nodes.text import Text
 from mwparserfromhell.nodes.wikilink import Wikilink
 
 # Excluded sections
-EXCLUDED_SECTIONS = {'References', 'References and notes', 'External links', 'Footnotes', 'Further reading'}
-AUXILIARY_TEXT_SECTIONS = {'See also'}
+EXCLUDED_SECTIONS = {'references', 'references and notes', 'external links', 'footnotes', 'further reading'}
+AUXILIARY_TEXT_SECTIONS = {'see also'}
 
 # Ignored templates
 IGNORED_TEMPLATES = {'sfn', 'efn', 'toc', 'anchor', 'vanchor', 'toc limit', 'toc_limit', 'toclimit', 'font color', 'clear',
@@ -68,6 +68,8 @@ def clean(text):
     text = unicodedata.normalize('NFKC', text)
 
     return text
+
+############################################################
 
 
 def parse_template(node):
@@ -678,6 +680,7 @@ def parse_section(section):
     # Extract list of section headings and title
     section_headings = [clean(concat(parse_node(heading.title)['text'])) for heading in section.filter_headings()]
     section_title = section_headings[0] if section_headings else ''
+    section_title = clean(section_title.lower())
 
     # Initialise object to return
     parsed_section = {
@@ -685,15 +688,8 @@ def parse_section(section):
         'text': [],
         'opening_text': [],
         'auxiliary_text': [],
-        'heading': []
+        'heading': section_headings
     }
-
-    # Return empty section if section is excluded
-    if section_title in EXCLUDED_SECTIONS:
-        return parsed_section
-
-    # Store headings
-    parsed_section['heading'] = section_headings
 
     # The first section is the only one that is included in opening_text
     first_section = not section_title
@@ -732,12 +728,50 @@ def parse_section(section):
     return parsed_section
 
 
+def section_is_wanted(heading):
+    """
+    Returns whether we want to keep a section of a page based on its title. Typically, we want to keep regular content,
+    and we want to exclude references, etc.
+    """
+    heading_lower = clean(heading.lower())
+    return heading_lower not in EXCLUDED_SECTIONS
+
+
+def link_is_wanted(link):
+    """
+    Returns whether we want to keep a wikilink.
+    """
+    title = str(link.title)
+
+    # If there is no ':', target namespace is (main), we keep the link
+    if ':' not in title:
+        return True
+
+    # We accept links like [[:Mathematics]], otherwise we reject it
+    prefix = title.split(':')[0]
+    return len(prefix) == 0
+
+
+def get_link_title(link):
+    """
+    Parses and cleans up the title of the target page given a wikilink.
+    """
+    # Extract title as string
+    title = str(link.title)
+
+    # Delete part of the link to a specific element in the page, so that we keep only the page title
+    title = title.split('#')[0]
+
+    # Return title with capital first letter and replacing spaces with underscores
+    return title.capitalize().replace(' ', '_')
+
+
 def parse_page(page_content):
     # Produce wikicode object from page content
     wikicode = mwparserfromhell.parse(page_content)
 
     # Split into sections
-    sections = wikicode.get_sections(levels=[2], include_lead=True)
+    sections = wikicode.get_sections(levels=[2], include_lead=True, matches=section_is_wanted)
 
     # Initialise object to return
     parsed_page = {
@@ -745,15 +779,20 @@ def parse_page(page_content):
         'text': [],
         'opening_text': [],
         'auxiliary_text': [],
-        'heading': []
+        'heading': [],
+        'links': []
     }
 
     # Parse each section separately and concatenate their outputs
     for section in sections:
         parsed_section = parse_section(section)
 
-        for key in parsed_page:
+        for key in parsed_section:
             parsed_page[key].extend(parsed_section[key])
+
+        links = section.filter(matches=link_is_wanted, forcetype=Wikilink)
+        links = [get_link_title(link) for link in links]
+        parsed_page['links'].extend(links)
 
     # Concatenate and clean the text fields
     parsed_page['html'] = concat(parsed_page['html'])
