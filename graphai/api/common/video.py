@@ -12,10 +12,11 @@ import acoustid
 from fuzzywuzzy import fuzz
 
 from graphai.core.common.video import file_exists, \
-    STANDARD_FPS, TEMP_SUBFOLDER, VideoConfig, count_files, get_dir_files, SLIDE_OUTPUT_FORMAT
+    STANDARD_FPS, TEMP_SUBFOLDER, VideoConfig, count_files, get_dir_files, SLIDE_OUTPUT_FORMAT, DBCachingManager
 
 
 video_config = VideoConfig()
+video_db_manager = DBCachingManager()
 
 
 def generate_random_token():
@@ -66,7 +67,7 @@ def extract_audio_from_video(input_filename, force=False):
         probe_results = perform_probe(input_filename)
     except Exception as e:
         print(e, file=sys.stderr)
-        return None, False
+        return None, False, 0.0
     audio_type = probe_results['streams'][1]['codec_name']
     # note to self: maybe we should skip the probing and just put this in an aac file in any case
     output_suffix='_audio.' + audio_type
