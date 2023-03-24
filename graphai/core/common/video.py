@@ -1,5 +1,6 @@
 import os
 import errno
+from graphai.core.interfaces.db import DB
 
 ROOT_VIDEO_DIR = os.path.normpath(os.path.join(os.path.dirname(__file__), '../../../Storage/'))
 # Formats with a . in their name indicate single files, whereas formats without a . indicate folders (e.g. '_slides')
@@ -77,4 +78,86 @@ class VideoConfig():
             filename_with_path = self.concat_file_path(filename, OTHER_SUBFOLDER)
         return filename_with_path
 
+
+def surround_with_character(s, c="'"):
+    return c + s + c
+
+
+class DBCachingManager():
+    def __init__(self):
+        self.schema = 'cache_graphai'
+        self.audio_cache_table = 'Audio_Main'
+        self.audio_most_similar_table = 'Audio_Most_Similar'
+        self.db = DB()
+
+    def init_db(self):
+        self.db.execute_query(
+            f"""
+            CREATE DATABASE IF NOT EXISTS `{self.schema}` 
+            DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci 
+            DEFAULT ENCRYPTION='N';
+            """
+        )
+        self.db.execute_query(
+            f"""
+            CREATE TABLE IF NOT EXISTS `{self.schema}`.`{self.audio_cache_table}` (
+              `id_token` VARCHAR(255),
+              `origin_token` VARCHAR(255),
+              `fingerprint` LONGTEXT DEFAULT NULL,
+              `duration` FLOAT,
+              `transcript_token` VARCHAR(255) DEFAULT NULL,
+              PRIMARY KEY id_token (id_token)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+            """
+        )
+        self.db.execute_query(
+            f"""
+            CREATE TABLE IF NOT EXISTS `{self.schema}`.`{self.audio_most_similar_table}` (
+              `id_token` VARCHAR(255),
+              `most_similar_token` VARCHAR(255) DEFAULT NULL,
+              PRIMARY KEY id_token (id_token),
+              KEY most_similar_token (most_similar_token)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+            """
+        )
+
+    def insert_or_update_audio_details(self, id_token, values_to_insert=None):
+        if values_to_insert is None:
+            values_to_insert = dict()
+        values_to_insert = {
+            x: surround_with_character(values_to_insert[x], "'") if isinstance(values_to_insert[x], str)
+            else str(values_to_insert[x])
+            for x in values_to_insert
+        }
+        existing = self.db.execute_query(
+            f"""
+            SELECT COUNT(*) FROM `{self.schema}`.`{self.audio_cache_table}`
+            WHERE id_token={surround_with_character(id_token, "'")}
+            """
+        )[0][0]
+        if existing > 0:
+            cols = [surround_with_character(x, "`") for x in values_to_insert.keys()]
+            values = list(values_to_insert.values())
+            cols_and_values = [cols[i] + ' = ' + values[i] for i in range(len(cols))]
+            self.db.execute_query(
+                f"""
+                UPDATE `{self.schema}`.`{self.audio_cache_table}`
+                SET
+                {', '.join(cols_and_values)}
+                WHERE id_token={surround_with_character(id_token, "'")};
+                """
+            )
+        else:
+            cols = ['id_token'] + [x for x in values_to_insert.keys()]
+            cols = [surround_with_character(x, "`") for x in cols]
+            values = [surround_with_character(id_token, "'")] + list(values_to_insert.values())
+
+            self.db.execute_query(
+                f"""
+                INSERT INTO `{self.schema}`.`{self.audio_cache_table}`
+                    ({', '.join(cols)})
+                    VALUES
+                    ({', '.join(values)});
+                """
+            )
 
