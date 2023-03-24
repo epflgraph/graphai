@@ -1,8 +1,8 @@
-from celery import shared_task, group
+from celery import shared_task, group, chain
 import time
 from graphai.api.common.log import log
 from graphai.api.common.video import generate_random_token, retrieve_file_from_url, extract_audio_from_video, \
-    compute_signature, video_config, compute_video_slides
+    compute_signature, video_config, compute_video_slides, video_db_manager
 from graphai.core.utils.time.stopwatch import Stopwatch
 
 
@@ -46,12 +46,27 @@ def get_file_task(self, filename):
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='video.extract_audio', ignore_result=False)
-def extract_audio_task(self, filename, force=False):
-    results, fresh, duration = extract_audio_from_video(filename, force=force)
+def extract_audio_task(self, token, force=False):
+    results, fresh, duration = extract_audio_from_video(token, force=force)
+    print(results)
     return {'token': results,
             'successful': results is not None,
             'fresh': fresh,
             'duration': duration}
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
+             name='video.extract_audio_callback', ignore_result=False)
+def extract_audio_callback_task(self, results, origin_token):
+    if results['successful'] and results['fresh']:
+        video_db_manager.insert_or_update_audio_details(
+            results['token'],
+            {
+                'duration': results['duration'],
+                'origin_token': origin_token
+            }
+        )
+    return results
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
@@ -101,7 +116,8 @@ def get_file_master(token):
 
 
 def extract_audio_master(token, force=False):
-    task = extract_audio_task.apply_async(args=[token, force], priority=2)
+    task = (extract_audio_task.s(token, force) |
+            extract_audio_callback_task.s(token)).apply_async(priority=2)
     return {'task_id': task.id}
 
 
