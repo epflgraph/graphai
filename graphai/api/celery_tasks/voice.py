@@ -5,7 +5,28 @@ from graphai.api.common.video import remove_silence_doublesided, perceptual_hash
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='video.audio_silenceremoval', ignore_result=False)
 def remove_audio_silence_task(self, token, force=False, threshold=0.0):
-    fp_token, fresh, duration = remove_silence_doublesided(token, force=force, threshold=threshold)
+    input_filename_with_path = video_config.generate_filename(token)
+    audio_type = token.split('.')[-1]
+    output_suffix = '_nosilence.' + audio_type
+    output_token = token + output_suffix
+    output_filename_with_path = video_config.generate_filename(output_token)
+    existing = video_db_manager.get_audio_details(token, cols=['nosilence_token', 'nosilence_duration'])
+    if not force:
+        if existing is not None and existing['nosilence_token'] is not None:
+            print('Returning cached result')
+            return {
+                'fp_token': existing['nosilence_token'],
+                'fresh': False,
+                'duration': existing['nosilence_duration']
+            }
+    fp_token, duration = remove_silence_doublesided(input_filename_with_path, output_filename_with_path,
+                                                    output_token, threshold=threshold)
+    if fp_token is None:
+        return {
+            'fp_token': None,
+            'fresh': False,
+            'duration': 0.0
+        }
     return {
         'fp_token': fp_token,
         'fresh': True,

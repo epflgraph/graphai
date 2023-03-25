@@ -37,13 +37,13 @@ def retrieve_file_from_url(url, output_filename_with_path, output_token):
 
 def perform_probe(input_filename_with_path):
     if not file_exists(input_filename_with_path):
-        raise Exception(f'File {input_filename_with_path} does not exist')
+        raise Exception(f'ffmpeg error: File {input_filename_with_path} does not exist')
     return ffmpeg.probe(input_filename_with_path, cmd='ffprobe')
 
 
 def md5_video_or_audio(input_filename_with_path, video=True):
     if not file_exists(input_filename_with_path):
-        print(f'File {input_filename_with_path} does not exist')
+        print(f'ffmpeg error: File {input_filename_with_path} does not exist')
         return None
     in_stream = ffmpeg.input(input_filename_with_path)
     if video:
@@ -86,7 +86,7 @@ def extract_audio_from_video(input_filename_with_path, output_filename_with_path
     #  make all these functions receive both the base name and the name with the path, the former being
     #  the return value in case of success.
     if not file_exists(input_filename_with_path):
-        print(f'File {input_filename_with_path} does not exist')
+        print(f'ffmpeg error: File {input_filename_with_path} does not exist')
         return None
     try:
         err = ffmpeg.input(input_filename_with_path).audio. \
@@ -104,7 +104,7 @@ def extract_audio_from_video(input_filename_with_path, output_filename_with_path
 
 def find_beginning_and_ending_silences(input_filename_with_path, distance_from_end_tol=0.01, noise_thresh=0.0001):
     if not file_exists(input_filename_with_path):
-        raise Exception(f'File {input_filename_with_path} does not exist')
+        raise Exception(f'ffmpeg error: File {input_filename_with_path} does not exist')
     _, results = ffmpeg.input(input_filename_with_path).filter('silencedetect', n=noise_thresh).\
                 output('pipe:', format='null').run(capture_stderr=True)
     results = results.decode('utf8')
@@ -145,19 +145,8 @@ def find_beginning_and_ending_silences(input_filename_with_path, distance_from_e
     return return_dict
 
 
-def remove_silence_doublesided(input_filename, force=False, threshold=0.0001):
-    audio_type = input_filename.split('.')[-1]
-    output_suffix = '_nosilence.' + audio_type
-    input_filename_with_path = video_config.generate_filename(input_filename)
-    output_filename = input_filename + output_suffix
-    output_filename_with_path = video_config.generate_filename(output_filename)
-
-    # If force=False, check whether the file has already been computed, return existing result if so
-    if not force and file_exists(output_filename_with_path):
-        print('Result already exists, returning cached result')
-        output_probe = perform_probe(video_config.generate_filename(output_filename))
-        # the audio length is approximate since the bitrate is used to estimate it
-        return output_filename, False, float(output_probe['format']['duration'])
+def remove_silence_doublesided(input_filename_with_path, output_filename_with_path, output_token,
+                               threshold=0.0001):
     try:
         from_and_to = find_beginning_and_ending_silences(input_filename_with_path, noise_thresh=threshold)
         err = ffmpeg.input(input_filename_with_path).audio. \
@@ -165,14 +154,13 @@ def remove_silence_doublesided(input_filename, force=False, threshold=0.0001):
             overwrite_output().run(capture_stdout=True)
     except Exception as e:
         print(e, file=sys.stderr)
+        from_and_to = {'ss': 0, 'to': 0}
         err = str(e)
 
     if file_exists(output_filename_with_path) and ('ffmpeg error' not in err):
-        output_probe = perform_probe(video_config.generate_filename(output_filename))
-        # the audio length is approximate since the bitrate is used to estimate it
-        return output_filename, True, float(output_probe['format']['duration'])
+        return output_token, from_and_to['to'] - from_and_to['ss']
     else:
-        return None, False, 0.0
+        return None, 0.0
 
 
 def compare_audio_fingerprints(decoded_1, decoded_2):
