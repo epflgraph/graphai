@@ -184,7 +184,7 @@ def compare_encoded_audio_fingerprints(f1, f2):
                       chromaprint.decode_fingerprint(f2.encode('utf8')))
 
 
-def compute_signature(input_filename, output_suffix='_sig.xml', force=False):
+def compute_mpeg7_signature(input_filename, output_suffix='_sig.xml', force=False):
     input_filename_with_path = video_config.generate_filename(input_filename)
     output_filename = input_filename + output_suffix
     output_filename_with_path = video_config.generate_filename(output_filename)
@@ -237,7 +237,7 @@ def compute_video_slides(input_filename, force=False):
 
 
 
-def compare_signatures(input_filename_1, input_filename_2, output_template='comparison%d_sig.xml'):
+def compare_mpeg7_signatures(input_filename_1, input_filename_2, output_template='comparison%d_sig.xml'):
     input_filename_with_path_1 = video_config.generate_filename(input_filename_1)
     input_filename_with_path_2 = video_config.generate_filename(input_filename_2)
     output_template_with_path = video_config.generate_filename(

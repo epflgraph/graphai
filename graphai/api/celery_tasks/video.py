@@ -2,7 +2,7 @@ from celery import shared_task, group, chain
 import time
 from graphai.api.common.log import log
 from graphai.api.common.video import generate_random_token, retrieve_file_from_url, extract_audio_from_video, \
-    compute_signature, video_config, compute_video_slides, video_db_manager, detect_audio_format_and_duration
+    compute_mpeg7_signature, video_config, compute_video_slides, video_db_manager, detect_audio_format_and_duration
 from graphai.core.utils.time.stopwatch import Stopwatch
 
 
@@ -33,7 +33,7 @@ def retrieve_file_from_url_task(self, url, filename):
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='video.compute_signature', ignore_result=False)
 def compute_signature_task(self, filename, force=False):
-    results, fresh = compute_signature(filename, force=force)
+    results, fresh = compute_mpeg7_signature(filename, force=force)
     return {'token': results,
             'successful': results is not None,
             'fresh': fresh}
