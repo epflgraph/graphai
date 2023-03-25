@@ -2,7 +2,7 @@ from celery import shared_task, group, chain
 import time
 from graphai.api.common.log import log
 from graphai.api.common.video import generate_random_token, retrieve_file_from_url, extract_audio_from_video, \
-    compute_signature, video_config, compute_video_slides, video_db_manager
+    compute_signature, video_config, compute_video_slides, video_db_manager, detect_audio_format_and_duration
 from graphai.core.utils.time.stopwatch import Stopwatch
 
 
@@ -24,7 +24,8 @@ def example_callback_task(self, l):
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='video.retrieve_url', ignore_result=False)
 def retrieve_file_from_url_task(self, url, filename):
-    results = retrieve_file_from_url(url, filename)
+    filename_with_path = video_config.generate_filename(filename)
+    results = retrieve_file_from_url(url, filename_with_path, filename)
     return {'token': results,
             'successful': results is not None}
 
@@ -47,12 +48,46 @@ def get_file_task(self, filename):
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='video.extract_audio', ignore_result=False)
 def extract_audio_task(self, token, force=False):
-    results, fresh, duration = extract_audio_from_video(token, force=force)
-    print(results)
-    return {'token': results,
-            'successful': results is not None,
-            'fresh': fresh,
-            'duration': duration}
+    input_filename_with_path = video_config.generate_filename(token)
+    output_token, input_duration = detect_audio_format_and_duration(input_filename_with_path, token)
+    if output_token is None:
+        return {
+            'token': None,
+            'successful': False,
+            'fresh': False,
+            'duration': 0.0
+        }
+    else:
+        output_filename_with_path = video_config.generate_filename(output_token)
+        if not force:
+            existing = video_db_manager.get_audio_details(output_token, cols=['duration'])
+        else:
+            existing = None
+        if existing is not None:
+            print('Returning cached result')
+            return {
+                'token': existing['id_token'],
+                'successful': True,
+                'fresh': False,
+                'duration': existing['duration']
+            }
+        else:
+            results = extract_audio_from_video(input_filename_with_path,
+                                                output_filename_with_path,
+                                                output_token)
+            if results is None:
+                return {
+                    'token': None,
+                    'successful': False,
+                    'fresh': False,
+                    'duration': 0.0
+                }
+            return {
+                'token': results,
+                'successful': True,
+                'fresh': True,
+                'duration': input_duration
+            }
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},

@@ -48,6 +48,10 @@ class AudioFingerprintTaskResponse(BaseModel):
                     "based on the audio file's bitrate."
     )
 
+    fp_nosilence: int = Field(
+        title="Fingerprint with no beginning/end silence"
+    )
+
 
 class AudioFingerprintResponse(TaskStatusResponse):
     task_result: Union[AudioFingerprintTaskResponse, OngoingTaskResponse, None] = Field(

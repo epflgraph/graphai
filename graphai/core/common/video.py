@@ -106,6 +106,9 @@ class DBCachingManager():
               `fingerprint` LONGTEXT DEFAULT NULL,
               `duration` FLOAT,
               `transcript_token` VARCHAR(255) DEFAULT NULL,
+              `nosilence_token` VARCHAR(255) DEFAULT NULL,
+              `nosilence_duration` FLOAT DEFAULT NULL,
+              `fp_nosilence` INT DEFAULT NULL,
               PRIMARY KEY id_token (id_token)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
             """
@@ -121,7 +124,8 @@ class DBCachingManager():
             """
         )
 
-    def insert_or_update_audio_details(self, id_token, values_to_insert=None):
+
+    def _insert_or_update_details(self, schema, table_name, id_token, values_to_insert=None):
         if values_to_insert is None:
             values_to_insert = dict()
         values_to_insert = {
@@ -131,7 +135,7 @@ class DBCachingManager():
         }
         existing = self.db.execute_query(
             f"""
-            SELECT COUNT(*) FROM `{self.schema}`.`{self.audio_cache_table}`
+            SELECT COUNT(*) FROM `{schema}`.`{table_name}`
             WHERE id_token={surround_with_character(id_token, "'")}
             """
         )[0][0]
@@ -141,7 +145,7 @@ class DBCachingManager():
             cols_and_values = [cols[i] + ' = ' + values[i] for i in range(len(cols))]
             self.db.execute_query(
                 f"""
-                UPDATE `{self.schema}`.`{self.audio_cache_table}`
+                UPDATE `{schema}`.`{table_name}`
                 SET
                 {', '.join(cols_and_values)}
                 WHERE id_token={surround_with_character(id_token, "'")};
@@ -154,10 +158,39 @@ class DBCachingManager():
 
             self.db.execute_query(
                 f"""
-                INSERT INTO `{self.schema}`.`{self.audio_cache_table}`
+                INSERT INTO `{schema}`.`{table_name}`
                     ({', '.join(cols)})
                     VALUES
                     ({', '.join(values)});
                 """
             )
 
+    def insert_or_update_audio_details(self, id_token, values_to_insert=None):
+        self._insert_or_update_details(self.schema, self.audio_cache_table, id_token, values_to_insert)
+
+    def get_audio_details(self, id_token, cols):
+        column_list = ['id_token'] + cols
+        results = self.db.execute_query(
+            f"""
+            SELECT {', '.join(column_list)} FROM `{self.schema}`.`{self.audio_cache_table}`
+            WHERE id_token={surround_with_character(id_token, "'")}
+            """
+        )
+        if len(results) > 0:
+            results = {column_list[i]: results[0][i] for i in range(len(column_list))}
+        else:
+            results = None
+        return results
+
+    def get_all_audio_details(self, cols):
+        column_list = ['id_token'] + cols
+        results = self.db.execute_query(
+            f"""
+            SELECT {', '.join(column_list)} FROM `{self.schema}`.`{self.audio_cache_table}`
+            """
+        )
+        if len(results) > 0:
+            results = {row[0]: {column_list[i]: row[i] for i in range(len(column_list))} for row in results}
+        else:
+            results = None
+        return results
