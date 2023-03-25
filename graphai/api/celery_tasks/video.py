@@ -57,37 +57,36 @@ def extract_audio_task(self, token, force=False):
             'fresh': False,
             'duration': 0.0
         }
+
+    output_filename_with_path = video_config.generate_filename(output_token)
+    if not force:
+        existing = video_db_manager.get_audio_details(output_token, cols=['duration'])
     else:
-        output_filename_with_path = video_config.generate_filename(output_token)
-        if not force:
-            existing = video_db_manager.get_audio_details(output_token, cols=['duration'])
-        else:
-            existing = None
-        if existing is not None:
-            print('Returning cached result')
-            return {
-                'token': existing['id_token'],
-                'successful': True,
-                'fresh': False,
-                'duration': existing['duration']
-            }
-        else:
-            results = extract_audio_from_video(input_filename_with_path,
-                                                output_filename_with_path,
-                                                output_token)
-            if results is None:
-                return {
-                    'token': None,
-                    'successful': False,
-                    'fresh': False,
-                    'duration': 0.0
-                }
-            return {
-                'token': results,
-                'successful': True,
-                'fresh': True,
-                'duration': input_duration
-            }
+        existing = None
+    if existing is not None:
+        print('Returning cached result')
+        return {
+            'token': existing['id_token'],
+            'successful': True,
+            'fresh': False,
+            'duration': existing['duration']
+        }
+    results = extract_audio_from_video(input_filename_with_path,
+                                        output_filename_with_path,
+                                        output_token)
+    if results is None:
+        return {
+            'token': None,
+            'successful': False,
+            'fresh': False,
+            'duration': 0.0
+        }
+    return {
+        'token': results,
+        'successful': True,
+        'fresh': True,
+        'duration': input_duration
+    }
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
