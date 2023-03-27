@@ -3,6 +3,7 @@ import re
 import sys
 import time
 from datetime import datetime
+import numpy as np
 
 import ffmpeg
 
@@ -163,10 +164,6 @@ def remove_silence_doublesided(input_filename_with_path, output_filename_with_pa
         return None, 0.0
 
 
-def compare_audio_fingerprints(decoded_1, decoded_2):
-    return fuzz.ratio(decoded_1, decoded_2) / 100
-
-
 def perceptual_hash_audio(input_filename_with_path, max_length=3600):
     if not file_exists(input_filename_with_path):
         print(f'File {input_filename_with_path} does not exist')
@@ -177,11 +174,28 @@ def perceptual_hash_audio(input_filename_with_path, max_length=3600):
     return fingerprint.decode('utf8'), decoded
 
 
-def compare_encoded_audio_fingerprints(f1, f2):
+def compare_audio_fingerprints(decoded_1, decoded_2):
+    return fuzz.ratio(decoded_1, decoded_2) / 100
+
+
+def compare_encoded_audio_fingerprints(f1, f2=None):
     # when fuzzywuzzy is used in combination with python-Levenshtein (fuzzywuzzy[speedup],
     # there's a 10-fold speedup here.
-    return fuzz.ratio(chromaprint.decode_fingerprint(f1.encode('utf8')),
-                      chromaprint.decode_fingerprint(f2.encode('utf8')))
+    if f2 is None:
+        return 0
+    return compare_audio_fingerprints(chromaprint.decode_fingerprint(f1.encode('utf8')),
+                                        chromaprint.decode_fingerprint(f2.encode('utf8')))
+
+
+def find_closest_audio_fingerprint(fp, fp_list, token_list, min_similarity=0.8):
+    if len(fp_list) == 0:
+        return None, None, None
+    fp_similarities = np.array([compare_encoded_audio_fingerprints(fp, fp2) for fp2 in fp_list])
+    max_index = np.argmax(fp_similarities)
+    if fp_similarities[max_index] >= min_similarity:
+        return token_list[max_index], fp_list[max_index], fp_similarities[max_index]
+    else:
+        return None, None, None
 
 
 def compute_mpeg7_signature(input_filename, output_suffix='_sig.xml', force=False):
