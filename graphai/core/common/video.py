@@ -165,14 +165,11 @@ class DBCachingManager():
                 """
             )
 
-    def insert_or_update_audio_details(self, id_token, values_to_insert=None):
-        self._insert_or_update_details(self.schema, self.audio_cache_table, id_token, values_to_insert)
-
-    def get_audio_details(self, id_token, cols):
+    def _get_details(self, schema, table_name, id_token, cols):
         column_list = ['id_token'] + cols
         results = self.db.execute_query(
             f"""
-            SELECT {', '.join(column_list)} FROM `{self.schema}`.`{self.audio_cache_table}`
+            SELECT {', '.join(column_list)} FROM `{schema}`.`{table_name}`
             WHERE id_token={surround_with_character(id_token, "'")}
             """
         )
@@ -182,11 +179,11 @@ class DBCachingManager():
             results = None
         return results
 
-    def get_all_audio_details(self, cols):
+    def _get_all_details(self, schema, table_name, cols):
         column_list = ['id_token'] + cols
         results = self.db.execute_query(
             f"""
-            SELECT {', '.join(column_list)} FROM `{self.schema}`.`{self.audio_cache_table}`
+            SELECT {', '.join(column_list)} FROM `{schema}`.`{table_name}`
             """
         )
         if len(results) > 0:
@@ -194,3 +191,19 @@ class DBCachingManager():
         else:
             results = None
         return results
+
+    def insert_or_update_audio_details(self, id_token, values_to_insert=None):
+        self._insert_or_update_details(self.schema, self.audio_cache_table, id_token, values_to_insert)
+
+    def get_audio_details(self, id_token, cols):
+        return self._get_details(self.schema, self.audio_cache_table, id_token, cols)
+
+    def get_all_audio_details(self, cols):
+        return self._get_all_details(self.schema, self.audio_cache_table, cols)
+
+    def insert_or_update_closest_match(self, id_token, values_to_insert):
+        self._insert_or_update_details(self.schema, self.audio_most_similar_table, id_token, values_to_insert)
+
+    def get_closest_match_from_db(self, id_token):
+        return self._get_details(self.schema, self.audio_most_similar_table, id_token, ['most_similar_token'])\
+                            ['most_similar_token']
