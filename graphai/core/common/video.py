@@ -195,8 +195,14 @@ class DBCachingManager():
     def insert_or_update_audio_details(self, id_token, values_to_insert=None):
         self._insert_or_update_details(self.schema, self.audio_cache_table, id_token, values_to_insert)
 
-    def get_audio_details(self, id_token, cols):
-        return self._get_details(self.schema, self.audio_cache_table, id_token, cols)
+    def get_audio_details(self, id_token, cols, using_most_similar=False):
+        if using_most_similar:
+            id_token_to_use = self.get_closest_match_from_db(id_token)
+            if id_token_to_use is None:
+                id_token_to_use = id_token
+        else:
+            id_token_to_use = id_token
+        return self._get_details(self.schema, self.audio_cache_table, id_token_to_use, cols)
 
     def get_all_audio_details(self, cols):
         return self._get_all_details(self.schema, self.audio_cache_table, cols)
@@ -205,5 +211,7 @@ class DBCachingManager():
         self._insert_or_update_details(self.schema, self.audio_most_similar_table, id_token, values_to_insert)
 
     def get_closest_match_from_db(self, id_token):
-        return self._get_details(self.schema, self.audio_most_similar_table, id_token, ['most_similar_token'])\
-                            ['most_similar_token']
+        results = self._get_details(self.schema, self.audio_most_similar_table, id_token, ['most_similar_token'])
+        if results is not None:
+            return results['most_similar_token']
+        return None
