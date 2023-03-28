@@ -1,4 +1,4 @@
-name: "Install repo"
+name: "Clone repo"
 
 on:
   workflow_dispatch:
@@ -6,7 +6,7 @@ on:
   workflow_call:
 
 jobs:
-  install-repo:
+  clone-repo:
     runs-on: self-hosted
 
     steps:

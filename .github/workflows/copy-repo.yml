@@ -1,0 +1,16 @@
+name: "Copy repo"
+
+on:
+  workflow_dispatch:
+
+  workflow_call:
+
+jobs:
+  copy-repo:
+    runs-on: self-hosted
+
+    steps:
+      - name: Copy repo from tmp to final location
+        run: |
+          rm -rf /home/ubuntu/test-graphai/*
+          cp -r main/graphai /home/ubuntu/test-graphai
