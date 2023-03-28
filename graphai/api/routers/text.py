@@ -15,7 +15,6 @@ from graphai.api.common.ontology import ontology
 from graphai.core.text.keywords import get_keywords
 from graphai.core.text.wikisearch import wikisearch
 
-from graphai.core.utils.text.markdown import strip
 from graphai.core.utils.time.stopwatch import Stopwatch
 
 pd.set_option('display.max_rows', 400)
@@ -221,8 +220,3 @@ async def legacy_wikify(data: WikifyRequest, method: Optional[str] = None):
     log(f'Finished all tasks', sw.total(), total=True)
 
     return results
-
-
-@router.post('/markdown_strip', response_model=StripResponse)
-async def markdown_strip(data: StripRequest):
-    return {'stripped_code': strip(data.markdown_code)['text']}
