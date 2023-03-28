@@ -14,5 +14,3 @@ Submodules
 
    graphai.core.utils.text.clean
    graphai.core.utils.text.io
-   graphai.core.utils.text.markdown
-   graphai.core.utils.text.markdown_2
