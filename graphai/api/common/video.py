@@ -187,11 +187,14 @@ def compare_encoded_audio_fingerprints(f1, f2=None):
                                         chromaprint.decode_fingerprint(f2.encode('utf8')))
 
 
-def find_closest_audio_fingerprint(fp, fp_list, token_list, min_similarity=0.8):
+def find_closest_audio_fingerprint(target_fp, fp_list, token_list, min_similarity=0.8):
+    # If the list of fingerprints is empty, there's no "closest" fingerprint to the target and the result is null.
     if len(fp_list) == 0:
         return None, None, None
-    fp_similarities = np.array([compare_encoded_audio_fingerprints(fp, fp2) for fp2 in fp_list])
+    fp_similarities = np.array([compare_encoded_audio_fingerprints(target_fp, fp2) for fp2 in fp_list])
     max_index = np.argmax(fp_similarities)
+    # If the similarity of the most similar fingerprint is also greater than the minimum similarity value,
+    # then it's a match. Otherwise, the result is null.
     if fp_similarities[max_index] >= min_similarity:
         return token_list[max_index], fp_list[max_index], fp_similarities[max_index]
     else:
