@@ -179,6 +179,17 @@ def compare_audio_fingerprints(decoded_1, decoded_2):
 
 
 def compare_encoded_audio_fingerprints(f1, f2=None):
+    """
+    Compares two string-encoded audio fingerprints
+    and returns the ratio of the fuzzy match between them
+    (value between 0 and 1, with 1 indicating an exact match).
+    Args:
+        f1: The target fingerprint
+        f2: The second fingerprint, can be None (similarity is 0 if so)
+
+    Returns:
+        Ratio of fuzzy match between the two fingerprints
+    """
     # when fuzzywuzzy is used in combination with python-Levenshtein (fuzzywuzzy[speedup],
     # there's a 10-fold speedup here.
     if f2 is None:

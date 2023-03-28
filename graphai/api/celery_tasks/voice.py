@@ -151,7 +151,9 @@ def audio_fingerprint_find_closest_retrieve_from_db_task(self, results, token):
             'all_fingerprints': None,
             'fp_results': results
         }
-    # Retrieving all the tokens and their fingerprints
+    # Retrieving all the tokens and their fingerprints. Since at least one audio has been extracted
+    # (i.e. this one), this result is never null. In addition, there's at least one non-null fingerprint
+    # value (again, for the present audio file).
     tokens_and_fingerprints = video_db_manager.get_all_audio_details(['fingerprint'])
     print(tokens_and_fingerprints)
     all_tokens = list(tokens_and_fingerprints.keys())
@@ -172,7 +174,7 @@ def audio_fingerprint_find_closest_retrieve_from_db_task(self, results, token):
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='video.audio_fingerprint_find_closest_parallel', ignore_result=False)
 def audio_fingerprint_find_closest_parallel_task(self, input_dict, i, n_total, min_similarity=0.8):
-    # This task's "closest fingerprint" result is null if either
+    # This parallel task's "closest fingerprint" result is null if either
     # a) the computation has been disabled (indicated by the token list being null), or
     # b) there are no previous fingerprints (indicated by the list of all tokens being empty)
     if input_dict['all_tokens'] is None or len(input_dict['all_tokens']) == 0:
@@ -188,6 +190,7 @@ def audio_fingerprint_find_closest_parallel_task(self, input_dict, i, n_total, m
     start_index = int(i / n_total * n_tokens_all)
     end_index = int((i + 1) / n_total * n_tokens_all)
     # Find the closest token for this batch
+    # Note: null fingerprint values are automatically handled and don't need to be filtered out.
     closest_token, closest_fingerprint, score = find_closest_audio_fingerprint(
         input_dict['target_fp'],
         input_dict['all_fingerprints'][start_index:end_index],
@@ -206,6 +209,7 @@ def audio_fingerprint_find_closest_parallel_task(self, input_dict, i, n_total, m
              name='video.audio_fingerprint_find_closest_callback', ignore_result=False)
 def audio_fingerprint_find_closest_callback_task(self, results_list, original_token):
     # Passing fingerprinting results along if it's been unsuccessful or a cached result has been returned
+    # This is essentially the same check as in all the other find_closest tasks.
     fp_results = results_list[0]['fp_results']
     if fp_results['result'] is None or not fp_results['fresh']:
         return{
