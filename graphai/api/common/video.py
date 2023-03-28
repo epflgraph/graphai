@@ -21,10 +21,25 @@ video_db_manager = DBCachingManager()
 
 
 def generate_random_token():
+    """
+    Generates a random string using the current time and a random number to be used as a token.
+    Returns:
+        Random token
+    """
     return ('%.06f' % time.time()).replace('.','') + '%08d'%random.randint(0,int(1e7))
 
 
 def retrieve_file_from_url(url, output_filename_with_path, output_token):
+    """
+    Retrieves a file from a given URL using WGET and stores it locally.
+    Args:
+        url: the URL
+        output_filename_with_path: Path of output file
+        output_token: Token of output file
+
+    Returns:
+        Output token if successful, None otherwise
+    """
     try:
         response = wget.download(url, output_filename_with_path)
     except Exception as e:
@@ -37,6 +52,14 @@ def retrieve_file_from_url(url, output_filename_with_path, output_token):
 
 
 def perform_probe(input_filename_with_path):
+    """
+    Performs a probe using ffprobe
+    Args:
+        input_filename_with_path: Input file path
+
+    Returns:
+        Probe results, see ffprobe documentation
+    """
     if not file_exists(input_filename_with_path):
         raise Exception(f'ffmpeg error: File {input_filename_with_path} does not exist')
     return ffmpeg.probe(input_filename_with_path, cmd='ffprobe')
@@ -68,6 +91,15 @@ def md5_video_or_audio(input_filename_with_path, video=True):
 
 
 def detect_audio_format_and_duration(input_filename_with_path, input_token):
+    """
+    Detects the format and duration of the audio track of the provided video file
+    Args:
+        input_filename_with_path: Path of input file
+        input_token: Token of input file
+
+    Returns:
+        Token of output file consisting of input token + audio format, plus audio duration.
+    """
     try:
         probe_results = perform_probe(input_filename_with_path)
     except Exception as e:
@@ -81,11 +113,16 @@ def detect_audio_format_and_duration(input_filename_with_path, input_token):
 
 
 def extract_audio_from_video(input_filename_with_path, output_filename_with_path, output_token):
-    # TODO Take all the `force` flags out of here and into celery_tasks/video.py or voice.py
-    # TODO Also remove all the existence checks
-    # TODO consolidate filename generation into one function that can be called from elsewhere and
-    #  make all these functions receive both the base name and the name with the path, the former being
-    #  the return value in case of success.
+    """
+    Extracts the audio track from a video.
+    Args:
+        input_filename_with_path: Path of input file
+        output_filename_with_path: Path of output file
+        output_token: Token of output file
+
+    Returns:
+        Output token if successful, None if not.
+    """
     if not file_exists(input_filename_with_path):
         print(f'ffmpeg error: File {input_filename_with_path} does not exist')
         return None
@@ -104,6 +141,16 @@ def extract_audio_from_video(input_filename_with_path, output_filename_with_path
 
 
 def find_beginning_and_ending_silences(input_filename_with_path, distance_from_end_tol=0.01, noise_thresh=0.0001):
+    """
+    Detects silence at the beginning and the end of an audio file
+    Args:
+        input_filename_with_path: Path of input file
+        distance_from_end_tol: Tolerance value for distance of the silence from each end of the file in seconds
+        noise_thresh: Noise threshold
+
+    Returns:
+        A dictionary with the beginning and ending timestamps of the file with the two silences removed.
+    """
     if not file_exists(input_filename_with_path):
         raise Exception(f'ffmpeg error: File {input_filename_with_path} does not exist')
     _, results = ffmpeg.input(input_filename_with_path).filter('silencedetect', n=noise_thresh).\
@@ -148,6 +195,17 @@ def find_beginning_and_ending_silences(input_filename_with_path, distance_from_e
 
 def remove_silence_doublesided(input_filename_with_path, output_filename_with_path, output_token,
                                threshold=0.0001):
+    """
+    Removes silence from the beginning and the end of the provided file.
+    Args:
+        input_filename_with_path: Path of the input file
+        output_filename_with_path: Path of the output file
+        output_token: Token of the output file (filename without path)
+        threshold: Noise threshold for silence detection
+
+    Returns:
+        Token of the resulting audio file and its duration if successful, None and 0 if unsuccessful
+    """
     try:
         from_and_to = find_beginning_and_ending_silences(input_filename_with_path, noise_thresh=threshold)
         err = ffmpeg.input(input_filename_with_path).audio. \
@@ -164,7 +222,17 @@ def remove_silence_doublesided(input_filename_with_path, output_filename_with_pa
         return None, 0.0
 
 
-def perceptual_hash_audio(input_filename_with_path, max_length=3600):
+def perceptual_hash_audio(input_filename_with_path, max_length=7200):
+    """
+    Computes the perceptual hash of an audio file
+    Args:
+        input_filename_with_path: Path of the input file
+        max_length: Maximum length of the file in seconds
+
+    Returns:
+        String representation of the computed fingerprint and its decoded representation. Both are None if the
+        file doesn't exist.
+    """
     if not file_exists(input_filename_with_path):
         print(f'File {input_filename_with_path} does not exist')
         return None, None
@@ -175,6 +243,15 @@ def perceptual_hash_audio(input_filename_with_path, max_length=3600):
 
 
 def compare_audio_fingerprints(decoded_1, decoded_2):
+    """
+    Compares two decoded fingerprints
+    Args:
+        decoded_1: Fingerprint 1
+        decoded_2: Fingerprint 2
+
+    Returns:
+        Fuzzy matching ratio between 0 and 1
+    """
     return fuzz.ratio(decoded_1, decoded_2) / 100
 
 
@@ -199,6 +276,20 @@ def compare_encoded_audio_fingerprints(f1, f2=None):
 
 
 def find_closest_audio_fingerprint(target_fp, fp_list, token_list, min_similarity=0.8):
+    """
+    Given a target fingerprint and a list of candidate fingerprints, finds the one with the highest similarity
+    to the target whose similarity is above a minimum value.
+    Args:
+        target_fp: Target fingerprint
+        fp_list: List of candidate fingerprints
+        token_list: List of tokens corresponding to those fingerprints
+        min_similarity: Minimum similarity value. If the similarity of the most similar candidate to the target
+                        is lower than this value, None will be returned as the result.
+
+    Returns:
+        Closest fingerprint, its token, and the highest score. All three are None if the closest one does not
+        satisfy the minimum similarity criterion.
+    """
     # If the list of fingerprints is empty, there's no "closest" fingerprint to the target and the result is null.
     if len(fp_list) == 0:
         return None, None, None
