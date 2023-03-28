@@ -59,6 +59,8 @@ def extract_audio_task(self, token, force=False):
         }
 
     output_filename_with_path = video_config.generate_filename(output_token)
+    # Here, the existing row can be None because the row is inserted into the table
+    # only after extracting the audio from the video.
     if not force:
         existing = video_db_manager.get_audio_details(output_token, cols=['duration'])
     else:

@@ -12,8 +12,17 @@ def remove_audio_silence_task(self, token, force=False, threshold=0.0):
     output_token = token + output_suffix
     output_filename_with_path = video_config.generate_filename(output_token)
     existing = video_db_manager.get_audio_details(token, cols=['nosilence_token', 'nosilence_duration'])
+    # The information on audio file needs to have been inserted into the cache table when
+    # the audio was extracted from the video. Therefore, the `existing` row needs to *exist*.
+    if existing is None:
+        print('Audio file not found!')
+        return {
+            'fp_token': None,
+            'fresh': False,
+            'duration': 0.0
+        }
     if not force:
-        if existing is not None and existing['nosilence_token'] is not None:
+        if existing['nosilence_token'] is not None:
             print('Returning cached result')
             return {
                 'fp_token': existing['nosilence_token'],
@@ -62,8 +71,19 @@ def compute_audio_fingerprint_task(self, input_dict, audio_token, force=False):
         }
     existing = video_db_manager.get_audio_details(audio_token, cols=['fingerprint', 'duration',
                                                                      'nosilence_duration', 'fp_nosilence'])
+    # The information on audio file needs to have been inserted into the cache table when
+    # the audio was extracted from the video. Therefore, the `existing` row needs to *exist*,
+    # even if its fingerprint and many of its other fields are null.
+    if existing is None:
+        print('Audio file not found!')
+        return {
+            'result': None,
+            'fresh': False,
+            'duration': 0.0,
+            'fp_nosilence': 0
+        }
     if not force:
-        if existing is not None and existing['fingerprint'] is not None:
+        if existing['fingerprint'] is not None:
             print('Returning cached result')
             return {
                 'result': existing['fingerprint'],
@@ -121,6 +141,9 @@ def resolve_most_similar_chain(token):
 def audio_fingerprint_find_closest_retrieve_from_db_task(self, results, token):
     target_fingerprint = results['result']
     fresh = results['fresh']
+    # If the fingerprint computation has been unsuccessful or if cached results are being returned,
+    # then there it is not necessary (or even possible, in the former case) to compute the closest
+    # audio fingerprint.
     if target_fingerprint is None or not fresh:
         return {
             'target_fp': None,
