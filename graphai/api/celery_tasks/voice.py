@@ -110,7 +110,7 @@ def compute_audio_fingerprint_callback_task(self, results, token):
 def resolve_most_similar_chain(token):
     if token is None:
         return None
-    prev_most_similar = video_db_manager.get_closest_match_from_db(token)
+    prev_most_similar = video_db_manager.get_closest_audio_match(token)
     if prev_most_similar is None or prev_most_similar==token:
         return token
     return resolve_most_similar_chain(prev_most_similar)
