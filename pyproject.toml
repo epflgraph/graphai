@@ -1,0 +1,51 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "graphai"
+version = "0.2.1"
+authors = [
+  { name="Aitor Pérez", email="aitor.perez@epfl.ch" }
+]
+description = "The graphai package contains tools and services enhancing the EPFL Graph project with AI-based utilities."
+readme = "README.md"
+requires-python = ">=3.7"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent"
+]
+dependencies = [
+    "numpy",
+    "pandas",
+    "matplotlib",
+    "fastapi",
+    "gunicorn",
+    "uvicorn",
+    "pydantic",
+    "requests",
+    "ray",
+    "celery[redis]",
+    "kombu",
+    "mysql-connector-python",
+    "elasticsearch",
+    "unidecode",
+    "clean-text",
+    "python-rake",
+    "nltk",
+    "rake-nltk",
+    "levenshtein",
+    "wikitext-asymptote",
+    "sphinx",
+    "sphinx-material",
+    "sphinx-rtd-theme"
+]
+
+[tool.setuptools]
+packages = ["graphai"]
+
+[project.urls]
+"Homepage" = "https://graphai.epfl.ch"
+"Documentation" = "https://epflgraph.github.io/graphai/graphai"
+"Source code" = "https://github.com/epflgraph/graphai"
+"Bug Tracker" = "https://github.com/epflgraph/graphai/issues"
