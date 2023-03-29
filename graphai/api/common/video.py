@@ -337,24 +337,16 @@ def upload_file_to_google_cloud(input_filename_with_path, input_token, bucket_na
     )
 
 
-def transcribe_gcs(bucket_name, input_token, sample_rate=48000, timeout=600, first_lang="en-US",
-                   alt_langs=None, use_alts=False):
+def transcribe_gcs(bucket_name, input_token, sample_rate=48000, timeout=600, lang="en-US"):
     """Asynchronously transcribes the audio file specified by the gcs_uri."""
 
     client = speech.SpeechClient()
 
     audio = speech.RecognitionAudio(uri=generate_gcp_uri(bucket_name, input_token))
-    if alt_langs is None:
-        if use_alts:
-            alt_langs = ALTERNATIVE_LANGUAGES
-            alt_langs = [x for x in alt_langs if x != first_lang]
-        else:
-            alt_langs = []
     config = speech.RecognitionConfig(
-        encoding=speech.RecognitionConfig.AudioEncoding.FLAC,
+        encoding=speech.RecognitionConfig.AudioEncoding.OGG_OPUS,
         sample_rate_hertz=sample_rate,
-        language_code=first_lang,
-        alternative_language_codes=alt_langs
+        language_code=lang
     )
 
     operation = client.long_running_recognize(config=config, audio=audio)
@@ -364,10 +356,13 @@ def transcribe_gcs(bucket_name, input_token, sample_rate=48000, timeout=600, fir
 
     # Each result is for a consecutive portion of the audio. Iterate through
     # them to get the transcripts for the entire audio file.
+    all_transcripts = list()
+    all_confidences = list()
     for result in response.results:
         # The first alternative is the most likely one for this portion.
-        print("Transcript: {}".format(result.alternatives[0].transcript))
-        print("Confidence: {}".format(result.alternatives[0].confidence))
+        all_transcripts.append(result.alternatives[0].transcript)
+        all_confidences.append(result.alternatives[0].confidence)
+    return all_transcripts, all_confidences, lang
 
 
 def compute_mpeg7_signature(input_filename, output_suffix='_sig.xml', force=False):
