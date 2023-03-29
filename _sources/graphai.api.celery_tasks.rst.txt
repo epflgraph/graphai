@@ -14,3 +14,4 @@ Submodules
 
    graphai.api.celery_tasks.ontology
    graphai.api.celery_tasks.video
+   graphai.api.celery_tasks.voice

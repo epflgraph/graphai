@@ -16,3 +16,4 @@ Submodules
    graphai.api.schemas.ontology
    graphai.api.schemas.text
    graphai.api.schemas.video
+   graphai.api.schemas.voice
