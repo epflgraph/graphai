@@ -1,12 +1,13 @@
-import time
-
 from fastapi import APIRouter
-
-import ray
+from fastapi.responses import FileResponse
 
 from graphai.api.schemas.video import *
+from graphai.api.schemas.common import *
 
-from graphai.api.celery_tasks.video import multiproc_example_task, celery_multiproc_example_task
+from graphai.api.celery_tasks.video import celery_multiproc_example_master, \
+    retrieve_and_generate_token_master, compute_signature_master, get_file_master, extract_audio_master, \
+    detect_slides_master
+from graphai.core.celery_utils.celery_utils import get_task_info
 
 
 # Initialise video router
@@ -17,48 +18,57 @@ router = APIRouter(
 )
 
 
-# Define ray actor
-@ray.remote
-class VideoActor:
-    """
-    Class representing a ray Actor to perform video tasks in parallel.
-    """
-
-    def do_something(self, x):
-        # Perform some time-consuming task
-        time.sleep(x)
-
-        return True
-
-
-class VideoActorList:
-
-    def __init__(self, n):
-        self.n = n
-        self.actors = []
-
-    def instantiate_actors(self):
-        self.actors = [VideoActor.remote() for i in range(self.n)]
-
-    def free_actors(self):
-        self.actors = []
-
-    def get_actor(self, i):
-        return self.actors[i % self.n]
-
-
-# Instantiate ray actor list
-video_actor_list = VideoActorList(16)
-
-
-# @router.post('/multiprocessing_example', response_model=MultiprocessingExampleResponse)
-# async def multiprocessing_example(data: MultiprocessingExampleRequest):
-#     result = multiproc_example_task.apply_async(args=[data, video_actor_list]).get()
-#     return result
-
-
-@router.post('/multiprocessing_example_purecelery', response_model=MultiprocessingExampleResponse)
+@router.post('/multiprocessing_example', response_model=MultiprocessingExampleResponse)
 async def multiprocessing_example(data: MultiprocessingExampleRequest):
-    result = celery_multiproc_example_task(data)
+    result = celery_multiproc_example_master(data)
     return result
 
+
+@router.post('/retrieve_url', response_model=TaskIDResponse)
+async def retrieve_file(data: RetrieveURLRequest):
+    result = retrieve_and_generate_token_master(data.url)
+    return result
+
+
+# For each async endpoint, we also have a status endpoint since they have different response models.
+@router.get('/retrieve_url/status/{task_id}', response_model=RetrieveURLResponse)
+async def get_retrieve_file_status(task_id):
+    return get_task_info(task_id)
+
+
+@router.post('/calculate_fingerprint', response_model=TaskIDResponse)
+async def calculate_fingerprint(data: ComputeSignatureRequest):
+    result = compute_signature_master(data.token, force=data.force)
+    return result
+
+
+@router.get('/calculate_fingerprint/status/{task_id}', response_model=ComputeSignatureResponse)
+async def calculate_fingerprint_status(task_id):
+    return get_task_info(task_id)
+
+
+@router.post('/get_file/')
+async def get_file(data: FileRequest):
+    return FileResponse(get_file_master(data.token))
+
+
+@router.post('/extract_audio', response_model=TaskIDResponse)
+async def extract_audio(data: ExtractAudioRequest):
+    result = extract_audio_master(data.token, force=data.force)
+    return result
+
+
+@router.get('/extract_audio/status/{task_id}', response_model=ExtractAudioResponse)
+async def extract_audio_status(task_id):
+    return get_task_info(task_id)
+
+
+@router.post('/detect_slides', response_model=TaskIDResponse)
+async def detect_slides(data: DetectSlidesRequest):
+    result = detect_slides_master(data.token, force=data.force)
+    return result
+
+
+@router.get('/detect_slides/status/{task_id}', response_model=DetectSlidesResponse)
+async def detect_slides_status(task_id):
+    return get_task_info(task_id)

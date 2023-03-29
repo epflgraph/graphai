@@ -14,6 +14,8 @@ sudo apt-get install redis
 sudo apt-get install rabbitmq
 ```
 
+The audio/video endpoints additionally require `ffmpeg` and `chromaprint` to be installed.
+
 The GraphAI module may then be installed as a regular python package. To install it, simply run
 ```
 pip install -e .

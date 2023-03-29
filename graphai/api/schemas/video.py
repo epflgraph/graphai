@@ -1,4 +1,6 @@
 from pydantic import BaseModel, Field
+from typing import List, Union
+from .common import TaskStatusResponse, FileCachableComputationResponse, OngoingTaskResponse
 
 
 class MultiprocessingExampleRequest(BaseModel):
@@ -28,4 +30,115 @@ class MultiprocessingExampleResponse(BaseModel):
         ...,
         title="Baz",
         description="Output parameter"
+    )
+
+
+class RetrieveURLRequest(BaseModel):
+    url: str = Field(
+        title="URL",
+        description="The URL to be retrieved and stored for further processing"
+    )
+
+
+class RetrieveURLResponseInner(BaseModel):
+    token: Union[str, None] = Field(
+        title="Token",
+        description="Result token, null if task has failed"
+    )
+    successful: bool = Field(
+        title="Success flag",
+        description="True if task successful, False otherwise"
+    )
+
+
+class RetrieveURLResponse(TaskStatusResponse):
+    task_result: Union[RetrieveURLResponseInner, None] = Field(
+        title="File retrieval response",
+        description="A dict containing a flag for whether the retrieval was successful, plus a token "
+                    "that refers to the now-retrieved file if so (and null if not)."
+    )
+
+
+class ComputeSignatureRequest(BaseModel):
+    token: str = Field(
+        title="Token",
+        description="The token that identifies the requested file"
+    )
+
+    force: bool = Field(
+        title="Force",
+        description="Whether to force a recomputation",
+        default=False
+    )
+
+
+class ComputeSignatureResponse(TaskStatusResponse):
+    task_result: Union[FileCachableComputationResponse, None] = Field(
+        title="Calculate fingerprint response",
+        description="A dict containing a flag for whether the fingerprint calculation was successful and "
+                    "a freshness flag, plus a token that refers to the now-computed file if so (and null if not)."
+    )
+
+
+class ExtractAudioRequest(BaseModel):
+    token: str = Field(
+        title="Token",
+        description="The token that identifies the requested file"
+    )
+
+    force: bool = Field(
+        title="Force",
+        description="Whether to force a recomputation",
+        default=False
+    )
+
+
+class ExtractAudioTaskResponse(FileCachableComputationResponse):
+    duration: float = Field(
+        title="Audio duration",
+        description="Duration of audio based on the length of its video file. This value is exact as it is based "
+                    "on video metadata."
+    )
+
+
+class ExtractAudioResponse(TaskStatusResponse):
+    task_result: Union[ExtractAudioTaskResponse, OngoingTaskResponse, None] = Field(
+        title="Extract audio response",
+        description="A dict containing a flag for whether the audio extraction was successful, a freshness flag, "
+                    "a token that refers to the now-computed file if so (and null if not), and the duration of "
+                    "the audio file."
+    )
+
+
+class DetectSlidesRequest(BaseModel):
+    token: str = Field(
+        title="Token",
+        description="The token that identifies the requested file"
+    )
+
+    force: bool = Field(
+        title="Force",
+        description="Whether to force a recomputation",
+        default=False
+    )
+
+
+class DetectSlidesTaskResponse(FileCachableComputationResponse):
+    n_slides: int = Field(
+        title="# of slides",
+        description="Number of detected slides in given video file"
+    )
+
+    files: List[str] = Field(
+        title="Names of slide files",
+        description="The names of the slide files extracted from video"
+    )
+
+
+class DetectSlidesResponse(TaskStatusResponse):
+    task_result: Union[DetectSlidesTaskResponse, OngoingTaskResponse, None] = Field(
+        title="Detect slides response",
+        description="A dict containing a flag for whether the slide detection was successful and a freshness flag, "
+                    "a token that refers to the now-computed file if so (and null if not), "
+                    "and the number of detected slides."
     )

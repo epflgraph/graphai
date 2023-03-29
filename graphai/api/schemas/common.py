@@ -14,13 +14,17 @@ class TaskIDResponse(BaseModel):
     )
 
 # This class follows the response model of our celery get_task_info function:
-# task_id, task_status, and task_result (the latter of which is implemented by child classes).
+# task_id, task_name, task_status, and task_result (the latter of which must be overwritten by child classes).
 
-# You need one child of this class for each "status" endpoint. Be sure to override the `task_result` attribute.
+# Create one child of this class per endpoint. Be sure to override the `task_result` attribute.
 class TaskStatusResponse(BaseModel, abc.ABC):
     task_id: str = Field(
         title="Task ID",
         description="ID of the task created as a response to an API request"
+    )
+    task_name: Union[str, None] = Field(
+        title="Task name",
+        description="Name of the task"
     )
     task_status: str = Field(
         title="Task status",
@@ -28,3 +32,35 @@ class TaskStatusResponse(BaseModel, abc.ABC):
     )
     task_result: Json[BaseModel]
 
+
+class OngoingTaskResponse(BaseModel):
+    pid: int = Field(
+        title="pid",
+        description="Process ID for ongoing task"
+    )
+    hostname: str = Field(
+        title="hostname",
+        description="Host name for celery task"
+    )
+
+
+class FileCachableComputationResponse(BaseModel):
+    token: Union[str, None] = Field(
+        title="Token",
+        description="Result token, null if task has failed"
+    )
+    successful: bool = Field(
+        title="Success flag",
+        description="True if task successful, False otherwise"
+    )
+    fresh: bool = Field(
+        title="Freshness flag",
+        description="Whether the result was computed freshly or an existing cached result was returned."
+    )
+
+
+class FileRequest(BaseModel):
+    token: str = Field(
+        title="File name",
+        description="The name of the file to be downloaded (received as a response from another endpoint)."
+    )
