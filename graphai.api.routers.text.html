@@ -88,64 +88,8 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="module-graphai.api.routers.text">
-<span id="graphai-api-routers-text-module"></span><h1>graphai.api.routers.text module<a class="headerlink" href="#module-graphai.api.routers.text" title="Permalink to this heading"></a></h1>
-<dl class="py function">
-<dt class="sig sig-object py" id="graphai.api.routers.text.keywords">
-<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">graphai.api.routers.text.</span></span><span class="sig-name descname"><span class="pre">keywords</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="graphai.api.schemas.text.html#graphai.api.schemas.text.KeywordsRequest" title="graphai.api.schemas.text.KeywordsRequest"><span class="pre">KeywordsRequest</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_nltk</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.api.routers.text.keywords" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="graphai.api.routers.text.wikify">
-<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">graphai.api.routers.text.</span></span><span class="sig-name descname"><span class="pre">wikify</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="graphai.api.schemas.text.html#graphai.api.schemas.text.WikifyRequest" title="graphai.api.schemas.text.WikifyRequest"><span class="pre">WikifyRequest</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.api.routers.text.wikify" title="Permalink to this definition"></a></dt>
-<dd><p>Processes raw text (e.g. from an abstract of a publication, a course description or a lecture slide) and returns a
-list of concepts (Wikipedia pages) that are relevant to the text, each with a set of scores in [0, 1]
-quantifying their relevance. This is done as follows:</p>
-<ol class="arabic simple">
-<li><dl class="simple">
-<dt>Keyword extraction: Automatic extraction of keywords from the text. Omitted if keyword_list is provided as</dt><dd><p>input instead of raw_text.</p>
-</dd>
-</dl>
-</li>
-<li><dl class="simple">
-<dt>Wikisearch: For each set of keywords, a set of 10 concepts (Wikipedia pages) is retrieved. This can be done</dt><dd><p>through requests to the Wikipedia API or through elasticsearch requests.</p>
-</dd>
-</dl>
-</li>
-<li><dl class="simple">
-<dt>Scores: For each pair of keywords and concept, several scores are derived, taking into account the ontology</dt><dd><p>of concepts and the concepts graph, among others.</p>
-</dd>
-</dl>
-</li>
-<li><dl class="simple">
-<dt>Aggregation and filter: For each concept, their scores are aggregated and filtered according to some rules,</dt><dd><p>to keep only the most relevant results.</p>
-</dd>
-</dl>
-</li>
-</ol>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="graphai.api.routers.text.legacy_wikify">
-<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">graphai.api.routers.text.</span></span><span class="sig-name descname"><span class="pre">legacy_wikify</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="graphai.api.schemas.text.html#graphai.api.schemas.text.WikifyRequest" title="graphai.api.schemas.text.WikifyRequest"><span class="pre">WikifyRequest</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.api.routers.text.legacy_wikify" title="Permalink to this definition"></a></dt>
-<dd><p>Wikifies some text.</p>
-<p>Wikifying a text is the composition of the following steps:</p>
-<ul class="simple">
-<li><p>Keyword extraction: Automatic extraction of keywords from the text. Omitted if keyword_list is provided as input instead of raw_text.</p></li>
-<li><p>Wikisearch: For each set of keywords, we call the Wikipedia API to search the 10 most related Wikipedia pages.</p></li>
-<li><dl class="simple">
-<dt>Graph scores: For each such page and each anchor page specified in the parameters, we search the graph and</dt><dd><p>compute a score depending on how well-connected both pages are.</p>
-</dd>
-</dl>
-</li>
-<li><dl class="simple">
-<dt>Postprocessing: For each set of keywords and Wikipedia page, the graph scores are aggregated over all anchor pages</dt><dd><p>and several other scores are computed.</p>
-</dd>
-</dl>
-</li>
-</ul>
-</dd></dl>
-
+  <section id="graphai-api-routers-text-module">
+<h1>graphai.api.routers.text module<a class="headerlink" href="#graphai-api-routers-text-module" title="Permalink to this heading"></a></h1>
 </section>
 
 
