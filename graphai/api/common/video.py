@@ -4,6 +4,8 @@ import sys
 import time
 from datetime import datetime
 import numpy as np
+from google.cloud import storage
+from google.cloud import speech
 
 import ffmpeg
 
@@ -19,6 +21,7 @@ from graphai.core.common.video import file_exists, \
 video_config = VideoConfig()
 video_db_manager = DBCachingManager()
 
+ALTERNATIVE_LANGUAGES = ["en-US", "en-GB", "fr-CH", "fr-FR"]
 
 def generate_random_token():
     """
@@ -92,7 +95,7 @@ def md5_video_or_audio(input_filename_with_path, video=True):
 
 def detect_audio_format_and_duration(input_filename_with_path, input_token):
     """
-    Detects the format and duration of the audio track of the provided video file
+    Detects the duration of the audio track of the provided video file and returns its name in ogg format
     Args:
         input_filename_with_path: Path of input file
         input_token: Token of input file
@@ -106,8 +109,7 @@ def detect_audio_format_and_duration(input_filename_with_path, input_token):
         print(e, file=sys.stderr)
         return None
     audio_type = probe_results['streams'][1]['codec_name']
-    # note to self: maybe we should skip the probing and just put this in an aac file in any case
-    output_suffix='_audio.' + audio_type
+    output_suffix='_audio.ogg'
     output_token = input_token + output_suffix
     return output_token, float(probe_results['format']['duration'])
 
@@ -128,7 +130,7 @@ def extract_audio_from_video(input_filename_with_path, output_filename_with_path
         return None
     try:
         err = ffmpeg.input(input_filename_with_path).audio. \
-            output(output_filename_with_path, c='copy').\
+            output(output_filename_with_path, acodec='libopus', ar=48000).\
             overwrite_output().run(capture_stdout=True)
     except Exception as e:
         print(e, file=sys.stderr)
@@ -301,6 +303,71 @@ def find_closest_audio_fingerprint(target_fp, fp_list, token_list, min_similarit
         return token_list[max_index], fp_list[max_index], fp_similarities[max_index]
     else:
         return None, None, None
+
+
+def generate_gcp_uri(bucket_name, blob_name):
+    return f'gs://{bucket_name}/{blob_name}'
+
+
+def upload_file_to_google_cloud(input_filename_with_path, input_token, bucket_name='epflgraph_bucket'):
+    """Uploads a file to the bucket."""
+    # The ID of your GCS bucket
+    # bucket_name = "your-bucket-name"
+    # The path to your file to upload
+    # source_file_name = "local/path/to/file"
+    # The ID of your GCS object
+    # destination_blob_name = "storage-object-name"
+
+    storage_client = storage.Client()
+    bucket = storage_client.bucket(bucket_name)
+    blob = bucket.blob(input_token)
+
+    # Optional: set a generation-match precondition to avoid potential race conditions
+    # and data corruptions. The request to upload is aborted if the object's
+    # generation number does not match your precondition. For a destination
+    # object that does not yet exist, set the if_generation_match precondition to 0.
+    # If the destination object already exists in your bucket, set instead a
+    # generation-match precondition using its generation number.
+    generation_match_precondition = 0
+
+    blob.upload_from_filename(input_filename_with_path, if_generation_match=generation_match_precondition)
+
+    print(
+        f"File {input_filename_with_path} uploaded to {generate_gcp_uri(bucket_name, input_token)}."
+    )
+
+
+def transcribe_gcs(bucket_name, input_token, sample_rate=48000, timeout=600, first_lang="en-US",
+                   alt_langs=None, use_alts=False):
+    """Asynchronously transcribes the audio file specified by the gcs_uri."""
+
+    client = speech.SpeechClient()
+
+    audio = speech.RecognitionAudio(uri=generate_gcp_uri(bucket_name, input_token))
+    if alt_langs is None:
+        if use_alts:
+            alt_langs = ALTERNATIVE_LANGUAGES
+            alt_langs = [x for x in alt_langs if x != first_lang]
+        else:
+            alt_langs = []
+    config = speech.RecognitionConfig(
+        encoding=speech.RecognitionConfig.AudioEncoding.FLAC,
+        sample_rate_hertz=sample_rate,
+        language_code=first_lang,
+        alternative_language_codes=alt_langs
+    )
+
+    operation = client.long_running_recognize(config=config, audio=audio)
+
+    print("Waiting for operation to complete...")
+    response = operation.result(timeout=timeout)
+
+    # Each result is for a consecutive portion of the audio. Iterate through
+    # them to get the transcripts for the entire audio file.
+    for result in response.results:
+        # The first alternative is the most likely one for this portion.
+        print("Transcript: {}".format(result.alternatives[0].transcript))
+        print("Confidence: {}".format(result.alternatives[0].confidence))
 
 
 def compute_mpeg7_signature(input_filename, output_suffix='_sig.xml', force=False):
