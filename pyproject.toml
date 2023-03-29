@@ -6,7 +6,8 @@ build-backend = "setuptools.build_meta"
 name = "graphai"
 version = "0.2.1"
 authors = [
-  { name="Aitor Pérez", email="aitor.perez@epfl.ch" }
+  { name="Aitor Pérez", email="aitor.perez@epfl.ch" },
+  { name="Ramtin Yazdanian", email="ramtin.yazdanian@epfl.ch" }
 ]
 description = "The graphai package contains tools and services enhancing the EPFL Graph project with AI-based utilities."
 readme = "README.md"
@@ -24,6 +25,9 @@ dependencies = [
     "uvicorn",
     "pydantic",
     "requests",
+    "ffmpeg-python",
+    "pyacoustid",
+    "fuzzywuzzy[speedup]",
     "ray",
     "celery[redis]",
     "kombu",
