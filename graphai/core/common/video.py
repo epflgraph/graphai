@@ -1,3 +1,4 @@
+import json
 import os
 import errno
 import random
@@ -63,6 +64,30 @@ def count_files(root_dir):
         if os.path.isfile(os.path.join(root_dir, sub_path)):
             count += 1
     return count
+
+
+def write_text_file(filename_with_path, contents):
+    with open(filename_with_path, 'w') as f:
+        f.write(contents)
+
+
+def write_json_file(filename_with_path, d):
+    with open(filename_with_path, 'w') as f:
+        json.dump(d, f)
+
+
+def read_text_file(filename_with_path):
+    f=open(filename_with_path, 'r')
+    result=f.read()
+    f.close()
+    return result
+
+
+def read_json_file(filename_with_path):
+    f=open(filename_with_path, 'r')
+    result=json.load(f)
+    f.close()
+    return result
 
 
 def generate_random_token():
@@ -456,11 +481,15 @@ def transcribe_audio_whisper(input_filename_with_path, model, force_lang=None, v
         translated segments which can be used as subtitles, and 'language' which contains the language code.
     """
     assert force_lang in [None, 'en', 'fr', 'de', 'it']
-    if force_lang is None:
-        result = model.transcribe(input_filename_with_path, verbose=verbose)
-    else:
-        result = model.transcribe(input_filename_with_path, verbose=verbose,
-                                  decode_options={'language': force_lang})
+    try:
+        if force_lang is None:
+            result = model.transcribe(input_filename_with_path, verbose=verbose)
+        else:
+            result = model.transcribe(input_filename_with_path, verbose=verbose,
+                                      decode_options={'language': force_lang})
+    except Exception as e:
+        print(e, file=sys.stderr)
+        return None
     return result
 
 
@@ -535,9 +564,10 @@ class DBCachingManager():
               `fingerprint` LONGTEXT DEFAULT NULL,
               `duration` FLOAT,
               `transcript_token` VARCHAR(255) DEFAULT NULL,
-              `subtitle_segments_token` VARCHAR(255) DEFAULT NULL,
+              `subtitle_token` VARCHAR(255) DEFAULT NULL,
               `nosilence_token` VARCHAR(255) DEFAULT NULL,
               `nosilence_duration` FLOAT DEFAULT NULL,
+              `language` VARCHAR(10) DEFAULT NULL,
               `fp_nosilence` INT DEFAULT NULL,
               PRIMARY KEY id_token (id_token)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;

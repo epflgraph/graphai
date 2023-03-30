@@ -1,6 +1,8 @@
 from celery import shared_task, chain, group
-from graphai.api.common.video import video_db_manager, video_config
-from graphai.core.common.video import remove_silence_doublesided, perceptual_hash_audio, find_closest_audio_fingerprint
+from graphai.api.common.video import video_db_manager, video_config, transcription_model
+from graphai.core.common.video import remove_silence_doublesided, perceptual_hash_audio, \
+    find_closest_audio_fingerprint, transcribe_audio_whisper, \
+    write_text_file, write_json_file, read_text_file, read_json_file
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
@@ -245,6 +247,86 @@ def retrieve_fingerprint_callback_task(self, results):
     return results['fp_results']
 
 
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
+             name='video.transcribe', ignore_result=False)
+def transcribe_task(self, token, lang=None, force=False):
+    if not force:
+        existing = video_db_manager.get_audio_details(token, ['transcript_token', 'subtitle_token', 'language'],
+                                                      using_most_similar=True)
+        if existing['transcript_token'] is not None and existing['subtitle_token'] is not None and \
+                existing['language'] is not None:
+            print('Returning cached result')
+            transcript_token = existing['transcript_token']
+            transcript_result = read_text_file(video_config.generate_filename(transcript_token))
+            subtitle_token = existing['subtitle_token']
+            subtitle_result = read_json_file(video_config.generate_filename(subtitle_token))
+            language_result = existing['language']
+            return {
+                'transcript_result': transcript_result,
+                'transcript_token': transcript_token,
+                'subtitle_result': subtitle_result,
+                'subtitle_token': subtitle_token,
+                'language': language_result,
+                'fresh': False
+            }
+
+    input_filename_with_path = video_config.generate_filename(token)
+    transcript_token = token + '_transcript.txt'
+    subtitle_token = token + '_subtitle_segments.json'
+    result_dict = \
+        transcribe_audio_whisper(input_filename_with_path, transcription_model.get_model(), force_lang=lang)
+    if result_dict is None:
+        return {
+            'transcript_result': None,
+            'transcript_token': None,
+            'subtitle_result': None,
+            'subtitle_token': None,
+            'language': None,
+            'fresh': False
+        }
+    transcript_result = result_dict['text']
+    subtitle_result = result_dict['segments']
+    language_result = result_dict['language']
+    transcript_filename_with_path = video_config.generate_filename(transcript_token)
+    subtitle_filename_with_path = video_config.generate_filename(subtitle_token)
+    write_text_file(transcript_filename_with_path, transcript_result)
+    write_json_file(subtitle_filename_with_path, subtitle_result)
+    return {
+        'transcript_result': transcript_result,
+        'transcript_token': transcript_token,
+        'subtitle_result': subtitle_result,
+        'subtitle_token': subtitle_token,
+        'language': language_result,
+        'fresh': True
+    }
+
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
+             name='video.transcribe_callback', ignore_result=False)
+def transcribe_callback_task(self, results, token):
+    if results['fresh']:
+        values_dict = {
+            'transcript_token': results['transcript_token'],
+            'subtitle_token': results['subtitle_token'],
+            'language': results['language']
+        }
+        video_db_manager.insert_or_update_audio_details(
+            token, values_dict
+        )
+        closest = video_db_manager.get_closest_audio_match(token)
+        if closest is not None and closest != token:
+            video_db_manager.insert_or_update_audio_details(
+                closest, values_dict
+            )
+    return {
+        'transcript_result': results['transcript_result'],
+        'subtitle_result': results['subtitle_result'],
+        'language': results['language'],
+        'fresh': results['fresh']
+    }
+
+
 def compute_audio_fingerprint_master(token, force=False, remove_silence=False, threshold=0.0,
                                      min_similarity=0.8, n_jobs=8):
     if not remove_silence:
@@ -265,4 +347,9 @@ def compute_audio_fingerprint_master(token, force=False, remove_silence=False, t
                 audio_fingerprint_find_closest_callback_task.s(token) |
                 retrieve_fingerprint_callback_task.s())
     task = task.apply_async(priority=2)
+    return {'task_id': task.id}
+
+
+def transcribe_master(token, lang=None, force=False):
+    task = (transcribe_task.s(token, lang, force) | transcribe_callback_task.s(token)).apply_async(priority=2)
     return {'task_id': task.id}
