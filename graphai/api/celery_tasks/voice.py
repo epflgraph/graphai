@@ -1,6 +1,6 @@
 from celery import shared_task, chain, group
-from graphai.api.common.video import remove_silence_doublesided, perceptual_hash_audio, \
-    video_db_manager, video_config, find_closest_audio_fingerprint
+from graphai.api.common.video import video_db_manager, video_config
+from graphai.core.common.video import remove_silence_doublesided, perceptual_hash_audio, find_closest_audio_fingerprint
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},

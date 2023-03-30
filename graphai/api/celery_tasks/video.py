@@ -1,8 +1,9 @@
 from celery import shared_task, group, chain
 import time
 from graphai.api.common.log import log
-from graphai.api.common.video import generate_random_token, retrieve_file_from_url, extract_audio_from_video, \
-    compute_mpeg7_signature, video_config, compute_video_slides, video_db_manager, detect_audio_format_and_duration
+from graphai.api.common.video import compute_mpeg7_signature, video_config, compute_video_slides, video_db_manager
+from graphai.core.common.video import generate_random_token, retrieve_file_from_url, detect_audio_format_and_duration, \
+    extract_audio_from_video
 from graphai.core.utils.time.stopwatch import Stopwatch
 
 
