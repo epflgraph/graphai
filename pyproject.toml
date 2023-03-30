@@ -26,6 +26,7 @@ dependencies = [
     "pydantic",
     "requests",
     "wget",
+    "openai-whisper",
     "google-cloud-speech",
     "google-cloud-storage",
     "ffmpeg-python",

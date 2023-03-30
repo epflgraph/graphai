@@ -6,7 +6,7 @@ from datetime import datetime
 import numpy as np
 from google.cloud import storage
 from google.cloud import speech
-
+import whisper
 import ffmpeg
 
 import chromaprint
@@ -335,6 +335,7 @@ def upload_file_to_google_cloud(input_filename_with_path, input_token, bucket_na
     print(
         f"File {input_filename_with_path} uploaded to {generate_gcp_uri(bucket_name, input_token)}."
     )
+    return True
 
 
 def transcribe_gcs(bucket_name, input_token, sample_rate=48000, timeout=600, lang="en-US"):
@@ -363,6 +364,62 @@ def transcribe_gcs(bucket_name, input_token, sample_rate=48000, timeout=600, lan
         all_transcripts.append(result.alternatives[0].transcript)
         all_confidences.append(result.alternatives[0].confidence)
     return all_transcripts, all_confidences, lang
+
+
+def load_model_whisper(model_type='small'):
+    """
+    Loads a Whisper model into memory
+    Args:
+        model_type: Type of model, see Whisper docs for details
+
+    Returns:
+        Model object
+    """
+    model = whisper.load_model(model_type)
+    return model
+
+
+def detect_audio_lang_whisper(input_filename_with_path, model):
+    """
+    Detects the language of an audio file using a 30-second sample
+    Args:
+        input_filename_with_path: Path to input file
+        model: Whisper model object
+
+    Returns:
+        Highest-scoring language code (e.g. 'en')
+    """
+    audio = whisper.load_audio(input_filename_with_path)
+    audio = whisper.pad_or_trim(audio)
+
+    # make log-Mel spectrogram and move to the same device as the model
+    mel = whisper.log_mel_spectrogram(audio).to(model.device)
+
+    # detect the spoken language
+    _, probs = model.detect_language(mel)
+    return max(probs, key=probs.get)
+
+
+def transcribe_audio_whisper(input_filename_with_path, model, force_lang=None, verbose=False):
+    """
+    Transcribes an audio file using whisper
+    Args:
+        input_filename_with_path: Path to input file
+        model: Whisper model object
+        force_lang: Whether to explicitly feed the model the language of the audio. None results in automatic detection.
+        verbose: Verbosity of the transcription
+
+    Returns:
+        A dictionary with three keys: 'text' contains the full transcript, 'segments' contains a JSON-like dict of
+        translated segments which can be used as subtitles, and 'language' which contains the language code.
+    """
+    assert force_lang in [None, 'en', 'fr', 'de', 'it']
+    if force_lang is None:
+        result = model.transcribe(input_filename_with_path, verbose=verbose)
+    else:
+        result = model.transcribe(input_filename_with_path, verbose=verbose,
+                                  decode_options={'language': force_lang})
+    return result
 
 
 def compute_mpeg7_signature(input_filename, output_suffix='_sig.xml', force=False):
