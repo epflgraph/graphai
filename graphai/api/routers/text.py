@@ -13,7 +13,7 @@ from graphai.api.common.graph import graph
 from graphai.api.common.ontology import ontology
 
 from graphai.core.text.keywords import get_keywords
-from graphai.core.text.wikisearch import wikisearch
+from graphai.core.text.wikisearch import wikisearch, ws_celery
 
 from graphai.core.utils.time.stopwatch import Stopwatch
 
@@ -27,6 +27,19 @@ router = APIRouter(
     tags=['text'],
     responses={404: {'description': 'Not found'}}
 )
+
+
+@router.get('/wikisearch')
+async def wikisearch():
+    raw_text = """Consider a nonparametric representation of acoustic wave fields"""
+
+    keywords = get_keywords(raw_text)
+
+    wikisearch_results = ws_celery(keywords)
+
+    print(wikisearch_results)
+
+    return {'len': len(wikisearch_results)}
 
 
 @router.post('/keywords', response_model=KeywordsResponse)

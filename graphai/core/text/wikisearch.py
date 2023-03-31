@@ -104,3 +104,33 @@ def wikisearch(keywords, method):
     results = pd.concat(results, ignore_index=True)
 
     return results
+
+############################################################
+
+
+from celery import shared_task, group
+
+wp = WP()
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={'max_retries': 2}, name='video.sleep', ignore_result=False)
+def ws_task(self, keywords):
+    results = wp.search(keywords)
+
+    results['SearchScore'] = 1 - (results['Searchrank'] - 1) / (len(results) - 1)
+
+    # Add Keywords column at the beginning
+    results['Keywords'] = keywords
+    results = results[['Keywords', 'PageID', 'PageTitle', 'Searchrank', 'SearchScore']]
+
+    return results
+
+
+def ws_celery(keywords):
+    job = group(ws_task.s(row['Keywords']) for i, row in keywords.iterrows())
+    results = job.apply_async()
+    results = results.get(timeout=10)
+
+    results = pd.concat(results, ignore_index=True)
+
+    return results
