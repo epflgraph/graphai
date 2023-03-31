@@ -4,18 +4,19 @@ from celery import shared_task, chain, group, Task
 from graphai.api.common.video import video_db_manager, video_config
 from graphai.core.common.video import remove_silence_doublesided, perceptual_hash_audio, \
     find_closest_audio_fingerprint, load_model_whisper, transcribe_audio_whisper, \
-    write_text_file, write_json_file, read_text_file, read_json_file
+    write_text_file, read_text_file, read_json_file
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='video.audio_silenceremoval', ignore_result=False)
+             name='video.audio_silenceremoval', ignore_result=False,
+             db_manager=video_db_manager, file_manager=video_config)
 def remove_audio_silence_task(self, token, force=False, threshold=0.0):
-    input_filename_with_path = video_config.generate_filename(token)
+    input_filename_with_path = self.file_manager.generate_filename(token)
     audio_type = token.split('.')[-1]
     output_suffix = '_nosilence.' + audio_type
     output_token = token + output_suffix
-    output_filename_with_path = video_config.generate_filename(output_token)
-    existing = video_db_manager.get_audio_details(token, cols=['nosilence_token', 'nosilence_duration'])
+    output_filename_with_path = self.file_manager.generate_filename(output_token)
+    existing = self.db_manager.get_audio_details(token, cols=['nosilence_token', 'nosilence_duration'])
     # The information on audio file needs to have been inserted into the cache table when
     # the audio was extracted from the video. Therefore, the `existing` row needs to *exist*.
     if existing is None:
@@ -49,10 +50,11 @@ def remove_audio_silence_task(self, token, force=False, threshold=0.0):
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='video.audio_silenceremoval_callback', ignore_result=False)
+             name='video.audio_silenceremoval_callback', ignore_result=False,
+             db_manager=video_db_manager, file_manager=video_config)
 def remove_audio_silence_callback_task(self, result, audio_token):
     if result['fp_token'] is not None and result['fresh']:
-        video_db_manager.insert_or_update_audio_details(
+        self.db_manager.insert_or_update_audio_details(
             audio_token,
             {
                 'nosilence_token': result['fp_token'],
@@ -63,7 +65,8 @@ def remove_audio_silence_callback_task(self, result, audio_token):
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='video.audio_fingerprint', ignore_result=False)
+             name='video.audio_fingerprint', ignore_result=False,
+             db_manager=video_db_manager, file_manager=video_config)
 def compute_audio_fingerprint_task(self, input_dict, audio_token, force=False):
     fp_token = input_dict['fp_token']
     if fp_token is None:
@@ -73,7 +76,7 @@ def compute_audio_fingerprint_task(self, input_dict, audio_token, force=False):
             'duration': 0.0,
             'fp_nosilence': 0
         }
-    existing = video_db_manager.get_audio_details(audio_token, cols=['fingerprint', 'duration',
+    existing = self.db_manager.get_audio_details(audio_token, cols=['fingerprint', 'duration',
                                                                      'nosilence_duration', 'fp_nosilence'])
     # The information on audio file needs to have been inserted into the cache table when
     # the audio was extracted from the video. Therefore, the `existing` row needs to *exist*,
@@ -95,7 +98,7 @@ def compute_audio_fingerprint_task(self, input_dict, audio_token, force=False):
                 'duration': existing['duration'] if existing['fp_nosilence'] == 0 else existing['nosilence_duration'],
                 'fp_nosilence': existing['fp_nosilence']
             }
-    fp_token_with_path = video_config.generate_filename(fp_token)
+    fp_token_with_path = self.file_manager.generate_filename(fp_token)
     fingerprint, decoded = perceptual_hash_audio(fp_token_with_path)
     if fingerprint is None:
         return {
@@ -118,10 +121,11 @@ def compute_audio_fingerprint_task(self, input_dict, audio_token, force=False):
     }
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='video.audio_fingerprint_callback', ignore_result=False)
+             name='video.audio_fingerprint_callback', ignore_result=False,
+             db_manager=video_db_manager, file_manager=video_config)
 def compute_audio_fingerprint_callback_task(self, results, token):
     if results['result'] is not None and results['fresh']:
-        video_db_manager.insert_or_update_audio_details(
+        self.db_manager.insert_or_update_audio_details(
             token,
             {
                 'fingerprint': results['result'],
@@ -131,17 +135,9 @@ def compute_audio_fingerprint_callback_task(self, results, token):
     return results
 
 
-def resolve_most_similar_chain(token):
-    if token is None:
-        return None
-    prev_most_similar = video_db_manager.get_closest_audio_match(token)
-    if prev_most_similar is None or prev_most_similar==token:
-        return token
-    return resolve_most_similar_chain(prev_most_similar)
-
-
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='video.audio_fingerprint_find_closest_retrieve_from_db', ignore_result=False)
+             name='video.audio_fingerprint_find_closest_retrieve_from_db', ignore_result=False,
+             db_manager=video_db_manager, file_manager=video_config)
 def audio_fingerprint_find_closest_retrieve_from_db_task(self, results, token):
     target_fingerprint = results['result']
     fresh = results['fresh']
@@ -158,7 +154,7 @@ def audio_fingerprint_find_closest_retrieve_from_db_task(self, results, token):
     # Retrieving all the tokens and their fingerprints. Since at least one audio has been extracted
     # (i.e. this one), this result is never null. In addition, there's at least one non-null fingerprint
     # value (again, for the present audio file).
-    tokens_and_fingerprints = video_db_manager.get_all_audio_details(['fingerprint'])
+    tokens_and_fingerprints = self.db_manager.get_all_audio_details(['fingerprint'])
     all_tokens = list(tokens_and_fingerprints.keys())
     all_fingerprints = [tokens_and_fingerprints[key]['fingerprint'] for key in all_tokens]
     # Now we remove the token of the current file itself, because otherwise we'd always get the video itself
@@ -175,7 +171,8 @@ def audio_fingerprint_find_closest_retrieve_from_db_task(self, results, token):
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='video.audio_fingerprint_find_closest_parallel', ignore_result=False)
+             name='video.audio_fingerprint_find_closest_parallel', ignore_result=False,
+             db_manager=video_db_manager, file_manager=video_config)
 def audio_fingerprint_find_closest_parallel_task(self, input_dict, i, n_total, min_similarity=0.8):
     # This parallel task's "closest fingerprint" result is null if either
     # a) the computation has been disabled (indicated by the token list being null), or
@@ -209,7 +206,8 @@ def audio_fingerprint_find_closest_parallel_task(self, input_dict, i, n_total, m
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='video.audio_fingerprint_find_closest_callback', ignore_result=False)
+             name='video.audio_fingerprint_find_closest_callback', ignore_result=False,
+             db_manager=video_db_manager, file_manager=video_config)
 def audio_fingerprint_find_closest_callback_task(self, results_list, original_token):
     # Passing fingerprinting results along if it's been unsuccessful or a cached result has been returned
     # This is essentially the same check as in all the other find_closest tasks.
@@ -230,9 +228,9 @@ def audio_fingerprint_find_closest_callback_task(self, results_list, original_to
     else:
         max_score = max([x[2] for x in results])
         closest_token = [x[0] for x in results if x[2] == max_score][0]
-        closest_token = resolve_most_similar_chain(closest_token)
+        closest_token = self.db_manager.resolve_most_similar_chain(closest_token)
     # Whether the closest token is itself or another token, we store the result in the database.
-    video_db_manager.insert_or_update_closest_match(
+    self.db_manager.insert_or_update_closest_match(
         original_token,
         {
             'most_similar_token': closest_token
@@ -242,7 +240,8 @@ def audio_fingerprint_find_closest_callback_task(self, results_list, original_to
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='video.retrieve_fingerprint_task_callback', ignore_result=False)
+             name='video.retrieve_fingerprint_task_callback', ignore_result=False,
+             db_manager=video_db_manager, file_manager=video_config)
 def retrieve_fingerprint_callback_task(self, results):
     # Returning the fingerprinting results, which is the part of this task whose results are sent back to the user.
     return results['fp_results']
@@ -254,23 +253,24 @@ class TranscriptionModelTask(Task):
     @property
     def model(self):
         if self._model is None:
-            self._model = load_model_whisper('base')
+            self._model = load_model_whisper('medium')
         return self._model
 
 
 @shared_task(bind=True, base=TranscriptionModelTask, autoretry_for=(Exception,), retry_backoff=True,
-             retry_kwargs={"max_retries": 2}, name='video.transcribe', ignore_result=False)
+             retry_kwargs={"max_retries": 2}, name='video.transcribe', ignore_result=False,
+             db_manager=video_db_manager, file_manager=video_config)
 def transcribe_task(self, token, lang=None, force=False):
     if not force:
-        existing = video_db_manager.get_audio_details(token, ['transcript_token', 'subtitle_token', 'language'],
+        existing = self.db_manager.get_audio_details(token, ['transcript_token', 'subtitle_token', 'language'],
                                                       using_most_similar=True)
         if existing['transcript_token'] is not None and existing['subtitle_token'] is not None and \
                 existing['language'] is not None:
             print('Returning cached result')
             transcript_token = existing['transcript_token']
-            transcript_result = read_text_file(video_config.generate_filename(transcript_token))
+            transcript_result = read_text_file(self.file_manager.generate_filename(transcript_token))
             subtitle_token = existing['subtitle_token']
-            subtitle_result = read_json_file(video_config.generate_filename(subtitle_token))
+            subtitle_result = read_json_file(self.file_manager.generate_filename(subtitle_token))
             language_result = existing['language']
             return {
                 'transcript_result': transcript_result,
@@ -281,7 +281,7 @@ def transcribe_task(self, token, lang=None, force=False):
                 'fresh': False
             }
 
-    input_filename_with_path = video_config.generate_filename(token)
+    input_filename_with_path = self.file_manager.generate_filename(token)
     transcript_token = token + '_transcript.txt'
     subtitle_token = token + '_subtitle_segments.json'
     result_dict = \
@@ -298,8 +298,8 @@ def transcribe_task(self, token, lang=None, force=False):
     transcript_result = result_dict['text']
     subtitle_result = json.dumps(result_dict['segments'])
     language_result = result_dict['language']
-    transcript_filename_with_path = video_config.generate_filename(transcript_token)
-    subtitle_filename_with_path = video_config.generate_filename(subtitle_token)
+    transcript_filename_with_path = self.file_manager.generate_filename(transcript_token)
+    subtitle_filename_with_path = self.file_manager.generate_filename(subtitle_token)
     write_text_file(transcript_filename_with_path, transcript_result)
     write_text_file(subtitle_filename_with_path, subtitle_result)
     return {
@@ -314,7 +314,8 @@ def transcribe_task(self, token, lang=None, force=False):
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='video.transcribe_callback', ignore_result=False)
+             name='video.transcribe_callback', ignore_result=False,
+             db_manager=video_db_manager, file_manager=video_config)
 def transcribe_callback_task(self, results, token):
     if results['fresh']:
         values_dict = {
@@ -322,12 +323,12 @@ def transcribe_callback_task(self, results, token):
             'subtitle_token': results['subtitle_token'],
             'language': results['language']
         }
-        video_db_manager.insert_or_update_audio_details(
+        self.db_manager.insert_or_update_audio_details(
             token, values_dict
         )
-        closest = video_db_manager.get_closest_audio_match(token)
+        closest = self.db_manager.get_closest_audio_match(token)
         if closest is not None and closest != token:
-            video_db_manager.insert_or_update_audio_details(
+            self.db_manager.insert_or_update_audio_details(
                 closest, values_dict
             )
     return {

@@ -1,7 +1,7 @@
 from celery import shared_task, group, chain
 import time
 from graphai.api.common.log import log
-from graphai.api.common.video import compute_mpeg7_signature, video_config, compute_video_slides, video_db_manager
+from graphai.api.common.video import compute_mpeg7_signature, compute_video_slides, video_config, video_db_manager
 from graphai.core.common.video import generate_random_token, retrieve_file_from_url, detect_audio_format_and_duration, \
     extract_audio_from_video
 from graphai.core.utils.time.stopwatch import Stopwatch
@@ -23,16 +23,18 @@ def example_callback_task(self, l):
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='video.retrieve_url', ignore_result=False)
+             name='video.retrieve_url', ignore_result=False,
+             db_manager=video_db_manager, file_manager=video_config)
 def retrieve_file_from_url_task(self, url, filename):
-    filename_with_path = video_config.generate_filename(filename)
+    filename_with_path = self.file_manager.generate_filename(filename)
     results = retrieve_file_from_url(url, filename_with_path, filename)
     return {'token': results,
             'successful': results is not None}
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='video.compute_signature', ignore_result=False)
+             name='video.compute_signature', ignore_result=False,
+             db_manager=video_db_manager, file_manager=video_config)
 def compute_signature_task(self, filename, force=False):
     results, fresh = compute_mpeg7_signature(filename, force=force)
     return {'token': results,
@@ -41,15 +43,17 @@ def compute_signature_task(self, filename, force=False):
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='video.get_file', ignore_result=False)
+             name='video.get_file', ignore_result=False,
+             db_manager=video_db_manager, file_manager=video_config)
 def get_file_task(self, filename):
-    return video_config.generate_filename(filename)
+    return self.file_manager.generate_filename(filename)
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='video.extract_audio', ignore_result=False)
+             name='video.extract_audio', ignore_result=False,
+             db_manager=video_db_manager, file_manager=video_config)
 def extract_audio_task(self, token, force=False):
-    input_filename_with_path = video_config.generate_filename(token)
+    input_filename_with_path = self.file_manager.generate_filename(token)
     output_token, input_duration = detect_audio_format_and_duration(input_filename_with_path, token)
     if output_token is None:
         return {
@@ -59,11 +63,11 @@ def extract_audio_task(self, token, force=False):
             'duration': 0.0
         }
 
-    output_filename_with_path = video_config.generate_filename(output_token)
+    output_filename_with_path = self.file_manager.generate_filename(output_token)
     # Here, the existing row can be None because the row is inserted into the table
     # only after extracting the audio from the video.
     if not force:
-        existing = video_db_manager.get_audio_details(output_token, cols=['duration'])
+        existing = self.db_manager.get_audio_details(output_token, cols=['duration'])
     else:
         existing = None
     if existing is not None:
@@ -93,10 +97,11 @@ def extract_audio_task(self, token, force=False):
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='video.extract_audio_callback', ignore_result=False)
+             name='video.extract_audio_callback', ignore_result=False,
+             db_manager=video_db_manager, file_manager=video_config)
 def extract_audio_callback_task(self, results, origin_token):
     if results['successful'] and results['fresh']:
-        video_db_manager.insert_or_update_audio_details(
+        self.db_manager.insert_or_update_audio_details(
             results['token'],
             {
                 'duration': results['duration'],
