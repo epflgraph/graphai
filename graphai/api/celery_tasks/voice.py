@@ -1,6 +1,6 @@
 import json
 
-from celery import shared_task, chain, group
+from celery import shared_task, chain, group, Task
 from graphai.api.common.video import video_db_manager, video_config
 from graphai.core.common.video import remove_silence_doublesided, perceptual_hash_audio, \
     find_closest_audio_fingerprint, load_model_whisper, transcribe_audio_whisper, \
@@ -248,8 +248,18 @@ def retrieve_fingerprint_callback_task(self, results):
     return results['fp_results']
 
 
-@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='video.transcribe', ignore_result=False)
+class TranscriptionModelTask(Task):
+    _model = None
+
+    @property
+    def model(self):
+        if self._model is None:
+            self._model = load_model_whisper('base')
+        return self._model
+
+
+@shared_task(bind=True, base=TranscriptionModelTask, autoretry_for=(Exception,), retry_backoff=True,
+             retry_kwargs={"max_retries": 2}, name='video.transcribe', ignore_result=False)
 def transcribe_task(self, token, lang=None, force=False):
     if not force:
         existing = video_db_manager.get_audio_details(token, ['transcript_token', 'subtitle_token', 'language'],
@@ -274,9 +284,8 @@ def transcribe_task(self, token, lang=None, force=False):
     input_filename_with_path = video_config.generate_filename(token)
     transcript_token = token + '_transcript.txt'
     subtitle_token = token + '_subtitle_segments.json'
-    model = load_model_whisper()
     result_dict = \
-        transcribe_audio_whisper(input_filename_with_path, model, force_lang=lang, verbose=True)
+        transcribe_audio_whisper(input_filename_with_path, self.model, force_lang=lang, verbose=True)
     if result_dict is None:
         return {
             'transcript_result': None,
