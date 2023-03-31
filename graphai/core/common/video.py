@@ -486,7 +486,7 @@ def transcribe_audio_whisper(input_filename_with_path, model, force_lang=None, v
             result = model.transcribe(input_filename_with_path, verbose=verbose)
         else:
             result = model.transcribe(input_filename_with_path, verbose=verbose,
-                                      decode_options={'language': force_lang})
+                                      language=force_lang)
     except Exception as e:
         print(e, file=sys.stderr)
         return None
@@ -536,6 +536,7 @@ class DBCachingManager():
         self.audio_cache_table = 'Audio_Main'
         self.audio_most_similar_table = 'Audio_Most_Similar'
         self.db = DB()
+        self.init_db()
 
     def init_db(self):
         self.db.execute_query(
@@ -572,6 +573,15 @@ class DBCachingManager():
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
             """
         )
+
+
+    def resolve_most_similar_chain(self, token):
+        if token is None:
+            return None
+        prev_most_similar = self.get_closest_audio_match(token)
+        if prev_most_similar is None or prev_most_similar==token:
+            return token
+        return self.resolve_most_similar_chain(prev_most_similar)
 
 
     def _insert_or_update_details(self, schema, table_name, id_token, values_to_insert=None):
