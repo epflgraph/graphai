@@ -10,7 +10,7 @@ from graphai.api.common.log import log
 
 from graphai.api.common.graph import graph
 from graphai.api.common.ontology import ontology
-from graphai.api.common.video import video_db_manager, transcription_model
+from graphai.api.common.video import video_db_manager
 
 from graphai.core.celery_utils.celery_utils import create_celery
 
@@ -42,7 +42,7 @@ async def instantiate_graph_and_ontology():
     log(f'Fetching ontology from database...')
     ontology.fetch_from_db()
     video_db_manager.init_db()
-    transcription_model.init_model()
+
 
     log(f'Instantiating actor lists...')
     ws_actor_list.instantiate_actors()

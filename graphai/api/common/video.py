@@ -4,11 +4,10 @@ import ffmpeg
 
 from graphai.core.common.video import file_exists, \
     STANDARD_FPS, TEMP_SUBFOLDER, VideoConfig, count_files, get_dir_files, SLIDE_OUTPUT_FORMAT, DBCachingManager, \
-    TranscriptionModel, perform_probe
+    perform_probe
 
 video_config = VideoConfig()
 video_db_manager = DBCachingManager()
-transcription_model = TranscriptionModel()
 
 
 def compute_mpeg7_signature(input_filename, output_suffix='_sig.xml', force=False):

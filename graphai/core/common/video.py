@@ -433,7 +433,7 @@ def transcribe_gcs(bucket_name, input_token, sample_rate=48000, timeout=600, lan
     return all_transcripts, all_confidences, lang
 
 
-def load_model_whisper(model_type='small'):
+def load_model_whisper(model_type='base'):
     """
     Loads a Whisper model into memory
     Args:
@@ -442,7 +442,7 @@ def load_model_whisper(model_type='small'):
     Returns:
         Model object
     """
-    model = whisper.load_model(model_type)
+    model = whisper.load_model(model_type, in_memory=True)
     return model
 
 
@@ -524,17 +524,6 @@ class VideoConfig():
         else:
             filename_with_path = self.concat_file_path(filename, OTHER_SUBFOLDER)
         return filename_with_path
-
-
-class TranscriptionModel():
-    def __init__(self):
-        pass
-
-    def init_model(self, model_type='base'):
-        self.model = load_model_whisper(model_type)
-
-    def get_model(self):
-        return self.model
 
 
 def surround_with_character(s, c="'"):
@@ -657,6 +646,7 @@ class DBCachingManager():
 
     def get_audio_details(self, id_token, cols, using_most_similar=False):
         if using_most_similar:
+            print(id_token)
             id_token_to_use = self.get_closest_audio_match(id_token)
             if id_token_to_use is None:
                 id_token_to_use = id_token

@@ -1,7 +1,9 @@
+import json
+
 from celery import shared_task, chain, group
-from graphai.api.common.video import video_db_manager, video_config, transcription_model
+from graphai.api.common.video import video_db_manager, video_config
 from graphai.core.common.video import remove_silence_doublesided, perceptual_hash_audio, \
-    find_closest_audio_fingerprint, transcribe_audio_whisper, \
+    find_closest_audio_fingerprint, load_model_whisper, transcribe_audio_whisper, \
     write_text_file, write_json_file, read_text_file, read_json_file
 
 
@@ -157,7 +159,6 @@ def audio_fingerprint_find_closest_retrieve_from_db_task(self, results, token):
     # (i.e. this one), this result is never null. In addition, there's at least one non-null fingerprint
     # value (again, for the present audio file).
     tokens_and_fingerprints = video_db_manager.get_all_audio_details(['fingerprint'])
-    print(tokens_and_fingerprints)
     all_tokens = list(tokens_and_fingerprints.keys())
     all_fingerprints = [tokens_and_fingerprints[key]['fingerprint'] for key in all_tokens]
     # Now we remove the token of the current file itself, because otherwise we'd always get the video itself
@@ -264,7 +265,7 @@ def transcribe_task(self, token, lang=None, force=False):
             return {
                 'transcript_result': transcript_result,
                 'transcript_token': transcript_token,
-                'subtitle_result': subtitle_result,
+                'subtitle_result': json.dumps(subtitle_result),
                 'subtitle_token': subtitle_token,
                 'language': language_result,
                 'fresh': False
@@ -273,8 +274,9 @@ def transcribe_task(self, token, lang=None, force=False):
     input_filename_with_path = video_config.generate_filename(token)
     transcript_token = token + '_transcript.txt'
     subtitle_token = token + '_subtitle_segments.json'
+    model = load_model_whisper()
     result_dict = \
-        transcribe_audio_whisper(input_filename_with_path, transcription_model.get_model(), force_lang=lang)
+        transcribe_audio_whisper(input_filename_with_path, model, force_lang=lang, verbose=True)
     if result_dict is None:
         return {
             'transcript_result': None,
@@ -285,12 +287,12 @@ def transcribe_task(self, token, lang=None, force=False):
             'fresh': False
         }
     transcript_result = result_dict['text']
-    subtitle_result = result_dict['segments']
+    subtitle_result = json.dumps(result_dict['segments'])
     language_result = result_dict['language']
     transcript_filename_with_path = video_config.generate_filename(transcript_token)
     subtitle_filename_with_path = video_config.generate_filename(subtitle_token)
     write_text_file(transcript_filename_with_path, transcript_result)
-    write_json_file(subtitle_filename_with_path, subtitle_result)
+    write_text_file(subtitle_filename_with_path, subtitle_result)
     return {
         'transcript_result': transcript_result,
         'transcript_token': transcript_token,
@@ -345,11 +347,13 @@ def compute_audio_fingerprint_master(token, force=False, remove_silence=False, t
                 audio_fingerprint_find_closest_retrieve_from_db_task.s(token) |
                 group(audio_fingerprint_find_closest_parallel_task.s(i, n_jobs, min_similarity) for i in range(n_jobs)) |
                 audio_fingerprint_find_closest_callback_task.s(token) |
-                retrieve_fingerprint_callback_task.s())
+                retrieve_fingerprint_callback_task.s()
+                )
     task = task.apply_async(priority=2)
     return {'task_id': task.id}
 
 
 def transcribe_master(token, lang=None, force=False):
-    task = (transcribe_task.s(token, lang, force) | transcribe_callback_task.s(token)).apply_async(priority=2)
+    task = (transcribe_task.s(token, lang, force) |
+            transcribe_callback_task.s(token)).apply_async(priority=2)
     return {'task_id': task.id}
