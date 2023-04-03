@@ -1,0 +1,7 @@
+graphai.api.celery\_tasks.text module
+=====================================
+
+.. automodule:: graphai.api.celery_tasks.text
+   :members:
+   :undoc-members:
+   :show-inheritance:

@@ -13,4 +13,3 @@ Submodules
    :maxdepth: 1
 
    graphai.core.text.keywords
-   graphai.core.text.wikisearch

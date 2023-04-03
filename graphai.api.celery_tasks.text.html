@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>graphai.api.celery_tasks.ontology module &mdash; EPFL Graph AI</title>
+  <title>graphai.api.celery_tasks.text module &mdash; EPFL Graph AI</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -18,8 +18,8 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="graphai.api.celery_tasks.text module" href="graphai.api.celery_tasks.text.html" />
-    <link rel="prev" title="graphai.api.celery_tasks package" href="graphai.api.celery_tasks.html" /> 
+    <link rel="next" title="graphai.api.celery_tasks.video module" href="graphai.api.celery_tasks.video.html" />
+    <link rel="prev" title="graphai.api.celery_tasks.ontology module" href="graphai.api.celery_tasks.ontology.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -78,9 +78,9 @@
       <li><a href="graphai.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="graphai.api.html">graphai.api package</a></li>
           <li class="breadcrumb-item"><a href="graphai.api.celery_tasks.html">graphai.api.celery_tasks package</a></li>
-      <li class="breadcrumb-item active">graphai.api.celery_tasks.ontology module</li>
+      <li class="breadcrumb-item active">graphai.api.celery_tasks.text module</li>
       <li class="wy-breadcrumbs-aside">
-            <a href="_sources/graphai.api.celery_tasks.ontology.rst.txt" rel="nofollow"> View page source</a>
+            <a href="_sources/graphai.api.celery_tasks.text.rst.txt" rel="nofollow"> View page source</a>
       </li>
   </ul>
   <hr/>
@@ -88,16 +88,45 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="module-graphai.api.celery_tasks.ontology">
-<span id="graphai-api-celery-tasks-ontology-module"></span><h1>graphai.api.celery_tasks.ontology module<a class="headerlink" href="#module-graphai.api.celery_tasks.ontology" title="Permalink to this heading"></a></h1>
+  <section id="module-graphai.api.celery_tasks.text">
+<span id="graphai-api-celery-tasks-text-module"></span><h1>graphai.api.celery_tasks.text module<a class="headerlink" href="#module-graphai.api.celery_tasks.text" title="Permalink to this heading"></a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.api.celery_tasks.text.wikisearch_master">
+<span class="sig-prename descclassname"><span class="pre">graphai.api.celery_tasks.text.</span></span><span class="sig-name descname"><span class="pre">wikisearch_master</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">keywords</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.api.celery_tasks.text.wikisearch_master" title="Permalink to this definition"></a></dt>
+<dd><p>Retrieves wikipages for all keywords in the list.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>keywords</strong> (<em>pd.DataFrame</em>) – A pandas DataFrame with one column ‘Keywords’.</p></li>
+<li><p><strong>method</strong> (<em>str{'wikipedia-api'</em><em>, </em><em>'es-base'</em><em>, </em><em>'es-score'}</em>) – Method to retrieve the wikipedia pages.
+It can be either ‘wikipedia-api’, to use the Wikipedia API, or one of {‘es-base’, ‘es-score’},
+to use elasticsearch, returning as score the inverse of the searchrank or the actual elasticsearch score,
+respectively. Default: ‘es-base’.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A pandas DataFrame with columns [‘Keywords’, ‘PageID’, ‘PageTitle’, ‘Searchrank’, ‘SearchScore’],
+unique on (‘Keywords’, ‘PageID’), with the wikisearch results for each keywords set.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">keywords</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">([</span><span class="s1">&#39;brown baggies&#39;</span><span class="p">,</span> <span class="s1">&#39;platform soles&#39;</span><span class="p">]),</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Keywords&#39;</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">wikisearch</span><span class="p">(</span><span class="n">keywords</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;wikipedia-api&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
 </section>
 
 
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="graphai.api.celery_tasks.html" class="btn btn-neutral float-left" title="graphai.api.celery_tasks package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="graphai.api.celery_tasks.text.html" class="btn btn-neutral float-right" title="graphai.api.celery_tasks.text module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="graphai.api.celery_tasks.ontology.html" class="btn btn-neutral float-left" title="graphai.api.celery_tasks.ontology module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="graphai.api.celery_tasks.video.html" class="btn btn-neutral float-right" title="graphai.api.celery_tasks.video module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

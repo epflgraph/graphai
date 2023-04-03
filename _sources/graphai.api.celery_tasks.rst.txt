@@ -13,5 +13,6 @@ Submodules
    :maxdepth: 1
 
    graphai.api.celery_tasks.ontology
+   graphai.api.celery_tasks.text
    graphai.api.celery_tasks.video
    graphai.api.celery_tasks.voice
