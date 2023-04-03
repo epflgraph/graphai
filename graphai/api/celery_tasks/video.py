@@ -67,7 +67,7 @@ def extract_audio_task(self, token, force=False):
     # Here, the existing row can be None because the row is inserted into the table
     # only after extracting the audio from the video.
     if not force:
-        existing = self.db_manager.get_audio_details(output_token, cols=['duration'])
+        existing = self.db_manager.get_details(output_token, cols=['duration'])
     else:
         existing = None
     if existing is not None:
@@ -101,7 +101,7 @@ def extract_audio_task(self, token, force=False):
              db_manager=video_db_manager, file_manager=video_config)
 def extract_audio_callback_task(self, results, origin_token):
     if results['successful'] and results['fresh']:
-        self.db_manager.insert_or_update_audio_details(
+        self.db_manager.insert_or_update_details(
             results['token'],
             {
                 'duration': results['duration'],

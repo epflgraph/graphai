@@ -533,8 +533,8 @@ def surround_with_character(s, c="'"):
 class DBCachingManager():
     def __init__(self):
         self.schema = 'cache_graphai'
-        self.audio_cache_table = 'Audio_Main'
-        self.audio_most_similar_table = 'Audio_Most_Similar'
+        self.cache_table = 'Audio_Main'
+        self.most_similar_table = 'Audio_Most_Similar'
         self.db = DB()
         self.init_db()
 
@@ -548,7 +548,7 @@ class DBCachingManager():
         )
         self.db.execute_query(
             f"""
-            CREATE TABLE IF NOT EXISTS `{self.schema}`.`{self.audio_cache_table}` (
+            CREATE TABLE IF NOT EXISTS `{self.schema}`.`{self.cache_table}` (
               `id_token` VARCHAR(255),
               `origin_token` VARCHAR(255),
               `fingerprint` LONGTEXT DEFAULT NULL,
@@ -565,7 +565,7 @@ class DBCachingManager():
         )
         self.db.execute_query(
             f"""
-            CREATE TABLE IF NOT EXISTS `{self.schema}`.`{self.audio_most_similar_table}` (
+            CREATE TABLE IF NOT EXISTS `{self.schema}`.`{self.most_similar_table}` (
               `id_token` VARCHAR(255),
               `most_similar_token` VARCHAR(255) DEFAULT NULL,
               PRIMARY KEY id_token (id_token),
@@ -578,7 +578,7 @@ class DBCachingManager():
     def resolve_most_similar_chain(self, token):
         if token is None:
             return None
-        prev_most_similar = self.get_closest_audio_match(token)
+        prev_most_similar = self.get_closest_match(token)
         if prev_most_similar is None or prev_most_similar==token:
             return token
         return self.resolve_most_similar_chain(prev_most_similar)
@@ -651,37 +651,37 @@ class DBCachingManager():
             results = None
         return results
 
-    def insert_or_update_audio_details(self, id_token, values_to_insert=None):
-        self._insert_or_update_details(self.schema, self.audio_cache_table, id_token, values_to_insert)
+    def insert_or_update_details(self, id_token, values_to_insert=None):
+        self._insert_or_update_details(self.schema, self.cache_table, id_token, values_to_insert)
 
-    def get_audio_details(self, id_token, cols, using_most_similar=False):
+    def get_details(self, id_token, cols, using_most_similar=False):
         if using_most_similar:
             print(id_token)
-            id_token_to_use = self.get_closest_audio_match(id_token)
+            id_token_to_use = self.get_closest_match(id_token)
             if id_token_to_use is None:
                 id_token_to_use = id_token
         else:
             id_token_to_use = id_token
-        return self._get_details(self.schema, self.audio_cache_table, id_token_to_use, cols)
+        return self._get_details(self.schema, self.cache_table, id_token_to_use, cols)
 
-    def get_all_audio_details(self, cols, using_most_similar=False):
-        results = self._get_all_details(self.schema, self.audio_cache_table, cols)
+    def get_all_details(self, cols, using_most_similar=False):
+        results = self._get_all_details(self.schema, self.cache_table, cols)
         if using_most_similar:
-            most_similar_map = self.get_all_closest_audio_matches()
+            most_similar_map = self.get_all_closest_matches()
             results = {x: results[most_similar_map.get(x, x)] for x in results}
         return results
 
     def insert_or_update_closest_match(self, id_token, values_to_insert):
-        self._insert_or_update_details(self.schema, self.audio_most_similar_table, id_token, values_to_insert)
+        self._insert_or_update_details(self.schema, self.most_similar_table, id_token, values_to_insert)
 
-    def get_closest_audio_match(self, id_token):
-        results = self._get_details(self.schema, self.audio_most_similar_table, id_token, ['most_similar_token'])
+    def get_closest_match(self, id_token):
+        results = self._get_details(self.schema, self.most_similar_table, id_token, ['most_similar_token'])
         if results is not None:
             return results['most_similar_token']
         return None
 
-    def get_all_closest_audio_matches(self):
-        results = self._get_all_details(self.schema, self.audio_most_similar_table, ['most_similar_token'])
+    def get_all_closest_matches(self):
+        results = self._get_all_details(self.schema, self.most_similar_table, ['most_similar_token'])
         if results is not None:
             return {x: results[x]['most_similar_token'] for x in results
                     if results[x]['most_similar_token'] is not None}

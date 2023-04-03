@@ -16,7 +16,7 @@ def remove_audio_silence_task(self, token, force=False, threshold=0.0):
     output_suffix = '_nosilence.' + audio_type
     output_token = token + output_suffix
     output_filename_with_path = self.file_manager.generate_filename(output_token)
-    existing = self.db_manager.get_audio_details(token, cols=['nosilence_token', 'nosilence_duration'])
+    existing = self.db_manager.get_details(token, cols=['nosilence_token', 'nosilence_duration'])
     # The information on audio file needs to have been inserted into the cache table when
     # the audio was extracted from the video. Therefore, the `existing` row needs to *exist*.
     if existing is None:
@@ -54,7 +54,7 @@ def remove_audio_silence_task(self, token, force=False, threshold=0.0):
              db_manager=video_db_manager, file_manager=video_config)
 def remove_audio_silence_callback_task(self, result, audio_token):
     if result['fp_token'] is not None and result['fresh']:
-        self.db_manager.insert_or_update_audio_details(
+        self.db_manager.insert_or_update_details(
             audio_token,
             {
                 'nosilence_token': result['fp_token'],
@@ -76,7 +76,7 @@ def compute_audio_fingerprint_task(self, input_dict, audio_token, force=False):
             'duration': 0.0,
             'fp_nosilence': 0
         }
-    existing = self.db_manager.get_audio_details(audio_token, cols=['fingerprint', 'duration',
+    existing = self.db_manager.get_details(audio_token, cols=['fingerprint', 'duration',
                                                                      'nosilence_duration', 'fp_nosilence'])
     # The information on audio file needs to have been inserted into the cache table when
     # the audio was extracted from the video. Therefore, the `existing` row needs to *exist*,
@@ -125,7 +125,7 @@ def compute_audio_fingerprint_task(self, input_dict, audio_token, force=False):
              db_manager=video_db_manager, file_manager=video_config)
 def compute_audio_fingerprint_callback_task(self, results, token):
     if results['result'] is not None and results['fresh']:
-        self.db_manager.insert_or_update_audio_details(
+        self.db_manager.insert_or_update_details(
             token,
             {
                 'fingerprint': results['result'],
@@ -154,7 +154,7 @@ def audio_fingerprint_find_closest_retrieve_from_db_task(self, results, token):
     # Retrieving all the tokens and their fingerprints. Since at least one audio has been extracted
     # (i.e. this one), this result is never null. In addition, there's at least one non-null fingerprint
     # value (again, for the present audio file).
-    tokens_and_fingerprints = self.db_manager.get_all_audio_details(['fingerprint'])
+    tokens_and_fingerprints = self.db_manager.get_all_details(['fingerprint'], using_most_similar=False)
     all_tokens = list(tokens_and_fingerprints.keys())
     all_fingerprints = [tokens_and_fingerprints[key]['fingerprint'] for key in all_tokens]
     # Now we remove the token of the current file itself, because otherwise we'd always get the video itself
@@ -262,8 +262,12 @@ class TranscriptionModelTask(Task):
              db_manager=video_db_manager, file_manager=video_config)
 def transcribe_task(self, token, lang=None, force=False):
     if not force:
-        existing = self.db_manager.get_audio_details(token, ['transcript_token', 'subtitle_token', 'language'],
-                                                      using_most_similar=True)
+        # using_most_similar is True here because if the transcript has previously been computed
+        # for this token, then the results have also been inserted into the table for its closest
+        # neighbor. However, it's also possible that the results have been computed for its closest
+        # neighbor but not for itself.
+        existing = self.db_manager.get_details(token, ['transcript_token', 'subtitle_token', 'language'],
+                                               using_most_similar=True)
         if existing['transcript_token'] is not None and existing['subtitle_token'] is not None and \
                 existing['language'] is not None:
             print('Returning cached result')
@@ -323,12 +327,19 @@ def transcribe_callback_task(self, results, token):
             'subtitle_token': results['subtitle_token'],
             'language': results['language']
         }
-        self.db_manager.insert_or_update_audio_details(
+        # Inserting values for original token
+        self.db_manager.insert_or_update_details(
             token, values_dict
         )
-        closest = self.db_manager.get_closest_audio_match(token)
+        # Inserting the same values for closest token if different than original token
+        # Unless force=True, the whole computation happens when the token and its closest
+        # neighbor both lack the requested value. As a result, once it's computed, we
+        # update both rows with the value, for other tokens that might depend on the
+        # aforementioned closest neighbor (i.e. other tokens that share their closest neighbor
+        # with the original token here).
+        closest = self.db_manager.get_closest_match(token)
         if closest is not None and closest != token:
-            self.db_manager.insert_or_update_audio_details(
+            self.db_manager.insert_or_update_details(
                 closest, values_dict
             )
     return {
