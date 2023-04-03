@@ -1,6 +1,6 @@
 from celery import shared_task
 from graphai.api.common.log import log
-from graphai.api.common.video import compute_mpeg7_signature, compute_video_slides, video_config, video_db_manager
+from graphai.api.common.video import video_config, video_db_manager
 from graphai.core.common.video import generate_random_token, retrieve_file_from_url, detect_audio_format_and_duration, \
     extract_audio_from_video
 
@@ -13,16 +13,6 @@ def retrieve_file_from_url_task(self, url, filename):
     results = retrieve_file_from_url(url, filename_with_path, filename)
     return {'token': results,
             'successful': results is not None}
-
-
-@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='video.compute_signature', ignore_result=False,
-             db_manager=video_db_manager, file_manager=video_config)
-def compute_signature_task(self, filename, force=False):
-    results, fresh = compute_mpeg7_signature(filename, force=force)
-    return {'token': results,
-            'successful': results is not None,
-            'fresh': fresh}
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
@@ -94,26 +84,10 @@ def extract_audio_callback_task(self, results, origin_token):
     return results
 
 
-@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='video.detect_slides', ignore_result=False)
-def detect_slides_task(self, filename, force=False):
-    results, fresh, n_slides, result_filenames = compute_video_slides(filename, force=force)
-    return {'token': results,
-            'successful': results is not None,
-            'fresh': fresh,
-            'n_slides': n_slides,
-            'files': result_filenames}
-
-
 def retrieve_and_generate_token_master(url):
     token = generate_random_token()
     out_filename = token + '.' + url.split('.')[-1]
     task = retrieve_file_from_url_task.apply_async(args=[url, out_filename], priority=2)
-    return {'task_id': task.id}
-
-
-def compute_signature_master(token, force=False):
-    task = compute_signature_task.apply_async(args=[token, force],  priority=2)
     return {'task_id': task.id}
 
 
@@ -126,8 +100,4 @@ def extract_audio_master(token, force=False):
             extract_audio_callback_task.s(token)).apply_async(priority=2)
     return {'task_id': task.id}
 
-
-def detect_slides_master(token, force=False):
-    task = detect_slides_task.apply_async(args=[token, force], priority=2)
-    return {'task_id': task.id}
 
