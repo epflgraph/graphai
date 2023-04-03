@@ -209,6 +209,24 @@ def extract_audio_from_video(input_filename_with_path, output_filename_with_path
         return None
 
 
+def extract_audio_segment(input_filename_with_path, output_filename_with_path, output_token, start, length):
+    if not file_exists(input_filename_with_path):
+        print(f'ffmpeg error: File {input_filename_with_path} does not exist')
+        return None
+    try:
+        err = ffmpeg.input(input_filename_with_path). \
+            output(output_filename_with_path, ss=start, t=length). \
+            overwrite_output().run(capture_stdout=True)
+    except Exception as e:
+        print(e, file=sys.stderr)
+        err = str(e)
+
+    if file_exists(output_filename_with_path) and ('ffmpeg error' not in err):
+        return output_token
+    else:
+        return None
+
+
 def find_beginning_and_ending_silences(input_filename_with_path, distance_from_end_tol=0.01, noise_thresh=0.0001):
     """
     Detects silence at the beginning and the end of an audio file
@@ -446,7 +464,7 @@ def load_model_whisper(model_type='base'):
     return model
 
 
-def detect_audio_lang_whisper(input_filename_with_path, model):
+def detect_audio_segment_lang_whisper(input_filename_with_path, model):
     """
     Detects the language of an audio file using a 30-second sample
     Args:
@@ -480,6 +498,9 @@ def transcribe_audio_whisper(input_filename_with_path, model, force_lang=None, v
         A dictionary with three keys: 'text' contains the full transcript, 'segments' contains a JSON-like dict of
         translated segments which can be used as subtitles, and 'language' which contains the language code.
     """
+    if not file_exists(input_filename_with_path):
+        print(f'File {input_filename_with_path} does not exist')
+        return None
     assert force_lang in [None, 'en', 'fr', 'de', 'it']
     try:
         if force_lang is None:

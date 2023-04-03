@@ -3,8 +3,9 @@ import json
 from celery import shared_task, chain, group, Task
 from graphai.api.common.video import video_db_manager, video_config
 from graphai.core.common.video import remove_silence_doublesided, perceptual_hash_audio, \
-    find_closest_audio_fingerprint, load_model_whisper, transcribe_audio_whisper, \
-    write_text_file, read_text_file, read_json_file
+    find_closest_audio_fingerprint, load_model_whisper, transcribe_audio_whisper, detect_audio_segment_lang_whisper, \
+    write_text_file, read_text_file, read_json_file, extract_audio_segment, TEMP_SUBFOLDER
+from collections import Counter
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
@@ -258,9 +259,77 @@ class TranscriptionModelTask(Task):
 
 
 @shared_task(bind=True, base=TranscriptionModelTask, autoretry_for=(Exception,), retry_backoff=True,
+             retry_kwargs={"max_retries": 2}, name='video.detect_language', ignore_result=False,
+             db_manager=video_db_manager, file_manager=video_config)
+def detect_language_task(self, token, force=False, n_divs=5, segment_length=30):
+    existing = self.db_manager.get_details(token, ['duration', 'language'],
+                                           using_most_similar=True)
+    if existing is None:
+        return {
+            'token': None,
+            'lang': None
+        }
+    if not force and existing['language'] is not None:
+        return {
+            'token': token,
+            'lang': existing['language']
+        }
+
+    input_filename_with_path = self.file_manager.generate_filename(token)
+    result_tokens = list()
+    # Creating `n_divs` segments (of duration `length` each) of the audio file and saving them to the temp subfolder
+    for i in range(n_divs):
+        current_output_token = token + '_' + str(i) + '_temp.ogg'
+        current_output_token_with_path = self.file_manager.generate_filename(current_output_token,
+                                                                             force_dir=TEMP_SUBFOLDER)
+        current_result = extract_audio_segment(
+            input_filename_with_path, current_output_token_with_path, current_output_token,
+            start=existing['duration']*i/n_divs, length=segment_length)
+        if current_result is None:
+            print('Unspecified error while creating temp files')
+            return {
+                'token': None,
+                'lang': None
+            }
+        result_tokens.append(current_result)
+
+    # Detecting the language of each audio segment
+    languages = list()
+    try:
+        for result_token in result_tokens:
+            language = detect_audio_segment_lang_whisper(
+                self.file_manager.generate_filename(result_token, force_dir=TEMP_SUBFOLDER),
+                self.model)
+            languages.append(language)
+    except:
+        return {
+            'token': None,
+            'lang': None
+        }
+    print(languages)
+    most_common_lang = Counter(languages).most_common(1)[0][0]
+    return {
+        'token': token,
+        'lang': most_common_lang
+    }
+
+
+@shared_task(bind=True, base=TranscriptionModelTask, autoretry_for=(Exception,), retry_backoff=True,
              retry_kwargs={"max_retries": 2}, name='video.transcribe', ignore_result=False,
              db_manager=video_db_manager, file_manager=video_config)
-def transcribe_task(self, token, lang=None, force=False):
+def transcribe_task(self, input_dict, force=False):
+    token = input_dict['token']
+    lang = input_dict['lang']
+    # If the token is null, it means that some error happened in the previous step (e.g. the file didn't exist)
+    if token is None:
+        return {
+            'transcript_result': None,
+            'transcript_token': None,
+            'subtitle_result': None,
+            'subtitle_token': None,
+            'language': None,
+            'fresh': False
+        }
     if not force:
         # using_most_similar is True here because if the transcript has previously been computed
         # for this token, then the results have also been inserted into the table for its closest
@@ -375,6 +444,12 @@ def compute_audio_fingerprint_master(token, force=False, remove_silence=False, t
 
 
 def transcribe_master(token, lang=None, force=False):
-    task = (transcribe_task.s(token, lang, force) |
-            transcribe_callback_task.s(token)).apply_async(priority=2)
+    if lang is not None:
+        task = (transcribe_task.s({'token':token, 'lang': lang}, force) |
+                transcribe_callback_task.s(token))
+    else:
+        task = (detect_language_task.s(token, force) |
+                transcribe_task.s(force) |
+                transcribe_callback_task.s(token))
+    task = task.apply_async(priority=2)
     return {'task_id': task.id}
