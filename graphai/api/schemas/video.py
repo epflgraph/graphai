@@ -3,36 +3,6 @@ from typing import List, Union
 from .common import TaskStatusResponse, FileCachableComputationResponse, OngoingTaskResponse
 
 
-class MultiprocessingExampleRequest(BaseModel):
-    """
-    Object representing the input of the /video/multiprocessing_example endpoint.
-    """
-
-    foo: int = Field(
-        ...,
-        title="Foo",
-        description="First parameter"
-    )
-
-    bar: int = Field(
-        ...,
-        title="Bar",
-        description="Second parameter"
-    )
-
-
-class MultiprocessingExampleResponse(BaseModel):
-    """
-    Object representing the output of the /video/multiprocessing_example endpoint.
-    """
-
-    baz: bool = Field(
-        ...,
-        title="Baz",
-        description="Output parameter"
-    )
-
-
 class RetrieveURLRequest(BaseModel):
     url: str = Field(
         title="URL",

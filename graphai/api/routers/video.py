@@ -4,9 +4,8 @@ from fastapi.responses import FileResponse
 from graphai.api.schemas.video import *
 from graphai.api.schemas.common import *
 
-from graphai.api.celery_tasks.video import celery_multiproc_example_master, \
-    retrieve_and_generate_token_master, compute_signature_master, get_file_master, extract_audio_master, \
-    detect_slides_master
+from graphai.api.celery_tasks.video import retrieve_and_generate_token_master, compute_signature_master, \
+    get_file_master, extract_audio_master, detect_slides_master
 from graphai.core.celery_utils.celery_utils import get_task_info
 
 
@@ -16,12 +15,6 @@ router = APIRouter(
     tags=['video'],
     responses={404: {'description': 'Not found'}}
 )
-
-
-@router.post('/multiprocessing_example', response_model=MultiprocessingExampleResponse)
-async def multiprocessing_example(data: MultiprocessingExampleRequest):
-    result = celery_multiproc_example_master(data)
-    return result
 
 
 @router.post('/retrieve_url', response_model=TaskIDResponse)

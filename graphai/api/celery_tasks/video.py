@@ -1,25 +1,8 @@
-from celery import shared_task, group, chain
-import time
+from celery import shared_task
 from graphai.api.common.log import log
 from graphai.api.common.video import compute_mpeg7_signature, compute_video_slides, video_config, video_db_manager
 from graphai.core.common.video import generate_random_token, retrieve_file_from_url, detect_audio_format_and_duration, \
     extract_audio_from_video
-from graphai.core.utils.time.stopwatch import Stopwatch
-
-
-# A task that will have several instances run in parallel
-@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 1},
-             name='video.example_parallel', ignore_result=False)
-def example_parallel_task(self, x):
-    time.sleep(x)
-    return True
-
-
-# A task that acts as a callback after a parallel operation
-@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 1},
-             name='video.example_callback', ignore_result=False)
-def example_callback_task(self, l):
-    return all(l)
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
@@ -120,25 +103,6 @@ def detect_slides_task(self, filename, force=False):
             'fresh': fresh,
             'n_slides': n_slides,
             'files': result_filenames}
-
-
-# The function that creates and calls the celery task
-def celery_multiproc_example_master(data):
-    sw = Stopwatch()
-    # Note: If you have some large dataset that you don't want to individually copy to every single task,
-    # take a look at custom Manager classes based on multiprocessing.managers.BaseManager, which enables you
-    # to create one Manager object and share it among all the tasks.
-    # Getting the parameters
-    foo = data.foo
-    bar = data.bar
-    log(f'Got input parameters ({foo}, {bar})', sw.delta())
-    # Here we run 'bar' instances of the parallel task in a group (which means in parallel), and
-    # the results are then collected and fed into the callback task.
-    # apply_async() schedules the task and get() blocks on it until completion and returns the results.
-    t = (group(example_parallel_task.signature(args=[foo]) for i in range(bar)) |
-         example_callback_task.signature(args=[])).apply_async(priority=2).get()
-    log(f'Got all results', sw.delta())
-    return {'baz': t}
 
 
 def retrieve_and_generate_token_master(url):
