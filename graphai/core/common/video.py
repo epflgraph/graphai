@@ -215,7 +215,7 @@ def extract_audio_segment(input_filename_with_path, output_filename_with_path, o
         return None
     try:
         err = ffmpeg.input(input_filename_with_path). \
-            output(output_filename_with_path, ss=start, t=length). \
+            output(output_filename_with_path, c='copy', ss=start, t=length). \
             overwrite_output().run(capture_stdout=True)
     except Exception as e:
         print(e, file=sys.stderr)

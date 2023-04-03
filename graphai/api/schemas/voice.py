@@ -60,6 +60,38 @@ class AudioFingerprintResponse(TaskStatusResponse):
     )
 
 
+class AudioDetectLanguageRequest(BaseModel):
+    token: str = Field(
+        title="Token",
+        description="The token that identifies the requested file"
+    )
+
+    force: bool = Field(
+        title="Force",
+        description="Whether to force a recomputation",
+        default=False
+    )
+
+
+class AudioDetectLanguageTaskResponse(BaseModel):
+    language: Union[str, None] = Field(
+        title="Language",
+        description="Language of the audio file."
+    )
+
+    fresh: bool = Field(
+        title="Freshness flag",
+        description="Whether the result was computed freshly or an existing cached result was returned."
+    )
+
+
+class AudioDetectLanguageResponse(TaskStatusResponse):
+    task_result: Union[AudioDetectLanguageTaskResponse, OngoingTaskResponse, None] = Field(
+        title="Audio transcription response",
+        description="A dict containing the resulting audio language and a freshness flag."
+    )
+
+
 class AudioTranscriptionRequest(BaseModel):
     token: str = Field(
         title="Token",

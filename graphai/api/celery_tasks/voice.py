@@ -1,9 +1,9 @@
 import json
 
 from celery import shared_task, chain, group, Task
-from graphai.api.common.video import video_db_manager, video_config
+from graphai.api.common.video import video_db_manager, video_config, transcription_model
 from graphai.core.common.video import remove_silence_doublesided, perceptual_hash_audio, \
-    find_closest_audio_fingerprint, load_model_whisper, transcribe_audio_whisper, detect_audio_segment_lang_whisper, \
+    find_closest_audio_fingerprint, transcribe_audio_whisper, detect_audio_segment_lang_whisper, \
     write_text_file, read_text_file, read_json_file, extract_audio_segment, TEMP_SUBFOLDER
 from collections import Counter
 
@@ -248,31 +248,25 @@ def retrieve_fingerprint_callback_task(self, results):
     return results['fp_results']
 
 
-class TranscriptionModelTask(Task):
-    _model = None
-
-    @property
-    def model(self):
-        if self._model is None:
-            self._model = load_model_whisper('medium')
-        return self._model
-
-
-@shared_task(bind=True, base=TranscriptionModelTask, autoretry_for=(Exception,), retry_backoff=True,
-             retry_kwargs={"max_retries": 2}, name='video.detect_language', ignore_result=False,
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True,
+             retry_kwargs={"max_retries": 2}, name='video.detect_language_retrieve_from_db', ignore_result=False,
              db_manager=video_db_manager, file_manager=video_config)
-def detect_language_task(self, token, force=False, n_divs=5, segment_length=30):
+def detect_language_retrieve_from_db_and_split_task(self, token, force=False, n_divs=5, segment_length=30):
     existing = self.db_manager.get_details(token, ['duration', 'language'],
                                            using_most_similar=True)
     if existing is None:
+        # The token doesn't exist in the cache, so the file doesn't exist
         return {
-            'token': None,
-            'lang': None
+            'temp_tokens': None,
+            'lang': None,
+            'fresh': False
         }
     if not force and existing['language'] is not None:
+        # A recomputation is not forced and a value already exists
         return {
-            'token': token,
-            'lang': existing['language']
+            'temp_tokens': None,
+            'lang': existing['language'],
+            'fresh': False
         }
 
     input_filename_with_path = self.file_manager.generate_filename(token)
@@ -288,39 +282,108 @@ def detect_language_task(self, token, force=False, n_divs=5, segment_length=30):
         if current_result is None:
             print('Unspecified error while creating temp files')
             return {
-                'token': None,
-                'lang': None
+                'lang': None,
+                'temp_tokens': None,
+                'fresh': False
             }
         result_tokens.append(current_result)
 
-    # Detecting the language of each audio segment
-    languages = list()
-    try:
-        for result_token in result_tokens:
-            language = detect_audio_segment_lang_whisper(
-                self.file_manager.generate_filename(result_token, force_dir=TEMP_SUBFOLDER),
-                self.model)
-            languages.append(language)
-    except:
-        return {
-            'token': None,
-            'lang': None
-        }
-    print(languages)
-    most_common_lang = Counter(languages).most_common(1)[0][0]
     return {
-        'token': token,
-        'lang': most_common_lang
+        'lang': None,
+        'temp_tokens': result_tokens,
+        'fresh': True
     }
 
 
-@shared_task(bind=True, base=TranscriptionModelTask, autoretry_for=(Exception,), retry_backoff=True,
-             retry_kwargs={"max_retries": 2}, name='video.transcribe', ignore_result=False,
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True,
+             retry_kwargs={"max_retries": 2}, name='video.detect_language_parallel', ignore_result=False,
+             file_manager=video_config, model=transcription_model)
+def detect_language_parallel_task(self, tokens_dict, i):
+    if not tokens_dict['fresh']:
+        return {
+            'lang': tokens_dict['lang'],
+            'fresh': tokens_dict['fresh']
+        }
+    current_token = tokens_dict['temp_tokens'][i]
+    try:
+        language = detect_audio_segment_lang_whisper(
+            self.file_manager.generate_filename(current_token, force_dir=TEMP_SUBFOLDER),
+            self.model
+        )
+    except:
+        return {
+            'lang': None,
+            'fresh': False
+        }
+    return {
+        'lang': language,
+        'fresh': True
+    }
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True,
+             retry_kwargs={"max_retries": 2}, name='video.detect_language_callback', ignore_result=False,
              db_manager=video_db_manager, file_manager=video_config)
+def detect_language_callback_task(self, results_list, token, return_token=True):
+    # The logic here is twofold:
+    # 1. If the results are not fresh (in which case all fresh flags are False),
+    #     they'll be passed through but not reinserted into the database.
+    # 2. If the computation has been performed, even a single error in the parallel task
+    #     (corresponding to a False value for the fresh flag) will cause a failure.
+    if all([x['lang'] is not None for x in results_list]):
+        # This indicates success (regardless of freshness)
+        languages = [x['lang'] for x in results_list]
+        most_common_lang = Counter(languages).most_common(1)[0][0]
+        fresh = False
+        if all([x['fresh'] for x in results_list]):
+            # This indicates freshness
+            fresh = True
+            values_dict = {
+                'language': most_common_lang
+            }
+            # Inserting values for original token
+            self.db_manager.insert_or_update_details(
+                token, values_dict
+            )
+            # Inserting values for the closest neighbor
+            closest = self.db_manager.get_closest_match(token)
+            if closest is not None and closest != token:
+                self.db_manager.insert_or_update_details(
+                    closest, values_dict
+                )
+        if return_token:
+            return {
+                'token': token,
+                'language': most_common_lang,
+                'fresh': fresh
+            }
+        else:
+            return {
+                'language': most_common_lang,
+                'fresh': fresh
+            }
+
+    if return_token:
+        return {
+            'token': None,
+            'language': None,
+            'fresh': False
+        }
+    else:
+        return {
+            'language': None,
+            'fresh': False
+        }
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True,
+             retry_kwargs={"max_retries": 2}, name='video.transcribe', ignore_result=False,
+             db_manager=video_db_manager, file_manager=video_config, model=transcription_model)
 def transcribe_task(self, input_dict, force=False):
     token = input_dict['token']
-    lang = input_dict['lang']
-    # If the token is null, it means that some error happened in the previous step (e.g. the file didn't exist)
+    lang = input_dict['language']
+    # If the token is null, it means that some error happened in the previous step (e.g. the file didn't exist
+    # in language detection)
     if token is None:
         return {
             'transcript_result': None,
@@ -443,12 +506,23 @@ def compute_audio_fingerprint_master(token, force=False, remove_silence=False, t
     return {'task_id': task.id}
 
 
+def detect_language_master(token, force=False):
+    n_divs = 5
+    task = (detect_language_retrieve_from_db_and_split_task.s(token, force, n_divs, 30) |
+            group(detect_language_parallel_task.s(i) for i in range(n_divs)) |
+            detect_language_callback_task.s(token, False)).apply_async(priority=2)
+    return {'task_id': task.id}
+
+
 def transcribe_master(token, lang=None, force=False):
     if lang is not None:
         task = (transcribe_task.s({'token':token, 'lang': lang}, force) |
                 transcribe_callback_task.s(token))
     else:
-        task = (detect_language_task.s(token, force) |
+        n_divs = 5
+        task = (detect_language_retrieve_from_db_and_split_task.s(token, force, n_divs, 30) |
+                group(detect_language_parallel_task.s(i) for i in range(n_divs)) |
+                detect_language_callback_task.s(token, True) |
                 transcribe_task.s(force) |
                 transcribe_callback_task.s(token))
     task = task.apply_async(priority=2)
