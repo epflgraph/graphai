@@ -13,7 +13,8 @@ from graphai.api.common.graph import graph
 from graphai.api.common.ontology import ontology
 
 from graphai.core.text.keywords import get_keywords
-from graphai.core.text.wikisearch import wikisearch
+
+from graphai.api.celery_tasks.text import wikisearch_master
 
 from graphai.core.utils.time.stopwatch import Stopwatch
 
@@ -68,7 +69,7 @@ async def wikify(data: WikifyRequest, method: Optional[str] = None):
     log(f'Extracted list of {len(keywords)} keywords', sw.delta())
 
     # Perform wikisearch to get concepts for all sets of keywords
-    results = wikisearch(keywords, method)
+    results = wikisearch_master(keywords, method)
     log(f"""Finished {method if method else 'es-base'} wikisearch with {len(results)} results""", sw.delta())
 
     ############################################################
@@ -154,69 +155,3 @@ async def wikify(data: WikifyRequest, method: Optional[str] = None):
     ############################################################
 
     return results.to_dict(orient='records')
-
-
-# @router.post('/legacy_wikify', response_model=WikifyResponse)
-async def legacy_wikify(data: WikifyRequest, method: Optional[str] = None):
-    """
-    Wikifies some text.
-
-    Wikifying a text is the composition of the following steps:
-
-    * Keyword extraction: Automatic extraction of keywords from the text. Omitted if keyword_list is provided as input instead of raw_text.
-    * Wikisearch: For each set of keywords, we call the Wikipedia API to search the 10 most related Wikipedia pages.
-    * Graph scores: For each such page and each anchor page specified in the parameters, we search the graph and
-        compute a score depending on how well-connected both pages are.
-    * Postprocessing: For each set of keywords and Wikipedia page, the graph scores are aggregated over all anchor pages
-        and several other scores are computed.
-    """
-
-    # Get input parameters
-    raw_text = data.raw_text
-    keyword_list = data.keyword_list
-    anchor_page_ids = data.anchor_page_ids
-
-    # Return if no input
-    if not raw_text and not keyword_list:
-        return []
-
-    # Initialize stopwatch to track time
-    sw = Stopwatch()
-
-    # Extract keywords from text
-    if raw_text:
-        log(f'Received raw text "{raw_text[:32]}..."', sw.delta())
-        keyword_list = get_keywords(raw_text)
-        log(f'Extracted list of {len(keyword_list)} keywords', sw.delta())
-    else:
-        log(f'Received list of {len(keyword_list)} keywords: [{keyword_list[0]}, ...]', sw.delta())
-
-    # Perform wikisearch and extract source_page_ids
-    wikisearch_results = wikisearch(keyword_list, method)
-    log(f"""Finished {method if method else 'es-base'} wikisearch with {len(wikisearch_results)} results""", sw.delta())
-
-    # Extract source_page_ids and anchor_page_ids if needed
-    source_page_ids = extract_page_ids(wikisearch_results)
-    if not anchor_page_ids:
-        anchor_page_ids = extract_anchor_page_ids(wikisearch_results)
-
-    # Filter None values from source and anchor page ids, due to pages not found in the page title ids mapping
-    source_page_ids = list(filter(None, source_page_ids))
-    anchor_page_ids = list(filter(None, anchor_page_ids))
-    n_source_page_ids = len(source_page_ids)
-    n_anchor_page_ids = len(anchor_page_ids)
-    log(f'Finished {f"{method} " if method else ""}wikisearch with {n_source_page_ids} source pages', sw.delta())
-
-    # Compute graph scores
-    graph_results = graph.compute_scores(source_page_ids, anchor_page_ids)
-    log(f'Computed graph scores for {n_source_page_ids * n_anchor_page_ids} pairs', sw.delta())
-
-    # Post-process results and derive the different scores
-    results = compute_scores(wikisearch_results, graph_results)
-    n_results = len(results)
-    log(f'Post-processed results, got {n_results}', sw.delta())
-
-    # Display total elapsed time
-    log(f'Finished all tasks', sw.total(), total=True)
-
-    return results
