@@ -19,19 +19,8 @@ def create_celery():
 
     return celery_app
 
-def format_results(id, name, status, result):
-    return {
-        "task_id": id,
-        "task_name": name,
-        "task_status": status,
-        "task_result": result
-    }
 
-def get_task_info(task_id):
-    """
-    return task info for the given task_id
-    """
-    task_result = AsyncResult(task_id)
-    result = format_results(task_id, task_result.name, task_result.status, task_result.result)
-    print(result)
-    return result
+def get_celery_task(task_id):
+    return AsyncResult(task_id)
+
+
