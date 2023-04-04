@@ -5,7 +5,7 @@ from graphai.api.schemas.voice import *
 from graphai.api.schemas.common import *
 
 from graphai.api.celery_tasks.voice import compute_audio_fingerprint_master, transcribe_master, detect_language_master
-from graphai.api.celery_tasks.common import get_task_results
+from graphai.api.celery_tasks.common import compile_task_results
 
 # Initialise video router
 router = APIRouter(
@@ -23,7 +23,7 @@ async def calculate_audio_fingerprint(data: AudioFingerprintRequest):
 
 @router.get('/calculate_fingerprint/status/{task_id}', response_model=AudioFingerprintResponse)
 async def calculate_audio_fingerprint_status(task_id):
-    return get_task_results(task_id)
+    return compile_task_results(task_id)
 
 
 @router.post('/transcribe', response_model=TaskIDResponse)
@@ -35,7 +35,7 @@ async def transcribe(data: AudioTranscriptionRequest):
 
 @router.get('/transcribe/status/{task_id}', response_model=AudioTranscriptionResponse)
 async def transcribe_status(task_id):
-    return get_task_results(task_id)
+    return compile_task_results(task_id)
 
 
 @router.post('/detect_language', response_model=TaskIDResponse)
@@ -46,4 +46,4 @@ async def detect_language(data: AudioDetectLanguageRequest):
 
 @router.get('/detect_language/status/{task_id}', response_model=AudioDetectLanguageResponse)
 async def detect_language_status(task_id):
-    return get_task_results(task_id)
+    return compile_task_results(task_id)

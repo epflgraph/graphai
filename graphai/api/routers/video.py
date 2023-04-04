@@ -6,7 +6,7 @@ from graphai.api.schemas.common import *
 
 from graphai.api.celery_tasks.video import retrieve_and_generate_token_master, \
     get_file_master, extract_audio_master
-from graphai.api.celery_tasks.common import get_task_results
+from graphai.api.celery_tasks.common import compile_task_results
 
 # Initialise video router
 router = APIRouter(
@@ -25,7 +25,7 @@ async def retrieve_file(data: RetrieveURLRequest):
 # For each async endpoint, we also have a status endpoint since they have different response models.
 @router.get('/retrieve_url/status/{task_id}', response_model=RetrieveURLResponse)
 async def get_retrieve_file_status(task_id):
-    return get_task_results(task_id)
+    return compile_task_results(task_id)
 
 
 # @router.post('/calculate_fingerprint', response_model=TaskIDResponse)
@@ -36,7 +36,7 @@ async def get_retrieve_file_status(task_id):
 
 @router.get('/calculate_fingerprint/status/{task_id}', response_model=ComputeSignatureResponse)
 async def calculate_fingerprint_status(task_id):
-    return get_task_results(task_id)
+    return compile_task_results(task_id)
 
 
 @router.post('/get_file/')
@@ -52,7 +52,7 @@ async def extract_audio(data: ExtractAudioRequest):
 
 @router.get('/extract_audio/status/{task_id}', response_model=ExtractAudioResponse)
 async def extract_audio_status(task_id):
-    return get_task_results(task_id)
+    return compile_task_results(task_id)
 
 
 # @router.post('/detect_slides', response_model=TaskIDResponse)
@@ -63,4 +63,4 @@ async def extract_audio_status(task_id):
 
 @router.get('/detect_slides/status/{task_id}', response_model=DetectSlidesResponse)
 async def detect_slides_status(task_id):
-    return get_task_results(task_id)
+    return compile_task_results(task_id)
