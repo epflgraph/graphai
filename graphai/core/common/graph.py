@@ -31,6 +31,8 @@ class ConceptsGraph:
         # Set containing the PageIDs of all concepts having an ingoing edge
         self.targets = None
 
+        self.fetch_from_db()
+
     def fetch_from_db(self):
         db = DB()
 

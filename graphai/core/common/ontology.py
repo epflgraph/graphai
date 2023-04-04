@@ -37,6 +37,8 @@ class Ontology:
         # Object of type pd.Series containing 'CategoryID' indexed by 'PageID'
         self.concept_categories = None
 
+        self.fetch_from_db()
+
     def fetch_from_db(self):
         db = DB()
 
