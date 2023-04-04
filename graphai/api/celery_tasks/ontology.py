@@ -6,6 +6,7 @@ from .common import compile_task_results
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 5},
              name='ontology.tree', ignore_result=False, ontology_obj=ontology)
 def get_ontology_tree_task(self):
+    print(self.ontology_obj.category_ids)
     return {'child_to_parent': self.ontology_obj.categories_categories.to_dict(orient='records')}
 
 
@@ -36,17 +37,20 @@ def get_category_children_task(self, parent_id):
 
 def get_ontology_tree_master():
     task = (get_ontology_tree_task.s()).apply_async(priority=6)
-    result = task.get()
-    return compile_task_results(task.id, task_results=result)
+    task_id = task.id
+    results = task.get(timeout=10)
+    return {'id': task_id, 'results': results}
 
 
 def get_category_parent_master(child_id):
     task = (get_category_parent_task.s(child_id)).apply_async(priority=6)
-    results = task.get()
-    return compile_task_results(task.id, task_results=results)
+    task_id = task.id
+    results = task.get(timeout=10)
+    return {'id': task_id, 'results': results}
 
 
 def get_category_children_master(child_id):
     task = (get_category_children_task.s(child_id)).apply_async(priority=6)
-    results = task.get()
-    return compile_task_results(task.id, task_results=results)
+    task_id = task.id
+    results = task.get(timeout=10)
+    return {'id': task_id, 'results': results}

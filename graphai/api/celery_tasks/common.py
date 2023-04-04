@@ -1,7 +1,7 @@
 from graphai.core.celery_utils.celery_utils import get_celery_task
 
 
-def format_results(id, name, status, result):
+def format_api_results(id, name, status, result):
     return {
         "task_id": id,
         "task_name": name,
@@ -17,5 +17,5 @@ def compile_task_results(task_id, task_results=None):
     task = get_celery_task(task_id)
     if task_results is None:
         task_results = task.result
-    return format_results(task_id, task.name, task.status, task_results)
+    return {'id': task_id, 'name': task.name, 'status': task.status, 'results': task_results}
 

@@ -11,8 +11,7 @@ from graphai.core.common.video import generate_random_token, retrieve_file_from_
 def retrieve_file_from_url_task(self, url, filename):
     filename_with_path = self.file_manager.generate_filename(filename)
     results = retrieve_file_from_url(url, filename_with_path, filename)
-    return {'token': results,
-            'successful': results is not None}
+    return {'token': results}
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
@@ -31,7 +30,6 @@ def extract_audio_task(self, token, force=False):
     if output_token is None:
         return {
             'token': None,
-            'successful': False,
             'fresh': False,
             'duration': 0.0
         }
@@ -47,7 +45,6 @@ def extract_audio_task(self, token, force=False):
         print('Returning cached result')
         return {
             'token': existing['id_token'],
-            'successful': True,
             'fresh': False,
             'duration': existing['duration']
         }
@@ -57,13 +54,11 @@ def extract_audio_task(self, token, force=False):
     if results is None:
         return {
             'token': None,
-            'successful': False,
             'fresh': False,
             'duration': 0.0
         }
     return {
         'token': results,
-        'successful': True,
         'fresh': True,
         'duration': input_duration
     }
@@ -73,7 +68,7 @@ def extract_audio_task(self, token, force=False):
              name='video.extract_audio_callback', ignore_result=False,
              db_manager=video_db_manager, file_manager=video_config)
 def extract_audio_callback_task(self, results, origin_token):
-    if results['successful'] and results['fresh']:
+    if results['fresh']:
         self.db_manager.insert_or_update_details(
             results['token'],
             {
@@ -88,7 +83,7 @@ def retrieve_and_generate_token_master(url):
     token = generate_random_token()
     out_filename = token + '.' + url.split('.')[-1]
     task = retrieve_file_from_url_task.apply_async(args=[url, out_filename], priority=2)
-    return {'task_id': task.id}
+    return {'id': task.id}
 
 
 def get_file_master(token):
@@ -98,6 +93,6 @@ def get_file_master(token):
 def extract_audio_master(token, force=False):
     task = (extract_audio_task.s(token, force) |
             extract_audio_callback_task.s(token)).apply_async(priority=2)
-    return {'task_id': task.id}
+    return {'id': task.id}
 
 

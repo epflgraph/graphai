@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field, Json
 from typing import List, Union, Any
-from .common import FileCachableComputationResponse, TaskStatusResponse, OngoingTaskResponse
+from .common import FileCachableComputationResponse, TaskStatusResponse
 
 
 class AudioFingerprintRequest(BaseModel):
@@ -48,13 +48,13 @@ class AudioFingerprintTaskResponse(BaseModel):
                     "based on the audio file's bitrate."
     )
 
-    fp_nosilence: int = Field(
+    fp_nosilence: bool = Field(
         title="Fingerprint with no beginning/end silence"
     )
 
 
 class AudioFingerprintResponse(TaskStatusResponse):
-    task_result: Union[AudioFingerprintTaskResponse, OngoingTaskResponse, None] = Field(
+    task_result: Union[AudioFingerprintTaskResponse, None] = Field(
         title="Audio fingerprinting response",
         description="A dict containing the resulting audio fingerprint, a freshness flag, and no-silence audio length."
     )
@@ -86,7 +86,7 @@ class AudioDetectLanguageTaskResponse(BaseModel):
 
 
 class AudioDetectLanguageResponse(TaskStatusResponse):
-    task_result: Union[AudioDetectLanguageTaskResponse, OngoingTaskResponse, None] = Field(
+    task_result: Union[AudioDetectLanguageTaskResponse, None] = Field(
         title="Audio transcription response",
         description="A dict containing the resulting audio language and a freshness flag."
     )
@@ -135,7 +135,7 @@ class AudioTranscriptionTaskResponse(BaseModel):
 
 
 class AudioTranscriptionResponse(TaskStatusResponse):
-    task_result: Union[AudioTranscriptionTaskResponse, OngoingTaskResponse, None] = Field(
+    task_result: Union[AudioTranscriptionTaskResponse, None] = Field(
         title="Audio transcription response",
         description="A dict containing the resulting audio transcript, its subtitles (timesstamped transcript), "
                     "the language of the audio, and a freshness flag."

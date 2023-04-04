@@ -324,7 +324,7 @@ def detect_language_parallel_task(self, tokens_dict, i):
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True,
              retry_kwargs={"max_retries": 2}, name='video.detect_language_callback', ignore_result=False,
              db_manager=video_db_manager, file_manager=video_config)
-def detect_language_callback_task(self, results_list, token, return_token=True):
+def detect_language_callback_task(self, results_list, token):
     # The logic here is twofold:
     # 1. If the results are not fresh (in which case all fresh flags are False),
     #     they'll be passed through but not reinserted into the database.
@@ -351,29 +351,18 @@ def detect_language_callback_task(self, results_list, token, return_token=True):
                 self.db_manager.insert_or_update_details(
                     closest, values_dict
                 )
-        if return_token:
-            return {
-                'token': token,
-                'language': most_common_lang,
-                'fresh': fresh
-            }
-        else:
-            return {
-                'language': most_common_lang,
-                'fresh': fresh
-            }
 
-    if return_token:
         return {
-            'token': None,
-            'language': None,
-            'fresh': False
+            'token': token,
+            'language': most_common_lang,
+            'fresh': fresh
         }
-    else:
-        return {
-            'language': None,
-            'fresh': False
-        }
+
+    return {
+        'token': None,
+        'language': None,
+        'fresh': False
+    }
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True,
@@ -474,12 +463,7 @@ def transcribe_callback_task(self, results, token):
             self.db_manager.insert_or_update_details(
                 closest, values_dict
             )
-    return {
-        'transcript_result': results['transcript_result'],
-        'subtitle_result': results['subtitle_result'],
-        'language': results['language'],
-        'fresh': results['fresh']
-    }
+    return results
 
 
 def compute_audio_fingerprint_master(token, force=False, remove_silence=False, threshold=0.0,
@@ -503,15 +487,15 @@ def compute_audio_fingerprint_master(token, force=False, remove_silence=False, t
                 retrieve_fingerprint_callback_task.s()
                 )
     task = task.apply_async(priority=2)
-    return {'task_id': task.id}
+    return {'id': task.id}
 
 
 def detect_language_master(token, force=False):
     n_divs = 5
     task = (detect_language_retrieve_from_db_and_split_task.s(token, force, n_divs, 30) |
             group(detect_language_parallel_task.s(i) for i in range(n_divs)) |
-            detect_language_callback_task.s(token, False)).apply_async(priority=2)
-    return {'task_id': task.id}
+            detect_language_callback_task.s(token)).apply_async(priority=2)
+    return {'id': task.id}
 
 
 def transcribe_master(token, lang=None, force=False):
@@ -522,8 +506,8 @@ def transcribe_master(token, lang=None, force=False):
         n_divs = 5
         task = (detect_language_retrieve_from_db_and_split_task.s(token, force, n_divs, 30) |
                 group(detect_language_parallel_task.s(i) for i in range(n_divs)) |
-                detect_language_callback_task.s(token, True) |
+                detect_language_callback_task.s(token) |
                 transcribe_task.s(force) |
                 transcribe_callback_task.s(token))
     task = task.apply_async(priority=2)
-    return {'task_id': task.id}
+    return {'id': task.id}

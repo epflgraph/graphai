@@ -33,17 +33,6 @@ class TaskStatusResponse(BaseModel, abc.ABC):
     task_result: Json[BaseModel]
 
 
-class OngoingTaskResponse(BaseModel):
-    pid: int = Field(
-        title="pid",
-        description="Process ID for ongoing task"
-    )
-    hostname: str = Field(
-        title="hostname",
-        description="Host name for celery task"
-    )
-
-
 class FileCachableComputationResponse(BaseModel):
     token: Union[str, None] = Field(
         title="Token",

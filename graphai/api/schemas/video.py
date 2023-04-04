@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field
 from typing import List, Union
-from .common import TaskStatusResponse, FileCachableComputationResponse, OngoingTaskResponse
+from .common import TaskStatusResponse, FileCachableComputationResponse
 
 
 class RetrieveURLRequest(BaseModel):
@@ -72,7 +72,7 @@ class ExtractAudioTaskResponse(FileCachableComputationResponse):
 
 
 class ExtractAudioResponse(TaskStatusResponse):
-    task_result: Union[ExtractAudioTaskResponse, OngoingTaskResponse, None] = Field(
+    task_result: Union[ExtractAudioTaskResponse, None] = Field(
         title="Extract audio response",
         description="A dict containing a flag for whether the audio extraction was successful, a freshness flag, "
                     "a token that refers to the now-computed file if so (and null if not), and the duration of "
@@ -106,7 +106,7 @@ class DetectSlidesTaskResponse(FileCachableComputationResponse):
 
 
 class DetectSlidesResponse(TaskStatusResponse):
-    task_result: Union[DetectSlidesTaskResponse, OngoingTaskResponse, None] = Field(
+    task_result: Union[DetectSlidesTaskResponse, None] = Field(
         title="Detect slides response",
         description="A dict containing a flag for whether the slide detection was successful and a freshness flag, "
                     "a token that refers to the now-computed file if so (and null if not), "

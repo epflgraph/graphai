@@ -22,7 +22,7 @@ class TreeResponseElem(BaseModel):
 
 
 class TreeResponse(TaskStatusResponse):
-    task_result: Union[Dict[str, List[TreeResponseElem]], None] = Field(
+    task_result: Union[List[TreeResponseElem], None] = Field(
         title="Ontology tree results",
         description="Child-parent relationships in the ontology's predefined tree as a list of dicts."
     )
