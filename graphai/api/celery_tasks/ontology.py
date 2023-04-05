@@ -1,6 +1,6 @@
 from celery import shared_task
 from graphai.api.common.ontology import ontology
-from .common import compile_task_results
+from ...core.celery_utils.celery_utils import compile_task_results
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 5},

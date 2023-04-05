@@ -6,7 +6,8 @@ from graphai.api.schemas.common import *
 
 from graphai.api.celery_tasks.video import retrieve_and_generate_token_master, \
     get_file_master, extract_audio_master
-from graphai.api.celery_tasks.common import compile_task_results, format_api_results
+from graphai.api.celery_tasks.common import format_api_results
+from graphai.core.celery_utils.celery_utils import compile_task_results
 
 # Initialise video router
 router = APIRouter(
