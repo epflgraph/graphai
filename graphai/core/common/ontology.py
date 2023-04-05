@@ -5,6 +5,9 @@ from graphai.core.interfaces.db import DB
 
 class Ontology:
     def __init__(self):
+        # Flag to know whether we've already loaded the data from the database
+        self.loaded = False
+
         # Object of type pd.DataFrame with columns ['CategoryID', 'CategoryName'] holding the categories
         self.categories = None
 
@@ -37,9 +40,9 @@ class Ontology:
         # Object of type pd.Series containing 'CategoryID' indexed by 'PageID'
         self.concept_categories = None
 
-        self.fetch_from_db()
-
     def fetch_from_db(self):
+        if self.loaded:
+            return
         db = DB()
 
         ################################################
@@ -81,16 +84,43 @@ class Ontology:
         # Store category ids indexing by PageID for faster access
         self.concept_categories = self.concepts_categories.set_index('PageID')['CategoryID']
 
+        # Setting the flag to avoid future reloads
+        self.loaded = True
+
     def get_concept_category(self, page_id):
+        self.fetch_from_db()
         if page_id not in self.concept_ids:
             return None
-
         return self.concept_categories.at[page_id]
 
+    def get_predefined_tree(self):
+        self.fetch_from_db()
+        return self.categories_categories.to_dict(orient='records')
+
+    def get_category_parent(self, category_id):
+        self.fetch_from_db()
+        if category_id not in self.category_parents.index:
+            return None
+        else:
+            return [{
+                'ParentCategoryID': self.category_parents[category_id],
+                'ChildCategoryID': category_id
+            }]
+
+    def get_category_children(self, category_id):
+        self.fetch_from_db()
+        if category_id not in self.category_ids:
+            return None
+        else:
+            cat_to_cat = self.categories_categories
+            return cat_to_cat.loc[cat_to_cat['ParentCategoryID']==category_id].to_dict(orient='records')
+
     def add_concepts_category(self, results):
+        self.fetch_from_db()
         return pd.merge(results, self.concept_categories, how='inner', on='PageID')
 
     def add_categories_category(self, results):
+        self.fetch_from_db()
         return pd.merge(
             results,
             self.categories_categories.rename(columns={'ChildCategoryID': 'CategoryID', 'ParentCategoryID': 'Category2ID'}),
@@ -99,9 +129,11 @@ class Ontology:
         )
 
     def filter_concepts(self, results):
+        self.fetch_from_db()
         return results[results['PageID'].isin(self.concept_ids)]
 
     def add_ontology_scores(self, results):
+        self.fetch_from_db()
         # Add concepts category column
         results = pd.merge(results, self.concepts_categories, how='inner', on='PageID')
 
