@@ -453,10 +453,12 @@ def transcribe_gcs(bucket_name, input_token, sample_rate=48000, timeout=600, lan
 
 class WhisperTranscriptionModel():
     def __init__(self, model_type='medium'):
-        self.model = self.load_model_whisper(model_type)
+        # The actual Whisper model is lazy loaded in order not to load it twice (celery *and* gunicorn)
+        self.model_type = model_type
+        self.model = None
 
 
-    def load_model_whisper(self, model_type='base'):
+    def load_model_whisper(self):
         """
         Loads a Whisper model into memory
         Args:
@@ -466,8 +468,8 @@ class WhisperTranscriptionModel():
             Model object
         """
         # device=None ensures that the model will use CUDA if available and switch to CPUs otherwise.
-        model = whisper.load_model(model_type, device=None, in_memory=True)
-        return model
+        if self.model is None:
+            self.model = whisper.load_model(self.model_type, device=None, in_memory=True)
 
 
     def detect_audio_segment_lang_whisper(self, input_filename_with_path):
@@ -479,6 +481,7 @@ class WhisperTranscriptionModel():
         Returns:
             Highest-scoring language code (e.g. 'en')
         """
+        self.load_model_whisper()
         audio = whisper.load_audio(input_filename_with_path)
         audio = whisper.pad_or_trim(audio)
 
@@ -503,6 +506,7 @@ class WhisperTranscriptionModel():
             A dictionary with three keys: 'text' contains the full transcript, 'segments' contains a JSON-like dict of
             translated segments which can be used as subtitles, and 'language' which contains the language code.
         """
+        self.load_model_whisper()
         if not file_exists(input_filename_with_path):
             print(f'File {input_filename_with_path} does not exist')
             return None
