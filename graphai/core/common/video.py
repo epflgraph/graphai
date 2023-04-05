@@ -465,7 +465,8 @@ class WhisperTranscriptionModel():
         Returns:
             Model object
         """
-        model = whisper.load_model(model_type, in_memory=True)
+        # device=None ensures that the model will use CUDA if available and switch to CPUs otherwise.
+        model = whisper.load_model(model_type, device=None, in_memory=True)
         return model
 
 
@@ -507,11 +508,13 @@ class WhisperTranscriptionModel():
             return None
         assert force_lang in [None, 'en', 'fr', 'de', 'it']
         try:
+            # setting fp16 to True makes sure that the model uses GPUs if available (otherwise
+            # Whisper automatically switches to fp32)
             if force_lang is None:
-                result = self.model.transcribe(input_filename_with_path, verbose=verbose)
+                result = self.model.transcribe(input_filename_with_path, verbose=verbose, fp16=True)
             else:
                 result = self.model.transcribe(input_filename_with_path, verbose=verbose,
-                                          language=force_lang)
+                                          language=force_lang, fp16=True)
         except Exception as e:
             print(e, file=sys.stderr)
             return None
