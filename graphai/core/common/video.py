@@ -451,67 +451,71 @@ def transcribe_gcs(bucket_name, input_token, sample_rate=48000, timeout=600, lan
     return all_transcripts, all_confidences, lang
 
 
-def load_model_whisper(model_type='base'):
-    """
-    Loads a Whisper model into memory
-    Args:
-        model_type: Type of model, see Whisper docs for details
-
-    Returns:
-        Model object
-    """
-    model = whisper.load_model(model_type, in_memory=True)
-    return model
+class WhisperTranscriptionModel():
+    def __init__(self, model_type='medium'):
+        self.model = self.load_model_whisper(model_type)
 
 
-def detect_audio_segment_lang_whisper(input_filename_with_path, model):
-    """
-    Detects the language of an audio file using a 30-second sample
-    Args:
-        input_filename_with_path: Path to input file
-        model: Whisper model object
+    def load_model_whisper(self, model_type='base'):
+        """
+        Loads a Whisper model into memory
+        Args:
+            model_type: Type of model, see Whisper docs for details
 
-    Returns:
-        Highest-scoring language code (e.g. 'en')
-    """
-    audio = whisper.load_audio(input_filename_with_path)
-    audio = whisper.pad_or_trim(audio)
-
-    # make log-Mel spectrogram and move to the same device as the model
-    mel = whisper.log_mel_spectrogram(audio).to(model.device)
-
-    # detect the spoken language
-    _, probs = model.detect_language(mel)
-    return max(probs, key=probs.get)
+        Returns:
+            Model object
+        """
+        model = whisper.load_model(model_type, in_memory=True)
+        return model
 
 
-def transcribe_audio_whisper(input_filename_with_path, model, force_lang=None, verbose=False):
-    """
-    Transcribes an audio file using whisper
-    Args:
-        input_filename_with_path: Path to input file
-        model: Whisper model object
-        force_lang: Whether to explicitly feed the model the language of the audio. None results in automatic detection.
-        verbose: Verbosity of the transcription
+    def detect_audio_segment_lang_whisper(self, input_filename_with_path):
+        """
+        Detects the language of an audio file using a 30-second sample
+        Args:
+            input_filename_with_path: Path to input file
 
-    Returns:
-        A dictionary with three keys: 'text' contains the full transcript, 'segments' contains a JSON-like dict of
-        translated segments which can be used as subtitles, and 'language' which contains the language code.
-    """
-    if not file_exists(input_filename_with_path):
-        print(f'File {input_filename_with_path} does not exist')
-        return None
-    assert force_lang in [None, 'en', 'fr', 'de', 'it']
-    try:
-        if force_lang is None:
-            result = model.transcribe(input_filename_with_path, verbose=verbose)
-        else:
-            result = model.transcribe(input_filename_with_path, verbose=verbose,
-                                      language=force_lang)
-    except Exception as e:
-        print(e, file=sys.stderr)
-        return None
-    return result
+        Returns:
+            Highest-scoring language code (e.g. 'en')
+        """
+        audio = whisper.load_audio(input_filename_with_path)
+        audio = whisper.pad_or_trim(audio)
+
+        # make log-Mel spectrogram and move to the same device as the model
+        mel = whisper.log_mel_spectrogram(audio).to(self.model.device)
+
+        # detect the spoken language
+        _, probs = self.model.detect_language(mel)
+        return max(probs, key=probs.get)
+
+
+    def transcribe_audio_whisper(self, input_filename_with_path, force_lang=None, verbose=False):
+        """
+        Transcribes an audio file using whisper
+        Args:
+            input_filename_with_path: Path to input file
+            force_lang: Whether to explicitly feed the model the language of the audio.
+                        None results in automatic detection.
+            verbose: Verbosity of the transcription
+
+        Returns:
+            A dictionary with three keys: 'text' contains the full transcript, 'segments' contains a JSON-like dict of
+            translated segments which can be used as subtitles, and 'language' which contains the language code.
+        """
+        if not file_exists(input_filename_with_path):
+            print(f'File {input_filename_with_path} does not exist')
+            return None
+        assert force_lang in [None, 'en', 'fr', 'de', 'it']
+        try:
+            if force_lang is None:
+                result = self.model.transcribe(input_filename_with_path, verbose=verbose)
+            else:
+                result = self.model.transcribe(input_filename_with_path, verbose=verbose,
+                                          language=force_lang)
+        except Exception as e:
+            print(e, file=sys.stderr)
+            return None
+        return result
 
 
 class VideoConfig():

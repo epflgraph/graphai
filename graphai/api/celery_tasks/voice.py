@@ -306,9 +306,8 @@ def detect_language_parallel_task(self, tokens_dict, i):
         }
     current_token = tokens_dict['temp_tokens'][i]
     try:
-        language = detect_audio_segment_lang_whisper(
-            self.file_manager.generate_filename(current_token, force_dir=TEMP_SUBFOLDER),
-            self.model
+        language = self.model.detect_audio_segment_lang_whisper(
+            self.file_manager.generate_filename(current_token, force_dir=TEMP_SUBFOLDER)
         )
     except:
         return {
@@ -410,7 +409,7 @@ def transcribe_task(self, input_dict, force=False):
     transcript_token = token + '_transcript.txt'
     subtitle_token = token + '_subtitle_segments.json'
     result_dict = \
-        transcribe_audio_whisper(input_filename_with_path, self.model, force_lang=lang, verbose=True)
+        self.model.transcribe_audio_whisper(input_filename_with_path, force_lang=lang, verbose=True)
     if result_dict is None:
         return {
             'transcript_result': None,
