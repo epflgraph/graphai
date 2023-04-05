@@ -3,8 +3,8 @@ import json
 from celery import shared_task, chain, group, Task
 from graphai.api.common.video import video_db_manager, video_config, transcription_model
 from graphai.core.common.video import remove_silence_doublesided, perceptual_hash_audio, \
-    find_closest_audio_fingerprint, transcribe_audio_whisper, detect_audio_segment_lang_whisper, \
-    write_text_file, read_text_file, read_json_file, extract_audio_segment, TEMP_SUBFOLDER
+    find_closest_audio_fingerprint, write_text_file, read_text_file, read_json_file, extract_audio_segment, \
+    TEMP_SUBFOLDER
 from collections import Counter
 
 
