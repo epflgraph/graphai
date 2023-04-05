@@ -25,7 +25,7 @@ def get_celery_task(task_id):
     return AsyncResult(task_id)
 
 
-def compile_task_results(task_id, task_results=None):
+def get_task_info(task_id, task_results=None):
     """
     return task info for the given task_id
     """

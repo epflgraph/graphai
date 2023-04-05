@@ -7,7 +7,7 @@ from graphai.api.common.log import log
 from graphai.api.celery_tasks.ontology import get_ontology_tree_master, get_category_parent_master, \
     get_category_children_master
 from graphai.api.celery_tasks.common import format_api_results
-from graphai.core.celery_utils.celery_utils import compile_task_results
+from graphai.core.celery_utils.celery_utils import get_task_info
 
 # Initialise ontology router
 router = APIRouter(
@@ -18,7 +18,7 @@ router = APIRouter(
 
 
 def ontology_tree_response_handler(id_and_results):
-    full_results = compile_task_results(id_and_results['id'], task_results=id_and_results['results'])
+    full_results = get_task_info(id_and_results['id'], task_results=id_and_results['results'])
     task_results = id_and_results['results']
     if task_results is not None:
         if 'child_to_parent' in task_results:

@@ -6,7 +6,7 @@ from graphai.api.schemas.common import *
 
 from graphai.api.celery_tasks.voice import compute_audio_fingerprint_master, transcribe_master, detect_language_master
 from graphai.api.celery_tasks.common import format_api_results
-from graphai.core.celery_utils.celery_utils import compile_task_results
+from graphai.core.celery_utils.celery_utils import get_task_info
 
 # Initialise video router
 router = APIRouter(
@@ -24,7 +24,7 @@ async def calculate_audio_fingerprint(data: AudioFingerprintRequest):
 
 @router.get('/calculate_fingerprint/status/{task_id}', response_model=AudioFingerprintResponse)
 async def calculate_audio_fingerprint_status(task_id):
-    full_results = compile_task_results(task_id)
+    full_results = get_task_info(task_id)
     task_results = full_results['results']
     if task_results is not None:
         if 'result' in task_results:
@@ -48,7 +48,7 @@ async def transcribe(data: AudioTranscriptionRequest):
 
 @router.get('/transcribe/status/{task_id}', response_model=AudioTranscriptionResponse)
 async def transcribe_status(task_id):
-    full_results = compile_task_results(task_id)
+    full_results = get_task_info(task_id)
     task_results = full_results['results']
     if task_results is not None:
         if 'transcript_result' in task_results:
@@ -71,7 +71,7 @@ async def detect_language(data: AudioDetectLanguageRequest):
 
 @router.get('/detect_language/status/{task_id}', response_model=AudioDetectLanguageResponse)
 async def detect_language_status(task_id):
-    full_results = compile_task_results(task_id)
+    full_results = get_task_info(task_id)
     task_results = full_results['results']
     if task_results is not None:
         if 'language' in task_results:

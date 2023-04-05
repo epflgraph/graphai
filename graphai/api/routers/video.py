@@ -7,7 +7,7 @@ from graphai.api.schemas.common import *
 from graphai.api.celery_tasks.video import retrieve_and_generate_token_master, \
     get_file_master, extract_audio_master
 from graphai.api.celery_tasks.common import format_api_results
-from graphai.core.celery_utils.celery_utils import compile_task_results
+from graphai.core.celery_utils.celery_utils import get_task_info
 
 # Initialise video router
 router = APIRouter(
@@ -26,7 +26,7 @@ async def retrieve_file(data: RetrieveURLRequest):
 # For each async endpoint, we also have a status endpoint since they have different response models.
 @router.get('/retrieve_url/status/{task_id}', response_model=RetrieveURLResponse)
 async def get_retrieve_file_status(task_id):
-    full_results = compile_task_results(task_id)
+    full_results = get_task_info(task_id)
     task_results = full_results['results']
     if task_results is not None:
         if 'token' in task_results:
@@ -52,7 +52,7 @@ async def extract_audio(data: ExtractAudioRequest):
 
 @router.get('/extract_audio/status/{task_id}', response_model=ExtractAudioResponse)
 async def extract_audio_status(task_id):
-    full_results = compile_task_results(task_id)
+    full_results = get_task_info(task_id)
     task_results = full_results['results']
     if task_results is not None:
         if 'token' in task_results:
