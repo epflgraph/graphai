@@ -6,6 +6,9 @@ from graphai.core.interfaces.db import DB
 
 class ConceptsGraph:
     def __init__(self):
+        # Flag to know whether we've already loaded the data from the database
+        self.loaded = False
+
         # Object of type pd.DataFrame with columns ['PageID', 'PageTitle'] holding the concepts
         self.concepts = None
 
@@ -31,9 +34,10 @@ class ConceptsGraph:
         # Set containing the PageIDs of all concepts having an ingoing edge
         self.targets = None
 
-        self.fetch_from_db()
-
     def fetch_from_db(self):
+        if self.loaded:
+            return
+
         db = DB()
 
         table_name = 'graph.Nodes_N_Concept'
@@ -56,6 +60,8 @@ class ConceptsGraph:
         self.predecessors = self.concepts_concepts.groupby(by='TargetPageID').aggregate({'SourcePageID': set})
         self.sources = set(self.successors.index)
         self.targets = set(self.predecessors.index)
+
+        self.loaded = True
 
     def compute_scores(self, source_page_ids, target_page_ids):
         """
@@ -83,6 +89,8 @@ class ConceptsGraph:
             >>> cg.compute_scores([6220, 1196], [18973446, 9417, 946975])
             [{'source_page_id': 6220, 'target_page_id': 18973446, 'score': 0.5193576613841849}, {'source_page_id': 6220, 'target_page_id': 9417, 'score': 0.4740698357575134}, {'source_page_id': 6220, 'target_page_id': 946975, 'score': 0.3591100561928845}, {'source_page_id': 1196, 'target_page_id': 18973446, 'score': 0.5343247664351338}, {'source_page_id': 1196, 'target_page_id': 9417, 'score': 0.530184349205493}, {'source_page_id': 1196, 'target_page_id': 946975, 'score': 0.40043881227279876}]
         """
+        self.fetch_from_db()
+
         pairs = [(s, t) for s in source_page_ids for t in target_page_ids]
 
         results = []
@@ -143,6 +151,8 @@ class ConceptsGraph:
         return results
 
     def add_graph_score(self, results):
+        self.fetch_from_db()
+
         concept_ids = list(results['PageID'].drop_duplicates())
         concepts_concepts = self.concepts_concepts[
             self.concepts_concepts['SourcePageID'].isin(concept_ids) &
