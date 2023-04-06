@@ -8,10 +8,7 @@ import graphai.api.routers.voice as audio_router
 
 from graphai.api.common.log import log
 
-from graphai.api.common.graph import graph
-from graphai.api.common.ontology import ontology
-
-from graphai.core.celery_utils.celery_utils import create_celery
+from graphai.core.interfaces.celery_config import create_celery
 
 # from graphai.core.text.wikisearch import ws_actor_list
 

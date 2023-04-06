@@ -6,7 +6,7 @@ from graphai.api.schemas.common import *
 
 from graphai.api.celery_tasks.voice import compute_audio_fingerprint_master, transcribe_master, detect_language_master
 from graphai.api.celery_tasks.common import format_api_results
-from graphai.core.celery_utils.celery_utils import get_task_info
+from graphai.core.interfaces.celery_config import get_task_info
 
 # Initialise video router
 router = APIRouter(

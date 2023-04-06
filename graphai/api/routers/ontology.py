@@ -7,7 +7,7 @@ from graphai.api.common.log import log
 from graphai.api.celery_tasks.ontology import get_ontology_tree_master, get_category_parent_master, \
     get_category_children_master
 from graphai.api.celery_tasks.common import format_api_results
-from graphai.core.celery_utils.celery_utils import get_task_info
+from graphai.core.interfaces.celery_config import get_task_info
 
 # Initialise ontology router
 router = APIRouter(
