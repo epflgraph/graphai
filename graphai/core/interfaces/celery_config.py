@@ -17,12 +17,12 @@ def route_task(name, args, kwargs, options, task=None, **kw):
 class BaseConfig:
 
     def __init__(self):
-        db_config = configparser.ConfigParser()
+        config_contents = configparser.ConfigParser()
         try:
             print('Reading celery configuration from file')
-            db_config.read(f'{CONFIG_DIR}/celery.ini')
-            self.broker_url = db_config['CELERY'].get('broker_url', fallback=DEFAULT_BROKER)
-            self.result_backend = db_config['CELERY'].get('result_backend', fallback=DEFAULT_CACHE)
+            config_contents.read(f'{CONFIG_DIR}/celery.ini')
+            self.broker_url = config_contents['CELERY'].get('broker_url', fallback=DEFAULT_BROKER)
+            self.result_backend = config_contents['CELERY'].get('result_backend', fallback=DEFAULT_CACHE)
         except Exception as e:
             print(f'Could not read file {CONFIG_DIR}/celery.ini or '
                   f'file does not have section [CELERY], falling back to defaults.')

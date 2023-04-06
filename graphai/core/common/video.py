@@ -1,6 +1,5 @@
 import json
 import os
-import errno
 import random
 import re
 import sys
@@ -15,37 +14,6 @@ import wget
 import whisper
 from fuzzywuzzy import fuzz
 from google.cloud import storage, speech
-
-ROOT_VIDEO_DIR = os.path.normpath(os.path.join(os.path.dirname(__file__), '../../../Storage/'))
-# Formats with a . in their name indicate single files, whereas formats without a . indicate folders (e.g. '_slides')
-VIDEO_SUBFOLDER = 'Video'
-VIDEO_FORMATS = ['.mkv', '.mp4', '.avi', '.mov', '.flv']
-AUDIO_SUBFOLDER = 'Audio'
-AUDIO_FORMATS = ['.mp3', '.flac', '.wav', '.aac', '.ogg']
-IMAGE_SUBFOLDER = 'Image'
-IMAGE_FORMATS = ['.png', '.tiff', '.jpg', '.jpeg', '.bmp', '_slides']
-OTHER_SUBFOLDER = 'Other'
-SIGNATURE_SUBFOLDER = 'Signatures'
-SIGNATURE_FORMATS = ['_sig.xml']
-TRANSCRIPT_SUBFOLDER = 'Transcripts'
-TRANSCRIPT_FORMATS = ['_transcript.txt', '_subtitle_segments.json']
-TEMP_SUBFOLDER = 'Temp'
-
-SLIDE_OUTPUT_FORMAT = '_slides/slide_%05d.png'
-
-STANDARD_FPS = 30
-
-
-def make_sure_path_exists(path, file_at_the_end=False):
-    try:
-        if not file_at_the_end:
-            os.makedirs(path)
-        else:
-            os.makedirs('/'.join(path.split('/')[:-1]))
-        return
-    except OSError as exception:
-        if exception.errno != errno.EEXIST and exception.errno != errno.EPERM:
-            raise
 
 
 def file_exists(file_path):

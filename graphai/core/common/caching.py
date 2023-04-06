@@ -1,10 +1,38 @@
+import errno
 import os
 
-from .video import ROOT_VIDEO_DIR, make_sure_path_exists, VIDEO_FORMATS, VIDEO_SUBFOLDER, AUDIO_FORMATS, \
-    AUDIO_SUBFOLDER, SIGNATURE_FORMATS, SIGNATURE_SUBFOLDER, IMAGE_FORMATS, IMAGE_SUBFOLDER, TRANSCRIPT_FORMATS, \
-    TRANSCRIPT_SUBFOLDER, OTHER_SUBFOLDER
 from ..interfaces.db import DB
 import abc
+import configparser
+from graphai.definitions import CONFIG_DIR
+
+
+ROOT_VIDEO_DIR = os.path.normpath(os.path.join(os.path.dirname(__file__), '../../../Storage/'))
+# Formats with a . in their name indicate single files, whereas formats without a . indicate folders (e.g. '_slides')
+VIDEO_SUBFOLDER = 'Video'
+VIDEO_FORMATS = ['.mkv', '.mp4', '.avi', '.mov', '.flv']
+AUDIO_SUBFOLDER = 'Audio'
+AUDIO_FORMATS = ['.mp3', '.flac', '.wav', '.aac', '.ogg']
+IMAGE_SUBFOLDER = 'Image'
+IMAGE_FORMATS = ['.png', '.tiff', '.jpg', '.jpeg', '.bmp', '_slides']
+OTHER_SUBFOLDER = 'Other'
+SIGNATURE_SUBFOLDER = 'Signatures'
+SIGNATURE_FORMATS = ['_sig.xml']
+TRANSCRIPT_SUBFOLDER = 'Transcripts'
+TRANSCRIPT_FORMATS = ['_transcript.txt', '_subtitle_segments.json']
+TEMP_SUBFOLDER = 'Temp'
+
+
+def make_sure_path_exists(path, file_at_the_end=False):
+    try:
+        if not file_at_the_end:
+            os.makedirs(path)
+        else:
+            os.makedirs('/'.join(path.split('/')[:-1]))
+        return
+    except OSError as exception:
+        if exception.errno != errno.EEXIST and exception.errno != errno.EPERM:
+            raise
 
 
 def surround_with_character(s, c="'"):
@@ -182,8 +210,16 @@ class AudioDBCachingManager(DBCachingManagerBase):
 
 
 class VideoConfig():
-    def __init__(self, root_dir=ROOT_VIDEO_DIR):
-        self.root_dir = root_dir
+    def __init__(self):
+        config_contents = configparser.ConfigParser()
+        try:
+            print('Reading cache storage configuration from file')
+            config_contents.read(f'{CONFIG_DIR}/cache.ini')
+            self.root_dir = config_contents['CACHE'].get('root', fallback=ROOT_VIDEO_DIR)
+        except Exception as e:
+            print(f'Could not read file {CONFIG_DIR}/cache.ini or '
+                  f'file does not have section [CACHE], falling back to defaults.')
+            self.root_dir = ROOT_VIDEO_DIR
 
 
     def concat_file_path(self, filename, subfolder):
@@ -212,3 +248,6 @@ class VideoConfig():
         else:
             filename_with_path = self.concat_file_path(filename, OTHER_SUBFOLDER)
         return filename_with_path
+
+
+
