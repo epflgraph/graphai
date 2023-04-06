@@ -1,5 +1,6 @@
-from graphai.core.common.video import VideoConfig, DBCachingManager, WhisperTranscriptionModel
+from graphai.core.common.video import WhisperTranscriptionModel
+from graphai.core.common.caching import AudioDBCachingManager, VideoConfig
 
-video_config = VideoConfig()
-video_db_manager = DBCachingManager()
+file_management_config = VideoConfig()
+audio_db_manager = AudioDBCachingManager()
 transcription_model = WhisperTranscriptionModel('medium')

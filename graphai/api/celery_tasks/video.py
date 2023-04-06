@@ -1,13 +1,13 @@
 from celery import shared_task
 from graphai.api.common.log import log
-from graphai.api.common.video import video_config, video_db_manager
+from graphai.api.common.video import file_management_config, audio_db_manager
 from graphai.core.common.video import generate_random_token, retrieve_file_from_url, detect_audio_format_and_duration, \
     extract_audio_from_video
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='video.retrieve_url', ignore_result=False,
-             db_manager=video_db_manager, file_manager=video_config)
+             db_manager=audio_db_manager, file_manager=file_management_config)
 def retrieve_file_from_url_task(self, url, filename):
     filename_with_path = self.file_manager.generate_filename(filename)
     results = retrieve_file_from_url(url, filename_with_path, filename)
@@ -16,14 +16,14 @@ def retrieve_file_from_url_task(self, url, filename):
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='video.get_file', ignore_result=False,
-             db_manager=video_db_manager, file_manager=video_config)
+             db_manager=audio_db_manager, file_manager=file_management_config)
 def get_file_task(self, filename):
     return self.file_manager.generate_filename(filename)
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='video.extract_audio', ignore_result=False,
-             db_manager=video_db_manager, file_manager=video_config)
+             db_manager=audio_db_manager, file_manager=file_management_config)
 def extract_audio_task(self, token, force=False):
     input_filename_with_path = self.file_manager.generate_filename(token)
     output_token, input_duration = detect_audio_format_and_duration(input_filename_with_path, token)
@@ -66,7 +66,7 @@ def extract_audio_task(self, token, force=False):
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='video.extract_audio_callback', ignore_result=False,
-             db_manager=video_db_manager, file_manager=video_config)
+             db_manager=audio_db_manager, file_manager=file_management_config)
 def extract_audio_callback_task(self, results, origin_token):
     if results['fresh']:
         self.db_manager.insert_or_update_details(
