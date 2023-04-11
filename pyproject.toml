@@ -27,6 +27,7 @@ dependencies = [
     "requests",
     "wget",
     "openai-whisper",
+    "pytesseract",
     "google-cloud-speech",
     "google-cloud-storage",
     "ffmpeg-python",

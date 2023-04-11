@@ -5,15 +5,25 @@ import re
 import sys
 import time
 from datetime import datetime
+import glob
+import math
 
 import acoustid
 import chromaprint
 import ffmpeg
+from PIL import Image
+import pytesseract
+import gzip
 import numpy as np
 import wget
 import whisper
 from fuzzywuzzy import fuzz
 from google.cloud import storage, speech
+from .caching import make_sure_path_exists
+
+
+FRAME_FORMAT = 'frame-%06d.png'
+OCR_FORMAT = 'ocr-%06d.txt.gz'
 
 
 def file_exists(file_path):
@@ -415,6 +425,34 @@ def transcribe_gcs(bucket_name, input_token, sample_rate=48000, timeout=600, lan
         all_transcripts.append(result.alternatives[0].transcript)
         all_confidences.append(result.alternatives[0].confidence)
     return all_transcripts, all_confidences, lang
+
+
+def extract_frames(input_filename_with_path, output_folder_with_path, output_folder, frame_format=FRAME_FORMAT):
+    if not file_exists(input_filename_with_path):
+        print(f'ffmpeg error: File {input_filename_with_path} does not exist')
+        return None
+    try:
+        make_sure_path_exists(output_folder_with_path)
+        err = ffmpeg.input(input_filename_with_path).video. \
+            output(os.path.join(output_folder_with_path, frame_format), r=1). \
+            overwrite_output().run(capture_stdout=True)
+    except Exception as e:
+        print(e, file=sys.stderr)
+        err = str(e)
+
+    if file_exists(os.path.join(output_folder_with_path, (frame_format) % (1))) and ('ffmpeg error' not in err):
+        return output_folder
+    else:
+        return None
+
+
+def generate_frame_sample_indices(input_folder_with_path, step=16):
+    # Get number of frames
+    n_frames = len(glob.glob(os.path.join(input_folder_with_path+'/*.png')))
+    # Generate list of frame sample indices
+    frame_sample_indices = list(np.arange(1, n_frames-step+1, step))+[n_frames-1]
+    # Return frame sample indices
+    return frame_sample_indices
 
 
 class WhisperTranscriptionModel():
