@@ -5,7 +5,7 @@ from graphai.api.schemas.video import *
 from graphai.api.schemas.common import *
 
 from graphai.api.celery_tasks.video import retrieve_and_generate_token_master, \
-    get_file_master, extract_audio_master
+    get_file_master, extract_audio_master, detect_slides_master
 from graphai.api.celery_tasks.common import format_api_results
 from graphai.core.interfaces.celery_config import get_task_info
 
@@ -66,3 +66,8 @@ async def extract_audio_status(task_id):
             task_results = None
     return format_api_results(full_results['id'], full_results['name'], full_results['status'], task_results)
 
+
+@router.post('/detect_slides', response_model=TaskIDResponse)
+async def detect_slides(data: DetectSlidesRequest):
+    result = detect_slides_master(data.token, force=data.force, language=data.language)
+    return {'task_id': result['id']}

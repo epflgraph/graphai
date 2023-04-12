@@ -1,8 +1,10 @@
-from celery import shared_task
+from celery import shared_task, group
 from graphai.api.common.log import log
-from graphai.api.common.video import file_management_config, audio_db_manager
+from graphai.api.common.video import file_management_config, audio_db_manager, local_ocr_nlp_models
 from graphai.core.common.video import generate_random_token, retrieve_file_from_url, detect_audio_format_and_duration, \
-    extract_audio_from_video
+    extract_audio_from_video, extract_frames, generate_frame_sample_indices, compute_ocr_noise_level, \
+    compute_ocr_threshold
+from itertools import chain
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
@@ -79,6 +81,81 @@ def extract_audio_callback_task(self, results, origin_token):
     return results
 
 
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
+             name='video.extract_and_sample_frames', ignore_result=False,
+             db_manager=None, file_manager=file_management_config)
+def extract_and_sample_frames_task(self, token, force=False):
+    # TODO do the cache check here
+    # Extracting frames
+    input_filename_with_path = self.file_manager.generate_filename(token)
+    output_folder = token + '_all_frames'
+    output_folder_with_path = self.file_manager.generate_filename(output_folder)
+    output_folder = extract_frames(input_filename_with_path, output_folder_with_path, output_folder)
+    if output_folder is None:
+        return {
+            'result': None,
+            'sample_indices': None,
+            'fresh': False
+        }
+    # Generating frame sample indices
+    frame_indices = generate_frame_sample_indices(self.file_manager.generate_filename(output_folder))
+    return {
+        'result': output_folder,
+        'sample_indices': frame_indices,
+        'fresh': True
+    }
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
+             name='video.noise_level_parallel', ignore_result=False,
+             db_manager=None, file_manager=file_management_config,
+             nlp_model=local_ocr_nlp_models)
+def compute_noise_level_parallel_task(self, results, i, n, language=None):
+    if results['result'] is None:
+        return {
+            'result': None,
+            'sample_indices': None,
+            'noise_level': None,
+            'fresh': False
+        }
+    all_sample_indices = results['sample_indices']
+    start_index = int(i*len(all_sample_indices)/n)
+    end_index = int((i+1)*len(all_sample_indices)/n)
+    current_sample_indices = all_sample_indices[start_index:end_index]
+    noise_level_list = \
+        compute_ocr_noise_level(self.file_manager.generate_filename(results['result']),
+                                current_sample_indices, self.nlp_model.nlp_models, language=language)
+    return {
+        'result': results['result'],
+        'sample_indices': results['sample_indices'],
+        'noise_level': noise_level_list,
+        'fresh': results['fresh'],
+    }
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
+             name='video.noise_level_callback', ignore_result=False)
+def compute_noise_threshold_callback_task(self, results):
+    if results[0]['result'] is None:
+        return {
+            'result': None,
+            'sample_indices': None,
+            'threshold': None,
+            'fresh': False
+        }
+    list_of_noise_value_lists = [x['noise_level'] for x in results]
+    all_noise_values = list(chain.from_iterable(list_of_noise_value_lists))
+    threshold = compute_ocr_threshold(all_noise_values)
+    final_result = {
+        'result': results[0]['result'],
+        'sample_indices': results[0]['sample_indices'],
+        'threshold': threshold,
+        'fresh': results[0]['fresh'],
+    }
+    print(final_result)
+    return final_result
+
+
 def retrieve_and_generate_token_master(url):
     token = generate_random_token()
     out_filename = token + '.' + url.split('.')[-1]
@@ -93,6 +170,13 @@ def get_file_master(token):
 def extract_audio_master(token, force=False):
     task = (extract_audio_task.s(token, force) |
             extract_audio_callback_task.s(token)).apply_async(priority=2)
+    return {'id': task.id}
+
+
+def detect_slides_master(token, force=False, language=None, n_jobs=8):
+    task = (extract_and_sample_frames_task.s(token, force) |
+            group(compute_noise_level_parallel_task.s(i, n_jobs, language) for i in range(n_jobs)) |
+            compute_noise_threshold_callback_task.s()).apply_async(priority=2)
     return {'id': task.id}
 
 

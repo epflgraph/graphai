@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from typing import List, Union
+from typing import List, Union, Literal
 from .common import TaskStatusResponse, FileCachableComputationResponse
 
 
@@ -90,6 +90,12 @@ class DetectSlidesRequest(BaseModel):
         title="Force",
         description="Whether to force a recomputation",
         default=False
+    )
+
+    language: Literal['English', 'French'] = Field(
+        title="Language",
+        description="Language of the video",
+        default="English"
     )
 
 
