@@ -13,6 +13,7 @@ import chromaprint
 import ffmpeg
 from PIL import Image
 import pytesseract
+import spacy
 import gzip
 import numpy as np
 import wget
@@ -433,6 +434,9 @@ def extract_frames(input_filename_with_path, output_folder_with_path, output_fol
         return None
     try:
         make_sure_path_exists(output_folder_with_path)
+        # DO NOT CHANGE r=1 HERE
+        # This parameter ensures that one frame is extracted per second, and the whole logic of the algorithm
+        # relies on timestamp being identical to frame number.
         err = ffmpeg.input(input_filename_with_path).video. \
             output(os.path.join(output_folder_with_path, frame_format), r=1). \
             overwrite_output().run(capture_stdout=True)
@@ -453,6 +457,112 @@ def generate_frame_sample_indices(input_folder_with_path, step=16):
     frame_sample_indices = list(np.arange(1, n_frames-step+1, step))+[n_frames-1]
     # Return frame sample indices
     return frame_sample_indices
+
+
+def frame_ocr_distance(input_folder_with_path, k1, k2, nlp_models, language=None,
+                       frame_format=FRAME_FORMAT, ocr_format=OCR_FORMAT):
+    # TODO Add a new subclass of DBCachingManagerBase for images to cache the results of slide extraction
+
+    if language is None:
+        language = 'English'
+
+    # Generate frame file paths
+    image_1_path = os.path.join(input_folder_with_path, (frame_format) % (k1))
+    image_2_path = os.path.join(input_folder_with_path, (frame_format) % (k2))
+
+    # Generate OCR file paths
+    ocr_1_path = os.path.join(input_folder_with_path, (ocr_format) % (k1))
+    ocr_2_path = os.path.join(input_folder_with_path, (ocr_format) % (k2))
+
+    # Check cache for OCR files or open otherwise (file 1)
+    if os.path.isfile(ocr_1_path):
+
+        # Found in cache: get OCR text from file
+        with gzip.open(ocr_1_path, 'r') as fid:
+            extracted_text1 = fid.read().decode('utf-8')
+    else:
+        # Not found in cache: use tesseract to extract text from image
+        extracted_text1 = pytesseract.image_to_string(Image.open(image_1_path),
+                                                     lang={'English':'eng', 'French':'fra'}[language])
+
+        # Save OCR result to cache
+        with gzip.open(ocr_1_path, 'w') as fid:
+            fid.write(extracted_text1.encode('utf-8'))
+
+    # Check cache for OCR files or open otherwise (file 2)
+    if os.path.isfile(ocr_2_path):
+
+        # Found in cache: get OCR text from file
+        with gzip.open(ocr_2_path, 'r') as fid:
+            extracted_text2 = fid.read().decode('utf-8')
+    else:
+        # Not found in cache: use tesseract to extract text from image
+        extracted_text2 = pytesseract.image_to_string(Image.open(image_2_path),
+                                                     lang={'English':'eng', 'French':'fra'}[language])
+
+        # Save OCR result to cache
+        with gzip.open(ocr_2_path, 'w') as fid:
+            fid.write(extracted_text2.encode('utf-8'))
+
+    # Caculate NLP objects
+    nlp_1 = nlp_models[language](extracted_text1)
+    nlp_2 = nlp_models[language](extracted_text2)
+
+    # Calculate distance score
+    if np.max([len(nlp_1), len(nlp_2)])<32:
+        text_dif = 0
+    elif np.min([len(nlp_1), len(nlp_2)])<4 and np.max([len(nlp_1), len(nlp_2)])>=32:
+        text_dif = 1
+    else:
+        text_sim = nlp_1.similarity(nlp_2)
+        text_dif = 1 - text_sim
+        text_dif = text_dif * (1 - np.exp(-np.mean([len(nlp_1), len(nlp_2)])/32))
+
+    # Return distance score
+    return text_dif
+
+
+def compute_ocr_noise_level(input_folder_with_path, frame_sample_indices, nlp_models, language=None):
+    print('Estimating transition threshold ...')
+    distance_list = []
+    for k in range(1, len(frame_sample_indices)):
+        d = frame_ocr_distance(input_folder_with_path, frame_sample_indices[k - 1], frame_sample_indices[k],
+                               nlp_models, language)
+        if d<0.01 and d>0.0001:
+            distance_list.append(d)
+    return distance_list
+
+
+def compute_ocr_threshold(distance_list, default_threshold=0.1):
+    threshold = float(5*np.median(distance_list))
+    if math.isnan(threshold):
+        return default_threshold
+    return threshold
+
+
+# Recursive function that finds slide transitions through binary tree search
+def frame_ocr_transition(input_folder_with_path, k_l, k_r, threshold, nlp_models, language=None):
+    k_m = int(np.mean([k_l, k_r]))
+    d = frame_ocr_distance(input_folder_with_path, k_l, k_r, nlp_models, language)
+    if k_m == k_l or k_m == k_r:
+        return [k_r, d]
+    else:
+        if d > threshold:
+            [k_sep_l, d_l] = frame_ocr_transition(input_folder_with_path, k_l, k_m, threshold, nlp_models, language)
+            [k_sep_r, d_r] = frame_ocr_transition(input_folder_with_path, k_m, k_r, threshold, nlp_models, language)
+            if k_sep_l is None and k_sep_r is None:
+                return [None, None]
+            elif k_sep_l is not None and k_sep_r is None:
+                return [k_sep_l, d_l]
+            elif k_sep_l is None and k_sep_r is not None:
+                return [k_sep_r, d_r]
+            else:
+                if d_r >= d_l:
+                    return [k_sep_r, d_r]
+                else:
+                    return [k_sep_l, d_l]
+        else:
+            return [None, None]
 
 
 class WhisperTranscriptionModel():
@@ -527,3 +637,12 @@ class WhisperTranscriptionModel():
             print(e, file=sys.stderr)
             return None
         return result
+
+
+class NLPModels():
+    def __init__(self):
+        spacy.prefer_gpu()
+        self.nlp_models = {
+            'English' : spacy.load('en_core_web_lg'),
+            'French'  : spacy.load('fr_core_news_md')
+        }
