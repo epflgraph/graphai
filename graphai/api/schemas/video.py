@@ -92,10 +92,10 @@ class DetectSlidesRequest(BaseModel):
         default=False
     )
 
-    language: Literal['English', 'French'] = Field(
+    language: Literal['en', 'fr'] = Field(
         title="Language",
         description="Language of the video",
-        default="English"
+        default="en"
     )
 
 

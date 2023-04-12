@@ -464,7 +464,7 @@ def frame_ocr_distance(input_folder_with_path, k1, k2, nlp_models, language=None
     # TODO Add a new subclass of DBCachingManagerBase for images to cache the results of slide extraction
 
     if language is None:
-        language = 'English'
+        language = 'en'
 
     # Generate frame file paths
     image_1_path = os.path.join(input_folder_with_path, (frame_format) % (k1))
@@ -483,7 +483,7 @@ def frame_ocr_distance(input_folder_with_path, k1, k2, nlp_models, language=None
     else:
         # Not found in cache: use tesseract to extract text from image
         extracted_text1 = pytesseract.image_to_string(Image.open(image_1_path),
-                                                     lang={'English':'eng', 'French':'fra'}[language])
+                                                     lang={'en':'eng', 'fr':'fra'}[language])
 
         # Save OCR result to cache
         with gzip.open(ocr_1_path, 'w') as fid:
@@ -498,7 +498,7 @@ def frame_ocr_distance(input_folder_with_path, k1, k2, nlp_models, language=None
     else:
         # Not found in cache: use tesseract to extract text from image
         extracted_text2 = pytesseract.image_to_string(Image.open(image_2_path),
-                                                     lang={'English':'eng', 'French':'fra'}[language])
+                                                     lang={'en':'eng', 'fr':'fra'}[language])
 
         # Save OCR result to cache
         with gzip.open(ocr_2_path, 'w') as fid:
@@ -524,7 +524,7 @@ def frame_ocr_distance(input_folder_with_path, k1, k2, nlp_models, language=None
 
 def compute_ocr_noise_level(input_folder_with_path, frame_sample_indices, nlp_models, language=None):
     print('Estimating transition threshold ...')
-    distance_list = []
+    distance_list = list()
     for k in range(1, len(frame_sample_indices)):
         d = frame_ocr_distance(input_folder_with_path, frame_sample_indices[k - 1], frame_sample_indices[k],
                                nlp_models, language)
@@ -563,6 +563,17 @@ def frame_ocr_transition(input_folder_with_path, k_l, k_r, threshold, nlp_models
                     return [k_sep_l, d_l]
         else:
             return [None, None]
+
+
+def compute_video_ocr_transitions(input_folder_with_path, frame_sample_indices, threshold, nlp_models, language=None):
+    transition_list = list()
+    for k in range(1, len(frame_sample_indices)):
+        [t,d] = frame_ocr_transition(input_folder_with_path,
+                                 frame_sample_indices[k - 1], frame_sample_indices[k],
+                                 threshold, nlp_models, language)
+        if t is not None and t < frame_sample_indices[-1]:
+            transition_list.append(t)
+    return transition_list
 
 
 class WhisperTranscriptionModel():
@@ -642,7 +653,12 @@ class WhisperTranscriptionModel():
 class NLPModels():
     def __init__(self):
         spacy.prefer_gpu()
-        self.nlp_models = {
-            'English' : spacy.load('en_core_web_lg'),
-            'French'  : spacy.load('fr_core_news_md')
-        }
+        self.nlp_models = None
+
+    def get_nlp_models(self):
+        if self.nlp_models is None:
+            self.nlp_models = {
+                'en' : spacy.load('en_core_web_lg'),
+                'fr'  : spacy.load('fr_core_news_md')
+            }
+        return self.nlp_models

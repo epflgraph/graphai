@@ -3,7 +3,7 @@ from graphai.api.common.log import log
 from graphai.api.common.video import file_management_config, audio_db_manager, local_ocr_nlp_models
 from graphai.core.common.video import generate_random_token, retrieve_file_from_url, detect_audio_format_and_duration, \
     extract_audio_from_video, extract_frames, generate_frame_sample_indices, compute_ocr_noise_level, \
-    compute_ocr_threshold
+    compute_ocr_threshold, compute_video_ocr_transitions
 from itertools import chain
 
 
@@ -124,7 +124,7 @@ def compute_noise_level_parallel_task(self, results, i, n, language=None):
     current_sample_indices = all_sample_indices[start_index:end_index]
     noise_level_list = \
         compute_ocr_noise_level(self.file_manager.generate_filename(results['result']),
-                                current_sample_indices, self.nlp_model.nlp_models, language=language)
+                                current_sample_indices, self.nlp_model.get_nlp_models(), language=language)
     return {
         'result': results['result'],
         'sample_indices': results['sample_indices'],
@@ -146,14 +146,64 @@ def compute_noise_threshold_callback_task(self, results):
     list_of_noise_value_lists = [x['noise_level'] for x in results]
     all_noise_values = list(chain.from_iterable(list_of_noise_value_lists))
     threshold = compute_ocr_threshold(all_noise_values)
-    final_result = {
+    return {
         'result': results[0]['result'],
         'sample_indices': results[0]['sample_indices'],
         'threshold': threshold,
         'fresh': results[0]['fresh'],
     }
-    print(final_result)
-    return final_result
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
+             name='video.slide_transitions_parallel', ignore_result=False,
+             file_manager=file_management_config, nlp_model=local_ocr_nlp_models)
+def compute_slide_transitions_parallel_task(self, results, i, n, language=None):
+    if results['result'] is None:
+        return {
+            'result': None,
+            'sample_indices': None,
+            'threshold': None,
+            'transitions': None,
+            'fresh': False
+        }
+    all_sample_indices = results['sample_indices']
+    start_index = int(i*len(all_sample_indices)/n)
+    end_index = int((i+1)*len(all_sample_indices)/n)
+    current_sample_indices = all_sample_indices[start_index:end_index]
+    slide_transition_list = \
+        compute_video_ocr_transitions(self.file_manager.generate_filename(results['result']),
+                                current_sample_indices, results['threshold'],
+                                self.nlp_model.get_nlp_models(), language=language)
+    return {
+        'result': results['result'],
+        'sample_indices': results['sample_indices'],
+        'threshold': results['threshold'],
+        'transitions': slide_transition_list,
+        'fresh': results['fresh'],
+    }
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
+             name='video.slide_transitions_callback', ignore_result=False)
+def compute_slide_transitions_callback_task(self, results):
+    if results[0]['result'] is None:
+        return {
+            'result': None,
+            'sample_indices': None,
+            'threshold': None,
+            'transitions': None,
+            'fresh': False
+        }
+    list_of_slide_transition_lists = [x['transitions'] for x in results]
+    all_transitions = list(chain.from_iterable(list_of_slide_transition_lists))
+    # TODO also insert into database and stuff
+    return {
+        'result': results[0]['result'],
+        'sample_indices': results[0]['sample_indices'],
+        'threshold': results[0]['threshold'],
+        'transitions': all_transitions,
+        'fresh': results[0]['fresh'],
+    }
 
 
 def retrieve_and_generate_token_master(url):
@@ -176,7 +226,10 @@ def extract_audio_master(token, force=False):
 def detect_slides_master(token, force=False, language=None, n_jobs=8):
     task = (extract_and_sample_frames_task.s(token, force) |
             group(compute_noise_level_parallel_task.s(i, n_jobs, language) for i in range(n_jobs)) |
-            compute_noise_threshold_callback_task.s()).apply_async(priority=2)
+            compute_noise_threshold_callback_task.s() |
+            group(compute_slide_transitions_parallel_task.s(i, n_jobs, language) for i in range(n_jobs)) |
+            compute_slide_transitions_callback_task.s()).\
+                    apply_async(priority=2)
     return {'id': task.id}
 
 
