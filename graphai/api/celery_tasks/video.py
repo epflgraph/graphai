@@ -1,9 +1,11 @@
+import os
+
 from celery import shared_task, group
 from graphai.api.common.log import log
 from graphai.api.common.video import file_management_config, audio_db_manager, local_ocr_nlp_models
 from graphai.core.common.video import generate_random_token, retrieve_file_from_url, detect_audio_format_and_duration, \
     extract_audio_from_video, extract_frames, generate_frame_sample_indices, compute_ocr_noise_level, \
-    compute_ocr_threshold, compute_video_ocr_transitions
+    compute_ocr_threshold, compute_video_ocr_transitions, FRAME_FORMAT
 from itertools import chain
 
 
@@ -85,7 +87,7 @@ def extract_audio_callback_task(self, results, origin_token):
              name='video.extract_and_sample_frames', ignore_result=False,
              db_manager=None, file_manager=file_management_config)
 def extract_and_sample_frames_task(self, token, force=False):
-    # TODO do the cache check here
+    # TODO do the cache check here and populate the "slide_tokens" field of the result with them, if available
     # Extracting frames
     input_filename_with_path = self.file_manager.generate_filename(token)
     output_folder = token + '_all_frames'
@@ -95,14 +97,16 @@ def extract_and_sample_frames_task(self, token, force=False):
         return {
             'result': None,
             'sample_indices': None,
-            'fresh': False
+            'fresh': False,
+            'slide_tokens': None
         }
     # Generating frame sample indices
     frame_indices = generate_frame_sample_indices(self.file_manager.generate_filename(output_folder))
     return {
         'result': output_folder,
         'sample_indices': frame_indices,
-        'fresh': True
+        'fresh': True,
+        'slide_tokens': None
     }
 
 
@@ -116,7 +120,8 @@ def compute_noise_level_parallel_task(self, results, i, n, language=None):
             'result': None,
             'sample_indices': None,
             'noise_level': None,
-            'fresh': False
+            'fresh': False,
+            'slide_tokens': None
         }
     all_sample_indices = results['sample_indices']
     start_index = int(i*len(all_sample_indices)/n)
@@ -130,6 +135,7 @@ def compute_noise_level_parallel_task(self, results, i, n, language=None):
         'sample_indices': results['sample_indices'],
         'noise_level': noise_level_list,
         'fresh': results['fresh'],
+        'slide_tokens': None
     }
 
 
@@ -141,7 +147,8 @@ def compute_noise_threshold_callback_task(self, results):
             'result': None,
             'sample_indices': None,
             'threshold': None,
-            'fresh': False
+            'fresh': False,
+            'slide_tokens': None
         }
     list_of_noise_value_lists = [x['noise_level'] for x in results]
     all_noise_values = list(chain.from_iterable(list_of_noise_value_lists))
@@ -151,6 +158,7 @@ def compute_noise_threshold_callback_task(self, results):
         'sample_indices': results[0]['sample_indices'],
         'threshold': threshold,
         'fresh': results[0]['fresh'],
+        'slide_tokens': None
     }
 
 
@@ -161,10 +169,9 @@ def compute_slide_transitions_parallel_task(self, results, i, n, language=None):
     if results['result'] is None:
         return {
             'result': None,
-            'sample_indices': None,
-            'threshold': None,
             'transitions': None,
-            'fresh': False
+            'fresh': False,
+            'slide_tokens': None
         }
     all_sample_indices = results['sample_indices']
     start_index = int(i*len(all_sample_indices)/n)
@@ -176,10 +183,9 @@ def compute_slide_transitions_parallel_task(self, results, i, n, language=None):
                                 self.nlp_model.get_nlp_models(), language=language)
     return {
         'result': results['result'],
-        'sample_indices': results['sample_indices'],
-        'threshold': results['threshold'],
         'transitions': slide_transition_list,
         'fresh': results['fresh'],
+        'slide_tokens': None
     }
 
 
@@ -189,20 +195,43 @@ def compute_slide_transitions_callback_task(self, results):
     if results[0]['result'] is None:
         return {
             'result': None,
-            'sample_indices': None,
-            'threshold': None,
-            'transitions': None,
-            'fresh': False
+            'slides': None,
+            'fresh': False,
+            'slide_tokens': None
         }
     list_of_slide_transition_lists = [x['transitions'] for x in results]
     all_transitions = list(chain.from_iterable(list_of_slide_transition_lists))
     # TODO also insert into database and stuff
     return {
         'result': results[0]['result'],
-        'sample_indices': results[0]['sample_indices'],
-        'threshold': results[0]['threshold'],
-        'transitions': all_transitions,
+        'slides': all_transitions,
         'fresh': results[0]['fresh'],
+        'slide_tokens': None
+    }
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
+             name='video.detect_slides_callback', ignore_result=False,
+             file_manager=file_management_config)
+def detect_slides_callback_task(self, results):
+    if results['fresh']:
+        # Delete frames aside from slides
+        list_of_slides = [(FRAME_FORMAT) % (x) for x in results['slides']]
+        base_folder = self.file_manager.generate_filename(results['result'])
+        for frame_file in os.listdir(base_folder):
+            if frame_file not in list_of_slides:
+                os.remove(os.path.join(base_folder, frame_file))
+        slides_folder = results['result'].replace('_all_frames', '_slides')
+        # Rename `all_frames` folder into `slides`
+        os.rename(base_folder,
+                  self.file_manager.generate_filename(slides_folder))
+        slide_tokens = [os.path.join(slides_folder, s) for s in list_of_slides]
+        # TODO Insert results into database
+    else:
+        slide_tokens = results['slide_tokens']
+    return {
+        'slide_tokens': slide_tokens,
+        'fresh': results['fresh']
     }
 
 
@@ -228,7 +257,8 @@ def detect_slides_master(token, force=False, language=None, n_jobs=8):
             group(compute_noise_level_parallel_task.s(i, n_jobs, language) for i in range(n_jobs)) |
             compute_noise_threshold_callback_task.s() |
             group(compute_slide_transitions_parallel_task.s(i, n_jobs, language) for i in range(n_jobs)) |
-            compute_slide_transitions_callback_task.s()).\
+            compute_slide_transitions_callback_task.s() |
+            detect_slides_callback_task.s()).\
                     apply_async(priority=2)
     return {'id': task.id}
 

@@ -428,7 +428,7 @@ def transcribe_gcs(bucket_name, input_token, sample_rate=48000, timeout=600, lan
     return all_transcripts, all_confidences, lang
 
 
-def extract_frames(input_filename_with_path, output_folder_with_path, output_folder, frame_format=FRAME_FORMAT):
+def extract_frames(input_filename_with_path, output_folder_with_path, output_folder):
     if not file_exists(input_filename_with_path):
         print(f'ffmpeg error: File {input_filename_with_path} does not exist')
         return None
@@ -438,13 +438,13 @@ def extract_frames(input_filename_with_path, output_folder_with_path, output_fol
         # This parameter ensures that one frame is extracted per second, and the whole logic of the algorithm
         # relies on timestamp being identical to frame number.
         err = ffmpeg.input(input_filename_with_path).video. \
-            output(os.path.join(output_folder_with_path, frame_format), r=1). \
+            output(os.path.join(output_folder_with_path, FRAME_FORMAT), r=1). \
             overwrite_output().run(capture_stdout=True)
     except Exception as e:
         print(e, file=sys.stderr)
         err = str(e)
 
-    if file_exists(os.path.join(output_folder_with_path, (frame_format) % (1))) and ('ffmpeg error' not in err):
+    if file_exists(os.path.join(output_folder_with_path, (FRAME_FORMAT) % (1))) and ('ffmpeg error' not in err):
         return output_folder
     else:
         return None
@@ -459,20 +459,19 @@ def generate_frame_sample_indices(input_folder_with_path, step=16):
     return frame_sample_indices
 
 
-def frame_ocr_distance(input_folder_with_path, k1, k2, nlp_models, language=None,
-                       frame_format=FRAME_FORMAT, ocr_format=OCR_FORMAT):
+def frame_ocr_distance(input_folder_with_path, k1, k2, nlp_models, language=None):
     # TODO Add a new subclass of DBCachingManagerBase for images to cache the results of slide extraction
 
     if language is None:
         language = 'en'
 
     # Generate frame file paths
-    image_1_path = os.path.join(input_folder_with_path, (frame_format) % (k1))
-    image_2_path = os.path.join(input_folder_with_path, (frame_format) % (k2))
+    image_1_path = os.path.join(input_folder_with_path, (FRAME_FORMAT) % (k1))
+    image_2_path = os.path.join(input_folder_with_path, (FRAME_FORMAT) % (k2))
 
     # Generate OCR file paths
-    ocr_1_path = os.path.join(input_folder_with_path, (ocr_format) % (k1))
-    ocr_2_path = os.path.join(input_folder_with_path, (ocr_format) % (k2))
+    ocr_1_path = os.path.join(input_folder_with_path, (OCR_FORMAT) % (k1))
+    ocr_2_path = os.path.join(input_folder_with_path, (OCR_FORMAT) % (k2))
 
     # Check cache for OCR files or open otherwise (file 1)
     if os.path.isfile(ocr_1_path):

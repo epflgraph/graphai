@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field
 from typing import List, Union, Literal
-from .common import TaskStatusResponse, FileCachableComputationResponse
+from .common import TaskStatusResponse
 
 
 class RetrieveURLRequest(BaseModel):
@@ -29,27 +29,6 @@ class RetrieveURLResponse(TaskStatusResponse):
     )
 
 
-class ComputeSignatureRequest(BaseModel):
-    token: str = Field(
-        title="Token",
-        description="The token that identifies the requested file"
-    )
-
-    force: bool = Field(
-        title="Force",
-        description="Whether to force a recomputation",
-        default=False
-    )
-
-
-class ComputeSignatureResponse(TaskStatusResponse):
-    task_result: Union[FileCachableComputationResponse, None] = Field(
-        title="Calculate fingerprint response",
-        description="A dict containing a flag for whether the fingerprint calculation was successful and "
-                    "a freshness flag, plus a token that refers to the now-computed file if so (and null if not)."
-    )
-
-
 class ExtractAudioRequest(BaseModel):
     token: str = Field(
         title="Token",
@@ -63,7 +42,19 @@ class ExtractAudioRequest(BaseModel):
     )
 
 
-class ExtractAudioTaskResponse(FileCachableComputationResponse):
+class ExtractAudioTaskResponse(BaseModel):
+    token: Union[str, None] = Field(
+        title="Token",
+        description="Result token, null if task has failed"
+    )
+    successful: bool = Field(
+        title="Success flag",
+        description="True if task successful, False otherwise"
+    )
+    fresh: bool = Field(
+        title="Freshness flag",
+        description="Whether the result was computed freshly or an existing cached result was returned."
+    )
     duration: float = Field(
         title="Audio duration",
         description="Duration of audio based on the length of its video file. This value is exact as it is based "
@@ -99,15 +90,20 @@ class DetectSlidesRequest(BaseModel):
     )
 
 
-class DetectSlidesTaskResponse(FileCachableComputationResponse):
-    n_slides: int = Field(
-        title="# of slides",
-        description="Number of detected slides in given video file"
+class DetectSlidesTaskResponse(BaseModel):
+    slide_tokens: Union[List[str], None] = Field(
+        title="Slide tokens",
+        description="Tokens of the detected slides"
     )
 
-    files: List[str] = Field(
-        title="Names of slide files",
-        description="The names of the slide files extracted from video"
+    successful: bool = Field(
+        title="Success flag",
+        description="True if task successful, False otherwise"
+    )
+
+    fresh: bool = Field(
+        title="Freshness flag",
+        description="Whether the result was computed freshly or an existing cached result was returned."
     )
 
 

@@ -33,21 +33,6 @@ class TaskStatusResponse(BaseModel, abc.ABC):
     task_result: Json[BaseModel]
 
 
-class FileCachableComputationResponse(BaseModel):
-    token: Union[str, None] = Field(
-        title="Token",
-        description="Result token, null if task has failed"
-    )
-    successful: bool = Field(
-        title="Success flag",
-        description="True if task successful, False otherwise"
-    )
-    fresh: bool = Field(
-        title="Freshness flag",
-        description="Whether the result was computed freshly or an existing cached result was returned."
-    )
-
-
 class FileRequest(BaseModel):
     token: str = Field(
         title="File name",

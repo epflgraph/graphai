@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field, Json
 from typing import List, Union, Any
-from .common import FileCachableComputationResponse, TaskStatusResponse
+from .common import TaskStatusResponse
 
 
 class AudioFingerprintRequest(BaseModel):

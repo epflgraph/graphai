@@ -71,3 +71,19 @@ async def extract_audio_status(task_id):
 async def detect_slides(data: DetectSlidesRequest):
     result = detect_slides_master(data.token, force=data.force, language=data.language)
     return {'task_id': result['id']}
+
+
+@router.get('/detect_slides/status/{task_id}', response_model=DetectSlidesResponse)
+async def detect_slides_status(task_id):
+    full_results = get_task_info(task_id)
+    task_results = full_results['results']
+    if task_results is not None:
+        if 'slide_tokens' in task_results:
+            task_results = {
+                'slide_tokens': task_results['slide_tokens'],
+                'fresh': task_results['fresh'],
+                'successful': task_results['slide_tokens'] is not None
+            }
+        else:
+            task_results = None
+    return format_api_results(full_results['id'], full_results['name'], full_results['status'], task_results)
