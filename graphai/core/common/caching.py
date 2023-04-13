@@ -145,6 +145,17 @@ class DBCachingManagerBase(abc.ABC):
             results = None
         return results
 
+    def _delete_rows(self, schema, table_name, id_tokens):
+        id_tokens_str = '(' + ', '.join([surround_with_character(id_token, "'") for id_token in id_tokens]) + ')'
+        self.db.execute_query(
+            f"""
+            DELETE FROM `{schema}`.`{table_name}` WHERE id_token IN {id_tokens_str}
+            """
+        )
+
+    def delete_cache_rows(self, id_tokens):
+        self._delete_rows(self.schema, self.cache_table, id_tokens)
+
     def insert_or_update_details(self, id_token, values_to_insert=None):
         self._insert_or_update_details(self.schema, self.cache_table, id_token, values_to_insert)
 
