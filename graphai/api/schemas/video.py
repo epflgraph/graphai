@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from typing import List, Union, Literal
+from typing import List, Union, Literal, Dict
 from .common import TaskStatusResponse
 
 
@@ -91,7 +91,7 @@ class DetectSlidesRequest(BaseModel):
 
 
 class DetectSlidesTaskResponse(BaseModel):
-    slide_tokens: Union[List[str], None] = Field(
+    slide_tokens: Union[Dict[int, str], None] = Field(
         title="Slide tokens",
         description="Tokens of the detected slides"
     )

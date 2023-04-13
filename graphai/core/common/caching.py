@@ -118,6 +118,20 @@ class DBCachingManagerBase(abc.ABC):
             results = None
         return results
 
+    def _get_details_using_origin(self, schema, table_name, origin_token, cols):
+        column_list = ['origin_token', 'id_token'] + cols
+        results = self.db.execute_query(
+            f"""
+            SELECT {', '.join(column_list)} FROM `{schema}`.`{table_name}`
+            WHERE origin_token={surround_with_character(origin_token, "'")}
+            """
+        )
+        if len(results) > 0:
+            results = [{column_list[i]: result[i] for i in range(len(column_list))} for result in results]
+        else:
+            results = None
+        return results
+
     def _get_all_details(self, schema, table_name, cols):
         column_list = ['id_token'] + cols
         results = self.db.execute_query(
@@ -143,6 +157,9 @@ class DBCachingManagerBase(abc.ABC):
         else:
             id_token_to_use = id_token
         return self._get_details(self.schema, self.cache_table, id_token_to_use, cols)
+
+    def get_details_using_origin(self, origin_token, cols):
+        return self._get_details_using_origin(self.schema, self.cache_table, origin_token, cols)
 
     def get_all_details(self, cols, using_most_similar=False):
         results = self._get_all_details(self.schema, self.cache_table, cols)
@@ -193,6 +210,44 @@ class AudioDBCachingManager(DBCachingManagerBase):
               `nosilence_duration` FLOAT DEFAULT NULL,
               `language` VARCHAR(10) DEFAULT NULL,
               `fp_nosilence` INT DEFAULT NULL,
+              PRIMARY KEY id_token (id_token)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+            """
+        )
+        self.db.execute_query(
+            f"""
+            CREATE TABLE IF NOT EXISTS `{self.schema}`.`{self.most_similar_table}` (
+              `id_token` VARCHAR(255),
+              `most_similar_token` VARCHAR(255) DEFAULT NULL,
+              PRIMARY KEY id_token (id_token),
+              KEY most_similar_token (most_similar_token)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+            """
+        )
+
+
+class SlideDBCachingManager(DBCachingManagerBase):
+    def __init__(self):
+        super().__init__(cache_table='Slide_Main', most_similar_table='Slide_Most_Similar')
+
+    def init_db(self):
+        self.db.execute_query(
+            f"""
+            CREATE DATABASE IF NOT EXISTS `{self.schema}` 
+            DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci 
+            DEFAULT ENCRYPTION='N';
+            """
+        )
+        self.db.execute_query(
+            f"""
+            CREATE TABLE IF NOT EXISTS `{self.schema}`.`{self.cache_table}` (
+              `id_token` VARCHAR(255),
+              `origin_token` VARCHAR(255),
+              `fingerprint` LONGTEXT DEFAULT NULL,
+              `timestamp` FLOAT,
+              `slide_number` INT UNSIGNED,
+              `ocr_token` VARCHAR(255) DEFAULT NULL,
+              `language` VARCHAR(10) DEFAULT NULL,
               PRIMARY KEY id_token (id_token)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
             """
