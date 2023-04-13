@@ -1,4 +1,5 @@
 import os
+import shutil
 
 from celery import shared_task, group
 from graphai.api.common.log import log
@@ -89,18 +90,25 @@ def extract_audio_callback_task(self, results, origin_token):
              db_manager=slide_db_manager, file_manager=file_management_config)
 def extract_and_sample_frames_task(self, token, force=False):
     # Checking for existing cached results
-    if not force:
-        existing_slides = self.db_manager.get_details_using_origin(token, cols=['slide_number'])
-    else:
-        existing_slides = None
+
+    existing_slides = self.db_manager.get_details_using_origin(token, cols=['slide_number'])
+
     if existing_slides is not None:
-        print('Returning cached result')
-        return {
-            'result': None,
-            'sample_indices': None,
-            'fresh': False,
-            'slide_tokens': {x['slide_number']: x['id_token'] for x in existing_slides}
-        }
+        if not force:
+            print('Returning cached result')
+            return {
+                'result': None,
+                'sample_indices': None,
+                'fresh': False,
+                'slide_tokens': {x['slide_number']: x['id_token'] for x in existing_slides}
+            }
+        else:
+            # If force==True, then we need to delete the existing rows in case the results this time are different
+            # than they were before, since unlike audio endpoints, there's multiple rows per video here!
+            # This will require a force-recomputation of every other property that pertains to the video whose slides
+            # have been force-recomputed, e.g. fingerprints and text OCRs.
+            # In general, force is only there for debugging and will not be usable by the end-user.
+            self.db_manager.delete_cache_rows([x['id_token'] for x in existing_slides])
     # Extracting frames
     input_filename_with_path = self.file_manager.generate_filename(token)
     output_folder = token + '_all_frames'
@@ -230,14 +238,20 @@ def detect_slides_callback_task(self, results, token):
     if results['fresh']:
         # Delete non-slide frames from the frames directory
         list_of_slides = [(FRAME_FORMAT) % (x) for x in results['slides']]
-        base_folder = self.file_manager.generate_filename(results['result'])
-        for frame_file in os.listdir(base_folder):
+        base_folder = results['result']
+        base_folder_with_path = self.file_manager.generate_filename(base_folder)
+        for frame_file in os.listdir(base_folder_with_path):
             if frame_file not in list_of_slides:
-                os.remove(os.path.join(base_folder, frame_file))
-        # Rename `all_frames` directory to `slides`
-        slides_folder = results['result'].replace('_all_frames', '_slides')
-        os.rename(base_folder,
-                  self.file_manager.generate_filename(slides_folder))
+                os.remove(os.path.join(base_folder_with_path, frame_file))
+        # Renaming the `all_frames` directory to `slides`
+        slides_folder = base_folder.replace('_all_frames', '_slides')
+        slides_folder_with_path = self.file_manager.generate_filename(slides_folder)
+        # Make sure the slides folder doesn't already exist, and recursively delete it if it does (force==True)
+        if os.path.exists(slides_folder_with_path) and os.path.isdir(slides_folder_with_path):
+            shutil.rmtree(slides_folder_with_path)
+        # Now rename _all_frames to _slides
+        os.rename(base_folder_with_path,
+                  slides_folder_with_path)
         slide_tokens = [os.path.join(slides_folder, s) for s in list_of_slides]
         slide_tokens = {i+1:slide_tokens[i] for i in range(len(slide_tokens))}
         # Inserting fresh results into the database
