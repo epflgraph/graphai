@@ -6,7 +6,7 @@ from graphai.api.common.log import log
 from graphai.api.common.video import file_management_config, audio_db_manager, local_ocr_nlp_models, slide_db_manager
 from graphai.core.common.video import generate_random_token, retrieve_file_from_url, detect_audio_format_and_duration, \
     extract_audio_from_video, extract_frames, generate_frame_sample_indices, compute_ocr_noise_level, \
-    compute_ocr_threshold, compute_video_ocr_transitions, FRAME_FORMAT, OCR_FORMAT
+    compute_ocr_threshold, compute_video_ocr_transitions, perceptual_hash_image, FRAME_FORMAT, OCR_FORMAT
 from itertools import chain
 
 
@@ -275,6 +275,49 @@ def detect_slides_callback_task(self, results, token):
         'slide_tokens': slide_tokens,
         'fresh': results['fresh']
     }
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
+             name='video.slide_fingerprint', ignore_result=False,
+             db_manager=slide_db_manager, file_manager=file_management_config)
+def compute_slide_fingerprint_task(self, token, force=False):
+    # Checking for existing cached results
+    existing_slide = self.db_manager.get_details(token, cols=['fingerprint'])
+    if existing_slide is None:
+        return {
+            'result': None,
+            'fresh': False
+        }
+    if not force and existing_slide['fingerprint'] is not None:
+        return {
+            'result': existing_slide['fingerprint'],
+            'fresh': False
+        }
+    slide_with_path = self.file_manager.generate_filepath(token)
+    fingerprint = perceptual_hash_image(slide_with_path)
+    if fingerprint is None:
+        return {
+            'result': None,
+            'fresh': False
+        }
+    return {
+        'result': fingerprint,
+        'fresh': True
+    }
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
+             name='video.slide_fingerprint_callback', ignore_result=False,
+             db_manager=slide_db_manager)
+def compute_slide_fingerprint_callback_task(self, results, token):
+    if results['fresh']:
+        self.db_manager.insert_or_update_details(
+            token,
+            {
+                'fingerprint': results['result'],
+            }
+        )
+    return results
 
 
 def retrieve_and_generate_token_master(url):

@@ -3,7 +3,7 @@ import json
 from celery import shared_task, chain, group, Task
 from graphai.api.common.video import audio_db_manager, file_management_config, transcription_model
 from graphai.core.common.video import remove_silence_doublesided, perceptual_hash_audio, \
-    find_closest_audio_fingerprint, write_text_file, read_text_file, read_json_file, extract_audio_segment
+    find_closest_audio_fingerprint_from_list, write_text_file, read_text_file, read_json_file, extract_audio_segment
 from graphai.core.common.caching import TEMP_SUBFOLDER
 from collections import Counter
 
@@ -192,7 +192,7 @@ def audio_fingerprint_find_closest_parallel_task(self, input_dict, i, n_total, m
     end_index = int((i + 1) / n_total * n_tokens_all)
     # Find the closest token for this batch
     # Note: null fingerprint values are automatically handled and don't need to be filtered out.
-    closest_token, closest_fingerprint, score = find_closest_audio_fingerprint(
+    closest_token, closest_fingerprint, score = find_closest_audio_fingerprint_from_list(
         input_dict['target_fp'],
         input_dict['all_fingerprints'][start_index:end_index],
         input_dict['all_tokens'][start_index:end_index],

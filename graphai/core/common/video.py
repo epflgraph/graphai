@@ -12,6 +12,7 @@ import math
 import acoustid
 import chromaprint
 import ffmpeg
+import imagehash
 from PIL import Image
 import pytesseract
 import spacy
@@ -308,7 +309,23 @@ def perceptual_hash_audio(input_filename_with_path, max_length=7200):
     return fingerprint.decode('utf8'), decoded
 
 
-def compare_audio_fingerprints(decoded_1, decoded_2):
+def perceptual_hash_image(input_filename_with_path, hash_size=16):
+    """
+    Computes the perceptual hash of an image file
+    Args:
+        input_filename_with_path: Path of the input file
+        hash_size: Size of hash
+    Returns:
+        String representation of the computed fingerprint. None if file does not exist
+    """
+    if not file_exists(input_filename_with_path):
+        print(f'File {input_filename_with_path} does not exist')
+        return None
+    results = imagehash.dhash(input_filename_with_path, hash_size=hash_size)
+    return str(results)
+
+
+def compare_decoded_fingerprints(decoded_1, decoded_2):
     """
     Compares two decoded fingerprints
     Args:
@@ -321,7 +338,7 @@ def compare_audio_fingerprints(decoded_1, decoded_2):
     return fuzz.ratio(decoded_1, decoded_2) / 100
 
 
-def compare_encoded_audio_fingerprints(f1, f2=None):
+def compare_encoded_fingerprints(f1, f2=None, decoder_func=chromaprint.decode_fingerprint):
     """
     Compares two string-encoded audio fingerprints
     and returns the ratio of the fuzzy match between them
@@ -337,11 +354,12 @@ def compare_encoded_audio_fingerprints(f1, f2=None):
     # there's a 10-fold speedup here.
     if f2 is None:
         return 0
-    return compare_audio_fingerprints(chromaprint.decode_fingerprint(f1.encode('utf8')),
-                                        chromaprint.decode_fingerprint(f2.encode('utf8')))
+    return compare_decoded_fingerprints(decoder_func(f1.encode('utf8')),
+                                        decoder_func(f2.encode('utf8')))
 
 
-def find_closest_audio_fingerprint(target_fp, fp_list, token_list, min_similarity=0.8):
+def find_closest_fingerprint_from_list(target_fp, fp_list, token_list, min_similarity=0.8,
+                                       decoder_func=chromaprint.decode_fingerprint):
     """
     Given a target fingerprint and a list of candidate fingerprints, finds the one with the highest similarity
     to the target whose similarity is above a minimum value.
@@ -359,7 +377,7 @@ def find_closest_audio_fingerprint(target_fp, fp_list, token_list, min_similarit
     # If the list of fingerprints is empty, there's no "closest" fingerprint to the target and the result is null.
     if len(fp_list) == 0:
         return None, None, None
-    fp_similarities = np.array([compare_encoded_audio_fingerprints(target_fp, fp2) for fp2 in fp_list])
+    fp_similarities = np.array([compare_encoded_fingerprints(target_fp, fp2, decoder_func) for fp2 in fp_list])
     max_index = np.argmax(fp_similarities)
     # If the similarity of the most similar fingerprint is also greater than the minimum similarity value,
     # then it's a match. Otherwise, the result is null.
@@ -367,6 +385,16 @@ def find_closest_audio_fingerprint(target_fp, fp_list, token_list, min_similarit
         return token_list[max_index], fp_list[max_index], fp_similarities[max_index]
     else:
         return None, None, None
+
+
+def find_closest_audio_fingerprint_from_list(target_fp, fp_list, token_list, min_similarity=0.8):
+    return find_closest_fingerprint_from_list(target_fp, fp_list, token_list, min_similarity,
+                                       decoder_func=chromaprint.decode_fingerprint)
+
+
+def find_closest_image_fingerprint_from_list(target_fp, fp_list, token_list, min_similarity=0.8):
+    return find_closest_fingerprint_from_list(target_fp, fp_list, token_list, min_similarity,
+                                              decoder_func=imagehash.hex_to_hash)
 
 
 def generate_gcp_uri(bucket_name, blob_name):
