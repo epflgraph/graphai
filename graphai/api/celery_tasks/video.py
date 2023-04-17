@@ -6,7 +6,7 @@ from graphai.api.common.log import log
 from graphai.api.common.video import file_management_config, audio_db_manager, local_ocr_nlp_models, slide_db_manager
 from graphai.core.common.video import generate_random_token, retrieve_file_from_url, detect_audio_format_and_duration, \
     extract_audio_from_video, extract_frames, generate_frame_sample_indices, compute_ocr_noise_level, \
-    compute_ocr_threshold, compute_video_ocr_transitions, FRAME_FORMAT
+    compute_ocr_threshold, compute_video_ocr_transitions, FRAME_FORMAT, OCR_FORMAT
 from itertools import chain
 
 
@@ -14,7 +14,7 @@ from itertools import chain
              name='video.retrieve_url', ignore_result=False,
              file_manager=file_management_config)
 def retrieve_file_from_url_task(self, url, filename):
-    filename_with_path = self.file_manager.generate_filename(filename)
+    filename_with_path = self.file_manager.generate_filepath(filename)
     results = retrieve_file_from_url(url, filename_with_path, filename)
     return {'token': results}
 
@@ -23,14 +23,14 @@ def retrieve_file_from_url_task(self, url, filename):
              name='video.get_file', ignore_result=False,
              file_manager=file_management_config)
 def get_file_task(self, filename):
-    return self.file_manager.generate_filename(filename)
+    return self.file_manager.generate_filepath(filename)
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='video.extract_audio', ignore_result=False,
              db_manager=audio_db_manager, file_manager=file_management_config)
 def extract_audio_task(self, token, force=False):
-    input_filename_with_path = self.file_manager.generate_filename(token)
+    input_filename_with_path = self.file_manager.generate_filepath(token)
     output_token, input_duration = detect_audio_format_and_duration(input_filename_with_path, token)
     if output_token is None:
         return {
@@ -39,7 +39,7 @@ def extract_audio_task(self, token, force=False):
             'duration': 0.0
         }
 
-    output_filename_with_path = self.file_manager.generate_filename(output_token)
+    output_filename_with_path = self.file_manager.generate_filepath(output_token)
     # Here, the existing row can be None because the row is inserted into the table
     # only after extracting the audio from the video.
     if not force:
@@ -110,9 +110,9 @@ def extract_and_sample_frames_task(self, token, force=False):
             # In general, force is only there for debugging and will not be usable by the end-user.
             self.db_manager.delete_cache_rows([x['id_token'] for x in existing_slides])
     # Extracting frames
-    input_filename_with_path = self.file_manager.generate_filename(token)
+    input_filename_with_path = self.file_manager.generate_filepath(token)
     output_folder = token + '_all_frames'
-    output_folder_with_path = self.file_manager.generate_filename(output_folder)
+    output_folder_with_path = self.file_manager.generate_filepath(output_folder)
     output_folder = extract_frames(input_filename_with_path, output_folder_with_path, output_folder)
     # If there was an error of any kind (e.g. non-existing video file), the returned token will be None
     if output_folder is None:
@@ -123,7 +123,7 @@ def extract_and_sample_frames_task(self, token, force=False):
             'slide_tokens': None
         }
     # Generating frame sample indices
-    frame_indices = generate_frame_sample_indices(self.file_manager.generate_filename(output_folder))
+    frame_indices = generate_frame_sample_indices(self.file_manager.generate_filepath(output_folder))
     return {
         'result': output_folder,
         'sample_indices': frame_indices,
@@ -150,7 +150,7 @@ def compute_noise_level_parallel_task(self, results, i, n, language=None):
     end_index = int((i+1)*len(all_sample_indices)/n)
     current_sample_indices = all_sample_indices[start_index:end_index]
     noise_level_list = \
-        compute_ocr_noise_level(self.file_manager.generate_filename(results['result']),
+        compute_ocr_noise_level(self.file_manager.generate_filepath(results['result']),
                                 current_sample_indices, self.nlp_model.get_nlp_models(), language=language)
     return {
         'result': results['result'],
@@ -200,9 +200,9 @@ def compute_slide_transitions_parallel_task(self, results, i, n, language=None):
     end_index = int((i+1)*len(all_sample_indices)/n)
     current_sample_indices = all_sample_indices[start_index:end_index]
     slide_transition_list = \
-        compute_video_ocr_transitions(self.file_manager.generate_filename(results['result']),
-                                current_sample_indices, results['threshold'],
-                                self.nlp_model.get_nlp_models(), language=language)
+        compute_video_ocr_transitions(self.file_manager.generate_filepath(results['result']),
+                                      current_sample_indices, results['threshold'],
+                                      self.nlp_model.get_nlp_models(), language=language)
     return {
         'result': results['result'],
         'transitions': slide_transition_list,
@@ -238,14 +238,15 @@ def detect_slides_callback_task(self, results, token):
     if results['fresh']:
         # Delete non-slide frames from the frames directory
         list_of_slides = [(FRAME_FORMAT) % (x) for x in results['slides']]
+        list_of_ocr_results = [(OCR_FORMAT) % (x) for x in results['slides']]
         base_folder = results['result']
-        base_folder_with_path = self.file_manager.generate_filename(base_folder)
-        for frame_file in os.listdir(base_folder_with_path):
-            if frame_file not in list_of_slides:
-                os.remove(os.path.join(base_folder_with_path, frame_file))
+        base_folder_with_path = self.file_manager.generate_filepath(base_folder)
+        for f in os.listdir(base_folder_with_path):
+            if f not in list_of_slides and f not in list_of_ocr_results:
+                os.remove(os.path.join(base_folder_with_path, f))
         # Renaming the `all_frames` directory to `slides`
         slides_folder = base_folder.replace('_all_frames', '_slides')
-        slides_folder_with_path = self.file_manager.generate_filename(slides_folder)
+        slides_folder_with_path = self.file_manager.generate_filepath(slides_folder)
         # Make sure the slides folder doesn't already exist, and recursively delete it if it does (force==True)
         if os.path.exists(slides_folder_with_path) and os.path.isdir(slides_folder_with_path):
             shutil.rmtree(slides_folder_with_path)
@@ -253,7 +254,9 @@ def detect_slides_callback_task(self, results, token):
         os.rename(base_folder_with_path,
                   slides_folder_with_path)
         slide_tokens = [os.path.join(slides_folder, s) for s in list_of_slides]
+        ocr_tokens = [os.path.join(slides_folder, s) for s in list_of_ocr_results]
         slide_tokens = {i+1:slide_tokens[i] for i in range(len(slide_tokens))}
+        ocr_tokens = {i+1:ocr_tokens[i] for i in range(len(ocr_tokens))}
         # Inserting fresh results into the database
         for slide_number in slide_tokens:
             self.db_manager.insert_or_update_details(
@@ -261,7 +264,8 @@ def detect_slides_callback_task(self, results, token):
                 {
                     'origin_token': token,
                     'timestamp': results['slides'][slide_number-1],
-                    'slide_number': slide_number
+                    'slide_number': slide_number,
+                    'ocr_tesseract_token': ocr_tokens[slide_number]
                 }
             )
     else:

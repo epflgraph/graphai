@@ -257,7 +257,8 @@ class SlideDBCachingManager(DBCachingManagerBase):
               `fingerprint` LONGTEXT DEFAULT NULL,
               `timestamp` FLOAT,
               `slide_number` INT UNSIGNED,
-              `ocr_token` VARCHAR(255) DEFAULT NULL,
+              `ocr_tesseract_token` VARCHAR(255) DEFAULT NULL,
+              `ocr_google_token` VARCHAR(255) DEFAULT NULL,
               `language` VARCHAR(10) DEFAULT NULL,
               PRIMARY KEY id_token (id_token)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
@@ -298,21 +299,27 @@ class VideoConfig():
         self.root_dir = new_root_dir
         make_sure_path_exists(new_root_dir)
 
-    def generate_filename(self, filename, force_dir=None):
+    def generate_filepath(self, filename, force_dir=None):
         if force_dir is not None:
             filename_with_path = self.concat_file_path(filename, force_dir)
-        elif any([filename.endswith(x) for x in VIDEO_FORMATS]):
-            filename_with_path = self.concat_file_path(filename, VIDEO_SUBFOLDER)
-        elif any([filename.endswith(x) for x in AUDIO_FORMATS]):
-            filename_with_path = self.concat_file_path(filename, AUDIO_SUBFOLDER)
-        elif any([filename.endswith(x) for x in SIGNATURE_FORMATS]):
-            filename_with_path = self.concat_file_path(filename, SIGNATURE_SUBFOLDER)
-        elif any([filename.endswith(x) for x in IMAGE_FORMATS]):
-            filename_with_path = self.concat_file_path(filename, IMAGE_SUBFOLDER)
-        elif any([filename.endswith(x) for x in TRANSCRIPT_FORMATS]):
-            filename_with_path = self.concat_file_path(filename, TRANSCRIPT_SUBFOLDER)
         else:
-            filename_with_path = self.concat_file_path(filename, OTHER_SUBFOLDER)
+            # If the "file" is really a file or a folder, this will give us the unchanged file name.
+            # However, if it's actually in a `folder/file` form, it'll give us the folder, which is how we
+            # figure out where it's supposed to go. The full path still involves the full file name,
+            # not just the folder part.
+            filename_first_part = filename.split('/')[0]
+            if any([filename_first_part.endswith(x) for x in VIDEO_FORMATS]):
+                filename_with_path = self.concat_file_path(filename, VIDEO_SUBFOLDER)
+            elif any([filename_first_part.endswith(x) for x in AUDIO_FORMATS]):
+                filename_with_path = self.concat_file_path(filename, AUDIO_SUBFOLDER)
+            elif any([filename_first_part.endswith(x) for x in SIGNATURE_FORMATS]):
+                filename_with_path = self.concat_file_path(filename, SIGNATURE_SUBFOLDER)
+            elif any([filename_first_part.endswith(x) for x in IMAGE_FORMATS]):
+                filename_with_path = self.concat_file_path(filename, IMAGE_SUBFOLDER)
+            elif any([filename_first_part.endswith(x) for x in TRANSCRIPT_FORMATS]):
+                filename_with_path = self.concat_file_path(filename, TRANSCRIPT_SUBFOLDER)
+            else:
+                filename_with_path = self.concat_file_path(filename, OTHER_SUBFOLDER)
         return filename_with_path
 
 

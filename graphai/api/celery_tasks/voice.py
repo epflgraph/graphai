@@ -12,11 +12,11 @@ from collections import Counter
              name='video.audio_silenceremoval', ignore_result=False,
              db_manager=audio_db_manager, file_manager=file_management_config)
 def remove_audio_silence_task(self, token, force=False, threshold=0.0):
-    input_filename_with_path = self.file_manager.generate_filename(token)
+    input_filename_with_path = self.file_manager.generate_filepath(token)
     audio_type = token.split('.')[-1]
     output_suffix = '_nosilence.' + audio_type
     output_token = token + output_suffix
-    output_filename_with_path = self.file_manager.generate_filename(output_token)
+    output_filename_with_path = self.file_manager.generate_filepath(output_token)
     existing = self.db_manager.get_details(token, cols=['nosilence_token', 'nosilence_duration'])
     # The information on audio file needs to have been inserted into the cache table when
     # the audio was extracted from the video. Therefore, the `existing` row needs to *exist*.
@@ -99,7 +99,7 @@ def compute_audio_fingerprint_task(self, input_dict, audio_token, force=False):
                 'duration': existing['duration'] if existing['fp_nosilence'] == 0 else existing['nosilence_duration'],
                 'fp_nosilence': existing['fp_nosilence']
             }
-    fp_token_with_path = self.file_manager.generate_filename(fp_token)
+    fp_token_with_path = self.file_manager.generate_filepath(fp_token)
     fingerprint, decoded = perceptual_hash_audio(fp_token_with_path)
     if fingerprint is None:
         return {
@@ -269,12 +269,12 @@ def detect_language_retrieve_from_db_and_split_task(self, token, force=False, n_
             'fresh': False
         }
 
-    input_filename_with_path = self.file_manager.generate_filename(token)
+    input_filename_with_path = self.file_manager.generate_filepath(token)
     result_tokens = list()
     # Creating `n_divs` segments (of duration `length` each) of the audio file and saving them to the temp subfolder
     for i in range(n_divs):
         current_output_token = token + '_' + str(i) + '_temp.ogg'
-        current_output_token_with_path = self.file_manager.generate_filename(current_output_token,
+        current_output_token_with_path = self.file_manager.generate_filepath(current_output_token,
                                                                              force_dir=TEMP_SUBFOLDER)
         current_result = extract_audio_segment(
             input_filename_with_path, current_output_token_with_path, current_output_token,
@@ -307,7 +307,7 @@ def detect_language_parallel_task(self, tokens_dict, i):
     current_token = tokens_dict['temp_tokens'][i]
     try:
         language = self.model.detect_audio_segment_lang_whisper(
-            self.file_manager.generate_filename(current_token, force_dir=TEMP_SUBFOLDER)
+            self.file_manager.generate_filepath(current_token, force_dir=TEMP_SUBFOLDER)
         )
     except:
         return {
@@ -392,9 +392,9 @@ def transcribe_task(self, input_dict, force=False):
                 existing['language'] is not None:
             print('Returning cached result')
             transcript_token = existing['transcript_token']
-            transcript_result = read_text_file(self.file_manager.generate_filename(transcript_token))
+            transcript_result = read_text_file(self.file_manager.generate_filepath(transcript_token))
             subtitle_token = existing['subtitle_token']
-            subtitle_result = read_json_file(self.file_manager.generate_filename(subtitle_token))
+            subtitle_result = read_json_file(self.file_manager.generate_filepath(subtitle_token))
             language_result = existing['language']
             return {
                 'transcript_result': transcript_result,
@@ -405,7 +405,7 @@ def transcribe_task(self, input_dict, force=False):
                 'fresh': False
             }
 
-    input_filename_with_path = self.file_manager.generate_filename(token)
+    input_filename_with_path = self.file_manager.generate_filepath(token)
     transcript_token = token + '_transcript.txt'
     subtitle_token = token + '_subtitle_segments.json'
     result_dict = \
@@ -422,8 +422,8 @@ def transcribe_task(self, input_dict, force=False):
     transcript_result = result_dict['text']
     subtitle_result = json.dumps(result_dict['segments'])
     language_result = result_dict['language']
-    transcript_filename_with_path = self.file_manager.generate_filename(transcript_token)
-    subtitle_filename_with_path = self.file_manager.generate_filename(subtitle_token)
+    transcript_filename_with_path = self.file_manager.generate_filepath(transcript_token)
+    subtitle_filename_with_path = self.file_manager.generate_filepath(subtitle_token)
     write_text_file(transcript_filename_with_path, transcript_result)
     write_text_file(subtitle_filename_with_path, subtitle_result)
     return {

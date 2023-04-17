@@ -460,8 +460,6 @@ def generate_frame_sample_indices(input_folder_with_path, step=16):
 
 
 def frame_ocr_distance(input_folder_with_path, k1, k2, nlp_models, language=None):
-    # TODO Add a new subclass of DBCachingManagerBase for images to cache the results of slide extraction
-
     if language is None:
         language = 'en'
 
@@ -473,37 +471,17 @@ def frame_ocr_distance(input_folder_with_path, k1, k2, nlp_models, language=None
     ocr_1_path = os.path.join(input_folder_with_path, (OCR_FORMAT) % (k1))
     ocr_2_path = os.path.join(input_folder_with_path, (OCR_FORMAT) % (k2))
 
-    # Check cache for OCR files or open otherwise (file 1)
-    if os.path.isfile(ocr_1_path):
+    extracted_text1 = pytesseract.image_to_string(Image.open(image_1_path),
+                                                 lang={'en':'eng', 'fr':'fra'}[language])
+    with gzip.open(ocr_1_path, 'w') as fid:
+        fid.write(extracted_text1.encode('utf-8'))
 
-        # Found in cache: get OCR text from file
-        with gzip.open(ocr_1_path, 'r') as fid:
-            extracted_text1 = fid.read().decode('utf-8')
-    else:
-        # Not found in cache: use tesseract to extract text from image
-        extracted_text1 = pytesseract.image_to_string(Image.open(image_1_path),
-                                                     lang={'en':'eng', 'fr':'fra'}[language])
+    extracted_text2 = pytesseract.image_to_string(Image.open(image_2_path),
+                                                 lang={'en':'eng', 'fr':'fra'}[language])
+    with gzip.open(ocr_2_path, 'w') as fid:
+        fid.write(extracted_text2.encode('utf-8'))
 
-        # Save OCR result to cache
-        with gzip.open(ocr_1_path, 'w') as fid:
-            fid.write(extracted_text1.encode('utf-8'))
-
-    # Check cache for OCR files or open otherwise (file 2)
-    if os.path.isfile(ocr_2_path):
-
-        # Found in cache: get OCR text from file
-        with gzip.open(ocr_2_path, 'r') as fid:
-            extracted_text2 = fid.read().decode('utf-8')
-    else:
-        # Not found in cache: use tesseract to extract text from image
-        extracted_text2 = pytesseract.image_to_string(Image.open(image_2_path),
-                                                     lang={'en':'eng', 'fr':'fra'}[language])
-
-        # Save OCR result to cache
-        with gzip.open(ocr_2_path, 'w') as fid:
-            fid.write(extracted_text2.encode('utf-8'))
-
-    # Caculate NLP objects
+    # Calculate NLP objects
     nlp_1 = nlp_models[language](extracted_text1)
     nlp_2 = nlp_models[language](extracted_text2)
 
