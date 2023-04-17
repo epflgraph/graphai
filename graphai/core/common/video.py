@@ -4,6 +4,7 @@ import random
 import re
 import sys
 import time
+import configparser
 from datetime import datetime
 import glob
 import math
@@ -21,6 +22,7 @@ import whisper
 from fuzzywuzzy import fuzz
 from google.cloud import storage, speech
 from .caching import make_sure_path_exists
+from graphai.definitions import CONFIG_DIR
 
 
 FRAME_FORMAT = 'frame-%06d.png'
@@ -554,9 +556,17 @@ def compute_video_ocr_transitions(input_folder_with_path, frame_sample_indices, 
 
 
 class WhisperTranscriptionModel():
-    def __init__(self, model_type='medium'):
+    def __init__(self):
         # The actual Whisper model is lazy loaded in order not to load it twice (celery *and* gunicorn)
-        self.model_type = model_type
+        config_contents = configparser.ConfigParser()
+        try:
+            print('Reading model configuration from file')
+            config_contents.read(f'{CONFIG_DIR}/models.ini')
+            self.model_type = config_contents['WHISPER'].get('model_type', fallback='medium')
+        except Exception as e:
+            print(f'Could not read file {CONFIG_DIR}/models.ini or '
+                  f'file does not have section [WHISPER], falling back to defaults.')
+            self.model_type = 'medium'
         self.model = None
 
 
@@ -584,6 +594,7 @@ class WhisperTranscriptionModel():
             Highest-scoring language code (e.g. 'en')
         """
         self.load_model_whisper()
+        print(self.model)
         audio = whisper.load_audio(input_filename_with_path)
         audio = whisper.pad_or_trim(audio)
 

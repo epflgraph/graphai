@@ -4,5 +4,5 @@ from graphai.core.common.caching import AudioDBCachingManager, SlideDBCachingMan
 file_management_config = VideoConfig()
 audio_db_manager = AudioDBCachingManager()
 slide_db_manager = SlideDBCachingManager()
-transcription_model = WhisperTranscriptionModel('medium')
+transcription_model = WhisperTranscriptionModel()
 local_ocr_nlp_models = NLPModels()
