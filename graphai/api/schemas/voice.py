@@ -52,6 +52,11 @@ class AudioFingerprintTaskResponse(BaseModel):
         title="Fingerprint with no beginning/end silence"
     )
 
+    successful: bool = Field(
+        title="Success flag",
+        description="Whether the computation was successful."
+    )
+
 
 class AudioFingerprintResponse(TaskStatusResponse):
     task_result: Union[AudioFingerprintTaskResponse, None] = Field(
