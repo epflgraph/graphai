@@ -4,7 +4,7 @@ from graphai.api.schemas.common import *
 from graphai.api.celery_tasks.common import format_api_results
 from graphai.core.interfaces.celery_config import get_task_info
 
-from ..celery_tasks.video import compute_slide_fingerprint_master
+from ..celery_tasks.image import compute_slide_fingerprint_master
 
 # Initialise video router
 router = APIRouter(
