@@ -114,4 +114,7 @@ def fingerprint_lookup_callback(results_list, original_token, db_manager):
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='video.dummy_task', ignore_result=False)
 def dummy_task(self, results):
+    # This task is required for chaining groups due to the peculiarities of celery
+    # Whenever there are two groups in one chain of tasks, there need to be at least
+    # TWO tasks between them, and this dummy task is simply an f(x)=x function.
     return results
