@@ -461,12 +461,12 @@ def generate_frame_sample_indices(input_folder_with_path, step=16):
     return frame_sample_indices
 
 
-def ocr_or_get_cached(ocr_path, language):
+def ocr_or_get_cached(ocr_path, image_path, language):
     if file_exists(ocr_path):
         with gzip.open(ocr_path, 'r') as fid:
             extracted_text = fid.read().decode('utf-8')
     else:
-        extracted_text = pytesseract.image_to_string(Image.open(ocr_path),
+        extracted_text = pytesseract.image_to_string(Image.open(image_path),
                                                       lang={'en':'eng', 'fr':'fra'}[language])
         with gzip.open(ocr_path, 'w') as fid:
             fid.write(extracted_text.encode('utf-8'))
@@ -486,8 +486,8 @@ def frame_ocr_distance(input_folder_with_path, k1, k2, nlp_models, language=None
     ocr_2_path = os.path.join(input_folder_with_path, (OCR_FORMAT) % (k2))
 
     # Cache the results since they will be used multiple times during slide detection
-    extracted_text1 = ocr_or_get_cached(ocr_1_path, language)
-    extracted_text2 = ocr_or_get_cached(ocr_2_path, language)
+    extracted_text1 = ocr_or_get_cached(ocr_1_path, image_1_path, language)
+    extracted_text2 = ocr_or_get_cached(ocr_2_path, image_2_path, language)
 
     # Calculate NLP objects
     nlp_1 = nlp_models[language](extracted_text1)
