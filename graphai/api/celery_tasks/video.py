@@ -7,6 +7,8 @@ from graphai.api.common.video import file_management_config, audio_db_manager, l
 from graphai.core.common.video import generate_random_token, retrieve_file_from_url, detect_audio_format_and_duration, \
     extract_audio_from_video, extract_frames, generate_frame_sample_indices, compute_ocr_noise_level, \
     compute_ocr_threshold, compute_video_ocr_transitions, perceptual_hash_image, FRAME_FORMAT, OCR_FORMAT
+from graphai.api.celery_tasks.common import fingerprint_lookup_retrieve_from_db, fingerprint_lookup_parallel, \
+    fingerprint_lookup_callback, dummy_task
 from itertools import chain
 
 
@@ -320,6 +322,34 @@ def compute_slide_fingerprint_callback_task(self, results, token):
     return results
 
 
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
+             name='video.slide_fingerprint_find_closest_retrieve_from_db', ignore_result=False,
+             db_manager=slide_db_manager)
+def slide_fingerprint_find_closest_retrieve_from_db_task(self, results, token):
+    return fingerprint_lookup_retrieve_from_db(results, token, self.db_manager)
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
+             name='video.slide_fingerprint_find_closest_parallel', ignore_result=False,
+             db_manager=slide_db_manager)
+def slide_fingerprint_find_closest_parallel_task(self, input_dict, i, n_total, min_similarity=1):
+    return fingerprint_lookup_parallel(input_dict, i, n_total, min_similarity)
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
+             name='video.slide_fingerprint_find_closest_callback', ignore_result=False,
+             db_manager=slide_db_manager)
+def slide_fingerprint_find_closest_callback_task(self, results_list, original_token):
+    return fingerprint_lookup_callback(results_list, original_token, self.db_manager)
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
+             name='video.retrieve_slide_fingerprint_final_callback', ignore_result=False)
+def retrieve_slide_fingerprint_callback_task(self, results):
+    # Returning the fingerprinting results, which is the part of this task whose results are sent back to the user.
+    return results['fp_results']
+
+
 def retrieve_and_generate_token_master(url):
     token = generate_random_token()
     out_filename = token + '.' + url.split('.')[-1]
@@ -341,6 +371,7 @@ def detect_slides_master(token, force=False, language=None, n_jobs=8):
     task = (extract_and_sample_frames_task.s(token, force) |
             group(compute_noise_level_parallel_task.s(i, n_jobs, language) for i in range(n_jobs)) |
             compute_noise_threshold_callback_task.s() |
+            dummy_task.s() |
             group(compute_slide_transitions_parallel_task.s(i, n_jobs, language) for i in range(n_jobs)) |
             compute_slide_transitions_callback_task.s() |
             detect_slides_callback_task.s(token)).\
@@ -348,3 +379,12 @@ def detect_slides_master(token, force=False, language=None, n_jobs=8):
     return {'id': task.id}
 
 
+def compute_slide_fingerprint_master(token, force=False, min_similarity=1, n_jobs=8):
+    task = (compute_slide_fingerprint_task.s(token, force) |
+            compute_slide_fingerprint_callback_task.s(token) |
+            slide_fingerprint_find_closest_retrieve_from_db_task.s(token) |
+            group(slide_fingerprint_find_closest_parallel_task.s(i, n_jobs, min_similarity) for i in range(n_jobs)) |
+            slide_fingerprint_find_closest_callback_task.s(token) |
+            retrieve_slide_fingerprint_callback_task.s()
+            ).apply_async(priority=2)
+    return {'id': task.id}
