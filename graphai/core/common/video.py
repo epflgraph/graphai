@@ -321,7 +321,7 @@ def perceptual_hash_image(input_filename_with_path, hash_size=16):
     if not file_exists(input_filename_with_path):
         print(f'File {input_filename_with_path} does not exist')
         return None
-    results = imagehash.dhash(input_filename_with_path, hash_size=hash_size)
+    results = imagehash.dhash(Image.open(input_filename_with_path), hash_size=hash_size)
     return str(results)
 
 
