@@ -333,7 +333,7 @@ def slide_fingerprint_find_closest_retrieve_from_db_task(self, results, token):
              name='video.slide_fingerprint_find_closest_parallel', ignore_result=False,
              db_manager=slide_db_manager)
 def slide_fingerprint_find_closest_parallel_task(self, input_dict, i, n_total, min_similarity=1):
-    return fingerprint_lookup_parallel(input_dict, i, n_total, min_similarity)
+    return fingerprint_lookup_parallel(input_dict, i, n_total, min_similarity, data_type='image')
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
