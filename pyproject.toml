@@ -29,7 +29,7 @@ dependencies = [
     "openai-whisper",
     "pytesseract",
     "spacy",
-    "google-cloud-speech",
+    "google-cloud-vision",
     "google-cloud-storage",
     "ffmpeg-python",
     "pyacoustid",
