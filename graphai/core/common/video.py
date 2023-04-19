@@ -1,5 +1,6 @@
 import json
 import os
+import io
 import random
 import re
 import sys
@@ -15,6 +16,8 @@ import ffmpeg
 import imagehash
 from PIL import Image
 import pytesseract
+from google.cloud import vision
+from google.protobuf.json_format import MessageToJson
 import spacy
 import gzip
 import numpy as np
@@ -461,15 +464,34 @@ def generate_frame_sample_indices(input_folder_with_path, step=16):
     return frame_sample_indices
 
 
-def ocr_or_get_cached(ocr_path, image_path, language):
+def read_txt_gz_file(fp):
+    with gzip.open(fp, 'r') as fid:
+        extracted_text = fid.read().decode('utf-8')
+    return extracted_text
+
+
+def write_txt_gz_file(text, fp):
+    with gzip.open(fp, 'w') as fid:
+        fid.write(text.encode('utf-8'))
+
+
+def perform_tesseract_ocr(image_path, language=None):
+    if language is None:
+        language = 'en'
+    if not file_exists(image_path):
+        print(f'Error: File {image_path} does not exist')
+        return None
+    return pytesseract.image_to_string(Image.open(image_path),
+                                       lang={'en':'eng', 'fr':'fra'}[language])
+
+
+def tesseract_ocr_or_get_cached(ocr_path, image_path, language):
     if file_exists(ocr_path):
-        with gzip.open(ocr_path, 'r') as fid:
-            extracted_text = fid.read().decode('utf-8')
+        extracted_text = read_txt_gz_file(ocr_path)
     else:
-        extracted_text = pytesseract.image_to_string(Image.open(image_path),
-                                                      lang={'en':'eng', 'fr':'fra'}[language])
-        with gzip.open(ocr_path, 'w') as fid:
-            fid.write(extracted_text.encode('utf-8'))
+        extracted_text = perform_tesseract_ocr(image_path, language)
+        if extracted_text is not None:
+            write_txt_gz_file(extracted_text, ocr_path)
     return extracted_text
 
 
@@ -486,8 +508,8 @@ def frame_ocr_distance(input_folder_with_path, k1, k2, nlp_models, language=None
     ocr_2_path = os.path.join(input_folder_with_path, (OCR_FORMAT) % (k2))
 
     # Cache the results since they will be used multiple times during slide detection
-    extracted_text1 = ocr_or_get_cached(ocr_1_path, image_1_path, language)
-    extracted_text2 = ocr_or_get_cached(ocr_2_path, image_2_path, language)
+    extracted_text1 = tesseract_ocr_or_get_cached(ocr_1_path, image_1_path, language)
+    extracted_text2 = tesseract_ocr_or_get_cached(ocr_2_path, image_2_path, language)
 
     # Calculate NLP objects
     nlp_1 = nlp_models[language](extracted_text1)
@@ -656,3 +678,44 @@ class NLPModels():
                 'fr'  : spacy.load('fr_core_news_md')
             }
         return self.nlp_models
+
+
+class GoogleOCRModel():
+    def __init__(self):
+        self.model = None
+
+    def establish_connection(self):
+        if self.model is None:
+            self.model = vision.ImageAnnotatorClient()
+
+    def perform_ocr(self, input_filename_with_path):
+        self.establish_connection()
+        # Loading the image
+        if not file_exists(input_filename_with_path):
+            print(f'Error: File {input_filename_with_path} does not exist')
+            return None, None
+        with io.open(input_filename_with_path, 'rb') as image_file:
+            image_content = image_file.read()
+        g_image_obj = vision.Image(content=image_content)
+        # Waiting for results (accounting for possible failures)
+        results_1 = self.wait_for_ocr_results(image_object=g_image_obj, method='dtd')
+        results_2 = self.wait_for_ocr_results(image_object=g_image_obj, method='td')
+        return results_1, results_2
+
+    def wait_for_ocr_results(self, image_object, method='dtd', retries=6):
+        assert method in ['dtd', 'td']
+        results = None
+        for i in range(retries):
+            try:
+                if method == 'dtd':
+                    results = self.model.document_text_detection(image=image_object)
+                else:
+                    results = self.model.text_detection(image=image_object)
+                break
+            except:
+                print('Failed to call OCR engine (method 1). Trying again in 60 seconds ...')
+                time.sleep(60)
+        if results is not None:
+            results = json.loads(MessageToJson(results))
+            results = results['responses'][0]['fullTextAnnotation']['text']
+        return results
