@@ -6,6 +6,7 @@ import graphai.api.routers.ontology as ontology_router
 import graphai.api.routers.video as video_router
 import graphai.api.routers.voice as audio_router
 import graphai.api.routers.image as image_router
+from graphai.api.celery_tasks.common import lazy_loader_task
 
 from graphai.api.common.log import log
 
@@ -33,24 +34,14 @@ celery_instance = app.celery_app
 
 # On startup, we instantiate concepts graph and ontology, so they are held into memory
 @app.on_event("startup")
-async def instantiate_graph_and_ontology():
-    # Fetching concepts graph, ontology graph, and the root directory for videos and other files
-    pass
-    # log(f'Fetching concepts graph from database...')
-    # graph.fetch_from_db()
-    # log(f'Fetching ontology from database...')
-    # ontology.fetch_from_db()
-
-
-    log(f'Instantiating actor lists...')
-    # ws_actor_list.instantiate_actors()
-
-
-# On shutdown, we free ray actors, so they can be garbage collected
-@app.on_event("shutdown")
-async def instantiate_graph_and_ontology():
-    log(f'Freeing ray actors...')
-    # ws_actor_list.free_actors()
+async def lazy_load_singletons():
+    # Loading all the lazy-loaded objects in the celery process
+    log(f'Loading all lazy-loaded objects')
+    lazy_loading_successful = lazy_loader_task.apply_async(priority=10).get()
+    if lazy_loading_successful:
+        log(f'Lazy-loaded objects loaded into memory')
+    else:
+        log(f'ERROR: Lazy-loading unsuccessful, check celery logs')
 
 
 # Root endpoint redirects to docs

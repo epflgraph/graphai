@@ -1,5 +1,8 @@
 from graphai.core.common.video import find_closest_audio_fingerprint_from_list, \
     find_closest_image_fingerprint_from_list
+from graphai.api.common.video import transcription_model, local_ocr_nlp_models, google_ocr_model
+from graphai.api.common.graph import graph
+from graphai.api.common.ontology import ontology
 from celery import shared_task
 
 def format_api_results(id, name, status, result):
@@ -118,3 +121,22 @@ def dummy_task(self, results):
     # Whenever there are two groups in one chain of tasks, there need to be at least
     # TWO tasks between them, and this dummy task is simply an f(x)=x function.
     return results
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
+             name='common.lazy_load_all', ignore_result=False,
+             graph_obj=graph, ontology_obj=ontology, transcription_obj=transcription_model,
+             nlp_obj=local_ocr_nlp_models, google_obj=google_ocr_model)
+def lazy_loader_task(self):
+    # This task force-loads all the lazy-loading objects in the celery process
+    print('Starting force-load...')
+    self.graph_obj.fetch_from_db()
+    print('Graph tables loaded')
+    self.ontology_obj.fetch_from_db()
+    print('Ontology tables loaded')
+    self.transcription_obj.load_model_whisper()
+    print('Transcription model loaded')
+    self.nlp_obj.get_nlp_models()
+    print('NLP models loaded')
+    # self.google_obj.establish_connection()
+    return True
