@@ -1,4 +1,4 @@
-from celery import shared_task, group
+from celery import shared_task
 
 from graphai.api.celery_tasks.common import fingerprint_lookup_retrieve_from_db, fingerprint_lookup_parallel, \
     fingerprint_lookup_callback
@@ -170,20 +170,3 @@ def extract_slide_text_callback_task(self, results, token):
     return results
 
 
-def compute_slide_fingerprint_master(token, force=False, min_similarity=1, n_jobs=8):
-    task = (
-            compute_slide_fingerprint_task.s(token, force) |
-            compute_slide_fingerprint_callback_task.s(token) |
-            slide_fingerprint_find_closest_retrieve_from_db_task.s(token) |
-            group(slide_fingerprint_find_closest_parallel_task.s(i, n_jobs, min_similarity) for i in range(n_jobs)) |
-            slide_fingerprint_find_closest_callback_task.s(token) |
-            retrieve_slide_fingerprint_callback_task.s()
-            ).apply_async(priority=2)
-    return {'id': task.id}
-
-
-def extract_slide_text_master(token, method='google', force=False):
-    assert method in ['google', 'tesseract']
-    task = (extract_slide_text_task.s(token, method, force) |
-            extract_slide_text_callback_task.s(token)).apply_async(priority=2)
-    return {'id': task.id}

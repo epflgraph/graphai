@@ -1,10 +1,14 @@
+from celery import group
 from fastapi import APIRouter
 from graphai.api.schemas.image import *
 from graphai.api.schemas.common import *
 from graphai.api.celery_tasks.common import format_api_results
 from graphai.core.interfaces.celery_config import get_task_info
 
-from ..celery_tasks.image import compute_slide_fingerprint_master, extract_slide_text_master
+from ..celery_tasks.image import compute_slide_fingerprint_task, \
+    compute_slide_fingerprint_callback_task, slide_fingerprint_find_closest_retrieve_from_db_task, \
+    slide_fingerprint_find_closest_parallel_task, slide_fingerprint_find_closest_callback_task, \
+    retrieve_slide_fingerprint_callback_task, extract_slide_text_task, extract_slide_text_callback_task
 
 # Initialise video router
 router = APIRouter(
@@ -13,10 +17,22 @@ router = APIRouter(
     responses={404: {'description': 'Not found'}}
 )
 
+
 @router.post('/calculate_fingerprint', response_model=TaskIDResponse)
 async def calculate_fingerprint(data: ImageFingerprintRequest):
-    result = compute_slide_fingerprint_master(data.token, force=data.force)
-    return {'task_id': result['id']}
+    token = data.token
+    force = data.force
+    min_similarity = 1
+    n_jobs = 8
+    task = (
+            compute_slide_fingerprint_task.s(token, force) |
+            compute_slide_fingerprint_callback_task.s(token) |
+            slide_fingerprint_find_closest_retrieve_from_db_task.s(token) |
+            group(slide_fingerprint_find_closest_parallel_task.s(i, n_jobs, min_similarity) for i in range(n_jobs)) |
+            slide_fingerprint_find_closest_callback_task.s(token) |
+            retrieve_slide_fingerprint_callback_task.s()
+        ).apply_async(priority=2)
+    return {'task_id': task.id}
 
 
 @router.get('/calculate_fingerprint/status/{task_id}', response_model=ImageFingerprintResponse)
@@ -37,8 +53,13 @@ async def calculate_fingerprint_status(task_id):
 
 @router.post('/extract_text', response_model=TaskIDResponse)
 async def extract_text(data: ExtractTextRequest):
-    result = extract_slide_text_master(data.token, method=data.method, force=data.force)
-    return {'task_id': result['id']}
+    token = data.token
+    method = data.method
+    force = data.force
+    assert method in ['google', 'tesseract']
+    task = (extract_slide_text_task.s(token, method, force) |
+            extract_slide_text_callback_task.s(token)).apply_async(priority=2)
+    return {'task_id': task.id}
 
 
 @router.get('/extract_text/status/{task_id}', response_model=ExtractTextResponse)

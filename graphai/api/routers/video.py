@@ -1,12 +1,15 @@
+from celery import group
 from fastapi import APIRouter
 from fastapi.responses import FileResponse
 
 from graphai.api.schemas.video import *
 from graphai.api.schemas.common import *
 
-from graphai.api.celery_tasks.video import retrieve_and_generate_token_master, \
-    get_file_master, extract_audio_master, detect_slides_master
-from graphai.api.celery_tasks.common import format_api_results
+from graphai.api.celery_tasks.video import retrieve_file_from_url_task, get_file_task, extract_audio_task, \
+    extract_audio_callback_task, extract_and_sample_frames_task, compute_noise_level_parallel_task, \
+    compute_noise_threshold_callback_task, compute_slide_transitions_parallel_task, \
+    compute_slide_transitions_callback_task, detect_slides_callback_task
+from graphai.api.celery_tasks.common import format_api_results, dummy_task
 from graphai.core.interfaces.celery_config import get_task_info
 
 # Initialise video router
@@ -19,8 +22,9 @@ router = APIRouter(
 
 @router.post('/retrieve_url', response_model=TaskIDResponse)
 async def retrieve_file(data: RetrieveURLRequest):
-    result = retrieve_and_generate_token_master(data.url)
-    return {'task_id': result['id']}
+    url = data.url
+    task = retrieve_file_from_url_task.s(url).apply_async(priority=2)
+    return {'task_id': task.id}
 
 
 # For each async endpoint, we also have a status endpoint since they have different response models.
@@ -41,13 +45,17 @@ async def get_retrieve_file_status(task_id):
 
 @router.post('/get_file/')
 async def get_file(data: FileRequest):
-    return FileResponse(get_file_master(data.token))
+    token = data.token
+    return FileResponse(get_file_task.apply_async(args=[token], priority=2).get())
 
 
 @router.post('/extract_audio', response_model=TaskIDResponse)
 async def extract_audio(data: ExtractAudioRequest):
-    result = extract_audio_master(data.token, force=data.force)
-    return {'task_id': result['id']}
+    token = data.token
+    force = data.force
+    task = (extract_audio_task.s(token, force) |
+            extract_audio_callback_task.s(token)).apply_async(priority=2)
+    return {'task_id': task.id}
 
 
 @router.get('/extract_audio/status/{task_id}', response_model=ExtractAudioResponse)
@@ -69,8 +77,20 @@ async def extract_audio_status(task_id):
 
 @router.post('/detect_slides', response_model=TaskIDResponse)
 async def detect_slides(data: DetectSlidesRequest):
-    result = detect_slides_master(data.token, force=data.force, language=data.language)
-    return {'task_id': result['id']}
+    token = data.token
+    force = data.force
+    language = data.language
+    n_jobs = 8
+    hash_thresh = 0.8
+    task = (extract_and_sample_frames_task.s(token, force) |
+            group(compute_noise_level_parallel_task.s(i, n_jobs, language) for i in range(n_jobs)) |
+            compute_noise_threshold_callback_task.s(hash_thresh) |
+            dummy_task.s() |
+            group(compute_slide_transitions_parallel_task.s(i, n_jobs, language) for i in range(n_jobs)) |
+            compute_slide_transitions_callback_task.s() |
+            detect_slides_callback_task.s(token)). \
+        apply_async(priority=2)
+    return {'task_id': task.id}
 
 
 @router.get('/detect_slides/status/{task_id}', response_model=DetectSlidesResponse)

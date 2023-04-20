@@ -4,8 +4,8 @@ from graphai.api.schemas.ontology import *
 from graphai.api.schemas.common import *
 
 from graphai.api.common.log import log
-from graphai.api.celery_tasks.ontology import get_ontology_tree_master, get_category_parent_master, \
-    get_category_children_master
+from graphai.api.celery_tasks.ontology import get_ontology_tree_task, get_category_parent_task, \
+    get_category_children_task
 from graphai.api.celery_tasks.common import format_api_results
 from graphai.core.interfaces.celery_config import get_task_info
 
@@ -31,19 +31,39 @@ def ontology_tree_response_handler(id_and_results):
 @router.get('/tree', response_model=TreeResponse)
 async def tree():
     log('Returning the ontology tree')
-    id_and_results = get_ontology_tree_master()
+    task = (get_ontology_tree_task.s()).apply_async(priority=6)
+    task_id = task.id
+    try:
+        results = task.get(timeout=10)
+    except TimeoutError as e:
+        print(e)
+        results = None
+    id_and_results = {'id': task_id, 'results': results}
     return ontology_tree_response_handler(id_and_results)
 
 
 @router.get('/tree/parent/{category_id}', response_model=TreeResponse)
 async def parent(category_id):
     log('Returning the parent of category %s' % category_id)
-    id_and_results = get_category_parent_master(int(category_id))
+    task = (get_category_parent_task.s(int(category_id))).apply_async(priority=6)
+    try:
+        results = task.get(timeout=10)
+    except TimeoutError as e:
+        print(e)
+        results = None
+    id_and_results = {'id': task.id, 'results': results}
     return ontology_tree_response_handler(id_and_results)
 
 
 @router.get('/tree/children/{category_id}', response_model=TreeResponse)
 async def children(category_id):
     log('Returning the children of category %s' % category_id)
-    id_and_results = get_category_children_master(int(category_id))
+    task = (get_category_children_task.s(int(category_id))).apply_async(priority=6)
+    task_id = task.id
+    try:
+        results = task.get(timeout=10)
+    except TimeoutError as e:
+        print(e)
+        results = None
+    id_and_results = {'id': task_id, 'results': results}
     return ontology_tree_response_handler(id_and_results)

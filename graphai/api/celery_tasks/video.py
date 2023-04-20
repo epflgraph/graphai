@@ -1,19 +1,20 @@
 import os
 import shutil
 
-from celery import shared_task, group
+from celery import shared_task
 from graphai.api.common.video import file_management_config, audio_db_manager, local_ocr_nlp_models, slide_db_manager
-from graphai.core.common.video import generate_random_token, retrieve_file_from_url, detect_audio_format_and_duration, \
+from graphai.core.common.video import retrieve_file_from_url, detect_audio_format_and_duration, \
     extract_audio_from_video, extract_frames, generate_frame_sample_indices, compute_ocr_noise_level, \
-    compute_ocr_threshold, compute_video_ocr_transitions, FRAME_FORMAT, OCR_FORMAT
-from graphai.api.celery_tasks.common import dummy_task
+    compute_ocr_threshold, compute_video_ocr_transitions, generate_random_token, FRAME_FORMAT, OCR_FORMAT
 from itertools import chain
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='video.retrieve_url', ignore_result=False,
              file_manager=file_management_config)
-def retrieve_file_from_url_task(self, url, filename):
+def retrieve_file_from_url_task(self, url):
+    token = generate_random_token()
+    filename = token + '.' + url.split('.')[-1]
     filename_with_path = self.file_manager.generate_filepath(filename)
     results = retrieve_file_from_url(url, filename_with_path, filename)
     return {'token': results}
@@ -276,34 +277,3 @@ def detect_slides_callback_task(self, results, token):
         'slide_tokens': slide_tokens,
         'fresh': results['fresh']
     }
-
-
-def retrieve_and_generate_token_master(url):
-    token = generate_random_token()
-    out_filename = token + '.' + url.split('.')[-1]
-    task = retrieve_file_from_url_task.apply_async(args=[url, out_filename], priority=2)
-    return {'id': task.id}
-
-
-def get_file_master(token):
-    return get_file_task.apply_async(args=[token], priority=2).get()
-
-
-def extract_audio_master(token, force=False):
-    task = (extract_audio_task.s(token, force) |
-            extract_audio_callback_task.s(token)).apply_async(priority=2)
-    return {'id': task.id}
-
-
-def detect_slides_master(token, force=False, language=None, n_jobs=8, hash_thresh=0.8):
-    task = (extract_and_sample_frames_task.s(token, force) |
-            group(compute_noise_level_parallel_task.s(i, n_jobs, language) for i in range(n_jobs)) |
-            compute_noise_threshold_callback_task.s(hash_thresh) |
-            dummy_task.s() |
-            group(compute_slide_transitions_parallel_task.s(i, n_jobs, language) for i in range(n_jobs)) |
-            compute_slide_transitions_callback_task.s() |
-            detect_slides_callback_task.s(token)).\
-                    apply_async(priority=2)
-    return {'id': task.id}
-
-

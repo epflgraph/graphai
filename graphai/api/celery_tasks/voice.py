@@ -1,6 +1,6 @@
 import json
 
-from celery import shared_task, chain, group, Task
+from celery import shared_task
 from graphai.api.common.video import audio_db_manager, file_management_config, transcription_model
 from graphai.core.common.video import remove_silence_doublesided, perceptual_hash_audio, \
     write_text_file, read_text_file, read_json_file, extract_audio_segment
@@ -382,50 +382,3 @@ def transcribe_callback_task(self, results, token):
                 closest, values_dict
             )
     return results
-
-
-def compute_audio_fingerprint_master(token, force=False, remove_silence=False, threshold=0.0,
-                                     min_similarity=0.8, n_jobs=8):
-    if not remove_silence:
-        task = (compute_audio_fingerprint_task.s({'fp_token': token}, token, force) |
-                compute_audio_fingerprint_callback_task.s(token) |
-                audio_fingerprint_find_closest_retrieve_from_db_task.s(token) |
-                group(audio_fingerprint_find_closest_parallel_task.s(i, n_jobs, min_similarity) for i in range(n_jobs)) |
-                audio_fingerprint_find_closest_callback_task.s(token) |
-                retrieve_audio_fingerprint_callback_task.s()
-                )
-    else:
-        task = (remove_audio_silence_task.s(token, force, threshold) |
-                remove_audio_silence_callback_task.s(token) |
-                compute_audio_fingerprint_task.s(token, force) |
-                compute_audio_fingerprint_callback_task.s(token) |
-                audio_fingerprint_find_closest_retrieve_from_db_task.s(token) |
-                group(audio_fingerprint_find_closest_parallel_task.s(i, n_jobs, min_similarity) for i in range(n_jobs)) |
-                audio_fingerprint_find_closest_callback_task.s(token) |
-                retrieve_audio_fingerprint_callback_task.s()
-                )
-    task = task.apply_async(priority=2)
-    return {'id': task.id}
-
-
-def detect_language_master(token, force=False):
-    n_divs = 5
-    task = (detect_language_retrieve_from_db_and_split_task.s(token, force, n_divs, 30) |
-            group(detect_language_parallel_task.s(i) for i in range(n_divs)) |
-            detect_language_callback_task.s(token)).apply_async(priority=2)
-    return {'id': task.id}
-
-
-def transcribe_master(token, lang=None, force=False):
-    if lang is not None:
-        task = (transcribe_task.s({'token':token, 'lang': lang}, force) |
-                transcribe_callback_task.s(token))
-    else:
-        n_divs = 5
-        task = (detect_language_retrieve_from_db_and_split_task.s(token, force, n_divs, 30) |
-                group(detect_language_parallel_task.s(i) for i in range(n_divs)) |
-                detect_language_callback_task.s(token) |
-                transcribe_task.s(force) |
-                transcribe_callback_task.s(token))
-    task = task.apply_async(priority=2)
-    return {'id': task.id}
