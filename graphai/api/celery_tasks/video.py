@@ -163,7 +163,7 @@ def compute_noise_level_parallel_task(self, results, i, n, language=None):
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='video.noise_level_callback', ignore_result=False)
-def compute_noise_threshold_callback_task(self, results, hash_thresh=0.9):
+def compute_noise_threshold_callback_task(self, results, hash_thresh=0.8):
     if not results[0]['fresh']:
         return {
             'result': None,
@@ -295,7 +295,7 @@ def extract_audio_master(token, force=False):
     return {'id': task.id}
 
 
-def detect_slides_master(token, force=False, language=None, n_jobs=8, hash_thresh=0.9):
+def detect_slides_master(token, force=False, language=None, n_jobs=8, hash_thresh=0.8):
     task = (extract_and_sample_frames_task.s(token, force) |
             group(compute_noise_level_parallel_task.s(i, n_jobs, language) for i in range(n_jobs)) |
             compute_noise_threshold_callback_task.s(hash_thresh) |
