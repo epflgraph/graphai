@@ -37,6 +37,7 @@ class BaseConfig:
             # default queue
             Queue("celery"),
             # custom queue
+            Queue("common", max_priority=10),
             Queue("text", max_priority=10),
             Queue("video", max_priority=2),
             Queue("ontology", max_priority=6)
