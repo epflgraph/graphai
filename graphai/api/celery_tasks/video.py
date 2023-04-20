@@ -163,7 +163,7 @@ def compute_noise_level_parallel_task(self, results, i, n, language=None):
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='video.noise_level_callback', ignore_result=False)
-def compute_noise_threshold_callback_task(self, results):
+def compute_noise_threshold_callback_task(self, results, hash_thresh=0.9):
     if not results[0]['fresh']:
         return {
             'result': None,
@@ -179,6 +179,7 @@ def compute_noise_threshold_callback_task(self, results):
         'result': results[0]['result'],
         'sample_indices': results[0]['sample_indices'],
         'threshold': threshold,
+        'hash_threshold': hash_thresh,
         'fresh': True,
         'slide_tokens': None
     }
@@ -200,8 +201,8 @@ def compute_slide_transitions_parallel_task(self, results, i, n, language=None):
     end_index = int((i+1)*len(all_sample_indices)/n)
     current_sample_indices = all_sample_indices[start_index:end_index]
     slide_transition_list = \
-        compute_video_ocr_transitions(self.file_manager.generate_filepath(results['result']),
-                                      current_sample_indices, results['threshold'],
+        compute_video_ocr_transitions(self.file_manager.generate_filepath(results['result']), current_sample_indices,
+                                      results['threshold'], results['hash_threshold'],
                                       self.nlp_model.get_nlp_models(), language=language)
     return {
         'result': results['result'],
@@ -294,10 +295,10 @@ def extract_audio_master(token, force=False):
     return {'id': task.id}
 
 
-def detect_slides_master(token, force=False, language=None, n_jobs=8):
+def detect_slides_master(token, force=False, language=None, n_jobs=8, hash_thresh=0.9):
     task = (extract_and_sample_frames_task.s(token, force) |
             group(compute_noise_level_parallel_task.s(i, n_jobs, language) for i in range(n_jobs)) |
-            compute_noise_threshold_callback_task.s() |
+            compute_noise_threshold_callback_task.s(hash_thresh) |
             dummy_task.s() |
             group(compute_slide_transitions_parallel_task.s(i, n_jobs, language) for i in range(n_jobs)) |
             compute_slide_transitions_callback_task.s() |

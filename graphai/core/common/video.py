@@ -529,6 +529,16 @@ def frame_ocr_distance(input_folder_with_path, k1, k2, nlp_models, language=None
     return text_dif
 
 
+def frame_hash_distance(input_folder_with_path, k1, k2):
+    image_1_path = os.path.join(input_folder_with_path, (FRAME_FORMAT) % (k1))
+    image_2_path = os.path.join(input_folder_with_path, (FRAME_FORMAT) % (k2))
+
+    image_1_hash = perceptual_hash_image(image_1_path)
+    image_2_hash = perceptual_hash_image(image_2_path)
+
+    return compare_encoded_fingerprints(image_1_hash, image_2_hash, decoder_func=imagehash.hex_to_hash)
+
+
 def compute_ocr_noise_level(input_folder_with_path, frame_sample_indices, nlp_models, language=None):
     print('Estimating transition threshold ...')
     distance_list = list()
@@ -548,15 +558,21 @@ def compute_ocr_threshold(distance_list, default_threshold=0.1):
 
 
 # Recursive function that finds slide transitions through binary tree search
-def frame_ocr_transition(input_folder_with_path, k_l, k_r, threshold, nlp_models, language=None):
+def frame_ocr_transition(input_folder_with_path, k_l, k_r, ocr_dist_threshold, hash_dist_threshold, nlp_models,
+                         language=None):
     k_m = int(np.mean([k_l, k_r]))
     d = frame_ocr_distance(input_folder_with_path, k_l, k_r, nlp_models, language)
+    d_hash = frame_hash_distance(input_folder_with_path, k_l, k_r)
     if k_m == k_l or k_m == k_r:
         return [k_r, d]
     else:
-        if d > threshold:
-            [k_sep_l, d_l] = frame_ocr_transition(input_folder_with_path, k_l, k_m, threshold, nlp_models, language)
-            [k_sep_r, d_r] = frame_ocr_transition(input_folder_with_path, k_m, k_r, threshold, nlp_models, language)
+        if d > ocr_dist_threshold and d_hash < hash_dist_threshold:
+            [k_sep_l, d_l] = frame_ocr_transition(input_folder_with_path, k_l, k_m, ocr_dist_threshold,
+                                                  hash_dist_threshold,
+                                                  nlp_models, language)
+            [k_sep_r, d_r] = frame_ocr_transition(input_folder_with_path, k_m, k_r, ocr_dist_threshold,
+                                                  hash_dist_threshold,
+                                                  nlp_models, language)
             if k_sep_l is None and k_sep_r is None:
                 return [None, None]
             elif k_sep_l is not None and k_sep_r is None:
@@ -572,12 +588,12 @@ def frame_ocr_transition(input_folder_with_path, k_l, k_r, threshold, nlp_models
             return [None, None]
 
 
-def compute_video_ocr_transitions(input_folder_with_path, frame_sample_indices, threshold, nlp_models, language=None):
+def compute_video_ocr_transitions(input_folder_with_path, frame_sample_indices, ocr_dist_threshold, hash_dist_threshold,
+                                  nlp_models, language=None):
     transition_list = list()
     for k in range(1, len(frame_sample_indices)):
-        [t,d] = frame_ocr_transition(input_folder_with_path,
-                                 frame_sample_indices[k - 1], frame_sample_indices[k],
-                                 threshold, nlp_models, language)
+        [t,d] = frame_ocr_transition(input_folder_with_path, frame_sample_indices[k - 1], frame_sample_indices[k],
+                                     ocr_dist_threshold, hash_dist_threshold, nlp_models, language)
         if t is not None and t < frame_sample_indices[-1]:
             transition_list.append(t)
     return transition_list
