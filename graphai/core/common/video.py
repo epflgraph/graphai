@@ -638,7 +638,6 @@ class WhisperTranscriptionModel():
             Highest-scoring language code (e.g. 'en')
         """
         self.load_model_whisper()
-        print(self.model)
         audio = whisper.load_audio(input_filename_with_path)
         audio = whisper.pad_or_trim(audio)
 
