@@ -138,5 +138,6 @@ def lazy_loader_task(self):
     print('Transcription model loaded')
     self.nlp_obj.get_nlp_models()
     print('NLP models loaded')
-    # self.google_obj.establish_connection()
+    self.google_obj.establish_connection()
+    print('Google API connection established')
     return True
