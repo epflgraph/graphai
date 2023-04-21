@@ -258,7 +258,8 @@ class SlideDBCachingManager(DBCachingManagerBase):
               `timestamp` FLOAT,
               `slide_number` INT UNSIGNED,
               `ocr_tesseract_token` VARCHAR(255) DEFAULT NULL,
-              `ocr_google_token` VARCHAR(255) DEFAULT NULL,
+              `ocr_google_1_token` VARCHAR(255) DEFAULT NULL,
+              `ocr_google_2_token` VARCHAR(255) DEFAULT NULL,
               `language` VARCHAR(10) DEFAULT NULL,
               PRIMARY KEY id_token (id_token)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
