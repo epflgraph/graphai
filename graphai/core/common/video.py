@@ -698,10 +698,23 @@ class NLPModels():
 class GoogleOCRModel():
     def __init__(self):
         self.model = None
+        config_contents = configparser.ConfigParser()
+        try:
+            print(f'Reading API key from file')
+            config_contents.read(f'{CONFIG_DIR}/models.ini')
+            self.api_key = config_contents['GOOGLE'].get('api_key', fallback=None)
+        except Exception as e:
+            self.api_key = None
+        if self.api_key is None:
+            print(f'Could not read file {CONFIG_DIR}/models.ini or '
+                  f'file does not have section [GOOGLE], Google API '
+                  f'endpoints cannot be used as there is no '
+                  f'default API key.')
 
     def establish_connection(self):
         if self.model is None:
-            self.model = vision.ImageAnnotatorClient()
+            print('Establishing Google API connection...')
+            self.model = vision.ImageAnnotatorClient(client_options={"api_key": self.api_key})
 
     def perform_ocr(self, input_filename_with_path):
         self.establish_connection()
@@ -728,9 +741,8 @@ class GoogleOCRModel():
                     results = self.model.text_detection(image=image_object)
                 break
             except:
-                print('Failed to call OCR engine (method 1). Trying again in 60 seconds ...')
-                time.sleep(60)
+                print('Failed to call OCR engine. Trying again in 60 seconds ...')
+                time.sleep(5)
         if results is not None:
-            results = json.loads(MessageToJson(results))
-            results = results['responses'][0]['fullTextAnnotation']['text']
+            results = results.full_text_annotation.text
         return results
