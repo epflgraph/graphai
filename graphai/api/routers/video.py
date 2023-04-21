@@ -81,7 +81,7 @@ async def detect_slides(data: DetectSlidesRequest):
     force = data.force
     language = data.language
     n_jobs = 8
-    hash_thresh = 0.8
+    hash_thresh = 0.85
     task = (extract_and_sample_frames_task.s(token, force) |
             group(compute_noise_level_parallel_task.s(i, n_jobs, language) for i in range(n_jobs)) |
             compute_noise_threshold_callback_task.s(hash_thresh) |
