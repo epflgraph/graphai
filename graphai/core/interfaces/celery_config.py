@@ -12,7 +12,7 @@ DEFAULT_CACHE = "redis://localhost:6379/0"
 
 def route_task(name, args, kwargs, options, task=None, **kw):
     if "." in name:
-        queue, _ = name.split(".")
+        queue = name.split(".")[0]
         return {"queue": queue}
     return {"queue": "celery"}
 
