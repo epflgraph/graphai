@@ -246,4 +246,4 @@ class KeywordsRequest(BaseModel):
     )
 
 
-KeywordsResponse = List[WikifyResponseElem]
+KeywordsResponse = List[str]

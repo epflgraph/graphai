@@ -2,8 +2,6 @@ import RAKE
 import nltk
 from rake_nltk import Rake
 
-import pandas as pd
-
 from graphai.core.utils.text.clean import normalize
 
 # Download nltk resources
@@ -128,7 +126,7 @@ def get_keywords(text, use_nltk=False):
         use_nltk (bool): Whether to use nltk-rake for keyword extraction, otherwise python-rake is used. Default: False.
 
     Returns:
-        pd.DataFrame: A pandas DataFrame with one column 'Keywords', containing the keywords extracted from the text.
+        list[str]: A list containing the keywords extracted from the text.
 
     Examples:
         >>> text = ' '.join([
@@ -140,12 +138,7 @@ def get_keywords(text, use_nltk=False):
         >>>     "</p>"
         >>> ])
         >>> get_keywords(text)
-                 Keywords
-        0   brown baggies
-        1      young boys
-        2  trumpet playin
-        3    corner drunk
-        4  platform soles
+        ['brown baggies', 'young boys', 'trumpet playin', 'corner drunk', 'platform soles']
     """
 
     text = normalize(text)
@@ -161,4 +154,4 @@ def get_keywords(text, use_nltk=False):
     # Remove duplicates
     keyword_list = list(set(keyword_list))
 
-    return pd.DataFrame(pd.Series(keyword_list), columns=['Keywords'])
+    return keyword_list

@@ -1,22 +1,15 @@
 import pandas as pd
 
-import Levenshtein
-
 from fastapi import APIRouter
+
+from celery import chain, group
 
 from typing import Optional
 
 from graphai.api.schemas.text import *
 
-from graphai.api.common.log import log
-from graphai.api.common.graph import graph
-from graphai.api.common.ontology import ontology
+from graphai.api.celery_tasks.text import extract_keywords_task, wikisearch_task, init, compute_scores_task, aggregate_and_filter_task
 
-from graphai.core.text.keywords import get_keywords
-
-from graphai.api.celery_tasks.text import wikisearch_master
-
-from graphai.core.utils.time.stopwatch import Stopwatch
 
 pd.set_option('display.max_rows', 400)
 pd.set_option('display.max_columns', 500)
@@ -32,7 +25,29 @@ router = APIRouter(
 
 @router.post('/keywords', response_model=KeywordsResponse)
 async def keywords(data: KeywordsRequest, use_nltk: Optional[bool] = False):
-    return get_keywords(data.raw_text, use_nltk)
+    """
+    Processes raw text (e.g. from an abstract of a publication, a course description or a lecture slide) and returns a
+    list of keywords from the text.
+    """
+
+    # Get input parameters
+    raw_text = data.raw_text
+
+    # Return if no input
+    if not raw_text:
+        return []
+
+    # Set up job
+    n = 10
+    job = extract_keywords_task.s(raw_text, use_nltk=use_nltk)
+
+    # Schedule job
+    results = job.apply_async(priority=10)
+
+    # Wait for results
+    results = results.get(timeout=10)
+
+    return results
 
 
 @router.post('/wikify', response_model=WikifyResponse)
@@ -52,9 +67,6 @@ async def wikify(data: WikifyRequest, method: Optional[str] = None):
         to keep only the most relevant results.
     """
 
-    # Initialize stopwatch to track time
-    sw = Stopwatch()
-
     # Get input parameters
     raw_text = data.raw_text
 
@@ -62,96 +74,20 @@ async def wikify(data: WikifyRequest, method: Optional[str] = None):
     if not raw_text:
         return []
 
-    log(f'Received raw text "{raw_text[:32]}..."', sw.delta())
-
-    # Extract keywords from text
-    keywords = get_keywords(raw_text)
-    log(f'Extracted list of {len(keywords)} keywords', sw.delta())
-
-    # Perform wikisearch to get concepts for all sets of keywords
-    results = wikisearch_master(keywords, method)
-    log(f"""Finished {method if method else 'es-base'} wikisearch with {len(results)} results""", sw.delta())
-
-    ############################################################
-
-    # Compute levenshtein score
-    # S-shaped function on [0, 1] that pulls values away from 1/2, exaggerating differences
-    def f(x):
-        return 1 / (1 + ((1 - x) / x) ** 2)
-
-    results['LevenshteinScore'] = results.apply(lambda row: Levenshtein.ratio(row['Keywords'], row['PageTitle'].replace('_', ' ').lower()), axis=1)
-    results['LevenshteinScore'] = f(results['LevenshteinScore'])
-
-    ############################################################
-
-    # Compute ontology score
-    results = ontology.add_ontology_scores(results)
-
-    # Compute graph score
-    results = graph.add_graph_score(results)
-
-    ############################################################
-
-    # Compute keywords score aggregating ontology global score over Keywords as an indicator for low-quality keywords
-    results = pd.merge(
-        results,
-        results.groupby(by=['Keywords']).aggregate(KeywordsScore=('OntologyGlobalScore', 'sum')).reset_index(),
-        how='left',
-        on=['Keywords']
+    # Set up composite job
+    n = 10
+    job = chain(
+        extract_keywords_task.s(raw_text),
+        group(wikisearch_task.s(fraction=(i / n, (i + 1) / n), method=method) for i in range(n)),
+        init.s(),
+        compute_scores_task.s(),
+        aggregate_and_filter_task.s()
     )
-    results['KeywordsScore'] = results['KeywordsScore'] / results['KeywordsScore'].max()
 
-    log(f"""Computed scores for {len(results)} results""", sw.delta())
+    # Schedule job
+    results = job.apply_async(priority=10)
 
-    ############################################################
-
-    # Aggregate over pages
-    results = results.groupby(by=['PageID', 'PageTitle']).aggregate(
-        SearchScore=('SearchScore', 'sum'),
-        LevenshteinScore=('LevenshteinScore', 'sum'),
-        OntologyLocalScore=('OntologyLocalScore', 'sum'),
-        OntologyGlobalScore=('OntologyGlobalScore', 'sum'),
-        GraphScore=('GraphScore', 'sum'),
-        KeywordsScore=('KeywordsScore', 'sum')
-    ).reset_index()
-    score_columns = ['SearchScore', 'LevenshteinScore', 'OntologyLocalScore', 'OntologyGlobalScore', 'GraphScore', 'KeywordsScore']
-
-    # Normalise scores to [0, 1]
-    for column in score_columns:
-        results[column] = results[column] / results[column].max()
-
-    log(f"""Aggregated results, got {len(results)} concepts""", sw.delta())
-
-    ############################################################
-
-    # Filter results with low scores through a majority vote among all scores
-    # To be kept, we require a concept to have at least 5 out of 6 scores to be significant (>= epsilon)
-    epsilon = 0.1
-    votes = pd.DataFrame()
-    for column in score_columns:
-        votes[column] = (results[column] >= epsilon).astype(int)
-    votes = votes.sum(axis=1)
-    results = results[votes >= 5]
-    results = results.sort_values(by='PageTitle')
-
-    log(f"""Filtered concepts with low scores, kept {len(results)} concepts""", sw.delta())
-
-    ############################################################
-
-    # Compute mixed score as a convex combination of the different scores,
-    # with prescribed coefficients found after running some analyses on manually tagged data.
-    coefficients = pd.DataFrame({
-        'SearchScore': [0.2],
-        'LevenshteinScore': [0.15],
-        'OntologyLocalScore': [0.15],
-        'OntologyGlobalScore': [0.1],
-        'GraphScore': [0.1],
-        'KeywordsScore': [0.3]
-    })
-    results['MixedScore'] = results[score_columns] @ coefficients.transpose()
-
-    log(f'Finished all tasks', sw.total(), total=True)
-
-    ############################################################
+    # Wait for results
+    results = results.get(timeout=10)
 
     return results.to_dict(orient='records')
