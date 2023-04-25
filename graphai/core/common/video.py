@@ -372,6 +372,7 @@ def find_closest_fingerprint_from_list(target_fp, fp_list, token_list, min_simil
         token_list: List of tokens corresponding to those fingerprints
         min_similarity: Minimum similarity value. If the similarity of the most similar candidate to the target
                         is lower than this value, None will be returned as the result.
+        decoder_func: The function that decodes the string hash, different for audio vs image hashes
 
     Returns:
         Closest fingerprint, its token, and the highest score. All three are None if the closest one does not
@@ -391,11 +392,17 @@ def find_closest_fingerprint_from_list(target_fp, fp_list, token_list, min_simil
 
 
 def find_closest_audio_fingerprint_from_list(target_fp, fp_list, token_list, min_similarity=0.8):
+    """
+    Finds closest audio fingerprint from list
+    """
     return find_closest_fingerprint_from_list(target_fp, fp_list, token_list, min_similarity,
                                        decoder_func=chromaprint.decode_fingerprint)
 
 
 def find_closest_image_fingerprint_from_list(target_fp, fp_list, token_list, min_similarity=0.8):
+    """
+    Finds closest image fingerprint from list
+    """
     return find_closest_fingerprint_from_list(target_fp, fp_list, token_list, min_similarity,
                                               decoder_func=imagehash.hex_to_hash)
 
@@ -434,6 +441,16 @@ def upload_file_to_google_cloud(input_filename_with_path, input_token, bucket_na
 
 
 def extract_frames(input_filename_with_path, output_folder_with_path, output_folder):
+    """
+    Extracts frames from an image file
+    Args:
+        input_filename_with_path: Path of input video file
+        output_folder_with_path: Path of output image folder
+        output_folder: The output folder only (as return token)
+
+    Returns:
+        The return token if successful, None otherwise
+    """
     if not file_exists(input_filename_with_path):
         print(f'ffmpeg error: File {input_filename_with_path} does not exist')
         return None
@@ -456,6 +473,15 @@ def extract_frames(input_filename_with_path, output_folder_with_path, output_fol
 
 
 def generate_frame_sample_indices(input_folder_with_path, step=16):
+    """
+    Generates indices for extracted frames (so we don't use every single frame for our calculations)
+    Args:
+        input_folder_with_path: Full path of the input image folder
+        step: Step size for indices
+
+    Returns:
+        List of indices
+    """
     # Get number of frames
     n_frames = len(glob.glob(os.path.join(input_folder_with_path+'/*.png')))
     # Generate list of frame sample indices
@@ -476,6 +502,15 @@ def write_txt_gz_file(text, fp):
 
 
 def perform_tesseract_ocr(image_path, language=None):
+    """
+    Performs OCR on an image using Tesseract
+    Args:
+        image_path: Full path of the image file
+        language: Language of the slide
+
+    Returns:
+        Extracted text
+    """
     if language is None:
         language = 'en'
     if not file_exists(image_path):
@@ -486,6 +521,16 @@ def perform_tesseract_ocr(image_path, language=None):
 
 
 def tesseract_ocr_or_get_cached(ocr_path, image_path, language):
+    """
+    Performs OCR using tesseract or uses cached results
+    Args:
+        ocr_path: Root path of OCR files
+        image_path: Root path of image files
+        language: Langauge of the slides
+
+    Returns:
+        Extracted text
+    """
     if file_exists(ocr_path):
         extracted_text = read_txt_gz_file(ocr_path)
     else:
@@ -496,6 +541,18 @@ def tesseract_ocr_or_get_cached(ocr_path, image_path, language):
 
 
 def frame_ocr_distance(input_folder_with_path, k1, k2, nlp_models, language=None):
+    """
+    Computes OCR distance between two frames
+    Args:
+        input_folder_with_path: Full path of input image folder
+        k1: Index of frame 1
+        k2: Index of frame 2
+        nlp_models: NLP models used to compute distance between OCR results
+        language: Language of the text in the input images
+
+    Returns:
+        Distance between the two frames
+    """
     if language is None:
         language = 'en'
 
@@ -529,7 +586,17 @@ def frame_ocr_distance(input_folder_with_path, k1, k2, nlp_models, language=None
     return text_dif
 
 
-def frame_hash_distance(input_folder_with_path, k1, k2):
+def frame_hash_similarity(input_folder_with_path, k1, k2):
+    """
+    Computes the hash-based similarity between two frames
+    Args:
+        input_folder_with_path: Full path of the input image folder
+        k1: Index of frame 1
+        k2: Index of frame 2
+
+    Returns:
+        Similarity between the two frames (between 0 and 1)
+    """
     image_1_path = os.path.join(input_folder_with_path, (FRAME_FORMAT) % (k1))
     image_2_path = os.path.join(input_folder_with_path, (FRAME_FORMAT) % (k2))
 
@@ -540,6 +607,17 @@ def frame_hash_distance(input_folder_with_path, k1, k2):
 
 
 def compute_ocr_noise_level(input_folder_with_path, frame_sample_indices, nlp_models, language=None):
+    """
+    Computes noise values for a sequence of frames
+    Args:
+        input_folder_with_path: Full path of the input image folder
+        frame_sample_indices: Indices of the sampled frames
+        nlp_models: The NLP models used for the OCR distance
+        language: Language of the slides
+
+    Returns:
+        List of distances identified as noise (i.e. below the default noise threshold)
+    """
     print('Estimating transition threshold ...')
     distance_list = list()
     for k in range(1, len(frame_sample_indices)):
@@ -551,27 +629,49 @@ def compute_ocr_noise_level(input_folder_with_path, frame_sample_indices, nlp_mo
 
 
 def compute_ocr_threshold(distance_list, default_threshold=0.1):
+    """
+    Computes the OCR noise threshold using a list of subsequent frame distances
+    Args:
+        distance_list: List of OCR distances
+        default_threshold: Default value to use if the list is empty
+
+    Returns:
+        The noise threshold
+    """
     threshold = float(5*np.median(distance_list))
     if math.isnan(threshold):
         return default_threshold
     return threshold
 
 
-# Recursive function that finds slide transitions through binary tree search
-def frame_ocr_transition(input_folder_with_path, k_l, k_r, ocr_dist_threshold, hash_dist_threshold, nlp_models,
+def frame_ocr_transition(input_folder_with_path, k_l, k_r, ocr_dist_threshold, hash_similarity_threshold, nlp_models,
                          language=None):
+    """
+    Recursive function that finds slide transitions through binary tree search
+    Args:
+        input_folder_with_path: Full path of input image folder, where they all follow FRAME_FORMAT
+        k_l: Leftmost index of the binary search
+        k_r: Rightmost index of the binary search
+        ocr_dist_threshold: Minimum OCR-based distance for two frames to be considered distinct
+        hash_similarity_threshold: Maximum hash-based similarity for two frames to be considered distinct
+        nlp_models: NLP models for the OCR results
+        language: Language of the document
+
+    Returns:
+        [transition frame index, distance] if a transition is found, [None, None] otherwise
+    """
     k_m = int(np.mean([k_l, k_r]))
     d = frame_ocr_distance(input_folder_with_path, k_l, k_r, nlp_models, language)
-    d_hash = frame_hash_distance(input_folder_with_path, k_l, k_r)
+    s_hash = frame_hash_similarity(input_folder_with_path, k_l, k_r)
     if k_m == k_l or k_m == k_r:
         return [k_r, d]
     else:
-        if d > ocr_dist_threshold and d_hash < hash_dist_threshold:
+        if d > ocr_dist_threshold and s_hash < hash_similarity_threshold:
             [k_sep_l, d_l] = frame_ocr_transition(input_folder_with_path, k_l, k_m, ocr_dist_threshold,
-                                                  hash_dist_threshold,
+                                                  hash_similarity_threshold,
                                                   nlp_models, language)
             [k_sep_r, d_r] = frame_ocr_transition(input_folder_with_path, k_m, k_r, ocr_dist_threshold,
-                                                  hash_dist_threshold,
+                                                  hash_similarity_threshold,
                                                   nlp_models, language)
             if k_sep_l is None and k_sep_r is None:
                 return [None, None]
@@ -616,7 +716,7 @@ class WhisperTranscriptionModel():
 
     def load_model_whisper(self):
         """
-        Loads a Whisper model into memory
+        Lazy-loads a Whisper model into memory
         Args:
             model_type: Type of model, see Whisper docs for details
 
@@ -687,6 +787,11 @@ class NLPModels():
         self.nlp_models = None
 
     def get_nlp_models(self):
+        """
+        Lazy-loads and returns the NLP models used for local OCR in slide detection
+        Returns:
+            The NLP model dict
+        """
         if self.nlp_models is None:
             self.nlp_models = {
                 'en' : spacy.load('en_core_web_lg'),
@@ -712,11 +817,24 @@ class GoogleOCRModel():
                   f'default API key.')
 
     def establish_connection(self):
+        """
+        Lazily connects to the Google API
+        Returns:
+            None
+        """
         if self.model is None:
             print('Establishing Google API connection...')
             self.model = vision.ImageAnnotatorClient(client_options={"api_key": self.api_key})
 
     def perform_ocr(self, input_filename_with_path):
+        """
+        Performs OCR with two methods (text_detection and document_text_detection)
+        Args:
+            input_filename_with_path: Full path of the input image file
+
+        Returns:
+            Text results of the two OCR methods
+        """
         self.establish_connection()
         # Loading the image
         if not file_exists(input_filename_with_path):
