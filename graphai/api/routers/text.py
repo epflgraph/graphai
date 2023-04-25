@@ -8,7 +8,7 @@ from typing import Optional
 
 from graphai.api.schemas.text import *
 
-from graphai.api.celery_tasks.text import extract_keywords_task, wikisearch_task, init, compute_scores_task, aggregate_and_filter_task
+from graphai.api.celery_tasks.text import extract_keywords_task, wikisearch_task, wikisearch_callback_task, compute_scores_task, aggregate_and_filter_task
 
 
 pd.set_option('display.max_rows', 400)
@@ -38,7 +38,6 @@ async def keywords(data: KeywordsRequest, use_nltk: Optional[bool] = False):
         return []
 
     # Set up job
-    n = 10
     job = extract_keywords_task.s(raw_text, use_nltk=use_nltk)
 
     # Schedule job
@@ -79,7 +78,7 @@ async def wikify(data: WikifyRequest, method: Optional[str] = None):
     job = chain(
         extract_keywords_task.s(raw_text),
         group(wikisearch_task.s(fraction=(i / n, (i + 1) / n), method=method) for i in range(n)),
-        init.s(),
+        wikisearch_callback_task.s(),
         compute_scores_task.s(),
         aggregate_and_filter_task.s()
     )

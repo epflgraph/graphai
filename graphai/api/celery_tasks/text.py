@@ -84,8 +84,14 @@ def wikisearch_task(self, keywords_list, fraction=(0, 1), method='es-base'):
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={'max_retries': 2},
-             name='text.init', ignore_result=False, ontology=ontology, graph=graph)
-def init(self, results):
+             name='text.wikisearch_callback', ignore_result=False, ontology=ontology, graph=graph)
+def wikisearch_callback_task(self, results):
+    # Concatenate all results in a single DataFrame
+    results = pd.concat(results, ignore_index=True)
+
+    if len(results) == 0:
+        return results
+
     self.graph.fetch_from_db()
     self.ontology.fetch_from_db()
 
@@ -95,8 +101,8 @@ def init(self, results):
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={'max_retries': 2},
              name='text.compute_scores', ignore_result=False, ontology=ontology, graph=graph)
 def compute_scores_task(self, results):
-    # Concatenate all results in a single DataFrame
-    results = pd.concat(results, ignore_index=True)
+    if len(results) == 0:
+        return results
 
     # Compute ontology score
     results = self.ontology.add_ontology_scores(results)
@@ -119,6 +125,9 @@ def compute_scores_task(self, results):
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={'max_retries': 2},
              name='text.aggregate_and_filter', ignore_result=False)
 def aggregate_and_filter_task(self, results):
+    if len(results) == 0:
+        return results
+
     # Aggregate over pages
     results = results.groupby(by=['PageID', 'PageTitle']).aggregate(
         SearchScore=('SearchScore', 'sum'),
