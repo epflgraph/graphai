@@ -56,4 +56,7 @@ jobs:
       - name: Install python package in editable mode along with dependencies
         run: |
           cd main
+          python -m spacy download en_core_web_lg
+          python -m spacy download fr_core_news_md
+          python -c "import whisper; whisper.load_model('${{ vars.whisper_model_type }}');"
           pip install -e .
