@@ -26,6 +26,7 @@ dependencies = [
     "pydantic",
     "requests",
     "wget",
+    "imagehash",
     "openai-whisper",
     "pytesseract",
     "spacy",
