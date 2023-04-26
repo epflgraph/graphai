@@ -88,16 +88,10 @@ def wikisearch_task(self, keywords_list, fraction=(0, 1), method='es-base'):
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={'max_retries': 2},
-             name='text.wikisearch_callback', ignore_result=False, ontology=ontology, graph=graph)
+             name='text.wikisearch_callback', ignore_result=False)
 def wikisearch_callback_task(self, results):
     # Concatenate all results in a single DataFrame
     results = pd.concat(results, ignore_index=True)
-
-    if len(results) == 0:
-        return results
-
-    self.graph.fetch_from_db()
-    self.ontology.fetch_from_db()
 
     return results
 

@@ -1,3 +1,3 @@
 #!/bin/bash
 
-celery -A main.celery_instance worker --loglevel=debug --concurrency=16 -Q common,text,video,ontology
+celery -A main.celery_instance worker --loglevel=debug -Q common,text,video,ontology
