@@ -90,35 +90,6 @@
              
   <section id="module-graphai.api.celery_tasks.text">
 <span id="graphai-api-celery-tasks-text-module"></span><h1>graphai.api.celery_tasks.text module<a class="headerlink" href="#module-graphai.api.celery_tasks.text" title="Permalink to this heading"></a></h1>
-<dl class="py function">
-<dt class="sig sig-object py" id="graphai.api.celery_tasks.text.wikisearch_master">
-<span class="sig-prename descclassname"><span class="pre">graphai.api.celery_tasks.text.</span></span><span class="sig-name descname"><span class="pre">wikisearch_master</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">keywords</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.api.celery_tasks.text.wikisearch_master" title="Permalink to this definition"></a></dt>
-<dd><p>Retrieves wikipages for all keywords in the list.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>keywords</strong> (<em>pd.DataFrame</em>) – A pandas DataFrame with one column ‘Keywords’.</p></li>
-<li><p><strong>method</strong> (<em>str{'wikipedia-api'</em><em>, </em><em>'es-base'</em><em>, </em><em>'es-score'}</em>) – Method to retrieve the wikipedia pages.
-It can be either ‘wikipedia-api’, to use the Wikipedia API, or one of {‘es-base’, ‘es-score’},
-to use elasticsearch, returning as score the inverse of the searchrank or the actual elasticsearch score,
-respectively. Default: ‘es-base’.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>A pandas DataFrame with columns [‘Keywords’, ‘PageID’, ‘PageTitle’, ‘Searchrank’, ‘SearchScore’],
-unique on (‘Keywords’, ‘PageID’), with the wikisearch results for each keywords set.</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>pd.DataFrame</p>
-</dd>
-</dl>
-<p class="rubric">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">keywords</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">([</span><span class="s1">&#39;brown baggies&#39;</span><span class="p">,</span> <span class="s1">&#39;platform soles&#39;</span><span class="p">]),</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Keywords&#39;</span><span class="p">])</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">wikisearch</span><span class="p">(</span><span class="n">keywords</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;wikipedia-api&#39;</span><span class="p">)</span>
-</pre></div>
-</div>
-</dd></dl>
-
 </section>
 
 
