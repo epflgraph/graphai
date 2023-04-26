@@ -1,22 +1,18 @@
 import pytest
-import pandas as pd
 
 from graphai.core.text.keywords import get_keywords
 
 
 @pytest.mark.usefixtures('sultans')
 def test_get_keywords(sultans):
-    keywords = get_keywords(sultans)
+    keywords_list = get_keywords(sultans)
 
-    # Check if output is a pd.DataFrame
-    assert isinstance(keywords, pd.DataFrame)
+    # Check if output is a list
+    assert isinstance(keywords_list, list)
 
-    # Check that number of columns is correct
-    assert len(keywords.columns) == 1
+    # Check if list is not empty
+    assert len(keywords_list) > 0
 
-    # Check that column name is correct
-    assert 'Keywords' in keywords.columns
-
-    # Check that there is at least one keyword
-    assert len(keywords) > 0
-
+    # Check that list contains strings
+    for keywords in keywords_list:
+        assert isinstance(keywords, str)
