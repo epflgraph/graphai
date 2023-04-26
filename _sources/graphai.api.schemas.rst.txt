@@ -13,6 +13,7 @@ Submodules
    :maxdepth: 1
 
    graphai.api.schemas.common
+   graphai.api.schemas.image
    graphai.api.schemas.ontology
    graphai.api.schemas.text
    graphai.api.schemas.video

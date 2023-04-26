@@ -1,0 +1,7 @@
+graphai.api.celery\_tasks.image module
+======================================
+
+.. automodule:: graphai.api.celery_tasks.image
+   :members:
+   :undoc-members:
+   :show-inheritance:

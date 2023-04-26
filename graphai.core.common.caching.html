@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>graphai.core.common.caching module &mdash; EPFL Graph AI</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="graphai.core.common.graph module" href="graphai.core.common.graph.html" />
+    <link rel="prev" title="graphai.core.common package" href="graphai.core.common.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="graphai.html" class="icon icon-home">
+            graphai
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="graphai.api.html">graphai.api package</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="graphai.core.html">graphai.core package</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="graphai.core.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="graphai.core.common.html">graphai.core.common package</a><ul class="current">
+<li class="toctree-l4 current"><a class="reference internal" href="graphai.core.common.html#submodules">Submodules</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="graphai.core.interfaces.html">graphai.core.interfaces package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="graphai.core.text.html">graphai.core.text package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="graphai.core.utils.html">graphai.core.utils package</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="graphai.definitions.html">graphai.definitions module</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="graphai.html">graphai</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="graphai.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="graphai.core.html">graphai.core package</a></li>
+          <li class="breadcrumb-item"><a href="graphai.core.common.html">graphai.core.common package</a></li>
+      <li class="breadcrumb-item active">graphai.core.common.caching module</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/graphai.core.common.caching.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-graphai.core.common.caching">
+<span id="graphai-core-common-caching-module"></span><h1>graphai.core.common.caching module<a class="headerlink" href="#module-graphai.core.common.caching" title="Permalink to this heading"></a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.core.common.caching.make_sure_path_exists">
+<span class="sig-prename descclassname"><span class="pre">graphai.core.common.caching.</span></span><span class="sig-name descname"><span class="pre">make_sure_path_exists</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_at_the_end</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.caching.make_sure_path_exists" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.core.common.caching.surround_with_character">
+<span class="sig-prename descclassname"><span class="pre">graphai.core.common.caching.</span></span><span class="sig-name descname"><span class="pre">surround_with_character</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">&quot;'&quot;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.caching.surround_with_character" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="graphai.core.common.caching.DBCachingManagerBase">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">graphai.core.common.caching.</span></span><span class="sig-name descname"><span class="pre">DBCachingManagerBase</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cache_table</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">most_similar_table</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.caching.DBCachingManagerBase" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="graphai.core.common.caching.DBCachingManagerBase.init_db">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">init_db</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.caching.DBCachingManagerBase.init_db" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="graphai.core.common.caching.DBCachingManagerBase.resolve_most_similar_chain">
+<span class="sig-name descname"><span class="pre">resolve_most_similar_chain</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">token</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.caching.DBCachingManagerBase.resolve_most_similar_chain" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="graphai.core.common.caching.DBCachingManagerBase.delete_cache_rows">
+<span class="sig-name descname"><span class="pre">delete_cache_rows</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id_tokens</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.caching.DBCachingManagerBase.delete_cache_rows" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="graphai.core.common.caching.DBCachingManagerBase.insert_or_update_details">
+<span class="sig-name descname"><span class="pre">insert_or_update_details</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id_token</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">values_to_insert</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.caching.DBCachingManagerBase.insert_or_update_details" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="graphai.core.common.caching.DBCachingManagerBase.get_details">
+<span class="sig-name descname"><span class="pre">get_details</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id_token</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cols</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">using_most_similar</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.caching.DBCachingManagerBase.get_details" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="graphai.core.common.caching.DBCachingManagerBase.get_details_using_origin">
+<span class="sig-name descname"><span class="pre">get_details_using_origin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">origin_token</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cols</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.caching.DBCachingManagerBase.get_details_using_origin" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="graphai.core.common.caching.DBCachingManagerBase.get_all_details">
+<span class="sig-name descname"><span class="pre">get_all_details</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cols</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">using_most_similar</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.caching.DBCachingManagerBase.get_all_details" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="graphai.core.common.caching.DBCachingManagerBase.insert_or_update_closest_match">
+<span class="sig-name descname"><span class="pre">insert_or_update_closest_match</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id_token</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">values_to_insert</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.caching.DBCachingManagerBase.insert_or_update_closest_match" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="graphai.core.common.caching.DBCachingManagerBase.get_closest_match">
+<span class="sig-name descname"><span class="pre">get_closest_match</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id_token</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.caching.DBCachingManagerBase.get_closest_match" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="graphai.core.common.caching.DBCachingManagerBase.get_all_closest_matches">
+<span class="sig-name descname"><span class="pre">get_all_closest_matches</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.caching.DBCachingManagerBase.get_all_closest_matches" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="graphai.core.common.caching.AudioDBCachingManager">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">graphai.core.common.caching.</span></span><span class="sig-name descname"><span class="pre">AudioDBCachingManager</span></span><a class="headerlink" href="#graphai.core.common.caching.AudioDBCachingManager" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#graphai.core.common.caching.DBCachingManagerBase" title="graphai.core.common.caching.DBCachingManagerBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">DBCachingManagerBase</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="graphai.core.common.caching.AudioDBCachingManager.init_db">
+<span class="sig-name descname"><span class="pre">init_db</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.caching.AudioDBCachingManager.init_db" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="graphai.core.common.caching.SlideDBCachingManager">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">graphai.core.common.caching.</span></span><span class="sig-name descname"><span class="pre">SlideDBCachingManager</span></span><a class="headerlink" href="#graphai.core.common.caching.SlideDBCachingManager" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#graphai.core.common.caching.DBCachingManagerBase" title="graphai.core.common.caching.DBCachingManagerBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">DBCachingManagerBase</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="graphai.core.common.caching.SlideDBCachingManager.init_db">
+<span class="sig-name descname"><span class="pre">init_db</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.caching.SlideDBCachingManager.init_db" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="graphai.core.common.caching.VideoConfig">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">graphai.core.common.caching.</span></span><span class="sig-name descname"><span class="pre">VideoConfig</span></span><a class="headerlink" href="#graphai.core.common.caching.VideoConfig" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="graphai.core.common.caching.VideoConfig.concat_file_path">
+<span class="sig-name descname"><span class="pre">concat_file_path</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">subfolder</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.caching.VideoConfig.concat_file_path" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="graphai.core.common.caching.VideoConfig.set_root_dir">
+<span class="sig-name descname"><span class="pre">set_root_dir</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new_root_dir</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.caching.VideoConfig.set_root_dir" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="graphai.core.common.caching.VideoConfig.generate_filepath">
+<span class="sig-name descname"><span class="pre">generate_filepath</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">force_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.caching.VideoConfig.generate_filepath" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="graphai.core.common.html" class="btn btn-neutral float-left" title="graphai.core.common package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="graphai.core.common.graph.html" class="btn btn-neutral float-right" title="graphai.core.common.graph module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Aitor Pérez.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

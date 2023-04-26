@@ -12,6 +12,7 @@ Submodules
 .. toctree::
    :maxdepth: 1
 
+   graphai.core.common.caching
    graphai.core.common.graph
    graphai.core.common.ontology
    graphai.core.common.video

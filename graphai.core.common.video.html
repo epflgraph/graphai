@@ -45,7 +45,6 @@
 <li class="toctree-l1"><a class="reference internal" href="graphai.api.html">graphai.api package</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="graphai.core.html">graphai.core package</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="graphai.core.html#subpackages">Subpackages</a><ul class="current">
-<li class="toctree-l3"><a class="reference internal" href="graphai.core.celery_utils.html">graphai.core.celery_utils package</a></li>
 <li class="toctree-l3 current"><a class="reference internal" href="graphai.core.common.html">graphai.core.common package</a><ul class="current">
 <li class="toctree-l4 current"><a class="reference internal" href="graphai.core.common.html#submodules">Submodules</a></li>
 </ul>
@@ -88,95 +87,8 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="module-graphai.core.common.video">
-<span id="graphai-core-common-video-module"></span><h1>graphai.core.common.video module<a class="headerlink" href="#module-graphai.core.common.video" title="Permalink to this heading"></a></h1>
-<dl class="py function">
-<dt class="sig sig-object py" id="graphai.core.common.video.make_sure_path_exists">
-<span class="sig-prename descclassname"><span class="pre">graphai.core.common.video.</span></span><span class="sig-name descname"><span class="pre">make_sure_path_exists</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_at_the_end</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.video.make_sure_path_exists" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="graphai.core.common.video.file_exists">
-<span class="sig-prename descclassname"><span class="pre">graphai.core.common.video.</span></span><span class="sig-name descname"><span class="pre">file_exists</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.video.file_exists" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="graphai.core.common.video.get_dir_files">
-<span class="sig-prename descclassname"><span class="pre">graphai.core.common.video.</span></span><span class="sig-name descname"><span class="pre">get_dir_files</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">root_dir</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.video.get_dir_files" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="graphai.core.common.video.count_files">
-<span class="sig-prename descclassname"><span class="pre">graphai.core.common.video.</span></span><span class="sig-name descname"><span class="pre">count_files</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">root_dir</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.video.count_files" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="graphai.core.common.video.VideoConfig">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">graphai.core.common.video.</span></span><span class="sig-name descname"><span class="pre">VideoConfig</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">root_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'/home/ubuntu/actions-runner/_work/graphai/graphai/main/Storage'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.video.VideoConfig" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<dl class="py method">
-<dt class="sig sig-object py" id="graphai.core.common.video.VideoConfig.concat_file_path">
-<span class="sig-name descname"><span class="pre">concat_file_path</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">subfolder</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.video.VideoConfig.concat_file_path" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="graphai.core.common.video.VideoConfig.set_root_dir">
-<span class="sig-name descname"><span class="pre">set_root_dir</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new_root_dir</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.video.VideoConfig.set_root_dir" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="graphai.core.common.video.VideoConfig.generate_filename">
-<span class="sig-name descname"><span class="pre">generate_filename</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">force_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.video.VideoConfig.generate_filename" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="graphai.core.common.video.surround_with_character">
-<span class="sig-prename descclassname"><span class="pre">graphai.core.common.video.</span></span><span class="sig-name descname"><span class="pre">surround_with_character</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">&quot;'&quot;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.video.surround_with_character" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="graphai.core.common.video.DBCachingManager">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">graphai.core.common.video.</span></span><span class="sig-name descname"><span class="pre">DBCachingManager</span></span><a class="headerlink" href="#graphai.core.common.video.DBCachingManager" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<dl class="py method">
-<dt class="sig sig-object py" id="graphai.core.common.video.DBCachingManager.init_db">
-<span class="sig-name descname"><span class="pre">init_db</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.video.DBCachingManager.init_db" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="graphai.core.common.video.DBCachingManager.insert_or_update_audio_details">
-<span class="sig-name descname"><span class="pre">insert_or_update_audio_details</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id_token</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">values_to_insert</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.video.DBCachingManager.insert_or_update_audio_details" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="graphai.core.common.video.DBCachingManager.get_audio_details">
-<span class="sig-name descname"><span class="pre">get_audio_details</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id_token</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cols</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">using_most_similar</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.video.DBCachingManager.get_audio_details" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="graphai.core.common.video.DBCachingManager.get_all_audio_details">
-<span class="sig-name descname"><span class="pre">get_all_audio_details</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cols</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">using_most_similar</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.video.DBCachingManager.get_all_audio_details" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="graphai.core.common.video.DBCachingManager.insert_or_update_closest_match">
-<span class="sig-name descname"><span class="pre">insert_or_update_closest_match</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id_token</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">values_to_insert</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.video.DBCachingManager.insert_or_update_closest_match" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="graphai.core.common.video.DBCachingManager.get_closest_audio_match">
-<span class="sig-name descname"><span class="pre">get_closest_audio_match</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id_token</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.video.DBCachingManager.get_closest_audio_match" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="graphai.core.common.video.DBCachingManager.get_all_closest_audio_matches">
-<span class="sig-name descname"><span class="pre">get_all_closest_audio_matches</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.video.DBCachingManager.get_all_closest_audio_matches" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
+  <section id="graphai-core-common-video-module">
+<h1>graphai.core.common.video module<a class="headerlink" href="#graphai-core-common-video-module" title="Permalink to this heading"></a></h1>
 </section>
 
 

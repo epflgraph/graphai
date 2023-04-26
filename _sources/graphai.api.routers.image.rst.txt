@@ -1,0 +1,7 @@
+graphai.api.routers.image module
+================================
+
+.. automodule:: graphai.api.routers.image
+   :members:
+   :undoc-members:
+   :show-inheritance:
