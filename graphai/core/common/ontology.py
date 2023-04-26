@@ -43,6 +43,9 @@ class Ontology:
     def fetch_from_db(self):
         if self.loaded:
             return
+
+        print('Actually loading the ontology tables...')
+
         db = DB()
 
         ################################################

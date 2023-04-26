@@ -38,6 +38,8 @@ class ConceptsGraph:
         if self.loaded:
             return
 
+        print('Actually loading the graph tables...')
+
         db = DB()
 
         table_name = 'graph.Nodes_N_Concept'
