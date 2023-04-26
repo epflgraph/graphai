@@ -7,6 +7,7 @@ import graphai.api.routers.video as video_router
 import graphai.api.routers.voice as audio_router
 import graphai.api.routers.image as image_router
 from graphai.api.celery_tasks.common import lazy_loader_task
+from graphai.api.common.celery_tools import celery_instance
 
 from graphai.api.common.log import log
 
@@ -26,8 +27,7 @@ app.include_router(text_router.router)
 app.include_router(video_router.router)
 app.include_router(audio_router.router)
 app.include_router(image_router.router)
-app.celery_app = create_celery()
-celery_instance = app.celery_app
+app.celery_app = celery_instance
 
 
 # On startup, we instantiate concepts graph and ontology, so they are held into memory
