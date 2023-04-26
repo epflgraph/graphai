@@ -33,12 +33,25 @@ jobs:
           echo "username: ${{ vars.es_username }}" >> es.ini
           echo "password: ${{ secrets.es_password }}" >> es.ini
           echo "cafile: ${{ vars.es_cafile }}" >> es.ini
+          
+          echo "[CELERY]" >> celery.ini
+          echo "broker_url: ${{ vars.celery_broker_url }}" >> celery.ini
+          echo "result_backend: ${{ vars.celery_result_backend }}" >> celery.ini
+          
+          echo "[WHISPER]" >> models.ini
+          echo "model_type: ${{ vars.whisper_model_type }}" >> models.ini
+          echo "" >> models.ini
+          echo "[GOOGLE]" >> models.ini
+          echo "api_key: ${{ secrets.google_api_key }}" >> models.ini
+          
+          echo "[CACHE]" >> cache.ini
+          echo "root: ${{ vars.cache_root }}" >> cache.ini
 
       - name: Create virtualenv and activate it
         run: |
-          cd main
-          virtualenv venv
-          source venv/bin/activate
+          # cd main
+          # virtualenv venv
+          # source venv/bin/activate
 
       - name: Install python package in editable mode along with dependencies
         run: |
