@@ -1,10 +1,12 @@
+from typing import Optional
+
 import pandas as pd
 
 from fastapi import APIRouter
 
 from celery import chain, group
 
-from typing import Optional
+from graphai.api.common.celery_tools import get_n_celery_workers
 
 from graphai.api.schemas.text import *
 
@@ -74,7 +76,11 @@ async def wikify(data: WikifyRequest, method: Optional[str] = None):
         return []
 
     # Set up composite job
-    n = 10
+    try:
+        n = get_n_celery_workers()
+    except Exception as e:
+        n = 10
+
     job = chain(
         extract_keywords_task.s(raw_text),
         group(wikisearch_task.s(fraction=(i / n, (i + 1) / n), method=method) for i in range(n)),
