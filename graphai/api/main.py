@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.responses import RedirectResponse
 
 import graphai.api.routers.ontology as ontology_router
-# import graphai.api.routers.text as text_router
+import graphai.api.routers.text as text_router
 import graphai.api.routers.video as video_router
 import graphai.api.routers.voice as audio_router
 import graphai.api.routers.image as image_router
@@ -11,8 +11,6 @@ from graphai.api.celery_tasks.common import lazy_loader_task
 from graphai.api.common.log import log
 
 from graphai.core.interfaces.celery_config import create_celery
-
-# from graphai.core.text.wikisearch import ws_actor_list
 
 # Initialise FastAPI
 app = FastAPI(
@@ -24,7 +22,7 @@ app = FastAPI(
 
 # Include all routers in the app
 app.include_router(ontology_router.router)
-# app.include_router(text_router.router)
+app.include_router(text_router.router)
 app.include_router(video_router.router)
 app.include_router(audio_router.router)
 app.include_router(image_router.router)

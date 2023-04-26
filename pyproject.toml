@@ -34,7 +34,6 @@ dependencies = [
     "ffmpeg-python",
     "pyacoustid",
     "fuzzywuzzy[speedup]",
-    "ray",
     "celery[redis]",
     "kombu",
     "mysql-connector-python",
