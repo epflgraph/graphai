@@ -36,6 +36,8 @@ class ConceptsGraph:
 
     def fetch_from_db(self):
         if self.loaded:
+            print('Graph already loaded')
+            print(self.loaded)
             return
 
         print('Actually loading the graph tables...')

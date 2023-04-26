@@ -692,6 +692,7 @@ class WhisperTranscriptionModel():
         """
         # device=None ensures that the model will use CUDA if available and switch to CPUs otherwise.
         if self.model is None:
+            print('Actually loading Whisper model...')
             self.model = whisper.load_model(self.model_type, device=None, in_memory=True)
 
 
