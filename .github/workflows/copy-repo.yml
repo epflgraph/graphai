@@ -13,4 +13,4 @@ jobs:
       - name: Copy repo from tmp to final location
         run: |
           rm -rf /home/ubuntu/test-graphai/*
-          cp -r main/graphai /home/ubuntu/test-graphai
+          cp -r main /home/ubuntu/test-graphai
