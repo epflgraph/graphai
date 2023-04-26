@@ -1,0 +1,97 @@
+from pydantic import BaseModel, Field
+from typing import Union, List, Literal
+from .common import TaskStatusResponse
+
+class ImageFingerprintRequest(BaseModel):
+    token: str = Field(
+        title="Token",
+        description="The token that identifies the requested file"
+    )
+
+    force: bool = Field(
+        title="Force",
+        description="Whether to force a recomputation",
+        default=False
+    )
+
+
+class ImageFingerprintTaskResponse(BaseModel):
+    result: Union[str, None] = Field(
+        title="Fingerprint",
+        description="Fingerprint of the image file."
+    )
+
+    fresh: bool = Field(
+        title="Freshness flag",
+        description="Whether the result was computed freshly or an existing cached result was returned."
+    )
+
+    successful: bool = Field(
+        title="Success flag",
+        description="Whether the computation was successful."
+    )
+
+
+class ImageFingerprintResponse(TaskStatusResponse):
+    task_result: Union[ImageFingerprintTaskResponse, None] = Field(
+        title="Image fingerprinting response",
+        description="A dict containing the resulting image fingerprint and a freshness flag."
+    )
+
+
+class ExtractTextRequest(BaseModel):
+    token: str = Field(
+        title="Token",
+        description="The token that identifies the requested file"
+    )
+
+    method: Literal['google', 'tesseract'] = Field(
+        title="Method",
+        description="OCR method. Available methods are 'google' (default) and 'tesseract' (not recommended)",
+        default="google"
+    )
+
+    force: bool = Field(
+        title="Force",
+        description="Whether to force a recomputation",
+        default=False
+    )
+
+
+class IndividualOCRResult(BaseModel):
+    method: str = Field(
+        title="OCR method",
+        description="OCR method of the result"
+    )
+    token: str = Field(
+        title="OCR token",
+        description="Token of the file where the OCR results have been stored"
+    )
+    text: str = Field(
+        title="OCR text",
+        description="Textual results of the OCR"
+    )
+
+
+class ExtractTextTaskResponse(BaseModel):
+    result: Union[List[IndividualOCRResult], None] = Field(
+        title="OCR results",
+        description="List of OCR results"
+    )
+
+    fresh: bool = Field(
+        title="Freshness flag",
+        description="Whether the result was computed freshly or an existing cached result was returned."
+    )
+
+    successful: bool = Field(
+        title="Success flag",
+        description="Whether the computation was successful."
+    )
+
+
+class ExtractTextResponse(TaskStatusResponse):
+    task_result: Union[ExtractTextTaskResponse, None] = Field(
+        title="Extract text response",
+        description="A dict containing the OCR results, plus the freshness and success flags."
+    )

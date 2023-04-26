@@ -1,6 +1,7 @@
 #!/bin/bash
 host="0.0.0.0"
 port=28800
+TIMEOUT=120
 
 while getopts ":h:p:" opt; do
   case $opt in
@@ -21,4 +22,4 @@ while getopts ":h:p:" opt; do
 done
 
 # uvicorn main:app --host $host --port $port
-gunicorn main:app -b $host:$port -w 1 -k uvicorn.workers.UvicornWorker
+gunicorn main:app -b $host:$port -w 1 -k uvicorn.workers.UvicornWorker --timeout $TIMEOUT

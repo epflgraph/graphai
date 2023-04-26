@@ -42,6 +42,31 @@ password: <es password>
 cafile: <path to es cluster certificate> 
 ```
 
+* **celery.ini**: Celery config file:
+```
+[CELERY]
+broker_url: <rabbitmq message broker url>
+result_backend: <redis backend url>
+```
+
+* **models.ini**: Config file for Whisper model (audio transcription) and Google Vision API (OCR):
+```
+[WHISPER]
+model_type: <whisper model type, default medium>
+
+[GOOGLE]
+api_key: <Google API key>
+```
+
+* **cache.ini**: Config file for results caching:
+```
+[CACHE]
+root: <root directory for the storage of all files (video, audio, image, etc.)>
+```
+
+**NOTE**: The caching additionally requires the existence of the schema `cache_graphai` in your database, or otherwise the 
+permission to create a new schema.
+
 ## API
 The GraphAI module includes an API that leverages the [FastAPI](https://fastapi.tiangolo.com/) package.
 

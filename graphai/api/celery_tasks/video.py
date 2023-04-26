@@ -1,75 +1,57 @@
-from celery import shared_task, group, chain
-import time
-from graphai.api.common.log import log
-from graphai.api.common.video import generate_random_token, retrieve_file_from_url, extract_audio_from_video, \
-    compute_mpeg7_signature, video_config, compute_video_slides, video_db_manager, detect_audio_format_and_duration
-from graphai.core.utils.time.stopwatch import Stopwatch
+import os
+import shutil
 
-
-# A task that will have several instances run in parallel
-@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 1},
-             name='video.example_parallel', ignore_result=False)
-def example_parallel_task(self, x):
-    time.sleep(x)
-    return True
-
-
-# A task that acts as a callback after a parallel operation
-@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 1},
-             name='video.example_callback', ignore_result=False)
-def example_callback_task(self, l):
-    return all(l)
+from celery import shared_task
+from graphai.api.common.video import file_management_config, audio_db_manager, local_ocr_nlp_models, slide_db_manager
+from graphai.core.common.video import retrieve_file_from_url, detect_audio_format_and_duration, \
+    extract_audio_from_video, extract_frames, generate_frame_sample_indices, compute_ocr_noise_level, \
+    compute_ocr_threshold, compute_video_ocr_transitions, generate_random_token, FRAME_FORMAT, OCR_FORMAT
+from itertools import chain
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='video.retrieve_url', ignore_result=False)
-def retrieve_file_from_url_task(self, url, filename):
-    filename_with_path = video_config.generate_filename(filename)
+             name='video.retrieve_url', ignore_result=False,
+             file_manager=file_management_config)
+def retrieve_file_from_url_task(self, url):
+    token = generate_random_token()
+    filename = token + '.' + url.split('.')[-1]
+    filename_with_path = self.file_manager.generate_filepath(filename)
     results = retrieve_file_from_url(url, filename_with_path, filename)
-    return {'token': results,
-            'successful': results is not None}
+    return {'token': results}
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='video.compute_signature', ignore_result=False)
-def compute_signature_task(self, filename, force=False):
-    results, fresh = compute_mpeg7_signature(filename, force=force)
-    return {'token': results,
-            'successful': results is not None,
-            'fresh': fresh}
-
-
-@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='video.get_file', ignore_result=False)
+             name='video.get_file', ignore_result=False,
+             file_manager=file_management_config)
 def get_file_task(self, filename):
-    return video_config.generate_filename(filename)
+    return self.file_manager.generate_filepath(filename)
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='video.extract_audio', ignore_result=False)
+             name='video.extract_audio', ignore_result=False,
+             db_manager=audio_db_manager, file_manager=file_management_config)
 def extract_audio_task(self, token, force=False):
-    input_filename_with_path = video_config.generate_filename(token)
+    input_filename_with_path = self.file_manager.generate_filepath(token)
     output_token, input_duration = detect_audio_format_and_duration(input_filename_with_path, token)
     if output_token is None:
         return {
             'token': None,
-            'successful': False,
             'fresh': False,
             'duration': 0.0
         }
 
-    output_filename_with_path = video_config.generate_filename(output_token)
+    output_filename_with_path = self.file_manager.generate_filepath(output_token)
     # Here, the existing row can be None because the row is inserted into the table
     # only after extracting the audio from the video.
     if not force:
-        existing = video_db_manager.get_audio_details(output_token, cols=['duration'])
+        # we get the first element because in the audio caching table, each origin token has only one row
+        existing = self.db_manager.get_details_using_origin(token, cols=['duration'])[0]
     else:
         existing = None
     if existing is not None:
         print('Returning cached result')
         return {
             'token': existing['id_token'],
-            'successful': True,
             'fresh': False,
             'duration': existing['duration']
         }
@@ -79,23 +61,22 @@ def extract_audio_task(self, token, force=False):
     if results is None:
         return {
             'token': None,
-            'successful': False,
             'fresh': False,
             'duration': 0.0
         }
     return {
         'token': results,
-        'successful': True,
         'fresh': True,
         'duration': input_duration
     }
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='video.extract_audio_callback', ignore_result=False)
+             name='video.extract_audio_callback', ignore_result=False,
+             db_manager=audio_db_manager, file_manager=file_management_config)
 def extract_audio_callback_task(self, results, origin_token):
-    if results['successful'] and results['fresh']:
-        video_db_manager.insert_or_update_audio_details(
+    if results['fresh']:
+        self.db_manager.insert_or_update_details(
             results['token'],
             {
                 'duration': results['duration'],
@@ -106,58 +87,193 @@ def extract_audio_callback_task(self, results, origin_token):
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='video.detect_slides', ignore_result=False)
-def detect_slides_task(self, filename, force=False):
-    results, fresh, n_slides, result_filenames = compute_video_slides(filename, force=force)
-    return {'token': results,
-            'successful': results is not None,
-            'fresh': fresh,
-            'n_slides': n_slides,
-            'files': result_filenames}
+             name='video.extract_and_sample_frames', ignore_result=False,
+             db_manager=slide_db_manager, file_manager=file_management_config)
+def extract_and_sample_frames_task(self, token, force=False):
+    # Checking for existing cached results
+
+    existing_slides = self.db_manager.get_details_using_origin(token, cols=['slide_number'])
+
+    if existing_slides is not None:
+        if not force:
+            print('Returning cached result')
+            return {
+                'result': None,
+                'sample_indices': None,
+                'fresh': False,
+                'slide_tokens': {x['slide_number']: x['id_token'] for x in existing_slides}
+            }
+        else:
+            # If force==True, then we need to delete the existing rows in case the results this time are different
+            # than they were before, since unlike audio endpoints, there's multiple rows per video here!
+            # This will require a force-recomputation of every other property that pertains to the video whose slides
+            # have been force-recomputed, e.g. fingerprints and text OCRs.
+            # In general, force is only there for debugging and will not be usable by the end-user.
+            self.db_manager.delete_cache_rows([x['id_token'] for x in existing_slides])
+    # Extracting frames
+    input_filename_with_path = self.file_manager.generate_filepath(token)
+    output_folder = token + '_all_frames'
+    output_folder_with_path = self.file_manager.generate_filepath(output_folder)
+    output_folder = extract_frames(input_filename_with_path, output_folder_with_path, output_folder)
+    # If there was an error of any kind (e.g. non-existing video file), the returned token will be None
+    if output_folder is None:
+        return {
+            'result': None,
+            'sample_indices': None,
+            'fresh': False,
+            'slide_tokens': None
+        }
+    # Generating frame sample indices
+    frame_indices = generate_frame_sample_indices(self.file_manager.generate_filepath(output_folder))
+    return {
+        'result': output_folder,
+        'sample_indices': frame_indices,
+        'fresh': True,
+        'slide_tokens': None
+    }
 
 
-# The function that creates and calls the celery task
-def celery_multiproc_example_master(data):
-    sw = Stopwatch()
-    # Note: If you have some large dataset that you don't want to individually copy to every single task,
-    # take a look at custom Manager classes based on multiprocessing.managers.BaseManager, which enables you
-    # to create one Manager object and share it among all the tasks.
-    # Getting the parameters
-    foo = data.foo
-    bar = data.bar
-    log(f'Got input parameters ({foo}, {bar})', sw.delta())
-    # Here we run 'bar' instances of the parallel task in a group (which means in parallel), and
-    # the results are then collected and fed into the callback task.
-    # apply_async() schedules the task and get() blocks on it until completion and returns the results.
-    t = (group(example_parallel_task.signature(args=[foo]) for i in range(bar)) |
-         example_callback_task.signature(args=[])).apply_async(priority=2).get()
-    log(f'Got all results', sw.delta())
-    return {'baz': t}
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
+             name='video.noise_level_parallel', ignore_result=False,
+             file_manager=file_management_config,
+             nlp_model=local_ocr_nlp_models)
+def compute_noise_level_parallel_task(self, results, i, n, language=None):
+    if not results['fresh']:
+        return {
+            'result': None,
+            'sample_indices': None,
+            'noise_level': None,
+            'fresh': False,
+            'slide_tokens': results['slide_tokens']
+        }
+    all_sample_indices = results['sample_indices']
+    start_index = int(i*len(all_sample_indices)/n)
+    end_index = int((i+1)*len(all_sample_indices)/n)
+    current_sample_indices = all_sample_indices[start_index:end_index]
+    noise_level_list = \
+        compute_ocr_noise_level(self.file_manager.generate_filepath(results['result']),
+                                current_sample_indices, self.nlp_model.get_nlp_models(), language=language)
+    return {
+        'result': results['result'],
+        'sample_indices': results['sample_indices'],
+        'noise_level': noise_level_list,
+        'fresh': True,
+        'slide_tokens': None
+    }
 
 
-def retrieve_and_generate_token_master(url):
-    token = generate_random_token()
-    out_filename = token + '.' + url.split('.')[-1]
-    task = retrieve_file_from_url_task.apply_async(args=[url, out_filename], priority=2)
-    return {'task_id': task.id}
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
+             name='video.noise_level_callback', ignore_result=False)
+def compute_noise_threshold_callback_task(self, results, hash_thresh=0.8):
+    if not results[0]['fresh']:
+        return {
+            'result': None,
+            'sample_indices': None,
+            'threshold': None,
+            'fresh': False,
+            'slide_tokens': results[0]['slide_tokens']
+        }
+    list_of_noise_value_lists = [x['noise_level'] for x in results]
+    all_noise_values = list(chain.from_iterable(list_of_noise_value_lists))
+    threshold = compute_ocr_threshold(all_noise_values)
+    return {
+        'result': results[0]['result'],
+        'sample_indices': results[0]['sample_indices'],
+        'threshold': threshold,
+        'hash_threshold': hash_thresh,
+        'fresh': True,
+        'slide_tokens': None
+    }
 
 
-def compute_signature_master(token, force=False):
-    task = compute_signature_task.apply_async(args=[token, force],  priority=2)
-    return {'task_id': task.id}
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
+             name='video.slide_transitions_parallel', ignore_result=False,
+             file_manager=file_management_config, nlp_model=local_ocr_nlp_models)
+def compute_slide_transitions_parallel_task(self, results, i, n, language=None):
+    if not results['fresh']:
+        return {
+            'result': None,
+            'transitions': None,
+            'fresh': False,
+            'slide_tokens': results['slide_tokens']
+        }
+    all_sample_indices = results['sample_indices']
+    start_index = int(i*len(all_sample_indices)/n)
+    end_index = int((i+1)*len(all_sample_indices)/n)
+    current_sample_indices = all_sample_indices[start_index:end_index]
+    slide_transition_list = \
+        compute_video_ocr_transitions(self.file_manager.generate_filepath(results['result']), current_sample_indices,
+                                      results['threshold'], results['hash_threshold'],
+                                      self.nlp_model.get_nlp_models(), language=language)
+    return {
+        'result': results['result'],
+        'transitions': slide_transition_list,
+        'fresh': True,
+        'slide_tokens': None
+    }
 
 
-def get_file_master(token):
-    return get_file_task.apply_async(args=[token], priority=2).get()
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
+             name='video.slide_transitions_callback', ignore_result=False)
+def compute_slide_transitions_callback_task(self, results):
+    if not results[0]['fresh']:
+        return {
+            'result': None,
+            'slides': None,
+            'fresh': False,
+            'slide_tokens': results[0]['slide_tokens']
+        }
+    list_of_slide_transition_lists = [x['transitions'] for x in results]
+    all_transitions = list(chain.from_iterable(list_of_slide_transition_lists))
+    return {
+        'result': results[0]['result'],
+        'slides': all_transitions,
+        'fresh': True,
+        'slide_tokens': None
+    }
 
 
-def extract_audio_master(token, force=False):
-    task = (extract_audio_task.s(token, force) |
-            extract_audio_callback_task.s(token)).apply_async(priority=2)
-    return {'task_id': task.id}
-
-
-def detect_slides_master(token, force=False):
-    task = detect_slides_task.apply_async(args=[token, force], priority=2)
-    return {'task_id': task.id}
-
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
+             name='video.detect_slides_callback', ignore_result=False,
+             db_manager=slide_db_manager, file_manager=file_management_config)
+def detect_slides_callback_task(self, results, token):
+    if results['fresh']:
+        # Delete non-slide frames from the frames directory
+        list_of_slides = [(FRAME_FORMAT) % (x) for x in results['slides']]
+        list_of_ocr_results = [(OCR_FORMAT) % (x) for x in results['slides']]
+        base_folder = results['result']
+        base_folder_with_path = self.file_manager.generate_filepath(base_folder)
+        for f in os.listdir(base_folder_with_path):
+            if f not in list_of_slides and f not in list_of_ocr_results:
+                os.remove(os.path.join(base_folder_with_path, f))
+        # Renaming the `all_frames` directory to `slides`
+        slides_folder = base_folder.replace('_all_frames', '_slides')
+        slides_folder_with_path = self.file_manager.generate_filepath(slides_folder)
+        # Make sure the slides folder doesn't already exist, and recursively delete it if it does (force==True)
+        if os.path.exists(slides_folder_with_path) and os.path.isdir(slides_folder_with_path):
+            shutil.rmtree(slides_folder_with_path)
+        # Now rename _all_frames to _slides
+        os.rename(base_folder_with_path,
+                  slides_folder_with_path)
+        slide_tokens = [os.path.join(slides_folder, s) for s in list_of_slides]
+        ocr_tokens = [os.path.join(slides_folder, s) for s in list_of_ocr_results]
+        slide_tokens = {i+1:slide_tokens[i] for i in range(len(slide_tokens))}
+        ocr_tokens = {i+1:ocr_tokens[i] for i in range(len(ocr_tokens))}
+        # Inserting fresh results into the database
+        for slide_number in slide_tokens:
+            self.db_manager.insert_or_update_details(
+                slide_tokens[slide_number],
+                {
+                    'origin_token': token,
+                    'timestamp': results['slides'][slide_number-1],
+                    'slide_number': slide_number,
+                    'ocr_tesseract_token': ocr_tokens[slide_number]
+                }
+            )
+    else:
+        # Getting cached or null results that have been passed along the chain of tasks
+        slide_tokens = results['slide_tokens']
+    return {
+        'slide_tokens': slide_tokens,
+        'fresh': results['fresh']
+    }
