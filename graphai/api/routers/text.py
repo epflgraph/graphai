@@ -67,6 +67,7 @@ async def wikify(data: WikifyRequest, method: Optional[str] = None):
     4. Aggregation and filter: For each concept, their scores are aggregated and filtered according to some rules,
         to keep only the most relevant results.
     """
+    print('hello')
 
     # Get input parameters
     raw_text = data.raw_text
@@ -80,6 +81,9 @@ async def wikify(data: WikifyRequest, method: Optional[str] = None):
         n = get_n_celery_workers()
     except Exception as e:
         n = 10
+
+    print('#' * 60, 'router')
+    print(n)
 
     job = chain(
         extract_keywords_task.s(raw_text),
