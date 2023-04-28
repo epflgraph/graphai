@@ -10,7 +10,7 @@ from graphai.api.celery_tasks.voice import compute_audio_fingerprint_task, \
     audio_fingerprint_find_closest_parallel_task, audio_fingerprint_find_closest_callback_task, \
     retrieve_audio_fingerprint_callback_task, remove_audio_silence_task, remove_audio_silence_callback_task, \
     detect_language_retrieve_from_db_and_split_task, detect_language_parallel_task, detect_language_callback_task, \
-    transcribe_task, transcribe_callback_task
+    transcribe_task, transcribe_callback_task, video_dummy
 from graphai.api.celery_tasks.common import format_api_results
 from graphai.core.interfaces.celery_config import get_task_info
 
@@ -108,6 +108,7 @@ async def transcribe_status(task_id):
 
 @router.post('/detect_language', response_model=TaskIDResponse)
 async def detect_language(data: AudioDetectLanguageRequest):
+    print('Detecting language')
     token = data.token
     force = data.force
     n_divs = 5
@@ -115,6 +116,13 @@ async def detect_language(data: AudioDetectLanguageRequest):
             group(detect_language_parallel_task.s(i) for i in range(n_divs)) |
             detect_language_callback_task.s(token)).apply_async(priority=2)
     return {'task_id': task.id}
+
+
+@router.post('/priority_test')
+async def priority_test():
+    print('launching a dummy')
+    task = group(video_dummy.s() for i in range(8)).apply_async(priority=2)
+    return {'id': task.id}
 
 
 @router.get('/detect_language/status/{task_id}', response_model=AudioDetectLanguageResponse)

@@ -1,5 +1,5 @@
 import json
-
+from time import sleep
 from celery import shared_task
 from graphai.api.common.video import audio_db_manager, file_management_config, transcription_model
 from graphai.core.common.video import remove_silence_doublesided, perceptual_hash_audio, \
@@ -382,3 +382,9 @@ def transcribe_callback_task(self, results, token):
                 closest, values_dict
             )
     return results
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
+             name='video.sleeper', ignore_result=False)
+def video_dummy(self):
+    sleep(30)
