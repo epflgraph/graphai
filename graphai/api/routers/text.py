@@ -105,5 +105,5 @@ async def wikify(data: WikifyRequest, method: Optional[str] = None):
 @router.post('/priority_test')
 async def priority_test_text():
     print('the dummy that matters is being launched')
-    task = group(text_test_task.s() for i in range(8)).apply_async(priority=2)
+    task = group(text_test_task.s() for i in range(8)).apply_async(priority=10)
     return {'id': task.id}
