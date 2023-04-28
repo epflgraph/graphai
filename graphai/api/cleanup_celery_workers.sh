@@ -1,3 +1,3 @@
 #!/bin/bash
 
-pkill -f celery
+pkill -9 -f 'celery -A'
