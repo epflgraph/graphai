@@ -386,5 +386,5 @@ def transcribe_callback_task(self, results, token):
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='video.sleeper', ignore_result=False)
-def video_dummy(self):
+def video_test_task(self):
     sleep(30)

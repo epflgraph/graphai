@@ -170,7 +170,7 @@ def aggregate_and_filter_task(self, results):
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='text.sleeper', ignore_result=False)
-def text_dummy(self):
+def text_test_task(self):
     sleep(5)
     print('it worked')
     return 0
