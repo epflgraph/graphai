@@ -2,7 +2,11 @@ import os
 import shutil
 
 from celery import shared_task
-from graphai.api.common.video import file_management_config, audio_db_manager, local_ocr_nlp_models, slide_db_manager
+
+from graphai.api.common.graph import graph
+from graphai.api.common.ontology import ontology
+from graphai.api.common.video import file_management_config, audio_db_manager, local_ocr_nlp_models, slide_db_manager, \
+    transcription_model
 from graphai.core.common.video import retrieve_file_from_url, detect_audio_format_and_duration, \
     extract_audio_from_video, extract_frames, generate_frame_sample_indices, compute_ocr_noise_level, \
     compute_ocr_threshold, compute_video_ocr_transitions, generate_random_token, FRAME_FORMAT, OCR_FORMAT
@@ -277,3 +281,30 @@ def detect_slides_callback_task(self, results, token):
         'slide_tokens': slide_tokens,
         'fresh': results['fresh']
     }
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
+             name='video.dummy_task', ignore_result=False)
+def dummy_task(self, results):
+    # This task is required for chaining groups due to the peculiarities of celery
+    # Whenever there are two groups in one chain of tasks, there need to be at least
+    # TWO tasks between them, and this dummy task is simply an f(x)=x function.
+    return results
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
+             name='video.lazy_load', ignore_result=False,
+             transcription_obj=transcription_model,
+             nlp_obj=local_ocr_nlp_models)
+def video_lazy_loader_task(self):
+    # This task force-loads all the lazy-loading objects in the celery process
+    print('Starting force-load for video processing objects...')
+    # self.graph_obj.fetch_from_db()
+    # print('Graph tables loaded')
+    # self.ontology_obj.fetch_from_db()
+    # print('Ontology tables loaded')
+    self.transcription_obj.load_model_whisper()
+    print('Transcription model loaded')
+    self.nlp_obj.get_nlp_models()
+    print('NLP models loaded')
+    return True

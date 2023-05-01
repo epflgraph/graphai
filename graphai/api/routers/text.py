@@ -10,7 +10,7 @@ from graphai.api.common.celery_tools import get_n_celery_workers
 
 from graphai.api.schemas.text import *
 
-from graphai.api.celery_tasks.text import extract_keywords_task, wikisearch_task, wikisearch_callback_task, compute_scores_task, aggregate_and_filter_task
+from graphai.api.celery_tasks.text import extract_keywords_task, wikisearch_task, wikisearch_callback_task, compute_scores_task, aggregate_and_filter_task, text_test_task
 
 
 pd.set_option('display.max_rows', 400)
@@ -100,3 +100,10 @@ async def wikify(data: WikifyRequest, method: Optional[str] = None):
     results = results.get(timeout=10)
 
     return results.to_dict(orient='records')
+
+
+@router.post('/priority_test')
+async def priority_test_text():
+    print('the dummy that matters is being launched')
+    task = group(text_test_task.s() for i in range(8)).apply_async(priority=10)
+    return {'id': task.id}

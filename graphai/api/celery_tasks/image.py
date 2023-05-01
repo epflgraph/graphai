@@ -2,8 +2,9 @@ from celery import shared_task
 
 from graphai.api.celery_tasks.common import fingerprint_lookup_retrieve_from_db, fingerprint_lookup_parallel, \
     fingerprint_lookup_callback
-from graphai.api.common.video import slide_db_manager, file_management_config, google_ocr_model
-from graphai.core.common.video import perceptual_hash_image, read_txt_gz_file, write_txt_gz_file, perform_tesseract_ocr
+from graphai.api.common.video import slide_db_manager, file_management_config
+from graphai.core.common.video import perceptual_hash_image, read_txt_gz_file, write_txt_gz_file, perform_tesseract_ocr, \
+    GoogleOCRModel
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
@@ -79,7 +80,7 @@ def retrieve_slide_fingerprint_callback_task(self, results):
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='video.extract_slide_text', ignore_result=False,
-             db_manager=slide_db_manager, file_manager=file_management_config, ocr_model=google_ocr_model)
+             db_manager=slide_db_manager, file_manager=file_management_config)
 def extract_slide_text_task(self, token, method='tesseract', force=False):
     if method == 'tesseract':
         ocr_colnames = ['ocr_tesseract_token']
@@ -124,7 +125,9 @@ def extract_slide_text_task(self, token, method='tesseract', force=False):
                 }
             ]
     else:
-        res1, res2 = self.ocr_model.perform_ocr(self.file_manager.generate_filepath(token))
+        ocr_model = GoogleOCRModel()
+        ocr_model.establish_connection()
+        res1, res2 = ocr_model.perform_ocr(self.file_manager.generate_filepath(token))
         if res1 is None or res2 is None:
             results = None
         else:

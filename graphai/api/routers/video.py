@@ -8,8 +8,8 @@ from graphai.api.schemas.common import *
 from graphai.api.celery_tasks.video import retrieve_file_from_url_task, get_file_task, extract_audio_task, \
     extract_audio_callback_task, extract_and_sample_frames_task, compute_noise_level_parallel_task, \
     compute_noise_threshold_callback_task, compute_slide_transitions_parallel_task, \
-    compute_slide_transitions_callback_task, detect_slides_callback_task
-from graphai.api.celery_tasks.common import format_api_results, dummy_task
+    compute_slide_transitions_callback_task, detect_slides_callback_task, dummy_task
+from graphai.api.celery_tasks.common import format_api_results
 from graphai.core.interfaces.celery_config import get_task_info
 
 # Initialise video router
