@@ -70,9 +70,10 @@ permission to create a new schema.
 ### Configuring Celery
 
 Celery has a few particularities that require attention when launching a server:
-* Celery can run jobs using **threads** or **processes**. Because of the Global Interpreter Lock (GIL) in Python, running using 
-threads will mostly reduce your tasks from true parallelism to concurrency (although this is only true when running 
-Python bytecode, as opposed to e.g. C libraries underneath, which _are_ truly run in parallel). 
+* Celery can run jobs using **threads** or **processes**. Because of the 
+[Global Interpreter Lock (GIL)](https://docs.celeryq.dev/projects/celery-enhancement-proposals/en/latest/glossary.html#term-GIL) 
+in Python, running using threads will mostly reduce your tasks from true parallelism to concurrency (although this is 
+only true when running Python bytecode, as opposed to e.g. C libraries underneath, which _are_ truly run in parallel). 
 However, using processes means that you will have one copy of your read-only (potentially large) objects _per process_. 
 To address this problem, the `deploy_celery.sh` script launches two workers: one using processes and designed to handle 
 more time-critical tasks, and one using threads and designed to handle long-running tasks. When writing tasks and jobs, 
