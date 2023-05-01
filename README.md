@@ -67,6 +67,25 @@ root: <root directory for the storage of all files (video, audio, image, etc.)>
 **NOTE**: The caching additionally requires the existence of the schema `cache_graphai` in your database, or otherwise the 
 permission to create a new schema.
 
+### Configuring Celery
+
+Celery has a few particularities that require attention when launching a server:
+* Celery can run jobs using **threads** or **processes**. Because of the Global Interpreter Lock (GIL) in Python, running using 
+threads will mostly reduce your tasks from true parallelism to concurrency (although this is only true when running 
+Python bytecode, as opposed to e.g. C libraries underneath, which _are_ truly run in parallel). 
+However, using processes means that you will have one copy of your read-only (potentially large) objects _per process_. 
+To address this problem, the `deploy_celery.sh` script launches two workers: one using processes and designed to handle 
+more time-critical tasks, and one using threads and designed to handle long-running tasks. When writing tasks and jobs, 
+be mindful of their overall priority and assign them to the appropriate worker (either using the existing queues or 
+by adding a new queue to `core/interfaces/celery_config.py` and `deploy_celery.sh`).
+  * Launching multiple workers also allows you to set the niceness value of each worker process, thus giving you more 
+  control over priorities.
+  * For more optimization tips, particularly regarding the `--prefetch-multiplier` flag, 
+  see [here](https://docs.celeryq.dev/en/stable/userguide/optimizing.html#optimizing-prefetch-limit).
+* The way `deploy_celery.sh` is set up, some workers will be running in detached mode. In order to monitor the status of 
+**all** workers, use the `monitor_celery.sh` script. In order to terminate them all, use the `cleanup_celery_workers.sh` 
+script. See more [here](https://docs.celeryq.dev/en/stable/userguide/workers.html#stopping-the-worker).
+
 ## API
 The GraphAI module includes an API that leverages the [FastAPI](https://fastapi.tiangolo.com/) package.
 
