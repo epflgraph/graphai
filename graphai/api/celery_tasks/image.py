@@ -4,7 +4,7 @@ from graphai.api.celery_tasks.common import fingerprint_lookup_retrieve_from_db,
     fingerprint_lookup_callback
 from graphai.api.common.video import slide_db_manager, file_management_config
 from graphai.core.common.video import perceptual_hash_image, read_txt_gz_file, write_txt_gz_file, perform_tesseract_ocr, \
-    GoogleOCRModel
+    GoogleOCRModel, detect_text_language
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
@@ -86,13 +86,13 @@ def extract_slide_text_task(self, token, method='tesseract', force=False):
         ocr_colnames = ['ocr_tesseract_token']
     else:
         ocr_colnames = ['ocr_google_1_token', 'ocr_google_2_token']
-
     if not force:
-        existing = self.db_manager.get_details(token, ocr_colnames,
+        existing = self.db_manager.get_details(token, ocr_colnames+['language'],
                                                using_most_similar=True)
         if existing is None:
             return {
                 'results': None,
+                'language': None,
                 'fresh': False
             }
         if all([existing[ocr_colname] is not None for ocr_colname in ocr_colnames]):
@@ -105,16 +105,24 @@ def extract_slide_text_task(self, token, method='tesseract', force=False):
                 }
                 for ocr_colname in ocr_colnames
             ]
+            language = existing['language']
+            fresh = False
+            if language is None:
+                language = detect_text_language(results[0]['text'])
+                fresh = True
 
             return {
                 'results': results,
-                'fresh': False
+                'language': language,
+                'fresh': fresh
             }
     if method == 'tesseract':
         res = perform_tesseract_ocr(self.file_manager.generate_filepath(token))
         if res is None:
             results = None
+            language = None
         else:
+            language = detect_text_language(res)
             res_token = token+'_'+ocr_colnames[0]+'.txt.gz'
             write_txt_gz_file(res, self.file_manager.generate_filepath(res_token))
             results = [
@@ -130,7 +138,10 @@ def extract_slide_text_task(self, token, method='tesseract', force=False):
         res1, res2 = ocr_model.perform_ocr(self.file_manager.generate_filepath(token))
         if res1 is None or res2 is None:
             results = None
+            language = None
         else:
+            # Since DTD usually performs better, method #1 is our point of reference for langdetect
+            language = detect_text_language(res1)
             res_list = [res1, res2]
             res_token_list = list()
             for i in range(len(res_list)):
@@ -147,6 +158,7 @@ def extract_slide_text_task(self, token, method='tesseract', force=False):
             ]
     return {
         'results': results,
+        'language': language,
         'fresh': results is not None
     }
 
@@ -160,6 +172,7 @@ def extract_slide_text_callback_task(self, results, token):
             result['method']: result['token']
             for result in results['results']
         }
+        values_dict.update({'language': results['language']})
         # Inserting values for original token
         self.db_manager.insert_or_update_details(
             token, values_dict
@@ -171,5 +184,4 @@ def extract_slide_text_callback_task(self, results, token):
                 closest, values_dict
             )
     return results
-
 
