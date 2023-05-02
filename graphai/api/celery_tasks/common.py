@@ -20,35 +20,27 @@ def fingerprint_lookup_retrieve_from_db(results, token, db_manager):
     if target_fingerprint is None or not fresh:
         return {
             'target_fp': None,
-            'all_tokens': None,
-            'all_fingerprints': None,
+            'cache_count': None,
             'fp_results': results
         }
     # Retrieving all the tokens and their fingerprints. Since at least one audio has been extracted
     # (i.e. this one), this result is never null. In addition, there's at least one non-null fingerprint
-    # value (again, for the present audio file).
-    tokens_and_fingerprints = db_manager.get_all_details(['fingerprint'], using_most_similar=False)
-    all_tokens = list(tokens_and_fingerprints.keys())
-    all_fingerprints = [tokens_and_fingerprints[key]['fingerprint'] for key in all_tokens]
-    # Now we remove the token of the current file itself, because otherwise we'd always get the token itself
-    # as the most similar token.
-    index_to_remove = all_tokens.index(token)
-    del all_tokens[index_to_remove]
-    del all_fingerprints[index_to_remove]
+    # value (again, for the present file).
+    n_cache_rows = db_manager.get_cache_count(['fingerprint'])
+
     return {
         'target_fp': target_fingerprint,
-        'all_tokens': all_tokens,
-        'all_fingerprints': all_fingerprints,
+        'cache_count': n_cache_rows,
         'fp_results': results
     }
 
 
-def fingerprint_lookup_parallel(input_dict, i, n_total, min_similarity, data_type='audio'):
+def fingerprint_lookup_parallel(input_dict, token, i, n_total, min_similarity, db_manager, data_type='audio'):
     assert data_type in ['audio', 'image']
     # This parallel task's "closest fingerprint" result is null if either
     # a) the computation has been disabled (indicated by the token list being null), or
     # b) there are no previous fingerprints (indicated by the list of all tokens being empty)
-    if input_dict['all_tokens'] is None or len(input_dict['all_tokens']) == 0:
+    if input_dict['cache_count'] is None or input_dict['cache_count'] == 0:
         return {
             'closest': None,
             'closest_fp': None,
@@ -56,10 +48,31 @@ def fingerprint_lookup_parallel(input_dict, i, n_total, min_similarity, data_typ
             'fp_results': input_dict['fp_results']
         }
     # Get the total number of tokens and fingerprints
-    n_tokens_all = len(input_dict['all_tokens'])
+    n_tokens_all = input_dict['cache_count']
     # Compute the start and end indices
     start_index = int(i / n_total * n_tokens_all)
     end_index = int((i + 1) / n_total * n_tokens_all)
+    limit = end_index - start_index
+    if limit <= 0:
+        return {
+            'closest': None,
+            'closest_fp': None,
+            'max_score': None,
+            'fp_results': input_dict['fp_results']
+        }
+    tokens_and_fingerprints = db_manager.get_all_details(
+        ['fingerprint'], start=start_index, limit=limit, exclude_token=token, using_most_similar=False,
+        allow_nulls=False
+    )
+    if tokens_and_fingerprints is None or len(tokens_and_fingerprints) == 0:
+        return {
+            'closest': None,
+            'closest_fp': None,
+            'max_score': None,
+            'fp_results': input_dict['fp_results']
+        }
+    all_tokens = list(tokens_and_fingerprints.keys())
+    all_fingerprints = [tokens_and_fingerprints[key]['fingerprint'] for key in all_tokens]
     # Find the closest token for this batch
     # Note: null fingerprint values are automatically handled and don't need to be filtered out.
     if data_type == 'audio':
@@ -68,8 +81,8 @@ def fingerprint_lookup_parallel(input_dict, i, n_total, min_similarity, data_typ
         find_closest_func = find_closest_image_fingerprint_from_list
     closest_token, closest_fingerprint, score = find_closest_func(
         input_dict['target_fp'],
-        input_dict['all_fingerprints'][start_index:end_index],
-        input_dict['all_tokens'][start_index:end_index],
+        all_fingerprints,
+        all_tokens,
         min_similarity=min_similarity
     )
     return {
