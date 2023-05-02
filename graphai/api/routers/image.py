@@ -28,7 +28,7 @@ async def calculate_fingerprint(data: ImageFingerprintRequest):
             compute_slide_fingerprint_task.s(token, force) |
             compute_slide_fingerprint_callback_task.s(token) |
             slide_fingerprint_find_closest_retrieve_from_db_task.s(token) |
-            group(slide_fingerprint_find_closest_parallel_task.s(i, n_jobs, min_similarity) for i in range(n_jobs)) |
+            group(slide_fingerprint_find_closest_parallel_task.s(token, i, n_jobs, min_similarity) for i in range(n_jobs)) |
             slide_fingerprint_find_closest_callback_task.s(token) |
             retrieve_slide_fingerprint_callback_task.s()
         ).apply_async(priority=2)
