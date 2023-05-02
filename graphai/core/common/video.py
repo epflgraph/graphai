@@ -15,6 +15,7 @@ import chromaprint
 import ffmpeg
 import imagehash
 from PIL import Image
+import langdetect
 import pytesseract
 from google.cloud import vision
 from google.protobuf.json_format import MessageToJson
@@ -664,6 +665,12 @@ def compute_video_ocr_transitions(input_folder_with_path, frame_sample_indices, 
         if t is not None and t < frame_sample_indices[-1]:
             transition_list.append(t)
     return transition_list
+
+
+def detect_text_language(s):
+    if s is None:
+        return None
+    return langdetect.detect(s)
 
 
 class WhisperTranscriptionModel():
