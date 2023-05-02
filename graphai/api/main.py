@@ -7,6 +7,7 @@ import graphai.api.routers.video as video_router
 import graphai.api.routers.voice as audio_router
 import graphai.api.routers.image as image_router
 from graphai.api.celery_tasks.video import video_lazy_loader_task
+from graphai.api.celery_tasks.text import text_lazy_loader_task
 from graphai.api.common.celery_tools import celery_instance
 
 from graphai.api.common.log import log
@@ -35,7 +36,8 @@ app.celery_app = celery_instance
 async def lazy_load_singletons():
     # Loading all the lazy-loaded objects in the celery process
     log(f'Loading all lazy-loaded objects')
-    lazy_loading_successful = video_lazy_loader_task.apply_async(priority=2).get()
+    # lazy_loading_successful = video_lazy_loader_task.apply_async(priority=2).get()
+    lazy_loading_successful = text_lazy_loader_task.apply_async(priority=10).get()
     if lazy_loading_successful:
         log(f'Lazy-loaded objects loaded into memory')
     else:

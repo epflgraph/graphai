@@ -174,3 +174,14 @@ def text_test_task(self):
     sleep(15)
     print('it worked')
     return 0
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
+             name='text.lazy_load', ignore_result=False, graph=graph, ontology=ontology)
+def text_lazy_loader_task(self):
+    print('Starting force-load for video processing objects...')
+    self.graph.fetch_from_db()
+    print('Graph tables loaded')
+    self.ontology.fetch_from_db()
+    print('Graph and ontology loaded')
+    return True
