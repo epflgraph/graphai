@@ -16,8 +16,6 @@ AUDIO_FORMATS = ['.mp3', '.flac', '.wav', '.aac', '.ogg']
 IMAGE_SUBFOLDER = 'Image'
 IMAGE_FORMATS = ['.png', '.tiff', '.jpg', '.jpeg', '.bmp', '_slides', '_all_frames']
 OTHER_SUBFOLDER = 'Other'
-SIGNATURE_SUBFOLDER = 'Signatures'
-SIGNATURE_FORMATS = ['_sig.xml']
 TRANSCRIPT_SUBFOLDER = 'Transcripts'
 TRANSCRIPT_FORMATS = ['_transcript.txt', '_subtitle_segments.json']
 TEMP_SUBFOLDER = 'Temp'
@@ -343,8 +341,6 @@ class VideoConfig():
                 filename_with_path = self.concat_file_path(filename, VIDEO_SUBFOLDER)
             elif any([filename_first_part.endswith(x) for x in AUDIO_FORMATS]):
                 filename_with_path = self.concat_file_path(filename, AUDIO_SUBFOLDER)
-            elif any([filename_first_part.endswith(x) for x in SIGNATURE_FORMATS]):
-                filename_with_path = self.concat_file_path(filename, SIGNATURE_SUBFOLDER)
             elif any([filename_first_part.endswith(x) for x in IMAGE_FORMATS]):
                 filename_with_path = self.concat_file_path(filename, IMAGE_SUBFOLDER)
             elif any([filename_first_part.endswith(x) for x in TRANSCRIPT_FORMATS]):
