@@ -37,6 +37,7 @@ dependencies = [
     "pyacoustid",
     "fuzzywuzzy[speedup]",
     "celery[redis]",
+    "flower",
     "kombu",
     "mysql-connector-python",
     "elasticsearch",
