@@ -47,15 +47,10 @@ jobs:
           echo "[CACHE]" >> cache.ini
           echo "root: ${{ vars.cache_root }}" >> cache.ini
 
-      - name: Create virtualenv and activate it
-        run: |
-          # cd main
-          # virtualenv venv
-          # source venv/bin/activate
-
-      - name: Install python package in editable mode along with dependencies
+      - name: Install python package in editable mode along with dependencies from the correct virtual environment
         run: |
           cd main
+          source /data/venvs/test_venv/bin/activate
           python -m spacy download en_core_web_lg
           python -m spacy download fr_core_news_md
           python -c "import whisper; whisper.load_model('${{ vars.whisper_model_type }}');"
