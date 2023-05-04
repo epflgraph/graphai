@@ -79,6 +79,11 @@ class ExtractTextTaskResponse(BaseModel):
         description="List of OCR results"
     )
 
+    language: str = Field(
+        title="Language",
+        description="Language of the detected text"
+    )
+
     fresh: bool = Field(
         title="Freshness flag",
         description="Whether the result was computed freshly or an existing cached result was returned."
@@ -94,4 +99,29 @@ class ExtractTextResponse(TaskStatusResponse):
     task_result: Union[ExtractTextTaskResponse, None] = Field(
         title="Extract text response",
         description="A dict containing the OCR results, plus the freshness and success flags."
+    )
+
+
+class DetectOCRLanguageTaskResponse(BaseModel):
+    language: str = Field(
+        title="Language",
+        description="Language of the detected text"
+    )
+
+    fresh: bool = Field(
+        title="Freshness flag",
+        description="Whether the result was computed freshly or an existing cached result was returned."
+    )
+
+    successful: bool = Field(
+        title="Success flag",
+        description="Whether the computation was successful."
+    )
+
+
+class DetectOCRLanguageResponse(TaskStatusResponse):
+    task_result: Union[DetectOCRLanguageTaskResponse, None] = Field(
+        title="Detect OCR language response",
+        description="A dict containing the language of the text found in the image, "
+                    "plus the freshness and success flags."
     )

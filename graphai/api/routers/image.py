@@ -28,7 +28,7 @@ async def calculate_fingerprint(data: ImageFingerprintRequest):
             compute_slide_fingerprint_task.s(token, force) |
             compute_slide_fingerprint_callback_task.s(token) |
             slide_fingerprint_find_closest_retrieve_from_db_task.s(token) |
-            group(slide_fingerprint_find_closest_parallel_task.s(i, n_jobs, min_similarity) for i in range(n_jobs)) |
+            group(slide_fingerprint_find_closest_parallel_task.s(token, i, n_jobs, min_similarity) for i in range(n_jobs)) |
             slide_fingerprint_find_closest_callback_task.s(token) |
             retrieve_slide_fingerprint_callback_task.s()
         ).apply_async(priority=2)
@@ -52,6 +52,7 @@ async def calculate_fingerprint_status(task_id):
 
 
 @router.post('/extract_text', response_model=TaskIDResponse)
+@router.post('/detect_language', response_model=TaskIDResponse)
 async def extract_text(data: ExtractTextRequest):
     token = data.token
     method = data.method
@@ -70,9 +71,27 @@ async def extract_text_status(task_id):
         if 'results' in task_results:
             task_results = {
                 'result': task_results['results'],
+                'language': task_results['language'],
                 'fresh': task_results['fresh'],
                 'successful': task_results['results'] is not None
             }
         else:
             task_results = None
     return format_api_results(full_results['id'], full_results['name'], full_results['status'], task_results)
+
+
+@router.get('/detect_language/status/{task_id}', response_model=DetectOCRLanguageResponse)
+async def detect_ocr_language_status(task_id):
+    full_results = get_task_info(task_id)
+    task_results = full_results['results']
+    if task_results is not None:
+        if 'language' in task_results:
+            task_results = {
+                'language': task_results['language'],
+                'fresh': task_results['fresh'],
+                'successful': task_results['results'] is not None
+            }
+        else:
+            task_results = None
+    return format_api_results(full_results['id'], full_results['name'], full_results['status'], task_results)
+

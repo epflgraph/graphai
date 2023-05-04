@@ -2,17 +2,19 @@ from celery import shared_task
 
 from graphai.api.celery_tasks.common import fingerprint_lookup_retrieve_from_db, fingerprint_lookup_parallel, \
     fingerprint_lookup_callback
-from graphai.api.common.video import slide_db_manager, file_management_config
+from graphai.api.common.video import file_management_config
 from graphai.core.common.video import perceptual_hash_image, read_txt_gz_file, write_txt_gz_file, perform_tesseract_ocr, \
-    GoogleOCRModel
+    GoogleOCRModel, detect_text_language
+from graphai.core.common.caching import SlideDBCachingManager
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='video.slide_fingerprint', ignore_result=False,
-             db_manager=slide_db_manager, file_manager=file_management_config)
+             file_manager=file_management_config)
 def compute_slide_fingerprint_task(self, token, force=False):
     # Checking for existing cached results
-    existing_slide = self.db_manager.get_details(token, cols=['fingerprint'])
+    db_manager = SlideDBCachingManager()
+    existing_slide = db_manager.get_details(token, cols=['fingerprint'])
     if existing_slide is None:
         return {
             'result': None,
@@ -37,11 +39,11 @@ def compute_slide_fingerprint_task(self, token, force=False):
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='video.slide_fingerprint_callback', ignore_result=False,
-             db_manager=slide_db_manager)
+             name='video.slide_fingerprint_callback', ignore_result=False)
 def compute_slide_fingerprint_callback_task(self, results, token):
     if results['fresh']:
-        self.db_manager.insert_or_update_details(
+        db_manager = SlideDBCachingManager()
+        db_manager.insert_or_update_details(
             token,
             {
                 'fingerprint': results['result'],
@@ -51,24 +53,24 @@ def compute_slide_fingerprint_callback_task(self, results, token):
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='video.slide_fingerprint_find_closest_retrieve_from_db', ignore_result=False,
-             db_manager=slide_db_manager)
+             name='video.slide_fingerprint_find_closest_retrieve_from_db', ignore_result=False)
 def slide_fingerprint_find_closest_retrieve_from_db_task(self, results, token):
-    return fingerprint_lookup_retrieve_from_db(results, token, self.db_manager)
+    db_manager = SlideDBCachingManager()
+    return fingerprint_lookup_retrieve_from_db(results, token, db_manager)
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='video.slide_fingerprint_find_closest_parallel', ignore_result=False,
-             db_manager=slide_db_manager)
-def slide_fingerprint_find_closest_parallel_task(self, input_dict, i, n_total, min_similarity=1):
-    return fingerprint_lookup_parallel(input_dict, i, n_total, min_similarity, data_type='image')
+             name='video.slide_fingerprint_find_closest_parallel', ignore_result=False)
+def slide_fingerprint_find_closest_parallel_task(self, input_dict, token, i, n_total, min_similarity=1):
+    db_manager = SlideDBCachingManager()
+    return fingerprint_lookup_parallel(input_dict, token, i, n_total, min_similarity, db_manager, data_type='image')
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='video.slide_fingerprint_find_closest_callback', ignore_result=False,
-             db_manager=slide_db_manager)
+             name='video.slide_fingerprint_find_closest_callback', ignore_result=False)
 def slide_fingerprint_find_closest_callback_task(self, results_list, original_token):
-    return fingerprint_lookup_callback(results_list, original_token, self.db_manager)
+    db_manager = SlideDBCachingManager()
+    return fingerprint_lookup_callback(results_list, original_token, db_manager)
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
@@ -80,19 +82,20 @@ def retrieve_slide_fingerprint_callback_task(self, results):
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='video.extract_slide_text', ignore_result=False,
-             db_manager=slide_db_manager, file_manager=file_management_config)
+             file_manager=file_management_config)
 def extract_slide_text_task(self, token, method='tesseract', force=False):
     if method == 'tesseract':
         ocr_colnames = ['ocr_tesseract_token']
     else:
         ocr_colnames = ['ocr_google_1_token', 'ocr_google_2_token']
-
     if not force:
-        existing = self.db_manager.get_details(token, ocr_colnames,
+        db_manager = SlideDBCachingManager()
+        existing = db_manager.get_details(token, ocr_colnames+['language'],
                                                using_most_similar=True)
         if existing is None:
             return {
                 'results': None,
+                'language': None,
                 'fresh': False
             }
         if all([existing[ocr_colname] is not None for ocr_colname in ocr_colnames]):
@@ -105,16 +108,24 @@ def extract_slide_text_task(self, token, method='tesseract', force=False):
                 }
                 for ocr_colname in ocr_colnames
             ]
+            language = existing['language']
+            fresh = False
+            if language is None:
+                language = detect_text_language(results[0]['text'])
+                fresh = True
 
             return {
                 'results': results,
-                'fresh': False
+                'language': language,
+                'fresh': fresh
             }
     if method == 'tesseract':
         res = perform_tesseract_ocr(self.file_manager.generate_filepath(token))
         if res is None:
             results = None
+            language = None
         else:
+            language = detect_text_language(res)
             res_token = token+'_'+ocr_colnames[0]+'.txt.gz'
             write_txt_gz_file(res, self.file_manager.generate_filepath(res_token))
             results = [
@@ -130,7 +141,10 @@ def extract_slide_text_task(self, token, method='tesseract', force=False):
         res1, res2 = ocr_model.perform_ocr(self.file_manager.generate_filepath(token))
         if res1 is None or res2 is None:
             results = None
+            language = None
         else:
+            # Since DTD usually performs better, method #1 is our point of reference for langdetect
+            language = detect_text_language(res1)
             res_list = [res1, res2]
             res_token_list = list()
             for i in range(len(res_list)):
@@ -147,29 +161,30 @@ def extract_slide_text_task(self, token, method='tesseract', force=False):
             ]
     return {
         'results': results,
+        'language': language,
         'fresh': results is not None
     }
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='video.extract_slide_text_callback', ignore_result=False,
-             db_manager=slide_db_manager)
+             name='video.extract_slide_text_callback', ignore_result=False)
 def extract_slide_text_callback_task(self, results, token):
     if results['fresh']:
         values_dict = {
             result['method']: result['token']
             for result in results['results']
         }
+        values_dict.update({'language': results['language']})
+        db_manager = SlideDBCachingManager()
         # Inserting values for original token
-        self.db_manager.insert_or_update_details(
+        db_manager.insert_or_update_details(
             token, values_dict
         )
         # Inserting the same values for closest token if different than original token
-        closest = self.db_manager.get_closest_match(token)
+        closest = db_manager.get_closest_match(token)
         if closest is not None and closest != token:
-            self.db_manager.insert_or_update_details(
+            db_manager.insert_or_update_details(
                 closest, values_dict
             )
     return results
-
 

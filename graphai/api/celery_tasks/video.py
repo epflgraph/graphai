@@ -3,13 +3,12 @@ import shutil
 
 from celery import shared_task
 
-from graphai.api.common.graph import graph
-from graphai.api.common.ontology import ontology
-from graphai.api.common.video import file_management_config, audio_db_manager, local_ocr_nlp_models, slide_db_manager, \
+from graphai.api.common.video import file_management_config, local_ocr_nlp_models, \
     transcription_model
 from graphai.core.common.video import retrieve_file_from_url, detect_audio_format_and_duration, \
     extract_audio_from_video, extract_frames, generate_frame_sample_indices, compute_ocr_noise_level, \
     compute_ocr_threshold, compute_video_ocr_transitions, generate_random_token, FRAME_FORMAT, OCR_FORMAT
+from graphai.core.common.caching import AudioDBCachingManager, SlideDBCachingManager
 from itertools import chain
 
 
@@ -33,7 +32,7 @@ def get_file_task(self, filename):
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='video.extract_audio', ignore_result=False,
-             db_manager=audio_db_manager, file_manager=file_management_config)
+             file_manager=file_management_config)
 def extract_audio_task(self, token, force=False):
     input_filename_with_path = self.file_manager.generate_filepath(token)
     output_token, input_duration = detect_audio_format_and_duration(input_filename_with_path, token)
@@ -49,7 +48,8 @@ def extract_audio_task(self, token, force=False):
     # only after extracting the audio from the video.
     if not force:
         # we get the first element because in the audio caching table, each origin token has only one row
-        existing = self.db_manager.get_details_using_origin(token, cols=['duration'])[0]
+        db_manager = AudioDBCachingManager()
+        existing = db_manager.get_details_using_origin(token, cols=['duration'])[0]
     else:
         existing = None
     if existing is not None:
@@ -77,10 +77,11 @@ def extract_audio_task(self, token, force=False):
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='video.extract_audio_callback', ignore_result=False,
-             db_manager=audio_db_manager, file_manager=file_management_config)
+             file_manager=file_management_config)
 def extract_audio_callback_task(self, results, origin_token):
     if results['fresh']:
-        self.db_manager.insert_or_update_details(
+        db_manager = AudioDBCachingManager()
+        db_manager.insert_or_update_details(
             results['token'],
             {
                 'duration': results['duration'],
@@ -92,11 +93,11 @@ def extract_audio_callback_task(self, results, origin_token):
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='video.extract_and_sample_frames', ignore_result=False,
-             db_manager=slide_db_manager, file_manager=file_management_config)
+             file_manager=file_management_config)
 def extract_and_sample_frames_task(self, token, force=False):
     # Checking for existing cached results
-
-    existing_slides = self.db_manager.get_details_using_origin(token, cols=['slide_number'])
+    db_manager = SlideDBCachingManager()
+    existing_slides = db_manager.get_details_using_origin(token, cols=['slide_number'])
 
     if existing_slides is not None:
         if not force:
@@ -113,7 +114,7 @@ def extract_and_sample_frames_task(self, token, force=False):
             # This will require a force-recomputation of every other property that pertains to the video whose slides
             # have been force-recomputed, e.g. fingerprints and text OCRs.
             # In general, force is only there for debugging and will not be usable by the end-user.
-            self.db_manager.delete_cache_rows([x['id_token'] for x in existing_slides])
+            db_manager.delete_cache_rows([x['id_token'] for x in existing_slides])
     # Extracting frames
     input_filename_with_path = self.file_manager.generate_filepath(token)
     output_folder = token + '_all_frames'
@@ -239,7 +240,7 @@ def compute_slide_transitions_callback_task(self, results):
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='video.detect_slides_callback', ignore_result=False,
-             db_manager=slide_db_manager, file_manager=file_management_config)
+             file_manager=file_management_config)
 def detect_slides_callback_task(self, results, token):
     if results['fresh']:
         # Delete non-slide frames from the frames directory
@@ -265,7 +266,8 @@ def detect_slides_callback_task(self, results, token):
         ocr_tokens = {i+1:ocr_tokens[i] for i in range(len(ocr_tokens))}
         # Inserting fresh results into the database
         for slide_number in slide_tokens:
-            self.db_manager.insert_or_update_details(
+            db_manager = SlideDBCachingManager()
+            db_manager.insert_or_update_details(
                 slide_tokens[slide_number],
                 {
                     'origin_token': token,

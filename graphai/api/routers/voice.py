@@ -34,7 +34,7 @@ async def calculate_audio_fingerprint(data: AudioFingerprintRequest):
         task = (compute_audio_fingerprint_task.s({'fp_token': token}, token, force) |
                 compute_audio_fingerprint_callback_task.s(token) |
                 audio_fingerprint_find_closest_retrieve_from_db_task.s(token) |
-                group(audio_fingerprint_find_closest_parallel_task.s(i, n_jobs, min_similarity) for i in range(n_jobs)) |
+                group(audio_fingerprint_find_closest_parallel_task.s(token, i, n_jobs, min_similarity) for i in range(n_jobs)) |
                 audio_fingerprint_find_closest_callback_task.s(token) |
                 retrieve_audio_fingerprint_callback_task.s()
                 )
@@ -44,7 +44,7 @@ async def calculate_audio_fingerprint(data: AudioFingerprintRequest):
                 compute_audio_fingerprint_task.s(token, force) |
                 compute_audio_fingerprint_callback_task.s(token) |
                 audio_fingerprint_find_closest_retrieve_from_db_task.s(token) |
-                group(audio_fingerprint_find_closest_parallel_task.s(i, n_jobs, min_similarity) for i in range(n_jobs)) |
+                group(audio_fingerprint_find_closest_parallel_task.s(token, i, n_jobs, min_similarity) for i in range(n_jobs)) |
                 audio_fingerprint_find_closest_callback_task.s(token) |
                 retrieve_audio_fingerprint_callback_task.s()
                 )

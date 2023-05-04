@@ -132,13 +132,26 @@ class DBCachingManagerBase(abc.ABC):
             results = None
         return results
 
-    def _get_all_details(self, schema, table_name, cols):
+    def _get_all_details(self, schema, table_name, cols, start=0, limit=-1, exclude_token=None, allow_nulls=True):
         column_list = ['id_token'] + cols
-        results = self.db.execute_query(
-            f"""
+        query = f"""
             SELECT {', '.join(column_list)} FROM `{schema}`.`{table_name}`
             """
-        )
+        if exclude_token is not None:
+            query += f"""
+            WHERE id_token != {surround_with_character(exclude_token, "'")}
+            """
+        if not allow_nulls:
+            if 'WHERE' in query:
+                query += ' AND '
+            else:
+                query += '\nWHERE '
+            query += ' AND '.join([col + ' IS NOT NULL' for col in cols])
+        if limit != -1:
+            query += f"""
+            LIMIT {start},{limit}
+            """
+        results = self.db.execute_query(query)
         if len(results) > 0:
             results = {row[0]: {column_list[i]: row[i] for i in range(len(column_list))} for row in results}
         else:
@@ -152,6 +165,17 @@ class DBCachingManagerBase(abc.ABC):
             DELETE FROM `{schema}`.`{table_name}` WHERE id_token IN {id_tokens_str}
             """
         )
+
+    def _get_count(self, schema, table_name, non_null_cols=None):
+        query = f"""
+        SELECT COUNT(*) FROM `{schema}`.`{table_name}`
+        """
+        if non_null_cols is not None:
+            query += f"""
+            WHERE {' AND '.join([col + " IS NOT NULL" for col in non_null_cols])}
+            """
+        results = self.db.execute_query(query)
+        return results[0][0]
 
     def delete_cache_rows(self, id_tokens):
         self._delete_rows(self.schema, self.cache_table, id_tokens)
@@ -172,12 +196,18 @@ class DBCachingManagerBase(abc.ABC):
     def get_details_using_origin(self, origin_token, cols):
         return self._get_details_using_origin(self.schema, self.cache_table, origin_token, cols)
 
-    def get_all_details(self, cols, using_most_similar=False):
-        results = self._get_all_details(self.schema, self.cache_table, cols)
+    def get_all_details(self, cols, start=0, limit=-1, exclude_token=None, using_most_similar=False,
+                        allow_nulls=True):
+        results = self._get_all_details(self.schema, self.cache_table, cols,
+                                        start=start, limit=limit, exclude_token=exclude_token,
+                                        allow_nulls=allow_nulls)
         if using_most_similar:
             most_similar_map = self.get_all_closest_matches()
             results = {x: results[most_similar_map.get(x, x)] for x in results}
         return results
+
+    def get_cache_count(self, non_null_cols=None):
+        return self._get_count(self.schema, self.cache_table, non_null_cols)
 
     def insert_or_update_closest_match(self, id_token, values_to_insert):
         self._insert_or_update_details(self.schema, self.most_similar_table, id_token, values_to_insert)
