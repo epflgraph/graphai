@@ -20,14 +20,9 @@ jobs:
     needs: [clone-repo]
     uses: ./.github/workflows/run-tests.yml
 
-  copy-repo:
-    if: github.event_name == 'push'
-    needs: [run-tests]
-    uses: ./.github/workflows/copy-repo.yml
-
   build-docs:
     if: github.event_name == 'push'
-    needs: [copy-repo]
+    needs: [run-tests]
     uses: ./.github/workflows/build-docs.yml
 
   update-gh-pages:
@@ -37,5 +32,5 @@ jobs:
 
   deploy-api:
     if: github.event_name == 'push'
-    needs: [copy-repo]
+    needs: [run-tests]
     uses: ./.github/workflows/deploy-api.yml
