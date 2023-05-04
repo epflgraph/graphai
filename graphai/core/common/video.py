@@ -18,14 +18,12 @@ from PIL import Image
 import langdetect
 import pytesseract
 from google.cloud import vision
-from google.protobuf.json_format import MessageToJson
 import spacy
 import gzip
 import numpy as np
 import wget
 import whisper
 from fuzzywuzzy import fuzz
-from google.cloud import storage, speech
 from .caching import make_sure_path_exists
 from graphai.definitions import CONFIG_DIR
 
