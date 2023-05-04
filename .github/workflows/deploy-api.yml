@@ -10,14 +10,10 @@ jobs:
     runs-on: self-hosted
 
     steps:
-      - name: Checkout repository code
-        uses: actions/checkout@v3
-        with:
-          path: /home/ubuntu/graphai-test
-
-      - name: Copy config folder
+      - name: Copy repo
         run: |
-          cp -r main/config /home/ubuntu/graphai-test
+          rm -r /home/ubuntu/graphai-test
+          cp -r main /home/ubuntu/graphai-test
 
       - name: Deploy API
         run: systemctl --user restart api-test
