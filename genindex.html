@@ -10,7 +10,6 @@
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
         <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/doctools.js"></script>
         <script src="_static/sphinx_highlight.js"></script>
@@ -190,10 +189,14 @@
 </li>
       <li><a href="graphai.core.utils.time.stopwatch.html#graphai.core.utils.time.stopwatch.Stopwatch.delta">delta() (graphai.core.utils.time.stopwatch.Stopwatch method)</a>
 </li>
-      <li><a href="graphai.api.schemas.video.html#graphai.api.schemas.video.DetectSlidesRequest">DetectSlidesRequest (class in graphai.api.schemas.video)</a>
+      <li><a href="graphai.api.schemas.image.html#graphai.api.schemas.image.DetectOCRLanguageResponse">DetectOCRLanguageResponse (class in graphai.api.schemas.image)</a>
+</li>
+      <li><a href="graphai.api.schemas.image.html#graphai.api.schemas.image.DetectOCRLanguageTaskResponse">DetectOCRLanguageTaskResponse (class in graphai.api.schemas.image)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="graphai.api.schemas.video.html#graphai.api.schemas.video.DetectSlidesRequest">DetectSlidesRequest (class in graphai.api.schemas.video)</a>
+</li>
       <li><a href="graphai.api.schemas.video.html#graphai.api.schemas.video.DetectSlidesResponse">DetectSlidesResponse (class in graphai.api.schemas.video)</a>
 </li>
       <li><a href="graphai.api.schemas.video.html#graphai.api.schemas.video.DetectSlidesTaskResponse">DetectSlidesTaskResponse (class in graphai.api.schemas.video)</a>
@@ -282,9 +285,11 @@
 </li>
       <li><a href="graphai.api.schemas.voice.html#graphai.api.schemas.voice.AudioFingerprintTaskResponse.fp_nosilence">fp_nosilence (graphai.api.schemas.voice.AudioFingerprintTaskResponse attribute)</a>
 </li>
-      <li><a href="graphai.api.schemas.image.html#graphai.api.schemas.image.ExtractTextTaskResponse.fresh">fresh (graphai.api.schemas.image.ExtractTextTaskResponse attribute)</a>
+      <li><a href="graphai.api.schemas.image.html#graphai.api.schemas.image.DetectOCRLanguageTaskResponse.fresh">fresh (graphai.api.schemas.image.DetectOCRLanguageTaskResponse attribute)</a>
 
       <ul>
+        <li><a href="graphai.api.schemas.image.html#graphai.api.schemas.image.ExtractTextTaskResponse.fresh">(graphai.api.schemas.image.ExtractTextTaskResponse attribute)</a>
+</li>
         <li><a href="graphai.api.schemas.image.html#graphai.api.schemas.image.ImageFingerprintTaskResponse.fresh">(graphai.api.schemas.image.ImageFingerprintTaskResponse attribute)</a>
 </li>
         <li><a href="graphai.api.schemas.video.html#graphai.api.schemas.video.DetectSlidesTaskResponse.fresh">(graphai.api.schemas.video.DetectSlidesTaskResponse attribute)</a>
@@ -310,6 +315,8 @@
 </li>
       <li><a href="graphai.core.common.caching.html#graphai.core.common.caching.DBCachingManagerBase.get_all_details">get_all_details() (graphai.core.common.caching.DBCachingManagerBase method)</a>
 </li>
+      <li><a href="graphai.core.common.caching.html#graphai.core.common.caching.DBCachingManagerBase.get_cache_count">get_cache_count() (graphai.core.common.caching.DBCachingManagerBase method)</a>
+</li>
       <li><a href="graphai.core.common.ontology.html#graphai.core.common.ontology.Ontology.get_category_children">get_category_children() (graphai.core.common.ontology.Ontology method)</a>
 </li>
       <li><a href="graphai.core.common.ontology.html#graphai.core.common.ontology.Ontology.get_category_parent">get_category_parent() (graphai.core.common.ontology.Ontology method)</a>
@@ -327,6 +334,8 @@
       <li><a href="graphai.core.common.caching.html#graphai.core.common.caching.DBCachingManagerBase.get_details_using_origin">get_details_using_origin() (graphai.core.common.caching.DBCachingManagerBase method)</a>
 </li>
       <li><a href="graphai.core.text.keywords.html#graphai.core.text.keywords.get_keywords">get_keywords() (in module graphai.core.text.keywords)</a>
+</li>
+      <li><a href="graphai.api.common.celery_tools.html#graphai.api.common.celery_tools.get_n_celery_workers">get_n_celery_workers() (in module graphai.api.common.celery_tools)</a>
 </li>
       <li><a href="graphai.core.common.ontology.html#graphai.core.common.ontology.Ontology.get_predefined_tree">get_predefined_tree() (graphai.core.common.ontology.Ontology method)</a>
 </li>
@@ -374,6 +383,13 @@
 
       <ul>
         <li><a href="graphai.api.common.html#module-graphai.api.common">module</a>
+</li>
+      </ul></li>
+      <li>
+    graphai.api.common.celery_tools
+
+      <ul>
+        <li><a href="graphai.api.common.celery_tools.html#module-graphai.api.common.celery_tools">module</a>
 </li>
       </ul></li>
       <li>
@@ -446,6 +462,8 @@
         <li><a href="graphai.api.schemas.text.html#module-graphai.api.schemas.text">module</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     graphai.api.schemas.video
 
@@ -453,8 +471,6 @@
         <li><a href="graphai.api.schemas.video.html#module-graphai.api.schemas.video">module</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     graphai.api.schemas.voice
 
@@ -690,9 +706,13 @@
 <h2 id="L">L</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="graphai.api.schemas.video.html#graphai.api.schemas.video.DetectSlidesRequest.language">language (graphai.api.schemas.video.DetectSlidesRequest attribute)</a>
+      <li><a href="graphai.api.schemas.image.html#graphai.api.schemas.image.DetectOCRLanguageTaskResponse.language">language (graphai.api.schemas.image.DetectOCRLanguageTaskResponse attribute)</a>
 
       <ul>
+        <li><a href="graphai.api.schemas.image.html#graphai.api.schemas.image.ExtractTextTaskResponse.language">(graphai.api.schemas.image.ExtractTextTaskResponse attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.video.html#graphai.api.schemas.video.DetectSlidesRequest.language">(graphai.api.schemas.video.DetectSlidesRequest attribute)</a>
+</li>
         <li><a href="graphai.api.schemas.voice.html#graphai.api.schemas.voice.AudioDetectLanguageTaskResponse.language">(graphai.api.schemas.voice.AudioDetectLanguageTaskResponse attribute)</a>
 </li>
         <li><a href="graphai.api.schemas.voice.html#graphai.api.schemas.voice.AudioTranscriptionTaskResponse.language">(graphai.api.schemas.voice.AudioTranscriptionTaskResponse attribute)</a>
@@ -743,6 +763,8 @@
         <li><a href="graphai.api.celery_tasks.text.html#module-graphai.api.celery_tasks.text">graphai.api.celery_tasks.text</a>
 </li>
         <li><a href="graphai.api.common.html#module-graphai.api.common">graphai.api.common</a>
+</li>
+        <li><a href="graphai.api.common.celery_tools.html#module-graphai.api.common.celery_tools">graphai.api.common.celery_tools</a>
 </li>
         <li><a href="graphai.api.common.graph.html#module-graphai.api.common.graph">graphai.api.common.graph</a>
 </li>
@@ -859,6 +881,8 @@
 </li>
       <li><a href="graphai.core.utils.text.io.html#graphai.core.utils.text.io.Colors.pref">pref (graphai.core.utils.text.io.Colors attribute)</a>
 </li>
+      <li><a href="graphai.api.routers.text.html#graphai.api.routers.text.priority_test_text">priority_test_text() (in module graphai.api.routers.text)</a>
+</li>
       <li><a href="graphai.core.utils.progress_bar.html#graphai.core.utils.progress_bar.ProgressBar">ProgressBar (class in graphai.core.utils.progress_bar)</a>
 </li>
   </ul></td>
@@ -965,9 +989,11 @@
 </li>
       <li><a href="graphai.api.schemas.voice.html#graphai.api.schemas.voice.AudioTranscriptionTaskResponse.subtitle_result">subtitle_result (graphai.api.schemas.voice.AudioTranscriptionTaskResponse attribute)</a>
 </li>
-      <li><a href="graphai.api.schemas.image.html#graphai.api.schemas.image.ExtractTextTaskResponse.successful">successful (graphai.api.schemas.image.ExtractTextTaskResponse attribute)</a>
+      <li><a href="graphai.api.schemas.image.html#graphai.api.schemas.image.DetectOCRLanguageTaskResponse.successful">successful (graphai.api.schemas.image.DetectOCRLanguageTaskResponse attribute)</a>
 
       <ul>
+        <li><a href="graphai.api.schemas.image.html#graphai.api.schemas.image.ExtractTextTaskResponse.successful">(graphai.api.schemas.image.ExtractTextTaskResponse attribute)</a>
+</li>
         <li><a href="graphai.api.schemas.image.html#graphai.api.schemas.image.ImageFingerprintTaskResponse.successful">(graphai.api.schemas.image.ImageFingerprintTaskResponse attribute)</a>
 </li>
         <li><a href="graphai.api.schemas.video.html#graphai.api.schemas.video.DetectSlidesTaskResponse.successful">(graphai.api.schemas.video.DetectSlidesTaskResponse attribute)</a>
@@ -998,6 +1024,8 @@
       <li><a href="graphai.api.schemas.common.html#graphai.api.schemas.common.TaskStatusResponse.task_result">task_result (graphai.api.schemas.common.TaskStatusResponse attribute)</a>
 
       <ul>
+        <li><a href="graphai.api.schemas.image.html#graphai.api.schemas.image.DetectOCRLanguageResponse.task_result">(graphai.api.schemas.image.DetectOCRLanguageResponse attribute)</a>
+</li>
         <li><a href="graphai.api.schemas.image.html#graphai.api.schemas.image.ExtractTextResponse.task_result">(graphai.api.schemas.image.ExtractTextResponse attribute)</a>
 </li>
         <li><a href="graphai.api.schemas.image.html#graphai.api.schemas.image.ImageFingerprintResponse.task_result">(graphai.api.schemas.image.ImageFingerprintResponse attribute)</a>
@@ -1023,10 +1051,10 @@
 </li>
       <li><a href="graphai.api.schemas.common.html#graphai.api.schemas.common.TaskStatusResponse">TaskStatusResponse (class in graphai.api.schemas.common)</a>
 </li>
-      <li><a href="graphai.api.schemas.image.html#graphai.api.schemas.image.IndividualOCRResult.text">text (graphai.api.schemas.image.IndividualOCRResult attribute)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="graphai.api.schemas.image.html#graphai.api.schemas.image.IndividualOCRResult.text">text (graphai.api.schemas.image.IndividualOCRResult attribute)</a>
+</li>
       <li><a href="graphai.api.schemas.voice.html#graphai.api.schemas.voice.AudioFingerprintRequest.threshold">threshold (graphai.api.schemas.voice.AudioFingerprintRequest attribute)</a>
 </li>
       <li><a href="graphai.core.utils.time.stopwatch.html#graphai.core.utils.time.stopwatch.Stopwatch.tick">tick() (graphai.core.utils.time.stopwatch.Stopwatch method)</a>
