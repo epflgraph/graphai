@@ -16,8 +16,16 @@ def extract_origin_folder(file_path):
     return file_path.split('/')[-4]
 
 
-def extract_frame_number(file_path):
+def extract_slide_frame_number(file_path):
     return int(file_path.split('/')[-1].split('_')[2])
+
+
+def extract_google_ocr_frame_number(file_path):
+    return int(file_path.split('/')[-1].split('_')[5])
+
+
+def extract_tesseract_ocr_frame_number(file_path):
+    return int(file_path.split('/')[-1].split('.')[0])
 
 
 def extract_file_extension(file_path):
@@ -60,10 +68,10 @@ def organize_processed_file(src_path, index_in_folder, video_tokens):
     else:
         # If it's not a video, it's slide-related
         video_token = video_tokens[video_key]
-        frame_index = extract_frame_number(src_path)
-        slide_token = video_token + '_slides/' + ((FRAME_FORMAT_JPG) % frame_index)
         if origin_folder == 'final_slide_files':
             # Slide file
+            frame_index = extract_slide_frame_number(src_path)
+            slide_token = video_token + '_slides/' + ((FRAME_FORMAT_JPG) % frame_index)
             new_file_name = slide_token
             # Creating a symbolic link to the image file in cache file structure
             new_file_path = create_symlink(src_path, new_file_name)
@@ -81,6 +89,8 @@ def organize_processed_file(src_path, index_in_folder, video_tokens):
             )
         elif origin_folder == 'slides_ocr_google':
             # Google OCR results file
+            frame_index = extract_google_ocr_frame_number(src_path)
+            slide_token = video_token + '_slides/' + ((FRAME_FORMAT_JPG) % frame_index)
             if '_dtd.' in file_name:
                 # Method 1 is document text detection
                 new_file_name = slide_token + '_ocr_google_1_token.txt.gz'
@@ -113,6 +123,8 @@ def organize_processed_file(src_path, index_in_folder, video_tokens):
                 )
         elif origin_folder == 'frames_ocr_tessaract':
             # Tesseract OCR results
+            frame_index = extract_tesseract_ocr_frame_number(src_path)
+            slide_token = video_token + '_slides/' + ((FRAME_FORMAT_JPG) % frame_index)
             new_file_name = video_token + '_slides/' + (TESSERACT_OCR_FORMAT) % frame_index
             # Creating a symlink for the txt.gz file
             create_symlink(src_path, new_file_name)
@@ -123,5 +135,6 @@ def organize_processed_file(src_path, index_in_folder, video_tokens):
                     'ocr_tesseract_token': new_file_name
                 }
             )
+
 
 
