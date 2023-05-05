@@ -15,5 +15,13 @@ jobs:
           rm -r /home/ubuntu/graphai-test
           cp -r main /home/ubuntu/graphai-test
 
-      - name: Deploy API
-        run: systemctl --user restart api-test
+      - name: Deploy API and associated services
+        run: |
+          systemctl --user stop celery-flower
+          systemctl --user stop celery-low-prio
+          systemctl --user stop celery-high-prio
+          systemctl --user stop api-test
+          systemctl --user start api-test
+          systemctl --user start celery-high-prio
+          systemctl --user start celery-low-prio
+          systemctl --user start celery-flower
