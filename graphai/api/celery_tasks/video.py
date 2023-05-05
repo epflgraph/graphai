@@ -7,7 +7,7 @@ from graphai.api.common.video import file_management_config, local_ocr_nlp_model
     transcription_model
 from graphai.core.common.video import retrieve_file_from_url, detect_audio_format_and_duration, \
     extract_audio_from_video, extract_frames, generate_frame_sample_indices, compute_ocr_noise_level, \
-    compute_ocr_threshold, compute_video_ocr_transitions, generate_random_token, FRAME_FORMAT, OCR_FORMAT
+    compute_ocr_threshold, compute_video_ocr_transitions, generate_random_token, FRAME_FORMAT_PNG, TESSERACT_OCR_FORMAT
 from graphai.core.common.caching import AudioDBCachingManager, SlideDBCachingManager
 from itertools import chain
 
@@ -244,8 +244,8 @@ def compute_slide_transitions_callback_task(self, results):
 def detect_slides_callback_task(self, results, token):
     if results['fresh']:
         # Delete non-slide frames from the frames directory
-        list_of_slides = [(FRAME_FORMAT) % (x) for x in results['slides']]
-        list_of_ocr_results = [(OCR_FORMAT) % (x) for x in results['slides']]
+        list_of_slides = [(FRAME_FORMAT_PNG) % (x) for x in results['slides']]
+        list_of_ocr_results = [(TESSERACT_OCR_FORMAT) % (x) for x in results['slides']]
         base_folder = results['result']
         base_folder_with_path = self.file_manager.generate_filepath(base_folder)
         for f in os.listdir(base_folder_with_path):
