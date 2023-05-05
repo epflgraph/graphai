@@ -171,8 +171,8 @@ def handle_already_processed_files(root_dir):
                     elif base_folder == 'mined/video_lectures':
                         if '_video_file_' not in filename:
                             continue
+                    print(f"Processing {file_path}...")
                     organize_processed_file(file_path, folder_index_counter, video_tokens)
-                    print(f"{file_path} processed!")
                     folder_index_counter += 1
 
 
