@@ -2,6 +2,7 @@ from graphai.core.common.caching import SlideDBCachingManager, VideoConfig
 from graphai.core.common.video import generate_random_token, read_json_gz_file, FRAME_FORMAT_JPG, \
     TESSERACT_OCR_FORMAT, detect_text_language, write_txt_gz_file, perceptual_hash_image
 import os
+import argparse
 
 cache_path_manager = VideoConfig()
 slide_db_manager = SlideDBCachingManager()
@@ -145,4 +146,38 @@ def organize_processed_file(src_path, index_in_folder, video_tokens):
             )
 
 
+def handle_already_processed_files(root_dir):
+    folders_to_process = ['mined/video_lectures',
+                          'modelled/img/final_slide_files',
+                          'modelled/json/slides_ocr_google',
+                          'modelled/raw/frames_ocr_tessaract']
+    video_tokens = dict()
+    for base_folder in folders_to_process:
+        base_path = os.path.join(root_dir, base_folder)
+        for channel_folder in os.listdir(base_path):
+            channel_path = os.path.join(base_path, channel_folder)
+            if not os.path.isdir(channel_path):
+                continue
+            for video_folder in os.listdir(channel_path):
+                video_folder_path = os.path.join(channel_path, video_folder)
+                if not os.path.isdir(video_folder_path):
+                    continue
+                folder_index_counter = 1
+                for filename in os.listdir(video_folder_path):
+                    file_path = os.path.join(video_folder_path, filename)
+                    if base_folder == 'modelled/img/final_slide_files':
+                        if '_R_1280x720_Q_80' not in filename:
+                            continue
+                    elif base_folder == 'mined/video_lectures':
+                        if '_video_file_' not in filename:
+                            continue
+                    organize_processed_file(file_path, folder_index_counter, video_tokens)
+                    print(f"{file_path} processed!")
+                    folder_index_counter += 1
 
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--root_dir', type=str, help='Root directory that contains the folders "mined" and "modelled"')
+    args = parser.parse_args()
+    handle_already_processed_files(args.root_dir)
