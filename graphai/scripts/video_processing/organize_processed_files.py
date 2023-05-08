@@ -68,12 +68,16 @@ def organize_processed_file(src_path, index_in_folder, video_tokens):
     video_key = extract_video_key(src_path)
     origin_folder = extract_origin_folder(src_path)
 
+    if file_extension not in ['.json.gz', '.txt.gz', '.jpg', '.jpeg', '.png', '.mp4', '.flv', '.mkv']:
+        return False
+
     # Creating new symlinks or files
     if origin_folder == 'video_lectures':
         new_file_name = generate_video_token(file_extension)
         video_tokens[video_key] = new_file_name
         # Creating a symbolic link to the video file in cache file structure
         create_symlink(src_path, new_file_name)
+        return True
     else:
         # If it's not a video, it's slide-related
         video_token = video_tokens[video_key]
@@ -96,6 +100,7 @@ def organize_processed_file(src_path, index_in_folder, video_tokens):
                     'fingerprint': fingerprint
                 }
             )
+            return True
         elif origin_folder == 'slides_ocr_google':
             # Google OCR results file
             frame_index = extract_google_ocr_frame_number(src_path)
@@ -109,7 +114,7 @@ def organize_processed_file(src_path, index_in_folder, video_tokens):
                 new_file_name = slide_token + '_ocr_google_2_token.txt.gz'
                 col_name = 'ocr_google_2_token'
             # Reading the contents of the json.gz file in order to write them to a txt.gz file
-            new_contents = read_json_gz_file(src_path)['fullTextAnnotation']['text']
+            new_contents = read_json_gz_file(src_path).get('fullTextAnnotation', {}).get('text', '')
             write_txt_gz_file(new_contents, cache_path_manager.generate_filepath(new_file_name))
             if '_dtd.' in file_name:
                 # We detect the language of the slide using the results of method 1
@@ -130,6 +135,7 @@ def organize_processed_file(src_path, index_in_folder, video_tokens):
                         col_name: new_file_name
                     }
                 )
+            return True
         elif origin_folder == 'frames_ocr_tessaract':
             # Tesseract OCR results
             frame_index = extract_tesseract_ocr_frame_number(src_path)
@@ -144,6 +150,8 @@ def organize_processed_file(src_path, index_in_folder, video_tokens):
                     'ocr_tesseract_token': new_file_name
                 }
             )
+            return True
+    return False
 
 
 def handle_already_processed_files(root_dir):
@@ -153,6 +161,7 @@ def handle_already_processed_files(root_dir):
                           'modelled/raw/frames_ocr_tessaract']
     video_tokens = dict()
     for base_folder in folders_to_process:
+        print(f"Processing {base_folder}")
         base_path = os.path.join(root_dir, base_folder)
         for channel_folder in os.listdir(base_path):
             channel_path = os.path.join(base_path, channel_folder)
@@ -170,6 +179,12 @@ def handle_already_processed_files(root_dir):
                             continue
                     elif base_folder == 'mined/video_lectures':
                         if '_video_file_' not in filename:
+                            continue
+                    elif base_folder == 'modelled/json/slides_ocr_google':
+                        if '_slideocr_' not in filename:
+                            continue
+                    elif base_folder == 'modelled/raw/frames_ocr_tessaract':
+                        if '.txt.gz' not in filename:
                             continue
                     print(f"Processing {file_path}...")
                     organize_processed_file(file_path, folder_index_counter, video_tokens)
