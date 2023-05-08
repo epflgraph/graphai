@@ -1,11 +1,12 @@
-from graphai.core.common.caching import SlideDBCachingManager, VideoConfig
-from graphai.core.common.video import generate_random_token, read_json_gz_file, FRAME_FORMAT_JPG, \
+from graphai.core.common.caching import SlideDBCachingManager, VideoConfig, OTHER_SUBFOLDER
+from graphai.core.common.video import generate_random_token, read_json_gz_file, file_exists, FRAME_FORMAT_JPG, \
     TESSERACT_OCR_FORMAT, detect_text_language, write_txt_gz_file, perceptual_hash_image
 import os
 import argparse
 
 cache_path_manager = VideoConfig()
 slide_db_manager = SlideDBCachingManager()
+progress_file = cache_path_manager.generate_filepath('already_organized_videos.txt', force_dir=OTHER_SUBFOLDER)
 
 
 def extract_video_key(file_path):
@@ -47,8 +48,14 @@ def generate_slide_token(video_token, frame_index):
 
 def create_symlink(old_path, new_filename):
     new_path = cache_path_manager.generate_filepath(new_filename)
-    os.symlink(old_path, new_path)
+    if not file_exists(new_path):
+        os.symlink(old_path, new_path)
     return new_path
+
+
+def write_to_progress_file(video_key, token):
+    with open(progress_file, 'a') as f:
+        f.write(f"{video_key}:{token}\n")
 
 
 def organize_processed_file(src_path, index_in_folder, video_tokens):
@@ -73,10 +80,13 @@ def organize_processed_file(src_path, index_in_folder, video_tokens):
 
     # Creating new symlinks or files
     if origin_folder == 'video_lectures':
+        if video_tokens.get(video_key, None) is not None:
+            return True
         new_file_name = generate_video_token(file_extension)
         video_tokens[video_key] = new_file_name
         # Creating a symbolic link to the video file in cache file structure
         create_symlink(src_path, new_file_name)
+        write_to_progress_file(video_key, new_file_name)
         return True
     else:
         # If it's not a video, it's slide-related
@@ -161,6 +171,11 @@ def handle_already_processed_files(root_dir):
                           # 'modelled/raw/frames_ocr_tessaract'
                           ]
     video_tokens = dict()
+    if file_exists(progress_file):
+        with open(progress_file, 'r') as f:
+            already_organized_videos = f.readlines()
+        already_organized_videos = [x for x in already_organized_videos if x != '']
+        video_tokens = {x.split(':')[0].strip():x.split(':')[1].strip() for x in already_organized_videos}
     for base_folder in folders_to_process:
         print(f"Processing {base_folder}")
         base_path = os.path.join(root_dir, base_folder)
