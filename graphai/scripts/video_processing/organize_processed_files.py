@@ -158,7 +158,8 @@ def handle_already_processed_files(root_dir):
     folders_to_process = ['mined/video_lectures',
                           'modelled/img/final_slide_files',
                           'modelled/json/slides_ocr_google',
-                          'modelled/raw/frames_ocr_tessaract']
+                          # 'modelled/raw/frames_ocr_tessaract'
+                          ]
     video_tokens = dict()
     for base_folder in folders_to_process:
         print(f"Processing {base_folder}")
@@ -169,23 +170,27 @@ def handle_already_processed_files(root_dir):
                 continue
             for video_folder in os.listdir(channel_path):
                 video_folder_path = os.path.join(channel_path, video_folder)
+                folder_index_counter = 1
                 if not os.path.isdir(video_folder_path):
                     continue
-                folder_index_counter = 1
-                for filename in os.listdir(video_folder_path):
+                # Getting all the files in the directory
+                full_file_list = os.listdir(video_folder_path)
+                # Only keeping the files that are relevant
+                full_file_list = [
+                    filename for filename in full_file_list if
+                    (base_folder == 'modelled/img/final_slide_files' and '_R_1280x720_Q_80' in filename)
+                    or
+                    (base_folder == 'mined/video_lectures' and '_video_file_' in filename)
+                    or
+                    (base_folder == 'modelled/json/slides_ocr_google' and '_slideocr_' in filename)
+                    or
+                    (base_folder == 'modelled/raw/frames_ocr_tessaract' and '.txt.gz' in filename)
+                ]
+                # Sorting by frame number in case of slides so that we can use the folder_index_counter as slide number
+                if base_folder == 'modelled/img/final_slide_files':
+                    full_file_list = sorted(full_file_list, key=extract_slide_frame_number)
+                for filename in full_file_list:
                     file_path = os.path.join(video_folder_path, filename)
-                    if base_folder == 'modelled/img/final_slide_files':
-                        if '_R_1280x720_Q_80' not in filename:
-                            continue
-                    elif base_folder == 'mined/video_lectures':
-                        if '_video_file_' not in filename:
-                            continue
-                    elif base_folder == 'modelled/json/slides_ocr_google':
-                        if '_slideocr_' not in filename:
-                            continue
-                    elif base_folder == 'modelled/raw/frames_ocr_tessaract':
-                        if '.txt.gz' not in filename:
-                            continue
                     print(f"Processing {file_path}...")
                     organize_processed_file(file_path, folder_index_counter, video_tokens)
                     folder_index_counter += 1
