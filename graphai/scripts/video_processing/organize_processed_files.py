@@ -48,6 +48,7 @@ def generate_slide_token(video_token, frame_index):
 
 def create_symlink(old_path, new_filename):
     new_path = cache_path_manager.generate_filepath(new_filename)
+    # Only creating the symlink if it doesn't already exist
     if not file_exists(new_path):
         os.symlink(old_path, new_path)
     return new_path
@@ -175,6 +176,7 @@ def handle_already_processed_files(root_dir):
         with open(progress_file, 'r') as f:
             already_organized_videos = f.readlines()
         already_organized_videos = [x for x in already_organized_videos if x != '']
+        # Loading the existing video key to video token mappings so no video gets two different tokens
         video_tokens = {x.split(':')[0].strip():x.split(':')[1].strip() for x in already_organized_videos}
     for base_folder in folders_to_process:
         print(f"Processing {base_folder}")
