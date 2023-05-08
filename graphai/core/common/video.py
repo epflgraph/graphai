@@ -671,9 +671,12 @@ def compute_video_ocr_transitions(input_folder_with_path, frame_sample_indices, 
 
 
 def detect_text_language(s):
-    if s is None:
+    if s is None or s == '':
         return None
-    return langdetect.detect(s)
+    try:
+        return langdetect.detect(s)
+    except langdetect.lang_detect_exception.LangDetectException as e:
+        return None
 
 
 class WhisperTranscriptionModel():
