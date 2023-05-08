@@ -126,7 +126,9 @@ def organize_processed_file(src_path, index_in_folder, video_tokens):
                 col_name = 'ocr_google_2_token'
             # Reading the contents of the json.gz file in order to write them to a txt.gz file
             new_contents = read_json_gz_file(src_path).get('fullTextAnnotation', {}).get('text', '')
-            write_txt_gz_file(new_contents, cache_path_manager.generate_filepath(new_file_name))
+            new_file_path = cache_path_manager.generate_filepath(new_file_name)
+            if not file_exists(new_file_path):
+                write_txt_gz_file(new_contents, new_file_path)
             if '_dtd.' in file_name:
                 # We detect the language of the slide using the results of method 1
                 language = detect_text_language(new_contents)
@@ -190,6 +192,7 @@ def handle_already_processed_files(root_dir):
                 folder_index_counter = 1
                 if not os.path.isdir(video_folder_path):
                     continue
+                print(f"Processing {video_folder_path}...")
                 # Getting all the files in the directory
                 full_file_list = os.listdir(video_folder_path)
                 # Only keeping the files that are relevant
@@ -208,7 +211,6 @@ def handle_already_processed_files(root_dir):
                     full_file_list = sorted(full_file_list, key=extract_slide_frame_number)
                 for filename in full_file_list:
                     file_path = os.path.join(video_folder_path, filename)
-                    print(f"Processing {file_path}...")
                     organize_processed_file(file_path, folder_index_counter, video_tokens)
                     folder_index_counter += 1
 
