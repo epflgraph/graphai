@@ -22,6 +22,7 @@ import spacy
 import gzip
 import numpy as np
 import wget
+from subprocess import call, PIPE
 import whisper
 from fuzzywuzzy import fuzz
 from .caching import make_sure_path_exists
@@ -99,6 +100,18 @@ def retrieve_file_from_url(url, output_filename_with_path, output_token):
         print(e, file=sys.stderr)
         return None
     if file_exists(output_filename_with_path):
+        return output_token
+    else:
+        return None
+
+
+def retrieve_file_from_kaltura(url, output_filename_with_path, output_token, timeout=120):
+    # If the file exists, we delete it (because downloadm3u8 will otherwise ask if we want to overwrite, which we do)
+    if file_exists(output_filename_with_path):
+        os.remove(output_filename_with_path)
+    result = call(f"downloadm3u8 -o {output_filename_with_path} {url}", timeout=timeout,
+                  stdout=PIPE, stderr=PIPE, shell=True)
+    if result == 0 and file_exists(output_filename_with_path):
         return output_token
     else:
         return None
