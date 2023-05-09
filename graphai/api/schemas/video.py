@@ -9,6 +9,18 @@ class RetrieveURLRequest(BaseModel):
         description="The URL to be retrieved and stored for further processing"
     )
 
+    kaltura: bool = Field(
+        title="Kaltura url",
+        description="A boolean variable indicating whether the provided URL is from Kaltura. True by default.",
+        default=True
+    )
+
+    timeout: int = Field(
+        title="Kaltura timeout",
+        description="Timeout in seconds for Kaltura URLs, default 120s. Cannot be more than 480s.",
+        default=240
+    )
+
 
 class RetrieveURLResponseInner(BaseModel):
     token: Union[str, None] = Field(
