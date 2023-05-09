@@ -24,6 +24,7 @@ router = APIRouter(
 async def retrieve_file(data: RetrieveURLRequest):
     url = data.url
     is_kaltura = data.kaltura
+    # Minimum timeout is 1 minute while maximum is 8 minutes.
     max_timeout = 480
     min_timeout = 60
     timeout = max([data.timeout, min_timeout])

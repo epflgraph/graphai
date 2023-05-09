@@ -109,8 +109,11 @@ def retrieve_file_from_kaltura(url, output_filename_with_path, output_token, tim
     # If the file exists, we delete it (because downloadm3u8 will otherwise ask if we want to overwrite, which we do)
     if file_exists(output_filename_with_path):
         os.remove(output_filename_with_path)
+    # The timeout parameter is necessary to avoid problems with faulty URLs (which may send m3u8downloader into a
+    #  never-ending loop).
     result = call(f"downloadm3u8 -o {output_filename_with_path} {url}", timeout=timeout,
                   stdout=PIPE, stderr=PIPE, shell=True)
+    # If the file exists and the command returned 0, the download has been successful
     if result == 0 and file_exists(output_filename_with_path):
         return output_token
     else:
