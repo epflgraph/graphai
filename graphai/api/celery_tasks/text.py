@@ -127,21 +127,79 @@ def aggregate_and_filter_task(self, results):
     if len(results) == 0:
         return results
 
-    # Aggregate over pages
+    ################################################################
+    # Normalisation of results                                     #
+    ################################################################
+
+    # We need to aggregate results, which at this point are unique by (Keywords, PageID), over Keywords, so that they
+    # are unique by PageID.
+    #
+    # To do so, several methods have been considered when grouping by PageID:
+    #   1. Take sum of scores.
+    #   2. Take max of scores.
+    #   3. Take median of scores.
+    #   4. Take max of the first two values: 1. and 2.
+    #   5. Take arithmetic mean of the first two values: 1. and 2.
+    #   6. Take geometric mean of the first two values: 1. and 2.
+    #   7. Take log(1 + sum of scores), then divide by maximum.
+    #
+    # All scores are divided by the maximum value to bring them back to [0, 1]. This is only a big concern for
+    # option 1., for the rest it is either irrelevant or has limited impact.
+    #
+    # The following properties have been considered when choosing one method:
+    #   A. If a page only appears with one set of keywords, its final score cannot tend to zero as the number of
+    #      sets of keywords increases.
+    #   B. If a page appears for $n$ sets of keywords with constant score $a$ and another page appears for $n$ sets of
+    #      keywords with constant score $b$, such that $a < b < 1$, then the final score of the former has to be
+    #      greater than $a$.
+    #   C. If a page appears for $n$ sets of keywords with constant score $a$ and another page appears for $n+1$ sets
+    #      of keywords with constant score $a$, then the final score of the latter must be strictly greater than
+    #      the final score of the former.
+    #   D. Let $P_1, P_2, P_3$ be three pages appearing for $n$, $n+1$ and $n+2$ sets of keywords, respectively,
+    #      in such a way that their scores are $\{x_1, ..., x_n\}$, $\{x_1, ..., x_n, a\}$ and
+    #      $\{x_1, ..., x_n, a, a\}$, respectively. Then the difference of the final scores of $P_2$ and $P-1$ must be
+    #      larger than the difference of the final scores of $P_3$ and $P_2$.
+    #
+    # None of the methods above satisfies all of these properties:
+    #   * Property A is satisfied by 2., 3., 4. and 5., and violated by 1., 6. and 7.
+    #   * Property B is satisfied by all methods.
+    #   * Property C is satisfied by 1., 5., 6. and 7., and violated by 2., 3. and 4.
+    #   * Property D is satisfied by 6. and 7., and violated by 1., 2., 3., 4. and 5.
+    #
+    # TL;DR
+    # After considering this and running some tests, we decide to use method 5.
+
+    # Aggregate over pages, compute sum and max of scores
     results = results.groupby(by=['PageID', 'PageTitle']).aggregate(
-        SearchScore=('SearchScore', 'sum'),
-        LevenshteinScore=('LevenshteinScore', 'sum'),
-        OntologyLocalScore=('OntologyLocalScore', 'sum'),
-        OntologyGlobalScore=('OntologyGlobalScore', 'sum'),
-        GraphScore=('GraphScore', 'sum'),
-        KeywordsScore=('KeywordsScore', 'sum')
+        SearchScoreSum=('SearchScore', 'sum'),
+        SearchScoreMax=('SearchScore', 'max'),
+        LevenshteinScoreSum=('LevenshteinScore', 'sum'),
+        LevenshteinScoreMax=('LevenshteinScore', 'max'),
+        OntologyLocalScoreSum=('OntologyLocalScore', 'sum'),
+        OntologyLocalScoreMax=('OntologyLocalScore', 'max'),
+        OntologyGlobalScoreSum=('OntologyGlobalScore', 'sum'),
+        OntologyGlobalScoreMax=('OntologyGlobalScore', 'max'),
+        GraphScoreSum=('GraphScore', 'sum'),
+        GraphScoreMax=('GraphScore', 'max'),
+        KeywordsScoreSum=('KeywordsScore', 'sum'),
+        KeywordsScoreMax=('KeywordsScore', 'max')
     ).reset_index()
     score_columns = ['SearchScore', 'LevenshteinScore', 'OntologyLocalScore', 'OntologyGlobalScore', 'GraphScore',
                      'KeywordsScore']
 
-    # Normalise scores to [0, 1]
+    # Normalise sum scores to [0, 1]
     for column in score_columns:
-        results[column] = results[column] / results[column].max()
+        results[f'{column}Sum'] = results[f'{column}Sum'] / results[f'{column}Sum'].max()
+
+    # Take max of two columns
+    for column in score_columns:
+        results[column] = results[[f'{column}Max', f'{column}Sum']].mean(axis=1)
+
+    results = results[['PageID', 'PageTitle'] + score_columns]
+
+    ################################################################
+    # Filtering of results                                         #
+    ################################################################
 
     # Filter results with low scores through a majority vote among all scores
     # To be kept, we require a concept to have at least 5 out of 6 scores to be significant (>= epsilon)
@@ -152,6 +210,10 @@ def aggregate_and_filter_task(self, results):
     votes = votes.sum(axis=1)
     results = results[votes >= 5]
     results = results.sort_values(by='PageTitle')
+
+    ################################################################
+    # Compute mixed score                                          #
+    ################################################################
 
     # Compute mixed score as a convex combination of the different scores,
     # with prescribed coefficients found after running some analyses on manually tagged data.
