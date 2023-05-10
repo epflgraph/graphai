@@ -15,13 +15,13 @@ from graphai.core.text.keywords import get_keywords
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={'max_retries': 2},
-             name='text.extract_keywords', ignore_result=False)
+             name='text_10.extract_keywords', ignore_result=False)
 def extract_keywords_task(self, raw_text, use_nltk=False):
     return get_keywords(raw_text, use_nltk)
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={'max_retries': 2},
-             name='text.wikisearch', ignore_result=False, wp=WP(), es=ES('concepts'))
+             name='text_10.wikisearch', ignore_result=False, wp=WP(), es=ES('concepts'))
 def wikisearch_task(self, keywords_list, fraction=(0, 1), method='es-base'):
     """
     Returns top 10 results for Wikipedia pages relevant to the keywords.
@@ -89,7 +89,7 @@ def wikisearch_task(self, keywords_list, fraction=(0, 1), method='es-base'):
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={'max_retries': 2},
-             name='text.wikisearch_callback', ignore_result=False)
+             name='text_10.wikisearch_callback', ignore_result=False)
 def wikisearch_callback_task(self, results):
     # Concatenate all results in a single DataFrame
     results = pd.concat(results, ignore_index=True)
@@ -98,7 +98,7 @@ def wikisearch_callback_task(self, results):
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={'max_retries': 2},
-             name='text.compute_scores', ignore_result=False, ontology=ontology, graph=graph)
+             name='text_10.compute_scores', ignore_result=False, ontology=ontology, graph=graph)
 def compute_scores_task(self, results):
     if len(results) == 0:
         return results
@@ -122,7 +122,7 @@ def compute_scores_task(self, results):
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={'max_retries': 2},
-             name='text.aggregate_and_filter', ignore_result=False)
+             name='text_10.aggregate_and_filter', ignore_result=False)
 def aggregate_and_filter_task(self, results):
     if len(results) == 0:
         return results
@@ -231,7 +231,7 @@ def aggregate_and_filter_task(self, results):
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='text.sleeper', ignore_result=False)
+             name='text_10.sleeper', ignore_result=False)
 def text_test_task(self):
     sleep(15)
     print('it worked')
@@ -239,7 +239,7 @@ def text_test_task(self):
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='text.lazy_load', ignore_result=False, graph=graph, ontology=ontology)
+             name='text_10.lazy_load', ignore_result=False, graph=graph, ontology=ontology)
 def text_lazy_loader_task(self):
     print('Starting force-load for video processing objects...')
     self.graph.fetch_from_db()
