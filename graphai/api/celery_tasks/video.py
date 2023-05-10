@@ -8,8 +8,8 @@ from graphai.api.common.video import file_management_config, local_ocr_nlp_model
 from graphai.core.common.video import retrieve_file_from_url, retrieve_file_from_kaltura, \
     detect_audio_format_and_duration, extract_audio_from_video, extract_frames, generate_frame_sample_indices, \
     compute_ocr_noise_level, compute_ocr_threshold, compute_video_ocr_transitions, generate_random_token, \
-    FRAME_FORMAT_PNG, TESSERACT_OCR_FORMAT
-from graphai.core.common.caching import AudioDBCachingManager, SlideDBCachingManager
+    md5_video_or_audio, FRAME_FORMAT_PNG, TESSERACT_OCR_FORMAT
+from graphai.core.common.caching import AudioDBCachingManager, SlideDBCachingManager, VideoDBCachingManager
 from itertools import chain
 
 
@@ -292,6 +292,78 @@ def detect_slides_callback_task(self, results, token):
         'slide_tokens': slide_tokens,
         'fresh': results['fresh']
     }
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
+             name='video_2.md5_hash_video', ignore_result=False,
+             file_manager=file_management_config)
+def md5_hash_video_task(self, token, force=False):
+    if not force:
+        db_manager = VideoDBCachingManager()
+        existing = db_manager.get_details(token, ['fingerprint'])
+        if existing is not None and existing.get('fingerprint', None) is not None:
+            return {
+                'hash': existing['fingerprint'],
+                'fresh': False
+            }
+
+    input_filename_with_path = self.file_manager.generate_filepath(token)
+    result = md5_video_or_audio(input_filename_with_path, video=True)
+    return {
+        'hash': result,
+        'fresh': result is not None
+    }
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
+             name='video_2.md5_hash_video_callback', ignore_result=False,
+             file_manager=file_management_config)
+def md5_hash_video_callback_task(self, results, token):
+    if results['fresh']:
+        db_manager = VideoDBCachingManager()
+        db_manager.insert_or_update_details(token, values_to_insert={
+            'fingerprint': results['hash']
+        })
+    return results
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
+             name='video_2.md5_hash_video_lookup', ignore_result=False,
+             file_manager=file_management_config)
+def md5_hash_video_lookup_task(self, results, token):
+    if results['hash'] is not None:
+        db_manager = VideoDBCachingManager()
+        existing_closest = db_manager.get_closest_match(token)
+        if existing_closest is not None:
+            closest = existing_closest
+        else:
+            tokens_and_fingerprints = db_manager.get_all_details(
+                ['fingerprint'], exclude_token=token, using_most_similar=False,
+                allow_nulls=False
+            )
+            all_tokens = list(tokens_and_fingerprints.keys())
+            all_fingerprints = [tokens_and_fingerprints[key]['fingerprint'] for key in all_tokens]
+            try:
+                fp_index = all_fingerprints.index(results['hash'])
+                closest = all_tokens[fp_index]
+            except ValueError as e:
+                closest = token
+    else:
+        closest = None
+    results['closest_token'] = closest
+    return results
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
+             name='video_2.md5_hash_video_lookup_callback', ignore_result=False,
+             file_manager=file_management_config)
+def md5_hash_video_lookup_callback_task(self, results, token):
+    if results['fresh']:
+        db_manager = VideoDBCachingManager()
+        db_manager.insert_or_update_closest_match(token, values_to_insert={
+            'most_similar_token': results['closest_token']
+        })
+    return results
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
