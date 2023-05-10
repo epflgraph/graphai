@@ -22,7 +22,7 @@ router = APIRouter(
 async def calculate_fingerprint(data: ImageFingerprintRequest):
     token = data.token
     force = data.force
-    min_similarity = 1
+    min_similarity = 0.9
     n_jobs = 8
     task = (
             compute_slide_fingerprint_task.s(token, force) |

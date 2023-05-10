@@ -26,6 +26,7 @@ dependencies = [
     "pydantic",
     "requests",
     "wget",
+    "m3u8downloader",
     "imagehash",
     "openai-whisper",
     "pytesseract",

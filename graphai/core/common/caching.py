@@ -67,7 +67,7 @@ class DBCachingManagerBase(abc.ABC):
             values_to_insert = dict()
         values_to_insert = {
             x: surround_with_character(values_to_insert[x], "'") if isinstance(values_to_insert[x], str)
-            else str(values_to_insert[x])
+            else str(values_to_insert[x]) if values_to_insert[x] is not None else 'null'
             for x in values_to_insert
         }
         existing = self.db.execute_query(
@@ -175,10 +175,25 @@ class DBCachingManagerBase(abc.ABC):
         results = self.db.execute_query(query)
         return results[0][0]
 
+    def _row_exists(self, schema, table_name, id_token):
+        query = f"""
+        SELECT COUNT(*) FROM `{schema}`.`{table_name}`
+        WHERE id_token = '{id_token}'
+        """
+        results = self.db.execute_query(query)
+        if len(results) > 0:
+            return True
+        return False
+
     def delete_cache_rows(self, id_tokens):
         self._delete_rows(self.schema, self.cache_table, id_tokens)
 
     def insert_or_update_details(self, id_token, values_to_insert=None):
+        self._insert_or_update_details(self.schema, self.cache_table, id_token, values_to_insert)
+
+    def update_details_if_exists(self, id_token, values_to_insert):
+        if not self._row_exists(self.schema, self.cache_table, id_token):
+            return
         self._insert_or_update_details(self.schema, self.cache_table, id_token, values_to_insert)
 
     def get_details(self, id_token, cols, using_most_similar=False):

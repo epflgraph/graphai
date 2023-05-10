@@ -22,14 +22,16 @@ import spacy
 import gzip
 import numpy as np
 import wget
+from subprocess import call, PIPE
 import whisper
 from fuzzywuzzy import fuzz
 from .caching import make_sure_path_exists
 from graphai.definitions import CONFIG_DIR
 
 
-FRAME_FORMAT = 'frame-%06d.png'
-OCR_FORMAT = 'ocr-%06d.txt.gz'
+FRAME_FORMAT_PNG = 'frame-%06d.png'
+FRAME_FORMAT_JPG = 'frame-%06d.jpg'
+TESSERACT_OCR_FORMAT = 'ocr-%06d.txt.gz'
 
 
 def file_exists(file_path):
@@ -98,6 +100,21 @@ def retrieve_file_from_url(url, output_filename_with_path, output_token):
         print(e, file=sys.stderr)
         return None
     if file_exists(output_filename_with_path):
+        return output_token
+    else:
+        return None
+
+
+def retrieve_file_from_kaltura(url, output_filename_with_path, output_token, timeout=120):
+    # If the file exists, we delete it (because downloadm3u8 will otherwise ask if we want to overwrite, which we do)
+    if file_exists(output_filename_with_path):
+        os.remove(output_filename_with_path)
+    # The timeout parameter is necessary to avoid problems with faulty URLs (which may send m3u8downloader into a
+    #  never-ending loop).
+    result = call(f"downloadm3u8 -o {output_filename_with_path} {url}", timeout=timeout,
+                  stdout=PIPE, stderr=PIPE, shell=True)
+    # If the file exists and the command returned 0, the download has been successful
+    if result == 0 and file_exists(output_filename_with_path):
         return output_token
     else:
         return None
@@ -426,13 +443,13 @@ def extract_frames(input_filename_with_path, output_folder_with_path, output_fol
         # This parameter ensures that one frame is extracted per second, and the whole logic of the algorithm
         # relies on timestamp being identical to frame number.
         err = ffmpeg.input(input_filename_with_path).video. \
-            output(os.path.join(output_folder_with_path, FRAME_FORMAT), r=1). \
+            output(os.path.join(output_folder_with_path, FRAME_FORMAT_PNG), r=1). \
             overwrite_output().run(capture_stdout=True)
     except Exception as e:
         print(e, file=sys.stderr)
         err = str(e)
 
-    if file_exists(os.path.join(output_folder_with_path, (FRAME_FORMAT) % (1))) and ('ffmpeg error' not in err):
+    if file_exists(os.path.join(output_folder_with_path, (FRAME_FORMAT_PNG) % (1))) and ('ffmpeg error' not in err):
         return output_folder
     else:
         return None
@@ -465,6 +482,10 @@ def read_txt_gz_file(fp):
 def write_txt_gz_file(text, fp):
     with gzip.open(fp, 'w') as fid:
         fid.write(text.encode('utf-8'))
+
+
+def read_json_gz_file(fp):
+    return json.loads(read_txt_gz_file(fp))
 
 
 def perform_tesseract_ocr(image_path, language=None):
@@ -523,12 +544,12 @@ def frame_ocr_distance(input_folder_with_path, k1, k2, nlp_models, language=None
         language = 'en'
 
     # Generate frame file paths
-    image_1_path = os.path.join(input_folder_with_path, (FRAME_FORMAT) % (k1))
-    image_2_path = os.path.join(input_folder_with_path, (FRAME_FORMAT) % (k2))
+    image_1_path = os.path.join(input_folder_with_path, (FRAME_FORMAT_PNG) % (k1))
+    image_2_path = os.path.join(input_folder_with_path, (FRAME_FORMAT_PNG) % (k2))
 
     # Generate OCR file paths
-    ocr_1_path = os.path.join(input_folder_with_path, (OCR_FORMAT) % (k1))
-    ocr_2_path = os.path.join(input_folder_with_path, (OCR_FORMAT) % (k2))
+    ocr_1_path = os.path.join(input_folder_with_path, (TESSERACT_OCR_FORMAT) % (k1))
+    ocr_2_path = os.path.join(input_folder_with_path, (TESSERACT_OCR_FORMAT) % (k2))
 
     # Cache the results since they will be used multiple times during slide detection
     extracted_text1 = tesseract_ocr_or_get_cached(ocr_1_path, image_1_path, language)
@@ -563,8 +584,8 @@ def frame_hash_similarity(input_folder_with_path, k1, k2):
     Returns:
         Similarity between the two frames (between 0 and 1)
     """
-    image_1_path = os.path.join(input_folder_with_path, (FRAME_FORMAT) % (k1))
-    image_2_path = os.path.join(input_folder_with_path, (FRAME_FORMAT) % (k2))
+    image_1_path = os.path.join(input_folder_with_path, (FRAME_FORMAT_PNG) % (k1))
+    image_2_path = os.path.join(input_folder_with_path, (FRAME_FORMAT_PNG) % (k2))
 
     image_1_hash = perceptual_hash_image(image_1_path)
     image_2_hash = perceptual_hash_image(image_2_path)
@@ -666,9 +687,12 @@ def compute_video_ocr_transitions(input_folder_with_path, frame_sample_indices, 
 
 
 def detect_text_language(s):
-    if s is None:
+    if s is None or s == '':
         return None
-    return langdetect.detect(s)
+    try:
+        return langdetect.detect(s)
+    except langdetect.lang_detect_exception.LangDetectException as e:
+        return None
 
 
 class WhisperTranscriptionModel():

@@ -5,9 +5,10 @@ from celery import shared_task
 
 from graphai.api.common.video import file_management_config, local_ocr_nlp_models, \
     transcription_model
-from graphai.core.common.video import retrieve_file_from_url, detect_audio_format_and_duration, \
-    extract_audio_from_video, extract_frames, generate_frame_sample_indices, compute_ocr_noise_level, \
-    compute_ocr_threshold, compute_video_ocr_transitions, generate_random_token, FRAME_FORMAT, OCR_FORMAT
+from graphai.core.common.video import retrieve_file_from_url, retrieve_file_from_kaltura, \
+    detect_audio_format_and_duration, extract_audio_from_video, extract_frames, generate_frame_sample_indices, \
+    compute_ocr_noise_level, compute_ocr_threshold, compute_video_ocr_transitions, generate_random_token, \
+    FRAME_FORMAT_PNG, TESSERACT_OCR_FORMAT
 from graphai.core.common.caching import AudioDBCachingManager, SlideDBCachingManager
 from itertools import chain
 
@@ -15,11 +16,17 @@ from itertools import chain
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='video.retrieve_url', ignore_result=False,
              file_manager=file_management_config)
-def retrieve_file_from_url_task(self, url):
+def retrieve_file_from_url_task(self, url, is_kaltura=True, timeout=120):
     token = generate_random_token()
-    filename = token + '.' + url.split('.')[-1]
+    file_format = url.split('.')[-1].lower()
+    if file_format not in ['mp4', 'mkv', 'flv']:
+        file_format = 'mp4'
+    filename = token + '.' + file_format
     filename_with_path = self.file_manager.generate_filepath(filename)
-    results = retrieve_file_from_url(url, filename_with_path, filename)
+    if is_kaltura:
+        results = retrieve_file_from_kaltura(url, filename_with_path, filename, timeout=timeout)
+    else:
+        results = retrieve_file_from_url(url, filename_with_path, filename)
     return {'token': results}
 
 
@@ -244,8 +251,8 @@ def compute_slide_transitions_callback_task(self, results):
 def detect_slides_callback_task(self, results, token):
     if results['fresh']:
         # Delete non-slide frames from the frames directory
-        list_of_slides = [(FRAME_FORMAT) % (x) for x in results['slides']]
-        list_of_ocr_results = [(OCR_FORMAT) % (x) for x in results['slides']]
+        list_of_slides = [(FRAME_FORMAT_PNG) % (x) for x in results['slides']]
+        list_of_ocr_results = [(TESSERACT_OCR_FORMAT) % (x) for x in results['slides']]
         base_folder = results['result']
         base_folder_with_path = self.file_manager.generate_filepath(base_folder)
         for f in os.listdir(base_folder_with_path):

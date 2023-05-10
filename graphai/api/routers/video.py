@@ -23,7 +23,13 @@ router = APIRouter(
 @router.post('/retrieve_url', response_model=TaskIDResponse)
 async def retrieve_file(data: RetrieveURLRequest):
     url = data.url
-    task = retrieve_file_from_url_task.s(url).apply_async(priority=2)
+    is_kaltura = data.kaltura
+    # Minimum timeout is 1 minute while maximum is 8 minutes.
+    max_timeout = 480
+    min_timeout = 60
+    timeout = max([data.timeout, min_timeout])
+    timeout = min([timeout, max_timeout])
+    task = retrieve_file_from_url_task.s(url, is_kaltura, timeout).apply_async(priority=2)
     return {'task_id': task.id}
 
 
