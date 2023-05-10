@@ -1,3 +1,5 @@
+from celery import shared_task
+
 from graphai.core.common.video import find_closest_audio_fingerprint_from_list, \
     find_closest_image_fingerprint_from_list
 
@@ -122,3 +124,10 @@ def fingerprint_lookup_callback(results_list, original_token, db_manager):
         }
     )
     return {'closest': closest_token, 'score': max_score, 'fp_results': fp_results}
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
+             name='video_2.ignore_fingerprint_results_callback', ignore_result=False)
+def ignore_fingerprint_results_callback_task(self, results, results_to_return):
+    # Returning the fingerprinting results, which is the part of this task whose results are sent back to the user.
+    return results_to_return

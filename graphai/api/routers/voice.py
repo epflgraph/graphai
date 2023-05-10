@@ -10,8 +10,8 @@ from graphai.api.celery_tasks.voice import compute_audio_fingerprint_task, \
     audio_fingerprint_find_closest_parallel_task, audio_fingerprint_find_closest_callback_task, \
     retrieve_audio_fingerprint_callback_task, remove_audio_silence_task, remove_audio_silence_callback_task, \
     detect_language_retrieve_from_db_and_split_task, detect_language_parallel_task, detect_language_callback_task, \
-    transcribe_task, transcribe_callback_task, video_test_task, ignore_fingerprint_results_callback_task
-from graphai.api.celery_tasks.common import format_api_results
+    transcribe_task, transcribe_callback_task, video_test_task
+from graphai.api.celery_tasks.common import format_api_results, ignore_fingerprint_results_callback_task
 from graphai.core.interfaces.celery_config import get_task_info
 
 # Initialise video router
@@ -46,9 +46,7 @@ async def calculate_audio_fingerprint(data: AudioFingerprintRequest):
     force = data.force
     remove_silence = data.remove_silence
     threshold = data.threshold
-    n_jobs = 8
-    min_similarity = 0.8
-    task_list = get_audio_fingerprint_chain_list(token, force, min_similarity, n_jobs, remove_silence, threshold)
+    task_list = get_audio_fingerprint_chain_list(token, force, remove_silence=remove_silence, threshold=threshold)
     task = chain(task_list)
     task = task.apply_async(priority=2)
     return {'task_id': task.id}

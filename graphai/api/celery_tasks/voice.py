@@ -171,13 +171,6 @@ def retrieve_audio_fingerprint_callback_task(self, results):
     return results['fp_results']
 
 
-@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='video_2.ignore_fingerprint_results_callback', ignore_result=False)
-def ignore_fingerprint_results_callback_task(self, results, results_to_return):
-    # Returning the fingerprinting results, which is the part of this task whose results are sent back to the user.
-    return results_to_return
-
-
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True,
              retry_kwargs={"max_retries": 2}, name='video_2.detect_language_retrieve_from_db', ignore_result=False,
              file_manager=file_management_config)
