@@ -173,7 +173,7 @@ def detect_audio_format_and_duration(input_filename_with_path, input_token):
         probe_results = perform_probe(input_filename_with_path)
     except Exception as e:
         print(e, file=sys.stderr)
-        return None
+        return None, None
     audio_type = probe_results['streams'][1]['codec_name']
     output_suffix='_audio.ogg'
     output_token = input_token + output_suffix

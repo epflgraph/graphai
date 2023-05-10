@@ -14,7 +14,7 @@ from itertools import chain
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='video.retrieve_url', ignore_result=False,
+             name='video_2.retrieve_url', ignore_result=False,
              file_manager=file_management_config)
 def retrieve_file_from_url_task(self, url, is_kaltura=True, timeout=120):
     token = generate_random_token()
@@ -31,14 +31,14 @@ def retrieve_file_from_url_task(self, url, is_kaltura=True, timeout=120):
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='video.get_file', ignore_result=False,
+             name='video_2.get_file', ignore_result=False,
              file_manager=file_management_config)
 def get_file_task(self, filename):
     return self.file_manager.generate_filepath(filename)
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='video.extract_audio', ignore_result=False,
+             name='video_2.extract_audio', ignore_result=False,
              file_manager=file_management_config)
 def extract_audio_task(self, token, force=False):
     input_filename_with_path = self.file_manager.generate_filepath(token)
@@ -56,7 +56,9 @@ def extract_audio_task(self, token, force=False):
     if not force:
         # we get the first element because in the audio caching table, each origin token has only one row
         db_manager = AudioDBCachingManager()
-        existing = db_manager.get_details_using_origin(token, cols=['duration'])[0]
+        existing = db_manager.get_details_using_origin(token, cols=['duration'])
+        if existing is not None:
+            existing = existing[0]
     else:
         existing = None
     if existing is not None:
@@ -83,7 +85,7 @@ def extract_audio_task(self, token, force=False):
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='video.extract_audio_callback', ignore_result=False,
+             name='video_2.extract_audio_callback', ignore_result=False,
              file_manager=file_management_config)
 def extract_audio_callback_task(self, results, origin_token):
     if results['fresh']:
@@ -99,7 +101,7 @@ def extract_audio_callback_task(self, results, origin_token):
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='video.extract_and_sample_frames', ignore_result=False,
+             name='video_2.extract_and_sample_frames', ignore_result=False,
              file_manager=file_management_config)
 def extract_and_sample_frames_task(self, token, force=False):
     # Checking for existing cached results
@@ -146,7 +148,7 @@ def extract_and_sample_frames_task(self, token, force=False):
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='video.noise_level_parallel', ignore_result=False,
+             name='video_2.noise_level_parallel', ignore_result=False,
              file_manager=file_management_config,
              nlp_model=local_ocr_nlp_models)
 def compute_noise_level_parallel_task(self, results, i, n, language=None):
@@ -175,7 +177,7 @@ def compute_noise_level_parallel_task(self, results, i, n, language=None):
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='video.noise_level_callback', ignore_result=False)
+             name='video_2.noise_level_callback', ignore_result=False)
 def compute_noise_threshold_callback_task(self, results, hash_thresh=0.8):
     if not results[0]['fresh']:
         return {
@@ -199,7 +201,7 @@ def compute_noise_threshold_callback_task(self, results, hash_thresh=0.8):
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='video.slide_transitions_parallel', ignore_result=False,
+             name='video_2.slide_transitions_parallel', ignore_result=False,
              file_manager=file_management_config, nlp_model=local_ocr_nlp_models)
 def compute_slide_transitions_parallel_task(self, results, i, n, language=None):
     if not results['fresh']:
@@ -226,7 +228,7 @@ def compute_slide_transitions_parallel_task(self, results, i, n, language=None):
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='video.slide_transitions_callback', ignore_result=False)
+             name='video_2.slide_transitions_callback', ignore_result=False)
 def compute_slide_transitions_callback_task(self, results):
     if not results[0]['fresh']:
         return {
@@ -246,7 +248,7 @@ def compute_slide_transitions_callback_task(self, results):
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='video.detect_slides_callback', ignore_result=False,
+             name='video_2.detect_slides_callback', ignore_result=False,
              file_manager=file_management_config)
 def detect_slides_callback_task(self, results, token):
     if results['fresh']:
@@ -293,7 +295,7 @@ def detect_slides_callback_task(self, results, token):
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='video.dummy_task', ignore_result=False)
+             name='video_2.dummy_task', ignore_result=False)
 def dummy_task(self, results):
     # This task is required for chaining groups due to the peculiarities of celery
     # Whenever there are two groups in one chain of tasks, there need to be at least
@@ -302,7 +304,7 @@ def dummy_task(self, results):
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='video.init', ignore_result=False,
+             name='video_2.init', ignore_result=False,
              transcription_obj=transcription_model,
              nlp_obj=local_ocr_nlp_models)
 def video_init_task(self):

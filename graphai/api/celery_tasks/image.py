@@ -9,7 +9,7 @@ from graphai.core.common.caching import SlideDBCachingManager
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='video.slide_fingerprint', ignore_result=False,
+             name='video_2.slide_fingerprint', ignore_result=False,
              file_manager=file_management_config)
 def compute_slide_fingerprint_task(self, token, force=False):
     # Checking for existing cached results
@@ -39,7 +39,7 @@ def compute_slide_fingerprint_task(self, token, force=False):
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='video.slide_fingerprint_callback', ignore_result=False)
+             name='video_2.slide_fingerprint_callback', ignore_result=False)
 def compute_slide_fingerprint_callback_task(self, results, token):
     if results['fresh']:
         db_manager = SlideDBCachingManager()
@@ -53,35 +53,35 @@ def compute_slide_fingerprint_callback_task(self, results, token):
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='video.slide_fingerprint_find_closest_retrieve_from_db', ignore_result=False)
+             name='video_2.slide_fingerprint_find_closest_retrieve_from_db', ignore_result=False)
 def slide_fingerprint_find_closest_retrieve_from_db_task(self, results, token):
     db_manager = SlideDBCachingManager()
     return fingerprint_lookup_retrieve_from_db(results, token, db_manager)
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='video.slide_fingerprint_find_closest_parallel', ignore_result=False)
+             name='video_2.slide_fingerprint_find_closest_parallel', ignore_result=False)
 def slide_fingerprint_find_closest_parallel_task(self, input_dict, token, i, n_total, min_similarity=1):
     db_manager = SlideDBCachingManager()
     return fingerprint_lookup_parallel(input_dict, token, i, n_total, min_similarity, db_manager, data_type='image')
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='video.slide_fingerprint_find_closest_callback', ignore_result=False)
+             name='video_2.slide_fingerprint_find_closest_callback', ignore_result=False)
 def slide_fingerprint_find_closest_callback_task(self, results_list, original_token):
     db_manager = SlideDBCachingManager()
     return fingerprint_lookup_callback(results_list, original_token, db_manager)
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='video.retrieve_slide_fingerprint_final_callback', ignore_result=False)
+             name='video_2.retrieve_slide_fingerprint_final_callback', ignore_result=False)
 def retrieve_slide_fingerprint_callback_task(self, results):
     # Returning the fingerprinting results, which is the part of this task whose results are sent back to the user.
     return results['fp_results']
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='video.extract_slide_text', ignore_result=False,
+             name='video_2.extract_slide_text', ignore_result=False,
              file_manager=file_management_config)
 def extract_slide_text_task(self, token, method='tesseract', force=False):
     if method == 'tesseract':
@@ -167,7 +167,7 @@ def extract_slide_text_task(self, token, method='tesseract', force=False):
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='video.extract_slide_text_callback', ignore_result=False)
+             name='video_2.extract_slide_text_callback', ignore_result=False)
 def extract_slide_text_callback_task(self, results, token):
     if results['fresh']:
         values_dict = {

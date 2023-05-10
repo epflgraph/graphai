@@ -1,4 +1,4 @@
-from celery import group
+from celery import group, chain
 from fastapi import APIRouter
 from fastapi.responses import FileResponse
 
@@ -10,7 +10,7 @@ from graphai.api.celery_tasks.voice import compute_audio_fingerprint_task, \
     audio_fingerprint_find_closest_parallel_task, audio_fingerprint_find_closest_callback_task, \
     retrieve_audio_fingerprint_callback_task, remove_audio_silence_task, remove_audio_silence_callback_task, \
     detect_language_retrieve_from_db_and_split_task, detect_language_parallel_task, detect_language_callback_task, \
-    transcribe_task, transcribe_callback_task, video_test_task
+    transcribe_task, transcribe_callback_task, video_test_task, ignore_fingerprint_results_callback_task
 from graphai.api.celery_tasks.common import format_api_results
 from graphai.core.interfaces.celery_config import get_task_info
 
@@ -21,6 +21,25 @@ router = APIRouter(
     responses={404: {'description': 'Not found'}}
 )
 
+
+def get_audio_fingerprint_chain_list(token, force=False, min_similarity=0.8, n_jobs=8, remove_silence=False,
+                                     threshold=None, ignore_fp_results=False, results_to_return=None):
+    if not remove_silence or threshold is None:
+        task_list = [compute_audio_fingerprint_task.s({'fp_token': token}, token, force)]
+    else:
+        task_list = [remove_audio_silence_task.s(token, force, threshold),
+                     remove_audio_silence_callback_task.s(token),
+                     compute_audio_fingerprint_task.s(token, force)]
+    task_list += [compute_audio_fingerprint_callback_task.s(token),
+                  audio_fingerprint_find_closest_retrieve_from_db_task.s(token),
+                  group(audio_fingerprint_find_closest_parallel_task.s(token, i, n_jobs, min_similarity) for i in range(n_jobs)),
+                  audio_fingerprint_find_closest_callback_task.s(token)]
+    if ignore_fp_results:
+        task_list += [ignore_fingerprint_results_callback_task.s(results_to_return)]
+    else:
+        task_list += [retrieve_audio_fingerprint_callback_task.s()]
+    return task_list
+
 @router.post('/calculate_fingerprint', response_model=TaskIDResponse)
 async def calculate_audio_fingerprint(data: AudioFingerprintRequest):
     token = data.token
@@ -29,25 +48,8 @@ async def calculate_audio_fingerprint(data: AudioFingerprintRequest):
     threshold = data.threshold
     n_jobs = 8
     min_similarity = 0.8
-
-    if not remove_silence:
-        task = (compute_audio_fingerprint_task.s({'fp_token': token}, token, force) |
-                compute_audio_fingerprint_callback_task.s(token) |
-                audio_fingerprint_find_closest_retrieve_from_db_task.s(token) |
-                group(audio_fingerprint_find_closest_parallel_task.s(token, i, n_jobs, min_similarity) for i in range(n_jobs)) |
-                audio_fingerprint_find_closest_callback_task.s(token) |
-                retrieve_audio_fingerprint_callback_task.s()
-                )
-    else:
-        task = (remove_audio_silence_task.s(token, force, threshold) |
-                remove_audio_silence_callback_task.s(token) |
-                compute_audio_fingerprint_task.s(token, force) |
-                compute_audio_fingerprint_callback_task.s(token) |
-                audio_fingerprint_find_closest_retrieve_from_db_task.s(token) |
-                group(audio_fingerprint_find_closest_parallel_task.s(token, i, n_jobs, min_similarity) for i in range(n_jobs)) |
-                audio_fingerprint_find_closest_callback_task.s(token) |
-                retrieve_audio_fingerprint_callback_task.s()
-                )
+    task_list = get_audio_fingerprint_chain_list(token, force, min_similarity, n_jobs, remove_silence, threshold)
+    task = chain(task_list)
     task = task.apply_async(priority=2)
     return {'task_id': task.id}
 
@@ -75,16 +77,32 @@ async def transcribe(data: AudioTranscriptionRequest):
     token = data.token
     force = data.force
     lang = data.force_lang
+
     if lang is not None:
-        task = (transcribe_task.s({'token':token, 'lang': lang}, force) |
-                transcribe_callback_task.s(token))
+        if not force:
+            task_list = get_audio_fingerprint_chain_list(token, force, ignore_fp_results=True,
+                                                         results_to_return={'token':token, 'language': lang})
+            task_list += [transcribe_task.s(force)]
+        else:
+            task_list = [transcribe_task.s({'token':token, 'language': lang}, force)]
     else:
         n_divs = 5
-        task = (detect_language_retrieve_from_db_and_split_task.s(token, force, n_divs, 30) |
-                group(detect_language_parallel_task.s(i) for i in range(n_divs)) |
-                detect_language_callback_task.s(token) |
-                transcribe_task.s(force) |
-                transcribe_callback_task.s(token))
+        len_segment=30
+        if not force:
+            task_list = get_audio_fingerprint_chain_list(token, force, ignore_fp_results=True,
+                                                         results_to_return=token)
+            task_list += [detect_language_retrieve_from_db_and_split_task.s(force, n_divs, len_segment)]
+        else:
+            task_list = [detect_language_retrieve_from_db_and_split_task.s(token, force, n_divs, len_segment)]
+
+        task_list += [
+            group(detect_language_parallel_task.s(i) for i in range(n_divs)),
+            detect_language_callback_task.s(token),
+            transcribe_task.s(force),
+        ]
+    task_list += [transcribe_callback_task.s(token)]
+    task = chain(task_list)
+
     task = task.apply_async(priority=2)
     return {'task_id': task.id}
 
@@ -112,9 +130,19 @@ async def detect_language(data: AudioDetectLanguageRequest):
     token = data.token
     force = data.force
     n_divs = 5
-    task = (detect_language_retrieve_from_db_and_split_task.s(token, force, n_divs, 30) |
-            group(detect_language_parallel_task.s(i) for i in range(n_divs)) |
-            detect_language_callback_task.s(token)).apply_async(priority=2)
+    len_segment = 30
+    if not force:
+        task_list = get_audio_fingerprint_chain_list(token, force, ignore_fp_results=True,
+                                                     results_to_return=token)
+        task_list += [detect_language_retrieve_from_db_and_split_task.s(force, n_divs, len_segment)]
+    else:
+        task_list = [detect_language_retrieve_from_db_and_split_task.s(token, force, n_divs, len_segment)]
+    task_list += [
+            group(detect_language_parallel_task.s(i) for i in range(n_divs)),
+            detect_language_callback_task.s(token)
+    ]
+    task = chain(task_list)
+    task = task.apply_async(priority=2)
     return {'task_id': task.id}
 
 

@@ -37,9 +37,10 @@ class BaseConfig:
             # default queue
             Queue("celery"),
             # custom queue
-            Queue("text", max_priority=10),
-            Queue("video", max_priority=2),
-            Queue("ontology", max_priority=6)
+            Queue("text_10", max_priority=10),
+            Queue("text_6", max_priority=6),
+            Queue("video_2", max_priority=2),
+            Queue("ontology_6", max_priority=6)
         ]
 
         self.CELERY_TASK_ROUTES = (route_task,)

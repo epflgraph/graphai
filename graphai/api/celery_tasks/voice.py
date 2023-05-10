@@ -11,7 +11,7 @@ from collections import Counter
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='video.audio_silenceremoval', ignore_result=False,
+             name='video_2.audio_silenceremoval', ignore_result=False,
              file_manager=file_management_config)
 def remove_audio_silence_task(self, token, force=False, threshold=0.0):
     input_filename_with_path = self.file_manager.generate_filepath(token)
@@ -54,7 +54,7 @@ def remove_audio_silence_task(self, token, force=False, threshold=0.0):
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='video.audio_silenceremoval_callback', ignore_result=False,
+             name='video_2.audio_silenceremoval_callback', ignore_result=False,
              file_manager=file_management_config)
 def remove_audio_silence_callback_task(self, result, audio_token):
     if result['fp_token'] is not None and result['fresh']:
@@ -70,7 +70,7 @@ def remove_audio_silence_callback_task(self, result, audio_token):
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='video.audio_fingerprint', ignore_result=False,
+             name='video_2.audio_fingerprint', ignore_result=False,
              file_manager=file_management_config)
 def compute_audio_fingerprint_task(self, input_dict, audio_token, force=False):
     fp_token = input_dict['fp_token']
@@ -127,7 +127,7 @@ def compute_audio_fingerprint_task(self, input_dict, audio_token, force=False):
     }
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='video.audio_fingerprint_callback', ignore_result=False,
+             name='video_2.audio_fingerprint_callback', ignore_result=False,
              file_manager=file_management_config)
 def compute_audio_fingerprint_callback_task(self, results, token):
     if results['result'] is not None and results['fresh']:
@@ -143,21 +143,21 @@ def compute_audio_fingerprint_callback_task(self, results, token):
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='video.audio_fingerprint_find_closest_retrieve_from_db', ignore_result=False)
+             name='video_2.audio_fingerprint_find_closest_retrieve_from_db', ignore_result=False)
 def audio_fingerprint_find_closest_retrieve_from_db_task(self, results, token):
     db_manager = AudioDBCachingManager()
     return fingerprint_lookup_retrieve_from_db(results, token, db_manager)
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='video.audio_fingerprint_find_closest_parallel', ignore_result=False)
+             name='video_2.audio_fingerprint_find_closest_parallel', ignore_result=False)
 def audio_fingerprint_find_closest_parallel_task(self, input_dict, token, i, n_total, min_similarity=0.8):
     db_manager = AudioDBCachingManager()
     return fingerprint_lookup_parallel(input_dict, token, i, n_total, min_similarity, db_manager, data_type='audio')
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='video.audio_fingerprint_find_closest_callback', ignore_result=False)
+             name='video_2.audio_fingerprint_find_closest_callback', ignore_result=False)
 def audio_fingerprint_find_closest_callback_task(self, results_list, original_token):
     db_manager = AudioDBCachingManager()
     return fingerprint_lookup_callback(results_list, original_token, db_manager)
@@ -165,14 +165,21 @@ def audio_fingerprint_find_closest_callback_task(self, results_list, original_to
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='video.retrieve_audio_fingerprint_final_callback', ignore_result=False)
+             name='video_2.retrieve_audio_fingerprint_final_callback', ignore_result=False)
 def retrieve_audio_fingerprint_callback_task(self, results):
     # Returning the fingerprinting results, which is the part of this task whose results are sent back to the user.
     return results['fp_results']
 
 
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
+             name='video_2.ignore_fingerprint_results_callback', ignore_result=False)
+def ignore_fingerprint_results_callback_task(self, results, results_to_return):
+    # Returning the fingerprinting results, which is the part of this task whose results are sent back to the user.
+    return results_to_return
+
+
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True,
-             retry_kwargs={"max_retries": 2}, name='video.detect_language_retrieve_from_db', ignore_result=False,
+             retry_kwargs={"max_retries": 2}, name='video_2.detect_language_retrieve_from_db', ignore_result=False,
              file_manager=file_management_config)
 def detect_language_retrieve_from_db_and_split_task(self, token, force=False, n_divs=5, segment_length=30):
     db_manager = AudioDBCachingManager()
@@ -220,7 +227,7 @@ def detect_language_retrieve_from_db_and_split_task(self, token, force=False, n_
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True,
-             retry_kwargs={"max_retries": 2}, name='video.detect_language_parallel', ignore_result=False,
+             retry_kwargs={"max_retries": 2}, name='video_2.detect_language_parallel', ignore_result=False,
              file_manager=file_management_config, model=transcription_model)
 def detect_language_parallel_task(self, tokens_dict, i):
     if not tokens_dict['fresh']:
@@ -245,7 +252,7 @@ def detect_language_parallel_task(self, tokens_dict, i):
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True,
-             retry_kwargs={"max_retries": 2}, name='video.detect_language_callback', ignore_result=False,
+             retry_kwargs={"max_retries": 2}, name='video_2.detect_language_callback', ignore_result=False,
              file_manager=file_management_config)
 def detect_language_callback_task(self, results_list, token):
     # The logic here is twofold:
@@ -290,7 +297,7 @@ def detect_language_callback_task(self, results_list, token):
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True,
-             retry_kwargs={"max_retries": 2}, name='video.transcribe', ignore_result=False,
+             retry_kwargs={"max_retries": 2}, name='video_2.transcribe', ignore_result=False,
              file_manager=file_management_config, model=transcription_model)
 def transcribe_task(self, input_dict, force=False):
     token = input_dict['token']
@@ -364,7 +371,7 @@ def transcribe_task(self, input_dict, force=False):
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='video.transcribe_callback', ignore_result=False,
+             name='video_2.transcribe_callback', ignore_result=False,
              file_manager=file_management_config)
 def transcribe_callback_task(self, results, token):
     if results['fresh']:
@@ -393,6 +400,6 @@ def transcribe_callback_task(self, results, token):
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='video.sleeper', ignore_result=False)
+             name='video_2.sleeper', ignore_result=False)
 def video_test_task(self):
     sleep(30)
