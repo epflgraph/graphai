@@ -1,18 +1,19 @@
 from fastapi import FastAPI
 from fastapi.responses import RedirectResponse
 
-import graphai.api.routers.ontology as ontology_router
-import graphai.api.routers.text as text_router
-import graphai.api.routers.video as video_router
-import graphai.api.routers.voice as audio_router
-import graphai.api.routers.image as image_router
-from graphai.api.celery_tasks.video import video_lazy_loader_task
-from graphai.api.celery_tasks.text import text_lazy_loader_task
 from graphai.api.common.celery_tools import celery_instance
 
 from graphai.api.common.log import log
 
-from graphai.core.interfaces.celery_config import create_celery
+import graphai.api.routers.image as image_router
+import graphai.api.routers.ontology as ontology_router
+import graphai.api.routers.text as text_router
+import graphai.api.routers.video as video_router
+import graphai.api.routers.voice as voice_router
+
+from graphai.api.celery_tasks.text import text_init_task
+from graphai.api.celery_tasks.video import video_init_task
+
 
 # Initialise FastAPI
 app = FastAPI(
@@ -23,25 +24,32 @@ app = FastAPI(
 )
 
 # Include all routers in the app
+app.include_router(image_router.router)
 app.include_router(ontology_router.router)
 app.include_router(text_router.router)
 app.include_router(video_router.router)
-app.include_router(audio_router.router)
-app.include_router(image_router.router)
+app.include_router(voice_router.router)
 app.celery_app = celery_instance
 
 
-# On startup, we instantiate concepts graph and ontology, so they are held into memory
-@app.on_event("startup")
-async def lazy_load_singletons():
-    # Loading all the lazy-loaded objects in the celery process
-    log(f'Loading all lazy-loaded objects')
-    # lazy_loading_successful = video_lazy_loader_task.apply_async(priority=2).get()
-    lazy_loading_successful = text_lazy_loader_task.apply_async(priority=10).get()
-    if lazy_loading_successful:
-        log(f'Lazy-loaded objects loaded into memory')
+# On startup, we spawn tasks to initialise services and variables in the memory space of the celery workers
+@app.on_event('startup')
+async def init():
+    log(f'Loading big objects and models into the memory space of the celery workers...')
+
+    # Spawn tasks
+    text_job = text_init_task.apply_async(priority=10)
+    video_job = video_init_task.apply_async(priority=2)
+
+    # Wait for results
+    text_ok = text_job.get()
+    video_ok = video_job.get()
+
+    # Print status message
+    if text_ok and video_ok:
+        log(f'Loaded')
     else:
-        log(f'ERROR: Lazy-loading unsuccessful, check celery logs')
+        log(f'ERROR: Loading unsuccessful, check celery logs')
 
 
 # Root endpoint redirects to docs
