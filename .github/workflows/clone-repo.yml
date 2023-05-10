@@ -52,6 +52,6 @@ jobs:
           cd main
           source /data/venvs/test_venv/bin/activate
           pip install -e .
-          python -m spacy download en_core_web_lg
-          python -m spacy download fr_core_news_md
+          python -c "import spacy; spacy.cli.download('en_core_web_lg') if 'en_core_web_lg' not in spacy.util.get_installed_models() else None"
+          python -c "import spacy; spacy.cli.download('fr_core_news_md') if 'fr_core_news_md' not in spacy.util.get_installed_models() else None"
           python -c "import whisper; whisper.load_model('${{ vars.whisper_model_type }}');"
