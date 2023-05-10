@@ -1,4 +1,4 @@
-from celery import group
+from celery import group, chain
 from fastapi import APIRouter
 from graphai.api.schemas.image import *
 from graphai.api.schemas.common import *
@@ -9,6 +9,7 @@ from ..celery_tasks.image import compute_slide_fingerprint_task, \
     compute_slide_fingerprint_callback_task, slide_fingerprint_find_closest_retrieve_from_db_task, \
     slide_fingerprint_find_closest_parallel_task, slide_fingerprint_find_closest_callback_task, \
     retrieve_slide_fingerprint_callback_task, extract_slide_text_task, extract_slide_text_callback_task
+from ..celery_tasks.common import ignore_fingerprint_results_callback_task
 
 # Initialise video router
 router = APIRouter(
@@ -18,20 +19,29 @@ router = APIRouter(
 )
 
 
+def get_slide_fingerprint_chain_list(token, force, min_similarity=0.9, n_jobs=8,
+                                     ignore_fp_results=False, results_to_return=None):
+    task_list = [
+        compute_slide_fingerprint_task.s(token, force),
+        compute_slide_fingerprint_callback_task.s(token),
+        slide_fingerprint_find_closest_retrieve_from_db_task.s(token),
+        group(slide_fingerprint_find_closest_parallel_task.s(token, i, n_jobs, min_similarity) for i in range(n_jobs)),
+        slide_fingerprint_find_closest_callback_task.s(token)
+    ]
+    if ignore_fp_results:
+        task_list += [ignore_fingerprint_results_callback_task.s(results_to_return)]
+    else:
+        task_list += [retrieve_slide_fingerprint_callback_task.s()]
+    return task_list
+
+
 @router.post('/calculate_fingerprint', response_model=TaskIDResponse)
 async def calculate_fingerprint(data: ImageFingerprintRequest):
     token = data.token
     force = data.force
-    min_similarity = 0.9
-    n_jobs = 8
-    task = (
-            compute_slide_fingerprint_task.s(token, force) |
-            compute_slide_fingerprint_callback_task.s(token) |
-            slide_fingerprint_find_closest_retrieve_from_db_task.s(token) |
-            group(slide_fingerprint_find_closest_parallel_task.s(token, i, n_jobs, min_similarity) for i in range(n_jobs)) |
-            slide_fingerprint_find_closest_callback_task.s(token) |
-            retrieve_slide_fingerprint_callback_task.s()
-        ).apply_async(priority=2)
+    task_list = get_slide_fingerprint_chain_list(token, force)
+    task = chain(task_list)
+    task = task.apply_async(priority=2)
     return {'task_id': task.id}
 
 
@@ -58,8 +68,15 @@ async def extract_text(data: ExtractTextRequest):
     method = data.method
     force = data.force
     assert method in ['google', 'tesseract']
-    task = (extract_slide_text_task.s(token, method, force) |
-            extract_slide_text_callback_task.s(token)).apply_async(priority=2)
+    if not force:
+        task_list = get_slide_fingerprint_chain_list(token, force, ignore_fp_results=True, results_to_return=token)
+        task_list += [extract_slide_text_task.s(method, force)]
+    else:
+        task_list = [extract_slide_text_task.s(token, method, force)]
+
+    task_list += [extract_slide_text_callback_task.s(token)]
+    task = chain(task_list)
+    task = task.apply_async(priority=2)
     return {'task_id': task.id}
 
 
