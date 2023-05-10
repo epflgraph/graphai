@@ -95,7 +95,7 @@ async def wikify(data: WikifyRequest, method: Optional[str] = None):
     results = job.apply_async(priority=10)
 
     # Wait for results
-    results = results.get(timeout=10)
+    results = results.get(timeout=300)
 
     return results.to_dict(orient='records')
 

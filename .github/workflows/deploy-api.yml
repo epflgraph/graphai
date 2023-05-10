@@ -18,10 +18,11 @@ jobs:
       - name: Deploy API and associated services
         run: |
           systemctl --user stop celery-flower
+          systemctl --user stop api-test
           systemctl --user stop celery-low-prio
           systemctl --user stop celery-high-prio
-          systemctl --user stop api-test
-          systemctl --user start api-test
+          ################
           systemctl --user start celery-high-prio
           systemctl --user start celery-low-prio
+          systemctl --user start api-test
           systemctl --user start celery-flower
