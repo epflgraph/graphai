@@ -56,7 +56,9 @@ def extract_audio_task(self, token, force=False):
     if not force:
         # we get the first element because in the audio caching table, each origin token has only one row
         db_manager = AudioDBCachingManager()
-        existing = db_manager.get_details_using_origin(token, cols=['duration'])[0]
+        existing = db_manager.get_details_using_origin(token, cols=['duration'])
+        if existing is not None:
+            existing = existing[0]
     else:
         existing = None
     if existing is not None:
