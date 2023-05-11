@@ -62,6 +62,7 @@ async def calculate_audio_fingerprint_status(task_id):
                 'result': task_results['result'],
                 'fresh': task_results['fresh'],
                 'closest_token': task_results['closest'],
+                'closest_token_origin': task_results['closest_origin'],
                 'duration': task_results['duration'],
                 'fp_nosilence': True if task_results['fp_nosilence'] == 1 else False,
                 'successful': task_results['result'] is not None

@@ -48,6 +48,11 @@ class AudioFingerprintTaskResponse(BaseModel):
                     "threshold."
     )
 
+    closest_token_origin: Union[str, None] = Field(
+        title="Original token of the closest token",
+        description="The token of video that the closest audio token originated from."
+    )
+
     duration: float = Field(
         title="Duration of audio file",
         description="Length of audio. If the remove_silence flag was set, this is the length of the audio "

@@ -214,6 +214,12 @@ class DBCachingManagerBase(abc.ABC):
         closest_match_results = self._get_details(self.schema, self.cache_table, closest_token, cols)
         return [own_results, closest_match_results]
 
+    def get_origin(self, id_token):
+        results = self._get_details(self.schema, self.cache_table, id_token, ['origin_token'])
+        if results is not None:
+            return results['origin_token']
+        return None
+
     def get_details_using_origin(self, origin_token, cols):
         return self._get_details_using_origin(self.schema, self.cache_table, origin_token, cols)
 

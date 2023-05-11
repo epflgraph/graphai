@@ -169,6 +169,11 @@ def retrieve_audio_fingerprint_callback_task(self, results):
     # Returning the fingerprinting results, which is the part of this task whose results are sent back to the user.
     results_to_return = results['fp_results']
     results_to_return['closest'] = results['closest']
+    db_manager = AudioDBCachingManager()
+    if results_to_return['closest'] is not None:
+        results_to_return['closest_origin'] = db_manager.get_origin(results_to_return['closest'])
+    else:
+        results_to_return['closest_origin'] = None
     return results_to_return
 
 

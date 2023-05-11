@@ -33,6 +33,11 @@ class ImageFingerprintTaskResponse(BaseModel):
                     "threshold."
     )
 
+    closest_token_origin: Union[str, None] = Field(
+        title="Original token of the closest token",
+        description="The token of video that the closest slide token originated from."
+    )
+
     successful: bool = Field(
         title="Success flag",
         description="Whether the computation was successful."
