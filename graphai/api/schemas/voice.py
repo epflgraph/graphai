@@ -41,6 +41,13 @@ class AudioFingerprintTaskResponse(BaseModel):
         description="Whether the result was computed freshly or an existing cached result was returned."
     )
 
+    closest_token: Union[str, None] = Field(
+        title="Closest token",
+        description="The token of the most similar existing audio that the fingerprint lookup was able to find. Equal "
+                    "to original token if the most similar existing audio did not satisfy the minimum similarity "
+                    "threshold."
+    )
+
     duration: float = Field(
         title="Duration of audio file",
         description="Length of audio. If the remove_silence flag was set, this is the length of the audio "

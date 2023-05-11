@@ -100,8 +100,12 @@ def fingerprint_lookup_callback(results_list, original_token, db_manager):
     # This is essentially the same check as in all the other find_closest tasks.
     fp_results = results_list[0]['fp_results']
     if fp_results['result'] is None or not fp_results['fresh']:
-        return{
-            'closest': None,
+        if fp_results['result'] is not None:
+            closest = db_manager.get_closest_match(original_token)
+        else:
+            closest = None
+        return {
+            'closest': closest,
             'score': None,
             'fp_results': fp_results
         }

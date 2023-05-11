@@ -77,7 +77,9 @@ def slide_fingerprint_find_closest_callback_task(self, results_list, original_to
              name='video_2.retrieve_slide_fingerprint_final_callback', ignore_result=False)
 def retrieve_slide_fingerprint_callback_task(self, results):
     # Returning the fingerprinting results, which is the part of this task whose results are sent back to the user.
-    return results['fp_results']
+    results_to_return = results['fp_results']
+    results_to_return['closest'] = results['closest']
+    return results_to_return
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},

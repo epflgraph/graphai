@@ -54,6 +54,7 @@ async def calculate_fingerprint_status(task_id):
             task_results = {
                 'result': task_results['result'],
                 'fresh': task_results['fresh'],
+                'closest_token': task_results['closest'],
                 'successful': task_results['result'] is not None
             }
         else:
