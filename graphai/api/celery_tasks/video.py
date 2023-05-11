@@ -300,7 +300,7 @@ def detect_slides_callback_task(self, results, token):
 def md5_hash_video_task(self, token, force=False):
     if not force:
         db_manager = VideoDBCachingManager()
-        existing = db_manager.get_details(token, ['fingerprint'])
+        existing = db_manager.get_details(token, ['fingerprint'])[0]
         if existing is not None and existing.get('fingerprint', None) is not None:
             return {
                 'hash': existing['fingerprint'],

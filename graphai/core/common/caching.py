@@ -197,14 +197,14 @@ class DBCachingManagerBase(abc.ABC):
         self._insert_or_update_details(self.schema, self.cache_table, id_token, values_to_insert)
 
     def get_details(self, id_token, cols, using_most_similar=False):
-        if using_most_similar:
-            print(id_token)
-            id_token_to_use = self.get_closest_match(id_token)
-            if id_token_to_use is None:
-                id_token_to_use = id_token
-        else:
-            id_token_to_use = id_token
-        return self._get_details(self.schema, self.cache_table, id_token_to_use, cols)
+        own_results = self._get_details(self.schema, self.cache_table, id_token, cols)
+        if not using_most_similar:
+            return [own_results, None]
+        closest_token = self.get_closest_match(id_token)
+        if closest_token is None or closest_token == id_token:
+            return [own_results, None]
+        closest_match_results = self._get_details(self.schema, self.cache_table, closest_token, cols)
+        return [own_results, closest_match_results]
 
     def get_details_using_origin(self, origin_token, cols):
         return self._get_details_using_origin(self.schema, self.cache_table, origin_token, cols)
