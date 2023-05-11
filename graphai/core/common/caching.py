@@ -39,10 +39,11 @@ def surround_with_character(s, c="'"):
 
 class DBCachingManagerBase(abc.ABC):
     def __init__(self, cache_table, most_similar_table):
-        # Only three values are hardcoded into this class and need to be respected by its child classes:
+        # Only four values are hardcoded into this class and need to be respected by its child classes:
         # 1. The schema, 'cache_graphai', should not be changed
         # 2. The name of the id column for both the main and the most-similar tables is 'id_token'
-        # 3. The name of the second column in the most-similar table is 'most_similar_token'
+        # 3. The cache tables must have a "date_added" column
+        # 4. The name of the second column in the most-similar table is 'most_similar_token'
         self.schema = 'cache_graphai'
         self.cache_table = cache_table
         self.most_similar_table = most_similar_table
@@ -130,7 +131,8 @@ class DBCachingManagerBase(abc.ABC):
             results = None
         return results
 
-    def _get_all_details(self, schema, table_name, cols, start=0, limit=-1, exclude_token=None, allow_nulls=True):
+    def _get_all_details(self, schema, table_name, cols, start=0, limit=-1,
+                         exclude_token=None, allow_nulls=True, earliest_date=None):
         column_list = ['id_token'] + cols
         query = f"""
             SELECT {', '.join(column_list)} FROM `{schema}`.`{table_name}`
@@ -145,6 +147,12 @@ class DBCachingManagerBase(abc.ABC):
             else:
                 query += '\nWHERE '
             query += ' AND '.join([col + ' IS NOT NULL' for col in cols])
+        if earliest_date is not None:
+            if 'WHERE' in query:
+                query += ' AND '
+            else:
+                query += '\nWHERE '
+            query += f" date_added >= '{earliest_date}'"
         if limit != -1:
             query += f"""
             LIMIT {start},{limit}
@@ -210,10 +218,10 @@ class DBCachingManagerBase(abc.ABC):
         return self._get_details_using_origin(self.schema, self.cache_table, origin_token, cols)
 
     def get_all_details(self, cols, start=0, limit=-1, exclude_token=None, using_most_similar=False,
-                        allow_nulls=True):
+                        allow_nulls=True, earliest_date=None):
         results = self._get_all_details(self.schema, self.cache_table, cols,
                                         start=start, limit=limit, exclude_token=exclude_token,
-                                        allow_nulls=allow_nulls)
+                                        allow_nulls=allow_nulls, earliest_date=earliest_date)
         if using_most_similar:
             most_similar_map = self.get_all_closest_matches()
             results = {x: results[most_similar_map.get(x, x)] for x in results}
@@ -264,6 +272,7 @@ class AudioDBCachingManager(DBCachingManagerBase):
               `nosilence_duration` FLOAT DEFAULT NULL,
               `language` VARCHAR(10) DEFAULT NULL,
               `fp_nosilence` INT DEFAULT NULL,
+              `date_added` DATETIME DEFAULT NULL,
               PRIMARY KEY id_token (id_token)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
             """
@@ -304,6 +313,7 @@ class SlideDBCachingManager(DBCachingManagerBase):
               `ocr_google_1_token` VARCHAR(255) DEFAULT NULL,
               `ocr_google_2_token` VARCHAR(255) DEFAULT NULL,
               `language` VARCHAR(10) DEFAULT NULL,
+              `date_added` DATETIME DEFAULT NULL,
               PRIMARY KEY id_token (id_token)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
             """

@@ -1,3 +1,4 @@
+from datetime import datetime
 import os
 import shutil
 
@@ -89,12 +90,14 @@ def extract_audio_task(self, token, force=False):
              file_manager=file_management_config)
 def extract_audio_callback_task(self, results, origin_token):
     if results['fresh']:
+        current_datetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         db_manager = AudioDBCachingManager()
         db_manager.insert_or_update_details(
             results['token'],
             {
                 'duration': results['duration'],
-                'origin_token': origin_token
+                'origin_token': origin_token,
+                'date_added': current_datetime
             }
         )
     return results
@@ -273,6 +276,7 @@ def detect_slides_callback_task(self, results, token):
         ocr_tokens = [os.path.join(slides_folder, s) for s in list_of_ocr_results]
         slide_tokens = {i+1:slide_tokens[i] for i in range(len(slide_tokens))}
         ocr_tokens = {i+1:ocr_tokens[i] for i in range(len(ocr_tokens))}
+        current_datetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         # Inserting fresh results into the database
         for slide_number in slide_tokens:
             db_manager = SlideDBCachingManager()
@@ -282,7 +286,8 @@ def detect_slides_callback_task(self, results, token):
                     'origin_token': token,
                     'timestamp': results['slides'][slide_number-1],
                     'slide_number': slide_number,
-                    'ocr_tesseract_token': ocr_tokens[slide_number]
+                    'ocr_tesseract_token': ocr_tokens[slide_number],
+                    'date_added': current_datetime
                 }
             )
     else:
