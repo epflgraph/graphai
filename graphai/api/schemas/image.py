@@ -79,7 +79,7 @@ class ExtractTextTaskResponse(BaseModel):
         description="List of OCR results"
     )
 
-    language: str = Field(
+    language: Union[str, None] = Field(
         title="Language",
         description="Language of the detected text"
     )
@@ -103,7 +103,7 @@ class ExtractTextResponse(TaskStatusResponse):
 
 
 class DetectOCRLanguageTaskResponse(BaseModel):
-    language: str = Field(
+    language: Union[str, None] = Field(
         title="Language",
         description="Language of the detected text"
     )
