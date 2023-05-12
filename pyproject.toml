@@ -43,6 +43,7 @@ dependencies = [
     "transformers",
     "sentencepiece",
     "sacremoses",
+    "pysbd",
     "mysql-connector-python",
     "elasticsearch",
     "unidecode",
