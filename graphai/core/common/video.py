@@ -867,23 +867,21 @@ class GoogleOCRModel():
 
 class TranslationModels:
     def __init__(self):
-        self.en_fr_model = None
-        self.fr_en_model = None
+        self.models = None
 
     def load_models(self):
-        if self.en_fr_model is None:
-            self.en_fr_model = dict()
+        if self.models is None:
+            self.models = dict()
             print('Loading EN-FR')
-            self.en_fr_model['tokenizer'] = AutoTokenizer.from_pretrained("Helsinki-NLP/opus-mt-en-fr")
-            self.en_fr_model['model'] = AutoModelForSeq2SeqLM.from_pretrained("Helsinki-NLP/opus-mt-en-fr")
-            self.en_fr_model['segmenter'] = pysbd.Segmenter(language='en', clean=False)
-
-        if self.fr_en_model is None:
-            self.fr_en_model = dict()
+            self.models['en-fr'] = dict()
+            self.models['en-fr']['tokenizer'] = AutoTokenizer.from_pretrained("Helsinki-NLP/opus-mt-en-fr")
+            self.models['en-fr']['model'] = AutoModelForSeq2SeqLM.from_pretrained("Helsinki-NLP/opus-mt-en-fr")
+            self.models['en-fr']['segmenter'] = pysbd.Segmenter(language='en', clean=False)
             print('Loading FR-EN')
-            self.fr_en_model['tokenizer'] = AutoTokenizer.from_pretrained("Helsinki-NLP/opus-mt-fr-en")
-            self.fr_en_model['model'] = AutoModelForSeq2SeqLM.from_pretrained("Helsinki-NLP/opus-mt-fr-en")
-            self.fr_en_model['segmenter'] = pysbd.Segmenter(language='fr', clean=False)
+            self.models['fr-en'] = dict()
+            self.models['fr-en']['tokenizer'] = AutoTokenizer.from_pretrained("Helsinki-NLP/opus-mt-fr-en")
+            self.models['fr-en']['model'] = AutoModelForSeq2SeqLM.from_pretrained("Helsinki-NLP/opus-mt-fr-en")
+            self.models['fr-en']['segmenter'] = pysbd.Segmenter(language='fr', clean=False)
 
     def _translate(self, text, full_model):
         tokenizer = full_model['tokenizer']
@@ -903,7 +901,6 @@ class TranslationModels:
     def translate(self, text, how='en-fr'):
         assert how in ['en-fr', 'fr-en']
         self.load_models()
-        if how == 'en-fr':
-            return self._translate(text, self.en_fr_model)
-        elif how == 'fr-en':
-            return self._translate(text, self.fr_en_model)
+        if text is None or text == '':
+            return None
+        return self._translate(text, self.models[how])
