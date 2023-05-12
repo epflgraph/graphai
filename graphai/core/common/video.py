@@ -28,6 +28,7 @@ from fuzzywuzzy import fuzz
 from .caching import make_sure_path_exists
 from graphai.definitions import CONFIG_DIR
 from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
+import pysbd
 
 
 FRAME_FORMAT_PNG = 'frame-%06d.png'
@@ -875,21 +876,29 @@ class TranslationModels:
             print('Loading EN-FR')
             self.en_fr_model['tokenizer'] = AutoTokenizer.from_pretrained("Helsinki-NLP/opus-mt-en-fr")
             self.en_fr_model['model'] = AutoModelForSeq2SeqLM.from_pretrained("Helsinki-NLP/opus-mt-en-fr")
+            self.en_fr_model['segmenter'] = pysbd.Segmenter(language='en', clean=False)
 
         if self.fr_en_model is None:
             self.fr_en_model = dict()
             print('Loading FR-EN')
             self.fr_en_model['tokenizer'] = AutoTokenizer.from_pretrained("Helsinki-NLP/opus-mt-fr-en")
             self.fr_en_model['model'] = AutoModelForSeq2SeqLM.from_pretrained("Helsinki-NLP/opus-mt-fr-en")
+            self.fr_en_model['segmenter'] = pysbd.Segmenter(language='fr', clean=False)
 
     def _translate(self, text, full_model):
         tokenizer = full_model['tokenizer']
         model = full_model['model']
-        input_ids = tokenizer.encode(text, return_tensors="pt")
-        outputs = model.generate(input_ids, max_length=512)
-        decoded = tokenizer.decode(outputs[0], skip_special_tokens=True)
-        print(decoded)
-        return decoded
+        segmenter = full_model['segmenter']
+        sentences = segmenter.segment(text)
+        full_result = ''
+        for sentence in sentences:
+            if len(sentence) == 0:
+                continue
+            input_ids = tokenizer.encode(sentence, return_tensors="pt")
+            outputs = model.generate(input_ids, max_length=512)
+            decoded = tokenizer.decode(outputs[0], skip_special_tokens=True)
+            full_result += decoded + ' '
+        return full_result
 
     def translate(self, text, how='en-fr'):
         assert how in ['en-fr', 'fr-en']
