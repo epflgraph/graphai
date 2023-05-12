@@ -11,15 +11,19 @@ def translate_text_task(self, text, src, tgt):
             'successful': False
         }
     how = f"{src}-{tgt}"
-    translated_text = self.translation_obj.translate(text, how=how)
-    if translated_text is None:
-        return {
-            'result': None,
-            'successful': False
-        }
+    try:
+        translated_text = self.translation_obj.translate(text, how=how)
+        if translated_text is None:
+            success = False
+        else:
+            success = True
+    except IndexError as e:
+        translated_text = "Unpunctuated text too long (over 512 tokens), " \
+                          "try adding punctuation or providing a smaller chunk of text."
+        success = False
     return {
         'result': translated_text,
-        'successful': True
+        'successful': success
     }
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
