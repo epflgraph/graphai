@@ -27,6 +27,7 @@ import whisper
 from fuzzywuzzy import fuzz
 from .caching import make_sure_path_exists
 from graphai.definitions import CONFIG_DIR
+from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
 
 
 FRAME_FORMAT_PNG = 'frame-%06d.png'
@@ -861,3 +862,39 @@ class GoogleOCRModel():
         if results is not None:
             results = results.full_text_annotation.text
         return results
+
+
+class TranslationModels:
+    def __init__(self):
+        self.en_fr_model = None
+        self.fr_en_model = None
+
+    def load_models(self):
+        if self.en_fr_model is None:
+            self.en_fr_model = dict()
+            print('Loading EN-FR')
+            self.en_fr_model['tokenizer'] = AutoTokenizer.from_pretrained("Helsinki-NLP/opus-mt-en-fr")
+            self.en_fr_model['model'] = AutoModelForSeq2SeqLM.from_pretrained("Helsinki-NLP/opus-mt-en-fr")
+
+        if self.fr_en_model is None:
+            self.fr_en_model = dict()
+            print('Loading FR-EN')
+            self.fr_en_model['tokenizer'] = AutoTokenizer.from_pretrained("Helsinki-NLP/opus-mt-fr-en")
+            self.fr_en_model['model'] = AutoModelForSeq2SeqLM.from_pretrained("Helsinki-NLP/opus-mt-fr-en")
+
+    def _translate(self, text, full_model):
+        tokenizer = full_model['tokenizer']
+        model = full_model['model']
+        input_ids = tokenizer.encode(text, return_tensors="pt")
+        outputs = model.generate(input_ids, max_length=512)
+        decoded = tokenizer.decode(outputs[0], skip_special_tokens=True)
+        print(decoded)
+        return decoded
+
+    def translate(self, text, how='en-fr'):
+        assert how in ['en-fr', 'fr-en']
+        self.load_models()
+        if how == 'en-fr':
+            return self._translate(text, self.en_fr_model)
+        elif how == 'fr-en':
+            return self._translate(text, self.fr_en_model)
