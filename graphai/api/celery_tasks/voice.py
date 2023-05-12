@@ -20,7 +20,7 @@ def remove_audio_silence_task(self, token, force=False, threshold=0.0):
     output_token = token + output_suffix
     output_filename_with_path = self.file_manager.generate_filepath(output_token)
     db_manager = AudioDBCachingManager()
-    existing = db_manager.get_details(token, cols=['nosilence_token', 'nosilence_duration'])
+    existing = db_manager.get_details(token, cols=['nosilence_token', 'nosilence_duration'])[0]
     # The information on audio file needs to have been inserted into the cache table when
     # the audio was extracted from the video. Therefore, the `existing` row needs to *exist*.
     if existing is None:
@@ -83,7 +83,7 @@ def compute_audio_fingerprint_task(self, input_dict, audio_token, force=False):
         }
     db_manager = AudioDBCachingManager()
     existing = db_manager.get_details(audio_token, cols=['fingerprint', 'duration',
-                                                                     'nosilence_duration', 'fp_nosilence'])
+                                        'nosilence_duration', 'fp_nosilence'])[0]
     # The information on audio file needs to have been inserted into the cache table when
     # the audio was extracted from the video. Therefore, the `existing` row needs to *exist*,
     # even if its fingerprint and many of its other fields are null.
@@ -163,18 +163,17 @@ def audio_fingerprint_find_closest_callback_task(self, results_list, original_to
     return fingerprint_lookup_callback(results_list, original_token, db_manager)
 
 
-
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='video_2.retrieve_audio_fingerprint_final_callback', ignore_result=False)
 def retrieve_audio_fingerprint_callback_task(self, results):
     # Returning the fingerprinting results, which is the part of this task whose results are sent back to the user.
-    return results['fp_results']
-
-
-@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='video_2.ignore_fingerprint_results_callback', ignore_result=False)
-def ignore_fingerprint_results_callback_task(self, results, results_to_return):
-    # Returning the fingerprinting results, which is the part of this task whose results are sent back to the user.
+    results_to_return = results['fp_results']
+    results_to_return['closest'] = results['closest']
+    db_manager = AudioDBCachingManager()
+    if results_to_return['closest'] is not None:
+        results_to_return['closest_origin'] = db_manager.get_origin(results_to_return['closest'])
+    else:
+        results_to_return['closest_origin'] = None
     return results_to_return
 
 
@@ -183,22 +182,26 @@ def ignore_fingerprint_results_callback_task(self, results, results_to_return):
              file_manager=file_management_config)
 def detect_language_retrieve_from_db_and_split_task(self, token, force=False, n_divs=5, segment_length=30):
     db_manager = AudioDBCachingManager()
-    existing = db_manager.get_details(token, ['duration', 'language'],
+    existing_list = db_manager.get_details(token, ['duration', 'language'],
                                            using_most_similar=True)
-    if existing is None:
+    if existing_list[0] is None:
         # The token doesn't exist in the cache, so the file doesn't exist
         return {
             'temp_tokens': None,
             'lang': None,
             'fresh': False
         }
-    if not force and existing['language'] is not None:
-        # A recomputation is not forced and a value already exists
-        return {
-            'temp_tokens': None,
-            'lang': existing['language'],
-            'fresh': False
-        }
+    if not force:
+        for existing in existing_list:
+            if existing is None:
+                continue
+            if existing['language'] is not None:
+                # A recomputation is not forced and a value already exists
+                return {
+                    'temp_tokens': None,
+                    'lang': existing['language'],
+                    'fresh': False
+                }
 
     input_filename_with_path = self.file_manager.generate_filepath(token)
     result_tokens = list()
@@ -209,7 +212,7 @@ def detect_language_retrieve_from_db_and_split_task(self, token, force=False, n_
                                                                              force_dir=TEMP_SUBFOLDER)
         current_result = extract_audio_segment(
             input_filename_with_path, current_output_token_with_path, current_output_token,
-            start=existing['duration']*i/n_divs, length=segment_length)
+            start=existing_list[0]['duration']*i/n_divs, length=segment_length)
         if current_result is None:
             print('Unspecified error while creating temp files')
             return {
@@ -319,24 +322,36 @@ def transcribe_task(self, input_dict, force=False):
         # neighbor. However, it's also possible that the results have been computed for its closest
         # neighbor but not for itself.
         db_manager = AudioDBCachingManager()
-        existing = db_manager.get_details(token, ['transcript_token', 'subtitle_token', 'language'],
+        existing_list = db_manager.get_details(token, ['transcript_token', 'subtitle_token', 'language'],
                                                using_most_similar=True)
-        if existing['transcript_token'] is not None and existing['subtitle_token'] is not None and \
-                existing['language'] is not None:
-            print('Returning cached result')
-            transcript_token = existing['transcript_token']
-            transcript_result = read_text_file(self.file_manager.generate_filepath(transcript_token))
-            subtitle_token = existing['subtitle_token']
-            subtitle_result = read_json_file(self.file_manager.generate_filepath(subtitle_token))
-            language_result = existing['language']
+        if existing_list[0] is None:
             return {
-                'transcript_result': transcript_result,
-                'transcript_token': transcript_token,
-                'subtitle_result': json.dumps(subtitle_result),
-                'subtitle_token': subtitle_token,
-                'language': language_result,
+                'transcript_result': None,
+                'transcript_token': None,
+                'subtitle_result': None,
+                'subtitle_token': None,
+                'language': None,
                 'fresh': False
             }
+        for existing in existing_list:
+            if existing is None:
+                continue
+            if existing['transcript_token'] is not None and existing['subtitle_token'] is not None and \
+                    existing['language'] is not None:
+                print('Returning cached result')
+                transcript_token = existing['transcript_token']
+                transcript_result = read_text_file(self.file_manager.generate_filepath(transcript_token))
+                subtitle_token = existing['subtitle_token']
+                subtitle_result = read_json_file(self.file_manager.generate_filepath(subtitle_token))
+                language_result = existing['language']
+                return {
+                    'transcript_result': transcript_result,
+                    'transcript_token': transcript_token,
+                    'subtitle_result': json.dumps(subtitle_result),
+                    'subtitle_token': subtitle_token,
+                    'language': language_result,
+                    'fresh': False
+                }
 
     input_filename_with_path = self.file_manager.generate_filepath(token)
     transcript_token = token + '_transcript.txt'
@@ -367,7 +382,6 @@ def transcribe_task(self, input_dict, force=False):
         'language': language_result,
         'fresh': True
     }
-
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},

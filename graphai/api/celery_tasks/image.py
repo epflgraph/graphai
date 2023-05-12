@@ -14,7 +14,7 @@ from graphai.core.common.caching import SlideDBCachingManager
 def compute_slide_fingerprint_task(self, token, force=False):
     # Checking for existing cached results
     db_manager = SlideDBCachingManager()
-    existing_slide = db_manager.get_details(token, cols=['fingerprint'])
+    existing_slide = db_manager.get_details(token, cols=['fingerprint'])[0]
     if existing_slide is None:
         return {
             'result': None,
@@ -77,7 +77,14 @@ def slide_fingerprint_find_closest_callback_task(self, results_list, original_to
              name='video_2.retrieve_slide_fingerprint_final_callback', ignore_result=False)
 def retrieve_slide_fingerprint_callback_task(self, results):
     # Returning the fingerprinting results, which is the part of this task whose results are sent back to the user.
-    return results['fp_results']
+    results_to_return = results['fp_results']
+    results_to_return['closest'] = results['closest']
+    db_manager = SlideDBCachingManager()
+    if results_to_return['closest'] is not None:
+        results_to_return['closest_origin'] = db_manager.get_origin(results_to_return['closest'])
+    else:
+        results_to_return['closest_origin'] = None
+    return results_to_return
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
@@ -90,35 +97,39 @@ def extract_slide_text_task(self, token, method='tesseract', force=False):
         ocr_colnames = ['ocr_google_1_token', 'ocr_google_2_token']
     if not force:
         db_manager = SlideDBCachingManager()
-        existing = db_manager.get_details(token, ocr_colnames+['language'],
+        existing_list = db_manager.get_details(token, ocr_colnames+['language'],
                                                using_most_similar=True)
-        if existing is None:
+        # Checking whether the token even exists
+        if existing_list[0] is None:
             return {
                 'results': None,
                 'language': None,
                 'fresh': False
             }
-        if all([existing[ocr_colname] is not None for ocr_colname in ocr_colnames]):
-            print('Returning cached result')
-            results = [
-                {
-                    'method': ocr_colname,
-                    'token': existing[ocr_colname],
-                    'text': read_txt_gz_file(self.file_manager.generate_filepath(existing[ocr_colname]))
-                }
-                for ocr_colname in ocr_colnames
-            ]
-            language = existing['language']
-            fresh = False
-            if language is None:
-                language = detect_text_language(results[0]['text'])
-                fresh = True
+        for existing in existing_list:
+            if existing is None:
+                continue
+            if all([existing[ocr_colname] is not None for ocr_colname in ocr_colnames]):
+                print('Returning cached result')
+                results = [
+                    {
+                        'method': ocr_colname,
+                        'token': existing[ocr_colname],
+                        'text': read_txt_gz_file(self.file_manager.generate_filepath(existing[ocr_colname]))
+                    }
+                    for ocr_colname in ocr_colnames
+                ]
+                language = existing['language']
+                fresh = False
+                if language is None:
+                    language = detect_text_language(results[0]['text'])
+                    fresh = True
 
-            return {
-                'results': results,
-                'language': language,
-                'fresh': fresh
-            }
+                return {
+                    'results': results,
+                    'language': language,
+                    'fresh': fresh
+                }
     if method == 'tesseract':
         res = perform_tesseract_ocr(self.file_manager.generate_filepath(token))
         if res is None:

@@ -26,6 +26,18 @@ class ImageFingerprintTaskResponse(BaseModel):
         description="Whether the result was computed freshly or an existing cached result was returned."
     )
 
+    closest_token: Union[str, None] = Field(
+        title="Closest token",
+        description="The token of the most similar existing image that the fingerprint lookup was able to find. Equal "
+                    "to original token if the most similar existing image did not satisfy the minimum similarity "
+                    "threshold."
+    )
+
+    closest_token_origin: Union[str, None] = Field(
+        title="Original token of the closest token",
+        description="The token of video that the closest slide token originated from."
+    )
+
     successful: bool = Field(
         title="Success flag",
         description="Whether the computation was successful."
@@ -79,7 +91,7 @@ class ExtractTextTaskResponse(BaseModel):
         description="List of OCR results"
     )
 
-    language: str = Field(
+    language: Union[str, None] = Field(
         title="Language",
         description="Language of the detected text"
     )
@@ -103,7 +115,7 @@ class ExtractTextResponse(TaskStatusResponse):
 
 
 class DetectOCRLanguageTaskResponse(BaseModel):
-    language: str = Field(
+    language: Union[str, None] = Field(
         title="Language",
         description="Language of the detected text"
     )
