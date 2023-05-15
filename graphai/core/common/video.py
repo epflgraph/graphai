@@ -883,24 +883,53 @@ class TranslationModels:
             self.models['fr-en']['model'] = AutoModelForSeq2SeqLM.from_pretrained("Helsinki-NLP/opus-mt-fr-en")
             self.models['fr-en']['segmenter'] = pysbd.Segmenter(language='fr', clean=False)
 
+    def _tokenize_and_get_model_output(self, sentence, tokenizer, model):
+        try:
+            input_ids = tokenizer.encode(sentence, return_tensors="pt")
+            outputs = model.generate(input_ids, max_length=512)
+            decoded = tokenizer.decode(outputs[0], skip_special_tokens=True)
+            return decoded
+        except IndexError as e:
+            print(e)
+            return None
+
+    def _concatenate_to_output(self, full_result, new_result):
+        return full_result + ' ' + new_result
+
     def _translate(self, text, full_model):
         tokenizer = full_model['tokenizer']
         model = full_model['model']
         segmenter = full_model['segmenter']
         sentences = segmenter.segment(text)
         full_result = ''
+        large_warning = False
         for sentence in sentences:
             if len(sentence) == 0:
                 continue
-            input_ids = tokenizer.encode(sentence, return_tensors="pt")
-            outputs = model.generate(input_ids, max_length=512)
-            decoded = tokenizer.decode(outputs[0], skip_special_tokens=True)
-            full_result += decoded + ' '
-        return full_result
+            decoded = self._tokenize_and_get_model_output(sentence, tokenizer, model)
+            if decoded is not None:
+                full_result = self._concatenate_to_output(full_result, decoded)
+            else:
+                # If there was an IndexError exception translating the sentence,
+                # it means that we have a very large unpunctuated sentence,
+                # so we turn newlines into periods to see if that helps.
+                large_warning = True
+                modified_sentence = sentence.replace('\n', '.')
+                if modified_sentence == sentence:
+                    # If there are no newlines in the sentence, this strategy is pointless and we return None
+                    return None, True
+                decoded, _ = self._translate(modified_sentence, full_model)
+                if decoded is not None:
+                    full_result = self._concatenate_to_output(full_result, decoded)
+                else:
+                    # If after all that, the result is still None, then our robustness strategy hasn't worked
+                    # and we return None to indicate failure.
+                    return None, True
+        return full_result, large_warning
 
     def translate(self, text, how='en-fr'):
         assert how in ['en-fr', 'fr-en']
         self.load_models()
         if text is None or text == '':
-            return None
+            return None, False
         return self._translate(text, self.models[how])
