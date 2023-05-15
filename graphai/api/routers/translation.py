@@ -31,6 +31,7 @@ async def translate_status(task_id):
         if 'result' in task_results:
             task_results = {
                 'result': task_results['result'],
+                'text_too_large': task_results['text_too_large'],
                 'successful': task_results['successful']
             }
         else:

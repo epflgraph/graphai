@@ -27,6 +27,12 @@ class TranslationTaskResponse(BaseModel):
         description="Translated text"
     )
 
+    text_too_large: bool = Field(
+        title="Text too large",
+        description="This boolean flag is true if the text provided for translation has an overly long "
+                    "unpunctuated segment (over 512 tokens)."
+    )
+
     successful: bool = Field(
         title="Success flag",
         description="Whether or not the translation was successful"
