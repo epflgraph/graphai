@@ -325,9 +325,9 @@ def perceptual_hash_audio(input_filename_with_path, max_length=7200):
         print(f'File {input_filename_with_path} does not exist')
         return None, None
     results = acoustid.fingerprint_file(input_filename_with_path, maxlength=max_length)
-    fingerprint = results[1]
-    decoded = chromaprint.decode_fingerprint(fingerprint)
-    return fingerprint.decode('utf8'), decoded
+    fingerprint_value = results[1]
+    decoded = chromaprint.decode_fingerprint(fingerprint_value)
+    return fingerprint_value.decode('utf8'), decoded
 
 
 def perceptual_hash_image(input_filename_with_path, hash_size=16):
