@@ -39,22 +39,19 @@ class HTMLCleaner(HTMLParser):
         Use as follows:
 
         >>> text = ' '.join([
-        >>>     "<p>You get a <i>shiver</i> in the <strong>dark</strong>"
-        >>>     "<br/>"
-        >>>     "It's a raining in the <a>park</a> but meantime</p>"
-        >>> ])
+        ...     "<p>You get a <i>shiver</i> in the <strong>dark</strong>",
+        ...     "<br/>",
+        ...     "It's a raining in the <a>park</a> but meantime</p>"
+        ... ])
         >>> c = HTMLCleaner()
         >>> c.feed(text)
         >>> print(c.get_data())
-
+        <BLANKLINE>
         You get a shiver in the dark
-
         It's a raining in the
-
         park
-
         but meantime
-
+        <BLANKLINE>
     """
 
     def __init__(self):
@@ -85,26 +82,12 @@ class HTMLCleaner(HTMLParser):
         self.pieces.append('\n')
 
     def handle_data(self, d):
-        for line in d.split('\n'):
-            # Don't include manual unordered list markers: -
-            split_line = line.split('-', 1)
-            if len(split_line) >= 2 and (not split_line[0] or split_line[0].isspace()):
-                self.pieces.append(split_line[1])
-                continue
+        # Clean manual unordered lists with leading *, - or ·
+        lines = d.split('\n')
+        lines = [re.sub(r'^\s*[\*+|\-+|•+]\s*', '', line) for line in lines]
+        d = '\n'.join(lines)
 
-            # Don't include manual unordered list markers: •
-            split_line = line.split('•', 1)
-            if len(split_line) >= 2 and (not split_line[0] or split_line[0].isspace()):
-                self.pieces.append(split_line[1])
-                continue
-
-            # Don't include manual unordered list markers: *
-            split_line = line.split('*', 1)
-            if len(split_line) >= 2 and (not split_line[0] or split_line[0].isspace()):
-                self.pieces.append(split_line[1])
-                continue
-
-            self.pieces.append(line)
+        self.pieces.append(d)
 
     def get_data(self):
         # Concatenate all pieces of text
@@ -141,21 +124,16 @@ def normalize(text):
 
     Examples:
         >>> text = ' '.join([
-        >>>     "<p>You get a <i>shiver</i> in the <strong>dark</strong>"
-        >>>     "<br/>"
-        >>>     "It's a \\u2018raining\\u2019 in the <a>park</a> but »meantime«</p>"
-        >>>     "&lt;3"
-        >>> ])
+        ...     "<p>You get a <i>shiver</i> in the <strong>dark</strong>",
+        ...     "<br/>",
+        ...     "It's a \\u2018raining\\u2019 in the <a>park</a> but »meantime«</p>",
+        ...     "&lt;3"
+        ... ])
         >>> print(normalize(text))
-
         you get a shiver in the dark
-
         it's a 'raining' in the
-
         park
-
         but meantime
-
         <3
     """
 
