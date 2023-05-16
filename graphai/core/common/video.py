@@ -24,6 +24,7 @@ import numpy as np
 import wget
 from subprocess import call, PIPE
 import whisper
+import fingerprint
 from fuzzywuzzy import fuzz
 from .caching import make_sure_path_exists
 from graphai.definitions import CONFIG_DIR
@@ -344,6 +345,19 @@ def perceptual_hash_image(input_filename_with_path, hash_size=16):
         return None
     results = imagehash.dhash(Image.open(input_filename_with_path), hash_size=hash_size)
     return str(results)
+
+
+def perceptual_hash_text(s):
+    fprinter = fingerprint.Fingerprint(kgram_len=10, window_len=10, base=10, modulo=256)
+    hash_numbers = fprinter.generate(str=s)
+    if len(hash_numbers) > 32:
+        sample_indices = np.arange(0, len(hash_numbers), len(hash_numbers) / 32)
+        sample_indices = [int(x) for x in sample_indices]
+        hash_numbers = [hash_numbers[i] for i in sample_indices]
+    elif len(hash_numbers) < 32:
+        hash_numbers = hash_numbers + [(0,0)] * (32-len(hash_numbers))
+    fp_result = ''.join([f"{n[0]:02x}" for n in hash_numbers])
+    return fp_result
 
 
 def compare_decoded_fingerprints(decoded_1, decoded_2):

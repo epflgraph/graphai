@@ -28,6 +28,7 @@ dependencies = [
     "wget",
     "m3u8downloader",
     "imagehash",
+    "fingerprint",
     "openai-whisper",
     "pytesseract",
     "spacy",
