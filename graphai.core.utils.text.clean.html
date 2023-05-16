@@ -98,19 +98,20 @@
 <p class="rubric">Examples</p>
 <p>Use as follows:</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">text</span> <span class="o">=</span> <span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span>
-<span class="gp">&gt;&gt;&gt; </span>    <span class="s2">&quot;&lt;p&gt;You get a &lt;i&gt;shiver&lt;/i&gt; in the &lt;strong&gt;dark&lt;/strong&gt;&quot;</span>
-<span class="gp">&gt;&gt;&gt; </span>    <span class="s2">&quot;&lt;br/&gt;&quot;</span>
-<span class="gp">&gt;&gt;&gt; </span>    <span class="s2">&quot;It&#39;s a raining in the &lt;a&gt;park&lt;/a&gt; but meantime&lt;/p&gt;&quot;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="p">])</span>
+<span class="gp">... </span>    <span class="s2">&quot;&lt;p&gt;You get a &lt;i&gt;shiver&lt;/i&gt; in the &lt;strong&gt;dark&lt;/strong&gt;&quot;</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="s2">&quot;&lt;br/&gt;&quot;</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="s2">&quot;It&#39;s a raining in the &lt;a&gt;park&lt;/a&gt; but meantime&lt;/p&gt;&quot;</span>
+<span class="gp">... </span><span class="p">])</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">c</span> <span class="o">=</span> <span class="n">HTMLCleaner</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">c</span><span class="o">.</span><span class="n">feed</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">get_data</span><span class="p">())</span>
+
+<span class="go">You get a shiver in the dark</span>
+<span class="go">It&#39;s a raining in the</span>
+<span class="go">park</span>
+<span class="go">but meantime</span>
 </pre></div>
 </div>
-<p>You get a shiver in the dark</p>
-<p>It’s a raining in the</p>
-<p>park</p>
-<p>but meantime</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="graphai.core.utils.text.clean.HTMLCleaner.handle_starttag">
 <span class="sig-name descname"><span class="pre">handle_starttag</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tag</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attrs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.utils.text.clean.HTMLCleaner.handle_starttag" title="Permalink to this definition"></a></dt>
@@ -151,19 +152,19 @@ converting to lowercase.</p>
 </dl>
 <p class="rubric">Examples</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">text</span> <span class="o">=</span> <span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span>
-<span class="gp">&gt;&gt;&gt; </span>    <span class="s2">&quot;&lt;p&gt;You get a &lt;i&gt;shiver&lt;/i&gt; in the &lt;strong&gt;dark&lt;/strong&gt;&quot;</span>
-<span class="gp">&gt;&gt;&gt; </span>    <span class="s2">&quot;&lt;br/&gt;&quot;</span>
-<span class="gp">&gt;&gt;&gt; </span>    <span class="s2">&quot;It&#39;s a </span><span class="se">\u2018</span><span class="s2">raining</span><span class="se">\u2019</span><span class="s2"> in the &lt;a&gt;park&lt;/a&gt; but »meantime«&lt;/p&gt;&quot;</span>
-<span class="gp">&gt;&gt;&gt; </span>    <span class="s2">&quot;&amp;lt;3&quot;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="p">])</span>
+<span class="gp">... </span>    <span class="s2">&quot;&lt;p&gt;You get a &lt;i&gt;shiver&lt;/i&gt; in the &lt;strong&gt;dark&lt;/strong&gt;&quot;</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="s2">&quot;&lt;br/&gt;&quot;</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="s2">&quot;It&#39;s a </span><span class="se">\u2018</span><span class="s2">raining</span><span class="se">\u2019</span><span class="s2"> in the &lt;a&gt;park&lt;/a&gt; but »meantime«&lt;/p&gt;&quot;</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="s2">&quot;&amp;lt;3&quot;</span>
+<span class="gp">... </span><span class="p">])</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">normalize</span><span class="p">(</span><span class="n">text</span><span class="p">))</span>
+<span class="go">you get a shiver in the dark</span>
+<span class="go">it&#39;s a &#39;raining&#39; in the</span>
+<span class="go">park</span>
+<span class="go">but meantime</span>
+<span class="go">&lt;3</span>
 </pre></div>
 </div>
-<p>you get a shiver in the dark</p>
-<p>it’s a ‘raining’ in the</p>
-<p>park</p>
-<p>but meantime</p>
-<p>&lt;3</p>
 </dd></dl>
 
 </section>
