@@ -9,6 +9,7 @@ import configparser
 from datetime import datetime
 import glob
 import math
+import hashlib
 
 import acoustid
 import chromaprint
@@ -160,6 +161,10 @@ def md5_video_or_audio(input_filename_with_path, video=True):
     result, _ = ffmpeg.output(in_stream, 'pipe:', format='md5').run(capture_stdout=True)
     # The result looks like 'MD5=9735151f36a3e628b0816b1bba3b9640\n' so we clean it up
     return (result.decode('utf8').strip())[4:]
+
+
+def md5_text(s):
+    return hashlib.md5(s.encode('utf8')).hexdigest()
 
 
 def detect_audio_format_and_duration(input_filename_with_path, input_token):
