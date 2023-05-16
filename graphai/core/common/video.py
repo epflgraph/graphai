@@ -347,14 +347,21 @@ def perceptual_hash_image(input_filename_with_path, hash_size=16):
     return str(results)
 
 
-def perceptual_hash_text(s):
-    fprinter = fingerprint.Fingerprint(kgram_len=10, window_len=10, base=10, modulo=256)
+def perceptual_hash_text(s, kgram_length=10, min_window_length=5, max_window_length=50, hash_len=32):
+    string_length = len(s)
+    window_length = max([min_window_length, string_length // 20])
+    window_length = min([max_window_length, window_length])
+
+    fprinter = fingerprint.Fingerprint(kgram_len=kgram_length, window_len=window_length, base=10, modulo=256)
     hash_numbers = fprinter.generate(str=s)
-    if len(hash_numbers) > 32:
-        sample_indices = np.arange(0, len(hash_numbers), len(hash_numbers) / 32)
+    print(hash_numbers)
+    if len(hash_numbers) > hash_len:
+        sample_indices = np.arange(start=0, stop=len(hash_numbers)-1, step=(len(hash_numbers)-1) / (hash_len-1)).\
+                            tolist()
+        sample_indices.append(len(hash_numbers)-1)
         sample_indices = [int(x) for x in sample_indices]
         hash_numbers = [hash_numbers[i] for i in sample_indices]
-    elif len(hash_numbers) < 32:
+    elif len(hash_numbers) < hash_len:
         hash_numbers = hash_numbers + [(0,0)] * (32-len(hash_numbers))
     fp_result = ''.join([f"{n[0]:02x}" for n in hash_numbers])
     return fp_result
