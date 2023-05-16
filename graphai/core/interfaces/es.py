@@ -124,7 +124,7 @@ class ES:
         password = self.es_config["ES"].get("password")
 
         context = create_default_context(cafile=self.cafile)
-        self.es = Elasticsearch([f'https://{self.username}:{password}@{self.host}:{self.port}'], ssl_context=context, timeout=3600)
+        self.es = Elasticsearch([f'https://{self.username}:{password}@{self.host}:{self.port}'], ssl_context=context, request_timeout=3600)
 
     def _search(self, query, limit=10, source=None, explain=False, rescore=None):
         return self.es.search(index=self.index, query=query, source=source, rescore=rescore, size=limit, explain=explain, profile=True)
