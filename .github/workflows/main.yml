@@ -16,8 +16,12 @@ jobs:
     uses: ./.github/workflows/clone-repo.yml
     secrets: inherit
 
-  run-tests:
+  deploy-api:
     needs: [clone-repo]
+    uses: ./.github/workflows/deploy-api.yml
+
+  run-tests:
+    needs: [deploy-api]
     uses: ./.github/workflows/run-tests.yml
 
   build-docs:
@@ -29,8 +33,3 @@ jobs:
     if: github.event_name == 'push'
     needs: [build-docs]
     uses: ./.github/workflows/update-gh-pages.yml
-
-  deploy-api:
-    if: github.event_name == 'push'
-    needs: [run-tests]
-    uses: ./.github/workflows/deploy-api.yml

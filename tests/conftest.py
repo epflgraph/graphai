@@ -1,1 +1,3 @@
-from fixtures.text import sultans
+from fixtures.app import *
+
+from fixtures.text import *

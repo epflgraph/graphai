@@ -25,6 +25,7 @@ dependencies = [
     "uvicorn",
     "pydantic",
     "requests",
+    "httpx",
     "wget",
     "m3u8downloader",
     "imagehash",
