@@ -347,10 +347,11 @@ def perceptual_hash_image(input_filename_with_path, hash_size=16):
     return str(results)
 
 
-def perceptual_hash_text(s, kgram_length=10, min_window_length=5, max_window_length=50, hash_len=32):
+def perceptual_hash_text(s, min_window_length=5, max_window_length=50, hash_len=32):
     string_length = len(s)
-    window_length = max([min_window_length, string_length // 20])
+    window_length = max([min_window_length, string_length // hash_len])
     window_length = min([max_window_length, window_length])
+    kgram_length = max([10, int(window_length/2)])
 
     fprinter = fingerprint.Fingerprint(kgram_len=kgram_length, window_len=window_length, base=10, modulo=256)
     hash_numbers = fprinter.generate(str=s)
