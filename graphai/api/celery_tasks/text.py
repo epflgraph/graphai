@@ -52,10 +52,16 @@ def wikisearch_task(self, keywords_list, fraction=(0, 1), method='es-base'):
         if method == 'wikipedia-api':
             results = self.wp.search(keywords)
         else:
-            results = self.es.search(keywords)
+            # Try to get elasticsearch results, fallback to Wikipedia API in case of error.
+            try:
+                results = self.es.search(keywords)
+            except Exception as e:
+                print('[ERROR] Error connecting to elasticsearch cluster. Falling back to Wikipedia API.')
+                results = self.wp.search(keywords)
 
-            # Fallback to Wikipedia API
+            # Fallback to Wikipedia API if no results from elasticsearch
             if len(results) == 0:
+                print('[WARNING] No results from elasticsearch cluster. Falling back to Wikipedia API.')
                 results = self.wp.search(keywords)
 
         # Replace score with linear function on Searchrank if needed
