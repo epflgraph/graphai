@@ -37,6 +37,21 @@ def surround_with_character(s, c="'"):
     return c + s + c
 
 
+def add_where_or_and(query):
+    if 'WHERE' in query:
+        return ' AND '
+    else:
+        return '\nWHERE '
+
+
+def add_equality_conditions(conditions):
+    return " AND ".join([f"{k}='{v}'" for k,v in conditions.items()])
+
+
+def add_non_null_conditions(cols):
+    return " AND ".join([col + " IS NOT NULL" for col in cols])
+
+
 class DBCachingManagerBase(abc.ABC):
     def __init__(self, cache_table, most_similar_table):
         # Only four values are hardcoded into this class and need to be respected by its child classes:
@@ -132,7 +147,8 @@ class DBCachingManagerBase(abc.ABC):
         return results
 
     def _get_all_details(self, schema, table_name, cols, start=0, limit=-1,
-                         exclude_token=None, allow_nulls=True, earliest_date=None):
+                         exclude_token=None, allow_nulls=True, earliest_date=None,
+                         equality_conditions=None):
         column_list = ['id_token'] + cols
         query = f"""
             SELECT {', '.join(column_list)} FROM `{schema}`.`{table_name}`
@@ -142,17 +158,14 @@ class DBCachingManagerBase(abc.ABC):
             WHERE id_token != {surround_with_character(exclude_token, "'")}
             """
         if not allow_nulls:
-            if 'WHERE' in query:
-                query += ' AND '
-            else:
-                query += '\nWHERE '
-            query += ' AND '.join([col + ' IS NOT NULL' for col in cols])
+            query += add_where_or_and(query)
+            query += add_non_null_conditions(cols)
         if earliest_date is not None:
-            if 'WHERE' in query:
-                query += ' AND '
-            else:
-                query += '\nWHERE '
+            query += add_where_or_and(query)
             query += f" date_added >= '{earliest_date}'"
+        if equality_conditions is not None:
+            query += add_where_or_and(query)
+            query += add_equality_conditions(equality_conditions)
         if limit != -1:
             query += f"""
             LIMIT {start},{limit}
@@ -172,14 +185,17 @@ class DBCachingManagerBase(abc.ABC):
             """
         )
 
-    def _get_count(self, schema, table_name, non_null_cols=None):
+    def _get_count(self, schema, table_name, non_null_cols=None, equality_conditions=None):
         query = f"""
         SELECT COUNT(*) FROM `{schema}`.`{table_name}`
         """
         if non_null_cols is not None:
             query += f"""
-            WHERE {' AND '.join([col + " IS NOT NULL" for col in non_null_cols])}
+            WHERE {add_non_null_conditions(non_null_cols)}
             """
+        if equality_conditions is not None:
+            query += add_where_or_and(query)
+            query += add_equality_conditions(equality_conditions)
         results = self.db.execute_query(query)
         return results[0][0]
 
@@ -224,17 +240,18 @@ class DBCachingManagerBase(abc.ABC):
         return self._get_details_using_origin(self.schema, self.cache_table, origin_token, cols)
 
     def get_all_details(self, cols, start=0, limit=-1, exclude_token=None, using_most_similar=False,
-                        allow_nulls=True, earliest_date=None):
+                        allow_nulls=True, earliest_date=None, equality_conditions=None):
         results = self._get_all_details(self.schema, self.cache_table, cols,
                                         start=start, limit=limit, exclude_token=exclude_token,
-                                        allow_nulls=allow_nulls, earliest_date=earliest_date)
+                                        allow_nulls=allow_nulls, earliest_date=earliest_date,
+                                        equality_conditions=equality_conditions)
         if using_most_similar:
             most_similar_map = self.get_all_closest_matches()
             results = {x: results[most_similar_map.get(x, x)] for x in results}
         return results
 
-    def get_cache_count(self, non_null_cols=None):
-        return self._get_count(self.schema, self.cache_table, non_null_cols)
+    def get_cache_count(self, non_null_cols=None, equality_conditions=None):
+        return self._get_count(self.schema, self.cache_table, non_null_cols, equality_conditions)
 
     def insert_or_update_closest_match(self, id_token, values_to_insert):
         self._insert_or_update_details(self.schema, self.most_similar_table, id_token, values_to_insert)
@@ -353,10 +370,10 @@ class TextDBCachingManager(DBCachingManagerBase):
             CREATE TABLE IF NOT EXISTS `{self.schema}`.`{self.cache_table}` (
               `id_token` VARCHAR(255),
               `fingerprint` VARCHAR(255) DEFAULT NULL,
-              `original` LONGTEXT NOT NULL,
-              `translated` LONGTEXT DEFAULT NULL,
-              `language_original` VARCHAR(10) DEFAULT NULL,
-              `language_translated` VARCHAR(10) DEFAULT NULL,
+              `source` LONGTEXT DEFAULT NULL,
+              `target` LONGTEXT DEFAULT NULL,
+              `source_lang` VARCHAR(10) DEFAULT NULL,
+              `target_lang` VARCHAR(10) DEFAULT NULL,
               `date_added` DATETIME DEFAULT NULL,
               PRIMARY KEY id_token (id_token)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
