@@ -14,10 +14,15 @@ class TranslationRequest(BaseModel):
         default='fr'
     )
 
-    target: Literal['en', 'fr'] = Field(
+    target: Literal['en', 'fr', 'de', 'it'] = Field(
         title="Target language",
         description="Language to translate the text into",
         default='en'
+    )
+
+    force: bool = Field(
+        title="Force recomputation",
+        default=False
     )
 
 
@@ -36,6 +41,11 @@ class TranslationTaskResponse(BaseModel):
     successful: bool = Field(
         title="Success flag",
         description="Whether or not the translation was successful"
+    )
+
+    fresh: bool = Field(
+        title="Freshness flag",
+        description="Whether or not the result is fresh"
     )
 
 
