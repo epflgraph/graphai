@@ -131,8 +131,8 @@ def translate_text_task(self, token, text, src, tgt, force):
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='text_6.translate_text_callback', translation_obj=translation_models, ignore_result=False)
 def translate_text_callback_task(self, results, token, text, src, tgt):
+    db_manager = TextDBCachingManager()
     if results['fresh']:
-        db_manager = TextDBCachingManager()
         current_datetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         values_dict = {
             'source': text,
@@ -151,6 +151,9 @@ def translate_text_callback_task(self, results, token, text, src, tgt):
             db_manager.insert_or_update_details(
                 closest, values_dict
             )
+    elif not results['successful']:
+        # in case we fingerprinted something and then failed to translate it, we delete its cache row
+        db_manager.delete_cache_rows([token])
     return results
 
 
