@@ -934,8 +934,9 @@ class TranslationModels:
         return full_result, False
 
     def translate(self, text, how='en-fr'):
-        assert how in ['en-fr', 'fr-en']
         self.load_models()
+        if how not in self.models.keys():
+            raise NotImplementedError("Source or target language not implemented")
         if text is None or text == '':
             return None, False
         tokenizer = self.models[how]['tokenizer']
