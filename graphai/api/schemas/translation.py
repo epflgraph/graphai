@@ -8,7 +8,7 @@ class TranslationRequest(BaseModel):
         description="Text to translate"
     )
 
-    source: Literal['en', 'fr'] = Field(
+    source: Literal['en', 'fr', 'de', 'it'] = Field(
         title="Source language",
         description="Language of the provided text",
         default='fr'
