@@ -1,0 +1,19 @@
+graphai.pipelines.elasticsearch package
+=======================================
+
+.. automodule:: graphai.pipelines.elasticsearch
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 1
+
+   graphai.pipelines.elasticsearch.create_index
+   graphai.pipelines.elasticsearch.dummy
+   graphai.pipelines.elasticsearch.populate
+   graphai.pipelines.elasticsearch.populate_dummy
+   graphai.pipelines.elasticsearch.search

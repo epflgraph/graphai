@@ -1,0 +1,7 @@
+graphai.pipelines.investment.compute\_investors\_units module
+=============================================================
+
+.. automodule:: graphai.pipelines.investment.compute_investors_units
+   :members:
+   :undoc-members:
+   :show-inheritance:

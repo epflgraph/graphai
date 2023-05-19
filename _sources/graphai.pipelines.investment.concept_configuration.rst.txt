@@ -1,0 +1,7 @@
+graphai.pipelines.investment.concept\_configuration module
+==========================================================
+
+.. automodule:: graphai.pipelines.investment.concept_configuration
+   :members:
+   :undoc-members:
+   :show-inheritance:

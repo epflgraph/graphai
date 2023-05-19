@@ -1,0 +1,7 @@
+graphai.pipelines.investment.create\_investments\_graph module
+==============================================================
+
+.. automodule:: graphai.pipelines.investment.create_investments_graph
+   :members:
+   :undoc-members:
+   :show-inheritance:

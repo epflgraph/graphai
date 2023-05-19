@@ -1,0 +1,7 @@
+graphai.pipelines.investment.compute\_jaccard\_index module
+===========================================================
+
+.. automodule:: graphai.pipelines.investment.compute_jaccard_index
+   :members:
+   :undoc-members:
+   :show-inheritance:

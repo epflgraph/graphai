@@ -1,0 +1,7 @@
+graphai.pipelines.validation.2\_new module
+==========================================
+
+.. automodule:: graphai.pipelines.validation.2_new
+   :members:
+   :undoc-members:
+   :show-inheritance:

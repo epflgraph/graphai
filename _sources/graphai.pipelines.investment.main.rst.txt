@@ -1,0 +1,7 @@
+graphai.pipelines.investment.main module
+========================================
+
+.. automodule:: graphai.pipelines.investment.main
+   :members:
+   :undoc-members:
+   :show-inheritance:

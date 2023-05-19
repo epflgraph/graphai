@@ -1,0 +1,7 @@
+graphai.pipelines.investment.detect\_fundraisers\_concepts module
+=================================================================
+
+.. automodule:: graphai.pipelines.investment.detect_fundraisers_concepts
+   :members:
+   :undoc-members:
+   :show-inheritance:

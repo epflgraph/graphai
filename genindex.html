@@ -40,6 +40,7 @@
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="graphai.api.html">graphai.api package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="graphai.core.html">graphai.core package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="graphai.pipelines.html">graphai.pipelines package</a></li>
 </ul>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="graphai.definitions.html">graphai.definitions module</a></li>
@@ -109,12 +110,16 @@
 </li>
       <li><a href="graphai.core.utils.time.date.html#graphai.core.utils.time.date.add_years">add_years() (in module graphai.core.utils.time.date)</a>
 </li>
-      <li><a href="graphai.core.common.caching.html#graphai.core.common.caching.AudioDBCachingManager">AudioDBCachingManager (class in graphai.core.common.caching)</a>
+      <li><a href="graphai.pipelines.investment.aggregate_recent_past.html#graphai.pipelines.investment.aggregate_recent_past.aggregate_recent_past">aggregate_recent_past() (in module graphai.pipelines.investment.aggregate_recent_past)</a>
 </li>
-      <li><a href="graphai.api.schemas.voice.html#graphai.api.schemas.voice.AudioDetectLanguageRequest">AudioDetectLanguageRequest (class in graphai.api.schemas.voice)</a>
+      <li><a href="graphai.pipelines.investment.aggregate_recent_past.html#graphai.pipelines.investment.aggregate_recent_past.aggregate_years">aggregate_years() (in module graphai.pipelines.investment.aggregate_recent_past)</a>
+</li>
+      <li><a href="graphai.core.common.caching.html#graphai.core.common.caching.AudioDBCachingManager">AudioDBCachingManager (class in graphai.core.common.caching)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="graphai.api.schemas.voice.html#graphai.api.schemas.voice.AudioDetectLanguageRequest">AudioDetectLanguageRequest (class in graphai.api.schemas.voice)</a>
+</li>
       <li><a href="graphai.api.schemas.voice.html#graphai.api.schemas.voice.AudioDetectLanguageResponse">AudioDetectLanguageResponse (class in graphai.api.schemas.voice)</a>
 </li>
       <li><a href="graphai.api.schemas.voice.html#graphai.api.schemas.voice.AudioDetectLanguageTaskResponse">AudioDetectLanguageTaskResponse (class in graphai.api.schemas.voice)</a>
@@ -179,11 +184,17 @@
 </li>
       <li><a href="graphai.core.utils.text.io.html#graphai.core.utils.text.io.Colors">Colors (class in graphai.core.utils.text.io)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="graphai.pipelines.investment.concept_configuration.html#graphai.pipelines.investment.concept_configuration.combine">combine() (in module graphai.pipelines.investment.concept_configuration)</a>
+</li>
       <li><a href="graphai.core.common.video.html#graphai.core.common.video.compare_decoded_fingerprints">compare_decoded_fingerprints() (in module graphai.core.common.video)</a>
 </li>
       <li><a href="graphai.core.common.video.html#graphai.core.common.video.compare_encoded_fingerprints">compare_encoded_fingerprints() (in module graphai.core.common.video)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="graphai.pipelines.investment.concept_configuration.html#graphai.pipelines.investment.concept_configuration.compute_affinities">compute_affinities() (in module graphai.pipelines.investment.concept_configuration)</a>
+</li>
+      <li><a href="graphai.pipelines.investment.compute_jaccard_index.html#graphai.pipelines.investment.compute_jaccard_index.compute_jaccard_index">compute_jaccard_index() (in module graphai.pipelines.investment.compute_jaccard_index)</a>
 </li>
       <li><a href="graphai.core.common.video.html#graphai.core.common.video.compute_ocr_noise_level">compute_ocr_noise_level() (in module graphai.core.common.video)</a>
 </li>
@@ -192,6 +203,8 @@
       <li><a href="graphai.core.common.graph.html#graphai.core.common.graph.ConceptsGraph.compute_scores">compute_scores() (graphai.core.common.graph.ConceptsGraph method)</a>
 </li>
       <li><a href="graphai.core.common.video.html#graphai.core.common.video.compute_video_ocr_transitions">compute_video_ocr_transitions() (in module graphai.core.common.video)</a>
+</li>
+      <li><a href="graphai.pipelines.investment.aggregate_recent_past.html#graphai.pipelines.investment.aggregate_recent_past.compute_year_coefficients">compute_year_coefficients() (in module graphai.pipelines.investment.aggregate_recent_past)</a>
 </li>
       <li><a href="graphai.core.common.caching.html#graphai.core.common.caching.VideoConfig.concat_file_path">concat_file_path() (graphai.core.common.caching.VideoConfig method)</a>
 </li>
@@ -204,6 +217,8 @@
       <li><a href="graphai.core.interfaces.celery_config.html#graphai.core.interfaces.celery_config.create_celery">create_celery() (in module graphai.core.interfaces.celery_config)</a>
 </li>
       <li><a href="graphai.core.interfaces.es.html#graphai.core.interfaces.es.ES.create_index">create_index() (graphai.core.interfaces.es.ES method)</a>
+</li>
+      <li><a href="graphai.pipelines.investment.create_investments_graph.html#graphai.pipelines.investment.create_investments_graph.create_investments_graph">create_investments_graph() (in module graphai.pipelines.investment.create_investments_graph)</a>
 </li>
       <li><a href="graphai.core.interfaces.db.html#graphai.core.interfaces.db.DB.create_table">create_table() (graphai.core.interfaces.db.DB method)</a>
 </li>
@@ -222,6 +237,8 @@
       <li><a href="graphai.core.interfaces.es.html#graphai.core.interfaces.es.ES.delete_index">delete_index() (graphai.core.interfaces.es.ES method)</a>
 </li>
       <li><a href="graphai.core.utils.time.stopwatch.html#graphai.core.utils.time.stopwatch.Stopwatch.delta">delta() (graphai.core.utils.time.stopwatch.Stopwatch method)</a>
+</li>
+      <li><a href="graphai.pipelines.investment.create_investments_graph.html#graphai.pipelines.investment.create_investments_graph.derive_yearly_data">derive_yearly_data() (in module graphai.pipelines.investment.create_investments_graph)</a>
 </li>
       <li><a href="graphai.core.common.video.html#graphai.core.common.video.detect_audio_format_and_duration">detect_audio_format_and_duration() (in module graphai.core.common.video)</a>
 </li>
@@ -399,6 +416,10 @@
 <h2 id="G">G</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="graphai.pipelines.elasticsearch.dummy.html#graphai.pipelines.elasticsearch.dummy.gen_random_docs">gen_random_docs() (in module graphai.pipelines.elasticsearch.dummy)</a>
+</li>
+      <li><a href="graphai.pipelines.elasticsearch.dummy.html#graphai.pipelines.elasticsearch.dummy.gen_random_phrase">gen_random_phrase() (in module graphai.pipelines.elasticsearch.dummy)</a>
+</li>
       <li><a href="graphai.core.common.caching.html#graphai.core.common.caching.VideoConfig.generate_filepath">generate_filepath() (graphai.core.common.caching.VideoConfig method)</a>
 </li>
       <li><a href="graphai.core.common.video.html#graphai.core.common.video.generate_frame_sample_indices">generate_frame_sample_indices() (in module graphai.core.common.video)</a>
@@ -432,6 +453,14 @@
       <li><a href="graphai.core.common.video.html#graphai.core.common.video.get_dir_files">get_dir_files() (in module graphai.core.common.video)</a>
 </li>
       <li><a href="graphai.api.routers.video.html#graphai.api.routers.video.get_file">get_file() (in module graphai.api.routers.video)</a>
+</li>
+      <li><a href="graphai.pipelines.investment.create_investments_graph.html#graphai.pipelines.investment.create_investments_graph.get_frs">get_frs() (in module graphai.pipelines.investment.create_investments_graph)</a>
+</li>
+      <li><a href="graphai.pipelines.investment.create_investments_graph.html#graphai.pipelines.investment.create_investments_graph.get_frs_fundraisers">get_frs_fundraisers() (in module graphai.pipelines.investment.create_investments_graph)</a>
+</li>
+      <li><a href="graphai.pipelines.investment.create_investments_graph.html#graphai.pipelines.investment.create_investments_graph.get_fundraisers_concepts">get_fundraisers_concepts() (in module graphai.pipelines.investment.create_investments_graph)</a>
+</li>
+      <li><a href="graphai.pipelines.investment.create_investments_graph.html#graphai.pipelines.investment.create_investments_graph.get_investors_frs">get_investors_frs() (in module graphai.pipelines.investment.create_investments_graph)</a>
 </li>
       <li><a href="graphai.core.text.keywords.html#graphai.core.text.keywords.get_keywords">get_keywords() (in module graphai.core.text.keywords)</a>
 </li>
@@ -593,8 +622,6 @@
         <li><a href="graphai.api.routers.text.html#module-graphai.api.routers.text">module</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     graphai.api.routers.video
 
@@ -630,6 +657,8 @@
         <li><a href="graphai.api.schemas.image.html#module-graphai.api.schemas.image">module</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     graphai.api.schemas.ontology
 
@@ -819,6 +848,97 @@
         <li><a href="graphai.definitions.html#module-graphai.definitions">module</a>
 </li>
       </ul></li>
+      <li>
+    graphai.pipelines
+
+      <ul>
+        <li><a href="graphai.pipelines.html#module-graphai.pipelines">module</a>
+</li>
+      </ul></li>
+      <li>
+    graphai.pipelines.elasticsearch
+
+      <ul>
+        <li><a href="graphai.pipelines.elasticsearch.html#module-graphai.pipelines.elasticsearch">module</a>
+</li>
+      </ul></li>
+      <li>
+    graphai.pipelines.elasticsearch.dummy
+
+      <ul>
+        <li><a href="graphai.pipelines.elasticsearch.dummy.html#module-graphai.pipelines.elasticsearch.dummy">module</a>
+</li>
+      </ul></li>
+      <li>
+    graphai.pipelines.elasticsearch.search
+
+      <ul>
+        <li><a href="graphai.pipelines.elasticsearch.search.html#module-graphai.pipelines.elasticsearch.search">module</a>
+</li>
+      </ul></li>
+      <li>
+    graphai.pipelines.investment
+
+      <ul>
+        <li><a href="graphai.pipelines.investment.html#module-graphai.pipelines.investment">module</a>
+</li>
+      </ul></li>
+      <li>
+    graphai.pipelines.investment.aggregate_recent_past
+
+      <ul>
+        <li><a href="graphai.pipelines.investment.aggregate_recent_past.html#module-graphai.pipelines.investment.aggregate_recent_past">module</a>
+</li>
+      </ul></li>
+      <li>
+    graphai.pipelines.investment.check_unit
+
+      <ul>
+        <li><a href="graphai.pipelines.investment.check_unit.html#module-graphai.pipelines.investment.check_unit">module</a>
+</li>
+      </ul></li>
+      <li>
+    graphai.pipelines.investment.compute_jaccard_index
+
+      <ul>
+        <li><a href="graphai.pipelines.investment.compute_jaccard_index.html#module-graphai.pipelines.investment.compute_jaccard_index">module</a>
+</li>
+      </ul></li>
+      <li>
+    graphai.pipelines.investment.concept_configuration
+
+      <ul>
+        <li><a href="graphai.pipelines.investment.concept_configuration.html#module-graphai.pipelines.investment.concept_configuration">module</a>
+</li>
+      </ul></li>
+      <li>
+    graphai.pipelines.investment.create_investments_graph
+
+      <ul>
+        <li><a href="graphai.pipelines.investment.create_investments_graph.html#module-graphai.pipelines.investment.create_investments_graph">module</a>
+</li>
+      </ul></li>
+      <li>
+    graphai.pipelines.investment.parameters
+
+      <ul>
+        <li><a href="graphai.pipelines.investment.parameters.html#module-graphai.pipelines.investment.parameters">module</a>
+</li>
+      </ul></li>
+      <li>
+    graphai.pipelines.validation
+
+      <ul>
+        <li><a href="graphai.pipelines.validation.html#module-graphai.pipelines.validation">module</a>
+</li>
+      </ul></li>
+      <li>
+    graphai.pipelines.visualisation
+
+      <ul>
+        <li><a href="graphai.pipelines.visualisation.html#module-graphai.pipelines.visualisation">module</a>
+</li>
+      </ul></li>
       <li><a href="graphai.api.schemas.text.html#graphai.api.schemas.text.WikifyResponseElem.GraphScore">GraphScore (graphai.api.schemas.text.WikifyResponseElem attribute)</a>
 </li>
   </ul></td>
@@ -929,6 +1049,8 @@
 <h2 id="M">M</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="graphai.pipelines.investment.check_unit.html#graphai.pipelines.investment.check_unit.main">main() (in module graphai.pipelines.investment.check_unit)</a>
+</li>
       <li><a href="graphai.core.common.caching.html#graphai.core.common.caching.make_sure_path_exists">make_sure_path_exists() (in module graphai.core.common.caching)</a>
 </li>
       <li><a href="graphai.core.common.video.html#graphai.core.common.video.md5_video_or_audio">md5_video_or_audio() (in module graphai.core.common.video)</a>
@@ -939,6 +1061,8 @@
         <li><a href="graphai.api.schemas.image.html#graphai.api.schemas.image.IndividualOCRResult.method">(graphai.api.schemas.image.IndividualOCRResult attribute)</a>
 </li>
       </ul></li>
+      <li><a href="graphai.pipelines.investment.concept_configuration.html#graphai.pipelines.investment.concept_configuration.mix">mix() (in module graphai.pipelines.investment.concept_configuration)</a>
+</li>
       <li><a href="graphai.api.schemas.text.html#graphai.api.schemas.text.WikifyResponseElem.MixedScore">MixedScore (graphai.api.schemas.text.WikifyResponseElem attribute)</a>
 </li>
       <li><a href="graphai.core.utils.text.io.html#graphai.core.utils.text.io.mkdir">mkdir() (in module graphai.core.utils.text.io)</a>
@@ -1051,6 +1175,32 @@
 </li>
         <li><a href="graphai.definitions.html#module-graphai.definitions">graphai.definitions</a>
 </li>
+        <li><a href="graphai.pipelines.html#module-graphai.pipelines">graphai.pipelines</a>
+</li>
+        <li><a href="graphai.pipelines.elasticsearch.html#module-graphai.pipelines.elasticsearch">graphai.pipelines.elasticsearch</a>
+</li>
+        <li><a href="graphai.pipelines.elasticsearch.dummy.html#module-graphai.pipelines.elasticsearch.dummy">graphai.pipelines.elasticsearch.dummy</a>
+</li>
+        <li><a href="graphai.pipelines.elasticsearch.search.html#module-graphai.pipelines.elasticsearch.search">graphai.pipelines.elasticsearch.search</a>
+</li>
+        <li><a href="graphai.pipelines.investment.html#module-graphai.pipelines.investment">graphai.pipelines.investment</a>
+</li>
+        <li><a href="graphai.pipelines.investment.aggregate_recent_past.html#module-graphai.pipelines.investment.aggregate_recent_past">graphai.pipelines.investment.aggregate_recent_past</a>
+</li>
+        <li><a href="graphai.pipelines.investment.check_unit.html#module-graphai.pipelines.investment.check_unit">graphai.pipelines.investment.check_unit</a>
+</li>
+        <li><a href="graphai.pipelines.investment.compute_jaccard_index.html#module-graphai.pipelines.investment.compute_jaccard_index">graphai.pipelines.investment.compute_jaccard_index</a>
+</li>
+        <li><a href="graphai.pipelines.investment.concept_configuration.html#module-graphai.pipelines.investment.concept_configuration">graphai.pipelines.investment.concept_configuration</a>
+</li>
+        <li><a href="graphai.pipelines.investment.create_investments_graph.html#module-graphai.pipelines.investment.create_investments_graph">graphai.pipelines.investment.create_investments_graph</a>
+</li>
+        <li><a href="graphai.pipelines.investment.parameters.html#module-graphai.pipelines.investment.parameters">graphai.pipelines.investment.parameters</a>
+</li>
+        <li><a href="graphai.pipelines.validation.html#module-graphai.pipelines.validation">graphai.pipelines.validation</a>
+</li>
+        <li><a href="graphai.pipelines.visualisation.html#module-graphai.pipelines.visualisation">graphai.pipelines.visualisation</a>
+</li>
       </ul></li>
   </ul></td>
 </tr></table>
@@ -1060,9 +1210,17 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="graphai.core.common.video.html#graphai.core.common.video.NLPModels">NLPModels (class in graphai.core.common.video)</a>
 </li>
+      <li><a href="graphai.pipelines.investment.concept_configuration.html#graphai.pipelines.investment.concept_configuration.norm">norm() (in module graphai.pipelines.investment.concept_configuration)</a>
+</li>
+      <li><a href="graphai.pipelines.investment.concept_configuration.html#graphai.pipelines.investment.concept_configuration.normalise">normalise() (in module graphai.pipelines.investment.concept_configuration)</a>
+</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="graphai.pipelines.investment.concept_configuration.html#graphai.pipelines.investment.concept_configuration.normalise_graph">normalise_graph() (in module graphai.pipelines.investment.concept_configuration)</a>
+</li>
       <li><a href="graphai.core.utils.text.clean.html#graphai.core.utils.text.clean.normalize">normalize() (in module graphai.core.utils.text.clean)</a>
+</li>
+      <li><a href="graphai.pipelines.investment.aggregate_recent_past.html#graphai.pipelines.investment.aggregate_recent_past.normalize_scores">normalize_scores() (in module graphai.pipelines.investment.aggregate_recent_past)</a>
 </li>
       <li><a href="graphai.core.utils.time.date.html#graphai.core.utils.time.date.now">now() (in module graphai.core.utils.time.date)</a>
 </li>
@@ -1166,9 +1324,11 @@
         <li><a href="graphai.core.utils.time.stopwatch.html#graphai.core.utils.time.stopwatch.Stopwatch.report">(graphai.core.utils.time.stopwatch.Stopwatch method)</a>
 </li>
       </ul></li>
+      <li><a href="graphai.core.utils.time.date.html#graphai.core.utils.time.date.rescale">rescale() (in module graphai.core.utils.time.date)</a>
+</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="graphai.core.utils.time.date.html#graphai.core.utils.time.date.rescale">rescale() (in module graphai.core.utils.time.date)</a>
+      <li><a href="graphai.pipelines.investment.aggregate_recent_past.html#graphai.pipelines.investment.aggregate_recent_past.rescale_scores">rescale_scores() (in module graphai.pipelines.investment.aggregate_recent_past)</a>
 </li>
       <li><a href="graphai.core.utils.text.io.html#graphai.core.utils.text.io.Colors.reset">reset (graphai.core.utils.text.io.Colors attribute)</a>
 </li>
@@ -1232,8 +1392,14 @@
 </li>
       <li><a href="graphai.core.common.caching.html#graphai.core.common.caching.VideoConfig.set_root_dir">set_root_dir() (graphai.core.common.caching.VideoConfig method)</a>
 </li>
+      <li><a href="graphai.pipelines.investment.check_unit.html#graphai.pipelines.investment.check_unit.show_matchmaking_chart_view">show_matchmaking_chart_view() (in module graphai.pipelines.investment.check_unit)</a>
+</li>
+      <li><a href="graphai.pipelines.investment.check_unit.html#graphai.pipelines.investment.check_unit.show_matchmaking_list_view">show_matchmaking_list_view() (in module graphai.pipelines.investment.check_unit)</a>
+</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="graphai.pipelines.investment.check_unit.html#graphai.pipelines.investment.check_unit.show_trends">show_trends() (in module graphai.pipelines.investment.check_unit)</a>
+</li>
       <li><a href="graphai.api.schemas.video.html#graphai.api.schemas.video.DetectSlidesTaskResponse.slide_tokens">slide_tokens (graphai.api.schemas.video.DetectSlidesTaskResponse attribute)</a>
 </li>
       <li><a href="graphai.core.common.caching.html#graphai.core.common.caching.SlideDBCachingManager">SlideDBCachingManager (class in graphai.core.common.caching)</a>

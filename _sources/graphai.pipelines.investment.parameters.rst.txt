@@ -1,0 +1,7 @@
+graphai.pipelines.investment.parameters module
+==============================================
+
+.. automodule:: graphai.pipelines.investment.parameters
+   :members:
+   :undoc-members:
+   :show-inheritance:

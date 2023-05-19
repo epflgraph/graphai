@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>graphai.pipelines.investment.concept_configuration module &mdash; EPFL Graph AI</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="graphai.pipelines.investment.create_investments_graph module" href="graphai.pipelines.investment.create_investments_graph.html" />
+    <link rel="prev" title="graphai.pipelines.investment.compute_jaccard_index module" href="graphai.pipelines.investment.compute_jaccard_index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="graphai.html" class="icon icon-home">
+            graphai
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="graphai.api.html">graphai.api package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="graphai.core.html">graphai.core package</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="graphai.pipelines.html">graphai.pipelines package</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="graphai.pipelines.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="graphai.pipelines.elasticsearch.html">graphai.pipelines.elasticsearch package</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="graphai.pipelines.investment.html">graphai.pipelines.investment package</a><ul class="current">
+<li class="toctree-l4 current"><a class="reference internal" href="graphai.pipelines.investment.html#submodules">Submodules</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="graphai.pipelines.validation.html">graphai.pipelines.validation package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="graphai.pipelines.visualisation.html">graphai.pipelines.visualisation package</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="graphai.definitions.html">graphai.definitions module</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="graphai.html">graphai</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="graphai.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="graphai.pipelines.html">graphai.pipelines package</a></li>
+          <li class="breadcrumb-item"><a href="graphai.pipelines.investment.html">graphai.pipelines.investment package</a></li>
+      <li class="breadcrumb-item active">graphai.pipelines.investment.concept_configuration module</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/graphai.pipelines.investment.concept_configuration.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-graphai.pipelines.investment.concept_configuration">
+<span id="graphai-pipelines-investment-concept-configuration-module"></span><h1>graphai.pipelines.investment.concept_configuration module<a class="headerlink" href="#module-graphai.pipelines.investment.concept_configuration" title="Permalink to this heading"></a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.pipelines.investment.concept_configuration.norm">
+<span class="sig-prename descclassname"><span class="pre">graphai.pipelines.investment.concept_configuration.</span></span><span class="sig-name descname"><span class="pre">norm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.pipelines.investment.concept_configuration.norm" title="Permalink to this definition"></a></dt>
+<dd><p>Computes the norm of the different configurations in x.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>x</strong> (<em>pd.DataFrame</em>) – DataFrame whose columns are key + [‘PageID’, ‘Score’]. Each configuration of scores is given
+by a unique tuple of values for columns in key. For example, if x has columns
+[‘InvestorID’, ‘PageID’, ‘Score’], then each value of InvestorID is assumed to index a configuration,
+given by the columns [‘PageID’, ‘Score’].</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Returns (pd.DataFrame): DataFrame with columns key + [‘Norm’], containing the norm of each configuration, computed</dt><dd><p>as sqrt{sum_{c in C} X(c)^2}, where C is the set of concepts and X: C        o [0, 1] is a given configuration.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.pipelines.investment.concept_configuration.normalise">
+<span class="sig-prename descclassname"><span class="pre">graphai.pipelines.investment.concept_configuration.</span></span><span class="sig-name descname"><span class="pre">normalise</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.pipelines.investment.concept_configuration.normalise" title="Permalink to this definition"></a></dt>
+<dd><p>Returns the same set of configurations as in x, with their scores divided by each norm. Hence, all configurations
+in x have norm 1.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>x</strong> (<em>pd.DataFrame</em>) – DataFrame whose columns are key + [‘PageID’, ‘Score’]. Each configuration of scores is given
+by a unique tuple of values for columns in key.</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Returns (pd.DataFrame): DataFrame with the same columns as x, containing configurations indexed by the same set as</dt><dd><p>x. The score of a concept in the returned configuration is the score it has in x divided by the norm of the
+configuration.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.pipelines.investment.concept_configuration.mix">
+<span class="sig-prename descclassname"><span class="pre">graphai.pipelines.investment.concept_configuration.</span></span><span class="sig-name descname"><span class="pre">mix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">edges</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_ratio</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.05</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.pipelines.investment.concept_configuration.mix" title="Permalink to this definition"></a></dt>
+<dd><p>Mixes the configurations in x according to the edges in edges.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>pd.DataFrame</em>) – DataFrame whose columns are key + [‘PageID’, ‘Score’]. Each configuration of scores is given
+by a unique tuple of values for columns in key. For example, if x has columns
+[‘InvestorID’, ‘PageID’, ‘Score’], then each value of InvestorID is assumed to index a configuration, given
+by the columns [‘PageID’, ‘Score’].</p></li>
+<li><p><strong>edges</strong> (<em>pd.DataFrame</em>) – DataFrame whose columns are [‘SourcePageID’, ‘TargetPageID’, ‘Score’], which define the
+weighted edges of the concepts graph.</p></li>
+<li><p><strong>min_ratio</strong> (<em>float</em>) – For every resulting configuration, only concepts whose ratio of score over maximum score
+is above min_ratio are kept. If set to 0, then all concepts are kept.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Returns (pd.DataFrame): DataFrame with the same columns as x, containing configurations indexed by the same set as</dt><dd><p>x. The score of a concept in the mixed configuration is the arithmetic mean of the products of the
+configuration score and the edge score in the 1-ball of the concept, assuming every concept has a loop
+with score 1.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.pipelines.investment.concept_configuration.normalise_graph">
+<span class="sig-prename descclassname"><span class="pre">graphai.pipelines.investment.concept_configuration.</span></span><span class="sig-name descname"><span class="pre">normalise_graph</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">edges</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.pipelines.investment.concept_configuration.normalise_graph" title="Permalink to this definition"></a></dt>
+<dd><p>Adds missing reverse edges and averages scores. Adds loops on each vertex with a score of one.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>edges</strong> (<em>pd.DataFrame</em>) – DataFrame whose columns are [‘SourcePageID’, ‘TargetPageID’, ‘Score’], which define the
+weighted edges of the concepts graph.</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Returns (pd.DataFrame): DataFrame whose columns are [‘SourcePageID’, ‘TargetPageID’, ‘Score’], with each pair in</dt><dd><p>both directions and with loops on every vertex with a score of 1.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.pipelines.investment.concept_configuration.combine">
+<span class="sig-prename descclassname"><span class="pre">graphai.pipelines.investment.concept_configuration.</span></span><span class="sig-name descname"><span class="pre">combine</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pairs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.pipelines.investment.concept_configuration.combine" title="Permalink to this definition"></a></dt>
+<dd><p>Combines the configurations in x and y based on the associations in pairs.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>pd.DataFrame</em>) – DataFrame whose columns are key_x + [‘PageID’, ‘Score’]. Each configuration of scores is
+given by a unique tuple of values for columns in key_x. For example, if x has columns
+[‘InvestorID’, ‘PageID’, ‘Score’], then each value of InvestorID is assumed to index a configuration,
+given by the columns [‘PageID’, ‘Score’].</p></li>
+<li><p><strong>y</strong> (<em>pd.DataFrame</em>) – DataFrame whose columns are key_y + [‘PageID’, ‘Score’]. Each configuration of scores is
+given by a unique tuple of values for columns in key_y. For example, if y has columns
+[‘InvestorID’, ‘PageID’, ‘Score’], then each value of InvestorID is assumed to index a configuration,
+given by the columns [‘PageID’, ‘Score’].</p></li>
+<li><p><strong>pairs</strong> (<em>pd.DataFrame</em>) – DataFrame whose columns are key_x + key_y. Configurations in x and y are compared
+based on the associations in this DataFrame.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Returns (pd.DataFrame): DataFrame with columns key_x + key_y + [‘PageID’, ‘Score’]. For each row in pairs, there is</dt><dd><p>a configuration of scores in the returned DataFrame. The score for each concept is the geometric mean of the
+scores in x and y.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.pipelines.investment.concept_configuration.compute_affinities">
+<span class="sig-prename descclassname"><span class="pre">graphai.pipelines.investment.concept_configuration.</span></span><span class="sig-name descname"><span class="pre">compute_affinities</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pairs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">edges</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mix_x</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mix_y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normalise_before</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'cosine'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.pipelines.investment.concept_configuration.compute_affinities" title="Permalink to this definition"></a></dt>
+<dd><p>Computes affinity scores between the pairs configurations in x and y indexed in pairs, according to the concepts
+(edge-weighted) graph specified in edges.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>pd.DataFrame</em>) – DataFrame whose columns are key_x + [‘PageID’, ‘Score’]. Each configuration of scores is
+given by a unique tuple of values for columns in key_x. For example, if x has columns
+[‘InvestorID’, ‘PageID’, ‘Score’], then each value of InvestorID is assumed to index a configuration,
+given by the columns [‘PageID’, ‘Score’].</p></li>
+<li><p><strong>y</strong> (<em>pd.DataFrame</em>) – DataFrame whose columns are key_y + [‘PageID’, ‘Score’]. Each configuration of scores is
+given by a unique tuple of values for columns in key_y. For example, if y has columns
+[‘InvestorID’, ‘PageID’, ‘Score’], then each value of InvestorID is assumed to index a configuration,
+given by the columns [‘PageID’, ‘Score’].</p></li>
+<li><p><strong>pairs</strong> (<em>pd.DataFrame</em>) – DataFrame whose columns are key_x + key_y. Configurations in x and y are compared
+based on the associations in this DataFrame.</p></li>
+<li><p><strong>edges</strong> (<em>pd.DataFrame</em>) – DataFrame whose columns are [‘SourcePageID’, ‘TargetPageID’, ‘Score’], which define the
+weighted edges of the concepts graph. Only required if one of mix_x or mix_y are True.</p></li>
+<li><p><strong>mix_x</strong> (<em>bool</em>) – Whether to replace x with its mixing before affinity computation. Recommended to set to True if
+the configurations in x have a low number of concepts. If set to True, then edges is required.</p></li>
+<li><p><strong>mix_y</strong> (<em>bool</em>) – Whether to replace y with its mixing before affinity computation. Recommended to set to True if
+the configurations in y have a low number of concepts. If set to True, then edges is required.</p></li>
+<li><p><strong>normalise_before</strong> (<em>bool</em>) – Whether to normalise score configurations to have norm 1 before computing affinities.</p></li>
+<li><p><strong>method</strong> (<em>str</em>) – Which method to use to compute affinities. ‘euclidean’ uses a function based on the euclidean
+distance of each pair of configurations. ‘cosine’ uses a function based on cosine similarity of each pair
+of configurations. Notice that ‘cosine’ performs faster than ‘euclidean’.</p></li>
+<li><p><strong>k</strong> (<em>float</em>) – Coefficient that controls the shape of the affinity function for method=’euclidean’. It takes any
+value in (0, +inf), typical values range from 0.1 to 10. The higher the value of k, the higher the score
+the same pair of configurations will be assigned. Unused if method=’cosine’.</p></li>
+</ul>
+</dd>
+</dl>
+<dl>
+<dt>Returns (pd.DataFrame): DataFrame with columns key_x + key_y + [‘Score’], containing the same rows as pairs.</dt><dd><dl class="simple">
+<dt>For each pair of configuration X and Y, their score is computed as follows:</dt><dd><ul class="simple">
+<li><dl class="simple">
+<dt>If method=’cosine’, the score is the ratio of the norm of U*V squared (equivalently, the scalar product</dt><dd><p>&lt;U, V&gt;) and the product of norms of U and V.</p>
+</dd>
+</dl>
+</li>
+<li><p>If method=’euclidean’, the score is 1 - tanh(k * ||U - V||), for some k &gt; 0.</p></li>
+</ul>
+</dd>
+</dl>
+<aside class="system-message">
+<p class="system-message-title">System Message: WARNING/2 (<span class="docutils literal">/home/ubuntu/actions-runner/_work/graphai/graphai/main/graphai/pipelines/investment/concept_configuration.py:docstring of graphai.pipelines.investment.concept_configuration.compute_affinities</span>, line 42)</p>
+<p>Definition list ends without a blank line; unexpected unindent.</p>
+</aside>
+<p>If mix_x is True, then U is defined as the mixing of X with respect to edges, otherwise U is X.
+If mix_y is True, then V is defined as the mixing of Y with respect to edges, otherwise V is Y.
+Finally, U*V denotes the combination of U and V.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="graphai.pipelines.investment.compute_jaccard_index.html" class="btn btn-neutral float-left" title="graphai.pipelines.investment.compute_jaccard_index module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="graphai.pipelines.investment.create_investments_graph.html" class="btn btn-neutral float-right" title="graphai.pipelines.investment.create_investments_graph module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Aitor Pérez.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

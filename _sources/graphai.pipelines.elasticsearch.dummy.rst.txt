@@ -1,0 +1,7 @@
+graphai.pipelines.elasticsearch.dummy module
+============================================
+
+.. automodule:: graphai.pipelines.elasticsearch.dummy
+   :members:
+   :undoc-members:
+   :show-inheritance:

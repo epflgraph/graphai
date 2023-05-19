@@ -1,0 +1,7 @@
+graphai.pipelines.validation.3\_slides module
+=============================================
+
+.. automodule:: graphai.pipelines.validation.3_slides
+   :members:
+   :undoc-members:
+   :show-inheritance:

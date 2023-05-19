@@ -1,0 +1,7 @@
+graphai.pipelines.investment.aggregate\_recent\_past module
+===========================================================
+
+.. automodule:: graphai.pipelines.investment.aggregate_recent_past
+   :members:
+   :undoc-members:
+   :show-inheritance:

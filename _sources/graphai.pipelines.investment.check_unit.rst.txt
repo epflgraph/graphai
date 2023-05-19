@@ -1,0 +1,7 @@
+graphai.pipelines.investment.check\_unit module
+===============================================
+
+.. automodule:: graphai.pipelines.investment.check_unit
+   :members:
+   :undoc-members:
+   :show-inheritance:

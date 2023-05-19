@@ -1,0 +1,17 @@
+graphai.pipelines.validation package
+====================================
+
+.. automodule:: graphai.pipelines.validation
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 1
+
+   graphai.pipelines.validation.1_old
+   graphai.pipelines.validation.2_new
+   graphai.pipelines.validation.3_slides

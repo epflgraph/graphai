@@ -1,0 +1,18 @@
+graphai.pipelines package
+=========================
+
+.. automodule:: graphai.pipelines
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Subpackages
+-----------
+
+.. toctree::
+   :maxdepth: 1
+
+   graphai.pipelines.elasticsearch
+   graphai.pipelines.investment
+   graphai.pipelines.validation
+   graphai.pipelines.visualisation

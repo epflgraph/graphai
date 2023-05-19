@@ -1,0 +1,26 @@
+graphai.pipelines.investment package
+====================================
+
+.. automodule:: graphai.pipelines.investment
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 1
+
+   graphai.pipelines.investment.aggregate_recent_past
+   graphai.pipelines.investment.check_unit
+   graphai.pipelines.investment.compute_fundraisers_units
+   graphai.pipelines.investment.compute_investors_units
+   graphai.pipelines.investment.compute_investors_units_2
+   graphai.pipelines.investment.compute_jaccard_index
+   graphai.pipelines.investment.concept_configuration
+   graphai.pipelines.investment.create_investments_graph
+   graphai.pipelines.investment.detect_fundraisers_concepts
+   graphai.pipelines.investment.main
+   graphai.pipelines.investment.parameters
+   graphai.pipelines.investment.toy_example

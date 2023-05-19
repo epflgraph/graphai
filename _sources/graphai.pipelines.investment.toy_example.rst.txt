@@ -1,0 +1,7 @@
+graphai.pipelines.investment.toy\_example module
+================================================
+
+.. automodule:: graphai.pipelines.investment.toy_example
+   :members:
+   :undoc-members:
+   :show-inheritance:

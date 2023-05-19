@@ -1,0 +1,7 @@
+graphai.pipelines.investment.compute\_fundraisers\_units module
+===============================================================
+
+.. automodule:: graphai.pipelines.investment.compute_fundraisers_units
+   :members:
+   :undoc-members:
+   :show-inheritance:
