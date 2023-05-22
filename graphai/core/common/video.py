@@ -360,7 +360,6 @@ def perceptual_hash_text(s, min_window_length=5, max_window_length=50, hash_len=
 
     fprinter = fingerprint.Fingerprint(kgram_len=kgram_length, window_len=window_length, base=10, modulo=256)
     hash_numbers = fprinter.generate(str=s)
-    print(hash_numbers)
     if len(hash_numbers) > hash_len:
         sample_indices = np.linspace(start=0, stop=len(hash_numbers)-1, num=hash_len-1, endpoint=False).\
                             tolist()
@@ -426,7 +425,11 @@ def find_closest_fingerprint_from_list(target_fp, fp_list, token_list, min_simil
     # If the list of fingerprints is empty, there's no "closest" fingerprint to the target and the result is null.
     if len(fp_list) == 0:
         return None, None, None
-    fp_similarities = np.array([compare_encoded_fingerprints(target_fp, fp2, decoder_func) for fp2 in fp_list])
+    if min_similarity < 1:
+        fp_similarities = np.array([compare_encoded_fingerprints(target_fp, fp2, decoder_func) for fp2 in fp_list])
+    else:
+        # if an exact match is required, we switch to a much faster equality comparison
+        fp_similarities = [1 if target_fp == fp2 else 0 for fp2 in fp_list]
     max_index = np.argmax(fp_similarities)
     # If the similarity of the most similar fingerprint is also greater than the minimum similarity value,
     # then it's a match. Otherwise, the result is null.
