@@ -15,5 +15,6 @@ Submodules
    graphai.api.routers.image
    graphai.api.routers.ontology
    graphai.api.routers.text
+   graphai.api.routers.translation
    graphai.api.routers.video
    graphai.api.routers.voice

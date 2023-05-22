@@ -99,6 +99,26 @@
 <span class="sig-prename descclassname"><span class="pre">graphai.core.common.caching.</span></span><span class="sig-name descname"><span class="pre">surround_with_character</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">&quot;'&quot;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.caching.surround_with_character" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.core.common.caching.escape_single_quotes">
+<span class="sig-prename descclassname"><span class="pre">graphai.core.common.caching.</span></span><span class="sig-name descname"><span class="pre">escape_single_quotes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.caching.escape_single_quotes" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.core.common.caching.add_where_or_and">
+<span class="sig-prename descclassname"><span class="pre">graphai.core.common.caching.</span></span><span class="sig-name descname"><span class="pre">add_where_or_and</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">query</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.caching.add_where_or_and" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.core.common.caching.add_equality_conditions">
+<span class="sig-prename descclassname"><span class="pre">graphai.core.common.caching.</span></span><span class="sig-name descname"><span class="pre">add_equality_conditions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">conditions</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.caching.add_equality_conditions" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.core.common.caching.add_non_null_conditions">
+<span class="sig-prename descclassname"><span class="pre">graphai.core.common.caching.</span></span><span class="sig-name descname"><span class="pre">add_non_null_conditions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cols</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.caching.add_non_null_conditions" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
 <dl class="py class">
 <dt class="sig sig-object py" id="graphai.core.common.caching.DBCachingManagerBase">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">graphai.core.common.caching.</span></span><span class="sig-name descname"><span class="pre">DBCachingManagerBase</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cache_table</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">most_similar_table</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.caching.DBCachingManagerBase" title="Permalink to this definition"></a></dt>
@@ -145,12 +165,12 @@
 
 <dl class="py method">
 <dt class="sig sig-object py" id="graphai.core.common.caching.DBCachingManagerBase.get_all_details">
-<span class="sig-name descname"><span class="pre">get_all_details</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cols</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">limit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exclude_token</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">using_most_similar</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">allow_nulls</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">earliest_date</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.caching.DBCachingManagerBase.get_all_details" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_all_details</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cols</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">limit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exclude_token</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">using_most_similar</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">allow_nulls</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">earliest_date</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">equality_conditions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.caching.DBCachingManagerBase.get_all_details" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="graphai.core.common.caching.DBCachingManagerBase.get_cache_count">
-<span class="sig-name descname"><span class="pre">get_cache_count</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">non_null_cols</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.caching.DBCachingManagerBase.get_cache_count" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_cache_count</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">non_null_cols</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">equality_conditions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.caching.DBCachingManagerBase.get_cache_count" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -188,6 +208,17 @@
 <dl class="py method">
 <dt class="sig sig-object py" id="graphai.core.common.caching.SlideDBCachingManager.init_db">
 <span class="sig-name descname"><span class="pre">init_db</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.caching.SlideDBCachingManager.init_db" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="graphai.core.common.caching.TextDBCachingManager">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">graphai.core.common.caching.</span></span><span class="sig-name descname"><span class="pre">TextDBCachingManager</span></span><a class="headerlink" href="#graphai.core.common.caching.TextDBCachingManager" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#graphai.core.common.caching.DBCachingManagerBase" title="graphai.core.common.caching.DBCachingManagerBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">DBCachingManagerBase</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="graphai.core.common.caching.TextDBCachingManager.init_db">
+<span class="sig-name descname"><span class="pre">init_db</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.caching.TextDBCachingManager.init_db" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>

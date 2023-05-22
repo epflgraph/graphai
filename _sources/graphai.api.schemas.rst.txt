@@ -16,5 +16,6 @@ Submodules
    graphai.api.schemas.image
    graphai.api.schemas.ontology
    graphai.api.schemas.text
+   graphai.api.schemas.translation
    graphai.api.schemas.video
    graphai.api.schemas.voice

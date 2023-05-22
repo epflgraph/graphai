@@ -168,6 +168,11 @@
 <dd></dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="graphai.core.common.video.md5_text">
+<span class="sig-prename descclassname"><span class="pre">graphai.core.common.video.</span></span><span class="sig-name descname"><span class="pre">md5_text</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.video.md5_text" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="graphai.core.common.video.detect_audio_format_and_duration">
 <span class="sig-prename descclassname"><span class="pre">graphai.core.common.video.</span></span><span class="sig-name descname"><span class="pre">detect_audio_format_and_duration</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_filename_with_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_token</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.video.detect_audio_format_and_duration" title="Permalink to this definition"></a></dt>
 <dd><p>Detects the duration of the audio track of the provided video file and returns its name in ogg format
@@ -254,6 +259,11 @@ file doesn’t exist.</p>
 </dd>
 </dl>
 </dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.core.common.video.perceptual_hash_text">
+<span class="sig-prename descclassname"><span class="pre">graphai.core.common.video.</span></span><span class="sig-name descname"><span class="pre">perceptual_hash_text</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_window_length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_window_length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">50</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hash_len</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">32</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.video.perceptual_hash_text" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="graphai.core.common.video.compare_decoded_fingerprints">
@@ -563,7 +573,7 @@ translated segments which can be used as subtitles, and ‘language’ which con
 <dt class="sig sig-object py" id="graphai.core.common.video.GoogleOCRModel.establish_connection">
 <span class="sig-name descname"><span class="pre">establish_connection</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.video.GoogleOCRModel.establish_connection" title="Permalink to this definition"></a></dt>
 <dd><p>Lazily connects to the Google API
-:returns: None</p>
+:returns: True if a connection already exists or if a new connection is successfully established, False otherwise</p>
 </dd></dl>
 
 <dl class="py method">
@@ -581,6 +591,22 @@ translated segments which can be used as subtitles, and ‘language’ which con
 <dl class="py method">
 <dt class="sig sig-object py" id="graphai.core.common.video.GoogleOCRModel.wait_for_ocr_results">
 <span class="sig-name descname"><span class="pre">wait_for_ocr_results</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">image_object</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'dtd'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">retries</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">6</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.video.GoogleOCRModel.wait_for_ocr_results" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="graphai.core.common.video.TranslationModels">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">graphai.core.common.video.</span></span><span class="sig-name descname"><span class="pre">TranslationModels</span></span><a class="headerlink" href="#graphai.core.common.video.TranslationModels" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="graphai.core.common.video.TranslationModels.load_models">
+<span class="sig-name descname"><span class="pre">load_models</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.video.TranslationModels.load_models" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="graphai.core.common.video.TranslationModels.translate">
+<span class="sig-name descname"><span class="pre">translate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">how</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'en-fr'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.video.TranslationModels.translate" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
