@@ -37,6 +37,10 @@ def surround_with_character(s, c="'"):
     return c + s + c
 
 
+def escape_single_quotes(s):
+    return s.replace("'", "''")
+
+
 def add_where_or_and(query):
     if 'WHERE' in query:
         return ' AND '
@@ -82,8 +86,11 @@ class DBCachingManagerBase(abc.ABC):
         if values_to_insert is None:
             values_to_insert = dict()
         values_to_insert = {
-            x: surround_with_character(values_to_insert[x], "'") if isinstance(values_to_insert[x], str)
-            else str(values_to_insert[x]) if values_to_insert[x] is not None else 'null'
+            x: surround_with_character(escape_single_quotes(values_to_insert[x]), "'")
+                            if isinstance(values_to_insert[x], str)
+            else str(values_to_insert[x])
+                            if values_to_insert[x] is not None
+            else 'null'
             for x in values_to_insert
         }
         existing = self.db.execute_query(
