@@ -55,3 +55,6 @@ jobs:
           python -c "import spacy; spacy.cli.download('en_core_web_lg') if 'en_core_web_lg' not in spacy.util.get_installed_models() else None"
           python -c "import spacy; spacy.cli.download('fr_core_news_md') if 'fr_core_news_md' not in spacy.util.get_installed_models() else None"
           python -c "import whisper; whisper.load_model('${{ vars.whisper_model_type }}');"
+          python -c "from transformers import AutoModelForSeq2SeqLM; AutoModelForSeq2SeqLM.from_pretrained('Helsinki-NLP/opus-mt-en-fr')"
+          python -c "from transformers import AutoModelForSeq2SeqLM; AutoModelForSeq2SeqLM.from_pretrained('Helsinki-NLP/opus-mt-fr-en')"
+
