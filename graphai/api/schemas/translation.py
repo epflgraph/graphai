@@ -2,6 +2,62 @@ from pydantic import BaseModel, Field
 from typing import List, Union, Any, Literal
 from .common import TaskStatusResponse
 
+
+class TextFingerprintRequest(BaseModel):
+    text: str = Field(
+        title="Text",
+        description="Text to translate"
+    )
+
+    source: Literal['en', 'fr', 'de', 'it'] = Field(
+        title="Source language",
+        description="Language of the provided text",
+        default='fr'
+    )
+
+    target: Literal['en', 'fr', 'de', 'it'] = Field(
+        title="Target language",
+        description="Language to translate the text into",
+        default='en'
+    )
+
+    force: bool = Field(
+        title="Force recomputation",
+        default=False
+    )
+
+
+class TextFingerprintTaskResponse(BaseModel):
+    result: Union[str, None] = Field(
+        title="Fingerprint",
+        description="Fingerprint of the provided text."
+    )
+
+    fresh: bool = Field(
+        title="Freshness flag",
+        description="Whether the result was computed freshly or an existing cached result was returned."
+    )
+
+    closest_token: Union[str, None] = Field(
+        title="Closest token",
+        description="The token of the most similar existing text that the fingerprint lookup was able to find. Equal "
+                    "to original token if the most similar existing text did not satisfy the minimum similarity "
+                    "threshold."
+    )
+
+    successful: bool = Field(
+        title="Success flag",
+        description="Whether the computation was successful."
+    )
+
+
+class TextFingerprintResponse(TaskStatusResponse):
+    task_result: Union[TextFingerprintTaskResponse, None] = Field(
+        title="Text fingerprinting response",
+        description="A dict containing the resulting text fingerprint and a freshness flag."
+    )
+
+
 class TranslationRequest(BaseModel):
     text: str = Field(
         title="Text",

@@ -2,7 +2,7 @@ from celery import group, chain
 from fastapi import APIRouter
 from graphai.api.schemas.common import TaskIDResponse
 from graphai.api.schemas.translation import TranslationRequest, TranslationResponse, \
-    TextDetectLanguageRequest, TextDetectLanguageResponse
+    TextDetectLanguageRequest, TextDetectLanguageResponse, TextFingerprintRequest, TextFingerprintResponse
 from graphai.api.celery_tasks.translation import translate_text_task, translate_text_callback_task, \
     detect_text_language_task, compute_text_fingerprint_task, compute_text_fingerprint_callback_task, \
     text_fingerprint_find_closest_retrieve_from_db_task, text_fingerprint_find_closest_parallel_task, \
@@ -43,6 +43,37 @@ def get_text_fingerprint_chain_list(token, text, src, tgt, force, min_similarity
     else:
         task_list += [retrieve_text_fingerprint_callback_task.s()]
     return task_list
+
+
+@router.post('/calculate_fingerprint/', response_model=TaskIDResponse)
+async def calculate_fingerprint(data: TextFingerprintRequest):
+    text = data.text
+    src = data.source
+    tgt = data.target
+    force = data.force
+    token = generate_text_token(text, src, tgt)
+    task_list = get_text_fingerprint_chain_list(token, text, src, tgt, force,
+                                                ignore_fp_results=False)
+    task = chain(task_list)
+    task = task.apply_async(priority=6)
+    return {'task_id': task.id}
+
+
+@router.get('/calculate_fingerprint/status/{task_id}', response_model=TextFingerprintResponse)
+async def calculate_fingerprint_status(task_id):
+    full_results = get_task_info(task_id)
+    task_results = full_results['results']
+    if task_results is not None:
+        if 'result' in task_results:
+            task_results = {
+                'result': task_results['result'],
+                'fresh': task_results['fresh'],
+                'closest_token': task_results['closest'],
+                'successful': task_results['result'] is not None
+            }
+        else:
+            task_results = None
+    return format_api_results(full_results['id'], full_results['name'], full_results['status'], task_results)
 
 
 @router.post('/translate/', response_model=TaskIDResponse)
