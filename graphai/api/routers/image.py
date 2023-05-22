@@ -4,6 +4,7 @@ from graphai.api.schemas.image import *
 from graphai.api.schemas.common import *
 from graphai.api.celery_tasks.common import format_api_results
 from graphai.core.interfaces.celery_config import get_task_info
+from graphai.core.common.video import FingerprintParameters
 
 from ..celery_tasks.image import compute_slide_fingerprint_task, \
     compute_slide_fingerprint_callback_task, slide_fingerprint_find_closest_retrieve_from_db_task, \
@@ -19,8 +20,12 @@ router = APIRouter(
 )
 
 
-def get_slide_fingerprint_chain_list(token, force, min_similarity=0.9, n_jobs=8,
+def get_slide_fingerprint_chain_list(token, force, min_similarity=None, n_jobs=8,
                                      ignore_fp_results=False, results_to_return=None):
+    if min_similarity is None:
+        fp_parameters = FingerprintParameters()
+        min_similarity = fp_parameters.get_min_sim_image()
+
     task_list = [
         compute_slide_fingerprint_task.s(token, force),
         compute_slide_fingerprint_callback_task.s(token),

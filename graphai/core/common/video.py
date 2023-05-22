@@ -960,3 +960,39 @@ class TranslationModels:
         model = self.models[how]['model']
         segmenter = self.models[how]['segmenter']
         return self._translate(text, tokenizer, model, segmenter)
+
+
+class FingerprintParameters:
+    def __init__(self):
+        self.min_similarity = dict()
+        self.load_values()
+
+    def load_values(self):
+        defaults = {
+            'text': '1.0',
+            'image': '0.9',
+            'audio': '0.8',
+            'video': '1.0'
+        }
+        config_contents = configparser.ConfigParser()
+        try:
+            print(f'Reading fingerprint min similarity values from file')
+            config_contents.read(f'{CONFIG_DIR}/fingerprint.ini')
+            self.min_similarity['text'] = float(config_contents['FP'].get('text', fallback=defaults['text']))
+            self.min_similarity['image'] = float(config_contents['FP'].get('image', fallback=defaults['image']))
+            self.min_similarity['audio'] = float(config_contents['FP'].get('audio', fallback=defaults['audio']))
+            self.min_similarity['video'] = float(config_contents['FP'].get('video', fallback=defaults['video']))
+        except Exception as e:
+            self.min_similarity = {k:float(v) for k,v in defaults.items()}
+
+    def get_min_sim_text(self):
+        return self.min_similarity['text']
+
+    def get_min_sim_image(self):
+        return self.min_similarity['image']
+
+    def get_min_sim_audio(self):
+        return self.min_similarity['audio']
+
+    def get_min_sim_video(self):
+        return self.min_similarity['video']

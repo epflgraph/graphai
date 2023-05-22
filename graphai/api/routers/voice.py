@@ -13,6 +13,7 @@ from graphai.api.celery_tasks.voice import compute_audio_fingerprint_task, \
     transcribe_task, transcribe_callback_task, video_test_task
 from graphai.api.celery_tasks.common import format_api_results, ignore_fingerprint_results_callback_task
 from graphai.core.interfaces.celery_config import get_task_info
+from graphai.core.common.video import FingerprintParameters
 
 # Initialise video router
 router = APIRouter(
@@ -22,8 +23,12 @@ router = APIRouter(
 )
 
 
-def get_audio_fingerprint_chain_list(token, force=False, min_similarity=0.8, n_jobs=8, remove_silence=False,
+def get_audio_fingerprint_chain_list(token, force=False, min_similarity=None, n_jobs=8, remove_silence=False,
                                      threshold=None, ignore_fp_results=False, results_to_return=None):
+    if min_similarity is None:
+        fp_parameters = FingerprintParameters()
+        min_similarity = fp_parameters.get_min_sim_audio()
+
     if not remove_silence or threshold is None:
         task_list = [compute_audio_fingerprint_task.s({'fp_token': token}, token, force)]
     else:
