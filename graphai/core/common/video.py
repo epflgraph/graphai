@@ -9,6 +9,7 @@ import configparser
 from datetime import datetime
 import glob
 import math
+import hashlib
 
 import acoustid
 import chromaprint
@@ -24,9 +25,12 @@ import numpy as np
 import wget
 from subprocess import call, PIPE
 import whisper
+import fingerprint
 from fuzzywuzzy import fuzz
 from .caching import make_sure_path_exists
 from graphai.definitions import CONFIG_DIR
+from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
+import pysbd
 
 
 FRAME_FORMAT_PNG = 'frame-%06d.png'
@@ -157,6 +161,10 @@ def md5_video_or_audio(input_filename_with_path, video=True):
     result, _ = ffmpeg.output(in_stream, 'pipe:', format='md5').run(capture_stdout=True)
     # The result looks like 'MD5=9735151f36a3e628b0816b1bba3b9640\n' so we clean it up
     return (result.decode('utf8').strip())[4:]
+
+
+def md5_text(s):
+    return hashlib.md5(s.encode('utf8')).hexdigest()
 
 
 def detect_audio_format_and_duration(input_filename_with_path, input_token):
@@ -323,9 +331,9 @@ def perceptual_hash_audio(input_filename_with_path, max_length=7200):
         print(f'File {input_filename_with_path} does not exist')
         return None, None
     results = acoustid.fingerprint_file(input_filename_with_path, maxlength=max_length)
-    fingerprint = results[1]
-    decoded = chromaprint.decode_fingerprint(fingerprint)
-    return fingerprint.decode('utf8'), decoded
+    fingerprint_value = results[1]
+    decoded = chromaprint.decode_fingerprint(fingerprint_value)
+    return fingerprint_value.decode('utf8'), decoded
 
 
 def perceptual_hash_image(input_filename_with_path, hash_size=16):
@@ -342,6 +350,26 @@ def perceptual_hash_image(input_filename_with_path, hash_size=16):
         return None
     results = imagehash.dhash(Image.open(input_filename_with_path), hash_size=hash_size)
     return str(results)
+
+
+def perceptual_hash_text(s, min_window_length=5, max_window_length=50, hash_len=32):
+    string_length = len(s)
+    window_length = max([min_window_length, string_length // hash_len])
+    window_length = min([max_window_length, window_length])
+    kgram_length = max([10, int(window_length/2)])
+
+    fprinter = fingerprint.Fingerprint(kgram_len=kgram_length, window_len=window_length, base=10, modulo=256)
+    hash_numbers = fprinter.generate(str=s)
+    if len(hash_numbers) > hash_len:
+        sample_indices = np.linspace(start=0, stop=len(hash_numbers)-1, num=hash_len-1, endpoint=False).\
+                            tolist()
+        sample_indices.append(len(hash_numbers)-1)
+        sample_indices = [int(x) for x in sample_indices]
+        hash_numbers = [hash_numbers[i] for i in sample_indices]
+    elif len(hash_numbers) < hash_len:
+        hash_numbers = hash_numbers + [(0,0)] * (32-len(hash_numbers))
+    fp_result = ''.join([f"{n[0]:02x}" for n in hash_numbers])
+    return fp_result
 
 
 def compare_decoded_fingerprints(decoded_1, decoded_2):
@@ -397,7 +425,11 @@ def find_closest_fingerprint_from_list(target_fp, fp_list, token_list, min_simil
     # If the list of fingerprints is empty, there's no "closest" fingerprint to the target and the result is null.
     if len(fp_list) == 0:
         return None, None, None
-    fp_similarities = np.array([compare_encoded_fingerprints(target_fp, fp2, decoder_func) for fp2 in fp_list])
+    if min_similarity < 1:
+        fp_similarities = np.array([compare_encoded_fingerprints(target_fp, fp2, decoder_func) for fp2 in fp_list])
+    else:
+        # if an exact match is required, we switch to a much faster equality comparison
+        fp_similarities = [1 if target_fp == fp2 else 0 for fp2 in fp_list]
     max_index = np.argmax(fp_similarities)
     # If the similarity of the most similar fingerprint is also greater than the minimum similarity value,
     # then it's a match. Otherwise, the result is null.
@@ -817,11 +849,23 @@ class GoogleOCRModel():
         """
         Lazily connects to the Google API
         Returns:
-            None
+            True if a connection already exists or if a new connection is successfully established, False otherwise
         """
         if self.model is None:
-            print('Establishing Google API connection...')
-            self.model = vision.ImageAnnotatorClient(client_options={"api_key": self.api_key})
+            if self.api_key is not None:
+                print('Establishing Google API connection...')
+                try:
+                    self.model = vision.ImageAnnotatorClient(client_options={"api_key": self.api_key})
+                    return True
+                except:
+                    print('Failed to connect to Google API!')
+                    return False
+            else:
+                print('No API key provided!')
+                return False
+        else:
+            return True
+
 
     def perform_ocr(self, input_filename_with_path):
         """
@@ -832,7 +876,9 @@ class GoogleOCRModel():
         Returns:
             Text results of the two OCR methods
         """
-        self.establish_connection()
+        model_loaded = self.establish_connection()
+        if not model_loaded:
+            return None, None
         # Loading the image
         if not file_exists(input_filename_with_path):
             print(f'Error: File {input_filename_with_path} does not exist')
@@ -861,3 +907,56 @@ class GoogleOCRModel():
         if results is not None:
             results = results.full_text_annotation.text
         return results
+
+
+class TranslationModels:
+    def __init__(self):
+        self.models = None
+
+    def load_models(self):
+        if self.models is None:
+            self.models = dict()
+            print('Loading EN-FR')
+            self.models['en-fr'] = dict()
+            self.models['en-fr']['tokenizer'] = AutoTokenizer.from_pretrained("Helsinki-NLP/opus-mt-en-fr")
+            self.models['en-fr']['model'] = AutoModelForSeq2SeqLM.from_pretrained("Helsinki-NLP/opus-mt-en-fr")
+            self.models['en-fr']['segmenter'] = pysbd.Segmenter(language='en', clean=False)
+            print('Loading FR-EN')
+            self.models['fr-en'] = dict()
+            self.models['fr-en']['tokenizer'] = AutoTokenizer.from_pretrained("Helsinki-NLP/opus-mt-fr-en")
+            self.models['fr-en']['model'] = AutoModelForSeq2SeqLM.from_pretrained("Helsinki-NLP/opus-mt-fr-en")
+            self.models['fr-en']['segmenter'] = pysbd.Segmenter(language='fr', clean=False)
+
+    def _tokenize_and_get_model_output(self, sentence, tokenizer, model):
+        try:
+            input_ids = tokenizer.encode(sentence, return_tensors="pt")
+            outputs = model.generate(input_ids, max_length=512)
+            decoded = tokenizer.decode(outputs[0], skip_special_tokens=True)
+            return decoded
+        except IndexError as e:
+            print(e)
+            return None
+
+    def _translate(self, text, tokenizer, model, segmenter):
+        sentences = segmenter.segment(text)
+        full_result = ''
+        for sentence in sentences:
+            if len(sentence) == 0:
+                continue
+            decoded = self._tokenize_and_get_model_output(sentence, tokenizer, model)
+            if decoded is None:
+                return None, True
+            full_result += ' ' + decoded
+
+        return full_result, False
+
+    def translate(self, text, how='en-fr'):
+        self.load_models()
+        if how not in self.models.keys():
+            raise NotImplementedError("Source or target language not implemented")
+        if text is None or text == '':
+            return None, False
+        tokenizer = self.models[how]['tokenizer']
+        model = self.models[how]['model']
+        segmenter = self.models[how]['segmenter']
+        return self._translate(text, tokenizer, model, segmenter)

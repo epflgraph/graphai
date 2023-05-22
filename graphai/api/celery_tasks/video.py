@@ -5,11 +5,11 @@ import shutil
 from celery import shared_task
 
 from graphai.api.common.video import file_management_config, local_ocr_nlp_models, \
-    transcription_model
+    transcription_model, translation_models
 from graphai.core.common.video import retrieve_file_from_url, retrieve_file_from_kaltura, \
     detect_audio_format_and_duration, extract_audio_from_video, extract_frames, generate_frame_sample_indices, \
     compute_ocr_noise_level, compute_ocr_threshold, compute_video_ocr_transitions, generate_random_token, \
-    md5_video_or_audio, FRAME_FORMAT_PNG, TESSERACT_OCR_FORMAT
+    FRAME_FORMAT_PNG, TESSERACT_OCR_FORMAT
 from graphai.core.common.caching import AudioDBCachingManager, SlideDBCachingManager
 from itertools import chain
 
@@ -109,7 +109,7 @@ def extract_audio_callback_task(self, results, origin_token):
 def extract_and_sample_frames_task(self, token, force=False):
     # Checking for existing cached results
     db_manager = SlideDBCachingManager()
-    existing_slides = db_manager.get_details_using_origin(token, cols=['slide_number'])
+    existing_slides = db_manager.get_details_using_origin(token, cols=['slide_number', 'timestamp'])
 
     if existing_slides is not None:
         if not force:
@@ -118,7 +118,8 @@ def extract_and_sample_frames_task(self, token, force=False):
                 'result': None,
                 'sample_indices': None,
                 'fresh': False,
-                'slide_tokens': {x['slide_number']: x['id_token'] for x in existing_slides}
+                'slide_tokens': {x['slide_number']: {'token': x['id_token'], 'timestamp': int(x['timestamp'])}
+                                 for x in existing_slides}
             }
         else:
             # If force==True, then we need to delete the existing rows in case the results this time are different
@@ -274,17 +275,18 @@ def detect_slides_callback_task(self, results, token):
                   slides_folder_with_path)
         slide_tokens = [os.path.join(slides_folder, s) for s in list_of_slides]
         ocr_tokens = [os.path.join(slides_folder, s) for s in list_of_ocr_results]
-        slide_tokens = {i+1:slide_tokens[i] for i in range(len(slide_tokens))}
+        slide_tokens = {i+1: {'token': slide_tokens[i], 'timestamp': results['slides'][i]}
+                        for i in range(len(slide_tokens))}
         ocr_tokens = {i+1:ocr_tokens[i] for i in range(len(ocr_tokens))}
         current_datetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         # Inserting fresh results into the database
         for slide_number in slide_tokens:
             db_manager = SlideDBCachingManager()
             db_manager.insert_or_update_details(
-                slide_tokens[slide_number],
+                slide_tokens[slide_number]['token'],
                 {
                     'origin_token': token,
-                    'timestamp': results['slides'][slide_number-1],
+                    'timestamp': slide_tokens[slide_number]['timestamp'],
                     'slide_number': slide_number,
                     'ocr_tesseract_token': ocr_tokens[slide_number],
                     'date_added': current_datetime
@@ -311,7 +313,8 @@ def dummy_task(self, results):
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='video_2.init', ignore_result=False,
              transcription_obj=transcription_model,
-             nlp_obj=local_ocr_nlp_models)
+             nlp_obj=local_ocr_nlp_models,
+             translation_obj=translation_models)
 def video_init_task(self):
     # This task initialises the video celery worker by loading into memory the transcription and NLP models
 
@@ -320,5 +323,7 @@ def video_init_task(self):
     print('Transcription model loaded')
     self.nlp_obj.get_nlp_models()
     print('NLP models loaded')
+    self.translation_obj.load_models()
+    print('Translation models loaded')
 
     return True

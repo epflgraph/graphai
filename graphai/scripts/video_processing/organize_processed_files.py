@@ -51,7 +51,6 @@ def create_symlink(old_path, new_filename):
     # Only creating the symlink if it doesn't already exist
     if not file_exists(new_path):
         os.symlink(old_path, new_path)
-    return new_path
 
 
 def write_to_progress_file(video_key, token):
@@ -59,7 +58,7 @@ def write_to_progress_file(video_key, token):
         f.write(f"{video_key}:{token}\n")
 
 
-def organize_processed_file(src_path, index_in_folder, video_tokens):
+def organize_processed_file(src_path, index_in_folder, video_tokens, create_symlinks=True):
     """
     Creates symlinks/files for an already processed file and updates the caching tables
     Args:
@@ -85,8 +84,9 @@ def organize_processed_file(src_path, index_in_folder, video_tokens):
             return True
         new_file_name = generate_video_token(file_extension)
         video_tokens[video_key] = new_file_name
-        # Creating a symbolic link to the video file in cache file structure
-        create_symlink(src_path, new_file_name)
+        if create_symlinks:
+            # Creating a symbolic link to the video file in cache file structure
+            create_symlink(src_path, new_file_name)
         write_to_progress_file(video_key, new_file_name)
         return True
     else:
@@ -97,10 +97,11 @@ def organize_processed_file(src_path, index_in_folder, video_tokens):
             frame_index = extract_slide_frame_number(src_path)
             slide_token = generate_slide_token(video_token, frame_index)
             new_file_name = slide_token
-            # Creating a symbolic link to the image file in cache file structure
-            new_file_path = create_symlink(src_path, new_file_name)
+            if create_symlinks:
+                # Creating a symbolic link to the image file in cache file structure
+                create_symlink(src_path, new_file_name)
             # Computing the file's fingerprint
-            fingerprint = perceptual_hash_image(new_file_path)
+            fingerprint = perceptual_hash_image(src_path)
             # Inserting the token and its details into the cache table
             slide_db_manager.insert_or_update_details(
                 slide_token,
@@ -154,8 +155,9 @@ def organize_processed_file(src_path, index_in_folder, video_tokens):
             frame_index = extract_tesseract_ocr_frame_number(src_path)
             slide_token = generate_slide_token(video_token, frame_index)
             new_file_name = video_token + '_slides/' + (TESSERACT_OCR_FORMAT) % frame_index
-            # Creating a symlink for the txt.gz file
-            create_symlink(src_path, new_file_name)
+            if create_symlinks:
+                # Creating a symlink for the txt.gz file
+                create_symlink(src_path, new_file_name)
             # Updating the cache with the ocr token
             slide_db_manager.insert_or_update_details(
                 slide_token,
@@ -167,7 +169,7 @@ def organize_processed_file(src_path, index_in_folder, video_tokens):
     return False
 
 
-def handle_already_processed_files(root_dir):
+def handle_already_processed_files(root_dir, create_symlinks=True):
     folders_to_process = ['mined/video_lectures',
                           'modelled/img/final_slide_files',
                           'modelled/json/slides_ocr_google',
@@ -211,12 +213,17 @@ def handle_already_processed_files(root_dir):
                     full_file_list = sorted(full_file_list, key=extract_slide_frame_number)
                 for filename in full_file_list:
                     file_path = os.path.join(video_folder_path, filename)
-                    organize_processed_file(file_path, folder_index_counter, video_tokens)
+                    organize_processed_file(file_path, folder_index_counter, video_tokens,
+                                            create_symlinks=create_symlinks)
                     folder_index_counter += 1
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--root_dir', type=str, help='Root directory that contains the folders "mined" and "modelled"')
+    parser.add_argument('--create_symlinks', action='store_true',
+                        help='Create symlinks to video and image files. Off by default, meaning that by default, '
+                             'the cache entries are decoupled from the actual file system, except for transcript '
+                             'files which are always *copied*.')
     args = parser.parse_args()
-    handle_already_processed_files(args.root_dir)
+    handle_already_processed_files(args.root_dir, args.create_symlinks)

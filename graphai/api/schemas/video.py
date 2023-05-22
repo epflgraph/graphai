@@ -102,10 +102,20 @@ class DetectSlidesRequest(BaseModel):
     )
 
 
+class SlideTokenAndTimeStamp(BaseModel):
+    token: str = Field(
+        title="Slide token"
+    )
+
+    timestamp: int = Field(
+        title="Slide timestamp"
+    )
+
+
 class DetectSlidesTaskResponse(BaseModel):
-    slide_tokens: Union[Dict[int, str], None] = Field(
+    slide_tokens: Union[Dict[int, SlideTokenAndTimeStamp], None] = Field(
         title="Slide tokens",
-        description="Tokens of the detected slides"
+        description="Tokens of the detected slides and their timestamps"
     )
 
     successful: bool = Field(
