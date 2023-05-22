@@ -846,11 +846,23 @@ class GoogleOCRModel():
         """
         Lazily connects to the Google API
         Returns:
-            None
+            True if a connection already exists or if a new connection is successfully established, False otherwise
         """
         if self.model is None:
-            print('Establishing Google API connection...')
-            self.model = vision.ImageAnnotatorClient(client_options={"api_key": self.api_key})
+            if self.api_key is not None:
+                print('Establishing Google API connection...')
+                try:
+                    self.model = vision.ImageAnnotatorClient(client_options={"api_key": self.api_key})
+                    return True
+                except:
+                    print('Failed to connect to Google API!')
+                    return False
+            else:
+                print('No API key provided!')
+                return False
+        else:
+            return True
+
 
     def perform_ocr(self, input_filename_with_path):
         """
@@ -861,7 +873,9 @@ class GoogleOCRModel():
         Returns:
             Text results of the two OCR methods
         """
-        self.establish_connection()
+        model_loaded = self.establish_connection()
+        if not model_loaded:
+            return None, None
         # Loading the image
         if not file_exists(input_filename_with_path):
             print(f'Error: File {input_filename_with_path} does not exist')
