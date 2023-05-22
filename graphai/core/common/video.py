@@ -362,7 +362,7 @@ def perceptual_hash_text(s, min_window_length=5, max_window_length=50, hash_len=
     hash_numbers = fprinter.generate(str=s)
     print(hash_numbers)
     if len(hash_numbers) > hash_len:
-        sample_indices = np.arange(start=0, stop=len(hash_numbers)-1, step=(len(hash_numbers)-1) / (hash_len-1)).\
+        sample_indices = np.linspace(start=0, stop=len(hash_numbers)-1, num=hash_len-1, endpoint=False).\
                             tolist()
         sample_indices.append(len(hash_numbers)-1)
         sample_indices = [int(x) for x in sample_indices]
