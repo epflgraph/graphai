@@ -27,7 +27,7 @@ def generate_text_token(s, src, tgt):
     return md5_text(s) + '_' + src + '_' + tgt
 
 
-def get_text_fingerprint_chain_list(token, text, src, tgt, force, min_similarity=0.99, n_jobs=8,
+def get_text_fingerprint_chain_list(token, text, src, tgt, force, min_similarity=1, n_jobs=8,
                                      ignore_fp_results=False, results_to_return=None):
     equality_conditions = generate_src_tgt_dict(src, tgt)
     task_list = [
