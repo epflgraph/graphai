@@ -222,6 +222,8 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--root_dir', type=str, help='Root directory that contains the folders "mined" and "modelled"')
     parser.add_argument('--create_symlinks', action='store_true',
-                        help='Root directory that contains the folders "mined" and "modelled"')
+                        help='Create symlinks to video and image files. Off by default, meaning that by default, '
+                             'the cache entries are decoupled from the actual file system, except for transcript '
+                             'files which are always *copied*.')
     args = parser.parse_args()
     handle_already_processed_files(args.root_dir, args.create_symlinks)
