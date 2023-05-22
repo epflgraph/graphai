@@ -49,7 +49,7 @@ def add_where_or_and(query):
 
 
 def add_equality_conditions(conditions):
-    return " AND ".join([f"{k}='{v}'" for k,v in conditions.items()])
+    return " AND ".join([f"{k}='{escape_single_quotes(v)}'" for k,v in conditions.items()])
 
 
 def add_non_null_conditions(cols):
@@ -61,7 +61,8 @@ class DBCachingManagerBase(abc.ABC):
         # Only four values are hardcoded into this class and need to be respected by its child classes:
         # 1. The schema, 'cache_graphai', should not be changed
         # 2. The name of the id column for both the main and the most-similar tables is 'id_token'
-        # 3. The cache tables must have a "date_added" column
+        # 3. The cache tables must have a "date_added" column of the data type DATETIME,
+        #    which has the following format: YYYY-MM-DD hh:mm:ss
         # 4. The name of the second column in the most-similar table is 'most_similar_token'
         self.schema = 'cache_graphai'
         self.cache_table = cache_table
