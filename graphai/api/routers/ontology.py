@@ -1,12 +1,14 @@
 from fastapi import APIRouter
 
-from graphai.api.schemas.ontology import *
-from graphai.api.schemas.common import *
+from graphai.api.schemas.ontology import TreeResponse
 
 from graphai.api.common.log import log
-from graphai.api.celery_tasks.ontology import get_ontology_tree_task, get_category_parent_task, \
-    get_category_children_task
 from graphai.api.celery_tasks.common import format_api_results
+from graphai.api.celery_tasks.ontology import (
+    get_ontology_tree_task,
+    get_category_parent_task,
+    get_category_children_task,
+)
 from graphai.core.interfaces.celery_config import get_task_info
 
 # Initialise ontology router

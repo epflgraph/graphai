@@ -1,6 +1,7 @@
 from pydantic import BaseModel, Field, Json
-from typing import List, Union, Any
-from .common import TaskStatusResponse
+from typing import Union, Any
+
+from graphai.api.schemas.common import TaskStatusResponse
 
 
 class AudioFingerprintRequest(BaseModel):
@@ -27,7 +28,6 @@ class AudioFingerprintRequest(BaseModel):
         description="Threshold for silence removal at the beginning and end of the video",
         default=0.0
     )
-
 
 
 class AudioFingerprintTaskResponse(BaseModel):

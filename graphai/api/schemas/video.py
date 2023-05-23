@@ -1,6 +1,7 @@
 from pydantic import BaseModel, Field
-from typing import List, Union, Literal, Dict
-from .common import TaskStatusResponse
+from typing import Union, Literal, Dict
+
+from graphai.api.schemas.common import TaskStatusResponse
 
 
 class RetrieveURLRequest(BaseModel):
