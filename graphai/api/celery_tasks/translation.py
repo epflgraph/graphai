@@ -15,13 +15,16 @@ LONG_TEXT_ERROR = "Unpunctuated text too long (over 512 tokens), " \
 def compute_text_fingerprint_task(self, token, text, force=False):
     db_manager = TextDBCachingManager()
     existing = db_manager.get_details(token, cols=['fingerprint'])[0]
+
     if existing is not None and not force:
         if existing['fingerprint'] is not None:
             return {
                 'result': existing['fingerprint'],
                 'fresh': False
             }
+
     fp = perceptual_hash_text(text)
+
     return {
         'result': fp,
         'fresh': True
@@ -39,6 +42,7 @@ def compute_text_fingerprint_callback_task(self, results, token):
                 'fingerprint': results['result']
             }
         )
+
     return results
 
 
@@ -84,6 +88,7 @@ def translate_text_task(self, token, text, src, tgt, force):
             'successful': False,
             'fresh': False
         }
+
     db_manager = TextDBCachingManager()
     if not force:
         existing_list = db_manager.get_details(token, ['target'], using_most_similar=True)
@@ -100,6 +105,7 @@ def translate_text_task(self, token, text, src, tgt, force):
                     'successful': True,
                     'fresh': False
                 }
+
     how = f"{src}-{tgt}"
     try:
         translated_text, large_warning = self.translation_obj.translate(text, how=how)
@@ -136,19 +142,23 @@ def translate_text_callback_task(self, results, token, text, src, tgt):
             'target_lang': tgt,
             'date_added': current_datetime
         }
+
         # Inserting values for original token
         db_manager.insert_or_update_details(
             token, values_dict
         )
+
         # Inserting the same values for closest token if different than original token
         closest = db_manager.get_closest_match(token)
         if closest is not None and closest != token:
             db_manager.insert_or_update_details(
                 closest, values_dict
             )
+
     elif not results['successful']:
         # in case we fingerprinted something and then failed to translate it, we delete its cache row
         db_manager.delete_cache_rows([token])
+
     return results
 
 

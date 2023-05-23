@@ -55,7 +55,7 @@ def wikisearch_task(self, keywords_list, fraction=(0, 1), method='es-base'):
             # Try to get elasticsearch results, fallback to Wikipedia API in case of error.
             try:
                 results = self.es.search(keywords)
-            except Exception as e:
+            except Exception:
                 print('[ERROR] Error connecting to elasticsearch cluster. Falling back to Wikipedia API.')
                 results = self.wp.search(keywords)
 

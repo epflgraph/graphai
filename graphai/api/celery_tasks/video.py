@@ -52,6 +52,7 @@ def extract_audio_task(self, token, force=False):
         }
 
     output_filename_with_path = self.file_manager.generate_filepath(output_token)
+
     # Here, the existing row can be None because the row is inserted into the table
     # only after extracting the audio from the video.
     if not force:
@@ -62,6 +63,7 @@ def extract_audio_task(self, token, force=False):
             existing = existing[0]
     else:
         existing = None
+
     if existing is not None:
         print('Returning cached result')
         return {
@@ -69,15 +71,20 @@ def extract_audio_task(self, token, force=False):
             'fresh': False,
             'duration': existing['duration']
         }
-    results = extract_audio_from_video(input_filename_with_path,
-                                        output_filename_with_path,
-                                        output_token)
+
+    results = extract_audio_from_video(
+        input_filename_with_path,
+        output_filename_with_path,
+        output_token
+    )
+
     if results is None:
         return {
             'token': None,
             'fresh': False,
             'duration': 0.0
         }
+
     return {
         'token': results,
         'fresh': True,
@@ -164,13 +171,18 @@ def compute_noise_level_parallel_task(self, results, i, n, language=None):
             'fresh': False,
             'slide_tokens': results['slide_tokens']
         }
+
     all_sample_indices = results['sample_indices']
-    start_index = int(i*len(all_sample_indices)/n)
-    end_index = int((i+1)*len(all_sample_indices)/n)
+    start_index = int(i * len(all_sample_indices) / n)
+    end_index = int((i + 1) * len(all_sample_indices) / n)
     current_sample_indices = all_sample_indices[start_index:end_index]
-    noise_level_list = \
-        compute_ocr_noise_level(self.file_manager.generate_filepath(results['result']),
-                                current_sample_indices, self.nlp_model.get_nlp_models(), language=language)
+    noise_level_list = compute_ocr_noise_level(
+        self.file_manager.generate_filepath(results['result']),
+        current_sample_indices,
+        self.nlp_model.get_nlp_models(),
+        language=language
+    )
+
     return {
         'result': results['result'],
         'sample_indices': results['sample_indices'],
@@ -191,9 +203,11 @@ def compute_noise_threshold_callback_task(self, results, hash_thresh=0.8):
             'fresh': False,
             'slide_tokens': results[0]['slide_tokens']
         }
+
     list_of_noise_value_lists = [x['noise_level'] for x in results]
     all_noise_values = list(chain.from_iterable(list_of_noise_value_lists))
     threshold = compute_ocr_threshold(all_noise_values)
+
     return {
         'result': results[0]['result'],
         'sample_indices': results[0]['sample_indices'],
@@ -215,14 +229,20 @@ def compute_slide_transitions_parallel_task(self, results, i, n, language=None):
             'fresh': False,
             'slide_tokens': results['slide_tokens']
         }
+
     all_sample_indices = results['sample_indices']
-    start_index = int(i*len(all_sample_indices)/n)
-    end_index = int((i+1)*len(all_sample_indices)/n)
+    start_index = int(i * len(all_sample_indices) / n)
+    end_index = int((i + 1) * len(all_sample_indices) / n)
     current_sample_indices = all_sample_indices[start_index:end_index]
-    slide_transition_list = \
-        compute_video_ocr_transitions(self.file_manager.generate_filepath(results['result']), current_sample_indices,
-                                      results['threshold'], results['hash_threshold'],
-                                      self.nlp_model.get_nlp_models(), language=language)
+    slide_transition_list = compute_video_ocr_transitions(
+        self.file_manager.generate_filepath(results['result']),
+        current_sample_indices,
+        results['threshold'],
+        results['hash_threshold'],
+        self.nlp_model.get_nlp_models(),
+        language=language
+    )
+
     return {
         'result': results['result'],
         'transitions': slide_transition_list,
@@ -241,8 +261,10 @@ def compute_slide_transitions_callback_task(self, results):
             'fresh': False,
             'slide_tokens': results[0]['slide_tokens']
         }
+
     list_of_slide_transition_lists = [x['transitions'] for x in results]
     all_transitions = list(chain.from_iterable(list_of_slide_transition_lists))
+
     return {
         'result': results[0]['result'],
         'slides': all_transitions,
@@ -255,46 +277,55 @@ def compute_slide_transitions_callback_task(self, results):
              name='video_2.detect_slides_callback', ignore_result=False,
              file_manager=file_management_config)
 def detect_slides_callback_task(self, results, token):
-    if results['fresh']:
-        # Delete non-slide frames from the frames directory
-        list_of_slides = [(FRAME_FORMAT_PNG) % (x) for x in results['slides']]
-        list_of_ocr_results = [(TESSERACT_OCR_FORMAT) % (x) for x in results['slides']]
-        base_folder = results['result']
-        base_folder_with_path = self.file_manager.generate_filepath(base_folder)
-        for f in os.listdir(base_folder_with_path):
-            if f not in list_of_slides and f not in list_of_ocr_results:
-                os.remove(os.path.join(base_folder_with_path, f))
-        # Renaming the `all_frames` directory to `slides`
-        slides_folder = base_folder.replace('_all_frames', '_slides')
-        slides_folder_with_path = self.file_manager.generate_filepath(slides_folder)
-        # Make sure the slides folder doesn't already exist, and recursively delete it if it does (force==True)
-        if os.path.exists(slides_folder_with_path) and os.path.isdir(slides_folder_with_path):
-            shutil.rmtree(slides_folder_with_path)
-        # Now rename _all_frames to _slides
-        os.rename(base_folder_with_path,
-                  slides_folder_with_path)
-        slide_tokens = [os.path.join(slides_folder, s) for s in list_of_slides]
-        ocr_tokens = [os.path.join(slides_folder, s) for s in list_of_ocr_results]
-        slide_tokens = {i+1: {'token': slide_tokens[i], 'timestamp': results['slides'][i]}
-                        for i in range(len(slide_tokens))}
-        ocr_tokens = {i+1:ocr_tokens[i] for i in range(len(ocr_tokens))}
-        current_datetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        # Inserting fresh results into the database
-        for slide_number in slide_tokens:
-            db_manager = SlideDBCachingManager()
-            db_manager.insert_or_update_details(
-                slide_tokens[slide_number]['token'],
-                {
-                    'origin_token': token,
-                    'timestamp': slide_tokens[slide_number]['timestamp'],
-                    'slide_number': slide_number,
-                    'ocr_tesseract_token': ocr_tokens[slide_number],
-                    'date_added': current_datetime
-                }
-            )
-    else:
-        # Getting cached or null results that have been passed along the chain of tasks
-        slide_tokens = results['slide_tokens']
+    # Getting cached or null results that have been passed along the chain of tasks
+    if not results['fresh']:
+        return {
+            'slide_tokens': results['slide_tokens'],
+            'fresh': results['fresh']
+        }
+
+    # Delete non-slide frames from the frames directory
+    list_of_slides = [FRAME_FORMAT_PNG % x for x in results['slides']]
+    list_of_ocr_results = [TESSERACT_OCR_FORMAT % x for x in results['slides']]
+    base_folder = results['result']
+    base_folder_with_path = self.file_manager.generate_filepath(base_folder)
+    for f in os.listdir(base_folder_with_path):
+        if f not in list_of_slides and f not in list_of_ocr_results:
+            os.remove(os.path.join(base_folder_with_path, f))
+
+    # Renaming the `all_frames` directory to `slides`
+    slides_folder = base_folder.replace('_all_frames', '_slides')
+    slides_folder_with_path = self.file_manager.generate_filepath(slides_folder)
+
+    # Make sure the slides folder doesn't already exist, and recursively delete it if it does (force==True)
+    if os.path.exists(slides_folder_with_path) and os.path.isdir(slides_folder_with_path):
+        shutil.rmtree(slides_folder_with_path)
+
+    # Now rename _all_frames to _slides
+    os.rename(base_folder_with_path, slides_folder_with_path)
+    slide_tokens = [os.path.join(slides_folder, s) for s in list_of_slides]
+    ocr_tokens = [os.path.join(slides_folder, s) for s in list_of_ocr_results]
+    slide_tokens = {
+        i + 1: {'token': slide_tokens[i], 'timestamp': results['slides'][i]}
+        for i in range(len(slide_tokens))
+    }
+    ocr_tokens = {i + 1: ocr_tokens[i] for i in range(len(ocr_tokens))}
+    current_datetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+    # Inserting fresh results into the database
+    for slide_number in slide_tokens:
+        db_manager = SlideDBCachingManager()
+        db_manager.insert_or_update_details(
+            slide_tokens[slide_number]['token'],
+            {
+                'origin_token': token,
+                'timestamp': slide_tokens[slide_number]['timestamp'],
+                'slide_number': slide_number,
+                'ocr_tesseract_token': ocr_tokens[slide_number],
+                'date_added': current_datetime
+            }
+        )
+
     return {
         'slide_tokens': slide_tokens,
         'fresh': results['fresh']
