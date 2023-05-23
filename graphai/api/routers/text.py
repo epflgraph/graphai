@@ -1,17 +1,23 @@
+from fastapi import APIRouter
+from celery import chain, group
 from typing import Optional
 
 import pandas as pd
 
-from fastapi import APIRouter
-
-from celery import chain, group
-
-from graphai.api.common.celery_tools import get_n_celery_workers
-
-from graphai.api.schemas.text import *
-
-from graphai.api.celery_tasks.text import extract_keywords_task, wikisearch_task, wikisearch_callback_task, compute_scores_task, aggregate_and_filter_task, text_test_task
-
+from graphai.api.schemas.text import (
+    KeywordsRequest,
+    KeywordsResponse,
+    WikifyRequest,
+    WikifyResponse,
+)
+from graphai.api.celery_tasks.text import (
+    extract_keywords_task,
+    wikisearch_task,
+    wikisearch_callback_task,
+    compute_scores_task,
+    aggregate_and_filter_task,
+    text_test_task,
+)
 
 pd.set_option('display.max_rows', 400)
 pd.set_option('display.max_columns', 500)

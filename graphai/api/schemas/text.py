@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from typing import List, Optional
+from typing import List
 
 
 class WikifyRequest(BaseModel):
@@ -12,12 +12,6 @@ class WikifyRequest(BaseModel):
         description="Raw text to be wikified",
         example="To draw a straight line from any point to any point.\nTo produce a finite straight line continuously in a straight line.\nTo describe a circle with any center and radius.\nThat all right angles equal one another.\nThat, if a straight line falling on two straight lines makes the interior angles on the same side less than two right angles, the two straight lines, if produced indefinitely, meet on that side on which are the angles less than the two right angles."
     )
-
-    # @root_validator
-    # def has_input(cls, values):
-    #     if 'raw_text' not in values and 'keyword_list' not in values:
-    #         raise ValueError('At least one of {raw_text, keyword_list} must be provided.')
-    #     return values
 
 
 class WikifyResponseElem(BaseModel):
@@ -82,7 +76,6 @@ class WikifyResponseElem(BaseModel):
 
     class Config:
         schema_extra = {
-            'examples': [],
             'examples': [
                 {
                     "PageID": 1196,

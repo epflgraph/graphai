@@ -74,7 +74,7 @@ class DB:
             if isinstance(conditions[key], dict):
                 if key == 'NOT':
                     subconditions_list, subvalues = self.build_conditions_list(conditions[key])
-                    conditions_list.append('NOT (' + f' AND '.join(subconditions_list) + ')')
+                    conditions_list.append('NOT (' + ' AND '.join(subconditions_list) + ')')
                     values.extend(subvalues)
                 elif key in ['AND', 'OR']:
                     subconditions_list, subvalues = self.build_conditions_list(conditions[key])

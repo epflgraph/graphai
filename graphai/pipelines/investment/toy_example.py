@@ -1,6 +1,7 @@
+import numpy as np
 import pandas as pd
 
-from graphai.scripts.investment.concept_configuration import *
+from graphai.pipelines.investment.concept_configuration import normalise_graph, compute_affinities
 
 # x = pd.DataFrame({
 #     'InvestorID': ['A', 'A', 'A', 'B', 'B', 'B', 'C', 'C'],

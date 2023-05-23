@@ -126,7 +126,7 @@ class ES:
 
             context = create_default_context(cafile=self.cafile)
             self.es = Elasticsearch([f'https://{self.username}:{password}@{self.host}:{self.port}'], ssl_context=context, request_timeout=3600)
-        except Exception as e:
+        except Exception:
             print('Warning: Unable to connect to the elasticsearch cluster. File config/es.ini is missing or has incorrect format.')
             self.es = None
 

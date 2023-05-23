@@ -1,16 +1,33 @@
-from celery import group
 from fastapi import APIRouter
 from fastapi.responses import FileResponse
+from celery import group
 
-from graphai.api.schemas.video import *
-from graphai.api.schemas.common import *
+from graphai.api.schemas.common import TaskIDResponse, FileRequest
+from graphai.api.schemas.video import (
+    RetrieveURLRequest,
+    RetrieveURLResponse,
+    ExtractAudioRequest,
+    ExtractAudioResponse,
+    DetectSlidesRequest,
+    DetectSlidesResponse,
+)
 
-from graphai.api.celery_tasks.video import retrieve_file_from_url_task, get_file_task, extract_audio_task, \
-    extract_audio_callback_task, extract_and_sample_frames_task, compute_noise_level_parallel_task, \
-    compute_noise_threshold_callback_task, compute_slide_transitions_parallel_task, \
-    compute_slide_transitions_callback_task, detect_slides_callback_task, dummy_task
 from graphai.api.celery_tasks.common import format_api_results
+from graphai.api.celery_tasks.video import (
+    retrieve_file_from_url_task,
+    get_file_task,
+    extract_audio_task,
+    extract_audio_callback_task,
+    extract_and_sample_frames_task,
+    compute_noise_level_parallel_task,
+    compute_noise_threshold_callback_task,
+    compute_slide_transitions_parallel_task,
+    compute_slide_transitions_callback_task,
+    detect_slides_callback_task,
+    dummy_task,
+)
 from graphai.core.interfaces.celery_config import get_task_info
+
 
 # Initialise video router
 router = APIRouter(
@@ -59,8 +76,10 @@ async def get_file(data: FileRequest):
 async def extract_audio(data: ExtractAudioRequest):
     token = data.token
     force = data.force
-    task = (extract_audio_task.s(token, force) |
-            extract_audio_callback_task.s(token)).apply_async(priority=2)
+    task = (
+        extract_audio_task.s(token, force)
+        | extract_audio_callback_task.s(token)
+    ).apply_async(priority=2)
     return {'task_id': task.id}
 
 
@@ -88,14 +107,15 @@ async def detect_slides(data: DetectSlidesRequest):
     language = data.language
     n_jobs = 8
     hash_thresh = 0.85
-    task = (extract_and_sample_frames_task.s(token, force) |
-            group(compute_noise_level_parallel_task.s(i, n_jobs, language) for i in range(n_jobs)) |
-            compute_noise_threshold_callback_task.s(hash_thresh) |
-            dummy_task.s() |
-            group(compute_slide_transitions_parallel_task.s(i, n_jobs, language) for i in range(n_jobs)) |
-            compute_slide_transitions_callback_task.s() |
-            detect_slides_callback_task.s(token)). \
-        apply_async(priority=2)
+    task = (
+        extract_and_sample_frames_task.s(token, force)
+        | group(compute_noise_level_parallel_task.s(i, n_jobs, language) for i in range(n_jobs))
+        | compute_noise_threshold_callback_task.s(hash_thresh)
+        | dummy_task.s()
+        | group(compute_slide_transitions_parallel_task.s(i, n_jobs, language) for i in range(n_jobs))
+        | compute_slide_transitions_callback_task.s()
+        | detect_slides_callback_task.s(token)
+    ).apply_async(priority=2)
     return {'task_id': task.id}
 
 

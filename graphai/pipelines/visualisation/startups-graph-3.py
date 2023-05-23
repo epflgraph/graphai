@@ -5,7 +5,7 @@ from graphai.core.interfaces.db import DB
 
 from graphai.core.utils.breadcrumb import Breadcrumb
 
-from graphai.scripts.investment.concept_configuration import normalise
+from graphai.pipelines.investment.concept_configuration import normalise
 
 
 def print_summary(startups, concepts, startups_concepts, concepts_concepts):
@@ -56,8 +56,8 @@ def create_startups_graph():
 
     # gpt_seed_concept_ids = [1055890, 25784]
 
-    seed_concept_ids = [3679268, 5042951, 4538124, 12637359, 23099899, 9528025, 18413531, 29501, 1055890, 25784,
-                        33094374]
+    # seed_concept_ids = [3679268, 5042951, 4538124, 12637359, 23099899, 9528025, 18413531, 29501, 1055890, 25784,
+    #                     33094374]
 
     # excluded_concept_ids = [66618, 31898, 26515241, 52634071, 30242372, 7726829, 27447253, 21782795, 16775, 326324,
     #                         32178, 3201, 15030, 60779659, 994228, 1021673, 12545698, 1407416, 15143713, 7694290,
@@ -72,10 +72,10 @@ def create_startups_graph():
     #                         241812, 10474719, 25997913, 548173, 1908142, 609614, 367276, 31146, 1638605, 308906, 48180,
     #                         1886820, 9559, 13764124, 1105937, 375416, 460253, 8286675, 146103, 28748]
 
-    excluded_concept_ids = [72576, 3694602, 24714, 1105937, 241812, 1866009, 2769817, 13764124, 212253, 395167,
-                            2925093, 154665, 308906, 1225002, 31146, 1908142, 48180, 146103, 487226, 2518458, 17554500,
-                            8267, 28748, 1638605, 19022, 548173, 3378256, 26833, 609614, 8286675, 9559, 25997913,
-                            10474719, 9028960, 1886820, 25065, 1134, 277237, 375416]
+    # excluded_concept_ids = [72576, 3694602, 24714, 1105937, 241812, 1866009, 2769817, 13764124, 212253, 395167,
+    #                         2925093, 154665, 308906, 1225002, 31146, 1908142, 48180, 146103, 487226, 2518458, 17554500,
+    #                         8267, 28748, 1638605, 19022, 548173, 3378256, 26833, 609614, 8286675, 9559, 25997913,
+    #                         10474719, 9028960, 1886820, 25065, 1134, 277237, 375416]
 
     gexf_filename = 'startups.gexf'
 
@@ -322,7 +322,7 @@ def create_startups_graph():
 
     ############################################################
 
-    bc.log(f'Exporting in gexf format at {gexf_filename}...'    )
+    bc.log(f'Exporting in gexf format at {gexf_filename}...')
 
     nx.write_gexf(G, gexf_filename)
 

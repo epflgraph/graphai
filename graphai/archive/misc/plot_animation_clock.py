@@ -16,10 +16,10 @@ def init():
 
 
 def animate(i):
-    x1 = [0, np.cos(-2 * np.pi * i/200)]
-    y1 = [0, np.sin(-2 * np.pi * i/200)]
-    x2 = [0, 0.5 * np.cos((-2 * np.pi * i/200) / 60)]
-    y2 = [0, 0.5 * np.sin((-2 * np.pi * i/200) / 60)]
+    x1 = [0, np.cos(-2 * np.pi * i / 200)]
+    y1 = [0, np.sin(-2 * np.pi * i / 200)]
+    x2 = [0, 0.5 * np.cos((-2 * np.pi * i / 200) / 60)]
+    y2 = [0, 0.5 * np.sin((-2 * np.pi * i / 200) / 60)]
     line1.set_data(x1, y1)
     line2.set_data(x2, y2)
     return [line1, line2]

@@ -1,15 +1,33 @@
-from celery import group, chain
 from fastapi import APIRouter
+from celery import group, chain
+
 from graphai.api.schemas.common import TaskIDResponse
-from graphai.api.schemas.translation import TranslationRequest, TranslationResponse, \
-    TextDetectLanguageRequest, TextDetectLanguageResponse, TextFingerprintRequest, TextFingerprintResponse
-from graphai.api.celery_tasks.translation import translate_text_task, translate_text_callback_task, \
-    detect_text_language_task, compute_text_fingerprint_task, compute_text_fingerprint_callback_task, \
-    text_fingerprint_find_closest_retrieve_from_db_task, text_fingerprint_find_closest_parallel_task, \
-    text_fingerprint_find_closest_callback_task, retrieve_text_fingerprint_callback_task
-from graphai.core.interfaces.celery_config import get_task_info
-from graphai.api.celery_tasks.common import format_api_results, ignore_fingerprint_results_callback_task
+from graphai.api.schemas.translation import (
+    TranslationRequest,
+    TranslationResponse,
+    TextDetectLanguageRequest,
+    TextDetectLanguageResponse,
+    TextFingerprintRequest,
+    TextFingerprintResponse,
+)
+
+from graphai.api.celery_tasks.translation import (
+    translate_text_task,
+    translate_text_callback_task,
+    detect_text_language_task,
+    compute_text_fingerprint_task,
+    compute_text_fingerprint_callback_task,
+    text_fingerprint_find_closest_retrieve_from_db_task,
+    text_fingerprint_find_closest_parallel_task,
+    text_fingerprint_find_closest_callback_task,
+    retrieve_text_fingerprint_callback_task,
+)
+from graphai.api.celery_tasks.common import (
+    format_api_results,
+    ignore_fingerprint_results_callback_task,
+)
 from graphai.core.common.video import md5_text
+from graphai.core.interfaces.celery_config import get_task_info
 
 
 router = APIRouter(
@@ -28,7 +46,7 @@ def generate_text_token(s, src, tgt):
 
 
 def get_text_fingerprint_chain_list(token, text, src, tgt, force, min_similarity=1, n_jobs=8,
-                                     ignore_fp_results=False, results_to_return=None):
+                                    ignore_fp_results=False, results_to_return=None):
     equality_conditions = generate_src_tgt_dict(src, tgt)
     task_list = [
         compute_text_fingerprint_task.s(token, text, force),

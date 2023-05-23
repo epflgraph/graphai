@@ -16,6 +16,7 @@ def format_api_results(id, name, status, result):
 def fingerprint_lookup_retrieve_from_db(results, token, db_manager, equality_conditions=None):
     target_fingerprint = results['result']
     fresh = results['fresh']
+
     # If the fingerprint computation has been unsuccessful or if cached results are being returned,
     # then there it is not necessary (or even possible, in the former case) to compute the closest
     # audio fingerprint, so we just pass the fingerprinting results along.
@@ -25,6 +26,7 @@ def fingerprint_lookup_retrieve_from_db(results, token, db_manager, equality_con
             'cache_count': None,
             'fp_results': results
         }
+
     # Retrieving all the tokens and their fingerprints. Since at least one audio has been extracted
     # (i.e. this one), this result is never null. In addition, there's at least one non-null fingerprint
     # value (again, for the present file).
@@ -40,6 +42,7 @@ def fingerprint_lookup_retrieve_from_db(results, token, db_manager, equality_con
 def fingerprint_lookup_parallel(input_dict, token, i, n_total, min_similarity, db_manager, data_type='audio',
                                 equality_conditions=None):
     assert data_type in ['audio', 'image', 'text']
+
     # This parallel task's "closest fingerprint" result is null if either
     # a) the computation has been disabled (indicated by the token list being null), or
     # b) there are no previous fingerprints (indicated by the list of all tokens being empty)
@@ -50,8 +53,10 @@ def fingerprint_lookup_parallel(input_dict, token, i, n_total, min_similarity, d
             'max_score': None,
             'fp_results': input_dict['fp_results']
         }
+
     # Get the total number of tokens and fingerprints
     n_tokens_all = input_dict['cache_count']
+
     # Compute the start and end indices
     start_index = int(i / n_total * n_tokens_all)
     end_index = int((i + 1) / n_total * n_tokens_all)
@@ -63,10 +68,12 @@ def fingerprint_lookup_parallel(input_dict, token, i, n_total, min_similarity, d
             'max_score': None,
             'fp_results': input_dict['fp_results']
         }
+
     tokens_and_fingerprints = db_manager.get_all_details(
         ['fingerprint'], start=start_index, limit=limit, exclude_token=token, using_most_similar=False,
         allow_nulls=False, equality_conditions=equality_conditions
     )
+
     if tokens_and_fingerprints is None or len(tokens_and_fingerprints) == 0:
         return {
             'closest': None,
@@ -74,8 +81,10 @@ def fingerprint_lookup_parallel(input_dict, token, i, n_total, min_similarity, d
             'max_score': None,
             'fp_results': input_dict['fp_results']
         }
+
     all_tokens = list(tokens_and_fingerprints.keys())
     all_fingerprints = [tokens_and_fingerprints[key]['fingerprint'] for key in all_tokens]
+
     # Find the closest token for this batch
     # Note: null fingerprint values are automatically handled and don't need to be filtered out.
     if data_type == 'audio':
@@ -83,12 +92,14 @@ def fingerprint_lookup_parallel(input_dict, token, i, n_total, min_similarity, d
     else:
         # Text and image fingerprinting are done the same way, so 'image' and 'text' are treated as the same here.
         find_closest_func = find_closest_image_fingerprint_from_list
+
     closest_token, closest_fingerprint, score = find_closest_func(
         input_dict['target_fp'],
         all_fingerprints,
         all_tokens,
         min_similarity=min_similarity
     )
+
     return {
         'closest': closest_token,
         'closest_fp': closest_fingerprint,

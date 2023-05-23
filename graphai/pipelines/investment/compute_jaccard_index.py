@@ -22,7 +22,7 @@ def compute_jaccard_index():
     # FETCH GRAPH FROM DATABASE                                #
     ############################################################
 
-    bc.log(f'Fetching tables from database...')
+    bc.log('Fetching tables from database...')
     bc.indent()
 
     ############################################################
@@ -86,7 +86,7 @@ def compute_jaccard_index():
 
     ############################################################
 
-    bc.log(f'Preparing potential edges...')
+    bc.log('Preparing potential edges...')
     bc.indent()
 
     ############################################################
@@ -131,7 +131,7 @@ def compute_jaccard_index():
     # POTENTIAL EDGES - INTERSECTION TERMS                     #
     ############################################################
 
-    bc.log(f'Computing intersection terms...')
+    bc.log('Computing intersection terms...')
     bc.indent()
 
     ############################################################
@@ -176,7 +176,7 @@ def compute_jaccard_index():
     # POTENTIAL EDGES - LATERAL TERMS                          #
     ############################################################
 
-    bc.log(f'Computing lateral terms...')
+    bc.log('Computing lateral terms...')
     bc.indent()
 
     ############################################################

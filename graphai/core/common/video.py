@@ -1,36 +1,39 @@
-import json
 import os
-import io
-import random
-import re
 import sys
-import time
+import io
 import configparser
-from datetime import datetime
-import glob
 import math
-import hashlib
+import glob
+import re
+import random
+import json
+import time
+from datetime import datetime
+import gzip
+import wget
+from subprocess import call, PIPE
 
+import numpy as np
+
+import hashlib
 import acoustid
 import chromaprint
 import ffmpeg
 import imagehash
 from PIL import Image
 import langdetect
+import pysbd
+import fingerprint
+from fuzzywuzzy import fuzz
+
 import pytesseract
 from google.cloud import vision
 import spacy
-import gzip
-import numpy as np
-import wget
-from subprocess import call, PIPE
 import whisper
-import fingerprint
-from fuzzywuzzy import fuzz
-from .caching import make_sure_path_exists
-from graphai.definitions import CONFIG_DIR
 from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
-import pysbd
+
+from graphai.definitions import CONFIG_DIR
+from graphai.core.common.caching import make_sure_path_exists
 
 
 FRAME_FORMAT_PNG = 'frame-%06d.png'
@@ -65,15 +68,15 @@ def write_json_file(filename_with_path, d):
 
 
 def read_text_file(filename_with_path):
-    f=open(filename_with_path, 'r')
-    result=f.read()
+    f = open(filename_with_path, 'r')
+    result = f.read()
     f.close()
     return result
 
 
 def read_json_file(filename_with_path):
-    f=open(filename_with_path, 'r')
-    result=json.load(f)
+    f = open(filename_with_path, 'r')
+    result = json.load(f)
     f.close()
     return result
 
@@ -84,7 +87,7 @@ def generate_random_token():
     Returns:
         Random token
     """
-    return ('%.06f' % time.time()).replace('.','') + '%08d'%random.randint(0,int(1e7))
+    return ('%.06f' % time.time()).replace('.', '') + '%08d' % random.randint(0, int(1e7))
 
 
 def retrieve_file_from_url(url, output_filename_with_path, output_token):
@@ -99,7 +102,7 @@ def retrieve_file_from_url(url, output_filename_with_path, output_token):
         Output token if successful, None otherwise
     """
     try:
-        response = wget.download(url, output_filename_with_path)
+        wget.download(url, output_filename_with_path)
     except Exception as e:
         print(e, file=sys.stderr)
         return None
@@ -147,14 +150,14 @@ def md5_video_or_audio(input_filename_with_path, video=True):
         # video
         try:
             in_stream = in_stream.video
-        except:
+        except Exception:
             print("No video found. If you're trying to hash an audio file, provide video=False.")
             return None
     else:
         # audio
         try:
             in_stream = in_stream.audio
-        except:
+        except Exception:
             print("No audio found. If you're trying to has the audio track of a video file, "
                   "make sure your video has audio.")
             return None
@@ -182,8 +185,7 @@ def detect_audio_format_and_duration(input_filename_with_path, input_token):
     except Exception as e:
         print(e, file=sys.stderr)
         return None, None
-    audio_type = probe_results['streams'][1]['codec_name']
-    output_suffix='_audio.ogg'
+    output_suffix = '_audio.ogg'
     output_token = input_token + output_suffix
     return output_token, float(probe_results['format']['duration'])
 
@@ -247,13 +249,15 @@ def find_beginning_and_ending_silences(input_filename_with_path, distance_from_e
     """
     if not file_exists(input_filename_with_path):
         raise Exception(f'ffmpeg error: File {input_filename_with_path} does not exist')
-    _, results = ffmpeg.input(input_filename_with_path).filter('silencedetect', n=noise_thresh).\
-                output('pipe:', format='null').run(capture_stderr=True)
+    _, results = ffmpeg.input(input_filename_with_path)\
+                       .filter('silencedetect', n=noise_thresh)\
+                       .output('pipe:', format='null')\
+                       .run(capture_stderr=True)
     results = results.decode('utf8')
     # the audio length will be accurate since the filter forces a decoding of the audio file
     audio_length = re.findall(r'time=\d{2}:\d{2}:\d{2}.\d+', results)
     audio_length = [datetime.strptime(x.strip('time=').strip(), '%H:%M:%S.%f') for x in audio_length]
-    audio_length = max([t.hour*3600+t.minute*60+t.second+t.microsecond/1e6 for t in audio_length])
+    audio_length = max([t.hour * 3600 + t.minute * 60 + t.second + t.microsecond / 1e6 for t in audio_length])
     results = re.split(r'[\n\r]', results)
     results = [x for x in results if '[silencedetect' in x]
     results = [x.split(']')[1].strip() for x in results]
@@ -356,18 +360,17 @@ def perceptual_hash_text(s, min_window_length=5, max_window_length=50, hash_len=
     string_length = len(s)
     window_length = max([min_window_length, string_length // hash_len])
     window_length = min([max_window_length, window_length])
-    kgram_length = max([10, int(window_length/2)])
+    kgram_length = max([10, int(window_length / 2)])
 
     fprinter = fingerprint.Fingerprint(kgram_len=kgram_length, window_len=window_length, base=10, modulo=256)
     hash_numbers = fprinter.generate(str=s)
     if len(hash_numbers) > hash_len:
-        sample_indices = np.linspace(start=0, stop=len(hash_numbers)-1, num=hash_len-1, endpoint=False).\
-                            tolist()
-        sample_indices.append(len(hash_numbers)-1)
+        sample_indices = np.linspace(start=0, stop=len(hash_numbers) - 1, num=hash_len - 1, endpoint=False).tolist()
+        sample_indices.append(len(hash_numbers) - 1)
         sample_indices = [int(x) for x in sample_indices]
         hash_numbers = [hash_numbers[i] for i in sample_indices]
     elif len(hash_numbers) < hash_len:
-        hash_numbers = hash_numbers + [(0,0)] * (32-len(hash_numbers))
+        hash_numbers = hash_numbers + [(0, 0)] * (32 - len(hash_numbers))
     fp_result = ''.join([f"{n[0]:02x}" for n in hash_numbers])
     return fp_result
 
@@ -443,8 +446,10 @@ def find_closest_audio_fingerprint_from_list(target_fp, fp_list, token_list, min
     """
     Finds closest audio fingerprint from list
     """
-    return find_closest_fingerprint_from_list(target_fp, fp_list, token_list, min_similarity,
-                                       decoder_func=chromaprint.decode_fingerprint)
+    return find_closest_fingerprint_from_list(
+        target_fp, fp_list, token_list, min_similarity,
+        decoder_func=chromaprint.decode_fingerprint
+    )
 
 
 def find_closest_image_fingerprint_from_list(target_fp, fp_list, token_list, min_similarity=0.8):
@@ -498,9 +503,9 @@ def generate_frame_sample_indices(input_folder_with_path, step=16):
         List of indices
     """
     # Get number of frames
-    n_frames = len(glob.glob(os.path.join(input_folder_with_path+'/*.png')))
+    n_frames = len(glob.glob(os.path.join(input_folder_with_path + '/*.png')))
     # Generate list of frame sample indices
-    frame_sample_indices = list(np.arange(1, n_frames-step+1, step))+[n_frames-1]
+    frame_sample_indices = list(np.arange(1, n_frames - step + 1, step)) + [n_frames - 1]
     # Return frame sample indices
     return frame_sample_indices
 
@@ -535,8 +540,7 @@ def perform_tesseract_ocr(image_path, language=None):
     if not file_exists(image_path):
         print(f'Error: File {image_path} does not exist')
         return None
-    return pytesseract.image_to_string(Image.open(image_path),
-                                       lang={'en':'eng', 'fr':'fra'}[language])
+    return pytesseract.image_to_string(Image.open(image_path), lang={'en': 'eng', 'fr': 'fra'}[language])
 
 
 def tesseract_ocr_or_get_cached(ocr_path, image_path, language):
@@ -592,14 +596,14 @@ def frame_ocr_distance(input_folder_with_path, k1, k2, nlp_models, language=None
     nlp_2 = nlp_models[language](extracted_text2)
 
     # Calculate distance score
-    if np.max([len(nlp_1), len(nlp_2)])<32:
+    if np.max([len(nlp_1), len(nlp_2)]) < 32:
         text_dif = 0
-    elif np.min([len(nlp_1), len(nlp_2)])<4 and np.max([len(nlp_1), len(nlp_2)])>=32:
+    elif np.min([len(nlp_1), len(nlp_2)]) < 4 and np.max([len(nlp_1), len(nlp_2)]) >= 32:
         text_dif = 1
     else:
         text_sim = nlp_1.similarity(nlp_2)
         text_dif = 1 - text_sim
-        text_dif = text_dif * (1 - np.exp(-np.mean([len(nlp_1), len(nlp_2)])/32))
+        text_dif = text_dif * (1 - np.exp(-np.mean([len(nlp_1), len(nlp_2)]) / 32))
 
     # Return distance score
     return text_dif
@@ -642,7 +646,7 @@ def compute_ocr_noise_level(input_folder_with_path, frame_sample_indices, nlp_mo
     for k in range(1, len(frame_sample_indices)):
         d = frame_ocr_distance(input_folder_with_path, frame_sample_indices[k - 1], frame_sample_indices[k],
                                nlp_models, language)
-        if d<0.01 and d>0.0001:
+        if 0.0001 < d < 0.01:
             distance_list.append(d)
     return distance_list
 
@@ -657,7 +661,7 @@ def compute_ocr_threshold(distance_list, default_threshold=0.1):
     Returns:
         The noise threshold
     """
-    threshold = float(5*np.median(distance_list))
+    threshold = float(5 * np.median(distance_list))
     if math.isnan(threshold):
         return default_threshold
     return threshold
@@ -711,8 +715,15 @@ def compute_video_ocr_transitions(input_folder_with_path, frame_sample_indices, 
                                   nlp_models, language=None):
     transition_list = list()
     for k in range(1, len(frame_sample_indices)):
-        [t,d] = frame_ocr_transition(input_folder_with_path, frame_sample_indices[k - 1], frame_sample_indices[k],
-                                     ocr_dist_threshold, hash_dist_threshold, nlp_models, language)
+        [t, d] = frame_ocr_transition(
+            input_folder_with_path,
+            frame_sample_indices[k - 1],
+            frame_sample_indices[k],
+            ocr_dist_threshold,
+            hash_dist_threshold,
+            nlp_models,
+            language
+        )
         if t is not None and t < frame_sample_indices[-1]:
             transition_list.append(t)
     return transition_list
@@ -723,7 +734,7 @@ def detect_text_language(s):
         return None
     try:
         return langdetect.detect(s)
-    except langdetect.lang_detect_exception.LangDetectException as e:
+    except langdetect.lang_detect_exception.LangDetectException:
         return None
 
 
@@ -735,12 +746,11 @@ class WhisperTranscriptionModel():
             print('Reading model configuration from file')
             config_contents.read(f'{CONFIG_DIR}/models.ini')
             self.model_type = config_contents['WHISPER'].get('model_type', fallback='medium')
-        except Exception as e:
+        except Exception:
             print(f'Could not read file {CONFIG_DIR}/models.ini or '
                   f'file does not have section [WHISPER], falling back to defaults.')
             self.model_type = 'medium'
         self.model = None
-
 
     def load_model_whisper(self):
         """
@@ -755,7 +765,6 @@ class WhisperTranscriptionModel():
         if self.model is None:
             print('Actually loading Whisper model...')
             self.model = whisper.load_model(self.model_type, device=None, in_memory=True)
-
 
     def detect_audio_segment_lang_whisper(self, input_filename_with_path):
         """
@@ -776,7 +785,6 @@ class WhisperTranscriptionModel():
         # detect the spoken language
         _, probs = self.model.detect_language(mel)
         return max(probs, key=probs.get)
-
 
     def transcribe_audio_whisper(self, input_filename_with_path, force_lang=None, verbose=False):
         """
@@ -802,15 +810,14 @@ class WhisperTranscriptionModel():
             if force_lang is None:
                 result = self.model.transcribe(input_filename_with_path, verbose=verbose, fp16=True)
             else:
-                result = self.model.transcribe(input_filename_with_path, verbose=verbose,
-                                          language=force_lang, fp16=True)
+                result = self.model.transcribe(input_filename_with_path, verbose=verbose, language=force_lang, fp16=True)
         except Exception as e:
             print(e, file=sys.stderr)
             return None
         return result
 
 
-class NLPModels():
+class NLPModels:
     def __init__(self):
         spacy.prefer_gpu()
         self.nlp_models = None
@@ -823,8 +830,8 @@ class NLPModels():
         """
         if self.nlp_models is None:
             self.nlp_models = {
-                'en' : spacy.load('en_core_web_lg'),
-                'fr'  : spacy.load('fr_core_news_md')
+                'en': spacy.load('en_core_web_lg'),
+                'fr': spacy.load('fr_core_news_md')
             }
         return self.nlp_models
 
@@ -834,10 +841,10 @@ class GoogleOCRModel():
         self.model = None
         config_contents = configparser.ConfigParser()
         try:
-            print(f'Reading API key from file')
+            print('Reading API key from file')
             config_contents.read(f'{CONFIG_DIR}/models.ini')
             self.api_key = config_contents['GOOGLE'].get('api_key', fallback=None)
-        except Exception as e:
+        except Exception:
             self.api_key = None
         if self.api_key is None:
             print(f'Could not read file {CONFIG_DIR}/models.ini or '
@@ -857,7 +864,7 @@ class GoogleOCRModel():
                 try:
                     self.model = vision.ImageAnnotatorClient(client_options={"api_key": self.api_key})
                     return True
-                except:
+                except Exception:
                     print('Failed to connect to Google API!')
                     return False
             else:
@@ -865,7 +872,6 @@ class GoogleOCRModel():
                 return False
         else:
             return True
-
 
     def perform_ocr(self, input_filename_with_path):
         """
@@ -901,7 +907,7 @@ class GoogleOCRModel():
                 else:
                     results = self.model.text_detection(image=image_object)
                 break
-            except:
+            except Exception:
                 print('Failed to call OCR engine. Trying again in 60 seconds ...')
                 time.sleep(5)
         if results is not None:

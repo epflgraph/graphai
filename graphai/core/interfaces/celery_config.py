@@ -1,20 +1,22 @@
 import os
+import configparser
 from functools import lru_cache
 
 from celery import current_app as current_celery_app
 from celery.result import AsyncResult
 from kombu import Queue
-import configparser
+
 from graphai.definitions import CONFIG_DIR
 
 DEFAULT_BROKER = "amqp://guest:guest@localhost:5672//"
 DEFAULT_CACHE = "redis://localhost:6379/0"
 
+
 def route_task(name, args, kwargs, options, task=None, **kw):
-    if "." in name:
-        queue = name.split(".")[0]
-        return {"queue": queue}
-    return {"queue": "celery"}
+    if '.' in name:
+        queue = name.split('.')[0]
+        return {'queue': queue}
+    return {'queue': 'celery'}
 
 
 class BaseConfig:
@@ -26,7 +28,7 @@ class BaseConfig:
             config_contents.read(f'{CONFIG_DIR}/celery.ini')
             self.broker_url = config_contents['CELERY'].get('broker_url', fallback=DEFAULT_BROKER)
             self.result_backend = config_contents['CELERY'].get('result_backend', fallback=DEFAULT_CACHE)
-        except Exception as e:
+        except Exception:
             print(f'Could not read file {CONFIG_DIR}/celery.ini or '
                   f'file does not have section [CELERY], falling back to defaults.')
             self.broker_url = DEFAULT_BROKER

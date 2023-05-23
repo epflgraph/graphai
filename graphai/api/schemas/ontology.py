@@ -1,6 +1,7 @@
 from pydantic import BaseModel, Field
-from typing import List, Dict, Union
-from .common import TaskStatusResponse
+from typing import List, Union
+
+from graphai.api.schemas.common import TaskStatusResponse
 
 
 class TreeResponseElem(BaseModel):
