@@ -74,7 +74,7 @@ class ConceptsGraph:
 
         :math:`\\displaystyle score(s, t) = 1 - \\frac{1}{1 + \\ln(1 + rebound(s, t) * \\ln(out(s, t)))}`, with
 
-        :math:`\\displaystyle rebound(s, t) = \\frac{1 + \\min\\{in(s, t), out(s, t)\\}}{1 + \max\\{in(s, t), out(s, t)\\}}`,
+        :math:`\\displaystyle rebound(s, t) = \\frac{1 + \\min\\{in(s, t), out(s, t)\\}}{1 + \\max\\{in(s, t), out(s, t)\\}}`,
 
         :math:`in(s, t) =` number of paths from t to s,
 
@@ -159,8 +159,8 @@ class ConceptsGraph:
 
         concept_ids = list(results['PageID'].drop_duplicates())
         concepts_concepts = self.concepts_concepts[
-            self.concepts_concepts['SourcePageID'].isin(concept_ids) &
-            self.concepts_concepts['TargetPageID'].isin(concept_ids)
+            self.concepts_concepts['SourcePageID'].isin(concept_ids)
+            & self.concepts_concepts['TargetPageID'].isin(concept_ids)
         ]
         concepts_concepts = concepts_concepts.groupby(by='SourcePageID').aggregate(GraphScore=('NormalisedScore', 'sum')).reset_index()
         concepts_concepts['GraphScore'] = concepts_concepts['GraphScore'] / concepts_concepts['GraphScore'].max()
