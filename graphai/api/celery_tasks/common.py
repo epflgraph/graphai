@@ -39,7 +39,7 @@ def fingerprint_lookup_retrieve_from_db(results, token, db_manager, equality_con
 
 def fingerprint_lookup_parallel(input_dict, token, i, n_total, min_similarity, db_manager, data_type='audio',
                                 equality_conditions=None):
-    assert data_type in ['audio', 'image', 'text']
+    assert data_type in ['audio', 'image', 'text', 'video']
     # This parallel task's "closest fingerprint" result is null if either
     # a) the computation has been disabled (indicated by the token list being null), or
     # b) there are no previous fingerprints (indicated by the list of all tokens being empty)
@@ -81,7 +81,8 @@ def fingerprint_lookup_parallel(input_dict, token, i, n_total, min_similarity, d
     if data_type == 'audio':
         find_closest_func = find_closest_audio_fingerprint_from_list
     else:
-        # Text and image fingerprinting are done the same way, so 'image' and 'text' are treated as the same here.
+        # Text, video, and image fingerprinting are done the same way,
+        #  so they are all treated as the same here.
         find_closest_func = find_closest_image_fingerprint_from_list
     closest_token, closest_fingerprint, score = find_closest_func(
         input_dict['target_fp'],

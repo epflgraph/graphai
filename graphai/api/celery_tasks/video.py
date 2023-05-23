@@ -9,9 +9,11 @@ from graphai.api.common.video import file_management_config, local_ocr_nlp_model
 from graphai.core.common.video import retrieve_file_from_url, retrieve_file_from_kaltura, \
     detect_audio_format_and_duration, extract_audio_from_video, extract_frames, generate_frame_sample_indices, \
     compute_ocr_noise_level, compute_ocr_threshold, compute_video_ocr_transitions, generate_random_token, \
-    FRAME_FORMAT_PNG, TESSERACT_OCR_FORMAT
+    md5_video_or_audio, FRAME_FORMAT_PNG, TESSERACT_OCR_FORMAT
 from graphai.core.common.caching import AudioDBCachingManager, SlideDBCachingManager, VideoDBCachingManager
 from itertools import chain
+from graphai.api.celery_tasks.common import fingerprint_lookup_retrieve_from_db, \
+    fingerprint_lookup_parallel, fingerprint_lookup_callback
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
@@ -55,6 +57,75 @@ def retrieve_file_from_url_callback_task(self, results, url):
                                             }
                                             )
     return results
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
+             name='video_2.fingerprint_video', ignore_result=False,
+             file_manager=file_management_config)
+def compute_video_fingerprint_task(self, token, force=False):
+    db_manager = VideoDBCachingManager()
+    existing = db_manager.get_details(token, ['fingerprint'])[0]
+    if existing is None:
+        return {
+            'result': None,
+            'fresh': False
+        }
+    if not force and existing['fingerprint'] is not None:
+        return {
+            'result': existing['fingerprint'],
+            'fresh': False
+        }
+    input_filename_with_path = self.file_manager.generate_filepath(token)
+    fp = md5_video_or_audio(input_filename_with_path, video=True)
+    return {
+        'result': fp,
+        'fresh': fp is not None
+    }
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
+             name='video_2.fingerprint_video_callback', ignore_result=False,
+             file_manager=file_management_config)
+def compute_video_fingerprint_callback_task(self, results, token):
+    if results['fresh']:
+        db_manager = VideoDBCachingManager()
+        db_manager.insert_or_update_details(token,
+                                            {
+                                                'fingerprint': results['result'],
+                                            }
+                                            )
+    return results
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
+             name='video_2.video_fingerprint_find_closest_retrieve_from_db', ignore_result=False)
+def video_fingerprint_find_closest_retrieve_from_db_task(self, results, token):
+    db_manager = VideoDBCachingManager()
+    return fingerprint_lookup_retrieve_from_db(results, token, db_manager)
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
+             name='video_2.video_fingerprint_find_closest_parallel', ignore_result=False)
+def video_fingerprint_find_closest_parallel_task(self, input_dict, token, i, n_total,
+                                                min_similarity=1):
+    db_manager = VideoDBCachingManager()
+    return fingerprint_lookup_parallel(input_dict, token, i, n_total, min_similarity, db_manager, data_type='video')
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
+             name='video_2.video_fingerprint_find_closest_callback', ignore_result=False)
+def video_fingerprint_find_closest_callback_task(self, results_list, original_token):
+    db_manager = VideoDBCachingManager()
+    return fingerprint_lookup_callback(results_list, original_token, db_manager)
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
+             name='video_2.retrieve_video_fingerprint_final_callback', ignore_result=False)
+def retrieve_video_fingerprint_callback_task(self, results):
+    # Returning the fingerprinting results, which is the part of this task whose results are sent back to the user.
+    results_to_return = results['fp_results']
+    results_to_return['closest'] = results['closest']
+    return results_to_return
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},

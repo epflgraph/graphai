@@ -1,4 +1,4 @@
-from celery import group
+from celery import group, chain
 from fastapi import APIRouter
 from fastapi.responses import FileResponse
 
@@ -9,9 +9,12 @@ from graphai.api.celery_tasks.video import retrieve_file_from_url_task, retrieve
     get_file_task, extract_audio_task, extract_audio_callback_task, extract_and_sample_frames_task, \
     compute_noise_level_parallel_task, compute_noise_threshold_callback_task, \
     compute_slide_transitions_parallel_task, compute_slide_transitions_callback_task, detect_slides_callback_task, \
-    dummy_task
-from graphai.api.celery_tasks.common import format_api_results
+    dummy_task, compute_video_fingerprint_task, compute_video_fingerprint_callback_task, \
+    video_fingerprint_find_closest_retrieve_from_db_task, video_fingerprint_find_closest_parallel_task, \
+    video_fingerprint_find_closest_callback_task, retrieve_video_fingerprint_callback_task
+from graphai.api.celery_tasks.common import format_api_results, ignore_fingerprint_results_callback_task
 from graphai.core.interfaces.celery_config import get_task_info
+from graphai.core.common.video import FingerprintParameters
 
 # Initialise video router
 router = APIRouter(
@@ -19,6 +22,27 @@ router = APIRouter(
     tags=['video'],
     responses={404: {'description': 'Not found'}}
 )
+
+
+def get_video_fingerprint_chain_list(token, force, min_similarity=None, n_jobs=8,
+                                    ignore_fp_results=False, results_to_return=None):
+    if min_similarity is None:
+        fp_parameters = FingerprintParameters()
+        min_similarity = fp_parameters.get_min_sim_video()
+
+    task_list = [
+        compute_video_fingerprint_task.s(token, force),
+        compute_video_fingerprint_callback_task.s(token),
+        video_fingerprint_find_closest_retrieve_from_db_task.s(token),
+        group(video_fingerprint_find_closest_parallel_task.s(token, i, n_jobs, min_similarity)
+              for i in range(n_jobs)),
+        video_fingerprint_find_closest_callback_task.s(token)
+    ]
+    if ignore_fp_results:
+        task_list += [ignore_fingerprint_results_callback_task.s(results_to_return)]
+    else:
+        task_list += [retrieve_video_fingerprint_callback_task.s()]
+    return task_list
 
 
 @router.post('/retrieve_url', response_model=TaskIDResponse)
@@ -46,6 +70,34 @@ async def get_retrieve_file_status(task_id):
                 'token': task_results['token'],
                 'fresh': task_results['fresh'],
                 'successful': task_results['token'] is not None
+            }
+        else:
+            task_results = None
+    return format_api_results(full_results['id'], full_results['name'], full_results['status'], task_results)
+
+
+@router.post('/calculate_fingerprint/', response_model=TaskIDResponse)
+async def calculate_fingerprint(data: VideoFingerprintRequest):
+    token = data.token
+    force = data.force
+    task_list = get_video_fingerprint_chain_list(token, force,
+                                                ignore_fp_results=False)
+    task = chain(task_list)
+    task = task.apply_async(priority=6)
+    return {'task_id': task.id}
+
+
+@router.get('/calculate_fingerprint/status/{task_id}', response_model=VideoFingerprintResponse)
+async def calculate_fingerprint_status(task_id):
+    full_results = get_task_info(task_id)
+    task_results = full_results['results']
+    if task_results is not None:
+        if 'result' in task_results:
+            task_results = {
+                'result': task_results['result'],
+                'fresh': task_results['fresh'],
+                'closest_token': task_results['closest'],
+                'successful': task_results['result'] is not None
             }
         else:
             task_results = None

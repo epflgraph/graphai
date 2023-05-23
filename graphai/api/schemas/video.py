@@ -47,6 +47,49 @@ class RetrieveURLResponse(TaskStatusResponse):
     )
 
 
+class VideoFingerprintRequest(BaseModel):
+    token: str = Field(
+        title="Token",
+        description="Token of video to fingerprint"
+    )
+
+    force: bool = Field(
+        title="Force recomputation",
+        default=False
+    )
+
+
+class VideoFingerprintTaskResponse(BaseModel):
+    result: Union[str, None] = Field(
+        title="Fingerprint",
+        description="Fingerprint of the provided video."
+    )
+
+    fresh: bool = Field(
+        title="Freshness flag",
+        description="Whether the result was computed freshly or an existing cached result was returned."
+    )
+
+    closest_token: Union[str, None] = Field(
+        title="Closest token",
+        description="The token of the most similar existing video that the fingerprint lookup was able to find. Equal "
+                    "to original token if the most similar existing video did not satisfy the minimum similarity "
+                    "threshold."
+    )
+
+    successful: bool = Field(
+        title="Success flag",
+        description="Whether the computation was successful."
+    )
+
+
+class VideoFingerprintResponse(TaskStatusResponse):
+    task_result: Union[VideoFingerprintTaskResponse, None] = Field(
+        title="Video fingerprinting response",
+        description="A dict containing the resulting video fingerprint and a freshness flag."
+    )
+
+
 class ExtractAudioRequest(BaseModel):
     token: str = Field(
         title="Token",
