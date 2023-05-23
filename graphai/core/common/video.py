@@ -27,7 +27,7 @@ from subprocess import call, PIPE
 import whisper
 import fingerprint
 from fuzzywuzzy import fuzz
-from .caching import make_sure_path_exists
+from .caching import make_sure_path_exists, file_exists
 from graphai.definitions import CONFIG_DIR
 from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
 import pysbd
@@ -36,10 +36,6 @@ import pysbd
 FRAME_FORMAT_PNG = 'frame-%06d.png'
 FRAME_FORMAT_JPG = 'frame-%06d.jpg'
 TESSERACT_OCR_FORMAT = 'ocr-%06d.txt.gz'
-
-
-def file_exists(file_path):
-    return os.path.exists(file_path)
 
 
 def get_dir_files(root_dir):
@@ -136,6 +132,10 @@ def perform_probe(input_filename_with_path):
     if not file_exists(input_filename_with_path):
         raise Exception(f'ffmpeg error: File {input_filename_with_path} does not exist')
     return ffmpeg.probe(input_filename_with_path, cmd='ffprobe')
+
+
+def generate_symbolic_token(origin, token):
+    return origin + '_' + token
 
 
 def md5_video_or_audio(input_filename_with_path, video=True):
