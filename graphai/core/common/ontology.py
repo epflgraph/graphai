@@ -53,7 +53,8 @@ class Ontology:
         ################################################
 
         # Fetch category nodes
-        table_name = 'graphontology.Hierarchical_Cluster_Names_HighLevel'
+        # table_name = 'graphontology.Hierarchical_Cluster_Names_HighLevel'
+        table_name = 'francisco.Nodes_N_Category'
         fields = ['CategoryID', 'CategoryName']
         self.categories = pd.DataFrame(db.find(table_name, fields=fields), columns=fields)
 
@@ -66,7 +67,8 @@ class Ontology:
         ################################################
 
         # Fetch category-category edges
-        table_name = 'graphontology.Predefined_Knowledge_Tree_Hierarchy'
+        # table_name = 'graphontology.Predefined_Knowledge_Tree_Hierarchy'
+        table_name = 'francisco.Edges_N_Category_N_Category'
         fields = ['ChildCategoryID', 'ParentCategoryID']
         self.categories_categories = pd.DataFrame(db.find(table_name, fields=fields), columns=fields)
 
@@ -79,7 +81,8 @@ class Ontology:
         ################################################
 
         # Fetch concept-category edges
-        table_name = 'graphontology.Hierarchical_Clusters_Main'
+        # table_name = 'graphontology.Hierarchical_Clusters_Main'
+        table_name = 'francisco.Edges_N_Category_N_Concept_T_OnlyDepth4'
         fields = ['PageID', 'CategoryID']
         self.concepts_categories = pd.DataFrame(db.find(table_name, fields=fields), columns=['PageID', 'CategoryID'])
 
@@ -189,6 +192,22 @@ class Ontology:
             how='left',
             on=['Category2ID']
         )
+
+        # S-shaped function f: [1, N] -> [0, 1] such that
+        #   * f is strictly increasing
+        #   * f(1) = 0 and f(N) = 1
+        #   * f is convex in (1, alpha) and concave in (alpha, N), for alpha in (1, N)
+        #   * f(alpha) = (alpha - 1)/(N - 1)
+        #   * f differentiable in alpha
+        def f(x, N, alpha):
+            def f_1(t):
+                return (t - 1)**2 / ((N - 1) * (alpha - 1))
+
+            def f_2(t):
+                return 1 - (N - t)**2 / ((N - 1) * (N - alpha))
+
+            indicator = (x <= alpha).astype(int)
+            return indicator * f_1(x) + (1 - indicator) * f_2(x)
 
         # Compute scores
         results['Ontology1LocalScore'] = results['Category1LocalCount'] / results['LocalCount']
