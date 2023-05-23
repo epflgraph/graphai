@@ -1,5 +1,5 @@
-from graphai.core.common.caching import SlideDBCachingManager, VideoConfig, OTHER_SUBFOLDER
-from graphai.core.common.video import generate_random_token, read_json_gz_file, file_exists, FRAME_FORMAT_JPG, \
+from graphai.core.common.caching import SlideDBCachingManager, VideoConfig, OTHER_SUBFOLDER, file_exists
+from graphai.core.common.video import generate_random_token, read_json_gz_file, FRAME_FORMAT_JPG, \
     TESSERACT_OCR_FORMAT, detect_text_language, write_txt_gz_file, perceptual_hash_image
 import os
 import argparse
@@ -46,13 +46,6 @@ def generate_slide_token(video_token, frame_index):
     return video_token + '_slides/' + ((FRAME_FORMAT_JPG) % frame_index)
 
 
-def create_symlink(old_path, new_filename):
-    new_path = cache_path_manager.generate_filepath(new_filename)
-    # Only creating the symlink if it doesn't already exist
-    if not file_exists(new_path):
-        os.symlink(old_path, new_path)
-
-
 def write_to_progress_file(video_key, token):
     with open(progress_file, 'a') as f:
         f.write(f"{video_key}:{token}\n")
@@ -86,7 +79,7 @@ def organize_processed_file(src_path, index_in_folder, video_tokens, create_syml
         video_tokens[video_key] = new_file_name
         if create_symlinks:
             # Creating a symbolic link to the video file in cache file structure
-            create_symlink(src_path, new_file_name)
+            cache_path_manager.create_symlink(src_path, new_file_name)
         write_to_progress_file(video_key, new_file_name)
         return True
     else:
@@ -99,7 +92,7 @@ def organize_processed_file(src_path, index_in_folder, video_tokens, create_syml
             new_file_name = slide_token
             if create_symlinks:
                 # Creating a symbolic link to the image file in cache file structure
-                create_symlink(src_path, new_file_name)
+                cache_path_manager.create_symlink(src_path, new_file_name)
             # Computing the file's fingerprint
             fingerprint = perceptual_hash_image(src_path)
             # Inserting the token and its details into the cache table
@@ -157,7 +150,7 @@ def organize_processed_file(src_path, index_in_folder, video_tokens, create_syml
             new_file_name = video_token + '_slides/' + (TESSERACT_OCR_FORMAT) % frame_index
             if create_symlinks:
                 # Creating a symlink for the txt.gz file
-                create_symlink(src_path, new_file_name)
+                cache_path_manager.create_symlink(src_path, new_file_name)
             # Updating the cache with the ocr token
             slide_db_manager.insert_or_update_details(
                 slide_token,
