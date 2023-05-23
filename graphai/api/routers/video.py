@@ -115,7 +115,7 @@ async def extract_audio(data: ExtractAudioRequest):
     token = data.token
     force = data.force
     task = (extract_audio_task.s(token, force) |
-            extract_audio_callback_task.s(token)).apply_async(priority=2)
+            extract_audio_callback_task.s(token, force)).apply_async(priority=2)
     return {'task_id': task.id}
 
 
@@ -149,7 +149,7 @@ async def detect_slides(data: DetectSlidesRequest):
             dummy_task.s() |
             group(compute_slide_transitions_parallel_task.s(i, n_jobs, language) for i in range(n_jobs)) |
             compute_slide_transitions_callback_task.s() |
-            detect_slides_callback_task.s(token)). \
+            detect_slides_callback_task.s(token, force)). \
         apply_async(priority=2)
     return {'task_id': task.id}
 
