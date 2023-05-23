@@ -6,7 +6,6 @@ import abc
 import configparser
 from graphai.definitions import CONFIG_DIR
 
-
 ROOT_VIDEO_DIR = os.path.normpath(os.path.join(os.path.dirname(__file__), '../../../Storage/'))
 # Formats with a . in their name indicate single files, whereas formats without a . indicate folders (e.g. '_slides')
 VIDEO_SUBFOLDER = 'Video'
@@ -31,6 +30,11 @@ def make_sure_path_exists(path, file_at_the_end=False):
     except OSError as exception:
         if exception.errno != errno.EEXIST and exception.errno != errno.EPERM:
             raise
+
+
+def create_symlink_between_paths(old_path, new_path):
+    if not file_exists(new_path):
+        os.symlink(old_path, new_path)
 
 
 def surround_with_character(s, c="'"):
@@ -77,7 +81,7 @@ class DBCachingManagerBase(abc.ABC):
     def resolve_most_similar_chain(self, token):
         if token is None:
             return None
-        prev_most_similar = self.get_closest_match(token)
+        prev_most_similar = self._get_closest_match(token)
         if prev_most_similar is None or prev_most_similar==token:
             return token
         return self.resolve_most_similar_chain(prev_most_similar)
@@ -139,6 +143,12 @@ class DBCachingManagerBase(abc.ABC):
         else:
             results = None
         return results
+
+    def _get_closest_match(self, id_token):
+        results = self._get_details(self.schema, self.most_similar_table, id_token, ['most_similar_token'])
+        if results is not None:
+            return results['most_similar_token']
+        return None
 
     def _get_details_using_origin(self, schema, table_name, origin_token, cols):
         column_list = ['origin_token', 'id_token'] + cols
@@ -265,10 +275,7 @@ class DBCachingManagerBase(abc.ABC):
         self._insert_or_update_details(self.schema, self.most_similar_table, id_token, values_to_insert)
 
     def get_closest_match(self, id_token):
-        results = self._get_details(self.schema, self.most_similar_table, id_token, ['most_similar_token'])
-        if results is not None:
-            return results['most_similar_token']
-        return None
+        return self.resolve_most_similar_chain(id_token)
 
     def get_all_closest_matches(self):
         results = self._get_all_details(self.schema, self.most_similar_table, ['most_similar_token'])
@@ -478,5 +485,11 @@ class VideoConfig():
                 filename_with_path = self.concat_file_path(filename, OTHER_SUBFOLDER)
         return filename_with_path
 
+    def create_symlink(self, old_path, new_filename):
+        new_path = self.generate_filepath(new_filename)
+        # Only creating the symlink if it doesn't already exist
+        create_symlink_between_paths(old_path, new_path)
 
 
+def file_exists(file_path):
+    return os.path.exists(file_path)
