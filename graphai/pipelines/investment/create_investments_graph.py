@@ -77,8 +77,7 @@ def get_frs_fundraisers(db, fr_ids=None):
     else:
         conditions = {'FundingRoundID': fr_ids, 'Action': 'Raised from'}
 
-    frs_fundraisers = pd.DataFrame(db.find(table_name, fields=fields, conditions=conditions),
-                                 columns=['FundingRoundID', 'FundraiserID'])
+    frs_fundraisers = pd.DataFrame(db.find(table_name, fields=fields, conditions=conditions), columns=['FundingRoundID', 'FundraiserID'])
     return frs_fundraisers
 
 
@@ -133,7 +132,7 @@ def create_investments_graph(params):
     # Instantiate db interface to communicate with database
     db = DB()
 
-    bc.log(f'Creating investments graph...')
+    bc.log('Creating investments graph...')
 
     ############################################################
     # BUILD DATAFRAME                                          #

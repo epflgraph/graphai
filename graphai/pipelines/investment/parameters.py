@@ -49,4 +49,3 @@ investor_types = ['Organization', 'Person']
 # None means no filtering is done and thus all funding rounds are considered.
 fr_types = ['pre seed']
 # fr_types = None
-

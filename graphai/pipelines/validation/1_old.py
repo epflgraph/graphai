@@ -25,7 +25,7 @@ def old_wikify(row):
 
     try:
         result = requests.post('http://graphai.epfl.ch:28800/wikify', json=data).json()
-    except TypeError as e:
+    except TypeError:
         print(data)
         result = []
 
