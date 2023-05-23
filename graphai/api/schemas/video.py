@@ -27,6 +27,12 @@ class RetrieveURLResponseInner(BaseModel):
         title="Token",
         description="Result token, null if task has failed"
     )
+
+    fresh: bool = Field(
+        title="Freshness flag",
+        description="False if the URI had already been retrieved before, True if not and if retrieval was successful"
+    )
+
     successful: bool = Field(
         title="Success flag",
         description="True if task successful, False otherwise"

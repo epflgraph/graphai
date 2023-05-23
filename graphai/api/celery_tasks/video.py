@@ -10,7 +10,7 @@ from graphai.core.common.video import retrieve_file_from_url, retrieve_file_from
     detect_audio_format_and_duration, extract_audio_from_video, extract_frames, generate_frame_sample_indices, \
     compute_ocr_noise_level, compute_ocr_threshold, compute_video_ocr_transitions, generate_random_token, \
     FRAME_FORMAT_PNG, TESSERACT_OCR_FORMAT
-from graphai.core.common.caching import AudioDBCachingManager, SlideDBCachingManager
+from graphai.core.common.caching import AudioDBCachingManager, SlideDBCachingManager, VideoDBCachingManager
 from itertools import chain
 
 
@@ -18,6 +18,13 @@ from itertools import chain
              name='video_2.retrieve_url', ignore_result=False,
              file_manager=file_management_config)
 def retrieve_file_from_url_task(self, url, is_kaltura=True, timeout=120):
+    db_manager = VideoDBCachingManager()
+    existing = db_manager.get_details_using_origin(url, [])
+    if existing is not None and existing[0]['id_token'] is not None:
+        return {
+            'token': existing[0]['id_token'],
+            'fresh': False
+        }
     token = generate_random_token()
     file_format = url.split('.')[-1].lower()
     if file_format not in ['mp4', 'mkv', 'flv']:
@@ -28,7 +35,26 @@ def retrieve_file_from_url_task(self, url, is_kaltura=True, timeout=120):
         results = retrieve_file_from_kaltura(url, filename_with_path, filename, timeout=timeout)
     else:
         results = retrieve_file_from_url(url, filename_with_path, filename)
-    return {'token': results}
+    return {
+        'token': results,
+        'fresh': results is not None
+    }
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
+             name='video_2.retrieve_url_callback', ignore_result=False,
+             file_manager=file_management_config)
+def retrieve_file_from_url_callback_task(self, results, url):
+    if results['fresh']:
+        db_manager = VideoDBCachingManager()
+        current_datetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        db_manager.insert_or_update_details(results['token'],
+                                            {
+                                                'origin_token': url,
+                                                'date_added': current_datetime
+                                            }
+                                            )
+    return results
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},

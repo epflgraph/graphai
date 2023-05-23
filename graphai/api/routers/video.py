@@ -5,10 +5,11 @@ from fastapi.responses import FileResponse
 from graphai.api.schemas.video import *
 from graphai.api.schemas.common import *
 
-from graphai.api.celery_tasks.video import retrieve_file_from_url_task, get_file_task, extract_audio_task, \
-    extract_audio_callback_task, extract_and_sample_frames_task, compute_noise_level_parallel_task, \
-    compute_noise_threshold_callback_task, compute_slide_transitions_parallel_task, \
-    compute_slide_transitions_callback_task, detect_slides_callback_task, dummy_task
+from graphai.api.celery_tasks.video import retrieve_file_from_url_task, retrieve_file_from_url_callback_task, \
+    get_file_task, extract_audio_task, extract_audio_callback_task, extract_and_sample_frames_task, \
+    compute_noise_level_parallel_task, compute_noise_threshold_callback_task, \
+    compute_slide_transitions_parallel_task, compute_slide_transitions_callback_task, detect_slides_callback_task, \
+    dummy_task
 from graphai.api.celery_tasks.common import format_api_results
 from graphai.core.interfaces.celery_config import get_task_info
 
@@ -29,7 +30,8 @@ async def retrieve_file(data: RetrieveURLRequest):
     min_timeout = 60
     timeout = max([data.timeout, min_timeout])
     timeout = min([timeout, max_timeout])
-    task = retrieve_file_from_url_task.s(url, is_kaltura, timeout).apply_async(priority=2)
+    task = (retrieve_file_from_url_task.s(url, is_kaltura, timeout) |
+            retrieve_file_from_url_callback_task.s(url)).apply_async(priority=2)
     return {'task_id': task.id}
 
 
@@ -42,6 +44,7 @@ async def get_retrieve_file_status(task_id):
         if 'token' in task_results:
             task_results = {
                 'token': task_results['token'],
+                'fresh': task_results['fresh'],
                 'successful': task_results['token'] is not None
             }
         else:

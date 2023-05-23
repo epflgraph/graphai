@@ -278,6 +278,41 @@ class DBCachingManagerBase(abc.ABC):
         return None
 
 
+class VideoDBCachingManager(DBCachingManagerBase):
+    def __init__(self):
+        super().__init__(cache_table='Video_Main', most_similar_table='Video_Most_Similar')
+
+    def init_db(self):
+        self.db.execute_query(
+            f"""
+            CREATE DATABASE IF NOT EXISTS `{self.schema}` 
+            DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci 
+            DEFAULT ENCRYPTION='N';
+            """
+        )
+        self.db.execute_query(
+            f"""
+            CREATE TABLE IF NOT EXISTS `{self.schema}`.`{self.cache_table}` (
+              `id_token` VARCHAR(255),
+              `origin_token` LONGTEXT,
+              `fingerprint` VARCHAR(255) DEFAULT NULL,
+              `date_added` DATETIME DEFAULT NULL,
+              PRIMARY KEY id_token (id_token)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+            """
+        )
+        self.db.execute_query(
+            f"""
+            CREATE TABLE IF NOT EXISTS `{self.schema}`.`{self.most_similar_table}` (
+              `id_token` VARCHAR(255),
+              `most_similar_token` VARCHAR(255) DEFAULT NULL,
+              PRIMARY KEY id_token (id_token),
+              KEY most_similar_token (most_similar_token)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+            """
+        )
+
+
 class AudioDBCachingManager(DBCachingManagerBase):
     def __init__(self):
         super().__init__(cache_table='Audio_Main', most_similar_table='Audio_Most_Similar')
