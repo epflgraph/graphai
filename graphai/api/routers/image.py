@@ -28,7 +28,7 @@ def get_slide_fingerprint_chain_list(token, force, min_similarity=None, n_jobs=8
 
     task_list = [
         compute_slide_fingerprint_task.s(token, force),
-        compute_slide_fingerprint_callback_task.s(),
+        compute_slide_fingerprint_callback_task.s(force),
         slide_fingerprint_find_closest_retrieve_from_db_task.s(),
         group(slide_fingerprint_find_closest_parallel_task.s(i, n_jobs, min_similarity) for i in range(n_jobs)),
         slide_fingerprint_find_closest_callback_task.s()
@@ -81,7 +81,7 @@ async def extract_text(data: ExtractTextRequest):
     else:
         task_list = [extract_slide_text_task.s(token, method, force)]
 
-    task_list += [extract_slide_text_callback_task.s(token)]
+    task_list += [extract_slide_text_callback_task.s(token, force)]
     task = chain(task_list)
     task = task.apply_async(priority=2)
     return {'task_id': task.id}

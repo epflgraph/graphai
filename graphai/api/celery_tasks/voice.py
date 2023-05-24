@@ -142,7 +142,7 @@ def compute_audio_fingerprint_task(self, input_dict, audio_token, force=False):
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='video_2.audio_fingerprint_callback', ignore_result=False,
              file_manager=file_management_config)
-def compute_audio_fingerprint_callback_task(self, results):
+def compute_audio_fingerprint_callback_task(self, results, force=False):
     if results['fresh']:
         token = results['fp_token']
         db_manager = AudioDBCachingManager()
@@ -153,20 +153,21 @@ def compute_audio_fingerprint_callback_task(self, results):
                 'fp_nosilence': results['fp_nosilence']
             }
         )
-        closest_token = db_manager.get_closest_match(token)
-        # If this token has a closest token, it means that their relationship comes from their parent videos,
-        # and that the closest token's fingerprint has not been calculated either (otherwise `fresh` wouldn't be True).
-        # In that case, we insert the computed fingerprint for the closest token as well, and then we will perform the
-        # fingerprint lookup for that token instead of the one we computed the fingerprint for.
-        if closest_token is not None and closest_token != token:
-            db_manager.insert_or_update_details(
-                closest_token,
-                {
-                    'fingerprint': results['result'],
-                    'fp_nosilence': results['fp_nosilence']
-                }
-            )
-            results['fp_token'] = closest_token
+        if not force:
+            closest_token = db_manager.get_closest_match(token)
+            # If this token has a closest token, it means that their relationship comes from their parent videos,
+            # and that the closest token's fingerprint has not been calculated either (otherwise `fresh` wouldn't be True).
+            # In that case, we insert the computed fingerprint for the closest token as well, and then we will perform the
+            # fingerprint lookup for that token instead of the one we computed the fingerprint for.
+            if closest_token is not None and closest_token != token:
+                db_manager.insert_or_update_details(
+                    closest_token,
+                    {
+                        'fingerprint': results['result'],
+                        'fp_nosilence': results['fp_nosilence']
+                    }
+                )
+                results['fp_token'] = closest_token
     return results
 
 
@@ -285,7 +286,7 @@ def detect_language_parallel_task(self, tokens_dict, i):
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True,
              retry_kwargs={"max_retries": 2}, name='video_2.detect_language_callback', ignore_result=False,
              file_manager=file_management_config)
-def detect_language_callback_task(self, results_list, token):
+def detect_language_callback_task(self, results_list, token, force=False):
     # The logic here is twofold:
     # 1. If the results are not fresh (in which case all fresh flags are False),
     #     they'll be passed through but not reinserted into the database.
@@ -307,12 +308,15 @@ def detect_language_callback_task(self, results_list, token):
             db_manager.insert_or_update_details(
                 token, values_dict
             )
-            # Inserting values for the closest neighbor
-            closest = db_manager.get_closest_match(token)
-            if closest is not None and closest != token:
-                db_manager.insert_or_update_details(
-                    closest, values_dict
-                )
+            if not force:
+                closest = db_manager.get_closest_match(token)
+                if closest is not None and closest != token:
+                    # If force=False and there's a closest match, it means that the closest match has not
+                    # had this computation performed on it, so we insert these results for the closest match
+                    # as well.
+                    db_manager.insert_or_update_details(
+                        closest, values_dict
+                    )
 
         return {
             'token': token,
@@ -415,7 +419,7 @@ def transcribe_task(self, input_dict, force=False):
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='video_2.transcribe_callback', ignore_result=False,
              file_manager=file_management_config)
-def transcribe_callback_task(self, results, token):
+def transcribe_callback_task(self, results, token, force=False):
     if results['fresh']:
         values_dict = {
             'transcript_token': results['transcript_token'],
@@ -427,17 +431,18 @@ def transcribe_callback_task(self, results, token):
         db_manager.insert_or_update_details(
             token, values_dict
         )
-        # Inserting the same values for closest token if different than original token
-        # Unless force=True, the whole computation happens when the token and its closest
-        # neighbor both lack the requested value. As a result, once it's computed, we
-        # update both rows with the value, for other tokens that might depend on the
-        # aforementioned closest neighbor (i.e. other tokens that share their closest neighbor
-        # with the original token here).
-        closest = db_manager.get_closest_match(token)
-        if closest is not None and closest != token:
-            db_manager.insert_or_update_details(
-                closest, values_dict
-            )
+        if not force:
+            # Inserting the same values for closest token if different than original token
+            # Unless force=True, the whole computation happens when the token and its closest
+            # neighbor both lack the requested value. As a result, once it's computed, we
+            # update both rows with the value, for other tokens that might depend on the
+            # aforementioned closest neighbor (i.e. other tokens that share their closest neighbor
+            # with the original token here).
+            closest = db_manager.get_closest_match(token)
+            if closest is not None and closest != token:
+                db_manager.insert_or_update_details(
+                    closest, values_dict
+                )
     return results
 
 

@@ -35,7 +35,7 @@ def get_audio_fingerprint_chain_list(token, force=False, min_similarity=None, n_
         task_list = [remove_audio_silence_task.s(token, force, threshold),
                      remove_audio_silence_callback_task.s(token),
                      compute_audio_fingerprint_task.s(token, force)]
-    task_list += [compute_audio_fingerprint_callback_task.s(),
+    task_list += [compute_audio_fingerprint_callback_task.s(force),
                   audio_fingerprint_find_closest_retrieve_from_db_task.s(),
                   group(audio_fingerprint_find_closest_parallel_task.s(i, n_jobs, min_similarity) for i in range(n_jobs)),
                   audio_fingerprint_find_closest_callback_task.s()]
@@ -102,10 +102,10 @@ async def transcribe(data: AudioTranscriptionRequest):
 
         task_list += [
             group(detect_language_parallel_task.s(i) for i in range(n_divs)),
-            detect_language_callback_task.s(token),
+            detect_language_callback_task.s(token, force),
             transcribe_task.s(force),
         ]
-    task_list += [transcribe_callback_task.s(token)]
+    task_list += [transcribe_callback_task.s(token, force)]
     task = chain(task_list)
 
     task = task.apply_async(priority=2)
@@ -144,7 +144,7 @@ async def detect_language(data: AudioDetectLanguageRequest):
         task_list = [detect_language_retrieve_from_db_and_split_task.s(token, force, n_divs, len_segment)]
     task_list += [
             group(detect_language_parallel_task.s(i) for i in range(n_divs)),
-            detect_language_callback_task.s(token)
+            detect_language_callback_task.s(token, force)
     ]
     task = chain(task_list)
     task = task.apply_async(priority=2)

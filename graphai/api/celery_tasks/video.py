@@ -210,7 +210,7 @@ def extract_audio_task(self, token, force=False):
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='video_2.extract_audio_callback', ignore_result=False,
              file_manager=file_management_config)
-def extract_audio_callback_task(self, results, origin_token, force):
+def extract_audio_callback_task(self, results, origin_token, force=False):
     if results['fresh']:
         current_datetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         db_manager = AudioDBCachingManager()
@@ -416,7 +416,7 @@ def compute_slide_transitions_callback_task(self, results):
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='video_2.detect_slides_callback', ignore_result=False,
              file_manager=file_management_config)
-def detect_slides_callback_task(self, results, token, force):
+def detect_slides_callback_task(self, results, token, force=False):
     if results['fresh']:
         # Delete non-slide frames from the frames directory
         list_of_slides = [(FRAME_FORMAT_PNG) % (x) for x in results['slides']]

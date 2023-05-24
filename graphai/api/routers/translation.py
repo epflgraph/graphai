@@ -93,7 +93,7 @@ async def translate(data: TranslationRequest):
         task_list += [translate_text_task.s(text, src, tgt, force)]
     else:
         task_list = [translate_text_task.s(token, text, src, tgt, force)]
-    task_list += [translate_text_callback_task.s(token, text, src, tgt)]
+    task_list += [translate_text_callback_task.s(token, text, src, tgt, force)]
     task = chain(task_list)
     task = task.apply_async(priority=6)
     return {'task_id': task.id}
