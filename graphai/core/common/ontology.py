@@ -140,7 +140,7 @@ class Ontology:
         self.fetch_from_db()
         return results[results['PageID'].isin(self.concept_ids)]
 
-    def add_ontology_scores(self, results):
+    def add_ontology_scores(self, results, smoothing=True):
         self.fetch_from_db()
         # Add concepts category column
         results = pd.merge(results, self.concepts_categories, how='inner', on='PageID')
@@ -193,27 +193,36 @@ class Ontology:
             on=['Category2ID']
         )
 
-        # S-shaped function f: [1, N] -> [0, 1] such that
-        #   * f is strictly increasing
-        #   * f(1) = 0 and f(N) = 1
-        #   * f is convex in (1, alpha) and concave in (alpha, N), for alpha in (1, N)
-        #   * f(alpha) = (alpha - 1)/(N - 1)
-        #   * f differentiable in alpha
-        def f(x, N, alpha):
-            def f_1(t):
-                return (t - 1)**2 / ((N - 1) * (alpha - 1))
+        # S-shaped function h: [0, N] -> [0, 1] such that
+        #   * h is strictly increasing
+        #   * h(0) = 0 and h(N) = 1
+        #   * h is convex in (1, beta/N) and concave in (beta/N, N), for beta in (0, 1).
+        #   * h(beta/N) = beta
+        #   * h differentiable in beta/N
+        #   * f(t, N, beta) + g(t, N, 1 - beta) is linear
+        #   * (f(t, N, 1) + g(t, N, 0)) / 2 = x/N, the linear function mapping [0, N] to [0, 1]
+        def h(x, N, beta):
+            def f(t):
+                return (1 / beta) * t**2
 
-            def f_2(t):
-                return 1 - (N - t)**2 / ((N - 1) * (N - alpha))
+            def g(t):
+                return 1 - (1 / (1 - beta)) * (1 - t)**2
 
-            indicator = (x <= alpha).astype(int)
-            return indicator * f_1(x) + (1 - indicator) * f_2(x)
+            y = x / N
+            indicator = (y <= beta).astype(int)
+            return indicator * f(y) + (1 - indicator) * g(y)
 
         # Compute scores
-        results['Ontology1LocalScore'] = results['Category1LocalCount'] / results['LocalCount']
-        results['Ontology2LocalScore'] = results['Category2LocalCount'] / results['LocalCount']
-        results['Ontology1GlobalScore'] = results['Category1GlobalCount'] / len(results)
-        results['Ontology2GlobalScore'] = results['Category2GlobalCount'] / len(results)
+        if smoothing:
+            results['Ontology1LocalScore'] = h(results['Category1LocalCount'], results['LocalCount'], 0.3)
+            results['Ontology2LocalScore'] = h(results['Category2LocalCount'], results['LocalCount'], 0.3)
+            results['Ontology1GlobalScore'] = h(results['Category1GlobalCount'], len(results), 0.1)
+            results['Ontology2GlobalScore'] = h(results['Category2GlobalCount'], len(results), 0.1)
+        else:
+            results['Ontology1LocalScore'] = results['Category1LocalCount'] / results['LocalCount']
+            results['Ontology2LocalScore'] = results['Category2LocalCount'] / results['LocalCount']
+            results['Ontology1GlobalScore'] = results['Category1GlobalCount'] / len(results)
+            results['Ontology2GlobalScore'] = results['Category2GlobalCount'] / len(results)
 
         # Normalise scores
         results['Ontology1LocalScore'] = results['Ontology1LocalScore'] / results['Ontology1LocalScore'].max()
