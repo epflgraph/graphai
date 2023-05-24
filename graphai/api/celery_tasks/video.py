@@ -238,9 +238,10 @@ def extract_audio_callback_task(self, results, origin_token, force):
                         'date_added': current_datetime
                     }
                 )
-                # We make the original file the closest match of the symlink file
-                db_manager.insert_or_update_closest_match(symbolic_token, {
-                    'most_similar_token': results['token']
+                # We make the symlink file the closest match of the main file (to make sure closest match refs flow in
+                # the same direction).
+                db_manager.insert_or_update_closest_match(results['token'], {
+                    'most_similar_token': symbolic_token
                 })
     return results
 
@@ -472,9 +473,10 @@ def detect_slides_callback_task(self, results, token, force):
                             'date_added': current_datetime
                         }
                     )
-                    # We make the original file the closest match of the symlink file
-                    db_manager.insert_or_update_closest_match(symbolic_token, {
-                        'most_similar_token': current_token
+                    # We make the symlink file the closest match of the main file (to make sure closest match refs flow in
+                    # the same direction).
+                    db_manager.insert_or_update_closest_match(current_token, {
+                        'most_similar_token': symbolic_token
                     })
     else:
         # Getting cached or null results that have been passed along the chain of tasks
