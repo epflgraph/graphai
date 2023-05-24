@@ -77,50 +77,63 @@ def compute_audio_fingerprint_task(self, input_dict, audio_token, force=False):
     if fp_token is None:
         return {
             'result': None,
+            'fp_token': None,
+            'perform_lookup': False,
             'fresh': False,
             'duration': 0.0,
             'fp_nosilence': 0
         }
     db_manager = AudioDBCachingManager()
-    existing = db_manager.get_details(audio_token, cols=['fingerprint', 'duration',
-                                        'nosilence_duration', 'fp_nosilence'])[0]
+    existing_list = db_manager.get_details(audio_token, cols=['fingerprint', 'duration',
+                                        'nosilence_duration', 'fp_nosilence'], using_most_similar=True)
     # The information on audio file needs to have been inserted into the cache table when
     # the audio was extracted from the video. Therefore, the `existing` row needs to *exist*,
     # even if its fingerprint and many of its other fields are null.
-    if existing is None:
+    if existing_list[0] is None:
         print('Audio file not found!')
         return {
             'result': None,
+            'fp_token': None,
+            'perform_lookup': False,
             'fresh': False,
             'duration': 0.0,
             'fp_nosilence': 0
         }
     if not force:
-        if existing['fingerprint'] is not None:
-            print('Returning cached result')
-            return {
-                'result': existing['fingerprint'],
-                'fresh': False,
-                'duration': existing['duration'] if existing['fp_nosilence'] == 0 else existing['nosilence_duration'],
-                'fp_nosilence': existing['fp_nosilence']
-            }
+        for existing in existing_list:
+            if existing is None:
+                continue
+            if existing['fingerprint'] is not None:
+                print('Returning cached result')
+                return {
+                    'result': existing['fingerprint'],
+                    'fp_token': existing['id_token'],
+                    'perform_lookup': False,
+                    'fresh': False,
+                    'duration': existing['duration'] if existing['fp_nosilence'] == 0 else existing['nosilence_duration'],
+                    'fp_nosilence': existing['fp_nosilence']
+                }
     fp_token_with_path = self.file_manager.generate_filepath(fp_token)
     fingerprint, decoded = perceptual_hash_audio(fp_token_with_path)
     if fingerprint is None:
         return {
             'result': None,
+            'fp_token': None,
+            'perform_lookup': False,
             'fresh': False,
             'duration': 0.0,
             'fp_nosilence': 0
         }
     if input_dict.get('duration', None) is None:
-        duration = existing['duration']
+        duration = existing_list[0]['duration']
         fp_nosilence = 0
     else:
         duration = input_dict['duration']
         fp_nosilence = 1
     return {
         'result': fingerprint,
+        'fp_token': fp_token,
+        'perform_lookup': True,
         'fresh': True,
         'duration': duration,
         'fp_nosilence': fp_nosilence
@@ -129,8 +142,9 @@ def compute_audio_fingerprint_task(self, input_dict, audio_token, force=False):
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='video_2.audio_fingerprint_callback', ignore_result=False,
              file_manager=file_management_config)
-def compute_audio_fingerprint_callback_task(self, results, token):
-    if results['result'] is not None and results['fresh']:
+def compute_audio_fingerprint_callback_task(self, results):
+    if results['fresh']:
+        token = results['fp_token']
         db_manager = AudioDBCachingManager()
         db_manager.insert_or_update_details(
             token,
@@ -139,28 +153,42 @@ def compute_audio_fingerprint_callback_task(self, results, token):
                 'fp_nosilence': results['fp_nosilence']
             }
         )
+        closest_token = db_manager.get_closest_match(token)
+        # If this token has a closest token, it means that their relationship comes from their parent videos,
+        # and that the closest token's fingerprint has not been calculated either (otherwise `fresh` wouldn't be True).
+        # In that case, we insert the computed fingerprint for the closest token as well, and then we will perform the
+        # fingerprint lookup for that token instead of the one we computed the fingerprint for.
+        if closest_token is not None and closest_token != token:
+            db_manager.insert_or_update_details(
+                closest_token,
+                {
+                    'fingerprint': results['result'],
+                    'fp_nosilence': results['fp_nosilence']
+                }
+            )
+            results['fp_token'] = closest_token
     return results
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='video_2.audio_fingerprint_find_closest_retrieve_from_db', ignore_result=False)
-def audio_fingerprint_find_closest_retrieve_from_db_task(self, results, token):
+def audio_fingerprint_find_closest_retrieve_from_db_task(self, results):
     db_manager = AudioDBCachingManager()
-    return fingerprint_lookup_retrieve_from_db(results, token, db_manager)
+    return fingerprint_lookup_retrieve_from_db(results, db_manager)
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='video_2.audio_fingerprint_find_closest_parallel', ignore_result=False)
-def audio_fingerprint_find_closest_parallel_task(self, input_dict, token, i, n_total, min_similarity=0.8):
+def audio_fingerprint_find_closest_parallel_task(self, input_dict, i, n_total, min_similarity=0.8):
     db_manager = AudioDBCachingManager()
-    return fingerprint_lookup_parallel(input_dict, token, i, n_total, min_similarity, db_manager, data_type='audio')
+    return fingerprint_lookup_parallel(input_dict, i, n_total, min_similarity, db_manager, data_type='audio')
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='video_2.audio_fingerprint_find_closest_callback', ignore_result=False)
-def audio_fingerprint_find_closest_callback_task(self, results_list, original_token):
+def audio_fingerprint_find_closest_callback_task(self, results_list):
     db_manager = AudioDBCachingManager()
-    return fingerprint_lookup_callback(results_list, original_token, db_manager)
+    return fingerprint_lookup_callback(results_list, db_manager)
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},

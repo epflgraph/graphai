@@ -69,12 +69,16 @@ def compute_video_fingerprint_task(self, token, force=False):
     if not force and existing is not None and existing['fingerprint'] is not None:
         return {
             'result': existing['fingerprint'],
+            'fp_token': existing['id_token'],
+            'perform_lookup': False,
             'fresh': False
         }
     input_filename_with_path = self.file_manager.generate_filepath(token)
     fp = md5_video_or_audio(input_filename_with_path, video=True)
     return {
         'result': fp,
+        'fp_token': token if fp is not None else None,
+        'perform_lookup': fp is not None,
         'fresh': fp is not None
     }
 
@@ -82,8 +86,9 @@ def compute_video_fingerprint_task(self, token, force=False):
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='video_2.fingerprint_video_callback', ignore_result=False,
              file_manager=file_management_config)
-def compute_video_fingerprint_callback_task(self, results, token):
+def compute_video_fingerprint_callback_task(self, results):
     if results['fresh']:
+        token = results['fp_token']
         db_manager = VideoDBCachingManager()
         # The video might already have a row in the cache, or may be nonexistent there because it was not
         # retrieved from a URI. If the latter is the case, we add the current datetime to the cache row.
@@ -106,24 +111,24 @@ def compute_video_fingerprint_callback_task(self, results, token):
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='video_2.video_fingerprint_find_closest_retrieve_from_db', ignore_result=False)
-def video_fingerprint_find_closest_retrieve_from_db_task(self, results, token):
+def video_fingerprint_find_closest_retrieve_from_db_task(self, results):
     db_manager = VideoDBCachingManager()
-    return fingerprint_lookup_retrieve_from_db(results, token, db_manager)
+    return fingerprint_lookup_retrieve_from_db(results, db_manager)
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='video_2.video_fingerprint_find_closest_parallel', ignore_result=False)
-def video_fingerprint_find_closest_parallel_task(self, input_dict, token, i, n_total,
+def video_fingerprint_find_closest_parallel_task(self, input_dict, i, n_total,
                                                 min_similarity=1):
     db_manager = VideoDBCachingManager()
-    return fingerprint_lookup_parallel(input_dict, token, i, n_total, min_similarity, db_manager, data_type='video')
+    return fingerprint_lookup_parallel(input_dict, i, n_total, min_similarity, db_manager, data_type='video')
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='video_2.video_fingerprint_find_closest_callback', ignore_result=False)
-def video_fingerprint_find_closest_callback_task(self, results_list, original_token):
+def video_fingerprint_find_closest_callback_task(self, results_list):
     db_manager = VideoDBCachingManager()
-    return fingerprint_lookup_callback(results_list, original_token, db_manager)
+    return fingerprint_lookup_callback(results_list, db_manager)
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},

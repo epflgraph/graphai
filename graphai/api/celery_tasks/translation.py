@@ -19,19 +19,24 @@ def compute_text_fingerprint_task(self, token, text, force=False):
         if existing['fingerprint'] is not None:
             return {
                 'result': existing['fingerprint'],
+                'fp_token': existing['id_token'],
+                'perform_lookup': False,
                 'fresh': False
             }
     fp = perceptual_hash_text(text)
     return {
         'result': fp,
+        'fp_token': token,
+        'perform_lookup': True,
         'fresh': True
     }
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='text_6.fingerprint_text_callback', ignore_result=False)
-def compute_text_fingerprint_callback_task(self, results, token):
+def compute_text_fingerprint_callback_task(self, results):
     if results['fresh']:
+        token = results['fp_token']
         db_manager = TextDBCachingManager()
         db_manager.insert_or_update_details(
             token,
@@ -44,25 +49,25 @@ def compute_text_fingerprint_callback_task(self, results, token):
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='text_6.text_fingerprint_find_closest_retrieve_from_db', ignore_result=False)
-def text_fingerprint_find_closest_retrieve_from_db_task(self, results, token, equality_conditions):
+def text_fingerprint_find_closest_retrieve_from_db_task(self, results, equality_conditions):
     db_manager = TextDBCachingManager()
-    return fingerprint_lookup_retrieve_from_db(results, token, db_manager, equality_conditions=equality_conditions)
+    return fingerprint_lookup_retrieve_from_db(results, db_manager, equality_conditions=equality_conditions)
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='text_6.text_fingerprint_find_closest_parallel', ignore_result=False)
-def text_fingerprint_find_closest_parallel_task(self, input_dict, token, i, n_total, equality_conditions,
+def text_fingerprint_find_closest_parallel_task(self, input_dict, i, n_total, equality_conditions,
                                                 min_similarity=1):
     db_manager = TextDBCachingManager()
-    return fingerprint_lookup_parallel(input_dict, token, i, n_total, min_similarity, db_manager, data_type='text',
+    return fingerprint_lookup_parallel(input_dict, i, n_total, min_similarity, db_manager, data_type='text',
                                        equality_conditions=equality_conditions)
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='text_6.text_fingerprint_find_closest_callback', ignore_result=False)
-def text_fingerprint_find_closest_callback_task(self, results_list, original_token):
+def text_fingerprint_find_closest_callback_task(self, results_list):
     db_manager = TextDBCachingManager()
-    return fingerprint_lookup_callback(results_list, original_token, db_manager)
+    return fingerprint_lookup_callback(results_list, db_manager)
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},

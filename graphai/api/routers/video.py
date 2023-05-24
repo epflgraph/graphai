@@ -32,11 +32,11 @@ def get_video_fingerprint_chain_list(token, force, min_similarity=None, n_jobs=8
 
     task_list = [
         compute_video_fingerprint_task.s(token, force),
-        compute_video_fingerprint_callback_task.s(token),
-        video_fingerprint_find_closest_retrieve_from_db_task.s(token),
-        group(video_fingerprint_find_closest_parallel_task.s(token, i, n_jobs, min_similarity)
+        compute_video_fingerprint_callback_task.s(),
+        video_fingerprint_find_closest_retrieve_from_db_task.s(),
+        group(video_fingerprint_find_closest_parallel_task.s(i, n_jobs, min_similarity)
               for i in range(n_jobs)),
-        video_fingerprint_find_closest_callback_task.s(token)
+        video_fingerprint_find_closest_callback_task.s()
     ]
     if ignore_fp_results:
         task_list += [ignore_fingerprint_results_callback_task.s(results_to_return)]

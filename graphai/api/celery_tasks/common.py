@@ -13,13 +13,13 @@ def format_api_results(id, name, status, result):
     }
 
 
-def fingerprint_lookup_retrieve_from_db(results, token, db_manager, equality_conditions=None):
+def fingerprint_lookup_retrieve_from_db(results, db_manager, equality_conditions=None):
     target_fingerprint = results['result']
-    fresh = results['fresh']
+    token = results['fp_token']
     # If the fingerprint computation has been unsuccessful or if cached results are being returned,
     # then there it is not necessary (or even possible, in the former case) to compute the closest
     # audio fingerprint, so we just pass the fingerprinting results along.
-    if target_fingerprint is None or not fresh:
+    if not results['perform_lookup']:
         return {
             'target_fp': None,
             'cache_count': None,
@@ -37,19 +37,21 @@ def fingerprint_lookup_retrieve_from_db(results, token, db_manager, equality_con
     }
 
 
-def fingerprint_lookup_parallel(input_dict, token, i, n_total, min_similarity, db_manager, data_type='audio',
+def fingerprint_lookup_parallel(input_dict, i, n_total, min_similarity, db_manager, data_type='audio',
                                 equality_conditions=None):
     assert data_type in ['audio', 'image', 'text', 'video']
     # This parallel task's "closest fingerprint" result is null if either
     # a) the computation has been disabled (indicated by the token list being null), or
     # b) there are no previous fingerprints (indicated by the list of all tokens being empty)
-    if input_dict['cache_count'] is None or input_dict['cache_count'] == 0:
+    fp_results = input_dict['fp_results']
+    if not fp_results['perform_lookup'] or input_dict['cache_count'] is None or input_dict['cache_count'] == 0:
         return {
             'closest': None,
             'closest_fp': None,
             'max_score': None,
-            'fp_results': input_dict['fp_results']
+            'fp_results': fp_results
         }
+    token = fp_results['fp_token']
     # Get the total number of tokens and fingerprints
     n_tokens_all = input_dict['cache_count']
     # Compute the start and end indices
@@ -61,7 +63,7 @@ def fingerprint_lookup_parallel(input_dict, token, i, n_total, min_similarity, d
             'closest': None,
             'closest_fp': None,
             'max_score': None,
-            'fp_results': input_dict['fp_results']
+            'fp_results': fp_results
         }
     tokens_and_fingerprints = db_manager.get_all_details(
         ['fingerprint'], start=start_index, limit=limit, exclude_token=token, using_most_similar=False,
@@ -72,7 +74,7 @@ def fingerprint_lookup_parallel(input_dict, token, i, n_total, min_similarity, d
             'closest': None,
             'closest_fp': None,
             'max_score': None,
-            'fp_results': input_dict['fp_results']
+            'fp_results': fp_results
         }
     all_tokens = list(tokens_and_fingerprints.keys())
     all_fingerprints = [tokens_and_fingerprints[key]['fingerprint'] for key in all_tokens]
@@ -94,16 +96,17 @@ def fingerprint_lookup_parallel(input_dict, token, i, n_total, min_similarity, d
         'closest': closest_token,
         'closest_fp': closest_fingerprint,
         'max_score': score,
-        'fp_results': input_dict['fp_results']
+        'fp_results': fp_results
     }
 
 
-def fingerprint_lookup_callback(results_list, original_token, db_manager):
+def fingerprint_lookup_callback(results_list, db_manager):
     # Passing fingerprinting results along if it's been unsuccessful or a cached result has been returned
     # This is essentially the same check as in all the other find_closest tasks.
     fp_results = results_list[0]['fp_results']
-    if fp_results['result'] is None or not fp_results['fresh']:
-        if fp_results['result'] is not None:
+    original_token = fp_results['fp_token']
+    if not fp_results['perform_lookup']:
+        if original_token is not None:
             closest = db_manager.get_closest_match(original_token)
         else:
             closest = None
