@@ -117,8 +117,13 @@ async def get_file(data: FileRequest):
 async def extract_audio(data: ExtractAudioRequest):
     token = data.token
     force = data.force
-    task_list = [extract_audio_task.s(token, force),
-                 extract_audio_callback_task.s(token, force)]
+    if force:
+        task_list = [extract_audio_task.s(token, force)]
+    else:
+        task_list = get_video_fingerprint_chain_list(token, force,
+                                                     ignore_fp_results=True, results_to_return=token)
+        task_list += [extract_audio_task.s(force)]
+    task_list += [extract_audio_callback_task.s(token, force)]
     task = chain(task_list)
     task = task.apply_async(priority=2)
     return {'task_id': task.id}
@@ -148,13 +153,18 @@ async def detect_slides(data: DetectSlidesRequest):
     language = data.language
     n_jobs = 8
     hash_thresh = 0.85
-    task_list = [extract_and_sample_frames_task.s(token, force),
-                 group(compute_noise_level_parallel_task.s(i, n_jobs, language) for i in range(n_jobs)),
-                 compute_noise_threshold_callback_task.s(hash_thresh),
-                 dummy_task.s(),
-                 group(compute_slide_transitions_parallel_task.s(i, n_jobs, language) for i in range(n_jobs)),
-                 compute_slide_transitions_callback_task.s(),
-                 detect_slides_callback_task.s(token, force)]
+    if force:
+        task_list = [extract_and_sample_frames_task.s(token, force)]
+    else:
+        task_list = get_video_fingerprint_chain_list(token, force,
+                                                     ignore_fp_results=True, results_to_return=token)
+        task_list += [extract_and_sample_frames_task.s(force)]
+    task_list += [group(compute_noise_level_parallel_task.s(i, n_jobs, language) for i in range(n_jobs)),
+                  compute_noise_threshold_callback_task.s(hash_thresh),
+                  dummy_task.s(),
+                  group(compute_slide_transitions_parallel_task.s(i, n_jobs, language) for i in range(n_jobs)),
+                  compute_slide_transitions_callback_task.s(),
+                  detect_slides_callback_task.s(token, force)]
     task = chain(task_list)
     task = task.apply_async(priority=2)
     return {'task_id': task.id}
