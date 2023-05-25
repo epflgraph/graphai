@@ -184,6 +184,8 @@ class DBCachingManagerBase(abc.ABC):
         if equality_conditions is not None:
             query += add_where_or_and(query)
             query += add_equality_conditions(equality_conditions)
+        # ORDER BY comes before LIMIT but after WHERE
+        query += "\nORDER BY id_token"
         if limit != -1:
             query += f"""
             LIMIT {start},{limit}
