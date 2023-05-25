@@ -55,6 +55,7 @@ dependencies = [
     "rake-nltk",
     "levenshtein",
     "wikitext-asymptote",
+    "flake8",
     "sphinx",
     "sphinx-material",
     "sphinx-rtd-theme"

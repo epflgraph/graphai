@@ -1,6 +1,7 @@
 from pydantic import BaseModel, Field
 from typing import Union, Literal
-from .common import TaskStatusResponse
+
+from graphai.api.schemas.common import TaskStatusResponse
 
 
 class TextFingerprintRequest(BaseModel):

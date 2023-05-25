@@ -74,7 +74,7 @@ class ConceptsGraph:
 
         :math:`\\displaystyle score(s, t) = 1 - \\frac{1}{1 + \\ln(1 + rebound(s, t) * \\ln(out(s, t)))}`, with
 
-        :math:`\\displaystyle rebound(s, t) = \\frac{1 + \\min\\{in(s, t), out(s, t)\\}}{1 + \max\\{in(s, t), out(s, t)\\}}`,
+        :math:`\\displaystyle rebound(s, t) = \\frac{1 + \\min\\{in(s, t), out(s, t)\\}}{1 + \\max\\{in(s, t), out(s, t)\\}}`,
 
         :math:`in(s, t) =` number of paths from t to s,
 
@@ -154,18 +154,30 @@ class ConceptsGraph:
 
         return results
 
-    def add_graph_score(self, results):
+    def add_graph_score(self, results, smoothing=True):
         self.fetch_from_db()
 
+        # Extract concept ids from set of results
         concept_ids = list(results['PageID'].drop_duplicates())
+
+        # Keep only edges whose vertices are in the results' concepts
         concepts_concepts = self.concepts_concepts[
-            self.concepts_concepts['SourcePageID'].isin(concept_ids) &
-            self.concepts_concepts['TargetPageID'].isin(concept_ids)
+            self.concepts_concepts['SourcePageID'].isin(concept_ids)
+            & self.concepts_concepts['TargetPageID'].isin(concept_ids)
         ]
+
+        # Aggregate by SourcePageID adding up the scores (concepts_concepts contains edges and their reversed edges)
         concepts_concepts = concepts_concepts.groupby(by='SourcePageID').aggregate(GraphScore=('NormalisedScore', 'sum')).reset_index()
-        concepts_concepts['GraphScore'] = concepts_concepts['GraphScore'] / concepts_concepts['GraphScore'].max()
         concepts_concepts = concepts_concepts.rename(columns={'SourcePageID': 'PageID'})
 
+        # Normalise so that scores are in [0, 1]
+        concepts_concepts['GraphScore'] = concepts_concepts['GraphScore'] / concepts_concepts['GraphScore'].max()
+
+        # Smooth score if needed using the function f(x) = (2 - x) * x, bumping lower values to avoid very low scores
+        if smoothing:
+            concepts_concepts['GraphScore'] = (2 - concepts_concepts['GraphScore']) * concepts_concepts['GraphScore']
+
+        # Add GraphScore column to results
         results = pd.merge(results, concepts_concepts, how='inner', on='PageID')
 
         return results

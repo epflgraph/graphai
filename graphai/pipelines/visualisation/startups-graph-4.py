@@ -5,8 +5,6 @@ from graphai.core.interfaces.db import DB
 
 from graphai.core.utils.breadcrumb import Breadcrumb
 
-from graphai.scripts.investment.concept_configuration import normalise
-
 
 def print_summary(startups, concepts, startups_concepts, concepts_concepts):
     n_s = len(startups)
@@ -405,7 +403,7 @@ def create_startups_graph():
 
     ############################################################
 
-    bc.log(f'Exporting in gexf format at {gexf_filename}...'    )
+    bc.log(f'Exporting in gexf format at {gexf_filename}...')
 
     nx.write_gexf(G, gexf_filename)
 

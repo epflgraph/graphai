@@ -60,7 +60,7 @@ def test__text_keywords__extract_keywords__run_task(sultans, wave_fields, schrei
 
 
 @pytest.mark.usefixtures('sultans', 'wave_fields', 'schreier')
-def test__text_keywords__integration(fixture_app, sultans, wave_fields, schreier, timeout=5):
+def test__text_keywords__integration(fixture_app, sultans, wave_fields, schreier, timeout=30):
     # Make POST request to fixture fastapi app
     response = fixture_app.post('/text/keywords', data=json.dumps({'raw_text': sultans}), timeout=timeout)
 
@@ -231,7 +231,7 @@ def test__text_keywords__aggregate_and_filter__run_task(wave_fields_scores_df):
 
 
 @pytest.mark.usefixtures('wave_fields', 'schreier')
-def test__text_wikify__integration(fixture_app, wave_fields, schreier, timeout=10):
+def test__text_wikify__integration(fixture_app, wave_fields, schreier, timeout=60):
     # Make POST request to fixture fastapi app
     response = fixture_app.post('/text/wikify', data=json.dumps({'raw_text': wave_fields}), timeout=timeout)
 

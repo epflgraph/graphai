@@ -1,17 +1,23 @@
+from fastapi import APIRouter
+from celery import chain, group
 from typing import Optional
 
 import pandas as pd
 
-from fastapi import APIRouter
-
-from celery import chain, group
-
-from graphai.api.common.celery_tools import get_n_celery_workers
-
-from graphai.api.schemas.text import *
-
-from graphai.api.celery_tasks.text import extract_keywords_task, wikisearch_task, wikisearch_callback_task, compute_scores_task, aggregate_and_filter_task, text_test_task
-
+from graphai.api.schemas.text import (
+    KeywordsRequest,
+    KeywordsResponse,
+    WikifyRequest,
+    WikifyResponse,
+)
+from graphai.api.celery_tasks.text import (
+    extract_keywords_task,
+    wikisearch_task,
+    wikisearch_callback_task,
+    compute_scores_task,
+    aggregate_and_filter_task,
+    text_test_task,
+)
 
 pd.set_option('display.max_rows', 400)
 pd.set_option('display.max_columns', 500)
@@ -52,7 +58,16 @@ async def keywords(data: KeywordsRequest, use_nltk: Optional[bool] = False):
 
 
 @router.post('/wikify', response_model=WikifyResponse)
-async def wikify(data: WikifyRequest, method: Optional[str] = None):
+async def wikify(
+    data: WikifyRequest,
+    method: Optional[str] = 'es-base',
+    ontology_score_smoothing: Optional[bool] = True,
+    graph_score_smoothing: Optional[bool] = True,
+    keywords_score_smoothing: Optional[bool] = True,
+    normalisation_coef: Optional[float] = 0.5,
+    filtering_threshold: Optional[float] = 0.1,
+    filtering_min_votes: Optional[int] = 5,
+):
     """
     Processes raw text (e.g. from an abstract of a publication, a course description or a lecture slide) and returns a
     list of concepts (Wikipedia pages) that are relevant to the text, each with a set of scores in [0, 1]
@@ -75,20 +90,22 @@ async def wikify(data: WikifyRequest, method: Optional[str] = None):
     if not raw_text:
         return []
 
-    # # Set up composite job
-    # try:
-    #     n = get_n_celery_workers()
-    # except Exception as e:
-    #     n = 10
-
     n = 16
 
     job = chain(
         extract_keywords_task.s(raw_text),
         group(wikisearch_task.s(fraction=(i / n, (i + 1) / n), method=method) for i in range(n)),
         wikisearch_callback_task.s(),
-        compute_scores_task.s(),
-        aggregate_and_filter_task.s()
+        compute_scores_task.s(
+            ontology_score_smoothing=ontology_score_smoothing,
+            graph_score_smoothing=graph_score_smoothing,
+            keywords_score_smoothing=keywords_score_smoothing
+        ),
+        aggregate_and_filter_task.s(
+            coef=normalisation_coef,
+            epsilon=filtering_threshold,
+            min_votes=filtering_min_votes
+        )
     )
 
     # Schedule job

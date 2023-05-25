@@ -160,6 +160,7 @@ def extract_audio_task(self, token, force=False):
         }
 
     output_filename_with_path = self.file_manager.generate_filepath(output_token)
+
     # Here, the existing row can be None because the row is inserted into the table
     # only after extracting the audio from the video.
     if not force:
@@ -199,6 +200,7 @@ def extract_audio_task(self, token, force=False):
             'fresh': False,
             'duration': 0.0
         }
+
     return {
         'token': results,
         'fresh': True,
@@ -325,13 +327,18 @@ def compute_noise_level_parallel_task(self, results, i, n, language=None):
             'fresh': False,
             'slide_tokens': results['slide_tokens']
         }
+
     all_sample_indices = results['sample_indices']
     start_index = int(i * len(all_sample_indices) / n)
     end_index = int((i + 1) * len(all_sample_indices) / n)
     current_sample_indices = all_sample_indices[start_index:end_index]
-    noise_level_list = \
-        compute_ocr_noise_level(self.file_manager.generate_filepath(results['result']),
-                                current_sample_indices, self.nlp_model.get_nlp_models(), language=language)
+    noise_level_list = compute_ocr_noise_level(
+        self.file_manager.generate_filepath(results['result']),
+        current_sample_indices,
+        self.nlp_model.get_nlp_models(),
+        language=language
+    )
+
     return {
         'result': results['result'],
         'sample_indices': results['sample_indices'],
@@ -352,9 +359,11 @@ def compute_noise_threshold_callback_task(self, results, hash_thresh=0.8):
             'fresh': False,
             'slide_tokens': results[0]['slide_tokens']
         }
+
     list_of_noise_value_lists = [x['noise_level'] for x in results]
     all_noise_values = list(chain.from_iterable(list_of_noise_value_lists))
     threshold = compute_ocr_threshold(all_noise_values)
+
     return {
         'result': results[0]['result'],
         'sample_indices': results[0]['sample_indices'],
@@ -376,14 +385,20 @@ def compute_slide_transitions_parallel_task(self, results, i, n, language=None):
             'fresh': False,
             'slide_tokens': results['slide_tokens']
         }
+
     all_sample_indices = results['sample_indices']
     start_index = int(i * len(all_sample_indices) / n)
     end_index = int((i + 1) * len(all_sample_indices) / n)
     current_sample_indices = all_sample_indices[start_index:end_index]
-    slide_transition_list = \
-        compute_video_ocr_transitions(self.file_manager.generate_filepath(results['result']), current_sample_indices,
-                                      results['threshold'], results['hash_threshold'],
-                                      self.nlp_model.get_nlp_models(), language=language)
+    slide_transition_list = compute_video_ocr_transitions(
+        self.file_manager.generate_filepath(results['result']),
+        current_sample_indices,
+        results['threshold'],
+        results['hash_threshold'],
+        self.nlp_model.get_nlp_models(),
+        language=language
+    )
+
     return {
         'result': results['result'],
         'transitions': slide_transition_list,
@@ -402,8 +417,10 @@ def compute_slide_transitions_callback_task(self, results):
             'fresh': False,
             'slide_tokens': results[0]['slide_tokens']
         }
+
     list_of_slide_transition_lists = [x['transitions'] for x in results]
     all_transitions = list(chain.from_iterable(list_of_slide_transition_lists))
+
     return {
         'result': results[0]['result'],
         'slides': all_transitions,

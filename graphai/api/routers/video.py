@@ -1,21 +1,43 @@
-from celery import group, chain
 from fastapi import APIRouter
 from fastapi.responses import FileResponse
+from celery import group, chain
 
-from graphai.api.schemas.video import RetrieveURLRequest, DetectSlidesRequest, ExtractAudioRequest, \
-    VideoFingerprintRequest, RetrieveURLResponse, DetectSlidesResponse, ExtractAudioResponse, VideoFingerprintResponse
 from graphai.api.schemas.common import TaskIDResponse, FileRequest
+from graphai.api.schemas.video import (
+    RetrieveURLRequest,
+    RetrieveURLResponse,
+    ExtractAudioRequest,
+    ExtractAudioResponse,
+    DetectSlidesRequest,
+    DetectSlidesResponse,
+    VideoFingerprintRequest,
+    VideoFingerprintResponse
+)
 
-from graphai.api.celery_tasks.video import retrieve_file_from_url_task, retrieve_file_from_url_callback_task, \
-    get_file_task, extract_audio_task, extract_audio_callback_task, extract_and_sample_frames_task, \
-    compute_noise_level_parallel_task, compute_noise_threshold_callback_task, \
-    compute_slide_transitions_parallel_task, compute_slide_transitions_callback_task, detect_slides_callback_task, \
-    dummy_task, compute_video_fingerprint_task, compute_video_fingerprint_callback_task, \
-    video_fingerprint_find_closest_retrieve_from_db_task, video_fingerprint_find_closest_parallel_task, \
-    video_fingerprint_find_closest_callback_task, retrieve_video_fingerprint_callback_task
 from graphai.api.celery_tasks.common import format_api_results, ignore_fingerprint_results_callback_task
+from graphai.api.celery_tasks.video import (
+    retrieve_file_from_url_task,
+    retrieve_file_from_url_callback_task,
+    get_file_task,
+    extract_audio_task,
+    extract_audio_callback_task,
+    extract_and_sample_frames_task,
+    compute_noise_level_parallel_task,
+    compute_noise_threshold_callback_task,
+    compute_slide_transitions_parallel_task,
+    compute_slide_transitions_callback_task,
+    detect_slides_callback_task,
+    dummy_task,
+    compute_video_fingerprint_task,
+    compute_video_fingerprint_callback_task,
+    video_fingerprint_find_closest_retrieve_from_db_task,
+    video_fingerprint_find_closest_parallel_task,
+    video_fingerprint_find_closest_callback_task,
+    retrieve_video_fingerprint_callback_task
+)
 from graphai.core.interfaces.celery_config import get_task_info
 from graphai.core.common.video import FingerprintParameters
+
 
 # Initialise video router
 router = APIRouter(

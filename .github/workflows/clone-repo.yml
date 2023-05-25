@@ -58,3 +58,8 @@ jobs:
           python -c "from transformers import AutoModelForSeq2SeqLM; AutoModelForSeq2SeqLM.from_pretrained('Helsinki-NLP/opus-mt-en-fr')"
           python -c "from transformers import AutoModelForSeq2SeqLM; AutoModelForSeq2SeqLM.from_pretrained('Helsinki-NLP/opus-mt-fr-en')"
 
+      - name: Run linter
+        run: |
+          cd main
+          source /data/venvs/test_venv/bin/activate
+          flake8 --ignore=E501,W503 graphai

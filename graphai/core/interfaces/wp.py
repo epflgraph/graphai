@@ -43,7 +43,6 @@ class WP:
             table = [[top_pages[i]['pageid'], top_pages[i]['title'], (i + 1), 1] for i in range(len(top_pages))]
 
             return pd.DataFrame(table, columns=['PageID', 'PageTitle', 'Searchrank', 'SearchScore'])
-        except Exception as e:
+        except Exception:
             # If something goes wrong, avoid crashing and return empty DataFrame
             return pd.DataFrame(columns=['PageID', 'PageTitle', 'Searchrank', 'SearchScore'])
-

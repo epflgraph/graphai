@@ -1,13 +1,15 @@
 import json
 from time import sleep
+from collections import Counter
+
 from celery import shared_task
+
 from graphai.api.common.video import file_management_config, transcription_model
 from graphai.core.common.video import remove_silence_doublesided, perceptual_hash_audio, \
     write_text_file, read_text_file, read_json_file, extract_audio_segment
 from graphai.core.common.caching import TEMP_SUBFOLDER, AudioDBCachingManager
 from graphai.api.celery_tasks.common import fingerprint_lookup_retrieve_from_db, fingerprint_lookup_parallel, \
     fingerprint_lookup_callback
-from collections import Counter
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
@@ -21,6 +23,7 @@ def remove_audio_silence_task(self, token, force=False, threshold=0.0):
     output_filename_with_path = self.file_manager.generate_filepath(output_token)
     db_manager = AudioDBCachingManager()
     existing = db_manager.get_details(token, cols=['nosilence_token', 'nosilence_duration'])[0]
+
     # The information on audio file needs to have been inserted into the cache table when
     # the audio was extracted from the video. Therefore, the `existing` row needs to *exist*.
     if existing is None:
@@ -30,6 +33,7 @@ def remove_audio_silence_task(self, token, force=False, threshold=0.0):
             'fresh': False,
             'duration': 0.0
         }
+
     if not force:
         if existing['nosilence_token'] is not None:
             print('Returning cached result')
@@ -38,14 +42,17 @@ def remove_audio_silence_task(self, token, force=False, threshold=0.0):
                 'fresh': False,
                 'duration': existing['nosilence_duration']
             }
+
     fp_token, duration = remove_silence_doublesided(input_filename_with_path, output_filename_with_path,
                                                     output_token, threshold=threshold)
+
     if fp_token is None:
         return {
             'fp_token': None,
             'fresh': False,
             'duration': 0.0
         }
+
     return {
         'fp_token': fp_token,
         'fresh': True,
@@ -66,6 +73,7 @@ def remove_audio_silence_callback_task(self, result, audio_token):
                 'nosilence_duration': result['duration']
             }
         )
+
     return result
 
 
@@ -83,6 +91,7 @@ def compute_audio_fingerprint_task(self, input_dict, audio_token, force=False):
             'duration': 0.0,
             'fp_nosilence': 0
         }
+
     db_manager = AudioDBCachingManager()
     existing_list = db_manager.get_details(audio_token, cols=['fingerprint', 'duration',
                                                               'nosilence_duration', 'fp_nosilence'],
@@ -100,6 +109,7 @@ def compute_audio_fingerprint_task(self, input_dict, audio_token, force=False):
             'duration': 0.0,
             'fp_nosilence': 0
         }
+
     if not force:
         for existing in existing_list:
             if existing is None:
@@ -126,12 +136,14 @@ def compute_audio_fingerprint_task(self, input_dict, audio_token, force=False):
             'duration': 0.0,
             'fp_nosilence': 0
         }
+
     if input_dict.get('duration', None) is None:
         duration = existing_list[0]['duration']
         fp_nosilence = 0
     else:
         duration = input_dict['duration']
         fp_nosilence = 1
+
     return {
         'result': fingerprint,
         'fp_token': fp_token,
@@ -202,10 +214,12 @@ def retrieve_audio_fingerprint_callback_task(self, results):
     results_to_return = results['fp_results']
     results_to_return['closest'] = results['closest']
     db_manager = AudioDBCachingManager()
+
     if results_to_return['closest'] is not None:
         results_to_return['closest_origin'] = db_manager.get_origin(results_to_return['closest'])
     else:
         results_to_return['closest_origin'] = None
+
     return results_to_return
 
 
@@ -223,6 +237,7 @@ def detect_language_retrieve_from_db_and_split_task(self, token, force=False, n_
             'lang': None,
             'fresh': False
         }
+
     if not force:
         for existing in existing_list:
             if existing is None:
@@ -237,6 +252,7 @@ def detect_language_retrieve_from_db_and_split_task(self, token, force=False, n_
 
     input_filename_with_path = self.file_manager.generate_filepath(token)
     result_tokens = list()
+
     # Creating `n_divs` segments (of duration `length` each) of the audio file and saving them to the temp subfolder
     for i in range(n_divs):
         current_output_token = token + '_' + str(i) + '_temp.ogg'
@@ -252,6 +268,7 @@ def detect_language_retrieve_from_db_and_split_task(self, token, force=False, n_
                 'temp_tokens': None,
                 'fresh': False
             }
+
         result_tokens.append(current_result)
 
     return {
@@ -270,7 +287,9 @@ def detect_language_parallel_task(self, tokens_dict, i):
             'lang': tokens_dict['lang'],
             'fresh': tokens_dict['fresh']
         }
+
     current_token = tokens_dict['temp_tokens'][i]
+
     try:
         language = self.model.detect_audio_segment_lang_whisper(
             self.file_manager.generate_filepath(current_token, force_dir=TEMP_SUBFOLDER)
@@ -280,6 +299,7 @@ def detect_language_parallel_task(self, tokens_dict, i):
             'lang': None,
             'fresh': False
         }
+
     return {
         'lang': language,
         'fresh': True
@@ -303,9 +323,8 @@ def detect_language_callback_task(self, results_list, token, force=False):
         if all([x['fresh'] for x in results_list]):
             # This indicates freshness
             fresh = True
-            values_dict = {
-                'language': most_common_lang
-            }
+            values_dict = {'language': most_common_lang}
+
             # Inserting values for original token
             db_manager = AudioDBCachingManager()
             db_manager.insert_or_update_details(
@@ -340,6 +359,7 @@ def detect_language_callback_task(self, results_list, token, force=False):
 def transcribe_task(self, input_dict, force=False):
     token = input_dict['token']
     lang = input_dict['language']
+
     # If the token is null, it means that some error happened in the previous step (e.g. the file didn't exist
     # in language detection)
     if token is None:
@@ -351,6 +371,7 @@ def transcribe_task(self, input_dict, force=False):
             'language': None,
             'fresh': False
         }
+
     if not force:
         # using_most_similar is True here because if the transcript has previously been computed
         # for this token, then the results have also been inserted into the table for its closest
@@ -368,9 +389,11 @@ def transcribe_task(self, input_dict, force=False):
                 'language': None,
                 'fresh': False
             }
+
         for existing in existing_list:
             if existing is None:
                 continue
+
             if existing['transcript_token'] is not None and existing['subtitle_token'] is not None and \
                     existing['language'] is not None:
                 print('Returning cached result')
@@ -379,6 +402,7 @@ def transcribe_task(self, input_dict, force=False):
                 subtitle_token = existing['subtitle_token']
                 subtitle_result = read_json_file(self.file_manager.generate_filepath(subtitle_token))
                 language_result = existing['language']
+
                 return {
                     'transcript_result': transcript_result,
                     'transcript_token': transcript_token,
@@ -391,8 +415,8 @@ def transcribe_task(self, input_dict, force=False):
     input_filename_with_path = self.file_manager.generate_filepath(token)
     transcript_token = token + '_transcript.txt'
     subtitle_token = token + '_subtitle_segments.json'
-    result_dict = \
-        self.model.transcribe_audio_whisper(input_filename_with_path, force_lang=lang, verbose=True)
+    result_dict = self.model.transcribe_audio_whisper(input_filename_with_path, force_lang=lang, verbose=True)
+
     if result_dict is None:
         return {
             'transcript_result': None,
@@ -402,6 +426,7 @@ def transcribe_task(self, input_dict, force=False):
             'language': None,
             'fresh': False
         }
+
     transcript_result = result_dict['text']
     subtitle_result = json.dumps(result_dict['segments'])
     language_result = result_dict['language']
@@ -409,6 +434,7 @@ def transcribe_task(self, input_dict, force=False):
     subtitle_filename_with_path = self.file_manager.generate_filepath(subtitle_token)
     write_text_file(transcript_filename_with_path, transcript_result)
     write_text_file(subtitle_filename_with_path, subtitle_result)
+
     return {
         'transcript_result': transcript_result,
         'transcript_token': transcript_token,
@@ -429,6 +455,7 @@ def transcribe_callback_task(self, results, token, force=False):
             'subtitle_token': results['subtitle_token'],
             'language': results['language']
         }
+
         # Inserting values for original token
         db_manager = AudioDBCachingManager()
         db_manager.insert_or_update_details(

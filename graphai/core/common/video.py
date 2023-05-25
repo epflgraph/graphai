@@ -1,36 +1,39 @@
-import json
 import os
-import io
-import random
-import re
 import sys
-import time
+import io
 import configparser
-from datetime import datetime
-import glob
 import math
-import hashlib
+import glob
+import re
+import random
+import json
+import time
+from datetime import datetime
+import gzip
+import wget
+from subprocess import call, PIPE
 
+import numpy as np
+
+import hashlib
 import acoustid
 import chromaprint
 import ffmpeg
 import imagehash
 from PIL import Image
 import langdetect
+import pysbd
+import fingerprint
+from fuzzywuzzy import fuzz
+
 import pytesseract
 from google.cloud import vision
 import spacy
-import gzip
-import numpy as np
-import wget
-from subprocess import call, PIPE
 import whisper
-import fingerprint
-from fuzzywuzzy import fuzz
-from .caching import make_sure_path_exists, file_exists
-from graphai.definitions import CONFIG_DIR
 from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
-import pysbd
+
+from graphai.definitions import CONFIG_DIR
+from graphai.core.common.caching import make_sure_path_exists, file_exists
 
 FRAME_FORMAT_PNG = 'frame-%06d.png'
 FRAME_FORMAT_JPG = 'frame-%06d.jpg'
@@ -245,8 +248,10 @@ def find_beginning_and_ending_silences(input_filename_with_path, distance_from_e
     """
     if not file_exists(input_filename_with_path):
         raise Exception(f'ffmpeg error: File {input_filename_with_path} does not exist')
-    _, results = ffmpeg.input(input_filename_with_path).filter('silencedetect', n=noise_thresh). \
-        output('pipe:', format='null').run(capture_stderr=True)
+    _, results = ffmpeg.input(input_filename_with_path)\
+                       .filter('silencedetect', n=noise_thresh)\
+                       .output('pipe:', format='null')\
+                       .run(capture_stderr=True)
     results = results.decode('utf8')
     # the audio length will be accurate since the filter forces a decoding of the audio file
     audio_length = re.findall(r'time=\d{2}:\d{2}:\d{2}.\d+', results)
@@ -359,8 +364,7 @@ def perceptual_hash_text(s, min_window_length=5, max_window_length=50, hash_len=
     fprinter = fingerprint.Fingerprint(kgram_len=kgram_length, window_len=window_length, base=10, modulo=256)
     hash_numbers = fprinter.generate(str=s)
     if len(hash_numbers) > hash_len:
-        sample_indices = np.linspace(start=0, stop=len(hash_numbers) - 1, num=hash_len - 1, endpoint=False). \
-            tolist()
+        sample_indices = np.linspace(start=0, stop=len(hash_numbers) - 1, num=hash_len - 1, endpoint=False).tolist()
         sample_indices.append(len(hash_numbers) - 1)
         sample_indices = [int(x) for x in sample_indices]
         hash_numbers = [hash_numbers[i] for i in sample_indices]
@@ -534,8 +538,7 @@ def perform_tesseract_ocr(image_path, language=None):
     if not file_exists(image_path):
         print(f'Error: File {image_path} does not exist')
         return None
-    return pytesseract.image_to_string(Image.open(image_path),
-                                       lang={'en': 'eng', 'fr': 'fra'}[language])
+    return pytesseract.image_to_string(Image.open(image_path), lang={'en': 'eng', 'fr': 'fra'}[language])
 
 
 def tesseract_ocr_or_get_cached(ocr_path, image_path, language):
@@ -641,7 +644,7 @@ def compute_ocr_noise_level(input_folder_with_path, frame_sample_indices, nlp_mo
     for k in range(1, len(frame_sample_indices)):
         d = frame_ocr_distance(input_folder_with_path, frame_sample_indices[k - 1], frame_sample_indices[k],
                                nlp_models, language)
-        if d < 0.01 and d > 0.0001:
+        if 0.0001 < d < 0.01:
             distance_list.append(d)
     return distance_list
 
@@ -710,8 +713,15 @@ def compute_video_ocr_transitions(input_folder_with_path, frame_sample_indices, 
                                   nlp_models, language=None):
     transition_list = list()
     for k in range(1, len(frame_sample_indices)):
-        [t, d] = frame_ocr_transition(input_folder_with_path, frame_sample_indices[k - 1], frame_sample_indices[k],
-                                      ocr_dist_threshold, hash_dist_threshold, nlp_models, language)
+        [t, d] = frame_ocr_transition(
+            input_folder_with_path,
+            frame_sample_indices[k - 1],
+            frame_sample_indices[k],
+            ocr_dist_threshold,
+            hash_dist_threshold,
+            nlp_models,
+            language
+        )
         if t is not None and t < frame_sample_indices[-1]:
             transition_list.append(t)
     return transition_list
@@ -797,15 +807,14 @@ class WhisperTranscriptionModel():
             if force_lang is None:
                 result = self.model.transcribe(input_filename_with_path, verbose=verbose, fp16=True)
             else:
-                result = self.model.transcribe(input_filename_with_path, verbose=verbose,
-                                               language=force_lang, fp16=True)
+                result = self.model.transcribe(input_filename_with_path, verbose=verbose, language=force_lang, fp16=True)
         except Exception as e:
             print(e, file=sys.stderr)
             return None
         return result
 
 
-class NLPModels():
+class NLPModels:
     def __init__(self):
         spacy.prefer_gpu()
         self.nlp_models = None

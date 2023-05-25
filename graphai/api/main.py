@@ -37,7 +37,7 @@ app.celery_app = celery_instance
 # On startup, we spawn tasks to initialise services and variables in the memory space of the celery workers
 @app.on_event('startup')
 async def init():
-    log(f'Loading big objects and models into the memory space of the celery workers...')
+    log('Loading big objects and models into the memory space of the celery workers...')
 
     # Spawn tasks
     text_job = text_init_task.apply_async(priority=10)
@@ -49,9 +49,9 @@ async def init():
 
     # Print status message
     if text_ok and video_ok:
-        log(f'Loaded')
+        log('Loaded')
     else:
-        log(f'ERROR: Loading unsuccessful, check celery logs')
+        log('ERROR: Loading unsuccessful, check celery logs')
 
 
 # Root endpoint redirects to docs

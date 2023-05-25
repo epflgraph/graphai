@@ -15,6 +15,7 @@ def format_api_results(id, name, status, result):
 
 def fingerprint_lookup_retrieve_from_db(results, db_manager, equality_conditions=None):
     target_fingerprint = results['result']
+
     # If the fingerprint computation has been unsuccessful or if cached results are being returned,
     # then there it is not necessary (or even possible, in the former case) to compute the closest
     # audio fingerprint, so we just pass the fingerprinting results along.
@@ -24,6 +25,7 @@ def fingerprint_lookup_retrieve_from_db(results, db_manager, equality_conditions
             'cache_count': None,
             'fp_results': results
         }
+
     # Retrieving all the tokens and their fingerprints. Since at least one audio has been extracted
     # (i.e. this one), this result is never null. In addition, there's at least one non-null fingerprint
     # value (again, for the present file).
@@ -54,6 +56,7 @@ def fingerprint_lookup_parallel(input_dict, i, n_total, min_similarity, db_manag
     token = fp_results['fp_token']
     # Get the total number of tokens and fingerprints
     n_tokens_all = input_dict['cache_count']
+
     # Compute the start and end indices
     start_index = int(i / n_total * n_tokens_all)
     end_index = int((i + 1) / n_total * n_tokens_all)
@@ -71,6 +74,7 @@ def fingerprint_lookup_parallel(input_dict, i, n_total, min_similarity, db_manag
         ['fingerprint', 'date_added'], start=start_index, limit=limit, exclude_token=token, using_most_similar=False,
         allow_nulls=False, equality_conditions=equality_conditions
     )
+
     if tokens_and_fingerprints is None or len(tokens_and_fingerprints) == 0:
         return {
             'closest': None,
@@ -79,6 +83,7 @@ def fingerprint_lookup_parallel(input_dict, i, n_total, min_similarity, db_manag
             'max_score': None,
             'fp_results': fp_results
         }
+
     all_tokens = list(tokens_and_fingerprints.keys())
     all_fingerprints = [tokens_and_fingerprints[key]['fingerprint'] for key in all_tokens]
     all_dates = [tokens_and_fingerprints[key]['date_added'] for key in all_tokens]
@@ -97,6 +102,7 @@ def fingerprint_lookup_parallel(input_dict, i, n_total, min_similarity, db_manag
         all_dates,
         min_similarity=min_similarity
     )
+
     return {
         'closest': closest_token,
         'closest_fp': closest_fingerprint,

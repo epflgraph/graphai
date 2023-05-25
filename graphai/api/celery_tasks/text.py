@@ -55,7 +55,7 @@ def wikisearch_task(self, keywords_list, fraction=(0, 1), method='es-base'):
             # Try to get elasticsearch results, fallback to Wikipedia API in case of error.
             try:
                 results = self.es.search(keywords)
-            except Exception as e:
+            except Exception:
                 print('[ERROR] Error connecting to elasticsearch cluster. Falling back to Wikipedia API.')
                 results = self.wp.search(keywords)
 
@@ -105,31 +105,37 @@ def wikisearch_callback_task(self, results):
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={'max_retries': 2},
              name='text_10.compute_scores', ignore_result=False, ontology=ontology, graph=graph)
-def compute_scores_task(self, results):
+def compute_scores_task(self, results, ontology_score_smoothing=True, graph_score_smoothing=True, keywords_score_smoothing=True):
     if len(results) == 0:
         return results
 
-    # Compute ontology score
-    results = self.ontology.add_ontology_scores(results)
+    # Compute OntologyLocalScore and OntologyGlobalScore
+    results = self.ontology.add_ontology_scores(results, smoothing=ontology_score_smoothing)
 
-    # Compute graph score
-    results = self.graph.add_graph_score(results)
+    # Compute GraphScore
+    results = self.graph.add_graph_score(results, smoothing=graph_score_smoothing)
 
-    # Compute keywords score aggregating ontology global score over Keywords as an indicator for low-quality keywords
+    # Compute KeywordsScore aggregating OntologyGlobalScore over Keywords as an indicator for low-quality keywords
     results = pd.merge(
         results,
         results.groupby(by=['Keywords']).aggregate(KeywordsScore=('OntologyGlobalScore', 'sum')).reset_index(),
         how='left',
         on=['Keywords']
     )
+
+    # Normalise the KeywordsScore to [0, 1]
     results['KeywordsScore'] = results['KeywordsScore'] / results['KeywordsScore'].max()
+
+    # Smooth score if needed using the function f(x) = (2 - x) * x, bumping lower values to avoid very low scores
+    if keywords_score_smoothing:
+        results['KeywordsScore'] = (2 - results['KeywordsScore']) * results['KeywordsScore']
 
     return results
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={'max_retries': 2},
              name='text_10.aggregate_and_filter', ignore_result=False)
-def aggregate_and_filter_task(self, results):
+def aggregate_and_filter_task(self, results, coef=0.5, epsilon=0.1, min_votes=5):
     if len(results) == 0:
         return results
 
@@ -173,7 +179,9 @@ def aggregate_and_filter_task(self, results):
     #   * Property D is satisfied by 6. and 7., and violated by 1., 2., 3., 4. and 5.
     #
     # TL;DR
-    # After considering this and running some tests, we decide to use method 5.
+    # After considering this and running some tests, we decide to use a convex combination between methods 1 and 2,
+    # tuned by a coefficient in [0, 1], in such a way that 0 gives method 1, 1 gives method 2 and 0.5 gives method 5.
+    # The default is method 5.
 
     # Aggregate over pages, compute sum and max of scores
     results = results.groupby(by=['PageID', 'PageTitle']).aggregate(
@@ -197,9 +205,10 @@ def aggregate_and_filter_task(self, results):
     for column in score_columns:
         results[f'{column}Sum'] = results[f'{column}Sum'] / results[f'{column}Sum'].max()
 
-    # Take max of two columns
+    # Take convex combination of the two columns
+    assert 0 <= coef <= 1, f'Normalisation coefficient {coef} is not in [0, 1]'
     for column in score_columns:
-        results[column] = results[[f'{column}Max', f'{column}Sum']].mean(axis=1)
+        results[column] = coef * results[f'{column}Sum'] + (1 - coef) * results[f'{column}Max']
 
     results = results[['PageID', 'PageTitle'] + score_columns]
 
@@ -208,14 +217,14 @@ def aggregate_and_filter_task(self, results):
     ################################################################
 
     # Filter results with low scores through a majority vote among all scores
-    # To be kept, we require a concept to have at least 5 out of 6 scores to be significant (>= epsilon)
-    epsilon = 0.1
+    # To be kept, we require a concept to have at least min_votes out of 6 scores to be significant (>= epsilon)
+    assert 0 <= epsilon <= 1, f'Filtering threshold {epsilon} is not in [0, 1]'
+    assert 0 <= min_votes <= 6, f'Filtering minimum number of votes {min_votes} is not in [0, 6]'
     votes = pd.DataFrame()
     for column in score_columns:
         votes[column] = (results[column] >= epsilon).astype(int)
     votes = votes.sum(axis=1)
-    results = results[votes >= 5]
-    results = results.sort_values(by='PageTitle')
+    results = results[votes >= min_votes]
 
     ################################################################
     # Compute mixed score                                          #

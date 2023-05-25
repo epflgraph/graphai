@@ -55,7 +55,7 @@ def show_trends(unit_id, unit_concepts, concepts):
 
         ax.set_ylim(bottom=0, top=ax.get_ylim()[1])
 
-    fig.suptitle(f'INVESTMENT TRENDS (chart view)')
+    fig.suptitle('INVESTMENT TRENDS (chart view)')
     axs.flat[0].legend()
 
     plt.savefig(f'img/{unit_id}')
@@ -167,8 +167,8 @@ def show_matchmaking_chart_view(investors_concepts, unit_concepts, unit_investor
         ax.set_xticks([])
         ax.set_yticks([])
 
-        ax.set_xlabel(f"Time (years)")
-        ax.set_ylabel(f"Investor-Unit affinity\n({', '.join(unit_sample_concepts)})")
+        ax.set_xlabel('Time (years)')
+        ax.set_ylabel(f'Investor-Unit affinity\n({", ".join(unit_sample_concepts)})')
         ax.set_title(f'POTENTIAL INVESTORS (chart view, affinity)\n{investor_name}')
 
         ###########################################################

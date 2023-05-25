@@ -13,7 +13,7 @@ def norm(x):
             given by the columns ['PageID', 'Score'].
 
     Returns (pd.DataFrame): DataFrame with columns key + ['Norm'], containing the norm of each configuration, computed
-        as \sqrt{\sum_{c \in C} X(c)^2}, where C is the set of concepts and X: C \to [0, 1] is a given configuration.
+        as \\sqrt{\\sum_{c \\in C} X(c)^2}, where C is the set of concepts and X: C \to [0, 1] is a given configuration.
     """
 
     # Extract key indexing each configuration

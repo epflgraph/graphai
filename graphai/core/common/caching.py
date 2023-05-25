@@ -1,10 +1,10 @@
-import errno
 import os
-
-from ..interfaces.db import DB
-import abc
 import configparser
+import errno
+import abc
+
 from graphai.definitions import CONFIG_DIR
+from graphai.core.interfaces.db import DB
 
 ROOT_VIDEO_DIR = os.path.normpath(os.path.join(os.path.dirname(__file__), '../../../Storage/'))
 # Formats with a . in their name indicate single files, whereas formats without a . indicate folders (e.g. '_slides')
@@ -94,8 +94,7 @@ class DBCachingManagerBase(abc.ABC):
         if values_to_insert is None:
             values_to_insert = dict()
         values_to_insert = {
-            x: surround_with_character(escape_single_quotes(values_to_insert[x]), "'")
-            if isinstance(values_to_insert[x], str)
+            x: surround_with_character(escape_single_quotes(values_to_insert[x]), "'") if isinstance(values_to_insert[x], str)
             else str(values_to_insert[x]) if values_to_insert[x] is not None
             else 'null'
             for x in values_to_insert

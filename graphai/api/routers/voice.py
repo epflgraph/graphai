@@ -1,19 +1,37 @@
-from celery import group, chain
 from fastapi import APIRouter
 
-from graphai.api.schemas.voice import AudioDetectLanguageRequest, AudioDetectLanguageResponse, \
-    AudioFingerprintRequest, AudioFingerprintResponse, AudioTranscriptionRequest, AudioTranscriptionResponse
-from graphai.api.schemas.common import TaskIDResponse
+from celery import group, chain
 
-from graphai.api.celery_tasks.voice import compute_audio_fingerprint_task, \
-    compute_audio_fingerprint_callback_task, audio_fingerprint_find_closest_retrieve_from_db_task, \
-    audio_fingerprint_find_closest_parallel_task, audio_fingerprint_find_closest_callback_task, \
-    retrieve_audio_fingerprint_callback_task, remove_audio_silence_task, remove_audio_silence_callback_task, \
-    detect_language_retrieve_from_db_and_split_task, detect_language_parallel_task, detect_language_callback_task, \
-    transcribe_task, transcribe_callback_task, video_test_task
+from graphai.api.schemas.common import TaskIDResponse
+from graphai.api.schemas.voice import (
+    AudioFingerprintRequest,
+    AudioFingerprintResponse,
+    AudioTranscriptionRequest,
+    AudioTranscriptionResponse,
+    AudioDetectLanguageRequest,
+    AudioDetectLanguageResponse,
+)
+
 from graphai.api.celery_tasks.common import format_api_results, ignore_fingerprint_results_callback_task
+from graphai.api.celery_tasks.voice import (
+    compute_audio_fingerprint_task,
+    compute_audio_fingerprint_callback_task,
+    audio_fingerprint_find_closest_retrieve_from_db_task,
+    audio_fingerprint_find_closest_parallel_task,
+    audio_fingerprint_find_closest_callback_task,
+    retrieve_audio_fingerprint_callback_task,
+    remove_audio_silence_task,
+    remove_audio_silence_callback_task,
+    detect_language_retrieve_from_db_and_split_task,
+    detect_language_parallel_task,
+    detect_language_callback_task,
+    transcribe_task,
+    transcribe_callback_task,
+    video_test_task,
+)
 from graphai.core.interfaces.celery_config import get_task_info
 from graphai.core.common.video import FingerprintParameters
+
 
 # Initialise video router
 router = APIRouter(

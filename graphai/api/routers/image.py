@@ -1,17 +1,32 @@
-from celery import group, chain
 from fastapi import APIRouter
-from graphai.api.schemas.image import ImageFingerprintRequest, ExtractTextRequest, \
-    ImageFingerprintResponse, ExtractTextResponse, DetectOCRLanguageResponse
+
+from celery import group, chain
+
 from graphai.api.schemas.common import TaskIDResponse
-from graphai.api.celery_tasks.common import format_api_results
+from graphai.api.schemas.image import (
+    ImageFingerprintRequest,
+    ImageFingerprintResponse,
+    ExtractTextRequest,
+    ExtractTextResponse,
+    DetectOCRLanguageResponse,
+)
+from graphai.api.celery_tasks.common import (
+    ignore_fingerprint_results_callback_task,
+    format_api_results,
+)
+from graphai.api.celery_tasks.image import (
+    compute_slide_fingerprint_task,
+    compute_slide_fingerprint_callback_task,
+    slide_fingerprint_find_closest_retrieve_from_db_task,
+    slide_fingerprint_find_closest_parallel_task,
+    slide_fingerprint_find_closest_callback_task,
+    retrieve_slide_fingerprint_callback_task,
+    extract_slide_text_task,
+    extract_slide_text_callback_task,
+)
 from graphai.core.interfaces.celery_config import get_task_info
 from graphai.core.common.video import FingerprintParameters
 
-from ..celery_tasks.image import compute_slide_fingerprint_task, \
-    compute_slide_fingerprint_callback_task, slide_fingerprint_find_closest_retrieve_from_db_task, \
-    slide_fingerprint_find_closest_parallel_task, slide_fingerprint_find_closest_callback_task, \
-    retrieve_slide_fingerprint_callback_task, extract_slide_text_task, extract_slide_text_callback_task
-from ..celery_tasks.common import ignore_fingerprint_results_callback_task
 
 # Initialise video router
 router = APIRouter(

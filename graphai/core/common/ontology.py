@@ -53,7 +53,8 @@ class Ontology:
         ################################################
 
         # Fetch category nodes
-        table_name = 'graphontology.Hierarchical_Cluster_Names_HighLevel'
+        # table_name = 'graphontology.Hierarchical_Cluster_Names_HighLevel'
+        table_name = 'francisco.Nodes_N_Category'
         fields = ['CategoryID', 'CategoryName']
         self.categories = pd.DataFrame(db.find(table_name, fields=fields), columns=fields)
 
@@ -66,7 +67,8 @@ class Ontology:
         ################################################
 
         # Fetch category-category edges
-        table_name = 'graphontology.Predefined_Knowledge_Tree_Hierarchy'
+        # table_name = 'graphontology.Predefined_Knowledge_Tree_Hierarchy'
+        table_name = 'francisco.Edges_N_Category_N_Category'
         fields = ['ChildCategoryID', 'ParentCategoryID']
         self.categories_categories = pd.DataFrame(db.find(table_name, fields=fields), columns=fields)
 
@@ -79,7 +81,8 @@ class Ontology:
         ################################################
 
         # Fetch concept-category edges
-        table_name = 'graphontology.Hierarchical_Clusters_Main'
+        # table_name = 'graphontology.Hierarchical_Clusters_Main'
+        table_name = 'francisco.Edges_N_Category_N_Concept_T_OnlyDepth4'
         fields = ['PageID', 'CategoryID']
         self.concepts_categories = pd.DataFrame(db.find(table_name, fields=fields), columns=['PageID', 'CategoryID'])
 
@@ -137,7 +140,7 @@ class Ontology:
         self.fetch_from_db()
         return results[results['PageID'].isin(self.concept_ids)]
 
-    def add_ontology_scores(self, results):
+    def add_ontology_scores(self, results, smoothing=True):
         self.fetch_from_db()
         # Add concepts category column
         results = pd.merge(results, self.concepts_categories, how='inner', on='PageID')
@@ -190,11 +193,41 @@ class Ontology:
             on=['Category2ID']
         )
 
+        # S-shaped function h: [0, N] -> [0, 1] such that
+        #   * h is strictly increasing
+        #   * h(0) = 0 and h(N) = 1
+        #   * h is convex in (1, alpha) and concave in (alpha, N), for alpha in (0, N).
+        #   * h(alpha) = alpha
+        #   * h differentiable in alpha
+        #   * h branches are polynomials of degree deg
+        def h(x, N, alpha, deg):
+            # Make everything a pd.Series
+            N = pd.Series(N, index=range(len(x)))
+            alpha = pd.Series(alpha, index=range(len(x)))
+
+            # Make sure alpha is in (0, N)
+            alpha = alpha.clip(lower=0.5, upper=N - 0.5)
+
+            def f(t):
+                return (1 / ((alpha / N)**(deg - 1))) * (t / N)**deg
+
+            def g(t):
+                return 1 - (1 / (1 - (alpha / N))**(deg - 1)) * (1 - t / N)**deg
+
+            indicator = (x <= alpha).astype(int)
+            return indicator * f(x) + (1 - indicator) * g(x)
+
         # Compute scores
-        results['Ontology1LocalScore'] = results['Category1LocalCount'] / results['LocalCount']
-        results['Ontology2LocalScore'] = results['Category2LocalCount'] / results['LocalCount']
-        results['Ontology1GlobalScore'] = results['Category1GlobalCount'] / len(results)
-        results['Ontology2GlobalScore'] = results['Category2GlobalCount'] / len(results)
+        if smoothing:
+            results['Ontology1LocalScore'] = h(results['Category1LocalCount'], N=results['LocalCount'], alpha=3, deg=2)
+            results['Ontology2LocalScore'] = h(results['Category2LocalCount'], N=results['LocalCount'], alpha=3, deg=2)
+            results['Ontology1GlobalScore'] = h(results['Category1GlobalCount'], N=len(results), alpha=3, deg=8)
+            results['Ontology2GlobalScore'] = h(results['Category2GlobalCount'], N=len(results), alpha=3, deg=8)
+        else:
+            results['Ontology1LocalScore'] = results['Category1LocalCount'] / results['LocalCount']
+            results['Ontology2LocalScore'] = results['Category2LocalCount'] / results['LocalCount']
+            results['Ontology1GlobalScore'] = results['Category1GlobalCount'] / len(results)
+            results['Ontology2GlobalScore'] = results['Category2GlobalCount'] / len(results)
 
         # Normalise scores
         results['Ontology1LocalScore'] = results['Ontology1LocalScore'] / results['Ontology1LocalScore'].max()

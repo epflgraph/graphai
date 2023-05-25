@@ -1,6 +1,7 @@
+import abc
+
 from pydantic import BaseModel, Field, Json
 from typing import Union
-import abc
 
 
 class TaskIDResponse(BaseModel):
@@ -17,7 +18,7 @@ class TaskIDResponse(BaseModel):
 
 # This class follows the response model of our celery get_task_info function:
 # task_id, task_name, task_status, and task_result (the latter of which must be overwritten by child classes).
-
+#
 # Create one child of this class per endpoint. Be sure to override the `task_result` attribute.
 class TaskStatusResponse(BaseModel, abc.ABC):
     task_id: str = Field(

@@ -30,10 +30,10 @@ def new_wikify(row):
         # Avoid error in the case of Internal Server Error
         try:
             result = result.json()
-        except json.decoder.JSONDecodeError as jde:
+        except json.decoder.JSONDecodeError:
             result = []
 
-    except TypeError as e:
+    except TypeError:
         print(data)
         result = []
 
@@ -66,4 +66,3 @@ pages = pages.reset_index(drop=True)
 
 with open('pages_new.json', 'w', encoding='utf-8') as file:
     json.dump(pages.to_dict(orient='records'), file, ensure_ascii=True)
-
