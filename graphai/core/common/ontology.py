@@ -196,28 +196,33 @@ class Ontology:
         # S-shaped function h: [0, N] -> [0, 1] such that
         #   * h is strictly increasing
         #   * h(0) = 0 and h(N) = 1
-        #   * h is convex in (1, beta/N) and concave in (beta/N, N), for beta in (0, 1).
-        #   * h(beta/N) = beta
-        #   * h differentiable in beta/N
-        #   * f(t, N, beta) + g(t, N, 1 - beta) is linear
-        #   * (f(t, N, 1) + g(t, N, 0)) / 2 = x/N, the linear function mapping [0, N] to [0, 1]
-        def h(x, N, beta):
+        #   * h is convex in (1, alpha) and concave in (alpha, N), for alpha in (0, N).
+        #   * h(alpha) = alpha
+        #   * h differentiable in alpha
+        #   * h branches are polynomials of degree deg
+        def h(x, N, alpha, deg):
+            # Make everything a pd.Series
+            N = pd.Series(N, index=range(len(x)))
+            alpha = pd.Series(alpha, index=range(len(x)))
+
+            # Make sure alpha is in (0, N)
+            alpha = alpha.clip(lower=0.5, upper=N - 0.5)
+
             def f(t):
-                return (1 / beta) * t**2
+                return (1 / ((alpha / N)**(deg - 1))) * (t / N)**deg
 
             def g(t):
-                return 1 - (1 / (1 - beta)) * (1 - t)**2
+                return 1 - (1 / (1 - (alpha / N))**(deg - 1)) * (1 - t / N)**deg
 
-            y = x / N
-            indicator = (y <= beta).astype(int)
-            return indicator * f(y) + (1 - indicator) * g(y)
+            indicator = (x <= alpha).astype(int)
+            return indicator * f(x) + (1 - indicator) * g(x)
 
         # Compute scores
         if smoothing:
-            results['Ontology1LocalScore'] = h(results['Category1LocalCount'], results['LocalCount'], 0.3)
-            results['Ontology2LocalScore'] = h(results['Category2LocalCount'], results['LocalCount'], 0.3)
-            results['Ontology1GlobalScore'] = h(results['Category1GlobalCount'], len(results), 0.1)
-            results['Ontology2GlobalScore'] = h(results['Category2GlobalCount'], len(results), 0.1)
+            results['Ontology1LocalScore'] = h(results['Category1LocalCount'], N=results['LocalCount'], alpha=3, deg=2)
+            results['Ontology2LocalScore'] = h(results['Category2LocalCount'], N=results['LocalCount'], alpha=3, deg=2)
+            results['Ontology1GlobalScore'] = h(results['Category1GlobalCount'], N=len(results), alpha=3, deg=8)
+            results['Ontology2GlobalScore'] = h(results['Category2GlobalCount'], N=len(results), alpha=3, deg=8)
         else:
             results['Ontology1LocalScore'] = results['Category1LocalCount'] / results['LocalCount']
             results['Ontology2LocalScore'] = results['Category2LocalCount'] / results['LocalCount']
