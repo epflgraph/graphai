@@ -38,12 +38,14 @@ def compute_text_fingerprint_callback_task(self, results):
     if results['fresh']:
         token = results['fp_token']
         db_manager = TextDBCachingManager()
-        db_manager.insert_or_update_details(
-            token,
-            {
-                'fingerprint': results['result']
-            }
-        )
+        values_dict = {
+            'fingerprint': results['result'],
+        }
+        existing = db_manager.get_details(token, ['date_added'], using_most_similar=False)[0]
+        if existing is None or existing['date_added'] is None:
+            current_datetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            values_dict['date_added'] = current_datetime
+        db_manager.insert_or_update_details(token, values_dict)
     return results
 
 
@@ -133,14 +135,16 @@ def translate_text_task(self, token, text, src, tgt, force):
 def translate_text_callback_task(self, results, token, text, src, tgt, force=False):
     db_manager = TextDBCachingManager()
     if results['fresh']:
-        current_datetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         values_dict = {
             'source': text,
             'target': results['result'],
             'source_lang': src,
-            'target_lang': tgt,
-            'date_added': current_datetime
+            'target_lang': tgt
         }
+        existing = db_manager.get_details(token, ['date_added'], using_most_similar=False)[0]
+        if existing is None or existing['date_added'] is None:
+            current_datetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            values_dict['date_added'] = current_datetime
         # Inserting values for original token
         db_manager.insert_or_update_details(
             token, values_dict
