@@ -166,7 +166,7 @@ class DBCachingManagerBase(abc.ABC):
 
     def _get_all_details(self, schema, table_name, cols, start=0, limit=-1,
                          exclude_token=None, allow_nulls=True, earliest_date=None,
-                         equality_conditions=None):
+                         equality_conditions=None, has_date_col=False):
         column_list = ['id_token'] + cols
         query = f"""
             SELECT {', '.join(column_list)} FROM `{schema}`.`{table_name}`
@@ -178,14 +178,17 @@ class DBCachingManagerBase(abc.ABC):
         if not allow_nulls:
             query += add_where_or_and(query)
             query += add_non_null_conditions(cols)
-        if earliest_date is not None:
+        if earliest_date is not None and has_date_col:
             query += add_where_or_and(query)
             query += f" date_added >= '{earliest_date}'"
         if equality_conditions is not None:
             query += add_where_or_and(query)
             query += add_equality_conditions(equality_conditions)
         # ORDER BY comes before LIMIT but after WHERE
-        query += "\nORDER BY id_token"
+        if has_date_col:
+            query += "\nORDER BY date_added"
+        else:
+            query += "\nORDER BY id_token"
         if limit != -1:
             query += f"""
             LIMIT {start},{limit}
@@ -264,7 +267,7 @@ class DBCachingManagerBase(abc.ABC):
         results = self._get_all_details(self.schema, self.cache_table, cols,
                                         start=start, limit=limit, exclude_token=exclude_token,
                                         allow_nulls=allow_nulls, earliest_date=earliest_date,
-                                        equality_conditions=equality_conditions)
+                                        equality_conditions=equality_conditions, has_date_col=True)
         if using_most_similar:
             most_similar_map = self.get_all_closest_matches()
             results = {x: results[most_similar_map.get(x, x)] for x in results}
@@ -280,7 +283,8 @@ class DBCachingManagerBase(abc.ABC):
         return self.resolve_most_similar_chain(id_token)
 
     def get_all_closest_matches(self):
-        results = self._get_all_details(self.schema, self.most_similar_table, ['most_similar_token'])
+        results = self._get_all_details(self.schema, self.most_similar_table,
+                                        ['most_similar_token'], has_date_col=False)
         if results is not None:
             return {x: results[x]['most_similar_token'] for x in results
                     if results[x]['most_similar_token'] is not None}

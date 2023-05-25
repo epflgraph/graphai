@@ -405,7 +405,7 @@ def compare_encoded_fingerprints(f1, f2=None, decoder_func=chromaprint.decode_fi
                                         decoder_func(f2.encode('utf8')))
 
 
-def find_closest_fingerprint_from_list(target_fp, fp_list, token_list, min_similarity=0.8,
+def find_closest_fingerprint_from_list(target_fp, fp_list, token_list, date_list, min_similarity=0.8,
                                        decoder_func=chromaprint.decode_fingerprint):
     """
     Given a target fingerprint and a list of candidate fingerprints, finds the one with the highest similarity
@@ -424,34 +424,35 @@ def find_closest_fingerprint_from_list(target_fp, fp_list, token_list, min_simil
     """
     # If the list of fingerprints is empty, there's no "closest" fingerprint to the target and the result is null.
     if len(fp_list) == 0:
-        return None, None, None
+        return None, None, None, None
     if min_similarity < 1:
         fp_similarities = np.array([compare_encoded_fingerprints(target_fp, fp2, decoder_func) for fp2 in fp_list])
     else:
         # if an exact match is required, we switch to a much faster equality comparison
         fp_similarities = [1 if target_fp == fp2 else 0 for fp2 in fp_list]
+    # The index returned by argmax is the first occurrence of the maximum
     max_index = np.argmax(fp_similarities)
     # If the similarity of the most similar fingerprint is also greater than the minimum similarity value,
     # then it's a match. Otherwise, the result is null.
     if fp_similarities[max_index] >= min_similarity:
-        return token_list[max_index], fp_list[max_index], fp_similarities[max_index]
+        return token_list[max_index], fp_list[max_index], date_list[max_index], fp_similarities[max_index]
     else:
-        return None, None, None
+        return None, None, None, None
 
 
-def find_closest_audio_fingerprint_from_list(target_fp, fp_list, token_list, min_similarity=0.8):
+def find_closest_audio_fingerprint_from_list(target_fp, fp_list, token_list, date_list, min_similarity=0.8):
     """
     Finds closest audio fingerprint from list
     """
-    return find_closest_fingerprint_from_list(target_fp, fp_list, token_list, min_similarity,
+    return find_closest_fingerprint_from_list(target_fp, fp_list, token_list, date_list, min_similarity,
                                        decoder_func=chromaprint.decode_fingerprint)
 
 
-def find_closest_image_fingerprint_from_list(target_fp, fp_list, token_list, min_similarity=0.8):
+def find_closest_image_fingerprint_from_list(target_fp, fp_list, token_list, date_list, min_similarity=0.8):
     """
     Finds closest image fingerprint from list
     """
-    return find_closest_fingerprint_from_list(target_fp, fp_list, token_list, min_similarity,
+    return find_closest_fingerprint_from_list(target_fp, fp_list, token_list, date_list, min_similarity,
                                               decoder_func=imagehash.hex_to_hash)
 
 
