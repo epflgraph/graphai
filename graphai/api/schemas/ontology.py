@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from typing import List, Dict, Union
+from typing import List, Union
 from .common import TaskStatusResponse
 
 

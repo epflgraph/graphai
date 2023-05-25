@@ -1,9 +1,9 @@
 from celery import group, chain
 from fastapi import APIRouter
-from fastapi.responses import FileResponse
 
-from graphai.api.schemas.voice import *
-from graphai.api.schemas.common import *
+from graphai.api.schemas.voice import AudioDetectLanguageRequest, AudioDetectLanguageResponse, \
+    AudioFingerprintRequest, AudioFingerprintResponse, AudioTranscriptionRequest, AudioTranscriptionResponse
+from graphai.api.schemas.common import TaskIDResponse
 
 from graphai.api.celery_tasks.voice import compute_audio_fingerprint_task, \
     compute_audio_fingerprint_callback_task, audio_fingerprint_find_closest_retrieve_from_db_task, \
@@ -44,6 +44,7 @@ def get_audio_fingerprint_chain_list(token, force=False, min_similarity=None, n_
     else:
         task_list += [retrieve_audio_fingerprint_callback_task.s()]
     return task_list
+
 
 @router.post('/calculate_fingerprint', response_model=TaskIDResponse)
 async def calculate_audio_fingerprint(data: AudioFingerprintRequest):
@@ -86,13 +87,13 @@ async def transcribe(data: AudioTranscriptionRequest):
     if lang is not None:
         if not force:
             task_list = get_audio_fingerprint_chain_list(token, force, ignore_fp_results=True,
-                                                         results_to_return={'token':token, 'language': lang})
+                                                         results_to_return={'token': token, 'language': lang})
             task_list += [transcribe_task.s(force)]
         else:
-            task_list = [transcribe_task.s({'token':token, 'language': lang}, force)]
+            task_list = [transcribe_task.s({'token': token, 'language': lang}, force)]
     else:
         n_divs = 5
-        len_segment=30
+        len_segment = 30
         if not force:
             task_list = get_audio_fingerprint_chain_list(token, force, ignore_fp_results=True,
                                                          results_to_return=token)
@@ -143,8 +144,8 @@ async def detect_language(data: AudioDetectLanguageRequest):
     else:
         task_list = [detect_language_retrieve_from_db_and_split_task.s(token, force, n_divs, len_segment)]
     task_list += [
-            group(detect_language_parallel_task.s(i) for i in range(n_divs)),
-            detect_language_callback_task.s(token, force)
+        group(detect_language_parallel_task.s(i) for i in range(n_divs)),
+        detect_language_callback_task.s(token, force)
     ]
     task = chain(task_list)
     task = task.apply_async(priority=2)

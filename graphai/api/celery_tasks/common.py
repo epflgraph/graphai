@@ -15,7 +15,6 @@ def format_api_results(id, name, status, result):
 
 def fingerprint_lookup_retrieve_from_db(results, db_manager, equality_conditions=None):
     target_fingerprint = results['result']
-    token = results['fp_token']
     # If the fingerprint computation has been unsuccessful or if cached results are being returned,
     # then there it is not necessary (or even possible, in the former case) to compute the closest
     # audio fingerprint, so we just pass the fingerprinting results along.

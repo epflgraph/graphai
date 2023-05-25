@@ -85,7 +85,8 @@ def compute_audio_fingerprint_task(self, input_dict, audio_token, force=False):
         }
     db_manager = AudioDBCachingManager()
     existing_list = db_manager.get_details(audio_token, cols=['fingerprint', 'duration',
-                                        'nosilence_duration', 'fp_nosilence'], using_most_similar=True)
+                                                              'nosilence_duration', 'fp_nosilence'],
+                                           using_most_similar=True)
     # The information on audio file needs to have been inserted into the cache table when
     # the audio was extracted from the video. Therefore, the `existing` row needs to *exist*,
     # even if its fingerprint and many of its other fields are null.
@@ -110,7 +111,8 @@ def compute_audio_fingerprint_task(self, input_dict, audio_token, force=False):
                     'fp_token': existing['id_token'],
                     'perform_lookup': False,
                     'fresh': False,
-                    'duration': existing['duration'] if existing['fp_nosilence'] == 0 else existing['nosilence_duration'],
+                    'duration': existing['duration'] if existing['fp_nosilence'] == 0 else existing[
+                        'nosilence_duration'],
                     'fp_nosilence': existing['fp_nosilence']
                 }
     fp_token_with_path = self.file_manager.generate_filepath(fp_token)
@@ -138,6 +140,7 @@ def compute_audio_fingerprint_task(self, input_dict, audio_token, force=False):
         'duration': duration,
         'fp_nosilence': fp_nosilence
     }
+
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='video_2.audio_fingerprint_callback', ignore_result=False,
@@ -241,7 +244,7 @@ def detect_language_retrieve_from_db_and_split_task(self, token, force=False, n_
                                                                              force_dir=TEMP_SUBFOLDER)
         current_result = extract_audio_segment(
             input_filename_with_path, current_output_token_with_path, current_output_token,
-            start=existing_list[0]['duration']*i/n_divs, length=segment_length)
+            start=existing_list[0]['duration'] * i / n_divs, length=segment_length)
         if current_result is None:
             print('Unspecified error while creating temp files')
             return {
@@ -272,7 +275,7 @@ def detect_language_parallel_task(self, tokens_dict, i):
         language = self.model.detect_audio_segment_lang_whisper(
             self.file_manager.generate_filepath(current_token, force_dir=TEMP_SUBFOLDER)
         )
-    except:
+    except Exception:
         return {
             'lang': None,
             'fresh': False

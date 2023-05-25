@@ -1,7 +1,8 @@
 from celery import group, chain
 from fastapi import APIRouter
-from graphai.api.schemas.image import *
-from graphai.api.schemas.common import *
+from graphai.api.schemas.image import ImageFingerprintRequest, ExtractTextRequest, \
+    ImageFingerprintResponse, ExtractTextResponse, DetectOCRLanguageResponse
+from graphai.api.schemas.common import TaskIDResponse
 from graphai.api.celery_tasks.common import format_api_results
 from graphai.core.interfaces.celery_config import get_task_info
 from graphai.core.common.video import FingerprintParameters
@@ -118,4 +119,3 @@ async def detect_ocr_language_status(task_id):
         else:
             task_results = None
     return format_api_results(full_results['id'], full_results['name'], full_results['status'], task_results)
-

@@ -32,6 +32,10 @@ def make_sure_path_exists(path, file_at_the_end=False):
             raise
 
 
+def file_exists(file_path):
+    return os.path.exists(file_path)
+
+
 def create_symlink_between_paths(old_path, new_path):
     if not file_exists(new_path):
         os.symlink(old_path, new_path)
@@ -53,7 +57,7 @@ def add_where_or_and(query):
 
 
 def add_equality_conditions(conditions):
-    return " AND ".join([f"{k}='{escape_single_quotes(v)}'" for k,v in conditions.items()])
+    return " AND ".join([f"{k}='{escape_single_quotes(v)}'" for k, v in conditions.items()])
 
 
 def add_non_null_conditions(cols):
@@ -82,19 +86,17 @@ class DBCachingManagerBase(abc.ABC):
         if token is None:
             return None
         prev_most_similar = self._get_closest_match(token)
-        if prev_most_similar is None or prev_most_similar==token:
+        if prev_most_similar is None or prev_most_similar == token:
             return token
         return self.resolve_most_similar_chain(prev_most_similar)
-
 
     def _insert_or_update_details(self, schema, table_name, id_token, values_to_insert=None):
         if values_to_insert is None:
             values_to_insert = dict()
         values_to_insert = {
             x: surround_with_character(escape_single_quotes(values_to_insert[x]), "'")
-                            if isinstance(values_to_insert[x], str)
-            else str(values_to_insert[x])
-                            if values_to_insert[x] is not None
+            if isinstance(values_to_insert[x], str)
+            else str(values_to_insert[x]) if values_to_insert[x] is not None
             else 'null'
             for x in values_to_insert
         }
@@ -298,8 +300,8 @@ class VideoDBCachingManager(DBCachingManagerBase):
     def init_db(self):
         self.db.execute_query(
             f"""
-            CREATE DATABASE IF NOT EXISTS `{self.schema}` 
-            DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci 
+            CREATE DATABASE IF NOT EXISTS `{self.schema}`
+            DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci
             DEFAULT ENCRYPTION='N';
             """
         )
@@ -333,8 +335,8 @@ class AudioDBCachingManager(DBCachingManagerBase):
     def init_db(self):
         self.db.execute_query(
             f"""
-            CREATE DATABASE IF NOT EXISTS `{self.schema}` 
-            DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci 
+            CREATE DATABASE IF NOT EXISTS `{self.schema}`
+            DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci
             DEFAULT ENCRYPTION='N';
             """
         )
@@ -375,8 +377,8 @@ class SlideDBCachingManager(DBCachingManagerBase):
     def init_db(self):
         self.db.execute_query(
             f"""
-            CREATE DATABASE IF NOT EXISTS `{self.schema}` 
-            DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci 
+            CREATE DATABASE IF NOT EXISTS `{self.schema}`
+            DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci
             DEFAULT ENCRYPTION='N';
             """
         )
@@ -416,8 +418,8 @@ class TextDBCachingManager(DBCachingManagerBase):
     def init_db(self):
         self.db.execute_query(
             f"""
-            CREATE DATABASE IF NOT EXISTS `{self.schema}` 
-            DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci 
+            CREATE DATABASE IF NOT EXISTS `{self.schema}`
+            DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci
             DEFAULT ENCRYPTION='N';
             """
         )
@@ -454,17 +456,15 @@ class VideoConfig():
             print('Reading cache storage configuration from file')
             config_contents.read(f'{CONFIG_DIR}/cache.ini')
             self.root_dir = config_contents['CACHE'].get('root', fallback=ROOT_VIDEO_DIR)
-        except Exception as e:
+        except Exception:
             print(f'Could not read file {CONFIG_DIR}/cache.ini or '
                   f'file does not have section [CACHE], falling back to defaults.')
             self.root_dir = ROOT_VIDEO_DIR
-
 
     def concat_file_path(self, filename, subfolder):
         result = os.path.join(self.root_dir, subfolder, filename)
         make_sure_path_exists(result, file_at_the_end=True)
         return result
-
 
     def set_root_dir(self, new_root_dir):
         self.root_dir = new_root_dir
@@ -495,7 +495,3 @@ class VideoConfig():
         new_path = self.generate_filepath(new_filename)
         # Only creating the symlink if it doesn't already exist
         create_symlink_between_paths(old_path, new_path)
-
-
-def file_exists(file_path):
-    return os.path.exists(file_path)

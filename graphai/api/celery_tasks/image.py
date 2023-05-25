@@ -124,7 +124,7 @@ def extract_slide_text_task(self, token, method='tesseract', force=False):
         ocr_colnames = ['ocr_google_1_token', 'ocr_google_2_token']
     if not force:
         db_manager = SlideDBCachingManager()
-        existing_list = db_manager.get_details(token, ocr_colnames+['language'],
+        existing_list = db_manager.get_details(token, ocr_colnames + ['language'],
                                                using_most_similar=True)
         # Checking whether the token even exists
         if existing_list[0] is None:
@@ -164,7 +164,7 @@ def extract_slide_text_task(self, token, method='tesseract', force=False):
             language = None
         else:
             language = detect_text_language(res)
-            res_token = token+'_'+ocr_colnames[0]+'.txt.gz'
+            res_token = token + '_' + ocr_colnames[0] + '.txt.gz'
             write_txt_gz_file(res, self.file_manager.generate_filepath(res_token))
             results = [
                 {
@@ -186,7 +186,7 @@ def extract_slide_text_task(self, token, method='tesseract', force=False):
             res_list = [res1, res2]
             res_token_list = list()
             for i in range(len(res_list)):
-                current_token = token+'_'+ocr_colnames[i]+'.txt.gz'
+                current_token = token + '_' + ocr_colnames[i] + '.txt.gz'
                 write_txt_gz_file(res_list[i], self.file_manager.generate_filepath(current_token))
                 res_token_list.append(current_token)
             results = [
@@ -226,4 +226,3 @@ def extract_slide_text_callback_task(self, results, token, force=False):
                     closest, values_dict
                 )
     return results
-

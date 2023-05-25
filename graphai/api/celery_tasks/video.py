@@ -54,8 +54,7 @@ def retrieve_file_from_url_callback_task(self, results, url):
                                             {
                                                 'origin_token': url,
                                                 'date_added': current_datetime
-                                            }
-                                            )
+        })
     return results
 
 
@@ -119,7 +118,7 @@ def video_fingerprint_find_closest_retrieve_from_db_task(self, results):
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='video_2.video_fingerprint_find_closest_parallel', ignore_result=False)
 def video_fingerprint_find_closest_parallel_task(self, input_dict, i, n_total,
-                                                min_similarity=1):
+                                                 min_similarity=1):
     db_manager = VideoDBCachingManager()
     return fingerprint_lookup_parallel(input_dict, i, n_total, min_similarity, db_manager, data_type='video')
 
@@ -327,8 +326,8 @@ def compute_noise_level_parallel_task(self, results, i, n, language=None):
             'slide_tokens': results['slide_tokens']
         }
     all_sample_indices = results['sample_indices']
-    start_index = int(i*len(all_sample_indices)/n)
-    end_index = int((i+1)*len(all_sample_indices)/n)
+    start_index = int(i * len(all_sample_indices) / n)
+    end_index = int((i + 1) * len(all_sample_indices) / n)
     current_sample_indices = all_sample_indices[start_index:end_index]
     noise_level_list = \
         compute_ocr_noise_level(self.file_manager.generate_filepath(results['result']),
@@ -378,8 +377,8 @@ def compute_slide_transitions_parallel_task(self, results, i, n, language=None):
             'slide_tokens': results['slide_tokens']
         }
     all_sample_indices = results['sample_indices']
-    start_index = int(i*len(all_sample_indices)/n)
-    end_index = int((i+1)*len(all_sample_indices)/n)
+    start_index = int(i * len(all_sample_indices) / n)
+    end_index = int((i + 1) * len(all_sample_indices) / n)
     current_sample_indices = all_sample_indices[start_index:end_index]
     slide_transition_list = \
         compute_video_ocr_transitions(self.file_manager.generate_filepath(results['result']), current_sample_indices,
@@ -437,9 +436,9 @@ def detect_slides_callback_task(self, results, token, force=False):
                   slides_folder_with_path)
         slide_tokens = [os.path.join(slides_folder, s) for s in list_of_slides]
         ocr_tokens = [os.path.join(slides_folder, s) for s in list_of_ocr_results]
-        slide_tokens = {i+1: {'token': slide_tokens[i], 'timestamp': results['slides'][i]}
+        slide_tokens = {i + 1: {'token': slide_tokens[i], 'timestamp': results['slides'][i]}
                         for i in range(len(slide_tokens))}
-        ocr_tokens = {i+1:ocr_tokens[i] for i in range(len(ocr_tokens))}
+        ocr_tokens = {i + 1: ocr_tokens[i] for i in range(len(ocr_tokens))}
         current_datetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         # Inserting fresh results into the database
         db_manager = SlideDBCachingManager()

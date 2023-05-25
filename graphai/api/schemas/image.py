@@ -2,6 +2,7 @@ from pydantic import BaseModel, Field
 from typing import Union, List, Literal
 from .common import TaskStatusResponse
 
+
 class ImageFingerprintRequest(BaseModel):
     token: str = Field(
         title="Token",

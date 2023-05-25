@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field, Json
-from typing import List, Union, Any
+from typing import Union, Any
 from .common import TaskStatusResponse
 
 
@@ -27,7 +27,6 @@ class AudioFingerprintRequest(BaseModel):
         description="Threshold for silence removal at the beginning and end of the video",
         default=0.0
     )
-
 
 
 class AudioFingerprintTaskResponse(BaseModel):

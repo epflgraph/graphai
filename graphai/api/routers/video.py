@@ -2,8 +2,9 @@ from celery import group, chain
 from fastapi import APIRouter
 from fastapi.responses import FileResponse
 
-from graphai.api.schemas.video import *
-from graphai.api.schemas.common import *
+from graphai.api.schemas.video import RetrieveURLRequest, DetectSlidesRequest, ExtractAudioRequest, \
+    VideoFingerprintRequest, RetrieveURLResponse, DetectSlidesResponse, ExtractAudioResponse, VideoFingerprintResponse
+from graphai.api.schemas.common import TaskIDResponse, FileRequest
 
 from graphai.api.celery_tasks.video import retrieve_file_from_url_task, retrieve_file_from_url_callback_task, \
     get_file_task, extract_audio_task, extract_audio_callback_task, extract_and_sample_frames_task, \
@@ -25,7 +26,7 @@ router = APIRouter(
 
 
 def get_video_fingerprint_chain_list(token, force, min_similarity=None, n_jobs=8,
-                                    ignore_fp_results=False, results_to_return=None):
+                                     ignore_fp_results=False, results_to_return=None):
     if min_similarity is None:
         fp_parameters = FingerprintParameters()
         min_similarity = fp_parameters.get_min_sim_video()
@@ -54,8 +55,10 @@ async def retrieve_file(data: RetrieveURLRequest):
     min_timeout = 60
     timeout = max([data.timeout, min_timeout])
     timeout = min([timeout, max_timeout])
-    task = (retrieve_file_from_url_task.s(url, is_kaltura, timeout) |
-            retrieve_file_from_url_callback_task.s(url)).apply_async(priority=2)
+    task_list = [retrieve_file_from_url_task.s(url, is_kaltura, timeout),
+                 retrieve_file_from_url_callback_task.s(url)]
+    task = chain(task_list)
+    task = task.apply_async(priority=2)
     return {'task_id': task.id}
 
 
@@ -81,7 +84,7 @@ async def calculate_fingerprint(data: VideoFingerprintRequest):
     token = data.token
     force = data.force
     task_list = get_video_fingerprint_chain_list(token, force,
-                                                ignore_fp_results=False)
+                                                 ignore_fp_results=False)
     task = chain(task_list)
     task = task.apply_async(priority=6)
     return {'task_id': task.id}
@@ -114,8 +117,10 @@ async def get_file(data: FileRequest):
 async def extract_audio(data: ExtractAudioRequest):
     token = data.token
     force = data.force
-    task = (extract_audio_task.s(token, force) |
-            extract_audio_callback_task.s(token, force)).apply_async(priority=2)
+    task_list = [extract_audio_task.s(token, force),
+                 extract_audio_callback_task.s(token, force)]
+    task = chain(task_list)
+    task = task.apply_async(priority=2)
     return {'task_id': task.id}
 
 
@@ -143,14 +148,15 @@ async def detect_slides(data: DetectSlidesRequest):
     language = data.language
     n_jobs = 8
     hash_thresh = 0.85
-    task = (extract_and_sample_frames_task.s(token, force) |
-            group(compute_noise_level_parallel_task.s(i, n_jobs, language) for i in range(n_jobs)) |
-            compute_noise_threshold_callback_task.s(hash_thresh) |
-            dummy_task.s() |
-            group(compute_slide_transitions_parallel_task.s(i, n_jobs, language) for i in range(n_jobs)) |
-            compute_slide_transitions_callback_task.s() |
-            detect_slides_callback_task.s(token, force)). \
-        apply_async(priority=2)
+    task_list = [extract_and_sample_frames_task.s(token, force),
+                 group(compute_noise_level_parallel_task.s(i, n_jobs, language) for i in range(n_jobs)),
+                 compute_noise_threshold_callback_task.s(hash_thresh),
+                 dummy_task.s(),
+                 group(compute_slide_transitions_parallel_task.s(i, n_jobs, language) for i in range(n_jobs)),
+                 compute_slide_transitions_callback_task.s(),
+                 detect_slides_callback_task.s(token, force)]
+    task = chain(task_list)
+    task = task.apply_async(priority=2)
     return {'task_id': task.id}
 
 

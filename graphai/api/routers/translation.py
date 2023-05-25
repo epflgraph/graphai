@@ -28,7 +28,7 @@ def generate_text_token(s, src, tgt):
 
 
 def get_text_fingerprint_chain_list(token, text, src, tgt, force, min_similarity=None, n_jobs=8,
-                                     ignore_fp_results=False, results_to_return=None):
+                                    ignore_fp_results=False, results_to_return=None):
     if min_similarity is None:
         fp_parameters = FingerprintParameters()
         min_similarity = fp_parameters.get_min_sim_text()

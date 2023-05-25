@@ -174,7 +174,7 @@ def handle_already_processed_files(root_dir, create_symlinks=True):
             already_organized_videos = f.readlines()
         already_organized_videos = [x for x in already_organized_videos if x != '']
         # Loading the existing video key to video token mappings so no video gets two different tokens
-        video_tokens = {x.split(':')[0].strip():x.split(':')[1].strip() for x in already_organized_videos}
+        video_tokens = {x.split(':')[0].strip(): x.split(':')[1].strip() for x in already_organized_videos}
     for base_folder in folders_to_process:
         print(f"Processing {base_folder}")
         base_path = os.path.join(root_dir, base_folder)
@@ -194,12 +194,9 @@ def handle_already_processed_files(root_dir, create_symlinks=True):
                 full_file_list = [
                     filename for filename in full_file_list if
                     (base_folder == 'modelled/img/final_slide_files' and '_R_1280x720_Q_80' in filename)
-                    or
-                    (base_folder == 'mined/video_lectures' and '_video_file_' in filename)
-                    or
-                    (base_folder == 'modelled/json/slides_ocr_google' and '_slideocr_' in filename)
-                    or
-                    (base_folder == 'modelled/raw/frames_ocr_tessaract' and '.txt.gz' in filename)
+                    or (base_folder == 'mined/video_lectures' and '_video_file_' in filename)
+                    or (base_folder == 'modelled/json/slides_ocr_google' and '_slideocr_' in filename)
+                    or (base_folder == 'modelled/raw/frames_ocr_tessaract' and '.txt.gz' in filename)
                 ]
                 # Sorting by frame number in case of slides so that we can use the folder_index_counter as slide number
                 if base_folder == 'modelled/img/final_slide_files':

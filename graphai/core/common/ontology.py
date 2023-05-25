@@ -118,7 +118,7 @@ class Ontology:
             return None
         else:
             cat_to_cat = self.categories_categories
-            return cat_to_cat.loc[cat_to_cat['ParentCategoryID']==category_id].to_dict(orient='records')
+            return cat_to_cat.loc[cat_to_cat['ParentCategoryID'] == category_id].to_dict(orient='records')
 
     def add_concepts_category(self, results):
         self.fetch_from_db()

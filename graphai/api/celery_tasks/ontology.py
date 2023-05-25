@@ -14,7 +14,6 @@ def get_category_parent_task(self, child_id):
     return {'child_to_parent': self.ontology_obj.get_category_parent(child_id)}
 
 
-
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 5},
              name='ontology_6.children', ignore_result=False, ontology_obj=ontology)
 def get_category_children_task(self, parent_id):
