@@ -6,7 +6,6 @@ import abc
 from graphai.definitions import CONFIG_DIR
 from graphai.core.interfaces.db import DB
 
-
 ROOT_VIDEO_DIR = os.path.normpath(os.path.join(os.path.dirname(__file__), '../../../Storage/'))
 # Formats with a . in their name indicate single files, whereas formats without a . indicate folders (e.g. '_slides')
 VIDEO_SUBFOLDER = 'Video'
@@ -31,6 +30,15 @@ def make_sure_path_exists(path, file_at_the_end=False):
     except OSError as exception:
         if exception.errno != errno.EEXIST and exception.errno != errno.EPERM:
             raise
+
+
+def file_exists(file_path):
+    return os.path.exists(file_path)
+
+
+def create_symlink_between_paths(old_path, new_path):
+    if not file_exists(new_path):
+        os.symlink(old_path, new_path)
 
 
 def surround_with_character(s, c="'"):
@@ -77,7 +85,7 @@ class DBCachingManagerBase(abc.ABC):
     def resolve_most_similar_chain(self, token):
         if token is None:
             return None
-        prev_most_similar = self.get_closest_match(token)
+        prev_most_similar = self._get_closest_match(token)
         if prev_most_similar is None or prev_most_similar == token:
             return token
         return self.resolve_most_similar_chain(prev_most_similar)
@@ -137,6 +145,12 @@ class DBCachingManagerBase(abc.ABC):
             results = None
         return results
 
+    def _get_closest_match(self, id_token):
+        results = self._get_details(self.schema, self.most_similar_table, id_token, ['most_similar_token'])
+        if results is not None:
+            return results['most_similar_token']
+        return None
+
     def _get_details_using_origin(self, schema, table_name, origin_token, cols):
         column_list = ['origin_token', 'id_token'] + cols
         results = self.db.execute_query(
@@ -153,7 +167,7 @@ class DBCachingManagerBase(abc.ABC):
 
     def _get_all_details(self, schema, table_name, cols, start=0, limit=-1,
                          exclude_token=None, allow_nulls=True, earliest_date=None,
-                         equality_conditions=None):
+                         equality_conditions=None, has_date_col=False):
         column_list = ['id_token'] + cols
         query = f"""
             SELECT {', '.join(column_list)} FROM `{schema}`.`{table_name}`
@@ -165,12 +179,17 @@ class DBCachingManagerBase(abc.ABC):
         if not allow_nulls:
             query += add_where_or_and(query)
             query += add_non_null_conditions(cols)
-        if earliest_date is not None:
+        if earliest_date is not None and has_date_col:
             query += add_where_or_and(query)
             query += f" date_added >= '{earliest_date}'"
         if equality_conditions is not None:
             query += add_where_or_and(query)
             query += add_equality_conditions(equality_conditions)
+        # ORDER BY comes before LIMIT but after WHERE
+        if has_date_col:
+            query += "\nORDER BY date_added"
+        else:
+            query += "\nORDER BY id_token"
         if limit != -1:
             query += f"""
             LIMIT {start},{limit}
@@ -249,7 +268,7 @@ class DBCachingManagerBase(abc.ABC):
         results = self._get_all_details(self.schema, self.cache_table, cols,
                                         start=start, limit=limit, exclude_token=exclude_token,
                                         allow_nulls=allow_nulls, earliest_date=earliest_date,
-                                        equality_conditions=equality_conditions)
+                                        equality_conditions=equality_conditions, has_date_col=True)
         if using_most_similar:
             most_similar_map = self.get_all_closest_matches()
             results = {x: results[most_similar_map.get(x, x)] for x in results}
@@ -262,17 +281,50 @@ class DBCachingManagerBase(abc.ABC):
         self._insert_or_update_details(self.schema, self.most_similar_table, id_token, values_to_insert)
 
     def get_closest_match(self, id_token):
-        results = self._get_details(self.schema, self.most_similar_table, id_token, ['most_similar_token'])
-        if results is not None:
-            return results['most_similar_token']
-        return None
+        return self.resolve_most_similar_chain(id_token)
 
     def get_all_closest_matches(self):
-        results = self._get_all_details(self.schema, self.most_similar_table, ['most_similar_token'])
+        results = self._get_all_details(self.schema, self.most_similar_table,
+                                        ['most_similar_token'], has_date_col=False)
         if results is not None:
             return {x: results[x]['most_similar_token'] for x in results
                     if results[x]['most_similar_token'] is not None}
         return None
+
+
+class VideoDBCachingManager(DBCachingManagerBase):
+    def __init__(self):
+        super().__init__(cache_table='Video_Main', most_similar_table='Video_Most_Similar')
+
+    def init_db(self):
+        self.db.execute_query(
+            f"""
+            CREATE DATABASE IF NOT EXISTS `{self.schema}`
+            DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci
+            DEFAULT ENCRYPTION='N';
+            """
+        )
+        self.db.execute_query(
+            f"""
+            CREATE TABLE IF NOT EXISTS `{self.schema}`.`{self.cache_table}` (
+              `id_token` VARCHAR(255),
+              `origin_token` LONGTEXT,
+              `fingerprint` VARCHAR(255) DEFAULT NULL,
+              `date_added` DATETIME DEFAULT NULL,
+              PRIMARY KEY id_token (id_token)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+            """
+        )
+        self.db.execute_query(
+            f"""
+            CREATE TABLE IF NOT EXISTS `{self.schema}`.`{self.most_similar_table}` (
+              `id_token` VARCHAR(255),
+              `most_similar_token` VARCHAR(255) DEFAULT NULL,
+              PRIMARY KEY id_token (id_token),
+              KEY most_similar_token (most_similar_token)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+            """
+        )
 
 
 class AudioDBCachingManager(DBCachingManagerBase):
@@ -437,3 +489,8 @@ class VideoConfig():
             else:
                 filename_with_path = self.concat_file_path(filename, OTHER_SUBFOLDER)
         return filename_with_path
+
+    def create_symlink(self, old_path, new_filename):
+        new_path = self.generate_filepath(new_filename)
+        # Only creating the symlink if it doesn't already exist
+        create_symlink_between_paths(old_path, new_path)

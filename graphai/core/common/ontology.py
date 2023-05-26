@@ -51,10 +51,12 @@ class Ontology:
         db = DB()
 
         ################################################
-
+        use_new_tables = db.check_if_table_exists('francisco', 'Nodes_N_Category')
         # Fetch category nodes
-        # table_name = 'graphontology.Hierarchical_Cluster_Names_HighLevel'
-        table_name = 'francisco.Nodes_N_Category'
+        if use_new_tables:
+            table_name = 'francisco.Nodes_N_Category'
+        else:
+            table_name = 'graphontology.Hierarchical_Cluster_Names_HighLevel'
         fields = ['CategoryID', 'CategoryName']
         self.categories = pd.DataFrame(db.find(table_name, fields=fields), columns=fields)
 
@@ -67,8 +69,10 @@ class Ontology:
         ################################################
 
         # Fetch category-category edges
-        # table_name = 'graphontology.Predefined_Knowledge_Tree_Hierarchy'
-        table_name = 'francisco.Edges_N_Category_N_Category'
+        if use_new_tables:
+            table_name = 'francisco.Edges_N_Category_N_Category'
+        else:
+            table_name = 'graphontology.Predefined_Knowledge_Tree_Hierarchy'
         fields = ['ChildCategoryID', 'ParentCategoryID']
         self.categories_categories = pd.DataFrame(db.find(table_name, fields=fields), columns=fields)
 
@@ -81,8 +85,10 @@ class Ontology:
         ################################################
 
         # Fetch concept-category edges
-        # table_name = 'graphontology.Hierarchical_Clusters_Main'
-        table_name = 'francisco.Edges_N_Category_N_Concept_T_OnlyDepth4'
+        if use_new_tables:
+            table_name = 'francisco.Edges_N_Category_N_Concept_T_OnlyDepth4'
+        else:
+            table_name = 'graphontology.Hierarchical_Clusters_Main'
         fields = ['PageID', 'CategoryID']
         self.concepts_categories = pd.DataFrame(db.find(table_name, fields=fields), columns=['PageID', 'CategoryID'])
 

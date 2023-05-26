@@ -33,16 +33,11 @@ import whisper
 from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
 
 from graphai.definitions import CONFIG_DIR
-from graphai.core.common.caching import make_sure_path_exists
-
+from graphai.core.common.caching import make_sure_path_exists, file_exists
 
 FRAME_FORMAT_PNG = 'frame-%06d.png'
 FRAME_FORMAT_JPG = 'frame-%06d.jpg'
 TESSERACT_OCR_FORMAT = 'ocr-%06d.txt.gz'
-
-
-def file_exists(file_path):
-    return os.path.exists(file_path)
 
 
 def get_dir_files(root_dir):
@@ -141,6 +136,10 @@ def perform_probe(input_filename_with_path):
     return ffmpeg.probe(input_filename_with_path, cmd='ffprobe')
 
 
+def generate_symbolic_token(origin, token):
+    return origin + '_' + token
+
+
 def md5_video_or_audio(input_filename_with_path, video=True):
     if not file_exists(input_filename_with_path):
         print(f'ffmpeg error: File {input_filename_with_path} does not exist')
@@ -161,7 +160,7 @@ def md5_video_or_audio(input_filename_with_path, video=True):
             print("No audio found. If you're trying to has the audio track of a video file, "
                   "make sure your video has audio.")
             return None
-    result, _ = ffmpeg.output(in_stream, 'pipe:', format='md5').run(capture_stdout=True)
+    result, _ = ffmpeg.output(in_stream, 'pipe:', c='copy', format='md5').run(capture_stdout=True)
     # The result looks like 'MD5=9735151f36a3e628b0816b1bba3b9640\n' so we clean it up
     return (result.decode('utf8').strip())[4:]
 
@@ -206,7 +205,7 @@ def extract_audio_from_video(input_filename_with_path, output_filename_with_path
         return None
     try:
         err = ffmpeg.input(input_filename_with_path).audio. \
-            output(output_filename_with_path, acodec='libopus', ar=48000).\
+            output(output_filename_with_path, acodec='libopus', ar=48000). \
             overwrite_output().run(capture_stdout=True)
     except Exception as e:
         print(e, file=sys.stderr)
@@ -307,7 +306,7 @@ def remove_silence_doublesided(input_filename_with_path, output_filename_with_pa
     try:
         from_and_to = find_beginning_and_ending_silences(input_filename_with_path, noise_thresh=threshold)
         err = ffmpeg.input(input_filename_with_path).audio. \
-            output(output_filename_with_path, c='copy', ss=from_and_to['ss'], to=from_and_to['to']).\
+            output(output_filename_with_path, c='copy', ss=from_and_to['ss'], to=from_and_to['to']). \
             overwrite_output().run(capture_stdout=True)
     except Exception as e:
         print(e, file=sys.stderr)
@@ -408,7 +407,7 @@ def compare_encoded_fingerprints(f1, f2=None, decoder_func=chromaprint.decode_fi
                                         decoder_func(f2.encode('utf8')))
 
 
-def find_closest_fingerprint_from_list(target_fp, fp_list, token_list, min_similarity=0.8,
+def find_closest_fingerprint_from_list(target_fp, fp_list, token_list, date_list, min_similarity=0.8,
                                        decoder_func=chromaprint.decode_fingerprint):
     """
     Given a target fingerprint and a list of candidate fingerprints, finds the one with the highest similarity
@@ -427,36 +426,35 @@ def find_closest_fingerprint_from_list(target_fp, fp_list, token_list, min_simil
     """
     # If the list of fingerprints is empty, there's no "closest" fingerprint to the target and the result is null.
     if len(fp_list) == 0:
-        return None, None, None
+        return None, None, None, None
     if min_similarity < 1:
         fp_similarities = np.array([compare_encoded_fingerprints(target_fp, fp2, decoder_func) for fp2 in fp_list])
     else:
         # if an exact match is required, we switch to a much faster equality comparison
         fp_similarities = [1 if target_fp == fp2 else 0 for fp2 in fp_list]
+    # The index returned by argmax is the first occurrence of the maximum
     max_index = np.argmax(fp_similarities)
     # If the similarity of the most similar fingerprint is also greater than the minimum similarity value,
     # then it's a match. Otherwise, the result is null.
     if fp_similarities[max_index] >= min_similarity:
-        return token_list[max_index], fp_list[max_index], fp_similarities[max_index]
+        return token_list[max_index], fp_list[max_index], date_list[max_index], fp_similarities[max_index]
     else:
-        return None, None, None
+        return None, None, None, None
 
 
-def find_closest_audio_fingerprint_from_list(target_fp, fp_list, token_list, min_similarity=0.8):
+def find_closest_audio_fingerprint_from_list(target_fp, fp_list, token_list, date_list, min_similarity=0.8):
     """
     Finds closest audio fingerprint from list
     """
-    return find_closest_fingerprint_from_list(
-        target_fp, fp_list, token_list, min_similarity,
-        decoder_func=chromaprint.decode_fingerprint
-    )
+    return find_closest_fingerprint_from_list(target_fp, fp_list, token_list, date_list, min_similarity,
+                                              decoder_func=chromaprint.decode_fingerprint)
 
 
-def find_closest_image_fingerprint_from_list(target_fp, fp_list, token_list, min_similarity=0.8):
+def find_closest_image_fingerprint_from_list(target_fp, fp_list, token_list, date_list, min_similarity=0.8):
     """
     Finds closest image fingerprint from list
     """
-    return find_closest_fingerprint_from_list(target_fp, fp_list, token_list, min_similarity,
+    return find_closest_fingerprint_from_list(target_fp, fp_list, token_list, date_list, min_similarity,
                                               decoder_func=imagehash.hex_to_hash)
 
 
@@ -794,7 +792,6 @@ class WhisperTranscriptionModel():
             force_lang: Whether to explicitly feed the model the language of the audio.
                         None results in automatic detection.
             verbose: Verbosity of the transcription
-
         Returns:
             A dictionary with three keys: 'text' contains the full transcript, 'segments' contains a JSON-like dict of
             translated segments which can be used as subtitles, and 'language' which contains the language code.
@@ -966,3 +963,39 @@ class TranslationModels:
         model = self.models[how]['model']
         segmenter = self.models[how]['segmenter']
         return self._translate(text, tokenizer, model, segmenter)
+
+
+class FingerprintParameters:
+    def __init__(self):
+        self.min_similarity = dict()
+        self.load_values()
+
+    def load_values(self):
+        defaults = {
+            'text': '1.0',
+            'image': '0.9',
+            'audio': '0.8',
+            'video': '1.0'
+        }
+        config_contents = configparser.ConfigParser()
+        try:
+            print('Reading fingerprint min similarity values from file')
+            config_contents.read(f'{CONFIG_DIR}/fingerprint.ini')
+            self.min_similarity['text'] = float(config_contents['FP'].get('text', fallback=defaults['text']))
+            self.min_similarity['image'] = float(config_contents['FP'].get('image', fallback=defaults['image']))
+            self.min_similarity['audio'] = float(config_contents['FP'].get('audio', fallback=defaults['audio']))
+            self.min_similarity['video'] = float(config_contents['FP'].get('video', fallback=defaults['video']))
+        except Exception:
+            self.min_similarity = {k: float(v) for k, v in defaults.items()}
+
+    def get_min_sim_text(self):
+        return self.min_similarity['text']
+
+    def get_min_sim_image(self):
+        return self.min_similarity['image']
+
+    def get_min_sim_audio(self):
+        return self.min_similarity['audio']
+
+    def get_min_sim_video(self):
+        return self.min_similarity['video']

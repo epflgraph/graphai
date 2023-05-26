@@ -14,37 +14,48 @@ from graphai.core.common.caching import SlideDBCachingManager
 def compute_slide_fingerprint_task(self, token, force=False):
     # Checking for existing cached results
     db_manager = SlideDBCachingManager()
-    existing_slide = db_manager.get_details(token, cols=['fingerprint'])[0]
-    if existing_slide is None:
+    existing_slide_list = db_manager.get_details(token, cols=['fingerprint'], using_most_similar=True)
+    if existing_slide_list[0] is None:
         return {
             'result': None,
+            'fp_token': None,
+            'perform_lookup': False,
             'fresh': False
         }
-
-    if not force and existing_slide['fingerprint'] is not None:
-        return {
-            'result': existing_slide['fingerprint'],
-            'fresh': False
-        }
-
+    if not force:
+        for existing_slide in existing_slide_list:
+            if existing_slide is None:
+                continue
+            if existing_slide['fingerprint'] is not None:
+                return {
+                    'result': existing_slide['fingerprint'],
+                    'fp_token': existing_slide['id_token'],
+                    'perform_lookup': False,
+                    'fresh': False
+                }
     slide_with_path = self.file_manager.generate_filepath(token)
     fingerprint = perceptual_hash_image(slide_with_path)
     if fingerprint is None:
         return {
             'result': None,
+            'fp_token': None,
+            'perform_lookup': False,
             'fresh': False
         }
 
     return {
         'result': fingerprint,
+        'fp_token': token,
+        'perform_lookup': True,
         'fresh': True
     }
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='video_2.slide_fingerprint_callback', ignore_result=False)
-def compute_slide_fingerprint_callback_task(self, results, token):
+def compute_slide_fingerprint_callback_task(self, results, force=False):
     if results['fresh']:
+        token = results['fp_token']
         db_manager = SlideDBCachingManager()
         db_manager.insert_or_update_details(
             token,
@@ -52,29 +63,42 @@ def compute_slide_fingerprint_callback_task(self, results, token):
                 'fingerprint': results['result'],
             }
         )
-
+        if not force:
+            closest_token = db_manager.get_closest_match(token)
+            # If this token has a closest token, it means that their relationship comes from their parent videos,
+            # and that the closest token's fingerprint has not been calculated either (otherwise `fresh` wouldn't be True).
+            # In that case, we insert the computed fingerprint for the closest token as well, and then we will perform the
+            # fingerprint lookup for that token instead of the one we computed the fingerprint for.
+            if closest_token is not None and closest_token != token:
+                db_manager.insert_or_update_details(
+                    closest_token,
+                    {
+                        'fingerprint': results['result'],
+                    }
+                )
+                results['fp_token'] = closest_token
     return results
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='video_2.slide_fingerprint_find_closest_retrieve_from_db', ignore_result=False)
-def slide_fingerprint_find_closest_retrieve_from_db_task(self, results, token):
+def slide_fingerprint_find_closest_retrieve_from_db_task(self, results):
     db_manager = SlideDBCachingManager()
-    return fingerprint_lookup_retrieve_from_db(results, token, db_manager)
+    return fingerprint_lookup_retrieve_from_db(results, db_manager)
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='video_2.slide_fingerprint_find_closest_parallel', ignore_result=False)
-def slide_fingerprint_find_closest_parallel_task(self, input_dict, token, i, n_total, min_similarity=1):
+def slide_fingerprint_find_closest_parallel_task(self, input_dict, i, n_total, min_similarity=1):
     db_manager = SlideDBCachingManager()
-    return fingerprint_lookup_parallel(input_dict, token, i, n_total, min_similarity, db_manager, data_type='image')
+    return fingerprint_lookup_parallel(input_dict, i, n_total, min_similarity, db_manager, data_type='image')
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='video_2.slide_fingerprint_find_closest_callback', ignore_result=False)
-def slide_fingerprint_find_closest_callback_task(self, results_list, original_token):
+def slide_fingerprint_find_closest_callback_task(self, results_list):
     db_manager = SlideDBCachingManager()
-    return fingerprint_lookup_callback(results_list, original_token, db_manager)
+    return fingerprint_lookup_callback(results_list, db_manager)
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
@@ -104,8 +128,8 @@ def extract_slide_text_task(self, token, method='tesseract', force=False):
 
     if not force:
         db_manager = SlideDBCachingManager()
-        existing_list = db_manager.get_details(token, ocr_colnames + ['language'], using_most_similar=True)
-
+        existing_list = db_manager.get_details(token, ocr_colnames + ['language'],
+                                               using_most_similar=True)
         # Checking whether the token even exists
         if existing_list[0] is None:
             return {
@@ -192,7 +216,7 @@ def extract_slide_text_task(self, token, method='tesseract', force=False):
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='video_2.extract_slide_text_callback', ignore_result=False)
-def extract_slide_text_callback_task(self, results, token):
+def extract_slide_text_callback_task(self, results, token, force=False):
     if results['fresh']:
         values_dict = {
             result['method']: result['token']
@@ -206,12 +230,11 @@ def extract_slide_text_callback_task(self, results, token):
         db_manager.insert_or_update_details(
             token, values_dict
         )
-
-        # Inserting the same values for closest token if different than original token
-        closest = db_manager.get_closest_match(token)
-        if closest is not None and closest != token:
-            db_manager.insert_or_update_details(
-                closest, values_dict
-            )
-
+        if not force:
+            # Inserting the same values for closest token if different than original token
+            closest = db_manager.get_closest_match(token)
+            if closest is not None and closest != token:
+                db_manager.insert_or_update_details(
+                    closest, values_dict
+                )
     return results

@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 from fastapi.responses import FileResponse
-from celery import group
+from celery import group, chain
 
 from graphai.api.schemas.common import TaskIDResponse, FileRequest
 from graphai.api.schemas.video import (
@@ -10,11 +10,14 @@ from graphai.api.schemas.video import (
     ExtractAudioResponse,
     DetectSlidesRequest,
     DetectSlidesResponse,
+    VideoFingerprintRequest,
+    VideoFingerprintResponse
 )
 
-from graphai.api.celery_tasks.common import format_api_results
+from graphai.api.celery_tasks.common import format_api_results, ignore_fingerprint_results_callback_task
 from graphai.api.celery_tasks.video import (
     retrieve_file_from_url_task,
+    retrieve_file_from_url_callback_task,
     get_file_task,
     extract_audio_task,
     extract_audio_callback_task,
@@ -25,8 +28,15 @@ from graphai.api.celery_tasks.video import (
     compute_slide_transitions_callback_task,
     detect_slides_callback_task,
     dummy_task,
+    compute_video_fingerprint_task,
+    compute_video_fingerprint_callback_task,
+    video_fingerprint_find_closest_retrieve_from_db_task,
+    video_fingerprint_find_closest_parallel_task,
+    video_fingerprint_find_closest_callback_task,
+    retrieve_video_fingerprint_callback_task
 )
 from graphai.core.interfaces.celery_config import get_task_info
+from graphai.core.common.video import FingerprintParameters
 
 
 # Initialise video router
@@ -35,6 +45,27 @@ router = APIRouter(
     tags=['video'],
     responses={404: {'description': 'Not found'}}
 )
+
+
+def get_video_fingerprint_chain_list(token, force, min_similarity=None, n_jobs=8,
+                                     ignore_fp_results=False, results_to_return=None):
+    if min_similarity is None:
+        fp_parameters = FingerprintParameters()
+        min_similarity = fp_parameters.get_min_sim_video()
+
+    task_list = [
+        compute_video_fingerprint_task.s(token, force),
+        compute_video_fingerprint_callback_task.s(),
+        video_fingerprint_find_closest_retrieve_from_db_task.s(),
+        group(video_fingerprint_find_closest_parallel_task.s(i, n_jobs, min_similarity)
+              for i in range(n_jobs)),
+        video_fingerprint_find_closest_callback_task.s()
+    ]
+    if ignore_fp_results:
+        task_list += [ignore_fingerprint_results_callback_task.s(results_to_return)]
+    else:
+        task_list += [retrieve_video_fingerprint_callback_task.s()]
+    return task_list
 
 
 @router.post('/retrieve_url', response_model=TaskIDResponse)
@@ -46,7 +77,10 @@ async def retrieve_file(data: RetrieveURLRequest):
     min_timeout = 60
     timeout = max([data.timeout, min_timeout])
     timeout = min([timeout, max_timeout])
-    task = retrieve_file_from_url_task.s(url, is_kaltura, timeout).apply_async(priority=2)
+    task_list = [retrieve_file_from_url_task.s(url, is_kaltura, timeout),
+                 retrieve_file_from_url_callback_task.s(url)]
+    task = chain(task_list)
+    task = task.apply_async(priority=2)
     return {'task_id': task.id}
 
 
@@ -59,7 +93,36 @@ async def get_retrieve_file_status(task_id):
         if 'token' in task_results:
             task_results = {
                 'token': task_results['token'],
+                'fresh': task_results['fresh'],
                 'successful': task_results['token'] is not None
+            }
+        else:
+            task_results = None
+    return format_api_results(full_results['id'], full_results['name'], full_results['status'], task_results)
+
+
+@router.post('/calculate_fingerprint/', response_model=TaskIDResponse)
+async def calculate_fingerprint(data: VideoFingerprintRequest):
+    token = data.token
+    force = data.force
+    task_list = get_video_fingerprint_chain_list(token, force,
+                                                 ignore_fp_results=False)
+    task = chain(task_list)
+    task = task.apply_async(priority=6)
+    return {'task_id': task.id}
+
+
+@router.get('/calculate_fingerprint/status/{task_id}', response_model=VideoFingerprintResponse)
+async def calculate_fingerprint_status(task_id):
+    full_results = get_task_info(task_id)
+    task_results = full_results['results']
+    if task_results is not None:
+        if 'result' in task_results:
+            task_results = {
+                'result': task_results['result'],
+                'fresh': task_results['fresh'],
+                'closest_token': task_results['closest'],
+                'successful': task_results['result'] is not None
             }
         else:
             task_results = None
@@ -76,10 +139,15 @@ async def get_file(data: FileRequest):
 async def extract_audio(data: ExtractAudioRequest):
     token = data.token
     force = data.force
-    task = (
-        extract_audio_task.s(token, force)
-        | extract_audio_callback_task.s(token)
-    ).apply_async(priority=2)
+    if force:
+        task_list = [extract_audio_task.s(token, force)]
+    else:
+        task_list = get_video_fingerprint_chain_list(token, force,
+                                                     ignore_fp_results=True, results_to_return=token)
+        task_list += [extract_audio_task.s(force)]
+    task_list += [extract_audio_callback_task.s(token, force)]
+    task = chain(task_list)
+    task = task.apply_async(priority=2)
     return {'task_id': task.id}
 
 
@@ -107,15 +175,20 @@ async def detect_slides(data: DetectSlidesRequest):
     language = data.language
     n_jobs = 8
     hash_thresh = 0.85
-    task = (
-        extract_and_sample_frames_task.s(token, force)
-        | group(compute_noise_level_parallel_task.s(i, n_jobs, language) for i in range(n_jobs))
-        | compute_noise_threshold_callback_task.s(hash_thresh)
-        | dummy_task.s()
-        | group(compute_slide_transitions_parallel_task.s(i, n_jobs, language) for i in range(n_jobs))
-        | compute_slide_transitions_callback_task.s()
-        | detect_slides_callback_task.s(token)
-    ).apply_async(priority=2)
+    if force:
+        task_list = [extract_and_sample_frames_task.s(token, force)]
+    else:
+        task_list = get_video_fingerprint_chain_list(token, force,
+                                                     ignore_fp_results=True, results_to_return=token)
+        task_list += [extract_and_sample_frames_task.s(force)]
+    task_list += [group(compute_noise_level_parallel_task.s(i, n_jobs, language) for i in range(n_jobs)),
+                  compute_noise_threshold_callback_task.s(hash_thresh),
+                  dummy_task.s(),
+                  group(compute_slide_transitions_parallel_task.s(i, n_jobs, language) for i in range(n_jobs)),
+                  compute_slide_transitions_callback_task.s(),
+                  detect_slides_callback_task.s(token, force)]
+    task = chain(task_list)
+    task = task.apply_async(priority=2)
     return {'task_id': task.id}
 
 

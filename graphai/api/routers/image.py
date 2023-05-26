@@ -1,4 +1,5 @@
 from fastapi import APIRouter
+
 from celery import group, chain
 
 from graphai.api.schemas.common import TaskIDResponse
@@ -24,6 +25,7 @@ from graphai.api.celery_tasks.image import (
     extract_slide_text_callback_task,
 )
 from graphai.core.interfaces.celery_config import get_task_info
+from graphai.core.common.video import FingerprintParameters
 
 
 # Initialise video router
@@ -34,14 +36,18 @@ router = APIRouter(
 )
 
 
-def get_slide_fingerprint_chain_list(token, force, min_similarity=0.9, n_jobs=8,
+def get_slide_fingerprint_chain_list(token, force, min_similarity=None, n_jobs=8,
                                      ignore_fp_results=False, results_to_return=None):
+    if min_similarity is None:
+        fp_parameters = FingerprintParameters()
+        min_similarity = fp_parameters.get_min_sim_image()
+
     task_list = [
         compute_slide_fingerprint_task.s(token, force),
-        compute_slide_fingerprint_callback_task.s(token),
-        slide_fingerprint_find_closest_retrieve_from_db_task.s(token),
-        group(slide_fingerprint_find_closest_parallel_task.s(token, i, n_jobs, min_similarity) for i in range(n_jobs)),
-        slide_fingerprint_find_closest_callback_task.s(token)
+        compute_slide_fingerprint_callback_task.s(force),
+        slide_fingerprint_find_closest_retrieve_from_db_task.s(),
+        group(slide_fingerprint_find_closest_parallel_task.s(i, n_jobs, min_similarity) for i in range(n_jobs)),
+        slide_fingerprint_find_closest_callback_task.s()
     ]
     if ignore_fp_results:
         task_list += [ignore_fingerprint_results_callback_task.s(results_to_return)]
@@ -91,7 +97,7 @@ async def extract_text(data: ExtractTextRequest):
     else:
         task_list = [extract_slide_text_task.s(token, method, force)]
 
-    task_list += [extract_slide_text_callback_task.s(token)]
+    task_list += [extract_slide_text_callback_task.s(token, force)]
     task = chain(task_list)
     task = task.apply_async(priority=2)
     return {'task_id': task.id}
