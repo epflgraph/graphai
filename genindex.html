@@ -173,13 +173,19 @@
       <ul>
         <li><a href="graphai.api.routers.translation.html#graphai.api.routers.translation.calculate_fingerprint">(in module graphai.api.routers.translation)</a>
 </li>
+        <li><a href="graphai.api.routers.video.html#graphai.api.routers.video.calculate_fingerprint">(in module graphai.api.routers.video)</a>
+</li>
       </ul></li>
       <li><a href="graphai.api.routers.image.html#graphai.api.routers.image.calculate_fingerprint_status">calculate_fingerprint_status() (in module graphai.api.routers.image)</a>
 
       <ul>
         <li><a href="graphai.api.routers.translation.html#graphai.api.routers.translation.calculate_fingerprint_status">(in module graphai.api.routers.translation)</a>
 </li>
+        <li><a href="graphai.api.routers.video.html#graphai.api.routers.video.calculate_fingerprint_status">(in module graphai.api.routers.video)</a>
+</li>
       </ul></li>
+      <li><a href="graphai.core.interfaces.db.html#graphai.core.interfaces.db.DB.check_if_table_exists">check_if_table_exists() (graphai.core.interfaces.db.DB method)</a>
+</li>
       <li><a href="graphai.api.schemas.ontology.html#graphai.api.schemas.ontology.TreeResponseElem.ChildCategoryID">ChildCategoryID (graphai.api.schemas.ontology.TreeResponseElem attribute)</a>
 </li>
       <li><a href="graphai.api.routers.ontology.html#graphai.api.routers.ontology.children">children() (in module graphai.api.routers.ontology)</a>
@@ -188,6 +194,8 @@
 
       <ul>
         <li><a href="graphai.api.schemas.translation.html#graphai.api.schemas.translation.TextFingerprintTaskResponse.closest_token">(graphai.api.schemas.translation.TextFingerprintTaskResponse attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.video.html#graphai.api.schemas.video.VideoFingerprintTaskResponse.closest_token">(graphai.api.schemas.video.VideoFingerprintTaskResponse attribute)</a>
 </li>
         <li><a href="graphai.api.schemas.voice.html#graphai.api.schemas.voice.AudioFingerprintTaskResponse.closest_token">(graphai.api.schemas.voice.AudioFingerprintTaskResponse attribute)</a>
 </li>
@@ -204,10 +212,10 @@
 </li>
       <li><a href="graphai.pipelines.investment.concept_configuration.html#graphai.pipelines.investment.concept_configuration.combine">combine() (in module graphai.pipelines.investment.concept_configuration)</a>
 </li>
-      <li><a href="graphai.core.common.video.html#graphai.core.common.video.compare_decoded_fingerprints">compare_decoded_fingerprints() (in module graphai.core.common.video)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="graphai.core.common.video.html#graphai.core.common.video.compare_decoded_fingerprints">compare_decoded_fingerprints() (in module graphai.core.common.video)</a>
+</li>
       <li><a href="graphai.core.common.video.html#graphai.core.common.video.compare_encoded_fingerprints">compare_encoded_fingerprints() (in module graphai.core.common.video)</a>
 </li>
       <li><a href="graphai.pipelines.investment.toy_example.html#graphai.pipelines.investment.toy_example.complete">complete() (in module graphai.pipelines.investment.toy_example)</a>
@@ -239,6 +247,10 @@
       <li><a href="graphai.core.interfaces.es.html#graphai.core.interfaces.es.ES.create_index">create_index() (graphai.core.interfaces.es.ES method)</a>
 </li>
       <li><a href="graphai.pipelines.investment.create_investments_graph.html#graphai.pipelines.investment.create_investments_graph.create_investments_graph">create_investments_graph() (in module graphai.pipelines.investment.create_investments_graph)</a>
+</li>
+      <li><a href="graphai.core.common.caching.html#graphai.core.common.caching.VideoConfig.create_symlink">create_symlink() (graphai.core.common.caching.VideoConfig method)</a>
+</li>
+      <li><a href="graphai.core.common.caching.html#graphai.core.common.caching.create_symlink_between_paths">create_symlink_between_paths() (in module graphai.core.common.caching)</a>
 </li>
       <li><a href="graphai.core.interfaces.db.html#graphai.core.interfaces.db.DB.create_table">create_table() (graphai.core.interfaces.db.DB method)</a>
 </li>
@@ -362,7 +374,7 @@
         <li><a href="graphai.core.common.ontology.html#graphai.core.common.ontology.Ontology.fetch_from_db">(graphai.core.common.ontology.Ontology method)</a>
 </li>
       </ul></li>
-      <li><a href="graphai.core.common.video.html#graphai.core.common.video.file_exists">file_exists() (in module graphai.core.common.video)</a>
+      <li><a href="graphai.core.common.caching.html#graphai.core.common.caching.file_exists">file_exists() (in module graphai.core.common.caching)</a>
 </li>
       <li><a href="graphai.api.schemas.common.html#graphai.api.schemas.common.FileRequest">FileRequest (class in graphai.api.schemas.common)</a>
 </li>
@@ -384,6 +396,8 @@
 </li>
       <li><a href="graphai.api.celery_tasks.common.html#graphai.api.celery_tasks.common.fingerprint_lookup_retrieve_from_db">fingerprint_lookup_retrieve_from_db() (in module graphai.api.celery_tasks.common)</a>
 </li>
+      <li><a href="graphai.core.common.video.html#graphai.core.common.video.FingerprintParameters">FingerprintParameters (class in graphai.core.common.video)</a>
+</li>
       <li><a href="graphai.api.schemas.image.html#graphai.api.schemas.image.ExtractTextRequest.force">force (graphai.api.schemas.image.ExtractTextRequest attribute)</a>
 
       <ul>
@@ -396,6 +410,8 @@
         <li><a href="graphai.api.schemas.video.html#graphai.api.schemas.video.DetectSlidesRequest.force">(graphai.api.schemas.video.DetectSlidesRequest attribute)</a>
 </li>
         <li><a href="graphai.api.schemas.video.html#graphai.api.schemas.video.ExtractAudioRequest.force">(graphai.api.schemas.video.ExtractAudioRequest attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.video.html#graphai.api.schemas.video.VideoFingerprintRequest.force">(graphai.api.schemas.video.VideoFingerprintRequest attribute)</a>
 </li>
         <li><a href="graphai.api.schemas.voice.html#graphai.api.schemas.voice.AudioDetectLanguageRequest.force">(graphai.api.schemas.voice.AudioDetectLanguageRequest attribute)</a>
 </li>
@@ -433,6 +449,10 @@
 </li>
         <li><a href="graphai.api.schemas.video.html#graphai.api.schemas.video.ExtractAudioTaskResponse.fresh">(graphai.api.schemas.video.ExtractAudioTaskResponse attribute)</a>
 </li>
+        <li><a href="graphai.api.schemas.video.html#graphai.api.schemas.video.RetrieveURLResponseInner.fresh">(graphai.api.schemas.video.RetrieveURLResponseInner attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.video.html#graphai.api.schemas.video.VideoFingerprintTaskResponse.fresh">(graphai.api.schemas.video.VideoFingerprintTaskResponse attribute)</a>
+</li>
         <li><a href="graphai.api.schemas.voice.html#graphai.api.schemas.voice.AudioDetectLanguageTaskResponse.fresh">(graphai.api.schemas.voice.AudioDetectLanguageTaskResponse attribute)</a>
 </li>
         <li><a href="graphai.api.schemas.voice.html#graphai.api.schemas.voice.AudioFingerprintTaskResponse.fresh">(graphai.api.schemas.voice.AudioFingerprintTaskResponse attribute)</a>
@@ -457,6 +477,8 @@
       <li><a href="graphai.core.common.video.html#graphai.core.common.video.generate_random_token">generate_random_token() (in module graphai.core.common.video)</a>
 </li>
       <li><a href="graphai.api.routers.translation.html#graphai.api.routers.translation.generate_src_tgt_dict">generate_src_tgt_dict() (in module graphai.api.routers.translation)</a>
+</li>
+      <li><a href="graphai.core.common.video.html#graphai.core.common.video.generate_symbolic_token">generate_symbolic_token() (in module graphai.core.common.video)</a>
 </li>
       <li><a href="graphai.api.routers.translation.html#graphai.api.routers.translation.generate_text_token">generate_text_token() (in module graphai.api.routers.translation)</a>
 </li>
@@ -498,6 +520,14 @@
 </li>
       <li><a href="graphai.core.text.keywords.html#graphai.core.text.keywords.get_keywords">get_keywords() (in module graphai.core.text.keywords)</a>
 </li>
+      <li><a href="graphai.core.common.video.html#graphai.core.common.video.FingerprintParameters.get_min_sim_audio">get_min_sim_audio() (graphai.core.common.video.FingerprintParameters method)</a>
+</li>
+      <li><a href="graphai.core.common.video.html#graphai.core.common.video.FingerprintParameters.get_min_sim_image">get_min_sim_image() (graphai.core.common.video.FingerprintParameters method)</a>
+</li>
+      <li><a href="graphai.core.common.video.html#graphai.core.common.video.FingerprintParameters.get_min_sim_text">get_min_sim_text() (graphai.core.common.video.FingerprintParameters method)</a>
+</li>
+      <li><a href="graphai.core.common.video.html#graphai.core.common.video.FingerprintParameters.get_min_sim_video">get_min_sim_video() (graphai.core.common.video.FingerprintParameters method)</a>
+</li>
       <li><a href="graphai.api.common.celery_tools.html#graphai.api.common.celery_tools.get_n_celery_workers">get_n_celery_workers() (in module graphai.api.common.celery_tools)</a>
 </li>
       <li><a href="graphai.core.common.video.html#graphai.core.common.video.NLPModels.get_nlp_models">get_nlp_models() (graphai.core.common.video.NLPModels method)</a>
@@ -515,6 +545,8 @@
       <li><a href="graphai.core.interfaces.celery_config.html#graphai.core.interfaces.celery_config.get_task_info">get_task_info() (in module graphai.core.interfaces.celery_config)</a>
 </li>
       <li><a href="graphai.api.routers.translation.html#graphai.api.routers.translation.get_text_fingerprint_chain_list">get_text_fingerprint_chain_list() (in module graphai.api.routers.translation)</a>
+</li>
+      <li><a href="graphai.api.routers.video.html#graphai.api.routers.video.get_video_fingerprint_chain_list">get_video_fingerprint_chain_list() (in module graphai.api.routers.video)</a>
 </li>
       <li><a href="graphai.core.common.video.html#graphai.core.common.video.GoogleOCRModel">GoogleOCRModel (class in graphai.core.common.video)</a>
 </li>
@@ -686,6 +718,8 @@
         <li><a href="graphai.api.routers.voice.html#module-graphai.api.routers.voice">module</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     graphai.api.schemas
 
@@ -700,8 +734,6 @@
         <li><a href="graphai.api.schemas.common.html#module-graphai.api.schemas.common">module</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     graphai.api.schemas.image
 
@@ -1041,10 +1073,10 @@
 </li>
       <li><a href="graphai.api.schemas.image.html#graphai.api.schemas.image.IndividualOCRResult">IndividualOCRResult (class in graphai.api.schemas.image)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="graphai.api.main.html#graphai.api.main.init">init() (in module graphai.api.main)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="graphai.core.common.caching.html#graphai.core.common.caching.AudioDBCachingManager.init_db">init_db() (graphai.core.common.caching.AudioDBCachingManager method)</a>
 
       <ul>
@@ -1053,6 +1085,8 @@
         <li><a href="graphai.core.common.caching.html#graphai.core.common.caching.SlideDBCachingManager.init_db">(graphai.core.common.caching.SlideDBCachingManager method)</a>
 </li>
         <li><a href="graphai.core.common.caching.html#graphai.core.common.caching.TextDBCachingManager.init_db">(graphai.core.common.caching.TextDBCachingManager method)</a>
+</li>
+        <li><a href="graphai.core.common.caching.html#graphai.core.common.caching.VideoDBCachingManager.init_db">(graphai.core.common.caching.VideoDBCachingManager method)</a>
 </li>
       </ul></li>
       <li><a href="graphai.core.interfaces.db.html#graphai.core.interfaces.db.DB.insert_dataframe">insert_dataframe() (graphai.core.interfaces.db.DB method)</a>
@@ -1104,6 +1138,8 @@
       <li><a href="graphai.core.common.video.html#graphai.core.common.video.WhisperTranscriptionModel.load_model_whisper">load_model_whisper() (graphai.core.common.video.WhisperTranscriptionModel method)</a>
 </li>
       <li><a href="graphai.core.common.video.html#graphai.core.common.video.TranslationModels.load_models">load_models() (graphai.core.common.video.TranslationModels method)</a>
+</li>
+      <li><a href="graphai.core.common.video.html#graphai.core.common.video.FingerprintParameters.load_values">load_values() (graphai.core.common.video.FingerprintParameters method)</a>
 </li>
       <li><a href="graphai.core.utils.breadcrumb.html#graphai.core.utils.breadcrumb.Breadcrumb.log">log() (graphai.core.utils.breadcrumb.Breadcrumb method)</a>
 
@@ -1412,10 +1448,10 @@
       </ul></li>
       <li><a href="graphai.core.utils.time.date.html#graphai.core.utils.time.date.rescale">rescale() (in module graphai.core.utils.time.date)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="graphai.pipelines.investment.aggregate_recent_past.html#graphai.pipelines.investment.aggregate_recent_past.rescale_scores">rescale_scores() (in module graphai.pipelines.investment.aggregate_recent_past)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="graphai.core.utils.text.io.html#graphai.core.utils.text.io.Colors.reset">reset (graphai.core.utils.text.io.Colors attribute)</a>
 </li>
       <li><a href="graphai.core.utils.progress_bar.html#graphai.core.utils.progress_bar.ProgressBar.reset">reset() (graphai.core.utils.progress_bar.ProgressBar method)</a>
@@ -1434,6 +1470,8 @@
         <li><a href="graphai.api.schemas.translation.html#graphai.api.schemas.translation.TextFingerprintTaskResponse.result">(graphai.api.schemas.translation.TextFingerprintTaskResponse attribute)</a>
 </li>
         <li><a href="graphai.api.schemas.translation.html#graphai.api.schemas.translation.TranslationTaskResponse.result">(graphai.api.schemas.translation.TranslationTaskResponse attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.video.html#graphai.api.schemas.video.VideoFingerprintTaskResponse.result">(graphai.api.schemas.video.VideoFingerprintTaskResponse attribute)</a>
 </li>
         <li><a href="graphai.api.schemas.voice.html#graphai.api.schemas.voice.AudioFingerprintTaskResponse.result">(graphai.api.schemas.voice.AudioFingerprintTaskResponse attribute)</a>
 </li>
@@ -1525,6 +1563,8 @@
 </li>
         <li><a href="graphai.api.schemas.video.html#graphai.api.schemas.video.RetrieveURLResponseInner.successful">(graphai.api.schemas.video.RetrieveURLResponseInner attribute)</a>
 </li>
+        <li><a href="graphai.api.schemas.video.html#graphai.api.schemas.video.VideoFingerprintTaskResponse.successful">(graphai.api.schemas.video.VideoFingerprintTaskResponse attribute)</a>
+</li>
         <li><a href="graphai.api.schemas.voice.html#graphai.api.schemas.voice.AudioFingerprintTaskResponse.successful">(graphai.api.schemas.voice.AudioFingerprintTaskResponse attribute)</a>
 </li>
       </ul></li>
@@ -1572,6 +1612,8 @@
         <li><a href="graphai.api.schemas.video.html#graphai.api.schemas.video.ExtractAudioResponse.task_result">(graphai.api.schemas.video.ExtractAudioResponse attribute)</a>
 </li>
         <li><a href="graphai.api.schemas.video.html#graphai.api.schemas.video.RetrieveURLResponse.task_result">(graphai.api.schemas.video.RetrieveURLResponse attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.video.html#graphai.api.schemas.video.VideoFingerprintResponse.task_result">(graphai.api.schemas.video.VideoFingerprintResponse attribute)</a>
 </li>
         <li><a href="graphai.api.schemas.voice.html#graphai.api.schemas.voice.AudioDetectLanguageResponse.task_result">(graphai.api.schemas.voice.AudioDetectLanguageResponse attribute)</a>
 </li>
@@ -1647,6 +1689,8 @@
 </li>
         <li><a href="graphai.api.schemas.video.html#graphai.api.schemas.video.SlideTokenAndTimeStamp.token">(graphai.api.schemas.video.SlideTokenAndTimeStamp attribute)</a>
 </li>
+        <li><a href="graphai.api.schemas.video.html#graphai.api.schemas.video.VideoFingerprintRequest.token">(graphai.api.schemas.video.VideoFingerprintRequest attribute)</a>
+</li>
         <li><a href="graphai.api.schemas.voice.html#graphai.api.schemas.voice.AudioDetectLanguageRequest.token">(graphai.api.schemas.voice.AudioDetectLanguageRequest attribute)</a>
 </li>
         <li><a href="graphai.api.schemas.voice.html#graphai.api.schemas.voice.AudioFingerprintRequest.token">(graphai.api.schemas.voice.AudioFingerprintRequest attribute)</a>
@@ -1707,6 +1751,16 @@
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="graphai.core.common.caching.html#graphai.core.common.caching.VideoConfig">VideoConfig (class in graphai.core.common.caching)</a>
+</li>
+      <li><a href="graphai.core.common.caching.html#graphai.core.common.caching.VideoDBCachingManager">VideoDBCachingManager (class in graphai.core.common.caching)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="graphai.api.schemas.video.html#graphai.api.schemas.video.VideoFingerprintRequest">VideoFingerprintRequest (class in graphai.api.schemas.video)</a>
+</li>
+      <li><a href="graphai.api.schemas.video.html#graphai.api.schemas.video.VideoFingerprintResponse">VideoFingerprintResponse (class in graphai.api.schemas.video)</a>
+</li>
+      <li><a href="graphai.api.schemas.video.html#graphai.api.schemas.video.VideoFingerprintTaskResponse">VideoFingerprintTaskResponse (class in graphai.api.schemas.video)</a>
 </li>
   </ul></td>
 </tr></table>

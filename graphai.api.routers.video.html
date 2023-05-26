@@ -91,6 +91,11 @@
   <section id="module-graphai.api.routers.video">
 <span id="graphai-api-routers-video-module"></span><h1>graphai.api.routers.video module<a class="headerlink" href="#module-graphai.api.routers.video" title="Permalink to this heading"></a></h1>
 <dl class="py function">
+<dt class="sig sig-object py" id="graphai.api.routers.video.get_video_fingerprint_chain_list">
+<span class="sig-prename descclassname"><span class="pre">graphai.api.routers.video.</span></span><span class="sig-name descname"><span class="pre">get_video_fingerprint_chain_list</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">token</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">force</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_similarity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_jobs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">8</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignore_fp_results</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">results_to_return</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.api.routers.video.get_video_fingerprint_chain_list" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="graphai.api.routers.video.retrieve_file">
 <em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">graphai.api.routers.video.</span></span><span class="sig-name descname"><span class="pre">retrieve_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="graphai.api.schemas.video.html#graphai.api.schemas.video.RetrieveURLRequest" title="graphai.api.schemas.video.RetrieveURLRequest"><span class="pre">RetrieveURLRequest</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.api.routers.video.retrieve_file" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
@@ -98,6 +103,16 @@
 <dl class="py function">
 <dt class="sig sig-object py" id="graphai.api.routers.video.get_retrieve_file_status">
 <em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">graphai.api.routers.video.</span></span><span class="sig-name descname"><span class="pre">get_retrieve_file_status</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">task_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.api.routers.video.get_retrieve_file_status" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.api.routers.video.calculate_fingerprint">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">graphai.api.routers.video.</span></span><span class="sig-name descname"><span class="pre">calculate_fingerprint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="graphai.api.schemas.video.html#graphai.api.schemas.video.VideoFingerprintRequest" title="graphai.api.schemas.video.VideoFingerprintRequest"><span class="pre">VideoFingerprintRequest</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.api.routers.video.calculate_fingerprint" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.api.routers.video.calculate_fingerprint_status">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">graphai.api.routers.video.</span></span><span class="sig-name descname"><span class="pre">calculate_fingerprint_status</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">task_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.api.routers.video.calculate_fingerprint_status" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
