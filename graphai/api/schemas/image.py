@@ -4,7 +4,6 @@ from typing import Union, List, Literal
 from graphai.api.schemas.common import TaskStatusResponse
 
 
-
 class ImageFingerprintRequest(BaseModel):
     token: str = Field(
         title="Token",
