@@ -54,7 +54,7 @@ def get_text_fingerprint_chain_list(token, text, src, tgt, force, min_similarity
     equality_conditions = generate_src_tgt_dict(src, tgt)
     task_list = [
         compute_text_fingerprint_task.s(token, text, force),
-        compute_text_fingerprint_callback_task.s(),
+        compute_text_fingerprint_callback_task.s(text, src, tgt),
         text_fingerprint_find_closest_retrieve_from_db_task.s(equality_conditions),
         group(text_fingerprint_find_closest_parallel_task.s(i, n_jobs, equality_conditions, min_similarity)
               for i in range(n_jobs)),

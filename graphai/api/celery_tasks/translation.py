@@ -37,12 +37,15 @@ def compute_text_fingerprint_task(self, token, text, force=False):
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='text_6.fingerprint_text_callback', ignore_result=False)
-def compute_text_fingerprint_callback_task(self, results):
+def compute_text_fingerprint_callback_task(self, results, text, src, tgt):
     if results['fresh']:
         token = results['fp_token']
         db_manager = TextDBCachingManager()
         values_dict = {
             'fingerprint': results['result'],
+            'source': text,
+            'source_lang': src,
+            'target_lang': tgt
         }
         existing = db_manager.get_details(token, ['date_added'], using_most_similar=False)[0]
         if existing is None or existing['date_added'] is None:
