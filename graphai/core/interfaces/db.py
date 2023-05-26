@@ -161,3 +161,17 @@ class DB:
         self.drop_table(table_name)
         self.create_table(table_name, definition)
         self.insert_dataframe(table_name, df)
+
+    def check_if_table_exists(self, schema, table_name):
+        query = f"""
+        SELECT COUNT(TABLE_NAME)
+        FROM
+           information_schema.TABLES
+        WHERE
+           TABLE_SCHEMA LIKE '{schema}' AND
+           TABLE_NAME = '{table_name}';
+        """
+        res = self.execute_query(query)
+        if res[0][0] > 0:
+            return True
+        return False
