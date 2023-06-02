@@ -42,6 +42,9 @@ class Ontology:
 
         ################################################
 
+        # We can optionally set a reference to a Graph object to use the concept-concept edges,
+        # but beware of doing this because the graph object takes several GB of memory space.
+        # This object is however needed in the add_ontology_scores function.
         self.graph = None
 
     def fetch_from_db(self):
@@ -55,7 +58,9 @@ class Ontology:
         db = DB()
 
         ################################################
+
         use_new_tables = db.check_if_table_exists('francisco', 'Nodes_N_Category')
+
         # Fetch category nodes
         if use_new_tables:
             table_name = 'francisco.Nodes_N_Category'
@@ -256,10 +261,6 @@ class Ontology:
 
     def add_ontology_scores(self, results, smoothing=True):
         self.fetch_from_db()
-
-        pd.set_option('display.max_rows', 400)
-        pd.set_option('display.max_columns', 500)
-        pd.set_option('display.width', 1000)
 
         # Extract local concepts and keep only edges between them
         concepts = results['PageID'].drop_duplicates()
