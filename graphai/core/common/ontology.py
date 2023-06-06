@@ -281,17 +281,9 @@ class Ontology:
             on='CategoryID'
         )
 
-        print('ontology_concepts_categories', '+' * 60)
-        print(ontology_concepts_categories)
-
         # Split concepts depending on whether they belong to the ontology
         ontology_concepts = ontology_concepts_categories['PageID']
         non_ontology_concepts = concepts[~concepts.isin(ontology_concepts)]
-
-        print('ontology concepts', '+' * 60)
-        print(ontology_concepts)
-        print('non ontology concepts', '+' * 60)
-        print(non_ontology_concepts)
 
         ################################################################
 
@@ -311,9 +303,6 @@ class Ontology:
             on='TargetPageID'
         )
 
-        print('non_ontology_concepts_categories 1', '+' * 60)
-        print(non_ontology_concepts_categories)
-
         # Add Coef column representing the relevance proportion of each neighbour, according to the edge NormalisedScore
         #   Notice that Coef sums to 1 for every PageID
         non_ontology_concepts_categories = pd.merge(
@@ -324,15 +313,9 @@ class Ontology:
         )
         non_ontology_concepts_categories['Coef'] = non_ontology_concepts_categories['NormalisedScore'] / non_ontology_concepts_categories['SumScore']
 
-        print('non_ontology_concepts_categories 2', '+' * 60)
-        print(non_ontology_concepts_categories)
-
         # Drop TargetPageID grouping by PageID and Categories and adding up the Coef
         #   Notice that Coef should still sum to 1 for every PageID
         non_ontology_concepts_categories = non_ontology_concepts_categories.groupby(by=['PageID', 'CategoryID', 'Category2ID']).aggregate(Coef=('Coef', 'sum')).reset_index()
-
-        print('non_ontology_concepts_categories 3', '+' * 60)
-        print(non_ontology_concepts_categories)
 
         ################################################################
 
@@ -342,9 +325,6 @@ class Ontology:
 
         # Recover Keywords from results so that we can use it for the local counts
         concepts_categories = pd.merge(results[['Keywords', 'PageID']], concepts_categories, how='inner', on='PageID')
-
-        print('concepts_categories', '+' * 60)
-        print(concepts_categories)
 
         ################################################################
 
@@ -387,9 +367,6 @@ class Ontology:
             how='left',
             on=['Category2ID']
         )
-
-        print('after counts', '+' * 60)
-        print(concepts_categories)
 
         ################################################################
 
@@ -443,9 +420,6 @@ class Ontology:
         # Keep only relevant columns
         concepts_categories = concepts_categories[['Keywords', 'PageID', 'Coef', 'OntologyLocalScore', 'OntologyGlobalScore']]
 
-        print('after scores', '+' * 60)
-        print(concepts_categories)
-
         ################################################################
 
         # Aggregate over Keywords and PageID and compute the convex combination of scores according to Coef
@@ -453,15 +427,9 @@ class Ontology:
         concepts_categories['OntologyGlobalScore'] = concepts_categories['Coef'] * concepts_categories['OntologyGlobalScore']
         concepts_categories = concepts_categories.groupby(by=['Keywords', 'PageID']).aggregate({'OntologyLocalScore': 'sum', 'OntologyGlobalScore': 'sum'}).reset_index()
 
-        print('pre-final concepts_categories', '+' * 60)
-        print(concepts_categories)
-
         ################################################################
 
         # Merge results with final scores
         results = pd.merge(results, concepts_categories[['Keywords', 'PageID', 'OntologyLocalScore', 'OntologyGlobalScore']], how='inner', on=['Keywords', 'PageID'])
-
-        print('final results', '+' * 60)
-        print(results)
 
         return results

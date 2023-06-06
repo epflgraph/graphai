@@ -19,9 +19,6 @@ from graphai.core.text.keywords import get_keywords
 def extract_keywords_task(self, raw_text, use_nltk=False):
     keywords_list = get_keywords(raw_text, use_nltk)
 
-    print('keywords', '#' * 60)
-    print(keywords_list)
-
     return keywords_list
 
 
@@ -105,9 +102,6 @@ def wikisearch_callback_task(self, results):
     # Concatenate all results in a single DataFrame
     results = pd.concat(results, ignore_index=True)
 
-    print('after wikisearch', '#' * 60)
-    print(results)
-
     return results
 
 
@@ -120,16 +114,10 @@ def compute_scores_task(self, results, graph_score_smoothing=True, ontology_scor
     # Compute GraphScore
     results = self.graph.add_graph_score(results, smoothing=graph_score_smoothing)
 
-    print('after graph', '#' * 60)
-    print(results)
-
     # Compute OntologyLocalScore and OntologyGlobalScore
     self.ontology.graph = self.graph
     results = self.ontology.add_ontology_scores(results, smoothing=ontology_score_smoothing)
     self.ontology.graph = None
-
-    print('after ontology', '#' * 60)
-    print(results)
 
     # Compute KeywordsScore aggregating OntologyGlobalScore over Keywords as an indicator for low-quality keywords
     results = pd.merge(
@@ -145,9 +133,6 @@ def compute_scores_task(self, results, graph_score_smoothing=True, ontology_scor
     # Smooth score if needed using the function f(x) = (2 - x) * x, bumping lower values to avoid very low scores
     if keywords_score_smoothing:
         results['KeywordsScore'] = (2 - results['KeywordsScore']) * results['KeywordsScore']
-
-    print('after keywords', '#' * 60)
-    print(results)
 
     return results
 
@@ -230,9 +215,6 @@ def aggregate_and_filter_task(self, results, coef=0.5, epsilon=0.1, min_votes=5)
 
     results = results[['PageID', 'PageTitle'] + score_columns]
 
-    print('after aggregation', '#' * 60)
-    print(results)
-
     ################################################################
     # Filtering of results                                         #
     ################################################################
@@ -262,9 +244,6 @@ def aggregate_and_filter_task(self, results, coef=0.5, epsilon=0.1, min_votes=5)
         'KeywordsScore': [0.3]
     })
     results['MixedScore'] = results[score_columns] @ coefficients.transpose()
-
-    print('after filter', '#' * 60)
-    print(results)
 
     return results
 
