@@ -107,9 +107,12 @@ def wikisearch_callback_task(self, results):
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={'max_retries': 2},
              name='text_10.compute_scores', ignore_result=False, graph=graph, ontology=ontology)
-def compute_scores_task(self, results, graph_score_smoothing=True, ontology_score_smoothing=True, keywords_score_smoothing=True):
+def compute_scores_task(self, results, restrict_to_ontology=False, graph_score_smoothing=True, ontology_score_smoothing=True, keywords_score_smoothing=True):
     if len(results) == 0:
         return results
+
+    if restrict_to_ontology:
+        results = self.ontology.filter_concepts(results)
 
     # Compute GraphScore
     results = self.graph.add_graph_score(results, smoothing=graph_score_smoothing)
