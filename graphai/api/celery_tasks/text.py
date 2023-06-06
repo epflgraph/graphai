@@ -17,7 +17,9 @@ from graphai.core.text.keywords import get_keywords
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={'max_retries': 2},
              name='text_10.extract_keywords', ignore_result=False)
 def extract_keywords_task(self, raw_text, use_nltk=False):
-    return get_keywords(raw_text, use_nltk)
+    keywords_list = get_keywords(raw_text, use_nltk)
+
+    return keywords_list
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={'max_retries': 2},
@@ -104,16 +106,21 @@ def wikisearch_callback_task(self, results):
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={'max_retries': 2},
-             name='text_10.compute_scores', ignore_result=False, ontology=ontology, graph=graph)
-def compute_scores_task(self, results, ontology_score_smoothing=True, graph_score_smoothing=True, keywords_score_smoothing=True):
+             name='text_10.compute_scores', ignore_result=False, graph=graph, ontology=ontology)
+def compute_scores_task(self, results, restrict_to_ontology=False, graph_score_smoothing=True, ontology_score_smoothing=True, keywords_score_smoothing=True):
     if len(results) == 0:
         return results
 
-    # Compute OntologyLocalScore and OntologyGlobalScore
-    results = self.ontology.add_ontology_scores(results, smoothing=ontology_score_smoothing)
+    if restrict_to_ontology:
+        results = self.ontology.filter_concepts(results)
 
     # Compute GraphScore
     results = self.graph.add_graph_score(results, smoothing=graph_score_smoothing)
+
+    # Compute OntologyLocalScore and OntologyGlobalScore
+    self.ontology.graph = self.graph
+    results = self.ontology.add_ontology_scores(results, smoothing=ontology_score_smoothing)
+    self.ontology.graph = None
 
     # Compute KeywordsScore aggregating OntologyGlobalScore over Keywords as an indicator for low-quality keywords
     results = pd.merge(
@@ -189,17 +196,16 @@ def aggregate_and_filter_task(self, results, coef=0.5, epsilon=0.1, min_votes=5)
         SearchScoreMax=('SearchScore', 'max'),
         LevenshteinScoreSum=('LevenshteinScore', 'sum'),
         LevenshteinScoreMax=('LevenshteinScore', 'max'),
+        GraphScoreSum=('GraphScore', 'sum'),
+        GraphScoreMax=('GraphScore', 'max'),
         OntologyLocalScoreSum=('OntologyLocalScore', 'sum'),
         OntologyLocalScoreMax=('OntologyLocalScore', 'max'),
         OntologyGlobalScoreSum=('OntologyGlobalScore', 'sum'),
         OntologyGlobalScoreMax=('OntologyGlobalScore', 'max'),
-        GraphScoreSum=('GraphScore', 'sum'),
-        GraphScoreMax=('GraphScore', 'max'),
         KeywordsScoreSum=('KeywordsScore', 'sum'),
         KeywordsScoreMax=('KeywordsScore', 'max')
     ).reset_index()
-    score_columns = ['SearchScore', 'LevenshteinScore', 'OntologyLocalScore', 'OntologyGlobalScore', 'GraphScore',
-                     'KeywordsScore']
+    score_columns = ['SearchScore', 'LevenshteinScore', 'GraphScore', 'OntologyLocalScore', 'OntologyGlobalScore', 'KeywordsScore']
 
     # Normalise sum scores to [0, 1]
     for column in score_columns:
@@ -235,9 +241,9 @@ def aggregate_and_filter_task(self, results, coef=0.5, epsilon=0.1, min_votes=5)
     coefficients = pd.DataFrame({
         'SearchScore': [0.2],
         'LevenshteinScore': [0.15],
+        'GraphScore': [0.1],
         'OntologyLocalScore': [0.15],
         'OntologyGlobalScore': [0.1],
-        'GraphScore': [0.1],
         'KeywordsScore': [0.3]
     })
     results['MixedScore'] = results[score_columns] @ coefficients.transpose()

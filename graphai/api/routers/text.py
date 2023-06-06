@@ -61,8 +61,9 @@ async def keywords(data: KeywordsRequest, use_nltk: Optional[bool] = False):
 async def wikify(
     data: WikifyRequest,
     method: Optional[str] = 'es-base',
-    ontology_score_smoothing: Optional[bool] = True,
+    restrict_to_ontology: Optional[bool] = False,
     graph_score_smoothing: Optional[bool] = True,
+    ontology_score_smoothing: Optional[bool] = True,
     keywords_score_smoothing: Optional[bool] = True,
     normalisation_coef: Optional[float] = 0.5,
     filtering_threshold: Optional[float] = 0.1,
@@ -97,8 +98,9 @@ async def wikify(
         group(wikisearch_task.s(fraction=(i / n, (i + 1) / n), method=method) for i in range(n)),
         wikisearch_callback_task.s(),
         compute_scores_task.s(
-            ontology_score_smoothing=ontology_score_smoothing,
+            restrict_to_ontology=restrict_to_ontology,
             graph_score_smoothing=graph_score_smoothing,
+            ontology_score_smoothing=ontology_score_smoothing,
             keywords_score_smoothing=keywords_score_smoothing
         ),
         aggregate_and_filter_task.s(

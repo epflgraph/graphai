@@ -44,6 +44,12 @@ class WikifyResponseElem(BaseModel):
         description="Score that measures the Levenshtein similarity of the given page title and the given set of keywords"
     )
 
+    GraphScore: float = Field(
+        ...,
+        title="Graph score",
+        description="Score that measures the relevance of the given page with respect to the rest according to the graph"
+    )
+
     OntologyLocalScore: float = Field(
         ...,
         title="OntologyLocalScore",
@@ -54,12 +60,6 @@ class WikifyResponseElem(BaseModel):
         ...,
         title="OntologyGlobalScore",
         description="Score that measures the relevance of the given page with respect to the rest according to the ontology"
-    )
-
-    GraphScore: float = Field(
-        ...,
-        title="Graph score",
-        description="Score that measures the relevance of the given page with respect to the rest according to the graph"
     )
 
     KeywordsScore: float = Field(
@@ -82,9 +82,9 @@ class WikifyResponseElem(BaseModel):
                     "PageTitle": "Angle",
                     "SearchScore": 0.8055555555555556,
                     "LevenshteinScore": 1,
+                    "GraphScore": 0.44735199351890065,
                     "OntologyLocalScore": 1,
                     "OntologyGlobalScore": 1,
-                    "GraphScore": 0.44735199351890065,
                     "KeywordsScore": 1,
                     "MixedScore": 0.9058463104630012
                 },
@@ -93,9 +93,9 @@ class WikifyResponseElem(BaseModel):
                     "PageTitle": "Bisection",
                     "SearchScore": 0.3333333333333333,
                     "LevenshteinScore": 0.16661245633224378,
+                    "GraphScore": 0.22717425120724127,
                     "OntologyLocalScore": 0.6666666666666667,
                     "OntologyGlobalScore": 0.5,
-                    "GraphScore": 0.22717425120724127,
                     "KeywordsScore": 0.609271523178808,
                     "MixedScore": 0.44715741719086977
                 },
@@ -104,9 +104,9 @@ class WikifyResponseElem(BaseModel):
                     "PageTitle": "Distance_from_a_point_to_a_line",
                     "SearchScore": 0.16666666666666669,
                     "LevenshteinScore": 0.2134432477817427,
+                    "GraphScore": 0.003590346636521923,
                     "OntologyLocalScore": 0.21885521885521886,
                     "OntologyGlobalScore": 0.19791666666666666,
-                    "GraphScore": 0.003590346636521923,
                     "KeywordsScore": 0.19828593689131283,
                     "MixedScore": 0.17781458572659029
                 },
@@ -115,9 +115,9 @@ class WikifyResponseElem(BaseModel):
                     "PageTitle": "Line_(geometry)",
                     "SearchScore": 1,
                     "LevenshteinScore": 0.33567080901262164,
+                    "GraphScore": 1,
                     "OntologyLocalScore": 0.8232323232323234,
                     "OntologyGlobalScore": 0.7916666666666666,
-                    "GraphScore": 1,
                     "KeywordsScore": 0.7855473315153876,
                     "MixedScore": 0.7886663359580247
                 },
@@ -126,9 +126,9 @@ class WikifyResponseElem(BaseModel):
                     "PageTitle": "Line_segment",
                     "SearchScore": 0.5555555555555556,
                     "LevenshteinScore": 0.3582111602475977,
+                    "GraphScore": 0.42461810549112244,
                     "OntologyLocalScore": 0.43097643097643096,
                     "OntologyGlobalScore": 0.75,
-                    "GraphScore": 0.42461810549112244,
                     "KeywordsScore": 0.6026490066225165,
                     "MixedScore": 0.5277457623305826
                 },
@@ -137,9 +137,9 @@ class WikifyResponseElem(BaseModel):
                     "PageTitle": "Non-line-of-sight_propagation",
                     "SearchScore": 0.19444444444444448,
                     "LevenshteinScore": 0.39019342923035233,
+                    "GraphScore": 0.01572170017309725,
                     "OntologyLocalScore": 0.21212121212121213,
                     "OntologyGlobalScore": 0.11647727272727273,
-                    "GraphScore": 0.01572170017309725,
                     "KeywordsScore": 0.5087650954421504,
                     "MixedScore": 0.2950855110143057
                 },
@@ -148,9 +148,9 @@ class WikifyResponseElem(BaseModel):
                     "PageTitle": "Parallelogram",
                     "SearchScore": 0.3055555555555556,
                     "LevenshteinScore": 0.13627674782665528,
+                    "GraphScore": 0.14484503981375635,
                     "OntologyLocalScore": 0.6666666666666667,
                     "OntologyGlobalScore": 0.5,
-                    "GraphScore": 0.14484503981375635,
                     "KeywordsScore": 0.609271523178808,
                     "MixedScore": 0.4288185842201275
                 },
@@ -159,9 +159,9 @@ class WikifyResponseElem(BaseModel):
                     "PageTitle": "Perpendicular",
                     "SearchScore": 0.19444444444444445,
                     "LevenshteinScore": 0.039652736888335365,
+                    "GraphScore": 0.15017752515904018,
                     "OntologyLocalScore": 0.21212121212121213,
                     "OntologyGlobalScore": 0.25,
-                    "GraphScore": 0.15017752515904018,
                     "KeywordsScore": 0.2584729255940787,
                     "MixedScore": 0.19421461143444865
                 },
@@ -170,9 +170,9 @@ class WikifyResponseElem(BaseModel):
                     "PageTitle": "Quadrilateral",
                     "SearchScore": 0.02777777777777779,
                     "LevenshteinScore": 0.15367913840285474,
+                    "GraphScore": 0.12360559235107477,
                     "OntologyLocalScore": 0.36363636363636365,
                     "OntologyGlobalScore": 0.25,
-                    "GraphScore": 0.12360559235107477,
                     "KeywordsScore": 0.3307362680171406,
                     "MixedScore": 0.21973432050168798
                 },
@@ -181,9 +181,9 @@ class WikifyResponseElem(BaseModel):
                     "PageTitle": "Right_angle",
                     "SearchScore": 0.4166666666666667,
                     "LevenshteinScore": 0.4451948682556247,
+                    "GraphScore": 0.12678424818870415,
                     "OntologyLocalScore": 0.42424242424242425,
                     "OntologyGlobalScore": 0.5,
-                    "GraphScore": 0.12678424818870415,
                     "KeywordsScore": 0.4107908063887807,
                     "MixedScore": 0.3996645939435453
                 },
@@ -192,9 +192,9 @@ class WikifyResponseElem(BaseModel):
                     "PageTitle": "Solid_angle",
                     "SearchScore": 0.3888888888888889,
                     "LevenshteinScore": 0.6912823774628103,
+                    "GraphScore": 0.08695255651117278,
                     "OntologyLocalScore": 0.196969696969697,
                     "OntologyGlobalScore": 0.15909090909090912,
-                    "GraphScore": 0.08695255651117278,
                     "KeywordsScore": 0.7415270744059212,
                     "MixedScore": 0.4580780578246384
                 },
@@ -203,9 +203,9 @@ class WikifyResponseElem(BaseModel):
                     "PageTitle": "Tangent",
                     "SearchScore": 0.4722222222222222,
                     "LevenshteinScore": 0.29631455223594527,
+                    "GraphScore": 0.3573397570845174,
                     "OntologyLocalScore": 0.6414141414141414,
                     "OntologyGlobalScore": 0.59375,
-                    "GraphScore": 0.3573397570845174,
                     "KeywordsScore": 0.5087650954421504,
                     "MixedScore": 0.48284225283305426
                 },
@@ -214,9 +214,9 @@ class WikifyResponseElem(BaseModel):
                     "PageTitle": "Triangle",
                     "SearchScore": 0.16666666666666669,
                     "LevenshteinScore": 0.5717479784842091,
+                    "GraphScore": 0.2535403349997643,
                     "OntologyLocalScore": 0.6666666666666667,
                     "OntologyGlobalScore": 0.5,
-                    "GraphScore": 0.2535403349997643,
                     "KeywordsScore": 0.609271523178808,
                     "MixedScore": 0.47723102055958355
                 }

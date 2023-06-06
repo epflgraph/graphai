@@ -47,12 +47,16 @@ class ConceptsGraph:
         table_name = 'graph.Nodes_N_Concept'
         fields = ['PageID', 'PageTitle']
         self.concepts = pd.DataFrame(db.find(table_name, fields=fields), columns=fields)
-        concept_ids = list(self.concepts['PageID'])
+        # concept_ids = list(self.concepts['PageID'])
 
         table_name = 'graph.Edges_N_Concept_N_Concept_T_GraphScore'
         fields = ['SourcePageID', 'TargetPageID', 'NormalisedScore']
-        conditions = {'SourcePageID': concept_ids, 'TargetPageID': concept_ids}
+        # conditions = {'SourcePageID': concept_ids, 'TargetPageID': concept_ids}
+        conditions = {}
         self.concepts_concepts = pd.DataFrame(db.find(table_name, fields=fields, conditions=conditions), columns=fields)
+
+        n_concepts = len(pd.concat([self.concepts_concepts['SourcePageID'], self.concepts_concepts['TargetPageID']]).drop_duplicates())
+        print(f'Got {len(self.concepts_concepts)} concept to concept edges among {n_concepts} different concepts.')
 
         self.concepts_concepts = pd.concat([
             self.concepts_concepts,
@@ -178,6 +182,9 @@ class ConceptsGraph:
             concepts_concepts['GraphScore'] = (2 - concepts_concepts['GraphScore']) * concepts_concepts['GraphScore']
 
         # Add GraphScore column to results
+        #   NOTE: We purposely perform an inner merge as an extra filter to exclude concepts which don't have an edge
+        #   to any of the other concepts in the results, as they are very often noise. This could be an issue
+        #   for very short texts, but this is rarely the case and even in that case it is never dramatic.
         results = pd.merge(results, concepts_concepts, how='inner', on='PageID')
 
         return results
