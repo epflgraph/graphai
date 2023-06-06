@@ -47,12 +47,12 @@ class ConceptsGraph:
         table_name = 'graph.Nodes_N_Concept'
         fields = ['PageID', 'PageTitle']
         self.concepts = pd.DataFrame(db.find(table_name, fields=fields), columns=fields)
-        # concept_ids = list(self.concepts['PageID'])
+        concept_ids = list(self.concepts['PageID'])
 
         table_name = 'graph.Edges_N_Concept_N_Concept_T_GraphScore'
         fields = ['SourcePageID', 'TargetPageID', 'NormalisedScore']
-        # conditions = {'SourcePageID': concept_ids, 'TargetPageID': concept_ids}
-        conditions = {}
+        conditions = {'SourcePageID': concept_ids, 'TargetPageID': concept_ids}
+        # conditions = {}
         self.concepts_concepts = pd.DataFrame(db.find(table_name, fields=fields, conditions=conditions), columns=fields)
 
         n_concepts = len(pd.concat([self.concepts_concepts['SourcePageID'], self.concepts_concepts['TargetPageID']]).drop_duplicates())
