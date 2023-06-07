@@ -73,7 +73,7 @@ class ConceptsGraph:
             self.concepts_concepts.rename(columns={'SourcePageID': 'TargetPageID', 'TargetPageID': 'SourcePageID'})
         ]).reset_index(drop=True)
 
-        print('Storing derived successors, predecessors, sources and targets')
+        print('Storing derived successors, predecessors, sources and targets...')
 
         # Store successor and predecessor sets as attributes
         self.successors = self.concepts_concepts.groupby(by='SourcePageID').aggregate({'TargetPageID': set})
@@ -81,8 +81,8 @@ class ConceptsGraph:
         self.sources = set(self.successors.index)
         self.targets = set(self.predecessors.index)
 
-        print('Set graph as loaded')
-
+        # Set the flag to avoid future reloads
+        print('Setting graph as loaded...')
         self.loaded = True
 
     def compute_scores(self, source_page_ids, target_page_ids):

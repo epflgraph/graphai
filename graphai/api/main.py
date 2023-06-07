@@ -40,19 +40,19 @@ async def init():
     log('Loading big objects and models into the memory space of the celery workers...')
 
     # Spawn tasks
+    log('Spawning text_init task...')
     text_job = text_init_task.apply_async(priority=10)
-    log('Spawned text_init task')
+    log('Spawning video_init task...')
     video_job = video_init_task.apply_async(priority=2)
-    log('Spawned video_init task')
 
     # Wait for results
+    log('Waiting for text_init task...', end=' ')
     text_ok = text_job.get()
-    log('Text task returned')
-    log(f'text_ok = {text_ok}')
+    log('Done')
 
+    log('Waiting for video_init task...', end=' ')
     video_ok = video_job.get()
-    log('Video task returned')
-    log(f'video_ok = {text_ok}')
+    log('Done')
 
     # Print status message
     if text_ok and video_ok:

@@ -272,5 +272,4 @@ def text_init_task(self):
     self.ontology.fetch_from_db()
 
     print('Graph and ontology tables loaded')
-
     return True

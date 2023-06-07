@@ -60,8 +60,14 @@ class Ontology:
         ################################################
 
         use_new_tables = db.check_if_table_exists('francisco', 'Nodes_N_Category')
+        if use_new_tables:
+            print('Loading tables from "francisco" schema...')
+        else:
+            print('Loading tables from "graphontology" schema...')
 
         # Fetch category nodes
+        print('Loading category nodes table...', end=' ')
+
         if use_new_tables:
             table_name = 'francisco.Nodes_N_Category'
         else:
@@ -75,9 +81,13 @@ class Ontology:
         # Store category names indexing by CategoryID for faster access
         self.category_names = self.categories.set_index('CategoryID')['CategoryName']
 
+        print('Done')
+
         ################################################
 
         # Fetch category-category edges
+        print('Loading category-category edges table...', end=' ')
+
         if use_new_tables:
             table_name = 'francisco.Edges_N_Category_N_Category'
         else:
@@ -91,9 +101,13 @@ class Ontology:
         # Store category parents indexing by ChildCategoryID for faster access
         self.category_parents = self.categories_categories.set_index('ChildCategoryID')['ParentCategoryID']
 
+        print('Done')
+
         ################################################
 
         # Fetch concept-category edges
+        print('Loading category-concept edges table...', end=' ')
+
         if use_new_tables:
             table_name = 'francisco.Edges_N_Category_N_Concept_T_OnlyDepth4'
         else:
@@ -107,7 +121,10 @@ class Ontology:
         # Store category ids indexing by PageID for faster access
         self.concept_categories = self.concepts_categories.set_index('PageID')['CategoryID']
 
-        # Setting the flag to avoid future reloads
+        print('Done')
+
+        # Set the flag to avoid future reloads
+        print('Setting ontology as loaded...')
         self.loaded = True
 
     def get_concept_category(self, page_id):
