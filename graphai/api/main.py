@@ -41,11 +41,18 @@ async def init():
 
     # Spawn tasks
     text_job = text_init_task.apply_async(priority=10)
+    log('Spawned text_init task')
     video_job = video_init_task.apply_async(priority=2)
+    log('Spawned video_init task')
 
     # Wait for results
     text_ok = text_job.get()
+    log('Text task returned')
+    log(f'text_ok = {text_ok}')
+
     video_ok = video_job.get()
+    log('Video task returned')
+    log(f'video_ok = {text_ok}')
 
     # Print status message
     if text_ok and video_ok:

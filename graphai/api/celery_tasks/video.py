@@ -524,6 +524,7 @@ def dummy_task(self, results):
              translation_obj=translation_models)
 def video_init_task(self):
     # This task initialises the video celery worker by loading into memory the transcription and NLP models
+    print('Start video_init task')
 
     print('Loading video processing objects...')
     self.transcription_obj.load_model_whisper()
