@@ -209,7 +209,9 @@ def aggregate_and_filter_task(self, results, coef=0.5, epsilon=0.1, min_votes=5)
 
     # Normalise sum scores to [0, 1]
     for column in score_columns:
-        results[f'{column}Sum'] = results[f'{column}Sum'] / results[f'{column}Sum'].max()
+        max_score_sum = results[f'{column}Sum'].max()
+        if max_score_sum > 0:
+            results[f'{column}Sum'] = results[f'{column}Sum'] / results[f'{column}Sum'].max()
 
     # Take convex combination of the two columns
     assert 0 <= coef <= 1, f'Normalisation coefficient {coef} is not in [0, 1]'
