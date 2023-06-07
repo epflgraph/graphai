@@ -46,11 +46,11 @@ async def init():
     video_job = video_init_task.apply_async(priority=2)
 
     # Wait for results
-    log('Waiting for text_init task...', end=' ')
+    log('Waiting for text_init task...')
     text_ok = text_job.get()
     log('Done')
 
-    log('Waiting for video_init task...', end=' ')
+    log('Waiting for video_init task...')
     video_ok = video_job.get()
     log('Done')
 
