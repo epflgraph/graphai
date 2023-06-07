@@ -44,10 +44,16 @@ class ConceptsGraph:
 
         db = DB()
 
+        print('Loading concept nodes table...', end=' ')
+
         table_name = 'graph.Nodes_N_Concept'
         fields = ['PageID', 'PageTitle']
         self.concepts = pd.DataFrame(db.find(table_name, fields=fields), columns=fields)
         concept_ids = list(self.concepts['PageID'])
+
+        print('Done')
+
+        print('Loading concept edges table...', end=' ')
 
         table_name = 'graph.Edges_N_Concept_N_Concept_T_GraphScore'
         fields = ['SourcePageID', 'TargetPageID', 'NormalisedScore']
@@ -55,13 +61,19 @@ class ConceptsGraph:
         # conditions = {}
         self.concepts_concepts = pd.DataFrame(db.find(table_name, fields=fields, conditions=conditions), columns=fields)
 
+        print('Done')
+
         n_concepts = len(pd.concat([self.concepts_concepts['SourcePageID'], self.concepts_concepts['TargetPageID']]).drop_duplicates())
         print(f'Got {len(self.concepts_concepts)} concept to concept edges among {n_concepts} different concepts.')
+
+        print('Concatenating edges with reverse edges for easy access...')
 
         self.concepts_concepts = pd.concat([
             self.concepts_concepts,
             self.concepts_concepts.rename(columns={'SourcePageID': 'TargetPageID', 'TargetPageID': 'SourcePageID'})
         ]).reset_index(drop=True)
+
+        print('Storing derived successors, predecessors, sources and targets...')
 
         # Store successor and predecessor sets as attributes
         self.successors = self.concepts_concepts.groupby(by='SourcePageID').aggregate({'TargetPageID': set})
@@ -69,6 +81,8 @@ class ConceptsGraph:
         self.sources = set(self.successors.index)
         self.targets = set(self.predecessors.index)
 
+        # Set the flag to avoid future reloads
+        print('Setting graph as loaded...')
         self.loaded = True
 
     def compute_scores(self, source_page_ids, target_page_ids):

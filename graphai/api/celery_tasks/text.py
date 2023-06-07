@@ -263,10 +263,13 @@ def text_test_task(self):
              name='text_10.init', ignore_result=False, graph=graph, ontology=ontology)
 def text_init_task(self):
     # This task initialises the text celery worker by loading into memory the graph and ontology tables
+    print('Start text_init task')
 
-    print('Loading graph and ontology tables...')
+    print('Loading graph tables...')
     self.graph.fetch_from_db()
-    self.ontology.fetch_from_db()
-    print('Loaded')
 
+    print('Loading ontology tables...')
+    self.ontology.fetch_from_db()
+
+    print('Graph and ontology tables loaded')
     return True
