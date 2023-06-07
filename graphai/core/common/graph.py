@@ -49,7 +49,7 @@ class ConceptsGraph:
         table_name = 'graph.Nodes_N_Concept'
         fields = ['PageID', 'PageTitle']
         self.concepts = pd.DataFrame(db.find(table_name, fields=fields), columns=fields)
-        concept_ids = list(self.concepts['PageID'])
+        # concept_ids = list(self.concepts['PageID'])
 
         print('Done')
 
@@ -57,8 +57,8 @@ class ConceptsGraph:
 
         table_name = 'graph.Edges_N_Concept_N_Concept_T_GraphScore'
         fields = ['SourcePageID', 'TargetPageID', 'NormalisedScore']
-        conditions = {'SourcePageID': concept_ids, 'TargetPageID': concept_ids}
-        # conditions = {}
+        # conditions = {'SourcePageID': concept_ids, 'TargetPageID': concept_ids}
+        conditions = {}
         self.concepts_concepts = pd.DataFrame(db.find(table_name, fields=fields, conditions=conditions), columns=fields)
 
         print('Done')
@@ -73,13 +73,13 @@ class ConceptsGraph:
             self.concepts_concepts.rename(columns={'SourcePageID': 'TargetPageID', 'TargetPageID': 'SourcePageID'})
         ]).reset_index(drop=True)
 
-        print('Storing derived successors, predecessors, sources and targets...')
-
-        # Store successor and predecessor sets as attributes
-        self.successors = self.concepts_concepts.groupby(by='SourcePageID').aggregate({'TargetPageID': set})
-        self.predecessors = self.concepts_concepts.groupby(by='TargetPageID').aggregate({'SourcePageID': set})
-        self.sources = set(self.successors.index)
-        self.targets = set(self.predecessors.index)
+        # print('Storing derived successors, predecessors, sources and targets...')
+        #
+        # # Store successor and predecessor sets as attributes
+        # self.successors = self.concepts_concepts.groupby(by='SourcePageID').aggregate({'TargetPageID': set})
+        # self.predecessors = self.concepts_concepts.groupby(by='TargetPageID').aggregate({'SourcePageID': set})
+        # self.sources = set(self.successors.index)
+        # self.targets = set(self.predecessors.index)
 
         # Set the flag to avoid future reloads
         print('Setting graph as loaded...')
@@ -115,6 +115,11 @@ class ConceptsGraph:
 
         pairs = [(s, t) for s in source_page_ids for t in target_page_ids]
 
+        successors = self.concepts_concepts.groupby(by='SourcePageID').aggregate({'TargetPageID': set})
+        predecessors = self.concepts_concepts.groupby(by='TargetPageID').aggregate({'SourcePageID': set})
+        sources = set(successors.index)
+        targets = set(predecessors.index)
+
         results = []
         for s, t in pairs:
 
@@ -128,7 +133,7 @@ class ConceptsGraph:
                 continue
 
             # If s has no successors or t has no predecessors, then there are no outgoing paths. The score is 0.
-            if (s not in self.sources) or (t not in self.targets):
+            if (s not in sources) or (t not in targets):
                 results.append({
                     'source_page_id': s,
                     'target_page_id': t,
@@ -137,8 +142,8 @@ class ConceptsGraph:
                 continue
 
             # Compute the number of outgoing paths of length <= 2
-            s_out = set(self.successors.loc[s, 'TargetPageID']) - {s}
-            t_in = set(self.predecessors.loc[t, 'SourcePageID']) - {t}
+            s_out = set(successors.loc[s, 'TargetPageID']) - {s}
+            t_in = set(predecessors.loc[t, 'SourcePageID']) - {t}
             n_out_paths = len(s_out & t_in) + (1 if t in s_out else 0)
 
             # If there are no outgoing paths, the score is zero
@@ -151,12 +156,12 @@ class ConceptsGraph:
                 continue
 
             # Compute the number of ingoing paths of length <= 2
-            if (s not in self.targets) or (t not in self.sources):
+            if (s not in targets) or (t not in sources):
                 # If s has no predecessors or t has no successors, then there are no ingoing paths.
                 n_in_paths = 0
             else:
-                s_in = set(self.predecessors.loc[s, 'SourcePageID']) - {s}
-                t_out = set(self.successors.loc[s, 'TargetPageID']) - {t}
+                s_in = set(predecessors.loc[s, 'SourcePageID']) - {s}
+                t_out = set(successors.loc[s, 'TargetPageID']) - {t}
                 n_in_paths = len(s_in & t_out) + (1 if s in t_out else 0)
 
             # Compute score
