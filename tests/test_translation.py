@@ -1,0 +1,103 @@
+import json
+
+import pytest
+from unittest.mock import patch
+from time import sleep
+
+from graphai.api.celery_tasks.translation import translate_text_task, compute_text_fingerprint_task
+
+
+################################################################
+# /translation/translate                                               #
+################################################################
+
+
+@patch('graphai.api.celery_tasks.translation.translate_text_task.run')
+@pytest.mark.usefixtures('en_to_fr_text')
+def test__translation_translate__translate_text__mock_task(mock_run, en_to_fr_text):
+    # Mock calling the task
+    translate_text_task.run(en_to_fr_text)
+
+    # Assert that the task has been called
+    assert translate_text_task.run.call_count == 1
+
+
+################################################################
+
+
+@pytest.mark.usefixtures('en_to_fr_text', 'fr_to_en_text')
+def test__translation_translate__translate_text__run_task(en_to_fr_text, fr_to_en_text):
+    # Call the task
+    en_fr_translated = translate_text_task.run('mock_token_en_fr', en_to_fr_text, "en", "fr", True)
+
+    # Assert that the results are correct
+    assert isinstance(en_fr_translated, dict)
+    assert 'result' in en_fr_translated
+    assert en_fr_translated['successful'] is True
+    assert 'salut les gars' in en_fr_translated['result'].lower()
+    assert 'comment ça va' in en_fr_translated['result'].lower()
+
+    #############################################################
+
+    # Call the task
+    fr_en_translated = translate_text_task.run('mock_token_fr_en', fr_to_en_text, "fr", "en", True)
+
+    # Assert that the results are correct
+    assert isinstance(fr_en_translated, dict)
+    assert 'result' in fr_en_translated
+    assert fr_en_translated['successful'] is True
+    assert 'ladies and gentlemen' in fr_en_translated['result'].lower()
+    assert 'welcome' in fr_en_translated['result'].lower()
+
+
+@pytest.mark.usefixtures('en_to_fr_text')
+def test__translation_translate__translate_text__integration(fixture_app, en_to_fr_text, timeout=30):
+    response = fixture_app.post('/translation/translate',
+                                data=json.dumps({"text": en_to_fr_text, "source": "en", "target": "fr",
+                                                 "force": True}),
+                                timeout=timeout)
+    # Check status code is successful
+    assert response.status_code == 200
+    # Parse resulting task id
+    task_id = response.json()['task_id']
+
+    # Wait a few seconds
+    sleep(5)
+
+    # Now get status
+    response = fixture_app.get(f'/translation/translate/status/{task_id}',
+                               timeout=timeout)
+    # Parse result
+    en_fr_translated = response.json()
+    # Check returned value
+    assert isinstance(en_fr_translated, dict)
+    assert 'task_result' in en_fr_translated
+    assert en_fr_translated['task_status'] == 'SUCCESS'
+    assert en_fr_translated['task_result']['successful'] is True
+    assert en_fr_translated['task_result']['fresh'] is True
+    assert 'salut les gars' in en_fr_translated['task_result']['result'].lower()
+    assert 'comment ça va' in en_fr_translated['task_result']['result'].lower()
+
+    ################################################
+
+    response = fixture_app.post('/translation/translate',
+                                data=json.dumps({"text": en_to_fr_text, "source": "en", "target": "fr",
+                                                 "force": False}),
+                                timeout=timeout)
+    # Check status code is successful
+    assert response.status_code == 200
+    # Parse resulting task id
+    task_id = response.json()['task_id']
+
+    # Wait a second
+    sleep(1)
+
+    # Now get status
+    response = fixture_app.get(f'/translation/translate/status/{task_id}',
+                               timeout=timeout)
+    # Parse result
+    en_fr_translated = response.json()
+    # Check values
+    assert isinstance(en_fr_translated, dict)
+    assert en_fr_translated['task_result']['successful'] is True
+    assert en_fr_translated['task_result']['fresh'] is False
