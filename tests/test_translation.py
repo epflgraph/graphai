@@ -69,7 +69,7 @@ def test__translation_translate__translate_text__integration(fixture_app, celery
     task_id = response.json()['task_id']
 
     # Wait a few seconds
-    sleep(3)
+    sleep(5)
 
     # Now get status
     response = fixture_app.get(f'/translation/translate/status/{task_id}',
@@ -84,6 +84,7 @@ def test__translation_translate__translate_text__integration(fixture_app, celery
     assert en_fr_translated['task_result']['fresh'] is True
     assert 'salut les gars' in en_fr_translated['task_result']['result'].lower()
     assert 'comment ça va' in en_fr_translated['task_result']['result'].lower()
+    original_results = en_fr_translated['task_result']['result']
 
     ################################################
 
@@ -97,8 +98,8 @@ def test__translation_translate__translate_text__integration(fixture_app, celery
     # Parse resulting task id
     task_id = response.json()['task_id']
 
-    # Wait a second
-    sleep(1)
+    # Wait a few seconds
+    sleep(3)
 
     # Now get status
     response = fixture_app.get(f'/translation/translate/status/{task_id}',
@@ -110,6 +111,7 @@ def test__translation_translate__translate_text__integration(fixture_app, celery
     # results must be successful but not fresh, since they were already cached
     assert en_fr_translated['task_result']['successful'] is True
     assert en_fr_translated['task_result']['fresh'] is False
+    assert en_fr_translated['task_result']['result'] == original_results
 
 
 ################################################################
@@ -140,4 +142,3 @@ def test__translation_calculate_fingerprint__compute_text_fingerprint__run_task(
     assert fp['fresh']
     assert fp['fp_token'] == 'mock_token_fr_en'
     assert fp['result'] == '263e3e409aaa6600000000000000000000000000000000000000000000000000'
-
