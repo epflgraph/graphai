@@ -8,7 +8,7 @@ from graphai.api.celery_tasks.translation import translate_text_task, compute_te
 
 
 ################################################################
-# /translation/translate                                               #
+# /translation/translate                                       #
 ################################################################
 
 
@@ -110,3 +110,34 @@ def test__translation_translate__translate_text__integration(fixture_app, celery
     # results must be successful but not fresh, since they were already cached
     assert en_fr_translated['task_result']['successful'] is True
     assert en_fr_translated['task_result']['fresh'] is False
+
+
+################################################################
+# /translation/calculate_fingerprint                           #
+################################################################
+
+
+@pytest.mark.usefixtures('en_to_fr_text', 'fr_to_en_text')
+def test__translation_calculate_fingerprint__compute_text_fingerprint__run_task(en_to_fr_text, fr_to_en_text):
+    # Call the task
+    fp = compute_text_fingerprint_task.run('mock_token_en_fr', en_to_fr_text, True)
+
+    # Assert that the results are correct
+    assert isinstance(fp, dict)
+    assert 'result' in fp
+    assert fp['fresh']
+    assert fp['fp_token'] == 'mock_token_en_fr'
+    assert fp['result'] == '0600000000000000000000000000000000000000000000000000000000000000'
+
+    #############################################################
+
+    # Call the task
+    fp = compute_text_fingerprint_task.run('mock_token_fr_en', fr_to_en_text, True)
+
+    # Assert that the results are correct
+    assert isinstance(fp, dict)
+    assert 'result' in fp
+    assert fp['fresh']
+    assert fp['fp_token'] == 'mock_token_fr_en'
+    assert fp['result'] == '263e3e409aaa6600000000000000000000000000000000000000000000000000'
+
