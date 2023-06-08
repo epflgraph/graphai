@@ -66,16 +66,13 @@ def wikisearch_task(self, keywords_list, fraction=(0, 1), method='es-base'):
                 print('[WARNING] No results from elasticsearch cluster. Falling back to Wikipedia API.')
                 results = self.wp.search(keywords)
 
-        # Replace score with linear function on Searchrank if needed
-        if method != 'es-score':
-            if len(results) >= 2:
-                results['SearchScore'] = 1 - (results['Searchrank'] - 1) / (len(results) - 1)
-            else:
-                results['SearchScore'] = 1
-
         # Ignore set of keywords if no pages are found
         if len(results) == 0:
             continue
+
+        # Replace score with linear function on Searchrank if needed
+        if method != 'es-score':
+            results['SearchScore'] = 1 - (results['Searchrank'] - 1) / len(results)
 
         # Add Keywords column
         results['Keywords'] = keywords
