@@ -50,8 +50,15 @@ def test__translation_translate__translate_text__run_task(en_to_fr_text, fr_to_e
     assert 'welcome' in fr_en_translated['result'].lower()
 
 
+################################################################
+
+
 @pytest.mark.usefixtures('en_to_fr_text')
-def test__translation_translate__translate_text__integration(fixture_app, en_to_fr_text, timeout=30):
+def test__translation_translate__translate_text__integration(fixture_app, celery_worker, en_to_fr_text, timeout=30):
+    # The celery_worker object is necessary for async tasks, otherwise the status will be permanently stuck on
+    # PENDING.
+
+    # First, we call the translate endpoint with force=True to test the full task pipeline working
     response = fixture_app.post('/translation/translate',
                                 data=json.dumps({"text": en_to_fr_text, "source": "en", "target": "fr",
                                                  "force": True}),
@@ -62,7 +69,7 @@ def test__translation_translate__translate_text__integration(fixture_app, en_to_
     task_id = response.json()['task_id']
 
     # Wait a few seconds
-    sleep(5)
+    sleep(3)
 
     # Now get status
     response = fixture_app.get(f'/translation/translate/status/{task_id}',
@@ -80,6 +87,7 @@ def test__translation_translate__translate_text__integration(fixture_app, en_to_
 
     ################################################
 
+    # Now, we call the translate endpoint again with the same input to make sure the caching works correctly
     response = fixture_app.post('/translation/translate',
                                 data=json.dumps({"text": en_to_fr_text, "source": "en", "target": "fr",
                                                  "force": False}),
@@ -99,5 +107,6 @@ def test__translation_translate__translate_text__integration(fixture_app, en_to_
     en_fr_translated = response.json()
     # Check values
     assert isinstance(en_fr_translated, dict)
+    # results must be successful but not fresh, since they were already cached
     assert en_fr_translated['task_result']['successful'] is True
     assert en_fr_translated['task_result']['fresh'] is False
