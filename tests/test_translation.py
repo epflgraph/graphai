@@ -99,7 +99,7 @@ def test__translation_translate__translate_text__integration(fixture_app, celery
     task_id = response.json()['task_id']
 
     # Wait a few seconds
-    sleep(3)
+    sleep(5)
 
     # Now get status
     response = fixture_app.get(f'/translation/translate/status/{task_id}',
@@ -142,3 +142,38 @@ def test__translation_calculate_fingerprint__compute_text_fingerprint__run_task(
     assert fp['fresh']
     assert fp['fp_token'] == 'mock_token_fr_en'
     assert fp['result'] == '263e3e409aaa6600000000000000000000000000000000000000000000000000'
+
+
+################################################################
+
+@pytest.mark.usefixtures('en_to_fr_text')
+def test__translation_calculate_fingerprint__compute_text_fingerprint__integration(
+        fixture_app, celery_worker, en_to_fr_text, timeout=30):
+    # The celery_worker object is necessary for async tasks, otherwise the status will be permanently stuck on
+    # PENDING.
+
+    # Call the calculate_fingerprint endpoint with force=True
+    response = fixture_app.post('/translation/calculate_fingerprint',
+                                data=json.dumps({"text": en_to_fr_text, "source": "en", "target": "fr",
+                                                 "force": True}),
+                                timeout=timeout)
+    # Check status code is successful
+    assert response.status_code == 200
+    # Parse resulting task id
+    task_id = response.json()['task_id']
+
+    # Wait a few seconds
+    sleep(5)
+
+    # Now get status
+    response = fixture_app.get(f'/translation/calculate_fingerprint/status/{task_id}',
+                               timeout=timeout)
+    # Parse result
+    content = response.json()
+    # Check returned value
+    assert isinstance(content, dict)
+    assert 'task_result' in content
+    assert content['task_status'] == 'SUCCESS'
+    assert content['task_result']['successful'] is True
+    assert content['task_result']['fresh'] is True
+    assert content['task_result']['result'] == '0600000000000000000000000000000000000000000000000000000000000000'
