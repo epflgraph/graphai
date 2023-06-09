@@ -15,7 +15,8 @@ from graphai.api.celery_tasks.text import (
     wikisearch_task,
     wikisearch_callback_task,
     compute_scores_task,
-    aggregate_and_filter_task,
+    purge_irrelevant_task,
+    aggregate_task,
     text_test_task,
 )
 
@@ -68,6 +69,7 @@ async def wikify(
     normalisation_coef: Optional[float] = 0.5,
     filtering_threshold: Optional[float] = 0.1,
     filtering_min_votes: Optional[int] = 5,
+    refresh_scores: Optional[bool] = True,
 ):
     """
     Processes raw text (e.g. from an abstract of a publication, a course description or a lecture slide) and returns a
@@ -93,22 +95,53 @@ async def wikify(
 
     n = 16
 
-    job = chain(
-        extract_keywords_task.s(raw_text),
-        group(wikisearch_task.s(fraction=(i / n, (i + 1) / n), method=method) for i in range(n)),
-        wikisearch_callback_task.s(),
-        compute_scores_task.s(
-            restrict_to_ontology=restrict_to_ontology,
-            graph_score_smoothing=graph_score_smoothing,
-            ontology_score_smoothing=ontology_score_smoothing,
-            keywords_score_smoothing=keywords_score_smoothing
-        ),
-        aggregate_and_filter_task.s(
-            coef=normalisation_coef,
-            epsilon=filtering_threshold,
-            min_votes=filtering_min_votes
+    if refresh_scores:
+        # We compute scores, filter results based on those and then recompute scores before returning
+        job = chain(
+            extract_keywords_task.s(raw_text),
+            group(wikisearch_task.s(fraction=(i / n, (i + 1) / n), method=method) for i in range(n)),
+            wikisearch_callback_task.s(),
+            compute_scores_task.s(
+                restrict_to_ontology=restrict_to_ontology,
+                graph_score_smoothing=graph_score_smoothing,
+                ontology_score_smoothing=ontology_score_smoothing,
+                keywords_score_smoothing=keywords_score_smoothing
+            ),
+            purge_irrelevant_task.s(
+                coef=normalisation_coef,
+                epsilon=filtering_threshold,
+                min_votes=filtering_min_votes
+            ),
+            compute_scores_task.s(
+                restrict_to_ontology=restrict_to_ontology,
+                graph_score_smoothing=graph_score_smoothing,
+                ontology_score_smoothing=ontology_score_smoothing,
+                keywords_score_smoothing=keywords_score_smoothing
+            ),
+            aggregate_task.s(
+                coef=normalisation_coef,
+                filter=False
+            )
         )
-    )
+    else:
+        # We compute scores, filter results based on those and return them directly
+        job = chain(
+            extract_keywords_task.s(raw_text),
+            group(wikisearch_task.s(fraction=(i / n, (i + 1) / n), method=method) for i in range(n)),
+            wikisearch_callback_task.s(),
+            compute_scores_task.s(
+                restrict_to_ontology=restrict_to_ontology,
+                graph_score_smoothing=graph_score_smoothing,
+                ontology_score_smoothing=ontology_score_smoothing,
+                keywords_score_smoothing=keywords_score_smoothing
+            ),
+            aggregate_task.s(
+                coef=normalisation_coef,
+                filter=True,
+                epsilon=filtering_threshold,
+                min_votes=filtering_min_votes
+            )
+        )
 
     # Schedule job
     results = job.apply_async(priority=10)
