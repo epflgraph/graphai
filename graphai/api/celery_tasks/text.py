@@ -137,9 +137,7 @@ def compute_scores_task(self, results, restrict_to_ontology=False, graph_score_s
     return results
 
 
-@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={'max_retries': 2},
-             name='text_10.aggregate_and_filter', ignore_result=False)
-def aggregate_and_filter_task(self, results, coef=0.5, epsilon=0.1, min_votes=5):
+def aggregate_results(results, coef=0.5):
     if len(results) == 0:
         return results
 
@@ -202,6 +200,7 @@ def aggregate_and_filter_task(self, results, coef=0.5, epsilon=0.1, min_votes=5)
         KeywordsScoreSum=('KeywordsScore', 'sum'),
         KeywordsScoreMax=('KeywordsScore', 'max')
     ).reset_index()
+
     score_columns = ['SearchScore', 'LevenshteinScore', 'GraphScore', 'OntologyLocalScore', 'OntologyGlobalScore', 'KeywordsScore']
 
     # Normalise sum scores to [0, 1]
@@ -218,20 +217,6 @@ def aggregate_and_filter_task(self, results, coef=0.5, epsilon=0.1, min_votes=5)
     results = results[['PageID', 'PageTitle'] + score_columns]
 
     ################################################################
-    # Filtering of results                                         #
-    ################################################################
-
-    # Filter results with low scores through a majority vote among all scores
-    # To be kept, we require a concept to have at least min_votes out of 6 scores to be significant (>= epsilon)
-    assert 0 <= epsilon <= 1, f'Filtering threshold {epsilon} is not in [0, 1]'
-    assert 0 <= min_votes <= 6, f'Filtering minimum number of votes {min_votes} is not in [0, 6]'
-    votes = pd.DataFrame()
-    for column in score_columns:
-        votes[column] = (results[column] >= epsilon).astype(int)
-    votes = votes.sum(axis=1)
-    results = results[votes >= min_votes]
-
-    ################################################################
     # Compute mixed score                                          #
     ################################################################
 
@@ -246,6 +231,55 @@ def aggregate_and_filter_task(self, results, coef=0.5, epsilon=0.1, min_votes=5)
         'KeywordsScore': [0.3]
     })
     results['MixedScore'] = results[score_columns] @ coefficients.transpose()
+
+    return results
+
+
+def filter_results(results, epsilon=0.1, min_votes=5):
+    if len(results) == 0:
+        return results
+
+    ################################################################
+    # Filtering of results                                         #
+    ################################################################
+
+    # Filter results with low scores through a majority vote among all scores
+    # To be kept, we require a concept to have at least min_votes out of 6 scores to be significant (>= epsilon)
+    assert 0 <= epsilon <= 1, f'Filtering threshold {epsilon} is not in [0, 1]'
+    assert 0 <= min_votes <= 6, f'Filtering minimum number of votes {min_votes} is not in [0, 6]'
+
+    votes = pd.DataFrame()
+    score_columns = ['SearchScore', 'LevenshteinScore', 'GraphScore', 'OntologyLocalScore', 'OntologyGlobalScore', 'KeywordsScore']
+    for column in score_columns:
+        votes[column] = (results[column] >= epsilon).astype(int)
+    votes = votes.sum(axis=1)
+    results = results[votes >= min_votes]
+
+    return results
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={'max_retries': 2},
+             name='text_10.purge_irrelevant_task', ignore_result=False)
+def purge_irrelevant_task(self, results, coef=0.5, epsilon=0.1, min_votes=5):
+    # Aggregate and filter to know which pages are relevant
+    relevant = filter_results(aggregate_results(results, coef=coef), epsilon=epsilon, min_votes=min_votes)
+
+    # Keep only relevant results, namely those whose PageID survives the aggregate_and_filter operation
+    results = pd.merge(results, relevant['PageID'], how='inner', on='PageID')
+
+    # Keep only SearchScore and LevenshteinScore, the rest need to be recomputed
+    results = results[['Keywords', 'PageID', 'PageTitle', 'SearchScore', 'LevenshteinScore']]
+
+    return results
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={'max_retries': 2},
+             name='text_10.aggregate_and_filter', ignore_result=False)
+def aggregate_task(self, results, coef=0.5, filter=False, epsilon=0.1, min_votes=5):
+    results = aggregate_results(results, coef=coef)
+
+    if filter:
+        results = filter_results(results, epsilon=epsilon, min_votes=min_votes)
 
     return results
 
