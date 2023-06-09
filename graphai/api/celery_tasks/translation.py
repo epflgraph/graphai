@@ -1,7 +1,6 @@
 from celery import shared_task
-from datetime import datetime
 from graphai.api.common.video import translation_models
-from graphai.core.common.video import detect_text_language, perceptual_hash_text
+from graphai.core.common.video import detect_text_language, perceptual_hash_text, get_current_datetime
 from graphai.core.common.caching import TextDBCachingManager
 from graphai.api.celery_tasks.common import fingerprint_lookup_retrieve_from_db, \
     fingerprint_lookup_parallel, fingerprint_lookup_callback
@@ -49,7 +48,7 @@ def compute_text_fingerprint_callback_task(self, results, text, src, tgt):
         }
         existing = db_manager.get_details(token, ['date_added'], using_most_similar=False)[0]
         if existing is None or existing['date_added'] is None:
-            current_datetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            current_datetime = get_current_datetime()
             values_dict['date_added'] = current_datetime
         db_manager.insert_or_update_details(token, values_dict)
     return results
@@ -151,7 +150,7 @@ def translate_text_callback_task(self, results, token, text, src, tgt, force=Fal
         }
         existing = db_manager.get_details(token, ['date_added'], using_most_similar=False)[0]
         if existing is None or existing['date_added'] is None:
-            current_datetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            current_datetime = get_current_datetime()
             values_dict['date_added'] = current_datetime
         # Inserting values for original token
         db_manager.insert_or_update_details(

@@ -85,6 +85,11 @@ def generate_random_token():
     return ('%.06f' % time.time()).replace('.', '') + '%08d' % random.randint(0, int(1e7))
 
 
+def get_current_datetime():
+    current_datetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    return current_datetime
+
+
 def retrieve_file_from_url(url, output_filename_with_path, output_token):
     """
     Retrieves a file from a given URL using WGET and stores it locally.
