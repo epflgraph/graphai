@@ -58,7 +58,8 @@ dependencies = [
     "flake8",
     "sphinx",
     "sphinx-material",
-    "sphinx-rtd-theme"
+    "sphinx-rtd-theme",
+    "pytest-celery"
 ]
 
 [tool.setuptools]
