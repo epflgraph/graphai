@@ -1,4 +1,3 @@
-from datetime import datetime
 import os
 import shutil
 
@@ -9,7 +8,7 @@ from graphai.api.common.video import file_management_config, local_ocr_nlp_model
 from graphai.core.common.video import retrieve_file_from_url, retrieve_file_from_kaltura, \
     detect_audio_format_and_duration, extract_audio_from_video, extract_frames, generate_frame_sample_indices, \
     compute_ocr_noise_level, compute_ocr_threshold, compute_video_ocr_transitions, generate_random_token, \
-    md5_video_or_audio, generate_symbolic_token, FRAME_FORMAT_PNG, TESSERACT_OCR_FORMAT
+    md5_video_or_audio, generate_symbolic_token, get_current_datetime, FRAME_FORMAT_PNG, TESSERACT_OCR_FORMAT
 from graphai.core.common.caching import AudioDBCachingManager, SlideDBCachingManager, VideoDBCachingManager
 from itertools import chain
 from graphai.api.celery_tasks.common import fingerprint_lookup_retrieve_from_db, \
@@ -49,7 +48,7 @@ def retrieve_file_from_url_task(self, url, is_kaltura=True, timeout=120):
 def retrieve_file_from_url_callback_task(self, results, url):
     if results['fresh']:
         db_manager = VideoDBCachingManager()
-        current_datetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        current_datetime = get_current_datetime()
         db_manager.insert_or_update_details(results['token'],
                                             {
                                                 'origin_token': url,
@@ -98,7 +97,7 @@ def compute_video_fingerprint_callback_task(self, results):
                                                 }
                                                 )
         else:
-            current_datetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            current_datetime = get_current_datetime()
             db_manager.insert_or_update_details(token,
                                                 {
                                                     'fingerprint': results['result'],
@@ -213,7 +212,7 @@ def extract_audio_task(self, token, force=False):
              file_manager=file_management_config)
 def extract_audio_callback_task(self, results, origin_token, force=False):
     if results['fresh']:
-        current_datetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        current_datetime = get_current_datetime()
         db_manager = AudioDBCachingManager()
         db_manager.insert_or_update_details(
             results['token'],
@@ -456,7 +455,7 @@ def detect_slides_callback_task(self, results, token, force=False):
         slide_tokens = {i + 1: {'token': slide_tokens[i], 'timestamp': results['slides'][i]}
                         for i in range(len(slide_tokens))}
         ocr_tokens = {i + 1: ocr_tokens[i] for i in range(len(ocr_tokens))}
-        current_datetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        current_datetime = get_current_datetime()
         # Inserting fresh results into the database
         db_manager = SlideDBCachingManager()
         for slide_number in slide_tokens:

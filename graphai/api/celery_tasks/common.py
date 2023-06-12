@@ -71,7 +71,7 @@ def fingerprint_lookup_parallel(input_dict, i, n_total, min_similarity, db_manag
         }
     # The resulting list will be sorted by date_added (asc)
     tokens_and_fingerprints = db_manager.get_all_details(
-        ['fingerprint', 'date_added'], start=start_index, limit=limit, exclude_token=token, using_most_similar=False,
+        ['fingerprint', 'date_added'], start=start_index, limit=limit, exclude_token=token,
         allow_nulls=False, equality_conditions=equality_conditions
     )
 

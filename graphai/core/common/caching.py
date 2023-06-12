@@ -173,9 +173,14 @@ class DBCachingManagerBase(abc.ABC):
             SELECT {', '.join(column_list)} FROM `{schema}`.`{table_name}`
             """
         if exclude_token is not None:
-            query += f"""
-            WHERE id_token != {surround_with_character(exclude_token, "'")}
-            """
+            if isinstance(exclude_token, str):
+                query += f"""
+                WHERE id_token != {surround_with_character(exclude_token, "'")}
+                """
+            else:
+                query += f"""
+                WHERE id_token NOT IN ({','.join([surround_with_character(t, "'") for t in exclude_token])})
+                """
         if not allow_nulls:
             query += add_where_or_and(query)
             query += add_non_null_conditions(cols)
@@ -263,15 +268,23 @@ class DBCachingManagerBase(abc.ABC):
     def get_details_using_origin(self, origin_token, cols):
         return self._get_details_using_origin(self.schema, self.cache_table, origin_token, cols)
 
-    def get_all_details(self, cols, start=0, limit=-1, exclude_token=None, using_most_similar=False,
+    def get_all_details(self, cols, start=0, limit=-1, exclude_token=None,
                         allow_nulls=True, earliest_date=None, equality_conditions=None):
+        # If we want to exclude a token, all the tokens whose closest match is the former should also be excluded
+        # in order not to create cycles.
+        if exclude_token is not None:
+            all_closest_matches = self.get_all_closest_matches()
+            if all_closest_matches is not None:
+                exclude_tokens = {k for k, v in all_closest_matches.items() if v == exclude_token}
+            else:
+                exclude_tokens = set()
+            exclude_tokens.add(exclude_token)
+        else:
+            exclude_tokens = None
         results = self._get_all_details(self.schema, self.cache_table, cols,
-                                        start=start, limit=limit, exclude_token=exclude_token,
+                                        start=start, limit=limit, exclude_token=exclude_tokens,
                                         allow_nulls=allow_nulls, earliest_date=earliest_date,
                                         equality_conditions=equality_conditions, has_date_col=True)
-        if using_most_similar:
-            most_similar_map = self.get_all_closest_matches()
-            results = {x: results[most_similar_map.get(x, x)] for x in results}
         return results
 
     def get_cache_count(self, non_null_cols=None, equality_conditions=None):
