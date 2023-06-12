@@ -275,7 +275,7 @@ class DBCachingManagerBase(abc.ABC):
         if exclude_token is not None:
             all_closest_matches = self.get_all_closest_matches()
             if all_closest_matches is not None:
-                exclude_tokens = {k for k,v in all_closest_matches.items() if v == exclude_token}
+                exclude_tokens = {k for k, v in all_closest_matches.items() if v == exclude_token}
             else:
                 exclude_tokens = set()
             exclude_tokens.add(exclude_token)
