@@ -32,7 +32,7 @@ print(both)
 ################################################################
 
 both['MixedScoreDiff'] = both['MixedScoreR'] - both['MixedScoreL']
-both = both[both['MixedScoreDiff'].abs() >= 0.05]
+both = both[both['MixedScoreDiff'].abs() >= 0.01]
 both = both.sort_values(by='MixedScoreDiff').reset_index(drop=True)
 
 print(both)
