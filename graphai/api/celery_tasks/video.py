@@ -18,15 +18,19 @@ from graphai.api.celery_tasks.common import fingerprint_lookup_retrieve_from_db,
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='video_2.retrieve_url', ignore_result=False,
              file_manager=file_management_config)
-def retrieve_file_from_url_task(self, url, is_kaltura=True, timeout=120):
+def retrieve_file_from_url_task(self, url, is_kaltura=True, timeout=120, force=False, force_token=None):
     db_manager = VideoDBCachingManager()
-    existing = db_manager.get_details_using_origin(url, [])
-    if existing is not None:
-        return {
-            'token': existing[0]['id_token'],
-            'fresh': False
-        }
-    token = generate_random_token()
+    if not force:
+        existing = db_manager.get_details_using_origin(url, [])
+        if existing is not None:
+            return {
+                'token': existing[0]['id_token'],
+                'fresh': False
+            }
+    if force_token is None:
+        token = generate_random_token()
+    else:
+        token = force_token
     file_format = url.split('.')[-1].lower()
     if file_format not in ['mp4', 'mkv', 'flv']:
         file_format = 'mp4'

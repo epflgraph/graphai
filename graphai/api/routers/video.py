@@ -77,7 +77,7 @@ async def retrieve_file(data: RetrieveURLRequest):
     min_timeout = 60
     timeout = max([data.timeout, min_timeout])
     timeout = min([timeout, max_timeout])
-    task_list = [retrieve_file_from_url_task.s(url, is_kaltura, timeout),
+    task_list = [retrieve_file_from_url_task.s(url, is_kaltura, timeout, False, None),
                  retrieve_file_from_url_callback_task.s(url)]
     task = chain(task_list)
     task = task.apply_async(priority=2)
