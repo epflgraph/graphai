@@ -127,6 +127,18 @@ def retrieve_file_from_kaltura(url, output_filename_with_path, output_token, tim
         return None
 
 
+def extract_video_slice(input_filename_with_path, output_filename_with_path, output_token, start, end):
+    if not file_exists(input_filename_with_path):
+        raise Exception(f'ffmpeg error: File {input_filename_with_path} does not exist')
+    err = ffmpeg.input(input_filename_with_path).audio. \
+        output(output_filename_with_path, c='copy', ss=start, to=end). \
+        overwrite_output().run(capture_stdout=True)
+    if file_exists(output_filename_with_path) and ('ffmpeg error' not in err):
+        return output_token
+    else:
+        return None
+
+
 def perform_probe(input_filename_with_path):
     """
     Performs a probe using ffprobe
