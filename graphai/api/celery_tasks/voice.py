@@ -6,7 +6,7 @@ from celery import shared_task
 
 from graphai.api.common.video import file_management_config, transcription_model
 from graphai.core.common.video import remove_silence_doublesided, perceptual_hash_audio, \
-    write_text_file, read_text_file, read_json_file, extract_audio_segment
+    write_text_file, read_text_file, read_json_file, extract_media_segment
 from graphai.core.common.caching import TEMP_SUBFOLDER, AudioDBCachingManager
 from graphai.api.celery_tasks.common import fingerprint_lookup_retrieve_from_db, fingerprint_lookup_parallel, \
     fingerprint_lookup_callback
@@ -258,7 +258,7 @@ def detect_language_retrieve_from_db_and_split_task(self, token, force=False, n_
         current_output_token = token + '_' + str(i) + '_temp.ogg'
         current_output_token_with_path = self.file_manager.generate_filepath(current_output_token,
                                                                              force_dir=TEMP_SUBFOLDER)
-        current_result = extract_audio_segment(
+        current_result = extract_media_segment(
             input_filename_with_path, current_output_token_with_path, current_output_token,
             start=existing_list[0]['duration'] * i / n_divs, length=segment_length)
         if current_result is None:
