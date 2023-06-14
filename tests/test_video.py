@@ -91,7 +91,7 @@ def test__video_extract_audio__extract_audio_task__run_task(test_video_token):
 @pytest.mark.celery(accept_content=['pickle', 'json'], result_serializer='pickle', task_serializer='pickle')
 @pytest.mark.usefixtures('test_video_url')
 def test__video_detect_slides__detect_slides__integration(fixture_app, celery_worker, test_video_url, timeout=30):
-    # First retrieving the video
+    # First retrieving the video (without `force` in order to use cached results if available)
     response = fixture_app.post('/video/retrieve_url',
                                 data=json.dumps({"url": test_video_url}),
                                 timeout=timeout)
@@ -178,6 +178,7 @@ def test__video_detect_slides__detect_slides__integration(fixture_app, celery_wo
         current_status = response.json()['task_status']
         n_tries += 1
 
+    # Checking OCR results
     slide_ocr = response.json()
 
     assert isinstance(slide_ocr, dict)
@@ -198,7 +199,7 @@ def test__video_detect_slides__detect_slides__integration(fixture_app, celery_wo
 @pytest.mark.celery(accept_content=['pickle', 'json'], result_serializer='pickle', task_serializer='pickle')
 @pytest.mark.usefixtures('test_video_url')
 def test__video_extract_audio__extract_audio__integration(fixture_app, celery_worker, test_video_url, timeout=30):
-    # First retrieving the video
+    # First retrieving the video (without `force` in order to use cached results if available)
     response = fixture_app.post('/video/retrieve_url',
                                 data=json.dumps({"url": test_video_url}),
                                 timeout=timeout)
@@ -263,7 +264,7 @@ def test__video_extract_audio__extract_audio__integration(fixture_app, celery_wo
 
     audio_token = audio_result['task_result']['token']
 
-    # Finally, performing OCR on the first slide
+    # Finally, performing language detection on the extracted audio
     response = fixture_app.post('/voice/detect_language',
                                 data=json.dumps({"token": audio_token, "force": True}),
                                 timeout=timeout)
@@ -284,6 +285,7 @@ def test__video_extract_audio__extract_audio__integration(fixture_app, celery_wo
         current_status = response.json()['task_status']
         n_tries += 1
 
+    # Checking language detection results
     audio_lang_result = response.json()
 
     assert isinstance(audio_lang_result, dict)
