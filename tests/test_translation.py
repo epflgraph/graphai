@@ -53,6 +53,7 @@ def test__translation_translate__translate_text__run_task(en_to_fr_text, fr_to_e
 ################################################################
 
 
+@pytest.mark.celery(accept_content=['pickle', 'json'], result_serializer='pickle', task_serializer='pickle')
 @pytest.mark.usefixtures('en_to_fr_text')
 def test__translation_translate__translate_text__integration(fixture_app, celery_worker, en_to_fr_text, timeout=30):
     # The celery_worker object is necessary for async tasks, otherwise the status will be permanently stuck on
@@ -146,6 +147,8 @@ def test__translation_calculate_fingerprint__compute_text_fingerprint__run_task(
 
 ################################################################
 
+
+@pytest.mark.celery(accept_content=['pickle', 'json'], result_serializer='pickle', task_serializer='pickle')
 @pytest.mark.usefixtures('en_to_fr_text')
 def test__translation_calculate_fingerprint__compute_text_fingerprint__integration(
         fixture_app, celery_worker, en_to_fr_text, timeout=30):

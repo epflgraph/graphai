@@ -191,7 +191,7 @@ def test__video_detect_slides__detect_slides__integration(fixture_app, celery_wo
 
 
 ################################################################
-# Audio extraction and languaage detection                     #
+# Audio extraction and language detection                     #
 ################################################################
 
 
