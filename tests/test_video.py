@@ -82,6 +82,11 @@ def test__video_extract_audio__extract_audio_task__run_task(test_video_token):
 ################################################################
 
 
+################################################################
+# Slide extraction and OCR                                     #
+################################################################
+
+
 # The mark is necessary because the celery_worker fixture uses JSON for serialization by default
 @pytest.mark.celery(accept_content=['pickle', 'json'], result_serializer='pickle', task_serializer='pickle')
 @pytest.mark.usefixtures('test_video_url')
@@ -183,3 +188,106 @@ def test__video_detect_slides__detect_slides__integration(fixture_app, celery_wo
     assert len(slide_ocr['task_result']['result']) == 2
     assert slide_ocr['task_result']['language'] == 'en'
     assert 'value capture' in slide_ocr['task_result']['result'][0]['text'].lower()
+
+
+################################################################
+# Audio extraction and languaage detection                     #
+################################################################
+
+
+@pytest.mark.celery(accept_content=['pickle', 'json'], result_serializer='pickle', task_serializer='pickle')
+@pytest.mark.usefixtures('test_video_url')
+def test__video_extract_audio__extract_audio__integration(fixture_app, celery_worker, test_video_url, timeout=30):
+    # First retrieving the video
+    response = fixture_app.post('/video/retrieve_url',
+                                data=json.dumps({"url": test_video_url}),
+                                timeout=timeout)
+
+    assert response.status_code == 200
+    # Parse resulting task id
+    task_id = response.json()['task_id']
+
+    # Waiting for task chain to succeed
+    current_status = 'PENDING'
+    n_tries = 0
+    while current_status == 'PENDING' and n_tries < 20:
+        # Wait a few seconds
+        sleep(5)
+        # Now get status
+        response = fixture_app.get(f'/video/retrieve_url/status/{task_id}',
+                                   timeout=timeout)
+        current_status = response.json()['task_status']
+        n_tries += 1
+
+    # Checking video token response
+    video_token_response = response.json()
+
+    assert isinstance(video_token_response, dict)
+    assert 'task_result' in video_token_response
+    assert video_token_response['task_status'] == 'SUCCESS'
+    assert video_token_response['task_result']['token'] is not None
+
+    video_token = video_token_response['task_result']['token']
+
+    # Then detecting audio
+    response = fixture_app.post('/video/extract_audio',
+                                data=json.dumps({"token": video_token, "force": True}),
+                                timeout=timeout)
+
+    assert response.status_code == 200
+    # Parse resulting task id
+    task_id = response.json()['task_id']
+
+    # Waiting for task chain to succeed
+    current_status = 'PENDING'
+    n_tries = 0
+    while current_status == 'PENDING' and n_tries < 40:
+        # Wait a few seconds
+        sleep(5)
+        # Now get status
+        response = fixture_app.get(f'/video/extract_audio/status/{task_id}',
+                                   timeout=timeout)
+        current_status = response.json()['task_status']
+        n_tries += 1
+
+    # Checking extracted audio
+    audio_result = response.json()
+
+    assert isinstance(audio_result, dict)
+    assert 'task_result' in audio_result
+    assert audio_result['task_status'] == 'SUCCESS'
+    assert audio_result['task_result']['fresh'] is True
+    assert video_token in audio_result['task_result']['token']
+    assert '.ogg' in audio_result['task_result']['token']
+    assert 450 < audio_result['task_result']['duration'] < 470
+
+    audio_token = audio_result['task_result']['token']
+
+    # Finally, performing OCR on the first slide
+    response = fixture_app.post('/voice/detect_language',
+                                data=json.dumps({"token": audio_token, "force": True}),
+                                timeout=timeout)
+
+    assert response.status_code == 200
+    # Parse resulting task id
+    task_id = response.json()['task_id']
+
+    # Waiting for task chain to succeed
+    current_status = 'PENDING'
+    n_tries = 0
+    while current_status == 'PENDING' and n_tries < 10:
+        # Wait a few seconds
+        sleep(3)
+        # Now get status
+        response = fixture_app.get(f'/voice/detect_language/status/{task_id}',
+                                   timeout=timeout)
+        current_status = response.json()['task_status']
+        n_tries += 1
+
+    audio_lang_result = response.json()
+
+    assert isinstance(audio_lang_result, dict)
+    assert 'task_result' in audio_lang_result
+    assert audio_lang_result['task_status'] == 'SUCCESS'
+    assert audio_lang_result['task_result']['fresh'] is True
+    assert audio_lang_result['task_result']['language'] == 'en'
