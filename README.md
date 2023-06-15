@@ -26,10 +26,12 @@ sudo apt-get install redis
 ```
 
 ### Install audio/video processing software
-The audio/video endpoints require the packages `ffmpeg` and `chromaprint`. Install them with
+The audio/video endpoints require the packages `ffmpeg` (for general handling of video/audio), 
+`chromaprint` (for audio fingerprinting), and `tesseract` (for OCR that is used in slide detection). Install them with
 ```
 sudo apt-get install ffmpeg
 sudo apt-get install libchromaprint-tools
+sudo apt-get install libleptonica-dev tesseract-ocr libtesseract-dev python3-pil tesseract-ocr-eng tesseract-ocr-fra tesseract-ocr-script-latn
 ```
 
 ### Install GraphAI python package
