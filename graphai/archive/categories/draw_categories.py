@@ -149,34 +149,9 @@ names = ['wave-fields', 'schreier', 'collider', 'skills']
 levels = [5, 4, 3, 2, 1]
 
 name = names[0]
-level = 5
+level = 2
 
-# wikify_and_plot(level, name=name)
+wikify_and_plot(level, name=name)
 
-raw_text = """
-One method for locating extrasolar planets is to observe the lateral movement of a star
-in the sky caused by a planet in orbit around it. In order to detect this displacement,
-the angular position of the star has to be measured with high accuracy. This technique
-is called astrometry.
-The Very Large Telescope Interferometer (VLTI) is operated by the European South-
-ern Observatory and located at the Paranal Observatory in Chile. The purpose of the
-PRIMA instrument (Phase Referenced Imaging and Micro-arcsecond Astrometry) of
-the VLTI is to perform high-resolution astrometric measurements and high-resolution
-imaging of faint stars using white light interferometry, by combining the light collected
-by two telescopes. In order to allow the detection of extrasolar planets, the astrometric
-measurement has to be performed with micro-arcsecond accuracy.
-In astrometric mode the PRIMA instrument observes two targets at the same time: the
-object of scientific interest, and a bright reference star. The angular position of the science
-object relative to the reference star is obtained by monitoring the differential optical path
-travelled by the light of each object in two separate white-light interferometers.
-The aim of this work was to develop a high-resolution laser metrology based on super-
-heterodyne interferometry, with an accuracy of 5 nm over a differential optical path of
-100 mm. Moreover the laser source had to be stabilised on an absolute frequency refer-
-ence, in order to ensure the long-term stability and calibration required to achieve the
-target performance. Superheterodyne interferometry allowed the direct measurement
-of the differential optical path using two heterodyne interferometers working with two
-different frequency shifts. The differential phase measurement between the two inter-
-ferometers was obtained by electronic mixing of the two heterodyne signals, leading to
-the differential optical path needed for the astrometric measurement.
-"""
-wikify_and_plot(level, raw_text=raw_text)
+# raw_text = """"""
+# wikify_and_plot(level, raw_text=raw_text)
