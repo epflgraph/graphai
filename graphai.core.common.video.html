@@ -205,9 +205,20 @@
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="graphai.core.common.video.extract_audio_segment">
-<span class="sig-prename descclassname"><span class="pre">graphai.core.common.video.</span></span><span class="sig-name descname"><span class="pre">extract_audio_segment</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_filename_with_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_filename_with_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_token</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.video.extract_audio_segment" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
+<dt class="sig sig-object py" id="graphai.core.common.video.extract_media_segment">
+<span class="sig-prename descclassname"><span class="pre">graphai.core.common.video.</span></span><span class="sig-name descname"><span class="pre">extract_media_segment</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_filename_with_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_filename_with_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_token</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.video.extract_media_segment" title="Permalink to this definition"></a></dt>
+<dd><p>Extracts a segment of a given video or audio file indicated by the starting time and the length
+:param input_filename_with_path: Full path of input file
+:param output_filename_with_path: Full path of output file
+:param output_token: Output token
+:param start: Starting timestamp
+:param length: Length of segment</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The output token if successful, None otherwise</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="graphai.core.common.video.find_beginning_and_ending_silences">
