@@ -222,7 +222,19 @@ def extract_audio_from_video(input_filename_with_path, output_filename_with_path
         return None
 
 
-def extract_audio_segment(input_filename_with_path, output_filename_with_path, output_token, start, length):
+def extract_media_segment(input_filename_with_path, output_filename_with_path, output_token, start, length):
+    """
+    Extracts a segment of a given video or audio file indicated by the starting time and the length
+    Args:
+        input_filename_with_path: Full path of input file
+        output_filename_with_path: Full path of output file
+        output_token: Output token
+        start: Starting timestamp
+        length: Length of segment
+
+    Returns:
+        The output token if successful, None otherwise
+    """
     if not file_exists(input_filename_with_path):
         print(f'ffmpeg error: File {input_filename_with_path} does not exist')
         return None
@@ -310,16 +322,15 @@ def remove_silence_doublesided(input_filename_with_path, output_filename_with_pa
     """
     try:
         from_and_to = find_beginning_and_ending_silences(input_filename_with_path, noise_thresh=threshold)
-        err = ffmpeg.input(input_filename_with_path).audio. \
-            output(output_filename_with_path, c='copy', ss=from_and_to['ss'], to=from_and_to['to']). \
-            overwrite_output().run(capture_stdout=True)
-    except Exception as e:
-        print(e, file=sys.stderr)
-        from_and_to = {'ss': 0, 'to': 0}
-        err = str(e)
+        audio_length = from_and_to['to'] - from_and_to['ss']
+        output = extract_media_segment(input_filename_with_path, output_filename_with_path, output_token,
+                                       start=from_and_to['ss'], length=audio_length)
+    except Exception:
+        output = None
+        audio_length = 0.0
 
-    if file_exists(output_filename_with_path) and ('ffmpeg error' not in err):
-        return output_token, from_and_to['to'] - from_and_to['ss']
+    if output is not None and file_exists(output_filename_with_path):
+        return output, audio_length
     else:
         return None, 0.0
 
