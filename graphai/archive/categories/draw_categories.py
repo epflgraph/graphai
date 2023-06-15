@@ -17,6 +17,8 @@ wikify_url = 'http://localhost:28800/text/wikify'
 
 
 def wikify_and_plot(level, name=None, folder='0-simple', raw_text=None):
+    assert level in [1, 2, 3, 4, 5], 'level not valid, must be integer between 1 and 5'
+
     # Prepare input for wikify
     if raw_text is None:
         # Read input from file
@@ -28,43 +30,28 @@ def wikify_and_plot(level, name=None, folder='0-simple', raw_text=None):
     # Perform wikify request and parse the results
     results = pd.DataFrame(requests.post(wikify_url, data=json.dumps(data)).json())
 
+    ################################################################
+
     # Instantiate and initialise ontology
     ontology = Ontology()
     ontology.fetch_from_db()
 
+    ################################################################
+
     # Add categories to results
-    results = pd.merge(results, ontology.concepts_categories, how='inner', on='PageID')
+    results = pd.merge(
+        results,
+        ontology.concepts_categories.rename(columns={'CategoryID': f'Category1ID'}),
+        how='inner',
+        on='PageID'
+    )
 
-    if level >= 2:
+    for i in range(1, level):
         results = pd.merge(
             results,
-            ontology.categories_categories.rename(columns={'ChildCategoryID': 'CategoryID', 'ParentCategoryID': 'Category2ID'}),
+            ontology.categories_categories.rename(columns={'ChildCategoryID': f'Category{i}ID', 'ParentCategoryID': f'Category{i + 1}ID'}),
             how='inner',
-            on='CategoryID'
-        )
-
-    if level >= 3:
-        results = pd.merge(
-            results,
-            ontology.categories_categories.rename(columns={'ChildCategoryID': 'Category2ID', 'ParentCategoryID': 'Category3ID'}),
-            how='inner',
-            on='Category2ID'
-        )
-
-    if level >= 4:
-        results = pd.merge(
-            results,
-            ontology.categories_categories.rename(columns={'ChildCategoryID': 'Category3ID', 'ParentCategoryID': 'Category4ID'}),
-            how='inner',
-            on='Category3ID'
-        )
-
-    if level >= 5:
-        results = pd.merge(
-            results,
-            ontology.categories_categories.rename(columns={'ChildCategoryID': 'Category4ID', 'ParentCategoryID': 'Category5ID'}),
-            how='inner',
-            on='Category4ID'
+            on=f'Category{i}ID'
         )
 
     ################################################################
@@ -73,39 +60,19 @@ def wikify_and_plot(level, name=None, folder='0-simple', raw_text=None):
     concept_nodes = results[['PageID', 'PageTitle', 'SearchScore', 'LevenshteinScore', 'GraphScore', 'OntologyLocalScore', 'OntologyGlobalScore', 'KeywordsScore', 'MixedScore']].to_dict(orient='records')
     concept_nodes = [(d['PageTitle'], {**d, 'Type': 'concept'}) for d in concept_nodes]
 
-    category_nodes = [(c, {'Type': 'category'}) for c in results['CategoryID'].drop_duplicates()]
-
-    if level >= 2:
-        category2_nodes = [(c, {'Type': 'category2'}) for c in results['Category2ID'].drop_duplicates()]
-
-    if level >= 3:
-        category3_nodes = [(c, {'Type': 'category3'}) for c in results['Category3ID'].drop_duplicates()]
-
-    if level >= 4:
-        category4_nodes = [(c, {'Type': 'category4'}) for c in results['Category4ID'].drop_duplicates()]
-
-    if level >= 5:
-        category5_nodes = [(c, {'Type': 'category5'}) for c in results['Category5ID'].drop_duplicates()]
+    category_nodes = []
+    for i in range(level):
+        category_nodes.append([(c, {'Type': f'category{i+1}'}) for c in results[f'Category{i + 1}ID'].drop_duplicates()])
 
     # Create edge lists in networkx format
-    concept_category_edges = results[['PageTitle', 'CategoryID']].to_dict(orient='records')
-    concept_category_edges = [(d['PageTitle'], d['CategoryID']) for d in concept_category_edges]
+    concept_category_edges = results[['PageTitle', 'Category1ID']].to_dict(orient='records')
+    concept_category_edges = [(d['PageTitle'], d['Category1ID']) for d in concept_category_edges]
 
-    if level >= 2:
-        category_category_edges = results[['CategoryID', 'Category2ID']].drop_duplicates().to_dict(orient='records')
-        category_category_edges = [(d['CategoryID'], d['Category2ID']) for d in category_category_edges]
-
-    if level >= 3:
-        category_category2_edges = results[['Category2ID', 'Category3ID']].drop_duplicates().to_dict(orient='records')
-        category_category2_edges = [(d['Category2ID'], d['Category3ID']) for d in category_category2_edges]
-
-    if level >= 4:
-        category_category3_edges = results[['Category3ID', 'Category4ID']].drop_duplicates().to_dict(orient='records')
-        category_category3_edges = [(d['Category3ID'], d['Category4ID']) for d in category_category3_edges]
-
-    if level >= 5:
-        category_category4_edges = results[['Category4ID', 'Category5ID']].drop_duplicates().to_dict(orient='records')
-        category_category4_edges = [(d['Category4ID'], d['Category5ID']) for d in category_category4_edges]
+    category_category_edges = []
+    for i in range(1, level):
+        edges = results[[f'Category{i}ID', f'Category{i + 1}ID']].drop_duplicates().to_dict(orient='records')
+        edges = [(d[f'Category{i}ID'], d[f'Category{i + 1}ID']) for d in edges]
+        category_category_edges.append(edges)
 
     ################################################################
 
@@ -113,33 +80,14 @@ def wikify_and_plot(level, name=None, folder='0-simple', raw_text=None):
     G = nx.Graph()
 
     G.add_nodes_from(concept_nodes)
-    G.add_nodes_from(category_nodes)
 
-    if level >= 2:
-        G.add_nodes_from(category2_nodes)
-
-    if level >= 3:
-        G.add_nodes_from(category3_nodes)
-
-    if level >= 4:
-        G.add_nodes_from(category4_nodes)
-
-    if level >= 5:
-        G.add_nodes_from(category5_nodes)
+    for category_nodes_subset in category_nodes:
+        G.add_nodes_from(category_nodes_subset)
 
     G.add_edges_from(concept_category_edges)
 
-    if level >= 2:
-        G.add_edges_from(category_category_edges)
-
-    if level >= 3:
-        G.add_edges_from(category_category2_edges)
-
-    if level >= 4:
-        G.add_edges_from(category_category3_edges)
-
-    if level >= 5:
-        G.add_edges_from(category_category4_edges)
+    for category_category_edges_subset in category_category_edges:
+        G.add_edges_from(category_category_edges_subset)
 
     # Compute the connected components as we will plot each separately to avoid cluttering
     connected_components = list(nx.connected_components(G))
@@ -177,19 +125,12 @@ def wikify_and_plot(level, name=None, folder='0-simple', raw_text=None):
 
         # Plot each subset of nodes separately
         nx.draw_networkx_nodes(H, pos, ax=ax, nodelist=[n for n, _ in concept_nodes if n in H.nodes()], node_size=[400 * d['MixedScore'] for n, d in concept_nodes if n in H.nodes()], node_color=[d['MixedScore'] for n, d in concept_nodes if n in H.nodes()], cmap='Blues', vmin=0, vmax=1, alpha=0.8)
-        nx.draw_networkx_nodes(H, pos, ax=ax, nodelist=[n for n, _ in category_nodes if n in H.nodes()], node_color='tab:green', alpha=0.8)
 
-        if level >= 2:
-            nx.draw_networkx_nodes(H, pos, ax=ax, nodelist=[n for n, _ in category2_nodes if n in H.nodes()], node_color='tab:red', alpha=0.8)
-
-        if level >= 3:
-            nx.draw_networkx_nodes(H, pos, ax=ax, nodelist=[n for n, _ in category3_nodes if n in H.nodes()], node_color='tab:orange', alpha=0.8)
-
-        if level >= 4:
-            nx.draw_networkx_nodes(H, pos, ax=ax, nodelist=[n for n, _ in category4_nodes if n in H.nodes()], node_color='tab:purple', alpha=0.8)
-
-        if level >= 5:
-            nx.draw_networkx_nodes(H, pos, ax=ax, nodelist=[n for n, _ in category5_nodes if n in H.nodes()], node_color='tab:gray', alpha=0.8)
+        colors = ['tab:green', 'tab:red', 'tab:orange', 'tab:purple', 'tab:gray']
+        j = 0
+        for category_nodes_subset in category_nodes:
+            nx.draw_networkx_nodes(H, pos, ax=ax, nodelist=[n for n, _ in category_nodes_subset if n in H.nodes()], node_color=colors[j], alpha=0.8)
+            j += 1
 
         # Plot edges and labels
         nx.draw_networkx_edges(H, pos, ax=ax, alpha=0.5)
@@ -208,9 +149,34 @@ names = ['wave-fields', 'schreier', 'collider', 'skills']
 levels = [5, 4, 3, 2, 1]
 
 name = names[0]
-level = 2
+level = 5
 
 # wikify_and_plot(level, name=name)
 
-raw_text = """  """
+raw_text = """
+One method for locating extrasolar planets is to observe the lateral movement of a star
+in the sky caused by a planet in orbit around it. In order to detect this displacement,
+the angular position of the star has to be measured with high accuracy. This technique
+is called astrometry.
+The Very Large Telescope Interferometer (VLTI) is operated by the European South-
+ern Observatory and located at the Paranal Observatory in Chile. The purpose of the
+PRIMA instrument (Phase Referenced Imaging and Micro-arcsecond Astrometry) of
+the VLTI is to perform high-resolution astrometric measurements and high-resolution
+imaging of faint stars using white light interferometry, by combining the light collected
+by two telescopes. In order to allow the detection of extrasolar planets, the astrometric
+measurement has to be performed with micro-arcsecond accuracy.
+In astrometric mode the PRIMA instrument observes two targets at the same time: the
+object of scientific interest, and a bright reference star. The angular position of the science
+object relative to the reference star is obtained by monitoring the differential optical path
+travelled by the light of each object in two separate white-light interferometers.
+The aim of this work was to develop a high-resolution laser metrology based on super-
+heterodyne interferometry, with an accuracy of 5 nm over a differential optical path of
+100 mm. Moreover the laser source had to be stabilised on an absolute frequency refer-
+ence, in order to ensure the long-term stability and calibration required to achieve the
+target performance. Superheterodyne interferometry allowed the direct measurement
+of the differential optical path using two heterodyne interferometers working with two
+different frequency shifts. The differential phase measurement between the two inter-
+ferometers was obtained by electronic mixing of the two heterodyne signals, leading to
+the differential optical path needed for the astrometric measurement.
+"""
 wikify_and_plot(level, raw_text=raw_text)
