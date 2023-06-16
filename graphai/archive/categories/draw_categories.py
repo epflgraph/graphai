@@ -41,7 +41,7 @@ def wikify_and_plot(level, name=None, folder='0-simple', raw_text=None):
     # Add categories to results
     results = pd.merge(
         results,
-        ontology.concepts_categories.rename(columns={'CategoryID': f'Category1ID'}),
+        ontology.concepts_categories.rename(columns={'CategoryID': 'Category1ID'}),
         how='inner',
         on='PageID'
     )
