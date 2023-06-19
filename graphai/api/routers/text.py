@@ -158,35 +158,17 @@ async def wikify(
 
 @router.post('/wikify_ontology_svg')
 async def wikify_ontology_svg(
-    data: WikifyRequest,
-    method: Optional[str] = 'es-base',
-    restrict_to_ontology: Optional[bool] = False,
-    graph_score_smoothing: Optional[bool] = True,
-    ontology_score_smoothing: Optional[bool] = True,
-    keywords_score_smoothing: Optional[bool] = True,
-    normalisation_coef: Optional[float] = 0.5,
-    filtering_threshold: Optional[float] = 0.1,
-    filtering_min_votes: Optional[int] = 5,
-    refresh_scores: Optional[bool] = True,
+    results: WikifyResponse,
     level: Optional[int] = 2
 ):
     """
-    Performs a wikify request (see own documentation) and returns a svg file representing the ontology subgraph induced by the set of results.
+    Returns a svg file representing the ontology subgraph induced by the provided set of results.
     """
 
-    results = await wikify(
-        data,
-        method,
-        restrict_to_ontology,
-        graph_score_smoothing,
-        ontology_score_smoothing,
-        keywords_score_smoothing,
-        normalisation_coef,
-        filtering_threshold,
-        filtering_min_votes,
-        refresh_scores,
-    )
+    # Convert WikifyResponseElems into dictionaries
+    results = [vars(result) for result in results]
 
+    # Switch to default level if not properly defined
     if level not in [1, 2, 3, 4, 5]:
         level = 2
 
@@ -196,41 +178,23 @@ async def wikify_ontology_svg(
     # Schedule job and block
     job.apply_async(priority=10).get(timeout=10)
 
-    return FileResponse('/tmp/wikify.svg')
+    # Return file
+    return FileResponse('/tmp/file.svg')
 
 
 @router.post('/wikify_graph_svg')
 async def wikify_graph_svg(
-    data: WikifyRequest,
-    method: Optional[str] = 'es-base',
-    restrict_to_ontology: Optional[bool] = False,
-    graph_score_smoothing: Optional[bool] = True,
-    ontology_score_smoothing: Optional[bool] = True,
-    keywords_score_smoothing: Optional[bool] = True,
-    normalisation_coef: Optional[float] = 0.5,
-    filtering_threshold: Optional[float] = 0.1,
-    filtering_min_votes: Optional[int] = 5,
-    refresh_scores: Optional[bool] = True,
+    results: WikifyResponse,
     concept_score_threshold: Optional[float] = 0.3,
     edge_threshold: Optional[float] = 0.3,
     min_component_size: Optional[int] = 3
 ):
     """
-    Performs a wikify request (see own documentation) and returns a svg file representing the concepts subgraph induced by the set of results.
+    Returns a svg file representing the graph subgraph induced by the provided set of results.
     """
 
-    results = await wikify(
-        data,
-        method,
-        restrict_to_ontology,
-        graph_score_smoothing,
-        ontology_score_smoothing,
-        keywords_score_smoothing,
-        normalisation_coef,
-        filtering_threshold,
-        filtering_min_votes,
-        refresh_scores,
-    )
+    # Convert WikifyResponseElems into dictionaries
+    results = [vars(result) for result in results]
 
     # Set up job
     job = draw_graph_task.s(results, concept_score_threshold, edge_threshold, min_component_size)
@@ -238,7 +202,8 @@ async def wikify_graph_svg(
     # Schedule job and block
     job.apply_async(priority=10).get(timeout=10)
 
-    return FileResponse('/tmp/wikify.svg')
+    # Return file
+    return FileResponse('/tmp/file.svg')
 
 
 @router.post('/priority_test')

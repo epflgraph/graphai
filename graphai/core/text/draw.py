@@ -114,7 +114,7 @@ def draw_ontology(results, ontology, level):
 
     # Set title, remove space between axs and display the plot
     # fig.suptitle(f'Results for "{data["raw_text"][:92] + "..." if len(data["raw_text"]) > 92 else data["raw_text"]}"')
-    plt.savefig('/tmp/wikify.svg', format='svg')
+    plt.savefig('/tmp/file.svg', format='svg')
 
     return True
 
@@ -218,6 +218,6 @@ def draw_graph(results, graph, concept_score_threshold=0.3, edge_threshold=0.3, 
 
     # Set title, remove space between axs and display the plot
     # fig.suptitle(f'Results for "{data["raw_text"][:92] + "..." if len(data["raw_text"]) > 92 else data["raw_text"]}"')
-    plt.savefig('/tmp/wikify.svg', format='svg')
+    plt.savefig('/tmp/file.svg', format='svg')
 
     return True
