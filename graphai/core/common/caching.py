@@ -739,16 +739,31 @@ class VideoConfig():
             self.root_dir = ROOT_VIDEO_DIR
 
     def concat_file_path(self, filename, subfolder):
+        """
+        Concatenates the root dir with the given subfolder and file name.
+        Args:
+            filename: Name of the file
+            subfolder: Subfolder it is/should be in
+
+        Returns:
+            Full path of the file
+        """
         result = os.path.join(self.root_dir, subfolder, filename)
         make_sure_path_exists(result, file_at_the_end=True)
         return result
 
-    def set_root_dir(self, new_root_dir):
-        self.root_dir = new_root_dir
-        make_sure_path_exists(new_root_dir)
-
     def generate_filepath(self, filename, force_dir=None):
+        """
+        Generates the full path of a given file based on its name
+        Args:
+            filename: Name of the file
+            force_dir: Whether to force a particular subfolder
+
+        Returns:
+            The full file path
+        """
         if force_dir is not None:
+            # If the directory is being forced, we don't check the name of the file to know where it should go
             filename_with_path = self.concat_file_path(filename, force_dir)
         else:
             # If the "file" is really a file or a folder, this will give us the unchanged file name.
@@ -756,6 +771,7 @@ class VideoConfig():
             # figure out where it's supposed to go. The full path still involves the full file name,
             # not just the folder part.
             filename_first_part = filename.split('/')[0]
+            # If it ends in a video format, it goes into the video subfolder, etc.
             if any([filename_first_part.endswith(x) for x in VIDEO_FORMATS]):
                 filename_with_path = self.concat_file_path(filename, VIDEO_SUBFOLDER)
             elif any([filename_first_part.endswith(x) for x in AUDIO_FORMATS]):
@@ -769,6 +785,15 @@ class VideoConfig():
         return filename_with_path
 
     def create_symlink(self, old_path, new_filename):
+        """
+        Creates a symlink between a new filename (for which the path is generated automatically) and an old full path
+        Args:
+            old_path: Old full path
+            new_filename: New filename
+
+        Returns:
+            None
+        """
         new_path = self.generate_filepath(new_filename)
         # Only creating the symlink if it doesn't already exist
         create_symlink_between_paths(old_path, new_path)
