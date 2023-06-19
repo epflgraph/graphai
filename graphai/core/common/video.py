@@ -40,29 +40,43 @@ FRAME_FORMAT_JPG = 'frame-%06d.jpg'
 TESSERACT_OCR_FORMAT = 'ocr-%06d.txt.gz'
 
 
-def get_dir_files(root_dir):
-    return [sub_path for sub_path in os.listdir(root_dir) if os.path.isfile(os.path.join(root_dir, sub_path))]
-
-
-def count_files(root_dir):
-    count = 0
-    for sub_path in os.listdir(root_dir):
-        if os.path.isfile(os.path.join(root_dir, sub_path)):
-            count += 1
-    return count
-
-
 def write_text_file(filename_with_path, contents):
+    """
+    Writes contents to text file
+    Args:
+        filename_with_path: Full path of the file
+        contents: Textual contents
+
+    Returns:
+        None
+    """
     with open(filename_with_path, 'w') as f:
         f.write(contents)
 
 
 def write_json_file(filename_with_path, d):
+    """
+    Writes dictionary to JSON file
+    Args:
+        filename_with_path: Full path of the file
+        d: Dictionary to write
+
+    Returns:
+        None
+    """
     with open(filename_with_path, 'w') as f:
         json.dump(d, f)
 
 
 def read_text_file(filename_with_path):
+    """
+    Opens and reads the contents of a text file
+    Args:
+        filename_with_path: Full path of the file
+
+    Returns:
+        Contents of the file
+    """
     f = open(filename_with_path, 'r')
     result = f.read()
     f.close()
@@ -70,6 +84,14 @@ def read_text_file(filename_with_path):
 
 
 def read_json_file(filename_with_path):
+    """
+    Reads the contents of a JSON file
+    Args:
+        filename_with_path: Full path of the file
+
+    Returns:
+        Dictionary containing contents of the JSON file
+    """
     f = open(filename_with_path, 'r')
     result = json.load(f)
     f.close()
@@ -86,6 +108,11 @@ def generate_random_token():
 
 
 def get_current_datetime():
+    """
+    Returns current datetime formatted for MySQL
+    Returns:
+        Datetime string
+    """
     current_datetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     return current_datetime
 
@@ -113,6 +140,17 @@ def retrieve_file_from_url(url, output_filename_with_path, output_token):
 
 
 def retrieve_file_from_kaltura(url, output_filename_with_path, output_token, timeout=120):
+    """
+    Retrieves a file in m3u8 format from Kaltura and stores it locally
+    Args:
+        url: URL of the m3u8 playlist
+        output_filename_with_path: Full path of output file
+        output_token: Token of output file
+        timeout: Timeout for the download operation
+
+    Returns:
+        Output token if retrieval is successful, None otherwise
+    """
     # If the file exists, we delete it (because downloadm3u8 will otherwise ask if we want to overwrite, which we do)
     if file_exists(output_filename_with_path):
         os.remove(output_filename_with_path)
@@ -142,10 +180,28 @@ def perform_probe(input_filename_with_path):
 
 
 def generate_symbolic_token(origin, token):
+    """
+    Generates a new symbolic token based on the origin token and the token itself
+    Args:
+        origin: Origin token
+        token: Target token
+
+    Returns:
+        Symbolic token
+    """
     return origin + '_' + token
 
 
 def md5_video_or_audio(input_filename_with_path, video=True):
+    """
+    Computes the md5 hash of the video or audio stream of a video file
+    Args:
+        input_filename_with_path: Full path of the input file
+        video: Whether to compute the md5 for the video stream or the audio stream
+
+    Returns:
+        MD5 hash
+    """
     if not file_exists(input_filename_with_path):
         print(f'ffmpeg error: File {input_filename_with_path} does not exist')
         return None
@@ -171,6 +227,14 @@ def md5_video_or_audio(input_filename_with_path, video=True):
 
 
 def md5_text(s):
+    """
+    Computes the md5 hash of a string
+    Args:
+        s: The string
+
+    Returns:
+        MD5 hash
+    """
     return hashlib.md5(s.encode('utf8')).hexdigest()
 
 
@@ -372,6 +436,17 @@ def perceptual_hash_image(input_filename_with_path, hash_size=16):
 
 
 def perceptual_hash_text(s, min_window_length=5, max_window_length=50, hash_len=32):
+    """
+    Computes the perceptual hash of a strong
+    Args:
+        s: String to hash
+        min_window_length: Minimum window length for k-grams
+        max_window_length: Maximum window length for k-grams
+        hash_len: Length of the hash
+
+    Returns:
+        Perceptual hash of string
+    """
     string_length = len(s)
     window_length = max([min_window_length, string_length // hash_len])
     window_length = min([max_window_length, window_length])
@@ -525,17 +600,42 @@ def generate_frame_sample_indices(input_folder_with_path, step=16):
 
 
 def read_txt_gz_file(fp):
+    """
+    Reads the contents of a txt.gz file
+    Args:
+        fp: File path
+
+    Returns:
+        Resulting text
+    """
     with gzip.open(fp, 'r') as fid:
         extracted_text = fid.read().decode('utf-8')
     return extracted_text
 
 
 def write_txt_gz_file(text, fp):
+    """
+    Writes text to a txt.gz file
+    Args:
+        text: String to write
+        fp: File path
+
+    Returns:
+        None
+    """
     with gzip.open(fp, 'w') as fid:
         fid.write(text.encode('utf-8'))
 
 
 def read_json_gz_file(fp):
+    """
+    Reads contents of a json.gz file
+    Args:
+        fp: File path
+
+    Returns:
+        Contents of JSON file as dict
+    """
     return json.loads(read_txt_gz_file(fp))
 
 
@@ -727,6 +827,19 @@ def frame_ocr_transition(input_folder_with_path, k_l, k_r, ocr_dist_threshold, h
 
 def compute_video_ocr_transitions(input_folder_with_path, frame_sample_indices, ocr_dist_threshold, hash_dist_threshold,
                                   nlp_models, language=None):
+    """
+    Computes all the slide transitions for slides extracted from a video file
+    Args:
+        input_folder_with_path: Path of the slide folder
+        frame_sample_indices: Indices of sampled frames
+        ocr_dist_threshold: Threshold for OCR distance (below which slides are considered to be the same)
+        hash_dist_threshold: Threshold for perceptual hash similarity (above which they are considered to be the same)
+        nlp_models: NLP models for parsing the OCR results
+        language: Language of the slides
+
+    Returns:
+        List of transitory slides
+    """
     transition_list = list()
     for k in range(1, len(frame_sample_indices)):
         [t, d] = frame_ocr_transition(
@@ -744,6 +857,14 @@ def compute_video_ocr_transitions(input_folder_with_path, frame_sample_indices, 
 
 
 def detect_text_language(s):
+    """
+    Detects the language of the provided string
+    Args:
+        s: String to detect language for
+
+    Returns:
+        Language of the string
+    """
     if s is None or s == '':
         return None
     try:
@@ -911,6 +1032,16 @@ class GoogleOCRModel():
         return results_1, results_2
 
     def wait_for_ocr_results(self, image_object, method='dtd', retries=6):
+        """
+        Makes call to Google OCR API and waits for the results
+        Args:
+            image_object: Image object for the Google API
+            method: Method to use, 'td' for text detection and 'dtd' for document text detection
+            retries: Number of retries to perform in case of failure
+
+        Returns:
+            OCR results
+        """
         assert method in ['dtd', 'td']
         results = None
         for i in range(retries):
@@ -933,6 +1064,11 @@ class TranslationModels:
         self.models = None
 
     def load_models(self):
+        """
+        Loads Huggingface translation and tokenization models plus a pysbd segmenter
+        Returns:
+            None
+        """
         if self.models is None:
             self.models = dict()
             print('Loading EN-FR')
@@ -947,6 +1083,16 @@ class TranslationModels:
             self.models['fr-en']['segmenter'] = pysbd.Segmenter(language='fr', clean=False)
 
     def _tokenize_and_get_model_output(self, sentence, tokenizer, model):
+        """
+        Internal method. Translates one single sentence.
+        Args:
+            sentence: Sentence to translate
+            tokenizer: Tokenizer model
+            model: Translation model
+
+        Returns:
+            Translation result or None if translation fails
+        """
         try:
             input_ids = tokenizer.encode(sentence, return_tensors="pt")
             outputs = model.generate(input_ids, max_length=512)
@@ -957,6 +1103,17 @@ class TranslationModels:
             return None
 
     def _translate(self, text, tokenizer, model, segmenter):
+        """
+        Internal method. Translates entire text, sentence by sentence.
+        Args:
+            text: Text to translate
+            tokenizer: Tokenizer model
+            model: Translation model
+            segmenter: Sentence segmenter
+
+        Returns:
+            Translated text, plus a flag denoting whether any of the sentences was too long and unpunctuated
+        """
         sentences = segmenter.segment(text)
         full_result = ''
         for sentence in sentences:
@@ -970,6 +1127,15 @@ class TranslationModels:
         return full_result, False
 
     def translate(self, text, how='en-fr'):
+        """
+        Translates provided text
+        Args:
+            text: Text to translate
+            how: source-target language
+
+        Returns:
+            Translated text and 'unpunctuated text too long' flag
+        """
         self.load_models()
         if how not in self.models.keys():
             raise NotImplementedError("Source or target language not implemented")
@@ -987,6 +1153,11 @@ class FingerprintParameters:
         self.load_values()
 
     def load_values(self):
+        """
+        Loads the values of fingerprinting similarity thresholds from file, or failing that, sets them to defaults
+        Returns:
+            None
+        """
         defaults = {
             'text': '1.0',
             'image': '0.9',
