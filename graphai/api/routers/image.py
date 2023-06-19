@@ -38,10 +38,11 @@ router = APIRouter(
 
 def get_slide_fingerprint_chain_list(token, force, min_similarity=None, n_jobs=8,
                                      ignore_fp_results=False, results_to_return=None):
+    # Loading minimum similarity parameter for image
     if min_similarity is None:
         fp_parameters = FingerprintParameters()
         min_similarity = fp_parameters.get_min_sim_image()
-
+    # The usual fingerprinting task list consists of fingerprinting and its callback, then lookup
     task_list = [
         compute_slide_fingerprint_task.s(token, force),
         compute_slide_fingerprint_callback_task.s(force),
@@ -91,6 +92,8 @@ async def extract_text(data: ExtractTextRequest):
     method = data.method
     force = data.force
     assert method in ['google', 'tesseract']
+    # If force=True, fingerprinting is skipped
+    # The tasks are slide text extraction and callback. These are the same for extract_text and detect_language.
     if not force:
         task_list = get_slide_fingerprint_chain_list(token, force, ignore_fp_results=True, results_to_return=token)
         task_list += [extract_slide_text_task.s(method, force)]
