@@ -1160,7 +1160,7 @@ class FingerprintParameters:
         """
         defaults = {
             'text': '1.0',
-            'image': '0.9',
+            'image': '1.0',
             'audio': '0.8',
             'video': '1.0'
         }
