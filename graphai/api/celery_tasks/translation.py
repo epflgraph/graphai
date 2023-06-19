@@ -66,6 +66,10 @@ def text_fingerprint_find_closest_retrieve_from_db_task(self, results, equality_
 def text_fingerprint_find_closest_parallel_task(self, input_dict, i, n_total, equality_conditions,
                                                 min_similarity=1):
     db_manager = TextDBCachingManager()
+    # The equality conditions, which only apply to text fingerprint lookup, make sure that the fingerprint lookup
+    # happens only among the cached texts that have the same source and target languages as this one. This is
+    # to make sure that, for example, we don't include French to English cached translations when looking up
+    # cached results for an English to French translation.
     return fingerprint_lookup_parallel(input_dict, i, n_total, min_similarity, db_manager, data_type='text',
                                        equality_conditions=equality_conditions)
 
