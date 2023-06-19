@@ -13,6 +13,7 @@ DEFAULT_CACHE = "redis://localhost:6379/0"
 
 
 def route_task(name, args, kwargs, options, task=None, **kw):
+    # Naming convention: name of a task follows the `queue.taskname` format. `taskname` may have further dots.
     if '.' in name:
         queue = name.split('.')[0]
         return {'queue': queue}
@@ -38,10 +39,14 @@ class BaseConfig:
         self.CELERY_TASK_QUEUES: list = [
             # default queue
             Queue("celery"),
-            # custom queue
+            # custom queues
+            # Concept detection
             Queue("text_10", max_priority=10),
+            # Translation
             Queue("text_6", max_priority=6),
+            # Video, voice, image
             Queue("video_2", max_priority=2),
+            # Ontology
             Queue("ontology_6", max_priority=6)
         ]
 
@@ -67,6 +72,7 @@ def create_celery():
     settings = get_settings()
     celery_app.config_from_object(settings, namespace='CELERY')
     celery_app.conf.update(task_track_started=True)
+    # Setting serializers to pickle makes them more flexible and faster (when running a local instance of celery)
     celery_app.conf.update(task_serializer='pickle')
     celery_app.conf.update(result_serializer='pickle')
     celery_app.conf.update(accept_content=['pickle', 'json'])
