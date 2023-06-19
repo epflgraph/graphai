@@ -12,6 +12,18 @@ def draw_ontology(results, ontology, level):
 
     ################################################################
 
+    # Save empty figure in case of empty input
+    if not results:
+        plt.savefig('/tmp/file.svg', format='svg')
+        return True
+
+    ################################################################
+
+    # Init ontology in case it is not initialised
+    ontology.fetch_from_db()
+
+    ################################################################
+
     # Add categories to results
     results = pd.merge(
         pd.DataFrame(results),
@@ -66,6 +78,13 @@ def draw_ontology(results, ontology, level):
     # Compute the connected components as we will plot each separately to avoid cluttering
     connected_components = list(nx.connected_components(G))
     n_connected_components = len(connected_components)
+
+    ################################################################
+
+    # Save empty figure in case there is not any connected component
+    if n_connected_components == 0:
+        plt.savefig('/tmp/file.svg', format='svg')
+        return True
 
     ################################################################
 
@@ -126,6 +145,18 @@ def draw_graph(results, graph, concept_score_threshold=0.3, edge_threshold=0.3, 
 
     ################################################################
 
+    # Save empty figure in case of empty input
+    if not results:
+        plt.savefig('/tmp/file.svg', format='svg')
+        return True
+
+    ################################################################
+
+    # Init graph in case it is not initialised
+    graph.fetch_from_db()
+
+    ################################################################
+
     # Filter results depending on score
     results = pd.DataFrame(results)
     results = results[results['MixedScore'] >= concept_score_threshold]
@@ -176,6 +207,13 @@ def draw_graph(results, graph, concept_score_threshold=0.3, edge_threshold=0.3, 
     connected_components = [component_nodes for component_nodes in connected_components if len(component_nodes) >= min_component_size]
 
     n_connected_components = len(connected_components)
+
+    ################################################################
+
+    # Save empty figure in case there is not any connected component
+    if n_connected_components == 0:
+        plt.savefig('/tmp/file.svg', format='svg')
+        return True
 
     ################################################################
 
