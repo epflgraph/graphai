@@ -296,7 +296,7 @@ def draw_ontology_task(self, results, level=2):
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={'max_retries': 2},
              name='text_10.draw_graph', ignore_result=False, graph=graph)
-def draw_graph_task(self, results, concept_score_threshold, edge_threshold, min_component_size):
+def draw_graph_task(self, results, concept_score_threshold=0.3, edge_threshold=0.3, min_component_size=3):
     return draw_graph(results, self.graph, concept_score_threshold, edge_threshold, min_component_size)
 
 
