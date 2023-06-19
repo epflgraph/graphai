@@ -26,7 +26,7 @@ from graphai.api.celery_tasks.common import (
     format_api_results,
     ignore_fingerprint_results_callback_task,
 )
-from graphai.core.common.video import md5_text, FingerprintParameters
+from graphai.core.common.video import FingerprintParameters, generate_src_tgt_dict, generate_text_token
 from graphai.core.interfaces.celery_config import get_task_info
 
 
@@ -35,14 +35,6 @@ router = APIRouter(
     tags=['translation'],
     responses={404: {'description': 'Not found'}}
 )
-
-
-def generate_src_tgt_dict(src, tgt):
-    return {'source_lang': src, 'target_lang': tgt}
-
-
-def generate_text_token(s, src, tgt):
-    return md5_text(s) + '_' + src + '_' + tgt
 
 
 def get_text_fingerprint_chain_list(token, text, src, tgt, force, min_similarity=None, n_jobs=8,

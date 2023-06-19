@@ -98,6 +98,18 @@ def read_json_file(filename_with_path):
     return result
 
 
+def md5_text(s):
+    """
+    Computes the md5 hash of a string
+    Args:
+        s: The string
+
+    Returns:
+        MD5 hash
+    """
+    return hashlib.md5(s.encode('utf8')).hexdigest()
+
+
 def generate_random_token():
     """
     Generates a random string using the current time and a random number to be used as a token.
@@ -115,6 +127,33 @@ def get_current_datetime():
     """
     current_datetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     return current_datetime
+
+
+def generate_src_tgt_dict(src, tgt):
+    """
+    Creates a source language and target language dictionary for translation
+    Args:
+        src: Source lang
+        tgt: Target lang
+
+    Returns:
+        dict
+    """
+    return {'source_lang': src, 'target_lang': tgt}
+
+
+def generate_text_token(s, src, tgt):
+    """
+    Generates an md5-based token for a string
+    Args:
+        s: The string
+        src: Source lang
+        tgt: Target lang
+
+    Returns:
+        Token
+    """
+    return md5_text(s) + '_' + src + '_' + tgt
 
 
 def retrieve_file_from_url(url, output_filename_with_path, output_token):
@@ -224,18 +263,6 @@ def md5_video_or_audio(input_filename_with_path, video=True):
     result, _ = ffmpeg.output(in_stream, 'pipe:', c='copy', format='md5').run(capture_stdout=True)
     # The result looks like 'MD5=9735151f36a3e628b0816b1bba3b9640\n' so we clean it up
     return (result.decode('utf8').strip())[4:]
-
-
-def md5_text(s):
-    """
-    Computes the md5 hash of a string
-    Args:
-        s: The string
-
-    Returns:
-        MD5 hash
-    """
-    return hashlib.md5(s.encode('utf8')).hexdigest()
 
 
 def detect_audio_format_and_duration(input_filename_with_path, input_token):
