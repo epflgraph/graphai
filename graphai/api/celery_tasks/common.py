@@ -142,7 +142,7 @@ def fingerprint_lookup_callback(results_list, db_manager):
         # date_added value. This ensures consistency in closest-token assignments because it ensures that even if there
         # are multiple matches, the same one will be chosen every time -- the one that was created first.
         closest_token = [x[0] for x in results if x[3] == max_score][0]
-        closest_token = db_manager.resolve_most_similar_chain(closest_token)
+        closest_token = db_manager.get_closest_match(closest_token)
     # Whether the closest token is itself or another token, we store the result in the database.
     db_manager.insert_or_update_closest_match(
         original_token,
