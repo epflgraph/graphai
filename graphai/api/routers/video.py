@@ -49,10 +49,12 @@ router = APIRouter(
 
 def get_video_fingerprint_chain_list(token, force, min_similarity=None, n_jobs=8,
                                      ignore_fp_results=False, results_to_return=None):
+    # Retrieve minimum similarity parameter for video fingerprints
     if min_similarity is None:
         fp_parameters = FingerprintParameters()
         min_similarity = fp_parameters.get_min_sim_video()
-
+    # The list of tasks involve video fingerprinting and its callback, followed by fingerprint lookup (preprocess,
+    # parallel, callback).
     task_list = [
         compute_video_fingerprint_task.s(token, force),
         compute_video_fingerprint_callback_task.s(),
@@ -61,6 +63,7 @@ def get_video_fingerprint_chain_list(token, force, min_similarity=None, n_jobs=8
               for i in range(n_jobs)),
         video_fingerprint_find_closest_callback_task.s()
     ]
+    # If the fingerprinting is part of another endpoint, its results are ignored, otherwise they are returned.
     if ignore_fp_results:
         task_list += [ignore_fingerprint_results_callback_task.s(results_to_return)]
     else:
@@ -71,12 +74,14 @@ def get_video_fingerprint_chain_list(token, force, min_similarity=None, n_jobs=8
 @router.post('/retrieve_url', response_model=TaskIDResponse)
 async def retrieve_file(data: RetrieveURLRequest):
     url = data.url
+    # This flag determines if the URL is that of an m3u8 playlist and not a video file (like a .mp4)
     is_kaltura = data.kaltura
     # Minimum timeout is 1 minute while maximum is 8 minutes.
     max_timeout = 480
     min_timeout = 60
     timeout = max([data.timeout, min_timeout])
     timeout = min([timeout, max_timeout])
+    # First retrieve the file, and then do the database callback
     task_list = [retrieve_file_from_url_task.s(url, is_kaltura, timeout, False, None),
                  retrieve_file_from_url_callback_task.s(url)]
     task = chain(task_list)
@@ -105,6 +110,7 @@ async def get_retrieve_file_status(task_id):
 async def calculate_fingerprint(data: VideoFingerprintRequest):
     token = data.token
     force = data.force
+    # This is the fingerprinting endpoint, so ignore_fp_results is False
     task_list = get_video_fingerprint_chain_list(token, force,
                                                  ignore_fp_results=False)
     task = chain(task_list)
@@ -139,6 +145,8 @@ async def get_file(data: FileRequest):
 async def extract_audio(data: ExtractAudioRequest):
     token = data.token
     force = data.force
+    # If force is True, fingerprinting is skipped, otherwise we fingerprint the video first
+    # Otherwise, the tasks are audio extraction and its callback.
     if force:
         task_list = [extract_audio_task.s(token, force)]
     else:
@@ -174,7 +182,12 @@ async def detect_slides(data: DetectSlidesRequest):
     force = data.force
     language = data.language
     n_jobs = 8
+    # This is the maximum similarity threshold used for image hashes when finding slide transitions.
     hash_thresh = 0.85
+    # force=True skips fingerprinting
+    # Task list involves extracting and sampling frames, parallel noise level comp and its callback, then a dummy task
+    # because of celery's need for an additional non-group task in the middle, then slide transition comp and its
+    # callback, followed by a final callback that inserts the results into the cache db.
     if force:
         task_list = [extract_and_sample_frames_task.s(token, force)]
     else:
