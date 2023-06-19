@@ -39,11 +39,15 @@ router = APIRouter(
 
 def get_text_fingerprint_chain_list(token, text, src, tgt, force, min_similarity=None, n_jobs=8,
                                     ignore_fp_results=False, results_to_return=None):
+    # Loading min similarity parameter for text
     if min_similarity is None:
         fp_parameters = FingerprintParameters()
         min_similarity = fp_parameters.get_min_sim_text()
 
+    # Generating the equality condition dictionary
     equality_conditions = generate_src_tgt_dict(src, tgt)
+    # The tasks are fingerprinting and callback, then lookup. The lookup is only among cache rows that satisfy the
+    # equality conditions (source and target languages).
     task_list = [
         compute_text_fingerprint_task.s(token, text, force),
         compute_text_fingerprint_callback_task.s(text, src, tgt),
@@ -97,6 +101,8 @@ async def translate(data: TranslationRequest):
     tgt = data.target
     force = data.force
     token = generate_text_token(text, src, tgt)
+    # If force=True, fingerprinting is skipped
+    # The tasks are translation and its callback
     if not force:
         task_list = get_text_fingerprint_chain_list(token, text, src, tgt, force,
                                                     ignore_fp_results=True, results_to_return=token)
@@ -129,6 +135,7 @@ async def translate_status(task_id):
 @router.post('/detect_language/', response_model=TaskIDResponse)
 async def text_detect_language(data: TextDetectLanguageRequest):
     text = data.text
+    # The only task is language detection because this task does not go through the caching logic
     task = (detect_text_language_task.s(text)).apply_async(priority=6)
     return {'task_id': task.id}
 
