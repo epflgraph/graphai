@@ -203,5 +203,7 @@ def fingerprint_lookup_callback(results_list, db_manager):
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='video_2.ignore_fingerprint_results_callback', ignore_result=False)
 def ignore_fingerprint_results_callback_task(self, results, results_to_return):
-    # Returning the fingerprinting results, which is the part of this task whose results are sent back to the user.
+    # Ignoring the fingerprinting results and returning the results relevant to the task chain.
+    # Used in tasks like transcription and OCR, where fingerprinting is performed before the task itself, but where
+    # the results of the fingerprinting are not returned.
     return results_to_return

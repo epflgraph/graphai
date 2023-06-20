@@ -232,6 +232,8 @@ def extract_slide_text_callback_task(self, results, token, force=False):
         )
         if not force:
             # Inserting the same values for closest token if different than original token
+            # Happens if the other token has been fingerprinted before being OCRed, or if the two tokens
+            # have identical but separate parent videos.
             closest = db_manager.get_closest_match(token)
             if closest is not None and closest != token:
                 db_manager.insert_or_update_details(

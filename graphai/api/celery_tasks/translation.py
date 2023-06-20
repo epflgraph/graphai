@@ -162,6 +162,7 @@ def translate_text_callback_task(self, results, token, text, src, tgt, force=Fal
         )
         if not force:
             # Inserting the same values for closest token if different than original token
+            # Only happens if the other token has been fingerprinted first without being translated.
             closest = db_manager.get_closest_match(token)
             if closest is not None and closest != token:
                 db_manager.insert_or_update_details(

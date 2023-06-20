@@ -468,6 +468,8 @@ def transcribe_callback_task(self, results, token, force=False):
             # update both rows with the value, for other tokens that might depend on the
             # aforementioned closest neighbor (i.e. other tokens that share their closest neighbor
             # with the original token here).
+            # Happens if the other token has been fingerprinted before being transcribed, or if the two tokens
+            # have identical but separate parent videos.
             closest = db_manager.get_closest_match(token)
             if closest is not None and closest != token:
                 db_manager.insert_or_update_details(

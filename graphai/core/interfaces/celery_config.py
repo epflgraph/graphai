@@ -68,6 +68,11 @@ def get_settings():
 
 
 def create_celery():
+    """
+    Creates a celery app with default settings
+    Returns:
+        Celery app object
+    """
     celery_app = current_celery_app
     settings = get_settings()
     celery_app.config_from_object(settings, namespace='CELERY')
@@ -86,6 +91,14 @@ def create_celery():
 
 
 def get_celery_task(task_id):
+    """
+    Returns results for the task with the provided task id
+    Args:
+        task_id: task id
+
+    Returns:
+        AsyncResult object that contains task id, name, status, and results
+    """
     return AsyncResult(task_id)
 
 
