@@ -47,3 +47,15 @@ def wave_fields_scores_df():
         ['acoustic wave fields', 144940, """Longitudinal_wave""", 3, 0.777778, 0.367288, 974, 194, 0.7125, 0.7125, 0.913514, 1.0],
         ['acoustic wave fields', 33516, """Wave""", 4, 0.555556, 0.200000, 974, 194, 0.7125, 0.7125, 1.000000, 1.0]
     ], columns=['Keywords', 'PageID', 'PageTitle', 'Searchrank', 'SearchScore', 'LevenshteinScore', 'CategoryID', 'Category2ID', 'OntologyLocalScore', 'OntologyGlobalScore', 'GraphScore', 'KeywordsScore'])
+
+
+@pytest.fixture
+def wave_fields_wikified_json():
+    return [
+        {'PageID': 459844, 'PageTitle': """Surface_acoustic_wave""", 'SearchScore': 0.888889, 'LevenshteinScore': 0.750277, 'GraphScore': 0.086486,
+         'OntologyLocalScore': 0.2375, 'OntologyGlobalScore': 0.2375, 'KeywordsScore': 1.0, 'MixedScore': 0.658343},
+        {'PageID': 144940, 'PageTitle': """Longitudinal_wave""", 'SearchScore': 0.777778, 'LevenshteinScore': 0.367288, 'GraphScore': 0.913514,
+         'OntologyLocalScore': 0.7125, 'OntologyGlobalScore': 0.7125, 'KeywordsScore': 1.0, 'MixedScore': 0.780125},
+        {'PageID': 33516, 'PageTitle': """Wave""", 'SearchScore': 0.555556, 'LevenshteinScore': 0.200000, 'GraphScore': 1.000000,
+         'OntologyLocalScore': 0.7125, 'OntologyGlobalScore': 0.7125, 'KeywordsScore': 1.0, 'MixedScore': 0.719236}
+    ]
