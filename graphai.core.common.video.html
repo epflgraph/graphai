@@ -90,34 +90,66 @@
   <section id="module-graphai.core.common.video">
 <span id="graphai-core-common-video-module"></span><h1>graphai.core.common.video module<a class="headerlink" href="#module-graphai.core.common.video" title="Permalink to this heading"></a></h1>
 <dl class="py function">
-<dt class="sig sig-object py" id="graphai.core.common.video.get_dir_files">
-<span class="sig-prename descclassname"><span class="pre">graphai.core.common.video.</span></span><span class="sig-name descname"><span class="pre">get_dir_files</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">root_dir</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.video.get_dir_files" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="graphai.core.common.video.count_files">
-<span class="sig-prename descclassname"><span class="pre">graphai.core.common.video.</span></span><span class="sig-name descname"><span class="pre">count_files</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">root_dir</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.video.count_files" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
 <dt class="sig sig-object py" id="graphai.core.common.video.write_text_file">
 <span class="sig-prename descclassname"><span class="pre">graphai.core.common.video.</span></span><span class="sig-name descname"><span class="pre">write_text_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename_with_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">contents</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.video.write_text_file" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Writes contents to text file
+:param filename_with_path: Full path of the file
+:param contents: Textual contents</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="graphai.core.common.video.write_json_file">
 <span class="sig-prename descclassname"><span class="pre">graphai.core.common.video.</span></span><span class="sig-name descname"><span class="pre">write_json_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename_with_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.video.write_json_file" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Writes dictionary to JSON file
+:param filename_with_path: Full path of the file
+:param d: Dictionary to write</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="graphai.core.common.video.read_text_file">
 <span class="sig-prename descclassname"><span class="pre">graphai.core.common.video.</span></span><span class="sig-name descname"><span class="pre">read_text_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename_with_path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.video.read_text_file" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Opens and reads the contents of a text file
+:param filename_with_path: Full path of the file</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Contents of the file</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="graphai.core.common.video.read_json_file">
 <span class="sig-prename descclassname"><span class="pre">graphai.core.common.video.</span></span><span class="sig-name descname"><span class="pre">read_json_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename_with_path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.video.read_json_file" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Reads the contents of a JSON file
+:param filename_with_path: Full path of the file</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Dictionary containing contents of the JSON file</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.core.common.video.md5_text">
+<span class="sig-prename descclassname"><span class="pre">graphai.core.common.video.</span></span><span class="sig-name descname"><span class="pre">md5_text</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.video.md5_text" title="Permalink to this definition"></a></dt>
+<dd><p>Computes the md5 hash of a string
+:param s: The string</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>MD5 hash</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="graphai.core.common.video.generate_random_token">
@@ -129,7 +161,36 @@
 <dl class="py function">
 <dt class="sig sig-object py" id="graphai.core.common.video.get_current_datetime">
 <span class="sig-prename descclassname"><span class="pre">graphai.core.common.video.</span></span><span class="sig-name descname"><span class="pre">get_current_datetime</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.video.get_current_datetime" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Returns current datetime formatted for MySQL
+:returns: Datetime string</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.core.common.video.generate_src_tgt_dict">
+<span class="sig-prename descclassname"><span class="pre">graphai.core.common.video.</span></span><span class="sig-name descname"><span class="pre">generate_src_tgt_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">src</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tgt</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.video.generate_src_tgt_dict" title="Permalink to this definition"></a></dt>
+<dd><p>Creates a source language and target language dictionary for translation
+:param src: Source lang
+:param tgt: Target lang</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.core.common.video.generate_text_token">
+<span class="sig-prename descclassname"><span class="pre">graphai.core.common.video.</span></span><span class="sig-name descname"><span class="pre">generate_text_token</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">src</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tgt</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.video.generate_text_token" title="Permalink to this definition"></a></dt>
+<dd><p>Generates an md5-based token for a string
+:param s: The string
+:param src: Source lang
+:param tgt: Target lang</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Token</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="graphai.core.common.video.retrieve_file_from_url">
@@ -148,7 +209,17 @@
 <dl class="py function">
 <dt class="sig sig-object py" id="graphai.core.common.video.retrieve_file_from_kaltura">
 <span class="sig-prename descclassname"><span class="pre">graphai.core.common.video.</span></span><span class="sig-name descname"><span class="pre">retrieve_file_from_kaltura</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">url</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_filename_with_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_token</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">120</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.video.retrieve_file_from_kaltura" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Retrieves a file in m3u8 format from Kaltura and stores it locally
+:param url: URL of the m3u8 playlist
+:param output_filename_with_path: Full path of output file
+:param output_token: Token of output file
+:param timeout: Timeout for the download operation</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Output token if retrieval is successful, None otherwise</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="graphai.core.common.video.perform_probe">
@@ -165,17 +236,28 @@
 <dl class="py function">
 <dt class="sig sig-object py" id="graphai.core.common.video.generate_symbolic_token">
 <span class="sig-prename descclassname"><span class="pre">graphai.core.common.video.</span></span><span class="sig-name descname"><span class="pre">generate_symbolic_token</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">origin</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">token</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.video.generate_symbolic_token" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Generates a new symbolic token based on the origin token and the token itself
+:param origin: Origin token
+:param token: Target token</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Symbolic token</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="graphai.core.common.video.md5_video_or_audio">
 <span class="sig-prename descclassname"><span class="pre">graphai.core.common.video.</span></span><span class="sig-name descname"><span class="pre">md5_video_or_audio</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_filename_with_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">video</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.video.md5_video_or_audio" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="graphai.core.common.video.md5_text">
-<span class="sig-prename descclassname"><span class="pre">graphai.core.common.video.</span></span><span class="sig-name descname"><span class="pre">md5_text</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.video.md5_text" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Computes the md5 hash of the video or audio stream of a video file
+:param input_filename_with_path: Full path of the input file
+:param video: Whether to compute the md5 for the video stream or the audio stream</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>MD5 hash</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="graphai.core.common.video.detect_audio_format_and_duration">
@@ -279,7 +361,17 @@ file doesn’t exist.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="graphai.core.common.video.perceptual_hash_text">
 <span class="sig-prename descclassname"><span class="pre">graphai.core.common.video.</span></span><span class="sig-name descname"><span class="pre">perceptual_hash_text</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_window_length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_window_length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">50</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hash_len</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">32</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.video.perceptual_hash_text" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Computes the perceptual hash of a strong
+:param s: String to hash
+:param min_window_length: Minimum window length for k-grams
+:param max_window_length: Maximum window length for k-grams
+:param hash_len: Length of the hash</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Perceptual hash of string</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="graphai.core.common.video.compare_decoded_fingerprints">
@@ -382,17 +474,39 @@ satisfy the minimum similarity criterion.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="graphai.core.common.video.read_txt_gz_file">
 <span class="sig-prename descclassname"><span class="pre">graphai.core.common.video.</span></span><span class="sig-name descname"><span class="pre">read_txt_gz_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fp</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.video.read_txt_gz_file" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Reads the contents of a txt.gz file
+:param fp: File path</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Resulting text</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="graphai.core.common.video.write_txt_gz_file">
 <span class="sig-prename descclassname"><span class="pre">graphai.core.common.video.</span></span><span class="sig-name descname"><span class="pre">write_txt_gz_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fp</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.video.write_txt_gz_file" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Writes text to a txt.gz file
+:param text: String to write
+:param fp: File path</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="graphai.core.common.video.read_json_gz_file">
 <span class="sig-prename descclassname"><span class="pre">graphai.core.common.video.</span></span><span class="sig-name descname"><span class="pre">read_json_gz_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fp</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.video.read_json_gz_file" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Reads contents of a json.gz file
+:param fp: File path</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Contents of JSON file as dict</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="graphai.core.common.video.perform_tesseract_ocr">
@@ -500,12 +614,31 @@ satisfy the minimum similarity criterion.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="graphai.core.common.video.compute_video_ocr_transitions">
 <span class="sig-prename descclassname"><span class="pre">graphai.core.common.video.</span></span><span class="sig-name descname"><span class="pre">compute_video_ocr_transitions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_folder_with_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frame_sample_indices</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ocr_dist_threshold</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hash_dist_threshold</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nlp_models</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">language</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.video.compute_video_ocr_transitions" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Computes all the slide transitions for slides extracted from a video file
+:param input_folder_with_path: Path of the slide folder
+:param frame_sample_indices: Indices of sampled frames
+:param ocr_dist_threshold: Threshold for OCR distance (below which slides are considered to be the same)
+:param hash_dist_threshold: Threshold for perceptual hash similarity (above which they are considered to be the same)
+:param nlp_models: NLP models for parsing the OCR results
+:param language: Language of the slides</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List of transitory slides</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="graphai.core.common.video.detect_text_language">
 <span class="sig-prename descclassname"><span class="pre">graphai.core.common.video.</span></span><span class="sig-name descname"><span class="pre">detect_text_language</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.video.detect_text_language" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Detects the language of the provided string
+:param s: String to detect language for</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Language of the string</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="graphai.core.common.video.WhisperTranscriptionModel">
@@ -607,7 +740,16 @@ translated segments which can be used as subtitles, and ‘language’ which con
 <dl class="py method">
 <dt class="sig sig-object py" id="graphai.core.common.video.GoogleOCRModel.wait_for_ocr_results">
 <span class="sig-name descname"><span class="pre">wait_for_ocr_results</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">image_object</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'dtd'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">retries</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">6</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.video.GoogleOCRModel.wait_for_ocr_results" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Makes call to Google OCR API and waits for the results
+:param image_object: Image object for the Google API
+:param method: Method to use, ‘td’ for text detection and ‘dtd’ for document text detection
+:param retries: Number of retries to perform in case of failure</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>OCR results</p>
+</dd>
+</dl>
+</dd></dl>
 
 </dd></dl>
 
@@ -618,12 +760,22 @@ translated segments which can be used as subtitles, and ‘language’ which con
 <dl class="py method">
 <dt class="sig sig-object py" id="graphai.core.common.video.TranslationModels.load_models">
 <span class="sig-name descname"><span class="pre">load_models</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.video.TranslationModels.load_models" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Loads Huggingface translation and tokenization models plus a pysbd segmenter
+:returns: None</p>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="graphai.core.common.video.TranslationModels.translate">
 <span class="sig-name descname"><span class="pre">translate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">how</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'en-fr'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.video.TranslationModels.translate" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Translates provided text
+:param text: Text to translate
+:param how: source-target language</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Translated text and ‘unpunctuated text too long’ flag</p>
+</dd>
+</dl>
+</dd></dl>
 
 </dd></dl>
 
@@ -634,7 +786,9 @@ translated segments which can be used as subtitles, and ‘language’ which con
 <dl class="py method">
 <dt class="sig sig-object py" id="graphai.core.common.video.FingerprintParameters.load_values">
 <span class="sig-name descname"><span class="pre">load_values</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.video.FingerprintParameters.load_values" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Loads the values of fingerprinting similarity thresholds from file, or failing that, sets them to defaults
+:returns: None</p>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="graphai.core.common.video.FingerprintParameters.get_min_sim_text">

@@ -93,22 +93,69 @@
 <dl class="py function">
 <dt class="sig sig-object py" id="graphai.api.celery_tasks.common.format_api_results">
 <span class="sig-prename descclassname"><span class="pre">graphai.api.celery_tasks.common.</span></span><span class="sig-name descname"><span class="pre">format_api_results</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">status</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">result</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.api.celery_tasks.common.format_api_results" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Formats results coming from celery into the common output format of the API
+:param id: Id of the task
+:param name: Name of the task
+:param status: Task status
+:param result: Task results</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Appropriately formatted results dictionary</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="graphai.api.celery_tasks.common.fingerprint_lookup_retrieve_from_db">
 <span class="sig-prename descclassname"><span class="pre">graphai.api.celery_tasks.common.</span></span><span class="sig-name descname"><span class="pre">fingerprint_lookup_retrieve_from_db</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">results</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db_manager</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">equality_conditions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.api.celery_tasks.common.fingerprint_lookup_retrieve_from_db" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Retrieves the number of cache rows relevant to fingerprint lookup
+:param results: Dict containing results of fingerprint computation
+:param db_manager: DBCachingManagerBase object
+:param equality_conditions: Dictionary of equality conditions for fingerprint counting. Only used for translation,</p>
+<aside class="system-message">
+<p class="system-message-title">System Message: ERROR/3 (<span class="docutils literal">/home/ubuntu/actions-runner/_work/graphai/graphai/main/graphai/api/celery_tasks/common.py:docstring of graphai.api.celery_tasks.common.fingerprint_lookup_retrieve_from_db</span>, line 5)</p>
+<p>Unexpected indentation.</p>
+</aside>
+<blockquote>
+<div><p>where the lookup needs to be done only among cached rows with the same source and target langs.</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Dict of original results plus the number of relevant cache rows.</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="graphai.api.celery_tasks.common.fingerprint_lookup_parallel">
 <span class="sig-prename descclassname"><span class="pre">graphai.api.celery_tasks.common.</span></span><span class="sig-name descname"><span class="pre">fingerprint_lookup_parallel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">i</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_total</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_similarity</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db_manager</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'audio'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">equality_conditions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.api.celery_tasks.common.fingerprint_lookup_parallel" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Performs parallel lookup of fingerprints
+:param input_dict: Dict of results from previous step
+:param i: The index of this parallel task
+:param n_total: Total number of parallel tasks
+:param min_similarity: Minimum similarity threshold for two fingerprints to be considered a match
+:param db_manager: DBCachingManagerBase object
+:param data_type: Type of data. Can be ‘audio’, ‘video’, ‘image’, and ‘text’
+:param equality_conditions: Equality conditions dict, only used for translation (‘text’ mode)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Dict with fingerprinting results, plus details of the closest match (which can be None)</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="graphai.api.celery_tasks.common.fingerprint_lookup_callback">
 <span class="sig-prename descclassname"><span class="pre">graphai.api.celery_tasks.common.</span></span><span class="sig-name descname"><span class="pre">fingerprint_lookup_callback</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">results_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db_manager</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.api.celery_tasks.common.fingerprint_lookup_callback" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Handles the collection and aggregation of parallel fingerprint lookup results, plus database insertion.
+:param results_list: List of parallel fingerprint lookup results
+:param db_manager: DBCachingManagerBase object</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Results of fingerprinting and the closest match</p>
+</dd>
+</dl>
+</dd></dl>
 
 </section>
 

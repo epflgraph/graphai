@@ -114,12 +114,21 @@
 <dl class="py function">
 <dt class="sig sig-object py" id="graphai.core.interfaces.celery_config.create_celery">
 <span class="sig-prename descclassname"><span class="pre">graphai.core.interfaces.celery_config.</span></span><span class="sig-name descname"><span class="pre">create_celery</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.interfaces.celery_config.create_celery" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Creates a celery app with default settings
+:returns: Celery app object</p>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="graphai.core.interfaces.celery_config.get_celery_task">
 <span class="sig-prename descclassname"><span class="pre">graphai.core.interfaces.celery_config.</span></span><span class="sig-name descname"><span class="pre">get_celery_task</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">task_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.interfaces.celery_config.get_celery_task" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Returns results for the task with the provided task id
+:param task_id: task id</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>AsyncResult object that contains task id, name, status, and results</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="graphai.core.interfaces.celery_config.get_task_info">
