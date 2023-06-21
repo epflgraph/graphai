@@ -43,10 +43,12 @@ router = APIRouter(
 
 def get_audio_fingerprint_chain_list(token, force=False, min_similarity=None, n_jobs=8, remove_silence=False,
                                      threshold=None, ignore_fp_results=False, results_to_return=None):
+    # Loading minimum similarity parameter for audio
     if min_similarity is None:
         fp_parameters = FingerprintParameters()
         min_similarity = fp_parameters.get_min_sim_audio()
-
+    # If remove_silence=True, then a silence removal task and its callback are added at the beginning
+    # Otherwise, the tasks are the same as any other fingerprinting chain: compute fp and callback, then lookup.
     if not remove_silence or threshold is None:
         task_list = [compute_audio_fingerprint_task.s({'fp_token': token}, token, force)]
     else:
@@ -102,6 +104,9 @@ async def transcribe(data: AudioTranscriptionRequest):
     force = data.force
     lang = data.force_lang
 
+    # If the language is already provided, we won't need to detect it. Otherwise, detection tasks are added.
+    # If force=True, fingerprinting is skipped
+    # The tasks are transcription and its callback
     if lang is not None:
         if not force:
             task_list = get_audio_fingerprint_chain_list(token, force, ignore_fp_results=True,
@@ -155,6 +160,9 @@ async def detect_language(data: AudioDetectLanguageRequest):
     force = data.force
     n_divs = 5
     len_segment = 30
+    # If force=True, fingerprinting is skipped
+    # The tasks are splitting the audio into n_divs segments of 30 seconds each, parallel language detection,
+    # and then aggregation and db insertion in the callback. Then the transcription tasks continue.
     if not force:
         task_list = get_audio_fingerprint_chain_list(token, force, ignore_fp_results=True,
                                                      results_to_return=token)

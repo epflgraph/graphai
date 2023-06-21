@@ -5,6 +5,17 @@ from graphai.core.common.video import find_closest_audio_fingerprint_from_list, 
 
 
 def format_api_results(id, name, status, result):
+    """
+    Formats results coming from celery into the common output format of the API
+    Args:
+        id: Id of the task
+        name: Name of the task
+        status: Task status
+        result: Task results
+
+    Returns:
+        Appropriately formatted results dictionary
+    """
     return {
         "task_id": id,
         "task_name": name,
@@ -14,6 +25,17 @@ def format_api_results(id, name, status, result):
 
 
 def fingerprint_lookup_retrieve_from_db(results, db_manager, equality_conditions=None):
+    """
+    Retrieves the number of cache rows relevant to fingerprint lookup
+    Args:
+        results: Dict containing results of fingerprint computation
+        db_manager: DBCachingManagerBase object
+        equality_conditions: Dictionary of equality conditions for fingerprint counting. Only used for translation,
+                where the lookup needs to be done only among cached rows with the same source and target langs.
+
+    Returns:
+        Dict of original results plus the number of relevant cache rows.
+    """
     target_fingerprint = results['result']
 
     # If the fingerprint computation has been unsuccessful or if cached results are being returned,
@@ -40,6 +62,20 @@ def fingerprint_lookup_retrieve_from_db(results, db_manager, equality_conditions
 
 def fingerprint_lookup_parallel(input_dict, i, n_total, min_similarity, db_manager, data_type='audio',
                                 equality_conditions=None):
+    """
+    Performs parallel lookup of fingerprints
+    Args:
+        input_dict: Dict of results from previous step
+        i: The index of this parallel task
+        n_total: Total number of parallel tasks
+        min_similarity: Minimum similarity threshold for two fingerprints to be considered a match
+        db_manager: DBCachingManagerBase object
+        data_type: Type of data. Can be 'audio', 'video', 'image', and 'text'
+        equality_conditions: Equality conditions dict, only used for translation ('text' mode)
+
+    Returns:
+        Dict with fingerprinting results, plus details of the closest match (which can be None)
+    """
     assert data_type in ['audio', 'image', 'text', 'video']
     # This parallel task's "closest fingerprint" result is null if either
     # a) the computation has been disabled (indicated by the token list being null), or
@@ -70,6 +106,8 @@ def fingerprint_lookup_parallel(input_dict, i, n_total, min_similarity, db_manag
             'fp_results': fp_results
         }
     # The resulting list will be sorted by date_added (asc)
+    # Nulls are not allowed because if a row doesn't have a fingerprint, it makes no sense to include it in a
+    # fingerprint lookup.
     tokens_and_fingerprints = db_manager.get_all_details(
         ['fingerprint', 'date_added'], start=start_index, limit=limit, exclude_token=token,
         allow_nulls=False, equality_conditions=equality_conditions
@@ -113,6 +151,15 @@ def fingerprint_lookup_parallel(input_dict, i, n_total, min_similarity, db_manag
 
 
 def fingerprint_lookup_callback(results_list, db_manager):
+    """
+    Handles the collection and aggregation of parallel fingerprint lookup results, plus database insertion.
+    Args:
+        results_list: List of parallel fingerprint lookup results
+        db_manager: DBCachingManagerBase object
+
+    Returns:
+        Results of fingerprinting and the closest match
+    """
     # Passing fingerprinting results along if it's been unsuccessful or a cached result has been returned
     # This is essentially the same check as in all the other find_closest tasks.
     fp_results = results_list[0]['fp_results']
@@ -142,7 +189,7 @@ def fingerprint_lookup_callback(results_list, db_manager):
         # date_added value. This ensures consistency in closest-token assignments because it ensures that even if there
         # are multiple matches, the same one will be chosen every time -- the one that was created first.
         closest_token = [x[0] for x in results if x[3] == max_score][0]
-        closest_token = db_manager.resolve_most_similar_chain(closest_token)
+        closest_token = db_manager.get_closest_match(closest_token)
     # Whether the closest token is itself or another token, we store the result in the database.
     db_manager.insert_or_update_closest_match(
         original_token,
@@ -156,5 +203,7 @@ def fingerprint_lookup_callback(results_list, db_manager):
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='video_2.ignore_fingerprint_results_callback', ignore_result=False)
 def ignore_fingerprint_results_callback_task(self, results, results_to_return):
-    # Returning the fingerprinting results, which is the part of this task whose results are sent back to the user.
+    # Ignoring the fingerprinting results and returning the results relevant to the task chain.
+    # Used in tasks like transcription and OCR, where fingerprinting is performed before the task itself, but where
+    # the results of the fingerprinting are not returned.
     return results_to_return

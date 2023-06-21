@@ -69,8 +69,17 @@ def test__translation_translate__translate_text__integration(fixture_app, celery
     # Parse resulting task id
     task_id = response.json()['task_id']
 
-    # Wait a few seconds
-    sleep(5)
+    # Waiting for task chain to succeed
+    current_status = 'PENDING'
+    n_tries = 0
+    while current_status == 'PENDING' and n_tries < 10:
+        # Wait a few seconds
+        sleep(3)
+        # Now get status
+        response = fixture_app.get(f'/translation/translate/status/{task_id}',
+                                   timeout=timeout)
+        current_status = response.json()['task_status']
+        n_tries += 1
 
     # Now get status
     response = fixture_app.get(f'/translation/translate/status/{task_id}',
@@ -99,8 +108,17 @@ def test__translation_translate__translate_text__integration(fixture_app, celery
     # Parse resulting task id
     task_id = response.json()['task_id']
 
-    # Wait a few seconds
-    sleep(5)
+    # Waiting for task chain to succeed
+    current_status = 'PENDING'
+    n_tries = 0
+    while current_status == 'PENDING' and n_tries < 10:
+        # Wait a few seconds
+        sleep(3)
+        # Now get status
+        response = fixture_app.get(f'/translation/translate/status/{task_id}',
+                                   timeout=timeout)
+        current_status = response.json()['task_status']
+        n_tries += 1
 
     # Now get status
     response = fixture_app.get(f'/translation/translate/status/{task_id}',
@@ -110,6 +128,7 @@ def test__translation_translate__translate_text__integration(fixture_app, celery
     # Check values
     assert isinstance(en_fr_translated, dict)
     # results must be successful but not fresh, since they were already cached
+    assert en_fr_translated['task_status'] == 'SUCCESS'
     assert en_fr_translated['task_result']['successful'] is True
     assert en_fr_translated['task_result']['fresh'] is False
     assert en_fr_translated['task_result']['result'] == original_results
@@ -166,7 +185,18 @@ def test__translation_calculate_fingerprint__compute_text_fingerprint__integrati
     task_id = response.json()['task_id']
 
     # Wait a few seconds
-    sleep(5)
+
+    # Waiting for task chain to succeed
+    current_status = 'PENDING'
+    n_tries = 0
+    while current_status == 'PENDING' and n_tries < 10:
+        # Wait a few seconds
+        sleep(3)
+        # Now get status
+        response = fixture_app.get(f'/translation/calculate_fingerprint/status/{task_id}',
+                                   timeout=timeout)
+        current_status = response.json()['task_status']
+        n_tries += 1
 
     # Now get status
     response = fixture_app.get(f'/translation/calculate_fingerprint/status/{task_id}',

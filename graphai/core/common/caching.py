@@ -20,36 +20,92 @@ TRANSCRIPT_FORMATS = ['_transcript.txt', '_subtitle_segments.json']
 TEMP_SUBFOLDER = 'Temp'
 
 
-def make_sure_path_exists(path, file_at_the_end=False):
-    try:
-        if not file_at_the_end:
-            os.makedirs(path)
-        else:
-            os.makedirs('/'.join(path.split('/')[:-1]))
+def make_sure_path_exists(path, file_at_the_end=False, full_perm=True):
+    """
+    Recursively creates the folders in a path.
+    Args:
+        path: The path that needs to exist (and will thus be created if it doesn't)
+        file_at_the_end: Whether there is a filename at the end of the path
+
+    Returns:
+        None
+    """
+    if path == '/' or path == '':
         return
+    if file_at_the_end:
+        path = '/'.join(path.split('/')[:-1])
+    try:
+        parent_path = '/'.join(path.split('/')[:-1])
+        make_sure_path_exists(parent_path)
+        os.mkdir(path)
+        if full_perm:
+            os.chmod(path, 0o777)
     except OSError as exception:
         if exception.errno != errno.EEXIST and exception.errno != errno.EPERM:
             raise
 
 
 def file_exists(file_path):
+    """
+    Checks whether a given file exists
+    Args:
+        file_path: Path of the file
+
+    Returns:
+        True if file exists, False otherwise
+    """
     return os.path.exists(file_path)
 
 
 def create_symlink_between_paths(old_path, new_path):
+    """
+    Creates a symlink from new_path to old_path
+    Args:
+        old_path: Path to the old (real) file
+        new_path: Path to the new (symlink) file
+
+    Returns:
+        None
+    """
     if not file_exists(new_path):
         os.symlink(old_path, new_path)
 
 
 def surround_with_character(s, c="'"):
+    """
+    Surrounds a string with a character
+    Args:
+        s: The string
+        c: The character
+
+    Returns:
+        Resulting string
+    """
     return c + s + c
 
 
 def escape_single_quotes(s):
+    """
+    Escapes single quotes for SQL queries
+    Args:
+        s: The original string
+
+    Returns:
+        Original string with single quotes escaped
+    """
     return s.replace("'", "''")
 
 
 def add_where_or_and(query):
+    """
+    Prepares an SQL query for a new condition by adding a WHERE (if the query doesn't already have one)
+    or an AND (if it does).
+    Args:
+        query: The original query
+
+    Returns:
+        The query with WHERE or AND added to it
+    """
     if 'WHERE' in query:
         return ' AND '
     else:
@@ -57,10 +113,26 @@ def add_where_or_and(query):
 
 
 def add_equality_conditions(conditions):
+    """
+    Generates equality conditions that can be added to a query
+    Args:
+        conditions: A dictionary where the conditions would be of the form "key=value"
+
+    Returns:
+        A string containing the conditions.
+    """
     return " AND ".join([f"{k}='{escape_single_quotes(v)}'" for k, v in conditions.items()])
 
 
 def add_non_null_conditions(cols):
+    """
+    Generates non-null conditions that can be added to a query
+    Args:
+        cols: List of columns that cannot be null, which would turn into conditions of the form "col IS NOT NULL"
+
+    Returns:
+        A string containing the conditions
+    """
     return " AND ".join([col + " IS NOT NULL" for col in cols])
 
 
@@ -82,15 +154,34 @@ class DBCachingManagerBase(abc.ABC):
     def init_db(self):
         pass
 
-    def resolve_most_similar_chain(self, token):
+    def _resolve_most_similar_chain(self, token):
+        """
+        Internal method that resolves the chain of most similar token edges for a given token.
+        Args:
+            token: The starting token
+
+        Returns:
+            The final token of the chain starting from `token`
+        """
         if token is None:
             return None
-        prev_most_similar = self._get_closest_match(token)
+        prev_most_similar = self._resolve_closest_match_edge(token)
         if prev_most_similar is None or prev_most_similar == token:
             return token
-        return self.resolve_most_similar_chain(prev_most_similar)
+        return self._resolve_most_similar_chain(prev_most_similar)
 
     def _insert_or_update_details(self, schema, table_name, id_token, values_to_insert=None):
+        """
+        Internal method that inserts a new row or updates an existing row.
+        Args:
+            schema: The schema of the table
+            table_name: Name of the table
+            id_token: The id token
+            values_to_insert: Dictionary of column names and values to be inserted/updated for `id_token`
+
+        Returns:
+            None
+        """
         if values_to_insert is None:
             values_to_insert = dict()
         values_to_insert = {
@@ -132,6 +223,17 @@ class DBCachingManagerBase(abc.ABC):
             )
 
     def _get_details(self, schema, table_name, id_token, cols):
+        """
+        Internal method that retrieves the details of a given id_token.
+        Args:
+            schema: Schema name
+            table_name: Table name
+            id_token: The identifier token
+            cols: Columns to retrieve
+
+        Returns:
+            A dictionary mapping each column name to its corresponding value for the `id_token` row
+        """
         column_list = ['id_token'] + cols
         results = self.db.execute_query(
             f"""
@@ -145,13 +247,32 @@ class DBCachingManagerBase(abc.ABC):
             results = None
         return results
 
-    def _get_closest_match(self, id_token):
+    def _resolve_closest_match_edge(self, id_token):
+        """
+        Internal method. Resolves one single edge in the closest match graph
+        Args:
+            id_token: The starting token
+
+        Returns:
+            Closest match of `id_token` if one exists in the corresponding table, None otherwise
+        """
         results = self._get_details(self.schema, self.most_similar_table, id_token, ['most_similar_token'])
         if results is not None:
             return results['most_similar_token']
         return None
 
     def _get_details_using_origin(self, schema, table_name, origin_token, cols):
+        """
+        Internal method that gets details using an origin token (e.g. the video an audio file originated from).
+        Args:
+            schema: Schema name
+            table_name: Table name
+            origin_token: Token of the origin file
+            cols: Columns to retrieve
+
+        Returns:
+            Dictionary mapping column names to values
+        """
         column_list = ['origin_token', 'id_token'] + cols
         results = self.db.execute_query(
             f"""
@@ -168,6 +289,23 @@ class DBCachingManagerBase(abc.ABC):
     def _get_all_details(self, schema, table_name, cols, start=0, limit=-1,
                          exclude_token=None, allow_nulls=True, earliest_date=None,
                          equality_conditions=None, has_date_col=False):
+        """
+        Internal method. Gets the details of all rows in a table, with some conditions.
+        Args:
+            schema: Schema name
+            table_name: Table name
+            cols: Columns to retrieve
+            start: The offset parameter of the LIMIT clause
+            limit: the limit parameter of the LIMIT clause
+            exclude_token: List of tokens to exclude
+            allow_nulls: Whether to allow null values or to exclude rows where any of the required columns is null
+            earliest_date: The earliest date to include
+            equality_conditions: Equality conditions
+            has_date_col: Whether or not the table has a date_added column, which would be used to sort the results.
+
+        Returns:
+            Dictionary mapping each id_token to a dictionary of column name : values.
+        """
         column_list = ['id_token'] + cols
         query = f"""
             SELECT {', '.join(column_list)} FROM `{schema}`.`{table_name}`
@@ -207,6 +345,16 @@ class DBCachingManagerBase(abc.ABC):
         return results
 
     def _delete_rows(self, schema, table_name, id_tokens):
+        """
+        Internal method. Deletes rows using a list of ids to delete
+        Args:
+            schema: Schema name
+            table_name: Table name
+            id_tokens: List of ids to delete
+
+        Returns:
+            None
+        """
         id_tokens_str = '(' + ', '.join([surround_with_character(id_token, "'") for id_token in id_tokens]) + ')'
         self.db.execute_query(
             f"""
@@ -215,6 +363,17 @@ class DBCachingManagerBase(abc.ABC):
         )
 
     def _get_count(self, schema, table_name, non_null_cols=None, equality_conditions=None):
+        """
+        Internal method. Gets the number of rows in a table, possibly with conditions on the rows.
+        Args:
+            schema: Schema name
+            table_name: Table name
+            non_null_cols: List of columns that have a non-null condition
+            equality_conditions: Dictionary of equality conditions
+
+        Returns:
+            Number of rows with the given conditions
+        """
         query = f"""
         SELECT COUNT(*) FROM `{schema}`.`{table_name}`
         """
@@ -229,6 +388,16 @@ class DBCachingManagerBase(abc.ABC):
         return results[0][0]
 
     def _row_exists(self, schema, table_name, id_token):
+        """
+        Internal method. Checks whether a row with a given id token exists.
+        Args:
+            schema: Schema name
+            table_name: Table name
+            id_token: Identifier token of the row
+
+        Returns:
+            True if the row exists, False otherwise
+        """
         query = f"""
         SELECT COUNT(*) FROM `{schema}`.`{table_name}`
         WHERE id_token = '{id_token}'
@@ -239,17 +408,55 @@ class DBCachingManagerBase(abc.ABC):
         return False
 
     def delete_cache_rows(self, id_tokens):
+        """
+        Deletes rows from the cache table
+        Args:
+            id_tokens: List of id tokens to delete the rows of
+
+        Returns:
+            None
+        """
         self._delete_rows(self.schema, self.cache_table, id_tokens)
 
     def insert_or_update_details(self, id_token, values_to_insert=None):
+        """
+        Inserts or updates values in the cache table
+        Args:
+            id_token: Identifier token
+            values_to_insert: Dictionary of column to value mappings
+
+        Returns:
+            None
+        """
         self._insert_or_update_details(self.schema, self.cache_table, id_token, values_to_insert)
 
     def update_details_if_exists(self, id_token, values_to_insert):
+        """
+        Only updates values if the row exists and does not insert otherwise
+        Args:
+            id_token: Identifier token
+            values_to_insert: Column to value dict
+
+        Returns:
+            None
+        """
         if not self._row_exists(self.schema, self.cache_table, id_token):
             return
         self._insert_or_update_details(self.schema, self.cache_table, id_token, values_to_insert)
 
     def get_details(self, id_token, cols, using_most_similar=False):
+        """
+        Gets details from the cache table for a given id token.
+        Args:
+            id_token: Identifier token
+            cols: Columns to retrieve
+            using_most_similar: Whether to resolve the most similar chain or not
+
+        Returns:
+            A list of two results: the token's own results and the results of the token's closest match. If there
+            is no closest match, or the closest match is the token itself, or using_most_similar is False, then the
+            second result is None.
+        """
         own_results = self._get_details(self.schema, self.cache_table, id_token, cols)
         if not using_most_similar:
             return [own_results, None]
@@ -260,16 +467,47 @@ class DBCachingManagerBase(abc.ABC):
         return [own_results, closest_match_results]
 
     def get_origin(self, id_token):
+        """
+        Gets the origin of a given id token
+        Args:
+            id_token: Identifier token
+
+        Returns:
+            Origin token if applicable
+        """
         results = self._get_details(self.schema, self.cache_table, id_token, ['origin_token'])
         if results is not None:
             return results['origin_token']
         return None
 
     def get_details_using_origin(self, origin_token, cols):
+        """
+        Gets details of cache row(s) using origin token instead of id token
+        Args:
+            origin_token: Origin token
+            cols: List of columns to retrieve
+
+        Returns:
+            Cache row detail dict
+        """
         return self._get_details_using_origin(self.schema, self.cache_table, origin_token, cols)
 
     def get_all_details(self, cols, start=0, limit=-1, exclude_token=None,
                         allow_nulls=True, earliest_date=None, equality_conditions=None):
+        """
+        Gets details of all rows in cache table, possibly with constraints
+        Args:
+            cols: Columns to retrieve
+            start: Offset of LIMIT clause
+            limit: count of LIMIT clause
+            exclude_token: List of tokens to exclude
+            allow_nulls: Whether to allow null values for requested cols
+            earliest_date: Earliest date to allow
+            equality_conditions: Dict of equality conditions
+
+        Returns:
+            Dict mapping id tokens to colname->value dicts
+        """
         # If we want to exclude a token, all the tokens whose closest match is the former should also be excluded
         # in order not to create cycles.
         if exclude_token is not None:
@@ -288,15 +526,46 @@ class DBCachingManagerBase(abc.ABC):
         return results
 
     def get_cache_count(self, non_null_cols=None, equality_conditions=None):
+        """
+        Gets number of rows in cache table, possibly with constraints
+        Args:
+            non_null_cols: Columns to enforce a non-null constraint on
+            equality_conditions: Equality conditions dict
+
+        Returns:
+            Number of rows that satisfy the given conditions from the cache table
+        """
         return self._get_count(self.schema, self.cache_table, non_null_cols, equality_conditions)
 
     def insert_or_update_closest_match(self, id_token, values_to_insert):
+        """
+        Inserts or updates the value of a row in the closest match table
+        Args:
+            id_token: Identifier token
+            values_to_insert: Dict of values to insert
+
+        Returns:
+            None
+        """
         self._insert_or_update_details(self.schema, self.most_similar_table, id_token, values_to_insert)
 
     def get_closest_match(self, id_token):
-        return self.resolve_most_similar_chain(id_token)
+        """
+        Gets closest match of given token by resolving the closest match chain.
+        Args:
+            id_token: Starting identifier token
+
+        Returns:
+            Final id token in the chain
+        """
+        return self._resolve_most_similar_chain(id_token)
 
     def get_all_closest_matches(self):
+        """
+        Retrieves all the rows in the closest match table
+        Returns:
+            All rows in most similar token table
+        """
         results = self._get_all_details(self.schema, self.most_similar_table,
                                         ['most_similar_token'], has_date_col=False)
         if results is not None:
@@ -474,16 +743,31 @@ class VideoConfig():
             self.root_dir = ROOT_VIDEO_DIR
 
     def concat_file_path(self, filename, subfolder):
+        """
+        Concatenates the root dir with the given subfolder and file name.
+        Args:
+            filename: Name of the file
+            subfolder: Subfolder it is/should be in
+
+        Returns:
+            Full path of the file
+        """
         result = os.path.join(self.root_dir, subfolder, filename)
         make_sure_path_exists(result, file_at_the_end=True)
         return result
 
-    def set_root_dir(self, new_root_dir):
-        self.root_dir = new_root_dir
-        make_sure_path_exists(new_root_dir)
-
     def generate_filepath(self, filename, force_dir=None):
+        """
+        Generates the full path of a given file based on its name
+        Args:
+            filename: Name of the file
+            force_dir: Whether to force a particular subfolder
+
+        Returns:
+            The full file path
+        """
         if force_dir is not None:
+            # If the directory is being forced, we don't check the name of the file to know where it should go
             filename_with_path = self.concat_file_path(filename, force_dir)
         else:
             # If the "file" is really a file or a folder, this will give us the unchanged file name.
@@ -491,6 +775,7 @@ class VideoConfig():
             # figure out where it's supposed to go. The full path still involves the full file name,
             # not just the folder part.
             filename_first_part = filename.split('/')[0]
+            # If it ends in a video format, it goes into the video subfolder, etc.
             if any([filename_first_part.endswith(x) for x in VIDEO_FORMATS]):
                 filename_with_path = self.concat_file_path(filename, VIDEO_SUBFOLDER)
             elif any([filename_first_part.endswith(x) for x in AUDIO_FORMATS]):
@@ -504,6 +789,15 @@ class VideoConfig():
         return filename_with_path
 
     def create_symlink(self, old_path, new_filename):
+        """
+        Creates a symlink between a new filename (for which the path is generated automatically) and an old full path
+        Args:
+            old_path: Old full path
+            new_filename: New filename
+
+        Returns:
+            None
+        """
         new_path = self.generate_filepath(new_filename)
         # Only creating the symlink if it doesn't already exist
         create_symlink_between_paths(old_path, new_path)

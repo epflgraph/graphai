@@ -234,6 +234,10 @@ def extract_audio_callback_task(self, results, origin_token, force=False):
         if not force:
             video_db_manager = VideoDBCachingManager()
             closest_video_match = video_db_manager.get_closest_match(origin_token)
+            # This only happens if the other video has been fingerprinted before having its audio extracted.
+            # A case where this happens is an old video that have had slide detection performed on it,
+            # but not audio extraction. When extract_audio is called on a new identical video, the results
+            # of audio extraction on the latter need to be inserted for the former as well.
             if closest_video_match is not None and closest_video_match != origin_token:
                 symbolic_token = generate_symbolic_token(closest_video_match, results['token'])
                 self.file_manager.create_symlink(self.file_manager.generate_filepath(results['token']), symbolic_token)
@@ -295,6 +299,7 @@ def extract_and_sample_frames_task(self, token, force=False):
                 if existing_slides[0]['origin_token'] == token:
                     slide_db_manager.delete_cache_rows([x['id_token'] for x in existing_slides])
     # Extracting frames
+    print('Extracting frames...')
     input_filename_with_path = self.file_manager.generate_filepath(token)
     output_folder = token + '_all_frames'
     output_folder_with_path = self.file_manager.generate_filepath(output_folder)
@@ -478,6 +483,10 @@ def detect_slides_callback_task(self, results, token, force=False):
             # video as well, but only if force is False because otherwise we ignore the closest match.
             video_db_manager = VideoDBCachingManager()
             closest_video_match = video_db_manager.get_closest_match(token)
+            # This only happens if the other video has been fingerprinted before having its slides extracted.
+            # A case where this happens is an old video that have had audio extraction performed on it,
+            # but not slide detection. When detect_slides is called on a new identical video, the results
+            # of slide detection on the latter need to be inserted for the former as well.
             if closest_video_match is not None and closest_video_match != token:
                 for slide_number in slide_tokens:
                     # For each slide, we get its token (which is the name of its file) and create a new file with a new
