@@ -1,5 +1,4 @@
 import os
-import stat
 import configparser
 import errno
 import abc
