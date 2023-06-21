@@ -88,8 +88,7 @@ def test__video_extract_audio__extract_audio_task__run_task(test_video_token):
 
 
 # The mark is necessary because the celery_worker fixture uses JSON for serialization by default
-@pytest.mark.celery(accept_content=['pickle', 'json'], result_serializer='pickle', task_serializer='pickle',
-                    shutdown_timeout=240.0, ping_task_timeout=240.0, perform_ping_check=False)
+@pytest.mark.celery(accept_content=['pickle', 'json'], result_serializer='pickle', task_serializer='pickle')
 @pytest.mark.usefixtures('test_video_url')
 def test__video_detect_slides__detect_slides__integration(fixture_app, celery_worker, test_video_url, timeout=30):
     # First retrieving the video (without `force` in order to use cached results if available)
@@ -198,8 +197,7 @@ def test__video_detect_slides__detect_slides__integration(fixture_app, celery_wo
 ################################################################
 
 
-@pytest.mark.celery(accept_content=['pickle', 'json'], result_serializer='pickle', task_serializer='pickle',
-                    shutdown_timeout=240.0, ping_task_timeout=240.0, perform_ping_check=False)
+@pytest.mark.celery(accept_content=['pickle', 'json'], result_serializer='pickle', task_serializer='pickle')
 @pytest.mark.usefixtures('test_video_url')
 def test__video_extract_audio__extract_audio__integration(fixture_app, celery_worker, test_video_url, timeout=30):
     # First retrieving the video (without `force` in order to use cached results if available)
