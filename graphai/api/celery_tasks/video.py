@@ -299,6 +299,7 @@ def extract_and_sample_frames_task(self, token, force=False):
                 if existing_slides[0]['origin_token'] == token:
                     slide_db_manager.delete_cache_rows([x['id_token'] for x in existing_slides])
     # Extracting frames
+    print('Extracting frames...')
     input_filename_with_path = self.file_manager.generate_filepath(token)
     output_folder = token + '_all_frames'
     output_folder_with_path = self.file_manager.generate_filepath(output_folder)

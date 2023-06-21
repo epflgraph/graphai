@@ -591,10 +591,12 @@ def extract_frames(input_filename_with_path, output_folder_with_path, output_fol
         print(f'ffmpeg error: File {input_filename_with_path} does not exist')
         return None
     try:
+        print('Creating the path...')
         make_sure_path_exists(output_folder_with_path)
         # DO NOT CHANGE r=1 HERE
         # This parameter ensures that one frame is extracted per second, and the whole logic of the algorithm
         # relies on timestamp being identical to frame number.
+        print('Starting ffmpeg slide extraction...')
         err = ffmpeg.input(input_filename_with_path).video. \
             output(os.path.join(output_folder_with_path, FRAME_FORMAT_PNG), r=1). \
             overwrite_output().run(capture_stdout=True)
