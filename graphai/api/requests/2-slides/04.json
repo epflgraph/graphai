@@ -1,0 +1,3 @@
+{
+  "raw_text": "Convolutional Neural Network (CNN)\nOne can stack multiple blocks performing convolutions and\npooling operations\nThe number of channels can vary (below: first 3, then 6)\n· The size of the filters can vary (below: first 5 x 5, then 3 X 3)\n28 x 28\n3 x 24 x 24\n3 x 12 x 12\n6 x 10 x 10\n6 x 5 x 5\n55"
+}

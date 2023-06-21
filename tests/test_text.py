@@ -12,6 +12,8 @@ from graphai.api.celery_tasks.text import (
     compute_scores_task,
     purge_irrelevant_task,
     aggregate_task,
+    draw_ontology_task,
+    draw_graph_task,
 )
 
 ################################################################
@@ -336,3 +338,136 @@ def test__text_wikify__integration(fixture_app, wave_fields, schreier, timeout=6
     assert 358277 in results['PageID'].values        # Cayley graph wikipage
     for column in ['PageID', 'PageTitle', 'SearchScore', 'LevenshteinScore', 'GraphScore', 'OntologyLocalScore', 'OntologyGlobalScore', 'KeywordsScore', 'MixedScore']:
         assert column in results.columns
+
+################################################################
+# /text/wikify_ontology_svg                                    #
+################################################################
+
+
+@patch('graphai.api.celery_tasks.text.draw_ontology_task.run')
+@pytest.mark.usefixtures('wave_fields_wikified_json')
+def test__text_wikify_ontology_svg__draw_ontology__mock_task(mock_run, wave_fields_wikified_json):
+    # Mock calling the task
+    draw_ontology_task.run(wave_fields_wikified_json)
+
+    # Assert that the task has been called
+    assert draw_ontology_task.run.call_count == 1
+
+################################################################
+
+
+@pytest.mark.usefixtures('wave_fields_wikified_json')
+def test__text_wikify_ontology_svg__draw_ontology__run_task(wave_fields_wikified_json):
+    # Call task
+    ok = draw_ontology_task.run([])
+
+    # Check returned value
+    assert isinstance(ok, bool)
+    assert ok
+
+    ################
+
+    # Call task
+    ok = draw_ontology_task.run(wave_fields_wikified_json)
+
+    # Check returned value
+    assert isinstance(ok, bool)
+    assert ok
+
+################################################################
+
+
+@pytest.mark.usefixtures('wave_fields_wikified_json')
+def test__text_wikify_ontology_svg__integration(fixture_app, wave_fields_wikified_json, timeout=30):
+    # Make POST request to fixture fastapi app
+    response = fixture_app.post('/text/wikify_ontology_svg', data=json.dumps([]), timeout=timeout)
+
+    # Check status code is successful
+    assert response.status_code == 200
+
+    # Check returned value
+    assert isinstance(response.content, bytes)
+    svg = response.content.decode()
+    assert len(svg) > 0
+    assert '<svg' in svg
+
+    ################
+
+    # Make POST request to fixture fastapi app
+    response = fixture_app.post('/text/wikify_ontology_svg', data=json.dumps(wave_fields_wikified_json), timeout=timeout)
+
+    # Check status code is successful
+    assert response.status_code == 200
+
+    # Check returned value
+    assert isinstance(response.content, bytes)
+    svg = response.content.decode()
+    assert len(svg) > 0
+    assert '<svg' in svg
+
+
+################################################################
+# /text/wikify_graph_svg                                    #
+################################################################
+
+
+@patch('graphai.api.celery_tasks.text.draw_graph_task.run')
+@pytest.mark.usefixtures('wave_fields_wikified_json')
+def test__text_wikify_graph_svg__draw_graph__mock_task(mock_run, wave_fields_wikified_json):
+    # Mock calling the task
+    draw_graph_task.run(wave_fields_wikified_json)
+
+    # Assert that the task has been called
+    assert draw_graph_task.run.call_count == 1
+
+################################################################
+
+
+@pytest.mark.usefixtures('wave_fields_wikified_json')
+def test__text_wikify_graph_svg__draw_graph__run_task(wave_fields_wikified_json):
+    # Call task
+    ok = draw_graph_task.run([])
+
+    # Check returned value
+    assert isinstance(ok, bool)
+    assert ok
+
+    ################
+
+    # Call task
+    ok = draw_graph_task.run(wave_fields_wikified_json)
+
+    # Check returned value
+    assert isinstance(ok, bool)
+    assert ok
+
+################################################################
+
+
+@pytest.mark.usefixtures('wave_fields_wikified_json')
+def test__text_wikify_graph_svg__integration(fixture_app, wave_fields_wikified_json, timeout=30):
+    # Make POST request to fixture fastapi app
+    response = fixture_app.post('/text/wikify_graph_svg', data=json.dumps([]), timeout=timeout)
+
+    # Check status code is successful
+    assert response.status_code == 200
+
+    # Check returned value
+    assert isinstance(response.content, bytes)
+    svg = response.content.decode()
+    assert len(svg) > 0
+    assert '<svg' in svg
+
+    ################
+
+    # Make POST request to fixture fastapi app
+    response = fixture_app.post('/text/wikify_graph_svg', data=json.dumps(wave_fields_wikified_json), timeout=timeout)
+
+    # Check status code is successful
+    assert response.status_code == 200
+
+    # Check returned value
+    assert isinstance(response.content, bytes)
+    svg = response.content.decode()
+    assert len(svg) > 0
+    assert '<svg' in svg

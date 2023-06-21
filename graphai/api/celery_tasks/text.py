@@ -12,6 +12,7 @@ from graphai.core.interfaces.wp import WP
 from graphai.core.interfaces.es import ES
 
 from graphai.core.text.keywords import get_keywords
+from graphai.core.text.draw import draw_ontology, draw_graph
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={'max_retries': 2},
@@ -259,10 +260,13 @@ def filter_results(results, epsilon=0.1, min_votes=5):
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={'max_retries': 2},
-             name='text_10.purge_irrelevant_task', ignore_result=False)
+             name='text_10.purge_irrelevant', ignore_result=False)
 def purge_irrelevant_task(self, results, coef=0.5, epsilon=0.1, min_votes=5):
     # Aggregate and filter to know which pages are relevant
     relevant = filter_results(aggregate_results(results, coef=coef), epsilon=epsilon, min_votes=min_votes)
+
+    if len(relevant) == 0:
+        return pd.DataFrame()
 
     # Keep only relevant results, namely those whose PageID survives the aggregate_and_filter operation
     results = pd.merge(results, relevant['PageID'], how='inner', on='PageID')
@@ -274,7 +278,7 @@ def purge_irrelevant_task(self, results, coef=0.5, epsilon=0.1, min_votes=5):
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={'max_retries': 2},
-             name='text_10.aggregate_and_filter', ignore_result=False)
+             name='text_10.aggregate', ignore_result=False)
 def aggregate_task(self, results, coef=0.5, filter=False, epsilon=0.1, min_votes=5):
     results = aggregate_results(results, coef=coef)
 
@@ -284,7 +288,19 @@ def aggregate_task(self, results, coef=0.5, filter=False, epsilon=0.1, min_votes
     return results
 
 
-@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={'max_retries': 2},
+             name='text_10.draw_ontology', ignore_result=False, ontology=ontology)
+def draw_ontology_task(self, results, level=2):
+    return draw_ontology(results, self.ontology, level)
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={'max_retries': 2},
+             name='text_10.draw_graph', ignore_result=False, graph=graph)
+def draw_graph_task(self, results, concept_score_threshold=0.3, edge_threshold=0.3, min_component_size=3):
+    return draw_graph(results, self.graph, concept_score_threshold, edge_threshold, min_component_size)
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={'max_retries': 2},
              name='text_10.sleeper', ignore_result=False)
 def text_test_task(self):
     sleep(15)
@@ -292,7 +308,7 @@ def text_test_task(self):
     return 0
 
 
-@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={'max_retries': 2},
              name='text_10.init', ignore_result=False, graph=graph, ontology=ontology)
 def text_init_task(self):
     # This task initialises the text celery worker by loading into memory the graph and ontology tables

@@ -1,4 +1,6 @@
 from fastapi import APIRouter
+from fastapi.responses import FileResponse
+
 from celery import chain, group
 from typing import Optional
 
@@ -17,6 +19,8 @@ from graphai.api.celery_tasks.text import (
     compute_scores_task,
     purge_irrelevant_task,
     aggregate_task,
+    draw_ontology_task,
+    draw_graph_task,
     text_test_task,
 )
 
@@ -152,8 +156,58 @@ async def wikify(
     return results.to_dict(orient='records')
 
 
+@router.post('/wikify_ontology_svg')
+async def wikify_ontology_svg(
+    results: WikifyResponse,
+    level: Optional[int] = 2
+):
+    """
+    Returns a svg file representing the ontology subgraph induced by the provided set of results.
+    """
+
+    # Convert WikifyResponseElems into dictionaries
+    results = [vars(result) for result in results]
+
+    # Switch to default level if not properly defined
+    if level not in [1, 2, 3, 4, 5]:
+        level = 2
+
+    # Set up job
+    job = draw_ontology_task.s(results, level)
+
+    # Schedule job and block
+    job.apply_async(priority=10).get(timeout=10)
+
+    # Return file
+    return FileResponse('/tmp/file.svg')
+
+
+@router.post('/wikify_graph_svg')
+async def wikify_graph_svg(
+    results: WikifyResponse,
+    concept_score_threshold: Optional[float] = 0.3,
+    edge_threshold: Optional[float] = 0.3,
+    min_component_size: Optional[int] = 3
+):
+    """
+    Returns a svg file representing the graph subgraph induced by the provided set of results.
+    """
+
+    # Convert WikifyResponseElems into dictionaries
+    results = [vars(result) for result in results]
+
+    # Set up job
+    job = draw_graph_task.s(results, concept_score_threshold, edge_threshold, min_component_size)
+
+    # Schedule job and block
+    job.apply_async(priority=10).get(timeout=10)
+
+    # Return file
+    return FileResponse('/tmp/file.svg')
+
+
 @router.post('/priority_test')
 async def priority_test_text():
     print('the dummy that matters is being launched')
-    task = group(text_test_task.s() for i in range(8)).apply_async(priority=10)
+    task = group(text_test_task.s() for _ in range(8)).apply_async(priority=10)
     return {'id': task.id}
