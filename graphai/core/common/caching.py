@@ -1,4 +1,5 @@
 import os
+import stat
 import configparser
 import errno
 import abc
@@ -20,7 +21,7 @@ TRANSCRIPT_FORMATS = ['_transcript.txt', '_subtitle_segments.json']
 TEMP_SUBFOLDER = 'Temp'
 
 
-def make_sure_path_exists(path, file_at_the_end=False):
+def make_sure_path_exists(path, file_at_the_end=False, full_perm=True):
     """
     Recursively creates the folders in a path.
     Args:
@@ -30,12 +31,16 @@ def make_sure_path_exists(path, file_at_the_end=False):
     Returns:
         None
     """
-    try:
-        if not file_at_the_end:
-            os.makedirs(path)
-        else:
-            os.makedirs('/'.join(path.split('/')[:-1]))
+    if path == '/' or path == '':
         return
+    if file_at_the_end:
+        path = '/'.join(path.split('/')[:-1])
+    try:
+        parent_path = '/'.join(path.split('/')[:-1])
+        make_sure_path_exists(parent_path)
+        os.mkdir(path)
+        if full_perm:
+            os.chmod(path, 0o777)
     except OSError as exception:
         if exception.errno != errno.EEXIST and exception.errno != errno.EPERM:
             raise
