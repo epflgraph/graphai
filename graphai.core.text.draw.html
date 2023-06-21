@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>graphai.core.text package &mdash; EPFL Graph AI</title>
+  <title>graphai.core.text.draw module &mdash; EPFL Graph AI</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -17,8 +17,8 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="graphai.core.text.draw module" href="graphai.core.text.draw.html" />
-    <link rel="prev" title="graphai.core.interfaces.wp module" href="graphai.core.interfaces.wp.html" /> 
+    <link rel="next" title="graphai.core.text.keywords module" href="graphai.core.text.keywords.html" />
+    <link rel="prev" title="graphai.core.text package" href="graphai.core.text.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -46,8 +46,8 @@
 <li class="toctree-l2 current"><a class="reference internal" href="graphai.core.html#subpackages">Subpackages</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="graphai.core.common.html">graphai.core.common package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="graphai.core.interfaces.html">graphai.core.interfaces package</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">graphai.core.text package</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#submodules">Submodules</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="graphai.core.text.html">graphai.core.text package</a><ul class="current">
+<li class="toctree-l4 current"><a class="reference internal" href="graphai.core.text.html#submodules">Submodules</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="graphai.core.utils.html">graphai.core.utils package</a></li>
@@ -76,9 +76,10 @@
   <ul class="wy-breadcrumbs">
       <li><a href="graphai.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="graphai.core.html">graphai.core package</a></li>
-      <li class="breadcrumb-item active">graphai.core.text package</li>
+          <li class="breadcrumb-item"><a href="graphai.core.text.html">graphai.core.text package</a></li>
+      <li class="breadcrumb-item active">graphai.core.text.draw module</li>
       <li class="wy-breadcrumbs-aside">
-            <a href="_sources/graphai.core.text.rst.txt" rel="nofollow"> View page source</a>
+            <a href="_sources/graphai.core.text.draw.rst.txt" rel="nofollow"> View page source</a>
       </li>
   </ul>
   <hr/>
@@ -86,25 +87,26 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="module-graphai.core.text">
-<span id="graphai-core-text-package"></span><h1>graphai.core.text package<a class="headerlink" href="#module-graphai.core.text" title="Permalink to this heading"></a></h1>
-<section id="submodules">
-<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this heading"></a></h2>
-<div class="toctree-wrapper compound">
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="graphai.core.text.draw.html">graphai.core.text.draw module</a></li>
-<li class="toctree-l1"><a class="reference internal" href="graphai.core.text.keywords.html">graphai.core.text.keywords module</a></li>
-</ul>
-</div>
-</section>
+  <section id="module-graphai.core.text.draw">
+<span id="graphai-core-text-draw-module"></span><h1>graphai.core.text.draw module<a class="headerlink" href="#module-graphai.core.text.draw" title="Permalink to this heading"></a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.core.text.draw.draw_ontology">
+<span class="sig-prename descclassname"><span class="pre">graphai.core.text.draw.</span></span><span class="sig-name descname"><span class="pre">draw_ontology</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">results</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ontology</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">level</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.text.draw.draw_ontology" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.core.text.draw.draw_graph">
+<span class="sig-prename descclassname"><span class="pre">graphai.core.text.draw.</span></span><span class="sig-name descname"><span class="pre">draw_graph</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">results</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">graph</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">concept_score_threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">edge_threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_component_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.text.draw.draw_graph" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
 </section>
 
 
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="graphai.core.interfaces.wp.html" class="btn btn-neutral float-left" title="graphai.core.interfaces.wp module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="graphai.core.text.draw.html" class="btn btn-neutral float-right" title="graphai.core.text.draw module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="graphai.core.text.html" class="btn btn-neutral float-left" title="graphai.core.text package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="graphai.core.text.keywords.html" class="btn btn-neutral float-right" title="graphai.core.text.keywords module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
