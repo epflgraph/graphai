@@ -158,9 +158,9 @@ def test__video_detect_slides__detect_slides__integration(fixture_app, celery_wo
     first_slide = slides['task_result']['slide_tokens']['1']['token']
 
     # Finally, performing OCR on the first slide
-    # setting force to False results in a calculation of the fingerprint as well
+    # setting force to True in order to skip fingerprint lookup
     response = fixture_app.post('/image/extract_text',
-                                data=json.dumps({"token": first_slide, "method": "google", "force": False}),
+                                data=json.dumps({"token": first_slide, "method": "google", "force": True}),
                                 timeout=timeout)
 
     assert response.status_code == 200
