@@ -106,7 +106,7 @@ async def get_retrieve_file_status(task_id):
     return format_api_results(full_results['id'], full_results['name'], full_results['status'], task_results)
 
 
-@router.post('/calculate_fingerprint/', response_model=TaskIDResponse)
+@router.post('/calculate_fingerprint', response_model=TaskIDResponse)
 async def calculate_fingerprint(data: VideoFingerprintRequest):
     token = data.token
     force = data.force
