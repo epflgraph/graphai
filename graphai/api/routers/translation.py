@@ -19,6 +19,7 @@ from graphai.api.celery_tasks.translation import (
     compute_text_fingerprint_callback_task,
     text_fingerprint_find_closest_retrieve_from_db_task,
     text_fingerprint_find_closest_parallel_task,
+    text_fingerprint_find_closest_direct_task,
     text_fingerprint_find_closest_callback_task,
     retrieve_text_fingerprint_callback_task,
 )
@@ -50,12 +51,17 @@ def get_text_fingerprint_chain_list(token, text, src, tgt, force, min_similarity
     # equality conditions (source and target languages).
     task_list = [
         compute_text_fingerprint_task.s(token, text, force),
-        compute_text_fingerprint_callback_task.s(text, src, tgt),
-        text_fingerprint_find_closest_retrieve_from_db_task.s(equality_conditions),
-        group(text_fingerprint_find_closest_parallel_task.s(i, n_jobs, equality_conditions, min_similarity)
-              for i in range(n_jobs)),
-        text_fingerprint_find_closest_callback_task.s()
+        compute_text_fingerprint_callback_task.s(text, src, tgt)
     ]
+    if min_similarity == 1:
+        task_list += [text_fingerprint_find_closest_direct_task.s(equality_conditions)]
+    else:
+        task_list += [
+            text_fingerprint_find_closest_retrieve_from_db_task.s(equality_conditions),
+            group(text_fingerprint_find_closest_parallel_task.s(i, n_jobs, equality_conditions, min_similarity)
+                  for i in range(n_jobs))
+        ]
+    task_list += [text_fingerprint_find_closest_callback_task.s()]
     if ignore_fp_results:
         task_list += [ignore_fingerprint_results_callback_task.s(results_to_return)]
     else:

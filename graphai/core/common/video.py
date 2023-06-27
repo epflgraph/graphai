@@ -598,7 +598,7 @@ def extract_frames(input_filename_with_path, output_folder_with_path, output_fol
         # relies on timestamp being identical to frame number.
         print('Starting ffmpeg slide extraction...')
         err = ffmpeg.input(input_filename_with_path).video. \
-            output(os.path.join(output_folder_with_path, FRAME_FORMAT_PNG), r=1). \
+            filter("fps", 1).output(os.path.join(output_folder_with_path, FRAME_FORMAT_PNG)). \
             overwrite_output().run(capture_stdout=True)
     except Exception as e:
         print(e, file=sys.stderr)
@@ -610,7 +610,7 @@ def extract_frames(input_filename_with_path, output_folder_with_path, output_fol
         return None
 
 
-def generate_frame_sample_indices(input_folder_with_path, step=16):
+def generate_frame_sample_indices(input_folder_with_path, step=12):
     """
     Generates indices for extracted frames (so we don't use every single frame for our calculations)
     Args:

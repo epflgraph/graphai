@@ -106,7 +106,7 @@ async def get_retrieve_file_status(task_id):
     return format_api_results(full_results['id'], full_results['name'], full_results['status'], task_results)
 
 
-@router.post('/calculate_fingerprint/', response_model=TaskIDResponse)
+@router.post('/calculate_fingerprint', response_model=TaskIDResponse)
 async def calculate_fingerprint(data: VideoFingerprintRequest):
     token = data.token
     force = data.force
@@ -183,7 +183,7 @@ async def detect_slides(data: DetectSlidesRequest):
     language = data.language
     n_jobs = 8
     # This is the maximum similarity threshold used for image hashes when finding slide transitions.
-    hash_thresh = 0.85
+    hash_thresh = 0.95
     # force=True skips fingerprinting
     # Task list involves extracting and sampling frames, parallel noise level comp and its callback, then a dummy task
     # because of celery's need for an additional non-group task in the middle, then slide transition comp and its

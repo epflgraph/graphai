@@ -19,6 +19,7 @@ from graphai.api.celery_tasks.image import (
     compute_slide_fingerprint_callback_task,
     slide_fingerprint_find_closest_retrieve_from_db_task,
     slide_fingerprint_find_closest_parallel_task,
+    slide_fingerprint_find_closest_direct_task,
     slide_fingerprint_find_closest_callback_task,
     retrieve_slide_fingerprint_callback_task,
     extract_slide_text_task,
@@ -45,11 +46,16 @@ def get_slide_fingerprint_chain_list(token, force, min_similarity=None, n_jobs=8
     # The usual fingerprinting task list consists of fingerprinting and its callback, then lookup
     task_list = [
         compute_slide_fingerprint_task.s(token, force),
-        compute_slide_fingerprint_callback_task.s(force),
-        slide_fingerprint_find_closest_retrieve_from_db_task.s(),
-        group(slide_fingerprint_find_closest_parallel_task.s(i, n_jobs, min_similarity) for i in range(n_jobs)),
-        slide_fingerprint_find_closest_callback_task.s()
+        compute_slide_fingerprint_callback_task.s(force)
     ]
+    if min_similarity == 1:
+        task_list += [slide_fingerprint_find_closest_direct_task.s()]
+    else:
+        task_list += [
+            slide_fingerprint_find_closest_retrieve_from_db_task.s(),
+            group(slide_fingerprint_find_closest_parallel_task.s(i, n_jobs, min_similarity) for i in range(n_jobs))
+        ]
+    task_list += [slide_fingerprint_find_closest_callback_task.s()]
     if ignore_fp_results:
         task_list += [ignore_fingerprint_results_callback_task.s(results_to_return)]
     else:
