@@ -1,7 +1,7 @@
 from celery import shared_task
 
 from graphai.api.celery_tasks.common import fingerprint_lookup_retrieve_from_db, fingerprint_lookup_parallel, \
-    fingerprint_lookup_callback
+    fingerprint_lookup_callback, fingerprint_lookup_direct
 from graphai.api.common.video import file_management_config
 from graphai.core.common.video import perceptual_hash_image, read_txt_gz_file, write_txt_gz_file, perform_tesseract_ocr, \
     GoogleOCRModel, detect_text_language
@@ -92,6 +92,13 @@ def slide_fingerprint_find_closest_retrieve_from_db_task(self, results):
 def slide_fingerprint_find_closest_parallel_task(self, input_dict, i, n_total, min_similarity=1):
     db_manager = SlideDBCachingManager()
     return fingerprint_lookup_parallel(input_dict, i, n_total, min_similarity, db_manager, data_type='image')
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
+             name='video_2.slide_fingerprint_find_closest_direct', ignore_result=False)
+def slide_fingerprint_find_closest_direct_task(self, results):
+    db_manager = SlideDBCachingManager()
+    return fingerprint_lookup_direct(results, db_manager)
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},

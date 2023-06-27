@@ -150,6 +150,54 @@ def fingerprint_lookup_parallel(input_dict, i, n_total, min_similarity, db_manag
     }
 
 
+def fingerprint_lookup_direct(fp_results, db_manager, equality_conditions=None):
+    target_fingerprint = fp_results['result']
+    token = fp_results['fp_token']
+
+    if not fp_results['perform_lookup']:
+        # The results are returned as a list to mimic the behavior of the group-chord fingerprint lookup path
+        return [{
+            'closest': None,
+            'closest_fp': None,
+            'closest_date': None,
+            'max_score': None,
+            'fp_results': fp_results
+        }]
+
+    if equality_conditions is None:
+        equality_conditions = dict()
+    equality_conditions['fingerprint'] = target_fingerprint
+
+    tokens_and_fingerprints = db_manager.get_all_details(
+        ['fingerprint', 'date_added'], start=0, limit=-1, exclude_token=token,
+        allow_nulls=False, equality_conditions=equality_conditions
+    )
+
+    if tokens_and_fingerprints is None or len(tokens_and_fingerprints) == 0:
+        return [{
+            'closest': None,
+            'closest_fp': None,
+            'closest_date': None,
+            'max_score': None,
+            'fp_results': fp_results
+        }]
+
+    all_tokens = list(tokens_and_fingerprints.keys())
+    all_fingerprints = [tokens_and_fingerprints[key]['fingerprint'] for key in all_tokens]
+    all_dates = [tokens_and_fingerprints[key]['date_added'] for key in all_tokens]
+
+    # Since the results are ordered by `date_added`, the first element is the earliest match
+    closest_token, closest_fingerprint, closest_date, score = all_tokens[0], all_fingerprints[0], all_dates[0], 1
+
+    return [{
+        'closest': closest_token,
+        'closest_fp': closest_fingerprint,
+        'closest_date': closest_date,
+        'max_score': score,
+        'fp_results': fp_results
+    }]
+
+
 def fingerprint_lookup_callback(results_list, db_manager):
     """
     Handles the collection and aggregation of parallel fingerprint lookup results, plus database insertion.

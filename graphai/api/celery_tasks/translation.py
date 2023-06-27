@@ -3,7 +3,7 @@ from graphai.api.common.video import translation_models
 from graphai.core.common.video import detect_text_language, perceptual_hash_text, get_current_datetime
 from graphai.core.common.caching import TextDBCachingManager
 from graphai.api.celery_tasks.common import fingerprint_lookup_retrieve_from_db, \
-    fingerprint_lookup_parallel, fingerprint_lookup_callback
+    fingerprint_lookup_parallel, fingerprint_lookup_callback, fingerprint_lookup_direct
 
 LONG_TEXT_ERROR = "Unpunctuated text too long (over 512 tokens), " \
                   "try adding punctuation or providing a smaller chunk of text."
@@ -72,6 +72,13 @@ def text_fingerprint_find_closest_parallel_task(self, input_dict, i, n_total, eq
     # cached results for an English to French translation.
     return fingerprint_lookup_parallel(input_dict, i, n_total, min_similarity, db_manager, data_type='text',
                                        equality_conditions=equality_conditions)
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
+             name='text_6.text_fingerprint_find_closest_direct', ignore_result=False)
+def text_fingerprint_find_closest_direct_task(self, results, equality_conditions):
+    db_manager = TextDBCachingManager()
+    return fingerprint_lookup_direct(results, db_manager, equality_conditions=equality_conditions)
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
