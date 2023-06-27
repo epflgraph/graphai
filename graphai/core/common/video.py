@@ -610,7 +610,7 @@ def extract_frames(input_filename_with_path, output_folder_with_path, output_fol
         return None
 
 
-def generate_frame_sample_indices(input_folder_with_path, step=16):
+def generate_frame_sample_indices(input_folder_with_path, step=12):
     """
     Generates indices for extracted frames (so we don't use every single frame for our calculations)
     Args:
