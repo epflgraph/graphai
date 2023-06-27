@@ -579,6 +579,7 @@ class VideoDBCachingManager(DBCachingManagerBase):
         super().__init__(cache_table='Video_Main', most_similar_table='Video_Most_Similar')
 
     def init_db(self):
+        # Ensuring the schema's existence
         self.db.execute_query(
             f"""
             CREATE DATABASE IF NOT EXISTS `{self.schema}`
@@ -586,6 +587,8 @@ class VideoDBCachingManager(DBCachingManagerBase):
             DEFAULT ENCRYPTION='N';
             """
         )
+
+        # Creating the cache table if it does not exist
         self.db.execute_query(
             f"""
             CREATE TABLE IF NOT EXISTS `{self.schema}`.`{self.cache_table}` (
@@ -597,6 +600,8 @@ class VideoDBCachingManager(DBCachingManagerBase):
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
             """
         )
+
+        # Creating the closest match table
         self.db.execute_query(
             f"""
             CREATE TABLE IF NOT EXISTS `{self.schema}`.`{self.most_similar_table}` (
@@ -614,6 +619,7 @@ class AudioDBCachingManager(DBCachingManagerBase):
         super().__init__(cache_table='Audio_Main', most_similar_table='Audio_Most_Similar')
 
     def init_db(self):
+        # Ensuring the schema's existence
         self.db.execute_query(
             f"""
             CREATE DATABASE IF NOT EXISTS `{self.schema}`
@@ -621,6 +627,8 @@ class AudioDBCachingManager(DBCachingManagerBase):
             DEFAULT ENCRYPTION='N';
             """
         )
+
+        # Creating the cache table if it does not exist
         self.db.execute_query(
             f"""
             CREATE TABLE IF NOT EXISTS `{self.schema}`.`{self.cache_table}` (
@@ -639,6 +647,8 @@ class AudioDBCachingManager(DBCachingManagerBase):
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
             """
         )
+
+        # Creating the closest match table
         self.db.execute_query(
             f"""
             CREATE TABLE IF NOT EXISTS `{self.schema}`.`{self.most_similar_table}` (
@@ -656,6 +666,7 @@ class SlideDBCachingManager(DBCachingManagerBase):
         super().__init__(cache_table='Slide_Main', most_similar_table='Slide_Most_Similar')
 
     def init_db(self):
+        # Ensuring the schema's existence
         self.db.execute_query(
             f"""
             CREATE DATABASE IF NOT EXISTS `{self.schema}`
@@ -663,6 +674,8 @@ class SlideDBCachingManager(DBCachingManagerBase):
             DEFAULT ENCRYPTION='N';
             """
         )
+
+        # Creating the cache table if it does not exist
         self.db.execute_query(
             f"""
             CREATE TABLE IF NOT EXISTS `{self.schema}`.`{self.cache_table}` (
@@ -680,6 +693,18 @@ class SlideDBCachingManager(DBCachingManagerBase):
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
             """
         )
+
+        # Creating the fingerprint index if it doesn't exist
+        try:
+            self.db.execute_query(
+                f"""
+                CREATE INDEX `slide_main_fp_index` ON `{self.schema}`.`{self.cache_table}` (`fingerprint`(64));
+                """
+            )
+        except Exception:
+            pass
+
+        # Creating the closest match table
         self.db.execute_query(
             f"""
             CREATE TABLE IF NOT EXISTS `{self.schema}`.`{self.most_similar_table}` (
@@ -697,6 +722,7 @@ class TextDBCachingManager(DBCachingManagerBase):
         super().__init__(cache_table='Text_Main', most_similar_table='Text_Most_Similar')
 
     def init_db(self):
+        # Making sure the schema exists
         self.db.execute_query(
             f"""
             CREATE DATABASE IF NOT EXISTS `{self.schema}`
@@ -704,6 +730,8 @@ class TextDBCachingManager(DBCachingManagerBase):
             DEFAULT ENCRYPTION='N';
             """
         )
+
+        # Creating the cache table if it does not exist
         self.db.execute_query(
             f"""
             CREATE TABLE IF NOT EXISTS `{self.schema}`.`{self.cache_table}` (
@@ -718,6 +746,18 @@ class TextDBCachingManager(DBCachingManagerBase):
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
             """
         )
+
+        # Creating the fingerprint index if it doesn't exist
+        try:
+            self.db.execute_query(
+                f"""
+                CREATE INDEX `text_main_fp_index` ON `{self.schema}`.`{self.cache_table}` (`fingerprint`(64));
+                """
+            )
+        except Exception:
+            pass
+
+        # Creating the closest match table
         self.db.execute_query(
             f"""
             CREATE TABLE IF NOT EXISTS `{self.schema}`.`{self.most_similar_table}` (
