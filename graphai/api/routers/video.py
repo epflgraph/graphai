@@ -183,7 +183,7 @@ async def detect_slides(data: DetectSlidesRequest):
     language = data.language
     n_jobs = 8
     # This is the maximum similarity threshold used for image hashes when finding slide transitions.
-    hash_thresh = 0.85
+    hash_thresh = 0.9
     # force=True skips fingerprinting
     # Task list involves extracting and sampling frames, parallel noise level comp and its callback, then a dummy task
     # because of celery's need for an additional non-group task in the middle, then slide transition comp and its
