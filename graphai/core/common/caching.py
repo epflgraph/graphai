@@ -608,8 +608,7 @@ class VideoDBCachingManager(DBCachingManagerBase):
                 CREATE INDEX `video_main_origin_token_index` ON `{self.schema}`.`{self.cache_table}` (`origin_token`(512));
                 """
             )
-        except Exception as e:
-            print(e)
+        except Exception:
             pass
 
         # Creating the closest match table
