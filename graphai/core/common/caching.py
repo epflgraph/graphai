@@ -601,6 +601,16 @@ class VideoDBCachingManager(DBCachingManagerBase):
             """
         )
 
+        # Creating an origin_token index (since it's LONGTEXT, we need to specify index length)
+        try:
+            self.db.execute_query(
+                f"""
+                CREATE INDEX `video_main_origin_token_index` ON `{self.schema}`.`{self.cache_table}` (`origin_token`(512));
+                """
+            )
+        except Exception:
+            pass
+
         # Creating the closest match table
         self.db.execute_query(
             f"""
@@ -647,6 +657,16 @@ class AudioDBCachingManager(DBCachingManagerBase):
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
             """
         )
+
+        # Creating an origin_token index
+        try:
+            self.db.execute_query(
+                f"""
+                CREATE INDEX `audio_main_origin_token_index` ON `{self.schema}`.`{self.cache_table}` (`origin_token`);
+                """
+            )
+        except Exception:
+            pass
 
         # Creating the closest match table
         self.db.execute_query(
@@ -699,6 +719,16 @@ class SlideDBCachingManager(DBCachingManagerBase):
             self.db.execute_query(
                 f"""
                 CREATE INDEX `slide_main_fp_index` ON `{self.schema}`.`{self.cache_table}` (`fingerprint`(64));
+                """
+            )
+        except Exception:
+            pass
+
+        # Creating an origin_token index
+        try:
+            self.db.execute_query(
+                f"""
+                CREATE INDEX `slide_main_origin_token_index` ON `{self.schema}`.`{self.cache_table}` (`origin_token`);
                 """
             )
         except Exception:
