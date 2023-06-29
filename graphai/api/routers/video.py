@@ -76,13 +76,8 @@ async def retrieve_file(data: RetrieveURLRequest):
     url = data.url
     # This flag determines if the URL is that of an m3u8 playlist and not a video file (like a .mp4)
     is_kaltura = data.kaltura
-    # Minimum timeout is 1 minute while maximum is 8 minutes.
-    max_timeout = 480
-    min_timeout = 60
-    timeout = max([data.timeout, min_timeout])
-    timeout = min([timeout, max_timeout])
     # First retrieve the file, and then do the database callback
-    task_list = [retrieve_file_from_url_task.s(url, is_kaltura, timeout, False, None),
+    task_list = [retrieve_file_from_url_task.s(url, is_kaltura, False, None),
                  retrieve_file_from_url_callback_task.s(url)]
     task = chain(task_list)
     task = task.apply_async(priority=2)

@@ -18,7 +18,7 @@ from graphai.api.celery_tasks.common import fingerprint_lookup_retrieve_from_db,
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='video_2.retrieve_url', ignore_result=False,
              file_manager=file_management_config)
-def retrieve_file_from_url_task(self, url, is_kaltura=True, timeout=120, force=False, force_token=None):
+def retrieve_file_from_url_task(self, url, is_kaltura=True, force=False, force_token=None):
     db_manager = VideoDBCachingManager()
     if not force:
         existing = db_manager.get_details_using_origin(url, [])
@@ -37,7 +37,7 @@ def retrieve_file_from_url_task(self, url, is_kaltura=True, timeout=120, force=F
     filename = token + '.' + file_format
     filename_with_path = self.file_manager.generate_filepath(filename)
     if is_kaltura:
-        results = retrieve_file_from_kaltura(url, filename_with_path, filename, timeout=timeout)
+        results = retrieve_file_from_kaltura(url, filename_with_path, filename)
     else:
         results = retrieve_file_from_url(url, filename_with_path, filename)
     return {
