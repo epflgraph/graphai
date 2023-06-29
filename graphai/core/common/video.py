@@ -11,7 +11,6 @@ import time
 from datetime import datetime
 import gzip
 import wget
-from subprocess import call, PIPE
 
 import numpy as np
 
