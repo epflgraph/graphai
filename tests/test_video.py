@@ -20,7 +20,7 @@ from graphai.api.celery_tasks.video import retrieve_file_from_url_task, \
 
 @pytest.mark.usefixtures('test_video_url', 'test_video_token')
 def test__video_retrieve_url__retrieve_file_from_url_task__run_task(test_video_url, test_video_token):
-    results = retrieve_file_from_url_task(test_video_url, True, timeout=240, force=True,
+    results = retrieve_file_from_url_task(test_video_url, True, force=True,
                                           force_token=test_video_token[:-4])
 
     assert isinstance(results, dict)
