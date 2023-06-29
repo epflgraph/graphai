@@ -198,7 +198,7 @@ def retrieve_file_from_kaltura(url, output_filename_with_path, output_token):
     except Exception as e:
         print(e, file=sys.stderr)
         err = str(e)
-    # If the file exists and the command returned 0, the download has been successful
+    # If the file exists and there were no errors, the download has been successful
     if file_exists(output_filename_with_path) and ('ffmpeg error' not in err.lower()):
         return output_token
     else:
