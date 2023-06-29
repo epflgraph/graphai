@@ -178,27 +178,28 @@ def retrieve_file_from_url(url, output_filename_with_path, output_token):
         return None
 
 
-def retrieve_file_from_kaltura(url, output_filename_with_path, output_token, timeout=120):
+def retrieve_file_from_kaltura(url, output_filename_with_path, output_token):
     """
     Retrieves a file in m3u8 format from Kaltura and stores it locally
     Args:
         url: URL of the m3u8 playlist
         output_filename_with_path: Full path of output file
         output_token: Token of output file
-        timeout: Timeout for the download operation
 
     Returns:
         Output token if retrieval is successful, None otherwise
     """
-    # If the file exists, we delete it (because downloadm3u8 will otherwise ask if we want to overwrite, which we do)
-    if file_exists(output_filename_with_path):
-        os.remove(output_filename_with_path)
-    # The timeout parameter is necessary to avoid problems with faulty URLs (which may send m3u8downloader into a
-    #  never-ending loop).
-    result = call(f"downloadm3u8 -o {output_filename_with_path} {url}", timeout=timeout,
-                  stdout=PIPE, stderr=PIPE, shell=True)
+    # Downloading using ffmpeg
+    try:
+        err = ffmpeg.input(url, protocol_whitelist="file,http,https,tcp,tls,crypto"). \
+            output(output_filename_with_path, c="copy"). \
+            overwrite_output().run(capture_stdout=True)
+        err = str(err[0])
+    except Exception as e:
+        print(e, file=sys.stderr)
+        err = str(e)
     # If the file exists and the command returned 0, the download has been successful
-    if result == 0 and file_exists(output_filename_with_path):
+    if file_exists(output_filename_with_path) and ('ffmpeg error' not in err.lower()):
         return output_token
     else:
         return None
