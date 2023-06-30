@@ -32,7 +32,7 @@ def retrieve_file_from_url_task(self, url, is_kaltura=True, force=False, force_t
     else:
         token = force_token
     file_format = url.split('.')[-1].lower()
-    if file_format not in ['mp4', 'mkv', 'flv']:
+    if file_format not in ['mp4', 'mkv', 'flv', 'avi', 'mov']:
         file_format = 'mp4'
     filename = token + '.' + file_format
     filename_with_path = self.file_manager.generate_filepath(filename)
