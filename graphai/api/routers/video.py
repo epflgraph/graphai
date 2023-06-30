@@ -75,7 +75,7 @@ def get_video_fingerprint_chain_list(token, force, min_similarity=None, n_jobs=8
 async def retrieve_file(data: RetrieveURLRequest):
     url = data.url
     # This flag determines if the URL is that of an m3u8 playlist and not a video file (like a .mp4)
-    is_kaltura = data.kaltura
+    is_kaltura = data.playlist
     # First retrieve the file, and then do the database callback
     task_list = [retrieve_file_from_url_task.s(url, is_kaltura, False, None),
                  retrieve_file_from_url_callback_task.s(url)]

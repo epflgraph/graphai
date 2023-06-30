@@ -10,16 +10,12 @@ class RetrieveURLRequest(BaseModel):
         description="The URL to be retrieved and stored for further processing"
     )
 
-    kaltura: bool = Field(
-        title="Kaltura url",
-        description="A boolean variable indicating whether the provided URL is from Kaltura. True by default.",
+    playlist: bool = Field(
+        title="Playlist flag",
+        description="A boolean variable indicating whether the provided URL is an m3u8 playlist, rather "
+                    "than a video file (like an .mp4 file). Video URLs from Kaltura, for example, "
+                    "are m3u8 playlists. True by default.",
         default=True
-    )
-
-    timeout: int = Field(
-        title="Kaltura timeout",
-        description="Timeout in seconds for Kaltura URLs, default 120s. Cannot be more than 480s.",
-        default=240
     )
 
 
