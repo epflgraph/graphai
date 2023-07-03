@@ -27,7 +27,6 @@ dependencies = [
     "requests",
     "httpx",
     "wget",
-    "m3u8downloader",
     "imagehash",
     "fingerprint",
     "openai-whisper",
