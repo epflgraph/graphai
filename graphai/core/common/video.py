@@ -76,10 +76,8 @@ def read_text_file(filename_with_path):
     Returns:
         Contents of the file
     """
-    f = open(filename_with_path, 'r')
-    result = f.read()
-    f.close()
-    return result
+    with open(filename_with_path, 'r') as f:
+        return f.read()
 
 
 def read_json_file(filename_with_path):
@@ -91,10 +89,8 @@ def read_json_file(filename_with_path):
     Returns:
         Dictionary containing contents of the JSON file
     """
-    f = open(filename_with_path, 'r')
-    result = json.load(f)
-    f.close()
-    return result
+    with open(filename_with_path, 'r') as f:
+        return json.load(f)
 
 
 def md5_text(s):
