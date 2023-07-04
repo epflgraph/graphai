@@ -9,7 +9,8 @@ from graphai.core.common.video import retrieve_file_from_url, retrieve_file_from
     detect_audio_format_and_duration, extract_audio_from_video, extract_frames, generate_frame_sample_indices, \
     compute_ocr_noise_level, compute_ocr_threshold, compute_video_ocr_transitions, generate_random_token, \
     md5_video_or_audio, generate_symbolic_token, get_current_datetime, FRAME_FORMAT_PNG, TESSERACT_OCR_FORMAT
-from graphai.core.common.caching import AudioDBCachingManager, SlideDBCachingManager, VideoDBCachingManager
+from graphai.core.common.caching import AudioDBCachingManager, SlideDBCachingManager, \
+    VideoDBCachingManager, file_exists
 from itertools import chain
 from graphai.api.celery_tasks.common import fingerprint_lookup_retrieve_from_db, \
     fingerprint_lookup_parallel, fingerprint_lookup_callback
@@ -276,9 +277,12 @@ def extract_and_sample_frames_task(self, token, force=False):
         existing_slides_closest = None
     # We first look at the video's own existing slides, then at those of the closest match because the video's
     # own precomputed slides (if any) take precedence.
+    input_filename_with_path = self.file_manager.generate_filepath(token)
     all_existing = [existing_slides_own, existing_slides_closest]
     for existing_slides in all_existing:
+        # If we have a cache hit
         if existing_slides is not None:
+            # If the force flag is off, we return the cache hit
             if not force:
                 print('Returning cached result')
                 return {
@@ -289,18 +293,26 @@ def extract_and_sample_frames_task(self, token, force=False):
                                      for x in existing_slides}
                 }
             else:
-                # If force==True, then we need to delete the existing rows in case the results this time are different
-                # than they were before, since unlike audio endpoints, there's multiple rows per video here (although
-                # the old files are not deleted because there may be symlinks to them).
+                # If force==True, then we need to first delete the existing rows in case the results this time are
+                # different from what they were before, since unlike audio endpoints, there's multiple rows per
+                # video here (although the old files are not deleted because there may be symlinks to them).
                 # This will require a force-recomputation of every other property that pertains to the video
-                # whose slides have been force-recomputed, e.g. fingerprints and text OCRs. Obviously, this only
-                # applies to the video itself, and not the closest match found.
+                # whose slides have been force-recomputed, e.g. fingerprints and text OCRs.
+                # Obviously, this only applies to the video itself, and not the closest match found,
+                # hence the `if` below.
                 # In general, force is only there for debugging and will not be usable by the end-user.
                 if existing_slides[0]['origin_token'] == token:
+                    if not file_exists(input_filename_with_path):
+                        return {
+                            'result': None,
+                            'sample_indices': None,
+                            'fresh': False,
+                            'slide_tokens': None
+                        }
                     slide_db_manager.delete_cache_rows([x['id_token'] for x in existing_slides])
+                    break
     # Extracting frames
     print('Extracting frames...')
-    input_filename_with_path = self.file_manager.generate_filepath(token)
     output_folder = token + '_all_frames'
     output_folder_with_path = self.file_manager.generate_filepath(output_folder)
     output_folder = extract_frames(input_filename_with_path, output_folder_with_path, output_folder)
