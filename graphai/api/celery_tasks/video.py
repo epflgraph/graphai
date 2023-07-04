@@ -311,6 +311,7 @@ def extract_and_sample_frames_task(self, token, force=False):
                             'fresh': False,
                             'slide_tokens': None
                         }
+                    # If everything's fine, we delete the cache rows before continuing
                     slide_db_manager.delete_cache_rows([x['id_token'] for x in existing_slides])
                     # We break because we're done with the cache lookup
                     break
