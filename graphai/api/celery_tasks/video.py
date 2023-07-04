@@ -300,8 +300,10 @@ def extract_and_sample_frames_task(self, token, force=False):
                 # whose slides have been force-recomputed, e.g. fingerprints and text OCRs.
                 # Obviously, this only applies to the video itself, and not the closest match found,
                 # hence the `if` below.
-                # In general, force is only there for debugging and will not be usable by the end-user.
+                # In general, force is only there for debugging and testing.
                 if existing_slides[0]['origin_token'] == token:
+                    # If the file doesn't exist, we don't allow for a forced recomputation since it'd involve deleting
+                    # the existing cache rows, which can't be replaced (since the original video file is gone).
                     if not file_exists(input_filename_with_path):
                         return {
                             'result': None,
