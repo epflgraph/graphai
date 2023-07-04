@@ -312,6 +312,7 @@ def extract_and_sample_frames_task(self, token, force=False):
                             'slide_tokens': None
                         }
                     slide_db_manager.delete_cache_rows([x['id_token'] for x in existing_slides])
+                    # We break because we're done with the cache lookup
                     break
     # Extracting frames
     print('Extracting frames...')
