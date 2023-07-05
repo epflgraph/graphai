@@ -261,7 +261,7 @@ class DBCachingManagerBase(abc.ABC):
             return results['most_similar_token']
         return None
 
-    def _get_details_using_origin(self, schema, table_name, origin_token, cols):
+    def _get_details_using_origin(self, schema, table_name, origin_token, cols, has_date_col=True):
         """
         Internal method that gets details using an origin token (e.g. the video an audio file originated from).
         Args:
@@ -274,12 +274,13 @@ class DBCachingManagerBase(abc.ABC):
             Dictionary mapping column names to values
         """
         column_list = ['origin_token', 'id_token'] + cols
-        results = self.db.execute_query(
-            f"""
+        query = f"""
             SELECT {', '.join(column_list)} FROM `{schema}`.`{table_name}`
             WHERE origin_token={surround_with_character(origin_token, "'")}
             """
-        )
+        if has_date_col:
+            query += '\nORDER BY date_added'
+        results = self.db.execute_query(query)
         if len(results) > 0:
             results = [{column_list[i]: result[i] for i in range(len(column_list))} for result in results]
         else:
@@ -490,7 +491,7 @@ class DBCachingManagerBase(abc.ABC):
         Returns:
             Cache row detail dict
         """
-        return self._get_details_using_origin(self.schema, self.cache_table, origin_token, cols)
+        return self._get_details_using_origin(self.schema, self.cache_table, origin_token, cols, has_date_col=True)
 
     def get_all_details(self, cols, start=0, limit=-1, exclude_token=None,
                         allow_nulls=True, earliest_date=None, equality_conditions=None):
