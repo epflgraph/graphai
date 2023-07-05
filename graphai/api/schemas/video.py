@@ -14,8 +14,8 @@ class RetrieveURLRequest(BaseModel):
         title="Playlist flag",
         description="A boolean variable indicating whether the provided URL is an m3u8 playlist, rather "
                     "than a video file (like an .mp4 file). Video URLs from Kaltura, for example, "
-                    "are m3u8 playlists. True by default.",
-        default=True
+                    "are m3u8 playlists. False by default.",
+        default=False
     )
 
 
