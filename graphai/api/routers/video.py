@@ -136,7 +136,7 @@ async def calculate_fingerprint_status(task_id):
     return format_api_results(full_results['id'], full_results['name'], full_results['status'], task_results)
 
 
-@router.post('/get_file/')
+@router.post('/get_file')
 async def get_file(data: FileRequest):
     token = data.token
     return FileResponse(get_file_task.apply_async(args=[token], priority=2).get())
