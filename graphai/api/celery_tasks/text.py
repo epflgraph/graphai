@@ -64,7 +64,7 @@ def wikisearch_task(self, keywords_list, fraction=(0, 1), method='es-base'):
 
             # Fallback to Wikipedia API if no results from elasticsearch
             if len(results) == 0:
-                print('[WARNING] No results from elasticsearch cluster. Falling back to Wikipedia API.')
+                print(f'[WARNING] No results from elasticsearch cluster for keywords {keywords}. Falling back to Wikipedia API.')
                 results = self.wp.search(keywords)
 
         # Ignore set of keywords if no pages are found
@@ -186,8 +186,11 @@ def aggregate_results(results, coef=0.5):
     # tuned by a coefficient in [0, 1], in such a way that 0 gives method 1, 1 gives method 2 and 0.5 gives method 5.
     # The default is method 5.
 
+    # Extract titles not to group by them
+    titles = results[['PageID', 'PageTitle']].drop_duplicates(subset='PageID')
+
     # Aggregate over pages, compute sum and max of scores
-    results = results.groupby(by=['PageID', 'PageTitle']).aggregate(
+    results = results.groupby(by='PageID').aggregate(
         SearchScoreSum=('SearchScore', 'sum'),
         SearchScoreMax=('SearchScore', 'max'),
         LevenshteinScoreSum=('LevenshteinScore', 'sum'),
@@ -201,6 +204,9 @@ def aggregate_results(results, coef=0.5):
         KeywordsScoreSum=('KeywordsScore', 'sum'),
         KeywordsScoreMax=('KeywordsScore', 'max')
     ).reset_index()
+
+    # Recover titles from before grouping
+    results = pd.merge(results, titles, how='left', on='PageID')
 
     score_columns = ['SearchScore', 'LevenshteinScore', 'GraphScore', 'OntologyLocalScore', 'OntologyGlobalScore', 'KeywordsScore']
 
