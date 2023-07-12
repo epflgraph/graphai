@@ -57,6 +57,19 @@ def file_exists(file_path):
     return os.path.exists(file_path)
 
 
+def delete_file(file_path):
+    """
+    Deletes a file
+    Args:
+        file_path: Full path of the file
+
+    Returns:
+        None
+    """
+    if file_exists(file_path):
+        os.remove(file_path)
+
+
 def create_symlink_between_paths(old_path, new_path):
     """
     Creates a symlink from new_path to old_path
