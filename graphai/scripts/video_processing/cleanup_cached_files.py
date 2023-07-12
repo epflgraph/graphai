@@ -21,7 +21,7 @@ def get_cleanup_interval():
     except Exception:
         print(f'Could not read file {CONFIG_DIR}/cache.ini or '
               f'file does not have section [CLEANUP], falling back to defaults.')
-        n_days = 30
+        n_days = 16
     return n_days
 
 
@@ -58,6 +58,7 @@ def remove_old_files(id_list):
     slide_db_manager = SlideDBCachingManager()
     audio_db_manager = AudioDBCachingManager()
     for id_token in id_list:
+        print(f"Working on token {id_token}")
         current_video_path = storage_config.generate_filepath(id_token)
         print("Deleting video file")
         delete_file(current_video_path)
@@ -79,3 +80,15 @@ def remove_old_files(id_list):
             current_audio_path = storage_config.generate_filepath(audio_token)
             delete_file(current_audio_path)
 
+
+def cleanup_old_cached_files():
+    cleanup_interval = get_cleanup_interval()
+    print(f"Deleting videos older than {cleanup_interval} days")
+    oldest_acceptable_date = get_oldest_acceptable_date(cleanup_interval)
+    old_video_ids = find_old_videos(oldest_acceptable_date)
+    remove_old_files(old_video_ids)
+    remove_origin_urls(old_video_ids)
+
+
+if __name__ == '__main__':
+    cleanup_old_cached_files()
