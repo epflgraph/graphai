@@ -30,3 +30,12 @@ def get_oldest_acceptable_date(cleanup_interval):
     oldest_acceptable_date = current_date - td
     oldest_acceptable_date_str = format_datetime_for_mysql(oldest_acceptable_date)
     return oldest_acceptable_date_str
+
+
+def find_old_videos(oldest_acceptable_date):
+    db_manager = VideoDBCachingManager()
+    results = db_manager.get_all_details(['date_added'], latest_date=oldest_acceptable_date)
+    if results is None:
+        return []
+    id_list = list(results.keys())
+    return id_list
