@@ -288,7 +288,7 @@ class DBCachingManagerBase(abc.ABC):
         return results
 
     def _get_all_details(self, schema, table_name, cols, start=0, limit=-1,
-                         exclude_token=None, allow_nulls=True, earliest_date=None,
+                         exclude_token=None, allow_nulls=True, earliest_date=None, latest_date=None,
                          equality_conditions=None, has_date_col=False):
         """
         Internal method. Gets the details of all rows in a table, with some conditions.
@@ -326,6 +326,9 @@ class DBCachingManagerBase(abc.ABC):
         if earliest_date is not None and has_date_col:
             query += add_where_or_and(query)
             query += f" date_added >= '{earliest_date}'"
+        if latest_date is not None and has_date_col:
+            query += add_where_or_and(query)
+            query += f" date_added <= '{latest_date}'"
         if equality_conditions is not None:
             query += add_where_or_and(query)
             query += add_equality_conditions(equality_conditions)
@@ -494,7 +497,7 @@ class DBCachingManagerBase(abc.ABC):
         return self._get_details_using_origin(self.schema, self.cache_table, origin_token, cols, has_date_col=True)
 
     def get_all_details(self, cols, start=0, limit=-1, exclude_token=None,
-                        allow_nulls=True, earliest_date=None, equality_conditions=None):
+                        allow_nulls=True, earliest_date=None, latest_date=None, equality_conditions=None):
         """
         Gets details of all rows in cache table, possibly with constraints
         Args:
@@ -504,6 +507,7 @@ class DBCachingManagerBase(abc.ABC):
             exclude_token: List of tokens to exclude
             allow_nulls: Whether to allow null values for requested cols
             earliest_date: Earliest date to allow
+            latest_date: Latest date to allow
             equality_conditions: Dict of equality conditions
 
         Returns:
@@ -522,7 +526,7 @@ class DBCachingManagerBase(abc.ABC):
             exclude_tokens = None
         results = self._get_all_details(self.schema, self.cache_table, cols,
                                         start=start, limit=limit, exclude_token=exclude_tokens,
-                                        allow_nulls=allow_nulls, earliest_date=earliest_date,
+                                        allow_nulls=allow_nulls, earliest_date=earliest_date, latest_date=latest_date,
                                         equality_conditions=equality_conditions, has_date_col=True)
         return results
 
