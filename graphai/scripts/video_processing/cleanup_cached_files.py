@@ -10,7 +10,6 @@ from graphai.core.common.video import format_datetime_for_mysql
 
 from datetime import datetime, timedelta
 import configparser
-import numpy as np
 
 
 def get_cleanup_interval():
