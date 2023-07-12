@@ -13,9 +13,11 @@ jobs:
       - name: Create docs source files with sphinx-apidoc
         run: |
           cd main
+          source /data/venvs/test_venv/bin/activate
           sphinx-apidoc -o docs/source graphai -d 1 -TMe
 
       - name: Build html docs with sphinx
         run: |
           cd main/docs
+          source /data/venvs/test_venv/bin/activate
           make html
