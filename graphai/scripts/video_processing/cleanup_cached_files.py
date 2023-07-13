@@ -88,10 +88,10 @@ def cleanup_broken_symlinks():
     storage_config = VideoConfig()
     image_dir = storage_config.get_image_dir()
     # This command finds all the broken symlinks in image_dir and then deletes them
-    os.system("find -L %s -type l -exec rm {} \;" % image_dir)
+    os.system("find -L %s -type l -exec rm {} \\;" % image_dir)
     audio_dir = storage_config.get_audio_dir()
     # Same as above but for the audio_dir, since it's the other directory that has symlinks
-    os.system("find -L %s -type l -exec rm {} \;" % audio_dir)
+    os.system("find -L %s -type l -exec rm {} \\;" % audio_dir)
 
 
 def cleanup_old_cached_files():
