@@ -95,8 +95,8 @@ class ExtractAudioRequest(BaseModel):
 
     force: bool = Field(
         title="Force",
-        description="Whether to force a recomputation",
-        default=False
+        description="Whether to force a recomputation. True by default.",
+        default=True
     )
 
 
@@ -137,8 +137,8 @@ class DetectSlidesRequest(BaseModel):
 
     force: bool = Field(
         title="Force",
-        description="Whether to force a recomputation",
-        default=False
+        description="Whether to force a recomputation. True by default.",
+        default=True
     )
 
     language: Literal['en', 'fr'] = Field(
