@@ -10,12 +10,6 @@ class ImageFingerprintRequest(BaseModel):
         description="The token that identifies the requested file"
     )
 
-    original_video_token: str = Field(
-        title="Original video token",
-        description="The token of the video this image file came from. None by default.",
-        default=None
-    )
-
     force: bool = Field(
         title="Force",
         description="Whether to force a recomputation",
@@ -63,12 +57,6 @@ class ExtractTextRequest(BaseModel):
     token: str = Field(
         title="Token",
         description="The token that identifies the requested file"
-    )
-
-    original_video_token: str = Field(
-        title="Original video token",
-        description="The token of the video this image file came from. None by default.",
-        default=None
     )
 
     method: Literal['google', 'tesseract'] = Field(

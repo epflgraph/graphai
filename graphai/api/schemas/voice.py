@@ -10,12 +10,6 @@ class AudioFingerprintRequest(BaseModel):
         description="The token that identifies the requested file"
     )
 
-    original_video_token: str = Field(
-        title="Original video token",
-        description="The token of the video this audio file came from. None by default.",
-        default=None
-    )
-
     force: bool = Field(
         title="Force",
         description="Whether to force a recomputation",
@@ -89,12 +83,6 @@ class AudioDetectLanguageRequest(BaseModel):
         description="The token that identifies the requested file"
     )
 
-    original_video_token: str = Field(
-        title="Original video token",
-        description="The token of the video this audio file came from. None by default.",
-        default=None
-    )
-
     force: bool = Field(
         title="Force",
         description="Whether to force a recomputation",
@@ -125,12 +113,6 @@ class AudioTranscriptionRequest(BaseModel):
     token: str = Field(
         title="Token",
         description="The token that identifies the requested file"
-    )
-
-    original_video_token: str = Field(
-        title="Original video token",
-        description="The token of the video this audio file came from. None by default.",
-        default=None
     )
 
     force: bool = Field(
