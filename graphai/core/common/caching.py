@@ -57,6 +57,19 @@ def file_exists(file_path):
     return os.path.exists(file_path)
 
 
+def delete_file(file_path):
+    """
+    Deletes a file
+    Args:
+        file_path: Full path of the file
+
+    Returns:
+        None
+    """
+    if file_exists(file_path):
+        os.remove(file_path)
+
+
 def create_symlink_between_paths(old_path, new_path):
     """
     Creates a symlink from new_path to old_path
@@ -261,7 +274,7 @@ class DBCachingManagerBase(abc.ABC):
             return results['most_similar_token']
         return None
 
-    def _get_details_using_origin(self, schema, table_name, origin_token, cols):
+    def _get_details_using_origin(self, schema, table_name, origin_token, cols, has_date_col=True):
         """
         Internal method that gets details using an origin token (e.g. the video an audio file originated from).
         Args:
@@ -274,12 +287,13 @@ class DBCachingManagerBase(abc.ABC):
             Dictionary mapping column names to values
         """
         column_list = ['origin_token', 'id_token'] + cols
-        results = self.db.execute_query(
-            f"""
+        query = f"""
             SELECT {', '.join(column_list)} FROM `{schema}`.`{table_name}`
             WHERE origin_token={surround_with_character(origin_token, "'")}
             """
-        )
+        if has_date_col:
+            query += '\nORDER BY date_added'
+        results = self.db.execute_query(query)
         if len(results) > 0:
             results = [{column_list[i]: result[i] for i in range(len(column_list))} for result in results]
         else:
@@ -287,7 +301,7 @@ class DBCachingManagerBase(abc.ABC):
         return results
 
     def _get_all_details(self, schema, table_name, cols, start=0, limit=-1,
-                         exclude_token=None, allow_nulls=True, earliest_date=None,
+                         exclude_token=None, allow_nulls=True, earliest_date=None, latest_date=None,
                          equality_conditions=None, has_date_col=False):
         """
         Internal method. Gets the details of all rows in a table, with some conditions.
@@ -325,6 +339,9 @@ class DBCachingManagerBase(abc.ABC):
         if earliest_date is not None and has_date_col:
             query += add_where_or_and(query)
             query += f" date_added >= '{earliest_date}'"
+        if latest_date is not None and has_date_col:
+            query += add_where_or_and(query)
+            query += f" date_added <= '{latest_date}'"
         if equality_conditions is not None:
             query += add_where_or_and(query)
             query += add_equality_conditions(equality_conditions)
@@ -490,10 +507,10 @@ class DBCachingManagerBase(abc.ABC):
         Returns:
             Cache row detail dict
         """
-        return self._get_details_using_origin(self.schema, self.cache_table, origin_token, cols)
+        return self._get_details_using_origin(self.schema, self.cache_table, origin_token, cols, has_date_col=True)
 
     def get_all_details(self, cols, start=0, limit=-1, exclude_token=None,
-                        allow_nulls=True, earliest_date=None, equality_conditions=None):
+                        allow_nulls=True, earliest_date=None, latest_date=None, equality_conditions=None):
         """
         Gets details of all rows in cache table, possibly with constraints
         Args:
@@ -503,6 +520,7 @@ class DBCachingManagerBase(abc.ABC):
             exclude_token: List of tokens to exclude
             allow_nulls: Whether to allow null values for requested cols
             earliest_date: Earliest date to allow
+            latest_date: Latest date to allow
             equality_conditions: Dict of equality conditions
 
         Returns:
@@ -521,7 +539,7 @@ class DBCachingManagerBase(abc.ABC):
             exclude_tokens = None
         results = self._get_all_details(self.schema, self.cache_table, cols,
                                         start=start, limit=limit, exclude_token=exclude_tokens,
-                                        allow_nulls=allow_nulls, earliest_date=earliest_date,
+                                        allow_nulls=allow_nulls, earliest_date=earliest_date, latest_date=latest_date,
                                         equality_conditions=equality_conditions, has_date_col=True)
         return results
 
@@ -811,6 +829,21 @@ class VideoConfig():
             print(f'Could not read file {CONFIG_DIR}/cache.ini or '
                   f'file does not have section [CACHE], falling back to defaults.')
             self.root_dir = ROOT_VIDEO_DIR
+
+    def get_root_dir(self):
+        return self.root_dir
+
+    def get_image_dir(self):
+        return self.concat_file_path('', IMAGE_SUBFOLDER)
+
+    def get_audio_dir(self):
+        return self.concat_file_path('', AUDIO_SUBFOLDER)
+
+    def get_video_dir(self):
+        return self.concat_file_path('', VIDEO_SUBFOLDER)
+
+    def get_transcript_dir(self):
+        return self.concat_file_path('', TRANSCRIPT_SUBFOLDER)
 
     def concat_file_path(self, filename, subfolder):
         """

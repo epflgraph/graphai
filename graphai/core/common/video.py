@@ -114,13 +114,17 @@ def generate_random_token():
     return ('%.06f' % time.time()).replace('.', '') + '%08d' % random.randint(0, int(1e7))
 
 
+def format_datetime_for_mysql(dt):
+    return dt.strftime("%Y-%m-%d %H:%M:%S")
+
+
 def get_current_datetime():
     """
     Returns current datetime formatted for MySQL
     Returns:
         Datetime string
     """
-    current_datetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    current_datetime = format_datetime_for_mysql(datetime.now())
     return current_datetime
 
 

@@ -69,7 +69,7 @@ def get_text_fingerprint_chain_list(token, text, src, tgt, force, min_similarity
     return task_list
 
 
-@router.post('/calculate_fingerprint/', response_model=TaskIDResponse)
+@router.post('/calculate_fingerprint', response_model=TaskIDResponse)
 async def calculate_fingerprint(data: TextFingerprintRequest):
     text = data.text
     src = data.source
@@ -100,7 +100,7 @@ async def calculate_fingerprint_status(task_id):
     return format_api_results(full_results['id'], full_results['name'], full_results['status'], task_results)
 
 
-@router.post('/translate/', response_model=TaskIDResponse)
+@router.post('/translate', response_model=TaskIDResponse)
 async def translate(data: TranslationRequest):
     text = data.text
     src = data.source
@@ -138,7 +138,7 @@ async def translate_status(task_id):
     return format_api_results(full_results['id'], full_results['name'], full_results['status'], task_results)
 
 
-@router.post('/detect_language/', response_model=TaskIDResponse)
+@router.post('/detect_language', response_model=TaskIDResponse)
 async def text_detect_language(data: TextDetectLanguageRequest):
     text = data.text
     # The only task is language detection because this task does not go through the caching logic

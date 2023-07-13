@@ -185,7 +185,6 @@ def test__video_detect_slides__detect_slides__integration(fixture_app, celery_wo
     assert isinstance(slide_ocr, dict)
     assert 'task_result' in slide_ocr
     assert slide_ocr['task_status'] == 'SUCCESS'
-    assert slide_ocr['task_result']['fresh'] is True
     assert isinstance(slide_ocr['task_result']['result'], list)
     assert len(slide_ocr['task_result']['result']) == 2
     assert slide_ocr['task_result']['language'] == 'en'
@@ -202,7 +201,7 @@ def test__video_detect_slides__detect_slides__integration(fixture_app, celery_wo
 def test__video_extract_audio__extract_audio__integration(fixture_app, celery_worker, test_video_url, timeout=30):
     # First retrieving the video (without `force` in order to use cached results if available)
     response = fixture_app.post('/video/retrieve_url',
-                                data=json.dumps({"url": test_video_url}),
+                                data=json.dumps({"url": test_video_url, "playlist": True}),
                                 timeout=timeout)
 
     assert response.status_code == 200

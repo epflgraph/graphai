@@ -136,7 +136,7 @@ async def calculate_fingerprint_status(task_id):
     return format_api_results(full_results['id'], full_results['name'], full_results['status'], task_results)
 
 
-@router.post('/get_file/')
+@router.post('/get_file')
 async def get_file(data: FileRequest):
     token = data.token
     return FileResponse(get_file_task.apply_async(args=[token], priority=2).get())
@@ -146,14 +146,10 @@ async def get_file(data: FileRequest):
 async def extract_audio(data: ExtractAudioRequest):
     token = data.token
     force = data.force
-    # If force is True, fingerprinting is skipped, otherwise we fingerprint the video first
-    # Otherwise, the tasks are audio extraction and its callback.
-    if force:
-        task_list = [extract_audio_task.s(token, force)]
-    else:
-        task_list = get_video_fingerprint_chain_list(token, force,
-                                                     ignore_fp_results=True, results_to_return=token)
-        task_list += [extract_audio_task.s(force)]
+    # Fingerprinting is always performed but with force=False, regardless of the provided force flag.
+    task_list = get_video_fingerprint_chain_list(token, force=False,
+                                                 ignore_fp_results=True, results_to_return=token)
+    task_list += [extract_audio_task.s(force)]
     task_list += [extract_audio_callback_task.s(token, force)]
     task = chain(task_list)
     task = task.apply_async(priority=2)
@@ -185,16 +181,13 @@ async def detect_slides(data: DetectSlidesRequest):
     n_jobs = 8
     # This is the maximum similarity threshold used for image hashes when finding slide transitions.
     hash_thresh = 0.95
-    # force=True skips fingerprinting
+    # Fingerprinting is always performed but with force=False, regardless of the provided force flag.
     # Task list involves extracting and sampling frames, parallel noise level comp and its callback, then a dummy task
     # because of celery's need for an additional non-group task in the middle, then slide transition comp and its
     # callback, followed by a final callback that inserts the results into the cache db.
-    if force:
-        task_list = [extract_and_sample_frames_task.s(token, force)]
-    else:
-        task_list = get_video_fingerprint_chain_list(token, force,
-                                                     ignore_fp_results=True, results_to_return=token)
-        task_list += [extract_and_sample_frames_task.s(force)]
+    task_list = get_video_fingerprint_chain_list(token, force=False,
+                                                 ignore_fp_results=True, results_to_return=token)
+    task_list += [extract_and_sample_frames_task.s(force)]
     task_list += [group(compute_noise_level_parallel_task.s(i, n_jobs, language) for i in range(n_jobs)),
                   compute_noise_threshold_callback_task.s(hash_thresh),
                   dummy_task.s(),
