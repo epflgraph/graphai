@@ -830,6 +830,21 @@ class VideoConfig():
                   f'file does not have section [CACHE], falling back to defaults.')
             self.root_dir = ROOT_VIDEO_DIR
 
+    def get_root_dir(self):
+        return self.root_dir
+
+    def get_image_dir(self):
+        return self.concat_file_path('', IMAGE_SUBFOLDER)
+
+    def get_audio_dir(self):
+        return self.concat_file_path('', AUDIO_SUBFOLDER)
+
+    def get_video_dir(self):
+        return self.concat_file_path('', VIDEO_SUBFOLDER)
+
+    def get_transcript_dir(self):
+        return self.concat_file_path('', TRANSCRIPT_SUBFOLDER)
+
     def concat_file_path(self, filename, subfolder):
         """
         Concatenates the root dir with the given subfolder and file name.
