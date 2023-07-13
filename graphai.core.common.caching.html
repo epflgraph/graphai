@@ -115,6 +115,18 @@
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="graphai.core.common.caching.delete_file">
+<span class="sig-prename descclassname"><span class="pre">graphai.core.common.caching.</span></span><span class="sig-name descname"><span class="pre">delete_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.caching.delete_file" title="Permalink to this definition"></a></dt>
+<dd><p>Deletes a file
+:param file_path: Full path of the file</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="graphai.core.common.caching.create_symlink_between_paths">
 <span class="sig-prename descclassname"><span class="pre">graphai.core.common.caching.</span></span><span class="sig-name descname"><span class="pre">create_symlink_between_paths</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">old_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new_path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.caching.create_symlink_between_paths" title="Permalink to this definition"></a></dt>
 <dd><p>Creates a symlink from new_path to old_path
@@ -282,7 +294,7 @@ second result is None.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="graphai.core.common.caching.DBCachingManagerBase.get_all_details">
-<span class="sig-name descname"><span class="pre">get_all_details</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cols</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">limit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exclude_token</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">allow_nulls</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">earliest_date</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">equality_conditions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.caching.DBCachingManagerBase.get_all_details" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_all_details</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cols</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">limit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exclude_token</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">allow_nulls</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">earliest_date</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">latest_date</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">equality_conditions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.caching.DBCachingManagerBase.get_all_details" title="Permalink to this definition"></a></dt>
 <dd><p>Gets details of all rows in cache table, possibly with constraints
 :param cols: Columns to retrieve
 :param start: Offset of LIMIT clause
@@ -290,6 +302,7 @@ second result is None.</p>
 :param exclude_token: List of tokens to exclude
 :param allow_nulls: Whether to allow null values for requested cols
 :param earliest_date: Earliest date to allow
+:param latest_date: Latest date to allow
 :param equality_conditions: Dict of equality conditions</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
@@ -393,6 +406,31 @@ second result is None.</p>
 <dt class="sig sig-object py" id="graphai.core.common.caching.VideoConfig">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">graphai.core.common.caching.</span></span><span class="sig-name descname"><span class="pre">VideoConfig</span></span><a class="headerlink" href="#graphai.core.common.caching.VideoConfig" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="graphai.core.common.caching.VideoConfig.get_root_dir">
+<span class="sig-name descname"><span class="pre">get_root_dir</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.caching.VideoConfig.get_root_dir" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="graphai.core.common.caching.VideoConfig.get_image_dir">
+<span class="sig-name descname"><span class="pre">get_image_dir</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.caching.VideoConfig.get_image_dir" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="graphai.core.common.caching.VideoConfig.get_audio_dir">
+<span class="sig-name descname"><span class="pre">get_audio_dir</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.caching.VideoConfig.get_audio_dir" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="graphai.core.common.caching.VideoConfig.get_video_dir">
+<span class="sig-name descname"><span class="pre">get_video_dir</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.caching.VideoConfig.get_video_dir" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="graphai.core.common.caching.VideoConfig.get_transcript_dir">
+<span class="sig-name descname"><span class="pre">get_transcript_dir</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.caching.VideoConfig.get_transcript_dir" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="graphai.core.common.caching.VideoConfig.concat_file_path">
 <span class="sig-name descname"><span class="pre">concat_file_path</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">subfolder</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.caching.VideoConfig.concat_file_path" title="Permalink to this definition"></a></dt>
