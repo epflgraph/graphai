@@ -1,3 +1,5 @@
+import os
+
 from graphai.core.common.caching import (
     VideoConfig,
     VideoDBCachingManager,
@@ -81,6 +83,15 @@ def remove_old_files(id_list):
             delete_file(current_audio_path)
 
 
+def cleanup_broken_symlinks():
+    print('Removing broken symlinks')
+    storage_config = VideoConfig()
+    image_dir = storage_config.get_image_dir()
+    os.system("find -L %s -type l -exec rm {} \;" % image_dir)
+    audio_dir = storage_config.get_audio_dir()
+    os.system("find -L %s -type l -exec rm {} \;" % audio_dir)
+
+
 def cleanup_old_cached_files():
     cleanup_interval = get_cleanup_interval()
     print(f"Deleting videos older than {cleanup_interval} days")
@@ -88,6 +99,7 @@ def cleanup_old_cached_files():
     old_video_ids = find_old_videos(oldest_acceptable_date)
     remove_old_files(old_video_ids)
     remove_origin_urls(old_video_ids)
+    cleanup_broken_symlinks()
 
 
 if __name__ == '__main__':
