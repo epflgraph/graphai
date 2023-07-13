@@ -212,7 +212,6 @@
         "tokenizer": "standard",
         "filter": [
           "aggressive_splitting",
-          "homoglyph_norm",
           "possessive_english",
           "icu_normalizer",
           "stop",
@@ -231,7 +230,6 @@
         "tokenizer": "standard",
         "filter": [
           "aggressive_splitting",
-          "homoglyph_norm",
           "possessive_english",
           "icu_normalizer",
           "stop",
