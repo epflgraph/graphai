@@ -93,10 +93,20 @@ class ExtractAudioRequest(BaseModel):
         description="The token that identifies the requested file"
     )
 
-    force: bool = Field(
-        title="Force",
-        description="Whether to force a recomputation. True by default.",
+    force_non_self: bool = Field(
+        title="Force recompute on non-self cache hits",
+        description="Whether to perform a cache check only on the token itself, and thus to force a computation "
+                    "if the computation has not been performed for this token itself."
+                    "`true` by default. If you fully process every file before its token's expiration, "
+                    "you can set this to `false` safely without worrying about failed calls due to cache misses. "
+                    "This flag's value is overridden if `force` is set to `true`.",
         default=True
+    )
+
+    force: bool = Field(
+        title="Force recompute",
+        description="Whether to force a recomputation under any circumstances. False by default.",
+        default=False
     )
 
 
@@ -135,10 +145,20 @@ class DetectSlidesRequest(BaseModel):
         description="The token that identifies the requested file"
     )
 
+    force_non_self: bool = Field(
+        title="Force recompute on non-self cache hits",
+        description="Whether to perform a cache check only on the token itself, and thus to force a computation "
+                    "if the computation has not been performed for this token itself."
+                    "`true` by default. If you fully process every file before its token's expiration, "
+                    "you can set this to `false` safely without worrying about failed calls due to cache misses. "
+                    "This flag's value is overridden if `force` is set to `true`.",
+        default=True
+    )
+
     force: bool = Field(
         title="Force",
-        description="Whether to force a recomputation. True by default.",
-        default=True
+        description="Whether to force a recomputation. False by default.",
+        default=False
     )
 
     language: Literal['en', 'fr'] = Field(
