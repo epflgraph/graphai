@@ -155,6 +155,39 @@ def test__video_detect_slides__detect_slides__integration(fixture_app, celery_wo
     assert '.png' in slides['task_result']['slide_tokens']['1']['token']
     assert len(slides['task_result']['slide_tokens']) > 5
 
+    # Re-detecting slides, which should yield a cache hit this time
+    response = fixture_app.post('/video/detect_slides',
+                                data=json.dumps({"token": video_token, "force_non_self": True}),
+                                timeout=timeout)
+
+    assert response.status_code == 200
+    # Parse resulting task id
+    task_id = response.json()['task_id']
+
+    # Waiting for task chain to succeed
+    current_status = 'PENDING'
+    n_tries = 0
+    while current_status == 'PENDING' and n_tries < 50:
+        # Wait a few seconds
+        sleep(5)
+        # Now get status
+        response = fixture_app.get(f'/video/detect_slides/status/{task_id}',
+                                   timeout=timeout)
+        current_status = response.json()['task_status']
+        n_tries += 1
+
+    # Checking extracted slides
+    slides = response.json()
+
+    assert isinstance(slides, dict)
+    assert 'task_result' in slides
+    assert slides['task_status'] == 'SUCCESS'
+    assert slides['task_result']['fresh'] is False
+    assert isinstance(slides['task_result']['slide_tokens'], dict)
+    assert video_token in slides['task_result']['slide_tokens']['1']['token']
+    assert '.png' in slides['task_result']['slide_tokens']['1']['token']
+    assert len(slides['task_result']['slide_tokens']) > 5
+
     first_slide = slides['task_result']['slide_tokens']['1']['token']
 
     # Finally, performing OCR on the first slide
