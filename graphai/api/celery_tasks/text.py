@@ -24,7 +24,7 @@ def extract_keywords_task(self, raw_text, use_nltk=False):
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={'max_retries': 2},
-             name='text_10.wikisearch', ignore_result=False, wp=WP(), es=ES('concepts'))
+             name='text_10.wikisearch', ignore_result=False, wp=WP(), es=ES('aitor_concepts'))
 def wikisearch_task(self, keywords_list, fraction=(0, 1), method='es-base'):
     """
     Returns top 10 results for Wikipedia pages relevant to the keywords.
@@ -58,8 +58,9 @@ def wikisearch_task(self, keywords_list, fraction=(0, 1), method='es-base'):
             # Try to get elasticsearch results, fallback to Wikipedia API in case of error.
             try:
                 results = self.es.search(keywords)
-            except Exception:
+            except Exception as e:
                 print('[ERROR] Error connecting to elasticsearch cluster. Falling back to Wikipedia API.')
+                print(e)
                 results = self.wp.search(keywords)
 
             # Fallback to Wikipedia API if no results from elasticsearch
