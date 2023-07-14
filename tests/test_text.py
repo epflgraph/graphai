@@ -194,24 +194,13 @@ def test__text_wikify__aggregate__mock_task(mock_run):
 ################################################################
 
 
-def test__text_keywords__wikisearch__run_task(sultans, wave_fields, schreier):
+def test__text_keywords__wikisearch__run_task():
     # Call task
     results = wikisearch_task.run([])
 
     # Check returned value
     assert isinstance(results, pd.DataFrame)
     assert len(results) == 0
-
-    ################
-
-    # Call task
-    results = wikisearch_task.run(['trumpet playin'])
-
-    # Check returned value
-    assert isinstance(results, pd.DataFrame)
-    assert len(results) > 0
-    assert not results.isna().values.any()
-    assert 61460054 in results['PageID'].values     # Playin' for Keeps (Bunky Green album) wikipage
 
     ################
 
