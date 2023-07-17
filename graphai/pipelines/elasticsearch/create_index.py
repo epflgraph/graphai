@@ -1,10 +1,11 @@
 from graphai.core.interfaces.es import ES
 
+from graphai.core.utils.time.date import now
 from graphai.core.utils.text.io import read_json
 
 number_of_shards = 1
 
-index = 'concepts'
+index = f'aitor_concepts_{now().date()}'
 es = ES(index)
 
 settings = read_json('config/settings.json')
