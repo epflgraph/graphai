@@ -1,7 +1,0 @@
-graphai.pipelines.elasticsearch.search module
-=============================================
-
-.. automodule:: graphai.pipelines.elasticsearch.search
-   :members:
-   :undoc-members:
-   :show-inheritance:

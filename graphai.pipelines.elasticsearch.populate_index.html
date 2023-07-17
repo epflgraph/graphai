@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>graphai.pipelines.elasticsearch.dummy module &mdash; EPFL Graph AI</title>
+  <title>graphai.pipelines.elasticsearch.populate_index module &mdash; EPFL Graph AI</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -17,7 +17,7 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="graphai.pipelines.elasticsearch.populate module" href="graphai.pipelines.elasticsearch.populate.html" />
+    <link rel="next" title="graphai.pipelines.investment package" href="graphai.pipelines.investment.html" />
     <link rel="prev" title="graphai.pipelines.elasticsearch.create_index module" href="graphai.pipelines.elasticsearch.create_index.html" /> 
 </head>
 
@@ -77,9 +77,9 @@
       <li><a href="graphai.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="graphai.pipelines.html">graphai.pipelines package</a></li>
           <li class="breadcrumb-item"><a href="graphai.pipelines.elasticsearch.html">graphai.pipelines.elasticsearch package</a></li>
-      <li class="breadcrumb-item active">graphai.pipelines.elasticsearch.dummy module</li>
+      <li class="breadcrumb-item active">graphai.pipelines.elasticsearch.populate_index module</li>
       <li class="wy-breadcrumbs-aside">
-            <a href="_sources/graphai.pipelines.elasticsearch.dummy.rst.txt" rel="nofollow"> View page source</a>
+            <a href="_sources/graphai.pipelines.elasticsearch.populate_index.rst.txt" rel="nofollow"> View page source</a>
       </li>
   </ul>
   <hr/>
@@ -87,16 +87,15 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="module-graphai.pipelines.elasticsearch.dummy">
-<span id="graphai-pipelines-elasticsearch-dummy-module"></span><h1>graphai.pipelines.elasticsearch.dummy module<a class="headerlink" href="#module-graphai.pipelines.elasticsearch.dummy" title="Permalink to this heading"></a></h1>
+  <section id="module-graphai.pipelines.elasticsearch.populate_index">
+<span id="graphai-pipelines-elasticsearch-populate-index-module"></span><h1>graphai.pipelines.elasticsearch.populate_index module<a class="headerlink" href="#module-graphai.pipelines.elasticsearch.populate_index" title="Permalink to this heading"></a></h1>
+<p>Script that populates an elasticsearch index named “aitor_concepts_&lt;date&gt;” containing concepts in the mediawiki format
+for use in concept detection.</p>
+<p>All data comes directly from the “Campus_Analytics” schema so this script can be run at any point in the pipeline after the
+creation of said schema. Should it use data from the “graph” schema, it could only be run at the very end of the pipeline.</p>
 <dl class="py function">
-<dt class="sig sig-object py" id="graphai.pipelines.elasticsearch.dummy.gen_random_phrase">
-<span class="sig-prename descclassname"><span class="pre">graphai.pipelines.elasticsearch.dummy.</span></span><span class="sig-name descname"><span class="pre">gen_random_phrase</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">min_words</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_words</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.pipelines.elasticsearch.dummy.gen_random_phrase" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="graphai.pipelines.elasticsearch.dummy.gen_random_docs">
-<span class="sig-prename descclassname"><span class="pre">graphai.pipelines.elasticsearch.dummy.</span></span><span class="sig-name descname"><span class="pre">gen_random_docs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.pipelines.elasticsearch.dummy.gen_random_docs" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="graphai.pipelines.elasticsearch.populate_index.index_doc">
+<span class="sig-prename descclassname"><span class="pre">graphai.pipelines.elasticsearch.populate_index.</span></span><span class="sig-name descname"><span class="pre">index_doc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">doc</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.pipelines.elasticsearch.populate_index.index_doc" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 </section>
@@ -106,7 +105,7 @@
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="graphai.pipelines.elasticsearch.create_index.html" class="btn btn-neutral float-left" title="graphai.pipelines.elasticsearch.create_index module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="graphai.pipelines.elasticsearch.populate.html" class="btn btn-neutral float-right" title="graphai.pipelines.elasticsearch.populate module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="graphai.pipelines.investment.html" class="btn btn-neutral float-right" title="graphai.pipelines.investment package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

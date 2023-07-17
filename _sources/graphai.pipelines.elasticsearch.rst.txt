@@ -13,7 +13,4 @@ Submodules
    :maxdepth: 1
 
    graphai.pipelines.elasticsearch.create_index
-   graphai.pipelines.elasticsearch.dummy
-   graphai.pipelines.elasticsearch.populate
-   graphai.pipelines.elasticsearch.populate_dummy
-   graphai.pipelines.elasticsearch.search
+   graphai.pipelines.elasticsearch.populate_index

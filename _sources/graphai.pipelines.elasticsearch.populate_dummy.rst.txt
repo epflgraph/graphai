@@ -1,7 +1,0 @@
-graphai.pipelines.elasticsearch.populate\_dummy module
-======================================================
-
-.. automodule:: graphai.pipelines.elasticsearch.populate_dummy
-   :members:
-   :undoc-members:
-   :show-inheritance:
