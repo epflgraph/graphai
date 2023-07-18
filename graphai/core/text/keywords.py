@@ -85,7 +85,7 @@ def rake_extract(text, use_nltk, split_words=False, return_scores=False, thresho
         results = python_rake_model.run(text)
 
     if threshold == 'auto':
-        threshold = 0.1 * max([score for _, score in results])
+        threshold = 0.1 * max([score for _, score in results], default=1)
 
     # Iterate over all results and compose keyword_list
     keyword_list = []
@@ -166,7 +166,7 @@ def get_keywords(text, use_nltk=False):
     keyword_list = list(set(keyword_list))
 
     # If no keywords are extracted at all and text is short, use it as a single keyword
-    if not keyword_list and len(text) < 50:
+    if not keyword_list and 1 < len(text) < 50:
         keyword_list = [text]
 
     return keyword_list
