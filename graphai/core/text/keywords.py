@@ -46,7 +46,7 @@ def word_tokens(text):
     return output
 
 
-def rake_extract(text, use_nltk, split_words=False, return_scores=False, threshold=1):
+def rake_extract(text, use_nltk, split_words=False, return_scores=False, threshold='auto', filter_past_tenses_and_adverbs=False):
     """
     Extracts keywords from unconstrained text using python-rake or nltk-rake.
 
@@ -55,7 +55,10 @@ def rake_extract(text, use_nltk, split_words=False, return_scores=False, thresho
         use_nltk (bool): Whether to use nltk-rake for keyword extraction, otherwise python-rake is used.
         split_words (bool): If True, keywords with more than one word are split. Default: False.
         return_scores (bool): If True, keywords are retured in a tuple with their RAKE score. Default: False.
-        threshold (float): Minimal RAKE score below which extracted keywords are ignored. Default: 1.
+        threshold (float or 'auto'): Minimal RAKE score below which extracted keywords are ignored. Default: 'auto',
+            which translates to 10% of the maximum score.
+        filter_past_tenses_and_adverbs (bool): Whether to filter out words in keywords which are past tenses, past
+            participles or adverbs. Default: False.
 
     Returns:
         list[str] or list[tuple(str, float)]: A list of
@@ -81,11 +84,19 @@ def rake_extract(text, use_nltk, split_words=False, return_scores=False, thresho
     else:
         results = python_rake_model.run(text)
 
+    if threshold == 'auto':
+        threshold = 0.1 * max([score for _, score in results])
+
     # Iterate over all results and compose keyword_list
     keyword_list = []
     for keywords, score in results:
         # Ignore scores below threshold
         if score <= threshold:
+            continue
+
+        # Nothing else to do if filtering is not needed
+        if not filter_past_tenses_and_adverbs:
+            keyword_list.append((keywords, score))
             continue
 
         # Split keywords into words and semantically tag them
@@ -153,5 +164,9 @@ def get_keywords(text, use_nltk=False):
 
     # Remove duplicates
     keyword_list = list(set(keyword_list))
+
+    # If no keywords are extracted at all and text is short, use it as a single keyword
+    if not keyword_list and len(text) < 50:
+        keyword_list = [text]
 
     return keyword_list
