@@ -46,6 +46,7 @@ jobs:
           
           echo "[CACHE]" >> cache.ini
           echo "root: ${{ vars.cache_root }}" >> cache.ini
+          echo "schema: ${{ vars.cache_schema }}" >> cache.ini
 
       - name: Install python package in editable mode along with dependencies from the correct virtual environment
         run: |
