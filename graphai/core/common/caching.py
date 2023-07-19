@@ -19,6 +19,8 @@ TRANSCRIPT_SUBFOLDER = 'Transcripts'
 TRANSCRIPT_FORMATS = ['_transcript.txt', '_subtitle_segments.json']
 TEMP_SUBFOLDER = 'Temp'
 
+DEFAULT_SCHEMA = 'cache_graphai'
+
 
 def make_sure_path_exists(path, file_at_the_end=False, full_perm=True):
     """
@@ -157,7 +159,17 @@ class DBCachingManagerBase(abc.ABC):
         # 3. The cache tables must have a "date_added" column of the data type DATETIME,
         #    which has the following format: YYYY-MM-DD hh:mm:ss
         # 4. The name of the second column in the most-similar table is 'most_similar_token'
-        self.schema = 'cache_graphai'
+
+        config_contents = configparser.ConfigParser()
+        try:
+            print('Reading cache storage configuration from file')
+            config_contents.read(f'{CONFIG_DIR}/cache.ini')
+            self.schema = config_contents['CACHE'].get('schema', fallback=DEFAULT_SCHEMA)
+        except Exception:
+            print(f'Could not read file {CONFIG_DIR}/cache.ini or '
+                  f'file does not have section [CACHE] with parameter "schema", '
+                  f'falling back to default.')
+            self.schema = DEFAULT_SCHEMA
         self.cache_table = cache_table
         self.most_similar_table = most_similar_table
         self.db = DB()
