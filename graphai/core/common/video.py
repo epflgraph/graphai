@@ -29,6 +29,7 @@ import pytesseract
 from google.cloud import vision
 import spacy
 import whisper
+import openai
 from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
 
 from graphai.definitions import CONFIG_DIR
@@ -1215,3 +1216,64 @@ class FingerprintParameters:
 
     def get_min_sim_video(self):
         return self.min_similarity['video']
+
+
+class ChatGPTSummarizer:
+    def __init__(self):
+        config_contents = configparser.ConfigParser()
+        try:
+            print('Reading ChatGPT API key from file')
+            config_contents.read(f'{CONFIG_DIR}/models.ini')
+            self.api_key = config_contents['CHATGPT'].get('api_key', fallback=None)
+        except Exception:
+            self.api_key = None
+        if self.api_key is None:
+            print(f'Could not read file {CONFIG_DIR}/models.ini or '
+                  f'file does not have section [CHATGPT], ChatGPT API '
+                  f'endpoints cannot be used as there is no '
+                  f'default API key.')
+
+    def establish_connection(self):
+        if self.api_key is not None:
+            openai.api_key = self.api_key
+            return True
+        else:
+            return False
+
+    def _generate_completion(self, text, system_message):
+        has_api_key = self.establish_connection()
+        print(openai.api_key)
+        if not has_api_key:
+            return None
+        try:
+            completion = openai.ChatCompletion.create(
+                model="gpt-3.5-turbo",
+                messages=[
+                    {"role": "system", "content": system_message},
+                    {"role": "user", "content": text}
+                ]
+            )
+            print(completion)
+        except Exception as e:
+            print(e)
+            return None
+        return completion.choices[0].message.content
+
+    def generate_title(self, s, max_len=20):
+        system_message = f"You will be given some text as input. " \
+                         f"Generate a title with under {max_len} words for the input text."
+        return self._generate_completion(s, system_message)
+
+    def generate_summary(self, s, max_len=100):
+        system_message = f"You will be given some text as input. " \
+                         f"Summarize the input text in under {max_len} words."
+        return self._generate_completion(s, system_message)
+
+    def generate_very_short_summary(self, s):
+        return self.generate_summary(s, 50)
+
+    def generate_short_summary(self, s):
+        return self.generate_summary(s, 100)
+
+    def generate_long_summary(self, s):
+        return self.generate_summary(s, 200)
