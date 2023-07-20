@@ -1,4 +1,4 @@
-import asyncio
+import requests
 
 import pandas as pd
 
@@ -6,10 +6,7 @@ from graphai.core.interfaces.db import DB
 
 from graphai.core.utils.breadcrumb import Breadcrumb
 
-from graphai.api.routers.text import wikify
-from graphai.api.schemas.text import WikifyRequest
-
-from graphai.scripts.investment.concept_configuration import normalise
+from graphai.pipelines.investment.concept_configuration import normalise
 
 
 def detect_fundraisers_concepts():
@@ -19,6 +16,9 @@ def detect_fundraisers_concepts():
 
     # Instantiate db interface to communicate with database
     db = DB()
+
+    # Define url of endpoint
+    WIKIFY_URL = 'http://localhost:28800/text/wikify'
 
     ############################################################
 
@@ -31,17 +31,13 @@ def detect_fundraisers_concepts():
     fundraiser_ids = list(fundraisers_concepts['FundraiserID'].drop_duplicates())
 
     # Fetch fundraiser descriptions
-    table_name = 'graph_piper.Nodes_N_Organisation'
+    table_name = 'graph.Nodes_N_Organisation'
     fields = ['OrganisationID', 'ShortDescription', 'Description']
     conditions = {'OrganisationID': fundraiser_ids}
     fundraisers = pd.DataFrame(db.find(table_name, fields=fields, conditions=conditions), columns=['FundraiserID', 'ShortDescription', 'Description'])
     fundraisers = fundraisers.fillna('')
     fundraisers['FullDescription'] = fundraisers['ShortDescription'] + ' ' + fundraisers['Description']
-
-    # Add list of AnchorPageIDs
-    fundraisers_concepts = fundraisers_concepts.groupby(by='FundraiserID').aggregate(AnchorPageIDs=('PageID', list)).reset_index()
-    fundraisers = pd.merge(fundraisers, fundraisers_concepts, how='left', on='FundraiserID')
-    fundraisers = fundraisers[['FundraiserID', 'FullDescription', 'AnchorPageIDs']]
+    fundraisers = fundraisers[['FundraiserID', 'FullDescription']]
 
     ############################################################
 
@@ -50,22 +46,18 @@ def detect_fundraisers_concepts():
     fundraisers_concepts_detected = None
 
     for row in fundraisers.to_dict(orient='records'):
-        data = WikifyRequest()
-        data.raw_text = row['FullDescription']
-        data.anchor_page_ids = row['AnchorPageIDs']
-
-        results_list = asyncio.run(wikify(data=data))
+        data = {'raw_text': row['FullDescription']}
+        results_list = requests.post(url=WIKIFY_URL, json=data).json()
 
         if len(results_list) == 0:
             continue
 
         results = pd.DataFrame(results_list)
-        results = results.groupby(by='page_id').aggregate(Score=('median_graph_score', 'mean')).reset_index()
         results['FundraiserID'] = row['FundraiserID']
 
         fundraisers_concepts_detected = pd.concat([fundraisers_concepts_detected, results])
 
-    fundraisers_concepts_detected = fundraisers_concepts_detected.rename(columns={'page_id': 'PageID'})
+    fundraisers_concepts_detected = fundraisers_concepts_detected.rename(columns={'MixedScore': 'Score'})
     fundraisers_concepts_detected = fundraisers_concepts_detected[['FundraiserID', 'PageID', 'Score']]
 
     ############################################################
