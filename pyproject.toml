@@ -30,6 +30,7 @@ dependencies = [
     "imagehash",
     "fingerprint",
     "openai-whisper",
+    "openai",
     "pytesseract",
     "spacy",
     "langdetect",
