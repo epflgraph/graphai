@@ -5,7 +5,7 @@ from graphai.core.interfaces.db import DB
 
 from graphai.core.utils.breadcrumb import Breadcrumb
 
-from graphai.scripts.investment.concept_configuration import compute_affinities
+from graphai.pipelines.investment.concept_configuration import compute_affinities
 
 
 def compute_investors_units():
@@ -20,7 +20,7 @@ def compute_investors_units():
 
     bc.log('Fetching unit-concept edges from database...')
 
-    table_name = 'graph_piper.Edges_N_Unit_N_Concept_T_Research'
+    table_name = 'graph.Edges_N_Unit_N_Concept_T_Research'
     fields = ['UnitID', 'PageID', 'Score']
     units_concepts = pd.DataFrame(db.find(table_name, fields=fields), columns=fields)
 
@@ -126,7 +126,7 @@ def compute_investors_units():
 
     bc.log('Fetching concept-concept edges from database...')
 
-    table_name = 'graph_piper.Edges_N_Concept_N_Concept_T_GraphScore'
+    table_name = 'graph.Edges_N_Concept_N_Concept_T_GraphScore'
     fields = ['SourcePageID', 'TargetPageID', 'NormalisedScore']
     conditions = {'OR': {'SourcePageID': concept_ids, 'TargetPageID': concept_ids}}
     concepts_concepts = pd.DataFrame(db.find(table_name, fields=fields, conditions=conditions), columns=['SourcePageID', 'TargetPageID', 'Score'])
