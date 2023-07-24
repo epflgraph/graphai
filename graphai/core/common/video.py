@@ -30,6 +30,7 @@ from google.cloud import vision
 import spacy
 import whisper
 import openai
+import tiktoken
 from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
 
 from graphai.definitions import CONFIG_DIR
@@ -903,6 +904,11 @@ def detect_text_language(s):
         return None
 
 
+def count_tokens_for_openai(text, model="cl100k_base"):
+    encoding = tiktoken.get_encoding(model)
+    return len(encoding.encode(text))
+
+
 class WhisperTranscriptionModel():
     def __init__(self):
         # The actual Whisper model is lazy loaded in order not to load it twice (celery *and* gunicorn)
@@ -1240,10 +1246,12 @@ class ChatGPTSummarizer:
         else:
             return False
 
-    def _generate_completion(self, text, system_message):
+    def _generate_completion(self, text, system_message, max_len):
         has_api_key = self.establish_connection()
         print(openai.api_key)
         if not has_api_key:
+            return None
+        if count_tokens_for_openai(text) + count_tokens_for_openai(system_message) + max_len > 4096:
             return None
         try:
             completion = openai.ChatCompletion.create(
@@ -1251,7 +1259,8 @@ class ChatGPTSummarizer:
                 messages=[
                     {"role": "system", "content": system_message},
                     {"role": "user", "content": text}
-                ]
+                ],
+                max_tokens=max_len
             )
             print(completion)
         except Exception as e:
@@ -1259,21 +1268,20 @@ class ChatGPTSummarizer:
             return None
         return completion.choices[0].message.content
 
-    def generate_title(self, s, max_len=20):
-        system_message = f"You will be given some text as input. " \
-                         f"Generate a title with under {max_len} words for the input text."
-        return self._generate_completion(s, system_message)
+    def generate_summary(self, text, text_type='lecture', keywords=True, ordered=False, title=False, max_len=20):
+        if keywords:
+            system_message = "You will be given a set of keywords as input,"
+        else:
+            system_message = "You will be given some text as input,"
+        system_message += f" extracted from a {text_type}"
+        if not ordered:
+            system_message += " in no particular order."
+        else:
+            system_message += "."
+        if title:
+            system_message += f" Generate a title for the {text_type} "
+        else:
+            system_message += f" Generate a summary for the {text_type} "
+        system_message += f"with under {max_len} words for the input."
 
-    def generate_summary(self, s, max_len=100):
-        system_message = f"You will be given some text as input. " \
-                         f"Summarize the input text in under {max_len} words."
-        return self._generate_completion(s, system_message)
-
-    def generate_very_short_summary(self, s):
-        return self.generate_summary(s, 50)
-
-    def generate_short_summary(self, s):
-        return self.generate_summary(s, 100)
-
-    def generate_long_summary(self, s):
-        return self.generate_summary(s, 200)
+        return self._generate_completion(text, system_message, max_len)
