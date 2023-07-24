@@ -1255,7 +1255,7 @@ class ChatGPTSummarizer:
             return None
         try:
             completion = openai.ChatCompletion.create(
-                model="gpt-3.5-turbo",
+                model="gpt-3.5-turbo-16k",
                 messages=[
                     {"role": "system", "content": system_message},
                     {"role": "user", "content": text}
