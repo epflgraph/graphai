@@ -909,6 +909,15 @@ def count_tokens_for_openai(text, model="cl100k_base"):
     return len(encoding.encode(text))
 
 
+def generate_summary_text_token(text, title=False):
+    token = md5_text(text)
+    if title:
+        token += '_title'
+    else:
+        token += '_summary'
+    return token
+
+
 class WhisperTranscriptionModel():
     def __init__(self):
         # The actual Whisper model is lazy loaded in order not to load it twice (celery *and* gunicorn)
