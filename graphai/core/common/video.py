@@ -1248,40 +1248,51 @@ class ChatGPTSummarizer:
 
     def _generate_completion(self, text, system_message, max_len):
         has_api_key = self.establish_connection()
-        print(openai.api_key)
         if not has_api_key:
-            return None
-        if count_tokens_for_openai(text) + count_tokens_for_openai(system_message) + max_len > 4096:
-            return None
+            return None, False
+        approx_token_count = count_tokens_for_openai(text) + count_tokens_for_openai(system_message) + int(2*max_len)
+        if approx_token_count < 4096:
+            model_type = 'gpt-3.5-turbo'
+        elif 4096 < approx_token_count < 16384:
+            model_type = 'gpt-3.5-turbo-16k'
+        else:
+            return None, True
         try:
             completion = openai.ChatCompletion.create(
-                model="gpt-3.5-turbo-16k",
+                model=model_type,
                 messages=[
                     {"role": "system", "content": system_message},
                     {"role": "user", "content": text}
                 ],
-                max_tokens=max_len
+                max_tokens=int(2*max_len)
             )
             print(completion)
+        except openai.error.InvalidRequestError as e:
+            # We check to see if the exception was caused by too many tokens in the input
+            print(e)
+            if "This model's maximum context length is" in e:
+                return None, True
+            else:
+                return None, False
         except Exception as e:
             print(e)
-            return None
-        return completion.choices[0].message.content
+            return None, False
+        return completion.choices[0].message.content, False
 
-    def generate_summary(self, text, text_type='lecture', keywords=True, ordered=False, title=False, max_len=20):
+    def generate_summary(self, text, text_type='lecture', keywords=True, ordered=False, title=False, max_len=100):
         if keywords:
-            system_message = "You will be given a set of keywords as input,"
+            system_message = "Given the following set of keywords"
         else:
-            system_message = "You will be given some text as input,"
+            system_message = "Given the following text"
         system_message += f" extracted from a {text_type}"
-        if not ordered:
-            system_message += " in no particular order."
+        if keywords and not ordered:
+            system_message += " in no particular order,"
         else:
-            system_message += "."
+            system_message += ","
         if title:
-            system_message += f" Generate a title for the {text_type} "
+            system_message += f" generate a title for the {text_type} "
         else:
-            system_message += f" Generate a summary for the {text_type} "
+            system_message += f" generate a summary for the {text_type} "
         system_message += f"with under {max_len} words for the input."
 
         return self._generate_completion(text, system_message, max_len)
