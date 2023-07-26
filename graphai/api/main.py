@@ -11,6 +11,7 @@ import graphai.api.routers.text as text_router
 import graphai.api.routers.video as video_router
 import graphai.api.routers.voice as voice_router
 import graphai.api.routers.translation as translation_router
+import graphai.api.routers.summarization as summarization_router
 
 from graphai.api.celery_tasks.text import text_init_task
 from graphai.api.celery_tasks.video import video_init_task
@@ -31,6 +32,7 @@ app.include_router(text_router.router)
 app.include_router(video_router.router)
 app.include_router(voice_router.router)
 app.include_router(translation_router.router)
+app.include_router(summarization_router.router)
 app.celery_app = celery_instance
 
 
