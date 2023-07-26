@@ -83,7 +83,7 @@ class SummarizationTaskResponse(BaseModel):
         description="Summarized text"
     )
 
-    summary_type: Literal['title', 'summary'] = Field(
+    summary_type: Union[Literal['title', 'summary'], None] = Field(
         title="Summary type",
         description="Whether the result is a title or a summary",
         default='summary'
