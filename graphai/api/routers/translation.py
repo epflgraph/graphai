@@ -15,13 +15,13 @@ from graphai.api.celery_tasks.translation import (
     translate_text_task,
     translate_text_callback_task,
     detect_text_language_task,
-    compute_text_fingerprint_task,
-    compute_text_fingerprint_callback_task,
-    text_fingerprint_find_closest_retrieve_from_db_task,
-    text_fingerprint_find_closest_parallel_task,
-    text_fingerprint_find_closest_direct_task,
-    text_fingerprint_find_closest_callback_task,
-    retrieve_text_fingerprint_callback_task,
+    compute_translation_text_fingerprint_task,
+    compute_translation_text_fingerprint_callback_task,
+    translation_text_fingerprint_find_closest_retrieve_from_db_task,
+    translation_text_fingerprint_find_closest_parallel_task,
+    translation_text_fingerprint_find_closest_direct_task,
+    translation_text_fingerprint_find_closest_callback_task,
+    translation_retrieve_text_fingerprint_callback_task,
 )
 from graphai.api.celery_tasks.common import (
     format_api_results,
@@ -50,22 +50,22 @@ def get_text_fingerprint_chain_list(token, text, src, tgt, force, min_similarity
     # The tasks are fingerprinting and callback, then lookup. The lookup is only among cache rows that satisfy the
     # equality conditions (source and target languages).
     task_list = [
-        compute_text_fingerprint_task.s(token, text, force),
-        compute_text_fingerprint_callback_task.s(text, src, tgt)
+        compute_translation_text_fingerprint_task.s(token, text, force),
+        compute_translation_text_fingerprint_callback_task.s(text, src, tgt)
     ]
     if min_similarity == 1:
-        task_list += [text_fingerprint_find_closest_direct_task.s(equality_conditions)]
+        task_list += [translation_text_fingerprint_find_closest_direct_task.s(equality_conditions)]
     else:
         task_list += [
-            text_fingerprint_find_closest_retrieve_from_db_task.s(equality_conditions),
-            group(text_fingerprint_find_closest_parallel_task.s(i, n_jobs, equality_conditions, min_similarity)
+            translation_text_fingerprint_find_closest_retrieve_from_db_task.s(equality_conditions),
+            group(translation_text_fingerprint_find_closest_parallel_task.s(i, n_jobs, equality_conditions, min_similarity)
                   for i in range(n_jobs))
         ]
-    task_list += [text_fingerprint_find_closest_callback_task.s()]
+    task_list += [translation_text_fingerprint_find_closest_callback_task.s()]
     if ignore_fp_results:
         task_list += [ignore_fingerprint_results_callback_task.s(results_to_return)]
     else:
-        task_list += [retrieve_text_fingerprint_callback_task.s()]
+        task_list += [translation_retrieve_text_fingerprint_callback_task.s()]
     return task_list
 
 

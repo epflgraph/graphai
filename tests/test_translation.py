@@ -4,7 +4,7 @@ import pytest
 from unittest.mock import patch
 from time import sleep
 
-from graphai.api.celery_tasks.translation import translate_text_task, compute_text_fingerprint_task
+from graphai.api.celery_tasks.translation import translate_text_task, compute_translation_text_fingerprint_task
 
 
 ################################################################
@@ -142,7 +142,7 @@ def test__translation_translate__translate_text__integration(fixture_app, celery
 @pytest.mark.usefixtures('en_to_fr_text', 'fr_to_en_text')
 def test__translation_calculate_fingerprint__compute_text_fingerprint__run_task(en_to_fr_text, fr_to_en_text):
     # Call the task
-    fp = compute_text_fingerprint_task.run('mock_token_en_fr', en_to_fr_text, True)
+    fp = compute_translation_text_fingerprint_task.run('mock_token_en_fr', en_to_fr_text, True)
 
     # Assert that the results are correct
     assert isinstance(fp, dict)
@@ -154,7 +154,7 @@ def test__translation_calculate_fingerprint__compute_text_fingerprint__run_task(
     #############################################################
 
     # Call the task
-    fp = compute_text_fingerprint_task.run('mock_token_fr_en', fr_to_en_text, True)
+    fp = compute_translation_text_fingerprint_task.run('mock_token_fr_en', fr_to_en_text, True)
 
     # Assert that the results are correct
     assert isinstance(fp, dict)

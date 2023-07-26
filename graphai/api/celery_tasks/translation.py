@@ -2,7 +2,7 @@ from celery import shared_task
 from graphai.api.common.video import translation_models
 from graphai.core.common.video import detect_text_language, perceptual_hash_text, get_current_datetime
 from graphai.core.common.caching import TextDBCachingManager
-from graphai.api.celery_tasks.common import fingerprint_lookup_retrieve_from_db, \
+from graphai.api.celery_tasks.common import compute_text_fingerprint_common, fingerprint_lookup_retrieve_from_db, \
     fingerprint_lookup_parallel, fingerprint_lookup_callback, fingerprint_lookup_direct
 
 LONG_TEXT_ERROR = "Unpunctuated text too long (over 512 tokens), " \
@@ -10,33 +10,15 @@ LONG_TEXT_ERROR = "Unpunctuated text too long (over 512 tokens), " \
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='text_6.fingerprint_text', ignore_result=False)
-def compute_text_fingerprint_task(self, token, text, force=False):
+             name='text_6.fingerprint_translation_text', ignore_result=False)
+def compute_translation_text_fingerprint_task(self, token, text, force=False):
     db_manager = TextDBCachingManager()
-    existing = db_manager.get_details(token, cols=['fingerprint'])[0]
-
-    if existing is not None and not force:
-        if existing['fingerprint'] is not None:
-            return {
-                'result': existing['fingerprint'],
-                'fp_token': existing['id_token'],
-                'perform_lookup': False,
-                'fresh': False
-            }
-
-    fp = perceptual_hash_text(text)
-
-    return {
-        'result': fp,
-        'fp_token': token,
-        'perform_lookup': True,
-        'fresh': True
-    }
+    return compute_text_fingerprint_common(db_manager, token, text, force)
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='text_6.fingerprint_text_callback', ignore_result=False)
-def compute_text_fingerprint_callback_task(self, results, text, src, tgt):
+             name='text_6.fingerprint_translation_text_callback', ignore_result=False)
+def compute_translation_text_fingerprint_callback_task(self, results, text, src, tgt):
     if results['fresh']:
         token = results['fp_token']
         db_manager = TextDBCachingManager()
@@ -55,16 +37,16 @@ def compute_text_fingerprint_callback_task(self, results, text, src, tgt):
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='text_6.text_fingerprint_find_closest_retrieve_from_db', ignore_result=False)
-def text_fingerprint_find_closest_retrieve_from_db_task(self, results, equality_conditions):
+             name='text_6.translation_text_fingerprint_find_closest_retrieve_from_db', ignore_result=False)
+def translation_text_fingerprint_find_closest_retrieve_from_db_task(self, results, equality_conditions):
     db_manager = TextDBCachingManager()
     return fingerprint_lookup_retrieve_from_db(results, db_manager, equality_conditions=equality_conditions)
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='text_6.text_fingerprint_find_closest_parallel', ignore_result=False)
-def text_fingerprint_find_closest_parallel_task(self, input_dict, i, n_total, equality_conditions,
-                                                min_similarity=1):
+             name='text_6.translation_text_fingerprint_find_closest_parallel', ignore_result=False)
+def translation_text_fingerprint_find_closest_parallel_task(self, input_dict, i, n_total, equality_conditions,
+                                                            min_similarity=1):
     db_manager = TextDBCachingManager()
     # The equality conditions, which only apply to text fingerprint lookup, make sure that the fingerprint lookup
     # happens only among the cached texts that have the same source and target languages as this one. This is
@@ -75,22 +57,22 @@ def text_fingerprint_find_closest_parallel_task(self, input_dict, i, n_total, eq
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='text_6.text_fingerprint_find_closest_direct', ignore_result=False)
-def text_fingerprint_find_closest_direct_task(self, results, equality_conditions):
+             name='text_6.translation_text_fingerprint_find_closest_direct', ignore_result=False)
+def translation_text_fingerprint_find_closest_direct_task(self, results, equality_conditions):
     db_manager = TextDBCachingManager()
     return fingerprint_lookup_direct(results, db_manager, equality_conditions=equality_conditions)
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='text_6.text_fingerprint_find_closest_callback', ignore_result=False)
-def text_fingerprint_find_closest_callback_task(self, results_list):
+             name='text_6.translation_text_fingerprint_find_closest_callback', ignore_result=False)
+def translation_text_fingerprint_find_closest_callback_task(self, results_list):
     db_manager = TextDBCachingManager()
     return fingerprint_lookup_callback(results_list, db_manager)
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='text_6.retrieve_text_fingerprint_final_callback', ignore_result=False)
-def retrieve_text_fingerprint_callback_task(self, results):
+             name='text_6.retrieve_translation_text_fingerprint_final_callback', ignore_result=False)
+def translation_retrieve_text_fingerprint_callback_task(self, results):
     # Returning the fingerprinting results, which is the part of this task whose results are sent back to the user.
     results_to_return = results['fp_results']
     results_to_return['closest'] = results['closest']

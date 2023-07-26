@@ -1,7 +1,7 @@
 from celery import shared_task
 
 from graphai.core.common.video import find_closest_audio_fingerprint_from_list, \
-    find_closest_image_fingerprint_from_list
+    find_closest_image_fingerprint_from_list, perceptual_hash_text
 
 
 def format_api_results(id, name, status, result):
@@ -21,6 +21,28 @@ def format_api_results(id, name, status, result):
         "task_name": name,
         "task_status": status,
         "task_result": result
+    }
+
+
+def compute_text_fingerprint_common(db_manager, token, text, force=False):
+    existing = db_manager.get_details(token, cols=['fingerprint'])[0]
+
+    if existing is not None and not force:
+        if existing['fingerprint'] is not None:
+            return {
+                'result': existing['fingerprint'],
+                'fp_token': existing['id_token'],
+                'perform_lookup': False,
+                'fresh': False
+            }
+
+    fp = perceptual_hash_text(text)
+
+    return {
+        'result': fp,
+        'fp_token': token,
+        'perform_lookup': True,
+        'fresh': True
     }
 
 
