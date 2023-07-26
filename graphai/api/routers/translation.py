@@ -38,8 +38,8 @@ router = APIRouter(
 )
 
 
-def get_text_fingerprint_chain_list(token, text, src, tgt, force, min_similarity=None, n_jobs=8,
-                                    ignore_fp_results=False, results_to_return=None):
+def get_translation_text_fingerprint_chain_list(token, text, src, tgt, force, min_similarity=None, n_jobs=8,
+                                                ignore_fp_results=False, results_to_return=None):
     # Loading min similarity parameter for text
     if min_similarity is None:
         fp_parameters = FingerprintParameters()
@@ -76,8 +76,8 @@ async def calculate_fingerprint(data: TextFingerprintRequest):
     tgt = data.target
     force = data.force
     token = generate_translation_text_token(text, src, tgt)
-    task_list = get_text_fingerprint_chain_list(token, text, src, tgt, force,
-                                                ignore_fp_results=False)
+    task_list = get_translation_text_fingerprint_chain_list(token, text, src, tgt, force,
+                                                            ignore_fp_results=False)
     task = chain(task_list)
     task = task.apply_async(priority=6)
     return {'task_id': task.id}
@@ -110,8 +110,8 @@ async def translate(data: TranslationRequest):
     # If force=True, fingerprinting is skipped
     # The tasks are translation and its callback
     if not force:
-        task_list = get_text_fingerprint_chain_list(token, text, src, tgt, force,
-                                                    ignore_fp_results=True, results_to_return=token)
+        task_list = get_translation_text_fingerprint_chain_list(token, text, src, tgt, force,
+                                                                ignore_fp_results=True, results_to_return=token)
         task_list += [translate_text_task.s(text, src, tgt, force)]
     else:
         task_list = [translate_text_task.s(token, text, src, tgt, force)]
