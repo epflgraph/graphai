@@ -59,12 +59,6 @@ class SummarizationRequest(BaseModel):
         description="Text to summarize"
     )
 
-    summary_type: Literal['title', 'summary'] = Field(
-        title="Summary type",
-        description="Whether the summarization to be performed is title or summary generation",
-        default='summary'
-    )
-
     text_type: str = Field(
         title="Text type",
         description="What the text being summarized describes/comes from. Example: 'lecture', 'course', 'person'."
