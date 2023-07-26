@@ -1,0 +1,118 @@
+from pydantic import BaseModel, Field
+from typing import Union, Literal
+
+from graphai.api.schemas.common import TaskStatusResponse
+
+
+class SummaryFingerprintRequest(BaseModel):
+    text: str = Field(
+        title="Text",
+        description="Text to summarize"
+    )
+
+    summary_type: Literal['title', 'summary'] = Field(
+        title="Summary type",
+        description="Whether the summarization to be performed is title or summary generation",
+        default='summary'
+    )
+
+    force: bool = Field(
+        title="Force recomputation",
+        default=False
+    )
+
+
+class SummaryFingerprintTaskResponse(BaseModel):
+    result: Union[str, None] = Field(
+        title="Fingerprint",
+        description="Fingerprint of the provided text."
+    )
+
+    fresh: bool = Field(
+        title="Freshness flag",
+        description="Whether the result was computed freshly or an existing cached result was returned."
+    )
+
+    closest_token: Union[str, None] = Field(
+        title="Closest token",
+        description="The token of the most similar existing text that the fingerprint lookup was able to find. Equal "
+                    "to original token if the most similar existing text did not satisfy the minimum similarity "
+                    "threshold."
+    )
+
+    successful: bool = Field(
+        title="Success flag",
+        description="Whether the computation was successful."
+    )
+
+
+class SummaryFingerprintResponse(TaskStatusResponse):
+    task_result: Union[SummaryFingerprintTaskResponse, None] = Field(
+        title="Text fingerprinting response",
+        description="A dict containing the resulting text fingerprint and a freshness flag."
+    )
+
+
+class SummarizationRequest(BaseModel):
+    text: str = Field(
+        title="Text",
+        description="Text to summarize"
+    )
+
+    summary_type: Literal['title', 'summary'] = Field(
+        title="Summary type",
+        description="Whether the summarization to be performed is title or summary generation",
+        default='summary'
+    )
+
+    text_type: str = Field(
+        title="Text type",
+        description="What the text being summarized describes/comes from. Example: 'lecture', 'course', 'person'."
+    )
+
+    use_keywords: bool = Field(
+        title="Use keywords",
+        description="Whether to use keywords for summarization or to "
+                    "use the raw text, default true (keywords are used).",
+        default=True
+    )
+
+    force: bool = Field(
+        title="Force recomputation",
+        default=False
+    )
+
+
+class SummarizationTaskResponse(BaseModel):
+    summary: Union[str, None] = Field(
+        title="Summarization results",
+        description="Summarized text"
+    )
+
+    summary_type: Literal['title', 'summary'] = Field(
+        title="Summary type",
+        description="Whether the result is a title or a summary",
+        default='summary'
+    )
+
+    text_too_large: bool = Field(
+        title="Text too large",
+        description="This boolean flag is true if the text provided for summarization is too long (over 16K tokens)."
+    )
+
+    successful: bool = Field(
+        title="Success flag",
+        description="Whether or not the summarization was successful"
+    )
+
+    fresh: bool = Field(
+        title="Freshness flag",
+        description="Whether or not the result is fresh"
+    )
+
+
+class SummarizationResponse(TaskStatusResponse):
+    task_result: Union[SummarizationTaskResponse, None] = Field(
+        title="Summarization response",
+        description="A dict containing the resulting summarized text and a success flag."
+    )
