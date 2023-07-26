@@ -143,7 +143,7 @@ def generate_src_tgt_dict(src, tgt):
     return {'source_lang': src, 'target_lang': tgt}
 
 
-def generate_text_token(s, src, tgt):
+def generate_translation_text_token(s, src, tgt):
     """
     Generates an md5-based token for a string
     Args:

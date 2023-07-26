@@ -27,7 +27,7 @@ from graphai.api.celery_tasks.common import (
     format_api_results,
     ignore_fingerprint_results_callback_task,
 )
-from graphai.core.common.video import FingerprintParameters, generate_src_tgt_dict, generate_text_token
+from graphai.core.common.video import FingerprintParameters, generate_src_tgt_dict, generate_translation_text_token
 from graphai.core.interfaces.celery_config import get_task_info
 
 
@@ -75,7 +75,7 @@ async def calculate_fingerprint(data: TextFingerprintRequest):
     src = data.source
     tgt = data.target
     force = data.force
-    token = generate_text_token(text, src, tgt)
+    token = generate_translation_text_token(text, src, tgt)
     task_list = get_text_fingerprint_chain_list(token, text, src, tgt, force,
                                                 ignore_fp_results=False)
     task = chain(task_list)
@@ -106,7 +106,7 @@ async def translate(data: TranslationRequest):
     src = data.source
     tgt = data.target
     force = data.force
-    token = generate_text_token(text, src, tgt)
+    token = generate_translation_text_token(text, src, tgt)
     # If force=True, fingerprinting is skipped
     # The tasks are translation and its callback
     if not force:
