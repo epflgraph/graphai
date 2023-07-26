@@ -918,6 +918,10 @@ def generate_summary_text_token(text, title=False):
     return token
 
 
+def generate_summary_type_dict(summary_type):
+    return {'summary_type': summary_type}
+
+
 class WhisperTranscriptionModel():
     def __init__(self):
         # The actual Whisper model is lazy loaded in order not to load it twice (celery *and* gunicorn)
