@@ -74,7 +74,7 @@ async def translate_status(task_id):
     full_results = get_task_info(task_id)
     task_results = full_results['results']
     if task_results is not None:
-        if 'result' in task_results:
+        if 'summary' in task_results:
             task_results = {
                 'summary': task_results['summary'],
                 'summary_type': task_results['summary_type'],
