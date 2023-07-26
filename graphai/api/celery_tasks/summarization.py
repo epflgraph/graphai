@@ -17,7 +17,10 @@ def lookup_text_summary_task(self, token, text, force=False):
                     return {
                         'token': token,
                         'text': text,
-                        'existing_results': existing['summary']
+                        'existing_results': {
+                            'summary': existing['summary'],
+                            'summary_type': existing['summary_type']
+                        }
                     }
     return {
         'token': token,
@@ -64,8 +67,8 @@ def summarize_text_task(self, token_and_text, text_type='lecture', title=False, 
         return {
             'token': token,
             'text': text,
-            'summary': existing_results,
-            'summary_type': None,
+            'summary': existing_results['summary'],
+            'summary_type': existing_results['summary_type'],
             'fresh': False,
             'successful': True,
             'too_many_tokens': False
@@ -119,3 +122,4 @@ def summarize_text_callback_task(self, results, force=False):
                 )
     elif not results['successful']:
         db_manager.delete_cache_rows([token])
+    return results
