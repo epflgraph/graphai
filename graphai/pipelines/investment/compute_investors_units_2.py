@@ -37,7 +37,7 @@ def compute_investors_units_2(params):
 
     bc.log('Fetching investor-concept Jaccard edges from database...')
 
-    table_name = 'aitor.Edges_N_Investor_N_Concept_T_Jaccard'
+    table_name = f'aitor.{params.prefix}_Edges_N_Investor_N_Concept_T_Jaccard'
     fields = ['InvestorID', 'PageID', 'Jaccard_000']
     investors_concepts_jaccard = pd.DataFrame(db.find(table_name, fields=fields), columns=fields)
 
@@ -56,7 +56,7 @@ def compute_investors_units_2(params):
 
     bc.log('Fetching investor-concept yearly edges from database...')
 
-    table_name = 'aitor.Edges_N_Investor_N_Concept_T_Years'
+    table_name = f'aitor.{params.prefix}_Edges_N_Investor_N_Concept_T_Years'
     fields = ['InvestorID', 'PageID', 'Year', 'CountAmount']
     conditions = {'InvestorID': investor_ids}
     investors_concepts = pd.DataFrame(db.find(table_name, fields=fields, conditions=conditions), columns=fields)
@@ -108,7 +108,7 @@ def compute_investors_units_2(params):
 
     bc.log('Inserting investors-units edges into database...')
 
-    table_name = 'aitor.Edges_N_Investor_N_Unit_T_2'
+    table_name = f'aitor.{params.prefix}_Edges_N_Investor_N_Unit_T_2'
     definition = [
         'InvestorID CHAR(64)',
         'Year SMALLINT',

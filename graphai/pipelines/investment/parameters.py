@@ -78,8 +78,6 @@ def build_prefix():
     else:
         prefix += 'ALL'
 
-    prefix += '_'
-
     return prefix
 
 

@@ -207,7 +207,7 @@ def create_investments_graph(params):
 
     bc.log('Inserting funding rounds into database...')
 
-    table_name = 'aitor.Nodes_N_FundingRound'
+    table_name = f'aitor.{params.prefix}_Nodes_N_FundingRound'
     definition = ['FundingRoundID CHAR(64)', 'FundingRoundDate DATE', 'FundingRoundType CHAR(32)',
                   'FundingAmount_USD FLOAT', 'FundingAmountPerInvestor_USD FLOAT', 'Year SMALLINT',
                   'PRIMARY KEY FundingRoundID (FundingRoundID)']
@@ -217,7 +217,7 @@ def create_investments_graph(params):
 
     bc.log('Inserting investors into database...')
 
-    table_name = 'aitor.Nodes_N_Investor'
+    table_name = f'aitor.{params.prefix}_Nodes_N_Investor'
     definition = ['InvestorID CHAR(64)', 'InvestorType CHAR(32)', 'PRIMARY KEY InvestorID (InvestorID)']
     db.drop_create_insert_table(table_name, definition, investors)
 
@@ -225,7 +225,7 @@ def create_investments_graph(params):
 
     bc.log('Inserting investors-frs edges into database...')
 
-    table_name = 'aitor.Edges_N_Investor_N_FundingRound'
+    table_name = f'aitor.{params.prefix}_Edges_N_Investor_N_FundingRound'
     definition = ['InvestorID CHAR(64)', 'FundingRoundID CHAR(64)', 'KEY InvestorID (InvestorID)',
                   'KEY FundingRoundID (FundingRoundID)']
     db.drop_create_insert_table(table_name, definition, investors_frs[['InvestorID', 'FundingRoundID']])
@@ -234,7 +234,7 @@ def create_investments_graph(params):
 
     bc.log('Inserting frs-fundraisers edges into database...')
 
-    table_name = 'aitor.Edges_N_FundingRound_N_Fundraiser'
+    table_name = f'aitor.{params.prefix}_Edges_N_FundingRound_N_Fundraiser'
     definition = ['FundingRoundID CHAR(64)', 'FundraiserID CHAR(64)', 'KEY FundingRoundID (FundingRoundID)',
                   'KEY FundraiserID (FundraiserID)']
     db.drop_create_insert_table(table_name, definition, frs_fundraisers)
@@ -243,7 +243,7 @@ def create_investments_graph(params):
 
     bc.log('Inserting fundraisers-concepts edges into database...')
 
-    table_name = 'aitor.Edges_N_Fundraiser_N_Concept'
+    table_name = f'aitor.{params.prefix}_Edges_N_Fundraiser_N_Concept'
     definition = ['FundraiserID CHAR(64)', 'PageID INT UNSIGNED', 'KEY FundraiserID (FundraiserID)', 'KEY PageID (PageID)']
     db.drop_create_insert_table(table_name, definition, fundraisers_concepts)
 
@@ -251,7 +251,7 @@ def create_investments_graph(params):
 
     bc.log('Inserting fundraisers into database...')
 
-    table_name = 'aitor.Nodes_N_Fundraiser'
+    table_name = f'aitor.{params.prefix}_Nodes_N_Fundraiser'
     definition = ['FundraiserID CHAR(64)', 'PRIMARY KEY FundraiserID (FundraiserID)']
     db.drop_create_insert_table(table_name, definition, fundraisers)
 
@@ -261,7 +261,7 @@ def create_investments_graph(params):
 
     bc.log('Inserting investors into database...')
 
-    table_name = 'aitor.Nodes_N_Investor_T_Years'
+    table_name = f'aitor.{params.prefix}_Nodes_N_Investor_T_Years'
     definition = [
         'InvestorID CHAR(64)',
         'InvestorType CHAR(32)',
@@ -284,7 +284,7 @@ def create_investments_graph(params):
 
     bc.log('Inserting concepts into database...')
 
-    table_name = 'aitor.Nodes_N_Concept_T_Years'
+    table_name = f'aitor.{params.prefix}_Nodes_N_Concept_T_Years'
     definition = [
         'PageID INT UNSIGNED',
         'Year SMALLINT',
@@ -306,7 +306,7 @@ def create_investments_graph(params):
 
     bc.log('Inserting investor-investor edges into database...')
 
-    table_name = 'aitor.Edges_N_Investor_N_Investor_T_Years'
+    table_name = f'aitor.{params.prefix}_Edges_N_Investor_N_Investor_T_Years'
     definition = [
         'SourceInvestorID CHAR(64)',
         'TargetInvestorID CHAR(64)',
@@ -330,7 +330,7 @@ def create_investments_graph(params):
 
     bc.log('Inserting investors-concepts edges into database...')
 
-    table_name = 'aitor.Edges_N_Investor_N_Concept_T_Years'
+    table_name = f'aitor.{params.prefix}_Edges_N_Investor_N_Concept_T_Years'
     definition = [
         'InvestorID CHAR(64)',
         'PageID INT UNSIGNED',

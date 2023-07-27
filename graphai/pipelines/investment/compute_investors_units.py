@@ -38,7 +38,7 @@ def compute_investors_units(params):
 
     bc.log('Fetching fundraiser-concept edges from database...')
 
-    table_name = 'aitor.Edges_N_Fundraiser_N_Concept'
+    table_name = f'aitor.{params.prefix}_Edges_N_Fundraiser_N_Concept'
     fields = ['FundraiserID', 'PageID']
     fundraisers_concepts = pd.DataFrame(db.find(table_name, fields=fields), columns=fields)
 
@@ -77,7 +77,7 @@ def compute_investors_units(params):
 
     bc.log('Fetching funding round-fundraiser edges from database...')
 
-    table_name = 'aitor.Edges_N_FundingRound_N_Fundraiser'
+    table_name = f'aitor.{params.prefix}_Edges_N_FundingRound_N_Fundraiser'
     fields = ['FundingRoundID', 'FundraiserID']
     frs_fundraisers = pd.DataFrame(db.find(table_name, fields=fields), columns=fields)
 
@@ -93,7 +93,7 @@ def compute_investors_units(params):
 
     bc.log('Fetching investor-funding round edges from database...')
 
-    table_name = 'aitor.Edges_N_Investor_N_FundingRound'
+    table_name = f'aitor.{params.prefix}_Edges_N_Investor_N_FundingRound'
     fields = ['InvestorID', 'FundingRoundID']
     investors_frs = pd.DataFrame(db.find(table_name, fields=fields), columns=fields)
 
@@ -195,7 +195,7 @@ def compute_investors_units(params):
 
     bc.log('Inserting investor-unit edges into database...')
 
-    table_name = 'aitor.Edges_N_Investor_N_Unit'
+    table_name = f'aitor.{params.prefix}_Edges_N_Investor_N_Unit'
     definition = [
         'InvestorID CHAR(64)',
         'UnitID CHAR(32)',

@@ -25,7 +25,7 @@ def detect_fundraisers_concepts(params):
     bc.log('Fetching fundraiser descriptions...')
 
     # Fetch manual fundraiser-concept edges
-    table_name = 'aitor.Edges_N_Fundraiser_N_Concept'
+    table_name = f'aitor.{params.prefix}_Edges_N_Fundraiser_N_Concept'
     fields = ['FundraiserID', 'PageID']
     fundraisers_concepts = pd.DataFrame(db.find(table_name, fields=fields), columns=fields)
     fundraiser_ids = list(fundraisers_concepts['FundraiserID'].drop_duplicates())
@@ -71,7 +71,7 @@ def detect_fundraisers_concepts(params):
 
     bc.log('Inserting fundraiser-concept detected edges into database...')
 
-    table_name = 'aitor.Edges_N_Fundraiser_N_Concept_T_AutoNLP'
+    table_name = f'aitor.{params.prefix}_Edges_N_Fundraiser_N_Concept_T_AutoNLP'
     definition = [
         'FundraiserID CHAR(64)',
         'PageID INT UNSIGNED',
