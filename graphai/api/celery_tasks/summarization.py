@@ -104,6 +104,7 @@ def lookup_text_summary_task(self, token, text, force=False):
 def get_keywords_for_summarization_task(self, input_dict, use_keywords=True):
     existing_results = input_dict['existing_results']
     text = input_dict['text']
+    input_dict['original_text'] = text
     if existing_results is not None or not use_keywords or text is None or len(text) == 0:
         input_dict['is_keywords'] = False
         return input_dict
@@ -123,10 +124,12 @@ def summarize_text_task(self, token_and_text, text_type='lecture', title=False, 
     existing_results = token_and_text['existing_results']
     token = token_and_text['token']
     text = token_and_text['text']
+    original_text = token_and_text['original_text']
     if text is None or len(text) == 0:
         return {
             'token': token,
             'text': text,
+            'original_text': original_text,
             'summary': None,
             'summary_type': None,
             'fresh': False,
@@ -137,6 +140,7 @@ def summarize_text_task(self, token_and_text, text_type='lecture', title=False, 
         return {
             'token': token,
             'text': text,
+            'original_text': original_text,
             'summary': existing_results['summary'],
             'summary_type': existing_results['summary_type'],
             'fresh': False,
@@ -151,6 +155,7 @@ def summarize_text_task(self, token_and_text, text_type='lecture', title=False, 
     return {
         'token': token,
         'text': text,
+        'original_text': original_text,
         'summary': results,
         'summary_type': 'title' if title else 'summary',
         'fresh': results is not None,
@@ -164,12 +169,12 @@ def summarize_text_task(self, token_and_text, text_type='lecture', title=False, 
 def summarize_text_callback_task(self, results, force=False):
     db_manager = SummaryDBCachingManager()
     token = results['token']
-    text = results['text']
+    original_text = results['original_text']
     summary = results['summary']
     summary_type = results['summary_type']
     if results['fresh']:
         values_dict = {
-            'input_text': text,
+            'input_text': original_text,
             'summary': summary,
             'summary_type': summary_type,
             'summary_length': len(summary.split(' '))
