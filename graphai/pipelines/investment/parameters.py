@@ -31,16 +31,16 @@ recent_past = {
 switzerland = ['CHE']
 switzerland_nbh = ['CHE', 'DEU', 'FRA', 'ITA', 'AUT', 'BEL', 'NLD', 'LUX']
 
-# countries = switzerland
-countries = switzerland_nbh
+countries = switzerland
+# countries = switzerland_nbh
 # countries = None
 
 ##################
 # Investor types #
 ##################
 # Only investors whose type is in the list will be considered, the rest will be ignored.
-# investor_types = ['Person']
-investor_types = ['Organization', 'Person']
+investor_types = ['Person']
+# investor_types = ['Organization', 'Person']
 
 #######################
 # Funding round types #
@@ -49,3 +49,38 @@ investor_types = ['Organization', 'Person']
 # None means no filtering is done and thus all funding rounds are considered.
 fr_types = ['pre seed']
 # fr_types = None
+
+
+#################
+# Schema prefix #
+#################
+def build_prefix():
+    prefix = ''
+
+    if countries == switzerland:
+        prefix += 'CH'
+    elif countries == switzerland_nbh:
+        prefix += 'NBH'
+    else:
+        prefix += 'ALL'
+
+    prefix += '_'
+
+    if investor_types == ['Person']:
+        prefix += 'PERSON'
+    else:
+        prefix += 'ALL'
+
+    prefix += '_'
+
+    if fr_types == ['pre seed']:
+        prefix += 'PRESEED'
+    else:
+        prefix += 'ALL'
+
+    prefix += '_'
+
+    return prefix
+
+
+prefix = build_prefix()

@@ -22,19 +22,19 @@ def main():
     aggregate_recent_past(params)
 
     bc.log('Computing Jaccard index...')
-    compute_jaccard_index()
+    compute_jaccard_index(params)
 
     bc.log('Detecting fundraisers concepts...')
-    detect_fundraisers_concepts()
+    detect_fundraisers_concepts(params)
 
     bc.log('Computing fundraiser-unit edges...')
-    compute_fundraisers_units()
+    compute_fundraisers_units(params)
 
     bc.log('Computing investor-unit edges...')
-    compute_investors_units()
+    compute_investors_units(params)
 
     bc.log('Computing investor-unit edges 2...')
-    compute_investors_units_2()
+    compute_investors_units_2(params)
 
     bc.report()
 

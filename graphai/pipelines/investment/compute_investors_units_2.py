@@ -7,7 +7,7 @@ from graphai.core.utils.breadcrumb import Breadcrumb
 from graphai.pipelines.investment.concept_configuration import compute_affinities
 
 
-def compute_investors_units_2():
+def compute_investors_units_2(params):
 
     # Initialize breadcrumb to log and keep track of time
     bc = Breadcrumb()
@@ -126,8 +126,10 @@ def compute_investors_units_2():
 
 
 if __name__ == '__main__':
+    import graphai.pipelines.investment.parameters as params
+
     pd.set_option('display.max_rows', 500)
     pd.set_option('display.max_columns', 500)
     pd.set_option('display.width', 1000)
 
-    compute_investors_units_2()
+    compute_investors_units_2(params)

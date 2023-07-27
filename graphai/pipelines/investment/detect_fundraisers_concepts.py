@@ -9,7 +9,7 @@ from graphai.core.utils.breadcrumb import Breadcrumb
 from graphai.pipelines.investment.concept_configuration import normalise
 
 
-def detect_fundraisers_concepts():
+def detect_fundraisers_concepts(params):
 
     # Initialize breadcrumb to log and keep track of time
     bc = Breadcrumb()
@@ -87,8 +87,10 @@ def detect_fundraisers_concepts():
 
 
 if __name__ == '__main__':
+    import graphai.pipelines.investment.parameters as params
+
     pd.set_option('display.max_rows', 500)
     pd.set_option('display.max_columns', 500)
     pd.set_option('display.width', 1000)
 
-    detect_fundraisers_concepts()
+    detect_fundraisers_concepts(params)

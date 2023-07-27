@@ -6,7 +6,7 @@ from graphai.core.interfaces.db import DB
 from graphai.core.utils.breadcrumb import Breadcrumb
 
 
-def compute_jaccard_index():
+def compute_jaccard_index(params):
 
     ############################################################
     # INITIALIZATION                                           #
@@ -399,8 +399,10 @@ def compute_jaccard_index():
 
 
 if __name__ == '__main__':
+    import graphai.pipelines.investment.parameters as params
+
     pd.set_option('display.max_rows', 400)
     pd.set_option('display.max_columns', 500)
     pd.set_option('display.width', 1000)
 
-    compute_jaccard_index()
+    compute_jaccard_index(params)
