@@ -1,5 +1,7 @@
 import pandas as pd
 
+import mysql.connector
+
 from graphai.core.interfaces.db import DB
 
 from graphai.core.utils.breadcrumb import Breadcrumb
@@ -29,16 +31,14 @@ def get_investors_frs(db, params, fr_ids=None):
     # Fetch investors-frs from database
     table_name = 'graph.Edges_N_Investor_N_FundingRound'
     fields = ['InvestorID', 'FundingRoundID']
-    conditions = {'FundingRoundID': fr_ids} if fr_ids else {}
-    investors_frs = pd.DataFrame(db.find(table_name, fields=fields, conditions=conditions), columns=fields)
+    investors_frs = db.find_or_split(table_name, fields, fields, 'FundingRoundID', fr_ids)
     investor_ids = list(investors_frs['InvestorID'].drop_duplicates())
 
     # Fetch investors from database
     table_name = 'graph.Nodes_N_Investor'
     fields = ['InvestorID', 'CASE WHEN PersonID IS NULL THEN "Organisation" ELSE "Person" END AS InvestorType']
     columns = ['InvestorID', 'InvestorType']
-    conditions = {'InvestorID': investor_ids}
-    investors = pd.DataFrame(db.find(table_name, fields=fields, conditions=conditions), columns=columns)
+    investors = db.find_or_split(table_name, fields, columns, 'InvestorID', investor_ids)
 
     # Filter by investor type
     investors = investors[investors['InvestorType'].isin(params.investor_types)]
@@ -53,8 +53,7 @@ def get_frs_fundraisers(db, fr_ids=None):
     # Fetch frs-fundraisers from database
     table_name = 'graph.Edges_N_Fundraiser_N_FundingRound'
     fields = ['FundingRoundID', 'FundraiserID']
-    conditions = {'FundingRoundID': fr_ids} if fr_ids else {}
-    frs_fundraisers = pd.DataFrame(db.find(table_name, fields=fields, conditions=conditions), columns=fields)
+    frs_fundraisers = db.find_or_split(table_name, fields, fields, 'FundingRoundID', fr_ids)
 
     return frs_fundraisers
 
@@ -63,8 +62,8 @@ def get_fundraisers_concepts(db, fundraiser_ids=None):
     # Fetch concepts from database
     table_name = 'graph.Edges_N_Organisation_N_Concept'
     fields = ['OrganisationID', 'PageID']
-    conditions = {'OrganisationID': fundraiser_ids} if fundraiser_ids else {}
-    fundraisers_concepts = pd.DataFrame(db.find(table_name, fields=fields, conditions=conditions), columns=['FundraiserID', 'PageID'])
+    columns = ['FundraiserID', 'PageID']
+    fundraisers_concepts = db.find_or_split(table_name, fields, columns, 'OrganisationID', fundraiser_ids)
 
     return fundraisers_concepts
 

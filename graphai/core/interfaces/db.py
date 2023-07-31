@@ -1,5 +1,7 @@
 import sys
 
+import pandas as pd
+
 import mysql.connector
 import configparser
 
@@ -113,6 +115,17 @@ class DB:
             print(query)
 
         return self.execute_query(query, values)
+
+    def find_or_split(self, table_name, fields, columns, filter_field, filter_ids):
+        try:
+            conditions = {filter_field: filter_ids} if filter_ids else {}
+            return pd.DataFrame(self.find(table_name, fields=fields, conditions=conditions), columns=columns)
+        except mysql.connector.Error:
+            n = len(filter_ids)
+            print(f'Failed fetching df filtering {n} ids. Splitting in two and retrying...')
+            df1 = self.find_or_split(table_name, fields, columns, filter_field, filter_ids[: n // 2])
+            df2 = self.find_or_split(table_name, fields, columns, filter_field, filter_ids[n // 2:])
+            return pd.concat([df1, df2]).reset_index(drop=True)
 
     def drop_table(self, table_name):
         query = f"""
