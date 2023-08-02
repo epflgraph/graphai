@@ -80,7 +80,7 @@ def lookup_text_summary_task(self, token, text, force=False):
     if not force:
         db_manager = SummaryDBCachingManager()
         # The token is [text md5]_[summary type], so we don't need to check the summary_type here
-        all_existing = db_manager.get_details(token, cols=['summary'], using_most_similar=True)
+        all_existing = db_manager.get_details(token, cols=['summary', 'summary_type'], using_most_similar=True)
         for existing in all_existing:
             if existing is not None:
                 if existing['summary'] is not None:
