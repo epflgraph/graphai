@@ -8,6 +8,7 @@ from graphai.api.celery_tasks.summarization import summarize_text_task, compute_
 
 ################################################################
 # /summarization/summary                                       #
+# /summarization/title                                         #
 ################################################################
 
 
