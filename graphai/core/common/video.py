@@ -1260,6 +1260,18 @@ class ChatGPTSummarizer:
             return False
 
     def _generate_completion(self, text, system_message, max_len):
+        """
+        Internal method, generates a chat completion, which is the OpenAI API endpoint for ChatGPT interactions
+        Args:
+            text: The text to be provided in the "user" role, i.e. the text that is to be processed by ChatGPT
+            system_message: The text to be provided in the "system" role, which provides directives to ChatGPT
+            max_len: Approximate maximum length of the response in words
+
+        Returns:
+            Results returned by ChatGPT, plus a flag that is True if there were too many tokens.
+            A (None, True) result means that the completion failed because the message had too many tokens,
+            while a (None, False) result indicates a different error (e.g. failed connection).
+        """
         has_api_key = self.establish_connection()
         if not has_api_key:
             return None, False
@@ -1293,6 +1305,19 @@ class ChatGPTSummarizer:
         return completion.choices[0].message.content, False
 
     def generate_summary(self, text, text_type='lecture', keywords=True, ordered=False, title=False, max_len=100):
+        """
+        Generates a summary or a title for the provided text
+        Args:
+            text: Text to summarize
+            text_type: Type of text, e.g. "lecture", "course". Useful for summaries.
+            keywords: Whether the provided text is in the form of keywords or raw text
+            ordered: If keywords, whether the provided keywords are in some chronological order
+            title: Whether to generate a title (True) or a summary (False)
+            max_len: Approximate maximum length of result (in words)
+
+        Returns:
+            Result of summarization, plus a flag indicating whether there were too many tokens
+        """
         if keywords:
             system_message = "Given the following set of keywords"
         else:
