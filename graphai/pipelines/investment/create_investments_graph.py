@@ -1,7 +1,5 @@
 import pandas as pd
 
-import mysql.connector
-
 from graphai.core.interfaces.db import DB
 
 from graphai.core.utils.breadcrumb import Breadcrumb
