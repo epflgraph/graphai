@@ -43,6 +43,10 @@ jobs:
           echo "" >> models.ini
           echo "[GOOGLE]" >> models.ini
           echo "api_key: ${{ secrets.google_api_key }}" >> models.ini
+          echo "" >> models.ini
+          echo "[CHATGPT]" >> models.ini
+          echo "api_key: ${{ secrets.openai_api_key }}" >> models.ini
+          
           
           echo "[CACHE]" >> cache.ini
           echo "root: ${{ vars.cache_root }}" >> cache.ini

@@ -29,6 +29,8 @@ import pytesseract
 from google.cloud import vision
 import spacy
 import whisper
+import openai
+import tiktoken
 from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
 
 from graphai.definitions import CONFIG_DIR
@@ -141,7 +143,7 @@ def generate_src_tgt_dict(src, tgt):
     return {'source_lang': src, 'target_lang': tgt}
 
 
-def generate_text_token(s, src, tgt):
+def generate_translation_text_token(s, src, tgt):
     """
     Generates an md5-based token for a string
     Args:
@@ -902,6 +904,24 @@ def detect_text_language(s):
         return None
 
 
+def count_tokens_for_openai(text, model="cl100k_base"):
+    encoding = tiktoken.get_encoding(model)
+    return len(encoding.encode(text))
+
+
+def generate_summary_text_token(text, title=False):
+    token = md5_text(text)
+    if title:
+        token += '_title'
+    else:
+        token += '_summary'
+    return token
+
+
+def generate_summary_type_dict(summary_type):
+    return {'summary_type': summary_type}
+
+
 class WhisperTranscriptionModel():
     def __init__(self):
         # The actual Whisper model is lazy loaded in order not to load it twice (celery *and* gunicorn)
@@ -1215,3 +1235,102 @@ class FingerprintParameters:
 
     def get_min_sim_video(self):
         return self.min_similarity['video']
+
+
+class ChatGPTSummarizer:
+    def __init__(self):
+        config_contents = configparser.ConfigParser()
+        try:
+            print('Reading ChatGPT API key from file')
+            config_contents.read(f'{CONFIG_DIR}/models.ini')
+            self.api_key = config_contents['CHATGPT'].get('api_key', fallback=None)
+        except Exception:
+            self.api_key = None
+        if self.api_key is None:
+            print(f'Could not read file {CONFIG_DIR}/models.ini or '
+                  f'file does not have section [CHATGPT], ChatGPT API '
+                  f'endpoints cannot be used as there is no '
+                  f'default API key.')
+
+    def establish_connection(self):
+        if self.api_key is not None:
+            openai.api_key = self.api_key
+            return True
+        else:
+            return False
+
+    def _generate_completion(self, text, system_message, max_len):
+        """
+        Internal method, generates a chat completion, which is the OpenAI API endpoint for ChatGPT interactions
+        Args:
+            text: The text to be provided in the "user" role, i.e. the text that is to be processed by ChatGPT
+            system_message: The text to be provided in the "system" role, which provides directives to ChatGPT
+            max_len: Approximate maximum length of the response in words
+
+        Returns:
+            Results returned by ChatGPT, plus a flag that is True if there were too many tokens.
+            A (None, True) result means that the completion failed because the message had too many tokens,
+            while a (None, False) result indicates a different error (e.g. failed connection).
+        """
+        has_api_key = self.establish_connection()
+        if not has_api_key:
+            return None, False
+        approx_token_count = count_tokens_for_openai(text) + count_tokens_for_openai(system_message) + int(2 * max_len)
+        if approx_token_count < 4096:
+            model_type = 'gpt-3.5-turbo'
+        elif 4096 < approx_token_count < 16384:
+            model_type = 'gpt-3.5-turbo-16k'
+        else:
+            return None, True
+        try:
+            completion = openai.ChatCompletion.create(
+                model=model_type,
+                messages=[
+                    {"role": "system", "content": system_message},
+                    {"role": "user", "content": text}
+                ],
+                max_tokens=int(2 * max_len)
+            )
+            print(completion)
+        except openai.error.InvalidRequestError as e:
+            # We check to see if the exception was caused by too many tokens in the input
+            print(e)
+            if "This model's maximum context length is" in e:
+                return None, True
+            else:
+                return None, False
+        except Exception as e:
+            print(e)
+            return None, False
+        return completion.choices[0].message.content, False
+
+    def generate_summary(self, text, text_type='lecture', keywords=True, ordered=False, title=False, max_len=100):
+        """
+        Generates a summary or a title for the provided text
+        Args:
+            text: Text to summarize
+            text_type: Type of text, e.g. "lecture", "course". Useful for summaries.
+            keywords: Whether the provided text is in the form of keywords or raw text
+            ordered: If keywords, whether the provided keywords are in some chronological order
+            title: Whether to generate a title (True) or a summary (False)
+            max_len: Approximate maximum length of result (in words)
+
+        Returns:
+            Result of summarization, plus a flag indicating whether there were too many tokens
+        """
+        if keywords:
+            system_message = "Given the following set of keywords"
+        else:
+            system_message = "Given the following text"
+        system_message += f" extracted from a {text_type}"
+        if keywords and not ordered:
+            system_message += " in no particular order,"
+        else:
+            system_message += ","
+        if title:
+            system_message += f" generate a title for the {text_type} "
+        else:
+            system_message += f" generate a summary for the {text_type} "
+        system_message += f"with under {max_len} words for the input."
+
+        return self._generate_completion(text, system_message, max_len)

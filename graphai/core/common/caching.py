@@ -830,6 +830,59 @@ class TextDBCachingManager(DBCachingManagerBase):
         )
 
 
+class SummaryDBCachingManager(DBCachingManagerBase):
+    def __init__(self):
+        super().__init__(cache_table='Summary_Main', most_similar_table='Summary_Most_Similar')
+
+    def init_db(self):
+        # Making sure the schema exists
+        self.db.execute_query(
+            f"""
+            CREATE DATABASE IF NOT EXISTS `{self.schema}`
+            DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci
+            DEFAULT ENCRYPTION='N';
+            """
+        )
+
+        # Creating the cache table if it does not exist
+        self.db.execute_query(
+            f"""
+            CREATE TABLE IF NOT EXISTS `{self.schema}`.`{self.cache_table}` (
+              `id_token` VARCHAR(255),
+              `fingerprint` VARCHAR(255) DEFAULT NULL,
+              `input_text` LONGTEXT DEFAULT NULL,
+              `summary` LONGTEXT DEFAULT NULL,
+              `summary_type` VARCHAR(10) DEFAULT NULL,
+              `summary_length` INT DEFAULT NULL,
+              `date_added` DATETIME DEFAULT NULL,
+              PRIMARY KEY id_token (id_token)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+            """
+        )
+
+        # Creating the fingerprint index if it doesn't exist
+        try:
+            self.db.execute_query(
+                f"""
+                CREATE INDEX `summary_main_fp_index` ON `{self.schema}`.`{self.cache_table}` (`fingerprint`(64));
+                """
+            )
+        except Exception:
+            pass
+
+        # Creating the closest match table
+        self.db.execute_query(
+            f"""
+            CREATE TABLE IF NOT EXISTS `{self.schema}`.`{self.most_similar_table}` (
+              `id_token` VARCHAR(255),
+              `most_similar_token` VARCHAR(255) DEFAULT NULL,
+              PRIMARY KEY id_token (id_token),
+              KEY most_similar_token (most_similar_token)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+            """
+        )
+
+
 class VideoConfig():
     def __init__(self):
         config_contents = configparser.ConfigParser()
