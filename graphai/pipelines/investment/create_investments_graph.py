@@ -8,7 +8,7 @@ from graphai.core.utils.time.date import rescale
 
 def get_frs(db, params):
     # Fetch funding rounds from database
-    table_name = 'graph_piper.Nodes_N_FundingRound'
+    table_name = 'graph.Nodes_N_FundingRound'
     fields = ['FundingRoundID', 'FundingRoundDate', 'FundingRoundType', 'FundingAmount_USD', 'FundingAmount_USD / CB_InvestorCount']
     columns = ['FundingRoundID', 'FundingRoundDate', 'FundingRoundType', 'FundingAmount_USD', 'FundingAmountPerInvestor_USD']
 
@@ -26,72 +26,43 @@ def get_frs(db, params):
 
 
 def get_investors_frs(db, params, fr_ids=None):
-    if 'Organization' in params.investor_types:
-        # Fetch organization investors from database
-        table_name = 'graph_piper.Edges_N_Organisation_N_FundingRound'
-        fields = ['OrganisationID', 'FundingRoundID']
+    # Fetch investors-frs from database
+    table_name = 'graph.Edges_N_Investor_N_FundingRound'
+    fields = ['InvestorID', 'FundingRoundID']
+    investors_frs = db.find_or_split(table_name, fields, fields, 'FundingRoundID', fr_ids)
+    investor_ids = list(investors_frs['InvestorID'].drop_duplicates())
 
-        if fr_ids is None:
-            conditions = {'Action': 'Invested in'}
-        else:
-            conditions = {'FundingRoundID': fr_ids, 'Action': 'Invested in'}
+    # Fetch investors from database
+    table_name = 'graph.Nodes_N_Investor'
+    fields = ['InvestorID', 'CASE WHEN PersonID IS NULL THEN "Organisation" ELSE "Person" END AS InvestorType']
+    columns = ['InvestorID', 'InvestorType']
+    investors = db.find_or_split(table_name, fields, columns, 'InvestorID', investor_ids)
 
-        org_investors_frs = pd.DataFrame(db.find(table_name, fields=fields, conditions=conditions),
-                                         columns=['InvestorID', 'FundingRoundID'])
-        org_investors_frs['InvestorType'] = 'Organization'
+    # Filter by investor type
+    investors = investors[investors['InvestorType'].isin(params.investor_types)]
 
-        if 'Person' not in params.investor_types:
-            return org_investors_frs
-
-    if 'Person' in params.investor_types:
-        # Fetch person investors from database
-        table_name = 'graph_piper.Edges_N_Person_N_FundingRound'
-        fields = ['PersonID', 'FundingRoundID']
-
-        if fr_ids is None:
-            conditions = {'Action': 'Invested in'}
-        else:
-            conditions = {'FundingRoundID': fr_ids, 'Action': 'Invested in'}
-
-        person_investors_frs = pd.DataFrame(db.find(table_name, fields=fields, conditions=conditions),
-                                            columns=['InvestorID', 'FundingRoundID'])
-        person_investors_frs['InvestorType'] = 'Person'
-
-        if 'Organization' not in params.investor_types:
-            return person_investors_frs
-
-    # Combine organization investors and person investors in a single DataFrame
-    investors_frs = pd.concat([org_investors_frs, person_investors_frs])
-    investors_frs = investors_frs[['InvestorID', 'InvestorType', 'FundingRoundID']]
+    # Add investor type column
+    investors_frs = pd.merge(investors, investors_frs, how='inner', on='InvestorID')
 
     return investors_frs
 
 
 def get_frs_fundraisers(db, fr_ids=None):
-    # Fetch fundraisers from database
-    table_name = 'graph_piper.Edges_N_Organisation_N_FundingRound'
-    fields = ['FundingRoundID', 'OrganisationID']
+    # Fetch frs-fundraisers from database
+    table_name = 'graph.Edges_N_Fundraiser_N_FundingRound'
+    fields = ['FundingRoundID', 'FundraiserID']
+    frs_fundraisers = db.find_or_split(table_name, fields, fields, 'FundingRoundID', fr_ids)
 
-    if fr_ids is None:
-        conditions = {'Action': 'Raised from'}
-    else:
-        conditions = {'FundingRoundID': fr_ids, 'Action': 'Raised from'}
-
-    frs_fundraisers = pd.DataFrame(db.find(table_name, fields=fields, conditions=conditions), columns=['FundingRoundID', 'FundraiserID'])
     return frs_fundraisers
 
 
 def get_fundraisers_concepts(db, fundraiser_ids=None):
     # Fetch concepts from database
-    table_name = 'graph_piper.Edges_N_Organisation_N_Concept'
+    table_name = 'graph.Edges_N_Organisation_N_Concept'
     fields = ['OrganisationID', 'PageID']
+    columns = ['FundraiserID', 'PageID']
+    fundraisers_concepts = db.find_or_split(table_name, fields, columns, 'OrganisationID', fundraiser_ids)
 
-    if fundraiser_ids is None:
-        conditions = {}
-    else:
-        conditions = {'OrganisationID': fundraiser_ids}
-
-    fundraisers_concepts = pd.DataFrame(db.find(table_name, fields=fields, conditions=conditions), columns=['FundraiserID', 'PageID'])
     return fundraisers_concepts
 
 
@@ -233,7 +204,7 @@ def create_investments_graph(params):
 
     bc.log('Inserting funding rounds into database...')
 
-    table_name = 'aitor.Nodes_N_FundingRound'
+    table_name = f'aitor.{params.prefix}_Nodes_N_FundingRound'
     definition = ['FundingRoundID CHAR(64)', 'FundingRoundDate DATE', 'FundingRoundType CHAR(32)',
                   'FundingAmount_USD FLOAT', 'FundingAmountPerInvestor_USD FLOAT', 'Year SMALLINT',
                   'PRIMARY KEY FundingRoundID (FundingRoundID)']
@@ -243,7 +214,7 @@ def create_investments_graph(params):
 
     bc.log('Inserting investors into database...')
 
-    table_name = 'aitor.Nodes_N_Investor'
+    table_name = f'aitor.{params.prefix}_Nodes_N_Investor'
     definition = ['InvestorID CHAR(64)', 'InvestorType CHAR(32)', 'PRIMARY KEY InvestorID (InvestorID)']
     db.drop_create_insert_table(table_name, definition, investors)
 
@@ -251,7 +222,7 @@ def create_investments_graph(params):
 
     bc.log('Inserting investors-frs edges into database...')
 
-    table_name = 'aitor.Edges_N_Investor_N_FundingRound'
+    table_name = f'aitor.{params.prefix}_Edges_N_Investor_N_FundingRound'
     definition = ['InvestorID CHAR(64)', 'FundingRoundID CHAR(64)', 'KEY InvestorID (InvestorID)',
                   'KEY FundingRoundID (FundingRoundID)']
     db.drop_create_insert_table(table_name, definition, investors_frs[['InvestorID', 'FundingRoundID']])
@@ -260,7 +231,7 @@ def create_investments_graph(params):
 
     bc.log('Inserting frs-fundraisers edges into database...')
 
-    table_name = 'aitor.Edges_N_FundingRound_N_Fundraiser'
+    table_name = f'aitor.{params.prefix}_Edges_N_FundingRound_N_Fundraiser'
     definition = ['FundingRoundID CHAR(64)', 'FundraiserID CHAR(64)', 'KEY FundingRoundID (FundingRoundID)',
                   'KEY FundraiserID (FundraiserID)']
     db.drop_create_insert_table(table_name, definition, frs_fundraisers)
@@ -269,7 +240,7 @@ def create_investments_graph(params):
 
     bc.log('Inserting fundraisers-concepts edges into database...')
 
-    table_name = 'aitor.Edges_N_Fundraiser_N_Concept'
+    table_name = f'aitor.{params.prefix}_Edges_N_Fundraiser_N_Concept'
     definition = ['FundraiserID CHAR(64)', 'PageID INT UNSIGNED', 'KEY FundraiserID (FundraiserID)', 'KEY PageID (PageID)']
     db.drop_create_insert_table(table_name, definition, fundraisers_concepts)
 
@@ -277,7 +248,7 @@ def create_investments_graph(params):
 
     bc.log('Inserting fundraisers into database...')
 
-    table_name = 'aitor.Nodes_N_Fundraiser'
+    table_name = f'aitor.{params.prefix}_Nodes_N_Fundraiser'
     definition = ['FundraiserID CHAR(64)', 'PRIMARY KEY FundraiserID (FundraiserID)']
     db.drop_create_insert_table(table_name, definition, fundraisers)
 
@@ -287,7 +258,7 @@ def create_investments_graph(params):
 
     bc.log('Inserting investors into database...')
 
-    table_name = 'aitor.Nodes_N_Investor_T_Years'
+    table_name = f'aitor.{params.prefix}_Nodes_N_Investor_T_Years'
     definition = [
         'InvestorID CHAR(64)',
         'InvestorType CHAR(32)',
@@ -310,7 +281,7 @@ def create_investments_graph(params):
 
     bc.log('Inserting concepts into database...')
 
-    table_name = 'aitor.Nodes_N_Concept_T_Years'
+    table_name = f'aitor.{params.prefix}_Nodes_N_Concept_T_Years'
     definition = [
         'PageID INT UNSIGNED',
         'Year SMALLINT',
@@ -332,7 +303,7 @@ def create_investments_graph(params):
 
     bc.log('Inserting investor-investor edges into database...')
 
-    table_name = 'aitor.Edges_N_Investor_N_Investor_T_Years'
+    table_name = f'aitor.{params.prefix}_Edges_N_Investor_N_Investor_T_Years'
     definition = [
         'SourceInvestorID CHAR(64)',
         'TargetInvestorID CHAR(64)',
@@ -356,7 +327,7 @@ def create_investments_graph(params):
 
     bc.log('Inserting investors-concepts edges into database...')
 
-    table_name = 'aitor.Edges_N_Investor_N_Concept_T_Years'
+    table_name = f'aitor.{params.prefix}_Edges_N_Investor_N_Concept_T_Years'
     definition = [
         'InvestorID CHAR(64)',
         'PageID INT UNSIGNED',
@@ -383,7 +354,7 @@ def create_investments_graph(params):
 
 
 if __name__ == '__main__':
-    import investment.parameters as params
+    import graphai.pipelines.investment.parameters as params
 
     pd.set_option('display.max_rows', 500)
     pd.set_option('display.max_columns', 500)

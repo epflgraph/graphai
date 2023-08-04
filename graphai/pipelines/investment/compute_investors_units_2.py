@@ -4,10 +4,10 @@ from graphai.core.interfaces.db import DB
 
 from graphai.core.utils.breadcrumb import Breadcrumb
 
-from graphai.scripts.investment.concept_configuration import compute_affinities
+from graphai.pipelines.investment.concept_configuration import compute_affinities
 
 
-def compute_investors_units_2():
+def compute_investors_units_2(params):
 
     # Initialize breadcrumb to log and keep track of time
     bc = Breadcrumb()
@@ -19,7 +19,7 @@ def compute_investors_units_2():
 
     bc.log('Fetching unit-concept edges from database...')
 
-    table_name = 'graph_piper.Edges_N_Unit_N_Concept_T_Research'
+    table_name = 'graph.Edges_N_Unit_N_Concept_T_Research'
     fields = ['UnitID', 'PageID', 'Score']
     units_concepts = pd.DataFrame(db.find(table_name, fields=fields), columns=fields)
 
@@ -37,7 +37,7 @@ def compute_investors_units_2():
 
     bc.log('Fetching investor-concept Jaccard edges from database...')
 
-    table_name = 'aitor.Edges_N_Investor_N_Concept_T_Jaccard'
+    table_name = f'aitor.{params.prefix}_Edges_N_Investor_N_Concept_T_Jaccard'
     fields = ['InvestorID', 'PageID', 'Jaccard_000']
     investors_concepts_jaccard = pd.DataFrame(db.find(table_name, fields=fields), columns=fields)
 
@@ -56,7 +56,7 @@ def compute_investors_units_2():
 
     bc.log('Fetching investor-concept yearly edges from database...')
 
-    table_name = 'aitor.Edges_N_Investor_N_Concept_T_Years'
+    table_name = f'aitor.{params.prefix}_Edges_N_Investor_N_Concept_T_Years'
     fields = ['InvestorID', 'PageID', 'Year', 'CountAmount']
     conditions = {'InvestorID': investor_ids}
     investors_concepts = pd.DataFrame(db.find(table_name, fields=fields, conditions=conditions), columns=fields)
@@ -81,7 +81,7 @@ def compute_investors_units_2():
 
     bc.log('Fetching concept-concept edges from database...')
 
-    table_name = 'graph_piper.Edges_N_Concept_N_Concept_T_GraphScore'
+    table_name = 'graph.Edges_N_Concept_N_Concept_T_GraphScore'
     fields = ['SourcePageID', 'TargetPageID', 'NormalisedScore']
     conditions = {'OR': {'SourcePageID': concept_ids, 'TargetPageID': concept_ids}}
     concepts_concepts = pd.DataFrame(db.find(table_name, fields=fields, conditions=conditions), columns=['SourcePageID', 'TargetPageID', 'Score'])
@@ -108,7 +108,7 @@ def compute_investors_units_2():
 
     bc.log('Inserting investors-units edges into database...')
 
-    table_name = 'aitor.Edges_N_Investor_N_Unit_T_2'
+    table_name = f'aitor.{params.prefix}_Edges_N_Investor_N_Unit_T_2'
     definition = [
         'InvestorID CHAR(64)',
         'Year SMALLINT',
@@ -126,8 +126,10 @@ def compute_investors_units_2():
 
 
 if __name__ == '__main__':
+    import graphai.pipelines.investment.parameters as params
+
     pd.set_option('display.max_rows', 500)
     pd.set_option('display.max_columns', 500)
     pd.set_option('display.width', 1000)
 
-    compute_investors_units_2()
+    compute_investors_units_2(params)

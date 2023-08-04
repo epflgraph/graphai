@@ -117,7 +117,7 @@ def aggregate_recent_past(params):
     bc.log('Fetching investor nodes from database...')
 
     # Fetch table from database
-    table_name = 'aitor.Nodes_N_Investor_T_Years'
+    table_name = f'aitor.{params.prefix}_Nodes_N_Investor_T_Years'
     fields = ['InvestorID', 'Year', 'CountAmount', 'MinAmount', 'MaxAmount', 'SumAmount', 'ScoreLinCount', 'ScoreLinAmount', 'ScoreQuadCount', 'ScoreQuadAmount']
     df = pd.DataFrame(db.find(table_name, fields=fields), columns=fields)
 
@@ -136,7 +136,7 @@ def aggregate_recent_past(params):
     bc.log('Fetching concept nodes from database...')
 
     # Fetch table from database
-    table_name = 'aitor.Nodes_N_Concept_T_Years'
+    table_name = f'aitor.{params.prefix}_Nodes_N_Concept_T_Years'
     fields = ['PageID', 'Year', 'CountAmount', 'MinAmount', 'MaxAmount', 'SumAmount', 'ScoreLinCount', 'ScoreLinAmount', 'ScoreQuadCount', 'ScoreQuadAmount']
     df = pd.DataFrame(db.find(table_name, fields=fields), columns=fields)
 
@@ -155,7 +155,7 @@ def aggregate_recent_past(params):
     bc.log('Fetching investor-investor edges from database...')
 
     # Fetch table from database
-    table_name = 'aitor.Edges_N_Investor_N_Investor_T_Years'
+    table_name = f'aitor.{params.prefix}_Edges_N_Investor_N_Investor_T_Years'
     fields = ['SourceInvestorID', 'TargetInvestorID', 'Year', 'CountAmount', 'MinAmount', 'MaxAmount', 'SumAmount', 'ScoreLinCount', 'ScoreLinAmount', 'ScoreQuadCount', 'ScoreQuadAmount']
     df = pd.DataFrame(db.find(table_name, fields=fields), columns=fields)
 
@@ -179,7 +179,7 @@ def aggregate_recent_past(params):
     bc.log('Fetching investor-concept edges from database...')
 
     # Fetch table from database
-    table_name = 'aitor.Edges_N_Investor_N_Concept_T_Years'
+    table_name = f'aitor.{params.prefix}_Edges_N_Investor_N_Concept_T_Years'
     fields = ['InvestorID', 'PageID', 'Year', 'CountAmount', 'MinAmount', 'MaxAmount', 'SumAmount', 'ScoreLinCount', 'ScoreLinAmount', 'ScoreQuadCount', 'ScoreQuadAmount', 'Concentration']
     df = pd.DataFrame(db.find(table_name, fields=fields), columns=fields)
 
@@ -206,7 +206,7 @@ def aggregate_recent_past(params):
     bc.log('Fetching concept-concept edges from database...')
 
     # Fetch table from database
-    table_name = 'graph_piper.Edges_N_Concept_N_Concept_T_GraphScore'
+    table_name = 'graph.Edges_N_Concept_N_Concept_T_GraphScore'
     fields = ['SourcePageID', 'TargetPageID', 'NormalisedScore']
     concept_ids = list(investors_concepts['PageID'].drop_duplicates().astype(int))
     conditions = {'SourcePageID': concept_ids, 'TargetPageID': concept_ids}
@@ -224,7 +224,7 @@ def aggregate_recent_past(params):
 
     bc.log('Inserting investors into database...')
 
-    table_name = 'aitor.Nodes_N_Investor_T_Aggregated'
+    table_name = f'aitor.{params.prefix}_Nodes_N_Investor_T_Aggregated'
     definition = [
         'InvestorID CHAR(64)',
         'Score FLOAT',
@@ -236,7 +236,7 @@ def aggregate_recent_past(params):
 
     bc.log('Inserting concepts into database...')
 
-    table_name = 'aitor.Nodes_N_Concept_T_Aggregated'
+    table_name = f'aitor.{params.prefix}_Nodes_N_Concept_T_Aggregated'
     definition = [
         'PageID INT UNSIGNED',
         'Score FLOAT',
@@ -248,7 +248,7 @@ def aggregate_recent_past(params):
 
     bc.log('Inserting investor-investor edges into database...')
 
-    table_name = 'aitor.Edges_N_Investor_N_Investor_T_Aggregated'
+    table_name = f'aitor.{params.prefix}_Edges_N_Investor_N_Investor_T_Aggregated'
     definition = [
         'SourceInvestorID CHAR(64)',
         'TargetInvestorID CHAR(64)',
@@ -262,7 +262,7 @@ def aggregate_recent_past(params):
 
     bc.log('Inserting investor-concept edges into database...')
 
-    table_name = 'aitor.Edges_N_Investor_N_Concept_T_Aggregated'
+    table_name = f'aitor.{params.prefix}_Edges_N_Investor_N_Concept_T_Aggregated'
     definition = [
         'InvestorID CHAR(64)',
         'PageID INT UNSIGNED',
@@ -276,7 +276,7 @@ def aggregate_recent_past(params):
 
     bc.log('Inserting investor-concept edges into database...')
 
-    table_name = 'aitor.Edges_N_Concept_N_Concept_T_Aggregated'
+    table_name = f'aitor.{params.prefix}_Edges_N_Concept_N_Concept_T_Aggregated'
     definition = [
         'SourcePageID INT UNSIGNED',
         'TargetPageID INT UNSIGNED',
@@ -292,7 +292,7 @@ def aggregate_recent_past(params):
 
 
 if __name__ == '__main__':
-    import investment.parameters as params
+    import graphai.pipelines.investment.parameters as params
 
     pd.set_option('display.max_rows', 400)
     pd.set_option('display.max_columns', 500)

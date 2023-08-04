@@ -5,10 +5,10 @@ from graphai.core.interfaces.db import DB
 
 from graphai.core.utils.breadcrumb import Breadcrumb
 
-from graphai.scripts.investment.concept_configuration import compute_affinities
+from graphai.pipelines.investment.concept_configuration import compute_affinities
 
 
-def compute_investors_units():
+def compute_investors_units(params):
 
     # Initialize breadcrumb to log and keep track of time
     bc = Breadcrumb()
@@ -20,7 +20,7 @@ def compute_investors_units():
 
     bc.log('Fetching unit-concept edges from database...')
 
-    table_name = 'graph_piper.Edges_N_Unit_N_Concept_T_Research'
+    table_name = 'graph.Edges_N_Unit_N_Concept_T_Research'
     fields = ['UnitID', 'PageID', 'Score']
     units_concepts = pd.DataFrame(db.find(table_name, fields=fields), columns=fields)
 
@@ -38,7 +38,7 @@ def compute_investors_units():
 
     bc.log('Fetching fundraiser-concept edges from database...')
 
-    table_name = 'aitor.Edges_N_Fundraiser_N_Concept'
+    table_name = f'aitor.{params.prefix}_Edges_N_Fundraiser_N_Concept'
     fields = ['FundraiserID', 'PageID']
     fundraisers_concepts = pd.DataFrame(db.find(table_name, fields=fields), columns=fields)
 
@@ -77,7 +77,7 @@ def compute_investors_units():
 
     bc.log('Fetching funding round-fundraiser edges from database...')
 
-    table_name = 'aitor.Edges_N_FundingRound_N_Fundraiser'
+    table_name = f'aitor.{params.prefix}_Edges_N_FundingRound_N_Fundraiser'
     fields = ['FundingRoundID', 'FundraiserID']
     frs_fundraisers = pd.DataFrame(db.find(table_name, fields=fields), columns=fields)
 
@@ -93,7 +93,7 @@ def compute_investors_units():
 
     bc.log('Fetching investor-funding round edges from database...')
 
-    table_name = 'aitor.Edges_N_Investor_N_FundingRound'
+    table_name = f'aitor.{params.prefix}_Edges_N_Investor_N_FundingRound'
     fields = ['InvestorID', 'FundingRoundID']
     investors_frs = pd.DataFrame(db.find(table_name, fields=fields), columns=fields)
 
@@ -126,7 +126,7 @@ def compute_investors_units():
 
     bc.log('Fetching concept-concept edges from database...')
 
-    table_name = 'graph_piper.Edges_N_Concept_N_Concept_T_GraphScore'
+    table_name = 'graph.Edges_N_Concept_N_Concept_T_GraphScore'
     fields = ['SourcePageID', 'TargetPageID', 'NormalisedScore']
     conditions = {'OR': {'SourcePageID': concept_ids, 'TargetPageID': concept_ids}}
     concepts_concepts = pd.DataFrame(db.find(table_name, fields=fields, conditions=conditions), columns=['SourcePageID', 'TargetPageID', 'Score'])
@@ -195,7 +195,7 @@ def compute_investors_units():
 
     bc.log('Inserting investor-unit edges into database...')
 
-    table_name = 'aitor.Edges_N_Investor_N_Unit'
+    table_name = f'aitor.{params.prefix}_Edges_N_Investor_N_Unit'
     definition = [
         'InvestorID CHAR(64)',
         'UnitID CHAR(32)',
@@ -211,8 +211,10 @@ def compute_investors_units():
 
 
 if __name__ == '__main__':
+    import graphai.pipelines.investment.parameters as params
+
     pd.set_option('display.max_rows', 500)
     pd.set_option('display.max_columns', 500)
     pd.set_option('display.width', 1000)
 
-    compute_investors_units()
+    compute_investors_units(params)

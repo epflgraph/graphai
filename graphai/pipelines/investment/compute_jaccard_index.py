@@ -6,7 +6,7 @@ from graphai.core.interfaces.db import DB
 from graphai.core.utils.breadcrumb import Breadcrumb
 
 
-def compute_jaccard_index():
+def compute_jaccard_index(params):
 
     ############################################################
     # INITIALIZATION                                           #
@@ -29,7 +29,7 @@ def compute_jaccard_index():
 
     bc.log('Fetching investor nodes from database...')
 
-    table_name = 'aitor.Nodes_N_Investor_T_Aggregated'
+    table_name = f'aitor.{params.prefix}_Nodes_N_Investor_T_Aggregated'
     fields = ['InvestorID', 'Score']
     investors = pd.DataFrame(db.find(table_name, fields=fields), columns=fields)
 
@@ -37,7 +37,7 @@ def compute_jaccard_index():
 
     bc.log('Fetching concept nodes from database...')
 
-    table_name = 'aitor.Nodes_N_Concept_T_Aggregated'
+    table_name = f'aitor.{params.prefix}_Nodes_N_Concept_T_Aggregated'
     fields = ['PageID', 'Score']
     concepts = pd.DataFrame(db.find(table_name, fields=fields), columns=fields)
     concepts['PageID'] = concepts['PageID'].astype(str)
@@ -46,7 +46,7 @@ def compute_jaccard_index():
 
     bc.log('Fetching investor-investor edges from database...')
 
-    table_name = 'aitor.Edges_N_Investor_N_Investor_T_Aggregated'
+    table_name = f'aitor.{params.prefix}_Edges_N_Investor_N_Investor_T_Aggregated'
     fields = ['SourceInvestorID', 'TargetInvestorID', 'Score']
     investors_investors = pd.DataFrame(db.find(table_name, fields=fields), columns=fields)
 
@@ -54,7 +54,7 @@ def compute_jaccard_index():
 
     bc.log('Fetching investor-concept edges from database...')
 
-    table_name = 'aitor.Edges_N_Investor_N_Concept_T_Aggregated'
+    table_name = f'aitor.{params.prefix}_Edges_N_Investor_N_Concept_T_Aggregated'
     fields = ['InvestorID', 'PageID', 'Score']
     investors_concepts = pd.DataFrame(db.find(table_name, fields=fields), columns=fields)
     investors_concepts['PageID'] = investors_concepts['PageID'].astype(str)
@@ -63,7 +63,7 @@ def compute_jaccard_index():
 
     bc.log('Fetching concept-concept edges from database...')
 
-    table_name = 'aitor.Edges_N_Concept_N_Concept_T_Aggregated'
+    table_name = f'aitor.{params.prefix}_Edges_N_Concept_N_Concept_T_Aggregated'
     fields = ['SourcePageID', 'TargetPageID', 'Score']
     concepts_concepts = pd.DataFrame(db.find(table_name, fields=fields), columns=fields)
     concepts_concepts['SourcePageID'] = concepts_concepts['SourcePageID'].astype(str)
@@ -369,7 +369,7 @@ def compute_jaccard_index():
     bc.log('Inserting potential edges into database...')
 
     # Drop, recreate table and fill with df
-    table_name = 'aitor.Edges_N_Investor_N_Concept_T_Jaccard'
+    table_name = f'aitor.{params.prefix}_Edges_N_Investor_N_Concept_T_Jaccard'
     definition = [
         'InvestorID CHAR(64)',
         'PageID INT UNSIGNED',
@@ -399,8 +399,10 @@ def compute_jaccard_index():
 
 
 if __name__ == '__main__':
+    import graphai.pipelines.investment.parameters as params
+
     pd.set_option('display.max_rows', 400)
     pd.set_option('display.max_columns', 500)
     pd.set_option('display.width', 1000)
 
-    compute_jaccard_index()
+    compute_jaccard_index(params)
