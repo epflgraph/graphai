@@ -15,6 +15,7 @@ Submodules
    graphai.api.celery_tasks.common
    graphai.api.celery_tasks.image
    graphai.api.celery_tasks.ontology
+   graphai.api.celery_tasks.summarization
    graphai.api.celery_tasks.text
    graphai.api.celery_tasks.translation
    graphai.api.celery_tasks.video

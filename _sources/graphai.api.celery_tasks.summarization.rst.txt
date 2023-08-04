@@ -1,0 +1,7 @@
+graphai.api.celery\_tasks.summarization module
+==============================================
+
+.. automodule:: graphai.api.celery_tasks.summarization
+   :members:
+   :undoc-members:
+   :show-inheritance:

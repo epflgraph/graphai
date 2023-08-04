@@ -184,8 +184,8 @@
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="graphai.core.common.video.generate_text_token">
-<span class="sig-prename descclassname"><span class="pre">graphai.core.common.video.</span></span><span class="sig-name descname"><span class="pre">generate_text_token</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">src</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tgt</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.video.generate_text_token" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="graphai.core.common.video.generate_translation_text_token">
+<span class="sig-prename descclassname"><span class="pre">graphai.core.common.video.</span></span><span class="sig-name descname"><span class="pre">generate_translation_text_token</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">src</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tgt</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.video.generate_translation_text_token" title="Permalink to this definition"></a></dt>
 <dd><p>Generates an md5-based token for a string
 :param s: The string
 :param src: Source lang
@@ -644,6 +644,21 @@ satisfy the minimum similarity criterion.</p>
 </dl>
 </dd></dl>
 
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.core.common.video.count_tokens_for_openai">
+<span class="sig-prename descclassname"><span class="pre">graphai.core.common.video.</span></span><span class="sig-name descname"><span class="pre">count_tokens_for_openai</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'cl100k_base'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.video.count_tokens_for_openai" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.core.common.video.generate_summary_text_token">
+<span class="sig-prename descclassname"><span class="pre">graphai.core.common.video.</span></span><span class="sig-name descname"><span class="pre">generate_summary_text_token</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.video.generate_summary_text_token" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.core.common.video.generate_summary_type_dict">
+<span class="sig-prename descclassname"><span class="pre">graphai.core.common.video.</span></span><span class="sig-name descname"><span class="pre">generate_summary_type_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">summary_type</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.video.generate_summary_type_dict" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
 <dl class="py class">
 <dt class="sig sig-object py" id="graphai.core.common.video.WhisperTranscriptionModel">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">graphai.core.common.video.</span></span><span class="sig-name descname"><span class="pre">WhisperTranscriptionModel</span></span><a class="headerlink" href="#graphai.core.common.video.WhisperTranscriptionModel" title="Permalink to this definition"></a></dt>
@@ -813,6 +828,34 @@ translated segments which can be used as subtitles, and ‘language’ which con
 <dt class="sig sig-object py" id="graphai.core.common.video.FingerprintParameters.get_min_sim_video">
 <span class="sig-name descname"><span class="pre">get_min_sim_video</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.video.FingerprintParameters.get_min_sim_video" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="graphai.core.common.video.ChatGPTSummarizer">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">graphai.core.common.video.</span></span><span class="sig-name descname"><span class="pre">ChatGPTSummarizer</span></span><a class="headerlink" href="#graphai.core.common.video.ChatGPTSummarizer" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="graphai.core.common.video.ChatGPTSummarizer.establish_connection">
+<span class="sig-name descname"><span class="pre">establish_connection</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.video.ChatGPTSummarizer.establish_connection" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="graphai.core.common.video.ChatGPTSummarizer.generate_summary">
+<span class="sig-name descname"><span class="pre">generate_summary</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">text_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'lecture'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keywords</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ordered</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_len</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.video.ChatGPTSummarizer.generate_summary" title="Permalink to this definition"></a></dt>
+<dd><p>Generates a summary or a title for the provided text
+:param text: Text to summarize
+:param text_type: Type of text, e.g. “lecture”, “course”. Useful for summaries.
+:param keywords: Whether the provided text is in the form of keywords or raw text
+:param ordered: If keywords, whether the provided keywords are in some chronological order
+:param title: Whether to generate a title (True) or a summary (False)
+:param max_len: Approximate maximum length of result (in words)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Result of summarization, plus a flag indicating whether there were too many tokens</p>
+</dd>
+</dl>
+</dd></dl>
 
 </dd></dl>
 

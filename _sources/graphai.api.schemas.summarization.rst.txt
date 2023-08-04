@@ -1,0 +1,7 @@
+graphai.api.schemas.summarization module
+========================================
+
+.. automodule:: graphai.api.schemas.summarization
+   :members:
+   :undoc-members:
+   :show-inheritance:
