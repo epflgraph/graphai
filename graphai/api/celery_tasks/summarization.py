@@ -42,7 +42,7 @@ def summarization_text_fingerprint_find_closest_retrieve_from_db_task(self, resu
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='text_6.summarization_text_fingerprint_find_closest_parallel', ignore_result=False)
 def summarization_text_fingerprint_find_closest_parallel_task(self, input_dict, i, n_total, equality_conditions,
-                                                            min_similarity=1):
+                                                              min_similarity=1):
     db_manager = SummaryDBCachingManager()
     # The equality conditions make sure that the fingerprint lookup happens only among the cached texts with
     # the same summary_type. This is because we don't want a request for the title of a given text to return a

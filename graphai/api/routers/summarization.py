@@ -41,7 +41,7 @@ router = APIRouter(
 
 
 def get_summary_text_fingerprint_chain_list(token, text, summary_type, force, min_similarity=None, n_jobs=8,
-                                    ignore_fp_results=False, results_to_return=None):
+                                            ignore_fp_results=False, results_to_return=None):
     # Loading min similarity parameter for text
     if min_similarity is None:
         fp_parameters = FingerprintParameters()

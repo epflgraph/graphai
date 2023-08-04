@@ -1275,7 +1275,7 @@ class ChatGPTSummarizer:
         has_api_key = self.establish_connection()
         if not has_api_key:
             return None, False
-        approx_token_count = count_tokens_for_openai(text) + count_tokens_for_openai(system_message) + int(2*max_len)
+        approx_token_count = count_tokens_for_openai(text) + count_tokens_for_openai(system_message) + int(2 * max_len)
         if approx_token_count < 4096:
             model_type = 'gpt-3.5-turbo'
         elif 4096 < approx_token_count < 16384:
@@ -1289,7 +1289,7 @@ class ChatGPTSummarizer:
                     {"role": "system", "content": system_message},
                     {"role": "user", "content": text}
                 ],
-                max_tokens=int(2*max_len)
+                max_tokens=int(2 * max_len)
             )
             print(completion)
         except openai.error.InvalidRequestError as e:
