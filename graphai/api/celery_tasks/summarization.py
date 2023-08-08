@@ -79,7 +79,8 @@ def summarization_retrieve_text_fingerprint_callback_task(self, results):
 def lookup_text_summary_task(self, token, text, force=False):
     if not force:
         db_manager = SummaryDBCachingManager()
-        # The token is [text md5]_[summary type], so we don't need to check the summary_type here
+        # The token is [text md5]_[summary type]
+        # We retrieve both the summary and the summary_type because both are needed for the results at the end
         all_existing = db_manager.get_details(token, cols=['summary', 'summary_type'], using_most_similar=True)
         for existing in all_existing:
             if existing is not None:
@@ -196,5 +197,6 @@ def summarize_text_callback_task(self, results, force=False):
                     closest, values_dict
                 )
     elif not results['successful']:
+        # If the summarization wasn't successful, we delete the cache row because it serves no other purpose
         db_manager.delete_cache_rows([token])
     return results
