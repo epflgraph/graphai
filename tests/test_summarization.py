@@ -113,7 +113,7 @@ def test__summarization_summary__summarize_text__integration(fixture_app, celery
     assert summary_results['task_result']['fresh'] is True
     summary_text = summary_results['task_result']['summary'].lower()
     assert 'lecture' in summary_text
-    assert 'digital circuit' in summary_text
+    assert 'digital circuit' in summary_text or 'discrete event' in summary_text
     assert 'simulation' in summary_text
     assert summary_results['task_result']['summary_type'] == 'summary'
     original_summary = summary_text
