@@ -90,7 +90,7 @@ async def calculate_fingerprint(data: SummaryFingerprintRequest):
     text = data.text
     summary_type = data.summary_type
     force = data.force
-    token = generate_summary_text_token(text, summary_type)
+    token = generate_summary_text_token(text, summary_type == 'title')
     task_list = get_summary_text_fingerprint_chain_list(token, text, summary_type, force,
                                                         ignore_fp_results=False)
     task = chain(task_list)
