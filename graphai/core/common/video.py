@@ -905,6 +905,15 @@ def detect_text_language(s):
 
 
 def count_tokens_for_openai(text, model="cl100k_base"):
+    """
+    Counts the number of tokens in a given text for a given OpenAI model
+    Args:
+        text: The text to tokenize
+        model: The OpenAI model to use
+
+    Returns:
+        Number of tokens
+    """
     encoding = tiktoken.get_encoding(model)
     return len(encoding.encode(text))
 
@@ -1253,6 +1262,11 @@ class ChatGPTSummarizer:
                   f'default API key.')
 
     def establish_connection(self):
+        """
+        Ensures that an API key exists and sets it as the OpenAI key
+        Returns:
+            Boolean indicating whether an API key was found
+        """
         if self.api_key is not None:
             openai.api_key = self.api_key
             return True
@@ -1275,14 +1289,17 @@ class ChatGPTSummarizer:
         has_api_key = self.establish_connection()
         if not has_api_key:
             return None, False
+        # We count the approximate number of tokens in order to choose the right model (i.e. context size)
         approx_token_count = count_tokens_for_openai(text) + count_tokens_for_openai(system_message) + int(2 * max_len)
         if approx_token_count < 4096:
             model_type = 'gpt-3.5-turbo'
         elif 4096 < approx_token_count < 16384:
             model_type = 'gpt-3.5-turbo-16k'
         else:
+            # If the token count is above 16384, the text is too large and we can't summarize it
             return None, True
         try:
+            # Generate the completion
             completion = openai.ChatCompletion.create(
                 model=model_type,
                 messages=[
@@ -1300,6 +1317,7 @@ class ChatGPTSummarizer:
             else:
                 return None, False
         except Exception as e:
+            # Any error other than "too many tokens" is dealt with here
             print(e)
             return None, False
         return completion.choices[0].message.content, False
@@ -1318,15 +1336,18 @@ class ChatGPTSummarizer:
         Returns:
             Result of summarization, plus a flag indicating whether there were too many tokens
         """
+        # Here we tell ChatGPT whether we're giving it keywords or raw text
         if keywords:
             system_message = "Given the following set of keywords"
         else:
             system_message = "Given the following text"
         system_message += f" extracted from a {text_type}"
+        # This part helps avoid the assumed chronological order of keywords
         if keywords and not ordered:
             system_message += " in no particular order,"
         else:
             system_message += ","
+        # This is the main part that determines whether we get a title or a summary
         if title:
             system_message += f" generate a title for the {text_type} "
         else:
