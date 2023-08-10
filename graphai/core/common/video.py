@@ -1363,7 +1363,7 @@ class ChatGPTSummarizer:
 
         # Based on the text_type, we may have additional constraints.
         if text_type == "person":
-            additional_constraints = " INCLUDE their current job title"
+            additional_constraints = " INCLUDE their current job title (if available)"
             if n_sentences == 1:
                 additional_constraints += " and EXCLUDE their name."
             else:
