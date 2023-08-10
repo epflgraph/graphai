@@ -1282,13 +1282,14 @@ class ChatGPTSummarizer:
             max_len: Approximate maximum length of the response in words
 
         Returns:
-            Results returned by ChatGPT, plus a flag that is True if there were too many tokens.
-            A (None, True) result means that the completion failed because the message had too many tokens,
-            while a (None, False) result indicates a different error (e.g. failed connection).
+            Results returned by ChatGPT, a flag that is True if there were too many tokens, and the total # of tokens
+            if (and only if) the request is successful (0 otherwise).
+            A (None, True, 0) result means that the completion failed because the message had too many tokens,
+            while a (None, False, 0) result indicates a different error (e.g. failed connection).
         """
         has_api_key = self.establish_connection()
         if not has_api_key:
-            return None, False
+            return None, False, 0
         # We count the approximate number of tokens in order to choose the right model (i.e. context size)
         approx_token_count = count_tokens_for_openai(text) + count_tokens_for_openai(system_message) + int(2 * max_len)
         if approx_token_count < 4096:
@@ -1297,7 +1298,7 @@ class ChatGPTSummarizer:
             model_type = 'gpt-3.5-turbo-16k'
         else:
             # If the token count is above 16384, the text is too large and we can't summarize it
-            return None, True
+            return None, True, 0
         try:
             # Generate the completion
             completion = openai.ChatCompletion.create(
@@ -1313,45 +1314,75 @@ class ChatGPTSummarizer:
             # We check to see if the exception was caused by too many tokens in the input
             print(e)
             if "This model's maximum context length is" in e:
-                return None, True
+                return None, True, 0
             else:
-                return None, False
+                return None, False, 0
         except Exception as e:
             # Any error other than "too many tokens" is dealt with here
             print(e)
-            return None, False
-        return completion.choices[0].message.content, False
+            return None, False, 0
+        return completion.choices[0].message.content, False, completion.usage.total_tokens
 
-    def generate_summary(self, text, text_type='lecture', keywords=True, ordered=False, title=False, max_len=100):
+    def generate_summary(self, text_or_dict, text_type='lecture', title=False, marketing_tone=False,
+                         max_len=100, n_sentences=None):
         """
         Generates a summary or a title for the provided text
         Args:
-            text: Text to summarize
+            text_or_dict: String or dictionary containing all the text to summarize and synthesize into one summary
             text_type: Type of text, e.g. "lecture", "course". Useful for summaries.
-            keywords: Whether the provided text is in the form of keywords or raw text
-            ordered: If keywords, whether the provided keywords are in some chronological order
             title: Whether to generate a title (True) or a summary (False)
+            marketing_tone: Whether to use a marketing tone or an informative tone (default)
             max_len: Approximate maximum length of result (in words)
+            n_sentences: Number of sentences in the summary. If None, no constraint is put on the number of sentences.
+                        This parameter is ignored if title=True.
 
         Returns:
             Result of summarization, plus a flag indicating whether there were too many tokens
         """
-        # Here we tell ChatGPT whether we're giving it keywords or raw text
-        if keywords:
-            system_message = "Given the following set of keywords"
+        if isinstance(text_or_dict, dict):
+            text_dict_fields = [x.lower() for x in text_or_dict.keys()]
         else:
-            system_message = "Given the following text"
-        system_message += f" extracted from a {text_type}"
-        # This part helps avoid the assumed chronological order of keywords
-        if keywords and not ordered:
-            system_message += " in no particular order,"
+            text_dict_fields = ["text"]
+
+        # Telling the API what information is being provided on the entity
+        system_message = f"You will be given the {', '.join(text_dict_fields)} of a {text_type}."
+
+        # We have certain constraints on the length of the response.
+        if n_sentences is not None:
+            sentences = f" {n_sentences}-sentence"
+            max_len_str = ""
         else:
-            system_message += ","
+            sentences = ""
+            max_len_str = f" with at most {max_len} words."
+
+        # Based on the text_type, we may have additional constraints.
+        if text_type == "person":
+            additional_constraints = " INCLUDE their current job title"
+            if n_sentences == 1:
+                additional_constraints += " and EXCLUDE their name."
+            else:
+                additional_constraints += "."
+        else:
+            additional_constraints = ""
+
         # This is the main part that determines whether we get a title or a summary
         if title:
-            system_message += f" generate a title for the {text_type} "
+            system_message += f" Generate a title for the {text_type}{max_len_str}."
         else:
-            system_message += f" generate a summary for the {text_type} "
-        system_message += f"with under {max_len} words for the input."
+            system_message += f" Generate a{sentences} summary for the " \
+                              f"{text_type}{max_len_str}."
+
+        # Adding the additional constraints
+        system_message += additional_constraints
+
+        if marketing_tone:
+            system_message += " Write in a marketing tone."
+        else:
+            system_message += " Write in an informative tone."
+
+        if isinstance(text_or_dict, dict):
+            text = "\n\n".join([f"{k}: {v}" for k, v in text_or_dict.items()])
+        else:
+            text = f"Text: {text_or_dict}"
 
         return self._generate_completion(text, system_message, max_len)
