@@ -151,7 +151,7 @@ def summarize_text_task(self, token_and_text, text_type='lecture', title=False, 
     is_keywords = token_and_text.get('keyword', False)
     summarizer = ChatGPTSummarizer()
     results, too_many_tokens = summarizer.generate_summary(
-        text, text_type=text_type, keywords=is_keywords, ordered=not is_keywords,
+        text, text_type=text_type,
         title=title, max_len=title_len if title else summary_len)
     return {
         'token': token,
