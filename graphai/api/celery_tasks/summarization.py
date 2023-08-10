@@ -135,7 +135,8 @@ def summarize_text_task(self, token_and_text, text_type='lecture', title=False, 
             'summary_type': None,
             'fresh': False,
             'successful': False,
-            'too_many_tokens': False
+            'too_many_tokens': False,
+            'n_tokens_total': 0
         }
     if existing_results is not None:
         return {
@@ -146,11 +147,11 @@ def summarize_text_task(self, token_and_text, text_type='lecture', title=False, 
             'summary_type': existing_results['summary_type'],
             'fresh': False,
             'successful': True,
-            'too_many_tokens': False
+            'too_many_tokens': False,
+            'n_tokens_total': 0
         }
-    is_keywords = token_and_text.get('keyword', False)
     summarizer = ChatGPTSummarizer()
-    results, too_many_tokens = summarizer.generate_summary(
+    results, too_many_tokens, n_tokens_total = summarizer.generate_summary(
         text, text_type=text_type,
         title=title, max_len=title_len if title else summary_len)
     return {
@@ -161,7 +162,8 @@ def summarize_text_task(self, token_and_text, text_type='lecture', title=False, 
         'summary_type': 'title' if title else 'summary',
         'fresh': results is not None,
         'successful': results is not None,
-        'too_many_tokens': too_many_tokens
+        'too_many_tokens': too_many_tokens,
+        'n_tokens_total': n_tokens_total
     }
 
 
