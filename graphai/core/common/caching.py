@@ -851,9 +851,13 @@ class SummaryDBCachingManager(DBCachingManagerBase):
               `id_token` VARCHAR(255),
               `fingerprint` VARCHAR(255) DEFAULT NULL,
               `input_text` LONGTEXT DEFAULT NULL,
+              `input_type` VARCHAR(255) DEFAULT NULL,
               `summary` LONGTEXT DEFAULT NULL,
               `summary_type` VARCHAR(10) DEFAULT NULL,
+              `summary_len_class` VARCHAR(10) DEFAULT NULL,
+              `summary_tone` VARCHART(10) DEFAULT NULL,
               `summary_length` INT DEFAULT NULL,
+              `summary_token_total` INT DEFAULT NULL,
               `date_added` DATETIME DEFAULT NULL,
               PRIMARY KEY id_token (id_token)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
