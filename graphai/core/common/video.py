@@ -1342,10 +1342,16 @@ class ChatGPTSummarizer:
         if isinstance(text_or_dict, dict):
             text_dict_fields = [x.lower() for x in text_or_dict.keys()]
         else:
-            text_dict_fields = ["text"]
+            if text_type != "text":
+                text_dict_fields = ["text"]
+            else:
+                text_dict_fields = list()
 
         # Telling the API what information is being provided on the entity
-        system_message = f"You will be given the {', '.join(text_dict_fields)} of a {text_type}."
+        if len(text_dict_fields) > 0:
+            system_message = f"You will be given the {', '.join(text_dict_fields)} of a {text_type}."
+        else:
+            system_message = f"You will be given a {text_type}."
 
         # We have certain constraints on the length of the response.
         if n_sentences is not None:
