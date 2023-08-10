@@ -77,7 +77,7 @@ class SummarizationRequest(BaseModel):
         title="Use keywords",
         description="Whether to use keywords for summarization or to "
                     "use the raw text, default true (keywords are used).",
-        default=True
+        default=False
     )
 
     tone: Literal['info', 'promo'] = Field(
