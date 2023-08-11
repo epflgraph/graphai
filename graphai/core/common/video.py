@@ -1374,10 +1374,9 @@ class ChatGPTSummarizer:
             n_sentences = 2
         if n_sentences is not None:
             sentences = f" {n_sentences}-sentence"
-            max_len_str = ""
         else:
             sentences = ""
-            max_len_str = f" with at most {max_len} words."
+        max_len_str = f" with at most {max_len} words."
 
         # Based on the text_type, we may have additional constraints.
         if text_type == "person":
