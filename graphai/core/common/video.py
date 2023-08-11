@@ -1399,7 +1399,7 @@ class ChatGPTSummarizer:
         system_message += additional_constraints
 
         if tone == 'promo':
-            system_message += " Write in a marketing tone."
+            system_message += " Write in a promotional tone."
         else:
             system_message += " Write in an informative tone."
 
