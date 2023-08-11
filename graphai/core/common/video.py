@@ -1411,5 +1411,6 @@ class ChatGPTSummarizer:
             text = f"Text: {text_or_dict}"
 
         results, too_many_tokens, n_total_tokens = self._generate_completion(text, system_message, max_normal_len)
+        # Now we remove the "Title:" or "Summary:" at the beginning
         results = ':'.join(results.split(':')[1:]).strip()
         return results, too_many_tokens, n_total_tokens
