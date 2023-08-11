@@ -29,7 +29,8 @@ from graphai.api.celery_tasks.summarization import (
     summarize_text_callback_task
 )
 
-from graphai.core.common.video import FingerprintParameters, generate_summary_type_dict, generate_summary_text_token
+from graphai.core.common.video import FingerprintParameters, generate_summary_type_dict, \
+    generate_summary_text_token, force_dict_to_text
 from graphai.core.interfaces.celery_config import get_task_info
 
 
@@ -40,7 +41,8 @@ router = APIRouter(
 )
 
 
-def get_summary_text_fingerprint_chain_list(token, text, summary_type, force, min_similarity=None, n_jobs=8,
+def get_summary_text_fingerprint_chain_list(token, text, text_type, summary_type, len_class, tone,
+                                            force, min_similarity=None, n_jobs=8,
                                             ignore_fp_results=False, results_to_return=None):
     # Loading min similarity parameter for text
     if min_similarity is None:
@@ -48,12 +50,12 @@ def get_summary_text_fingerprint_chain_list(token, text, summary_type, force, mi
         min_similarity = fp_parameters.get_min_sim_text()
 
     # Generating the equality condition dictionary
-    equality_conditions = generate_summary_type_dict(summary_type)
+    equality_conditions = generate_summary_type_dict(text_type, summary_type, len_class, tone)
     # The tasks are fingerprinting and callback, then lookup. The lookup is only among cache rows that satisfy the
     # equality conditions (source and target languages).
     task_list = [
         compute_summarization_text_fingerprint_task.s(token, text, force),
-        compute_summarization_text_fingerprint_callback_task.s(text, summary_type)
+        compute_summarization_text_fingerprint_callback_task.s(text, text_type, summary_type, len_class, tone)
     ]
     if min_similarity == 1:
         task_list += [summarization_text_fingerprint_find_closest_direct_task.s(equality_conditions)]
@@ -72,14 +74,15 @@ def get_summary_text_fingerprint_chain_list(token, text, summary_type, force, mi
     return task_list
 
 
-def get_summary_task_chain(token, text, text_type, title=False, keywords=True, force=False, skip_token=False):
+def get_summary_task_chain(token, text, text_type, summary_type, len_class, tone,
+                           keywords=True, force=False, skip_token=False):
     if skip_token:
         task_list = [lookup_text_summary_task.s(text, force)]
     else:
         task_list = [lookup_text_summary_task.s(token, text, force)]
     task_list += [
         get_keywords_for_summarization_task.s(keywords),
-        summarize_text_task.s(text_type, title),
+        summarize_text_task.s(text_type, summary_type, len_class, tone),
         summarize_text_callback_task.s(force)
     ]
     return task_list
@@ -89,9 +92,12 @@ def get_summary_task_chain(token, text, text_type, title=False, keywords=True, f
 async def calculate_fingerprint(data: SummaryFingerprintRequest):
     text = data.text
     summary_type = data.summary_type
+    text_type = data.text_type
+    len_class = data.len_class
+    tone = data.tone
     force = data.force
-    token = generate_summary_text_token(text, summary_type == 'title')
-    task_list = get_summary_text_fingerprint_chain_list(token, text, summary_type, force,
+    token = generate_summary_text_token(text, text_type, summary_type, len_class, tone)
+    task_list = get_summary_text_fingerprint_chain_list(token, text, text_type, summary_type, len_class, tone, force,
                                                         ignore_fp_results=False)
     task = chain(task_list)
     task = task.apply_async(priority=6)
@@ -119,18 +125,21 @@ async def calculate_fingerprint_status(task_id):
 async def summarize(data: SummarizationRequest):
     text = data.text
     text_type = data.text_type
+    len_class = data.len_class
     keywords = data.use_keywords
+    tone = data.tone
     force = data.force
-    token = generate_summary_text_token(text, title=False)
+
+    token = generate_summary_text_token(text, text_type, 'summary', len_class, tone)
     if not force:
-        task_list = get_summary_text_fingerprint_chain_list(token, text, 'summary', force,
+        task_list = get_summary_text_fingerprint_chain_list(token, text, text_type, 'summary', len_class, tone, force,
                                                             ignore_fp_results=True, results_to_return=token)
         skip_token = True
     else:
         task_list = []
         skip_token = False
-    task_list += get_summary_task_chain(token, text, text_type,
-                                        title=False, keywords=keywords, force=force, skip_token=skip_token)
+    task_list += get_summary_task_chain(token, text, text_type, 'summary', len_class, tone,
+                                        keywords=keywords, force=force, skip_token=skip_token)
     tasks = chain(task_list)
     tasks = tasks.apply_async(priority=6)
     return {'task_id': tasks.id}
@@ -140,18 +149,21 @@ async def summarize(data: SummarizationRequest):
 async def create_title(data: SummarizationRequest):
     text = data.text
     text_type = data.text_type
+    len_class = data.len_class
     keywords = data.use_keywords
+    tone = data.tone
     force = data.force
-    token = generate_summary_text_token(text, title=True)
+
+    token = generate_summary_text_token(text, text_type, 'title', len_class, tone)
     if not force:
-        task_list = get_summary_text_fingerprint_chain_list(token, text, 'title', force,
+        task_list = get_summary_text_fingerprint_chain_list(token, text, text_type, 'title', len_class, tone, force,
                                                             ignore_fp_results=True, results_to_return=token)
         skip_token = True
     else:
         task_list = []
         skip_token = False
-    task_list += get_summary_task_chain(token, text, text_type,
-                                        title=True, keywords=keywords, force=force, skip_token=skip_token)
+    task_list += get_summary_task_chain(token, text, text_type, 'title', len_class, tone,
+                                        keywords=keywords, force=force, skip_token=skip_token)
     tasks = chain(task_list)
     tasks = tasks.apply_async(priority=6)
     return {'task_id': tasks.id}

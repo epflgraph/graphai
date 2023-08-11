@@ -1,5 +1,5 @@
 from celery import shared_task
-from graphai.core.common.video import ChatGPTSummarizer, get_current_datetime
+from graphai.core.common.video import ChatGPTSummarizer, get_current_datetime, force_dict_to_text
 from graphai.core.common.caching import SummaryDBCachingManager
 from graphai.core.text.keywords import get_keywords
 from graphai.api.celery_tasks.common import compute_text_fingerprint_common, fingerprint_lookup_retrieve_from_db, \
@@ -10,19 +10,23 @@ from graphai.api.celery_tasks.common import compute_text_fingerprint_common, fin
              name='text_6.fingerprint_summarization_text', ignore_result=False)
 def compute_summarization_text_fingerprint_task(self, token, text, force=False):
     db_manager = SummaryDBCachingManager()
-    return compute_text_fingerprint_common(db_manager, token, text, force)
+    return compute_text_fingerprint_common(db_manager, token, force_dict_to_text(text), force)
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='text_6.fingerprint_summarization_text_callback', ignore_result=False)
-def compute_summarization_text_fingerprint_callback_task(self, results, text, summary_type):
+def compute_summarization_text_fingerprint_callback_task(self, results, text, text_type,
+                                                         summary_type, len_class, tone):
     if results['fresh']:
         token = results['fp_token']
         db_manager = SummaryDBCachingManager()
         values_dict = {
             'fingerprint': results['result'],
-            'input_text': text,
-            'summary_type': summary_type
+            'input_text': force_dict_to_text(text),
+            'input_type': text_type,
+            'summary_type': summary_type,
+            'summary_len_class': len_class,
+            'summary_tone': tone
         }
         existing = db_manager.get_details(token, ['date_added'], using_most_similar=False)[0]
         if existing is None or existing['date_added'] is None:
@@ -79,19 +83,15 @@ def summarization_retrieve_text_fingerprint_callback_task(self, results):
 def lookup_text_summary_task(self, token, text, force=False):
     if not force:
         db_manager = SummaryDBCachingManager()
-        # The token is [text md5]_[summary type]
-        # We retrieve both the summary and the summary_type because both are needed for the results at the end
-        all_existing = db_manager.get_details(token, cols=['summary', 'summary_type'], using_most_similar=True)
+        # The token is [text md5]_[text type]_[summary type]_[len class]_[tone]
+        all_existing = db_manager.get_details(token, cols=['summary'], using_most_similar=True)
         for existing in all_existing:
             if existing is not None:
                 if existing['summary'] is not None:
                     return {
                         'token': token,
                         'text': text,
-                        'existing_results': {
-                            'summary': existing['summary'],
-                            'summary_type': existing['summary_type']
-                        }
+                        'existing_results': existing['summary']
                     }
     return {
         'token': token,
@@ -105,12 +105,14 @@ def lookup_text_summary_task(self, token, text, force=False):
 def get_keywords_for_summarization_task(self, input_dict, use_keywords=True):
     existing_results = input_dict['existing_results']
     text = input_dict['text']
-    input_dict['original_text'] = text
+    input_dict['original_text'] = force_dict_to_text(text)
     if existing_results is not None or not use_keywords or text is None or len(text) == 0:
         input_dict['is_keywords'] = False
         return input_dict
-    keywords = get_keywords(input_dict['text'])
-    new_text = ', '.join(keywords)
+    if isinstance(text, dict):
+        new_text = {k: ', '.join(get_keywords(v)) for k,v in text.items()}
+    else:
+        new_text = ', '.join(get_keywords(text))
     if len(new_text) > 0:
         input_dict['text'] = new_text
         input_dict['is_keywords'] = True
@@ -121,7 +123,9 @@ def get_keywords_for_summarization_task(self, input_dict, use_keywords=True):
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='text_6.summarize_text_chatgpt_compute', ignore_result=False)
-def summarize_text_task(self, token_and_text, text_type='lecture', title=False, title_len=20, summary_len=100):
+def summarize_text_task(self, token_and_text, text_type='text', summary_type='summary',
+                        len_class='normal', tone='info',
+                        title_len=20, summary_len=100):
     existing_results = token_and_text['existing_results']
     token = token_and_text['token']
     text = token_and_text['text']
@@ -133,6 +137,9 @@ def summarize_text_task(self, token_and_text, text_type='lecture', title=False, 
             'original_text': original_text,
             'summary': None,
             'summary_type': None,
+            'text_type': None,
+            'len_class': None,
+            'tone': None,
             'fresh': False,
             'successful': False,
             'too_many_tokens': False,
@@ -143,8 +150,11 @@ def summarize_text_task(self, token_and_text, text_type='lecture', title=False, 
             'token': token,
             'text': text,
             'original_text': original_text,
-            'summary': existing_results['summary'],
-            'summary_type': existing_results['summary_type'],
+            'summary': existing_results,
+            'summary_type': summary_type,
+            'text_type': text_type,
+            'len_class': len_class,
+            'tone': tone,
             'fresh': False,
             'successful': True,
             'too_many_tokens': False,
@@ -152,14 +162,17 @@ def summarize_text_task(self, token_and_text, text_type='lecture', title=False, 
         }
     summarizer = ChatGPTSummarizer()
     results, too_many_tokens, n_tokens_total = summarizer.generate_summary(
-        text, text_type=text_type,
-        title=title, max_len=title_len if title else summary_len)
+        text, text_type=text_type, summary_type=summary_type, len_class=len_class, tone=tone,
+        max_len=title_len if summary_type == 'title' else summary_len)
     return {
         'token': token,
         'text': text,
         'original_text': original_text,
         'summary': results,
-        'summary_type': 'title' if title else 'summary',
+        'summary_type': summary_type,
+        'text_type': text_type,
+        'len_class': len_class,
+        'tone': tone,
         'fresh': results is not None,
         'successful': results is not None,
         'too_many_tokens': too_many_tokens,
@@ -175,12 +188,20 @@ def summarize_text_callback_task(self, results, force=False):
     original_text = results['original_text']
     summary = results['summary']
     summary_type = results['summary_type']
+    text_type = results['text_type']
+    len_class = results['len_class']
+    tone = results['tone']
+    n_tokens_total = results['n_tokens_total']
     if results['fresh']:
         values_dict = {
             'input_text': original_text,
             'summary': summary,
             'summary_type': summary_type,
-            'summary_length': len(summary.split(' '))
+            'input_type': text_type,
+            'summary_len_class': len_class,
+            'summary_tone': tone,
+            'summary_length': len(summary.split(' ')),
+            'summary_token_total': n_tokens_total
         }
         existing = db_manager.get_details(token, ['date_added'], using_most_similar=False)[0]
         if existing is None or existing['date_added'] is None:

@@ -935,8 +935,13 @@ def generate_summary_text_token(text, text_type='text', summary_type='summary', 
     return token
 
 
-def generate_summary_type_dict(summary_type):
-    return {'summary_type': summary_type}
+def generate_summary_type_dict(text_type, summary_type, len_class, tone):
+    return {
+        'input_type': text_type,
+        'summary_type': summary_type,
+        'summary_len_class': len_class,
+        'summary_tone': tone
+    }
 
 
 class WhisperTranscriptionModel():
@@ -1331,18 +1336,18 @@ class ChatGPTSummarizer:
             return None, False, 0
         return completion.choices[0].message.content, False, completion.usage.total_tokens
 
-    def generate_summary(self, text_or_dict, text_type='lecture', title=False, marketing_tone=False,
-                         max_len=100, n_sentences=None):
+    def generate_summary(self, text_or_dict, text_type='lecture', summary_type='summary',
+                         len_class='normal', tone='info', max_len=100):
         """
         Generates a summary or a title for the provided text
         Args:
             text_or_dict: String or dictionary containing all the text to summarize and synthesize into one summary
             text_type: Type of text, e.g. "lecture", "course". Useful for summaries.
-            title: Whether to generate a title (True) or a summary (False)
-            marketing_tone: Whether to use a marketing tone or an informative tone (default)
+            summary_type: The type of the summary to be produced, either 'title' or 'summary' (default)
+            len_class: Whether there's a constraint on the number of sentences ('vshort' for 1, 'short' for 2)
+                       or not ('normal', default).
+            tone: Whether to use a marketing tone ('promo') or an informative tone ('info', default)
             max_len: Approximate maximum length of result (in words)
-            n_sentences: Number of sentences in the summary. If None, no constraint is put on the number of sentences.
-                        This parameter is ignored if title=True.
 
         Returns:
             Result of summarization, plus a flag indicating whether there were too many tokens
@@ -1362,6 +1367,11 @@ class ChatGPTSummarizer:
             system_message = f"You will be given a {text_type}."
 
         # We have certain constraints on the length of the response.
+        n_sentences = None
+        if len_class == 'vshort':
+            n_sentences = 1
+        elif len_class == 'short':
+            n_sentences = 2
         if n_sentences is not None:
             sentences = f" {n_sentences}-sentence"
             max_len_str = ""
@@ -1380,7 +1390,7 @@ class ChatGPTSummarizer:
             additional_constraints = ""
 
         # This is the main part that determines whether we get a title or a summary
-        if title:
+        if summary_type == 'title':
             system_message += f" Generate a title for the {text_type}{max_len_str}."
         else:
             system_message += f" Generate a{sentences} summary for the " \
@@ -1389,7 +1399,7 @@ class ChatGPTSummarizer:
         # Adding the additional constraints
         system_message += additional_constraints
 
-        if marketing_tone:
+        if tone == 'promo':
             system_message += " Write in a marketing tone."
         else:
             system_message += " Write in an informative tone."
