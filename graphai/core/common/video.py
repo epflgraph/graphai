@@ -918,12 +918,20 @@ def count_tokens_for_openai(text, model="cl100k_base"):
     return len(encoding.encode(text))
 
 
-def generate_summary_text_token(text, title=False):
-    token = md5_text(text)
-    if title:
-        token += '_title'
-    else:
-        token += '_summary'
+def force_dict_to_text(t):
+    if isinstance(t, dict):
+        return json.dumps(t)
+    return t
+
+
+def generate_summary_text_token(text, text_type='text', summary_type='summary', len_class='normal', tone='info'):
+    assert text_type in ['person', 'unit', 'concept', 'course', 'lecture', 'MOOC', 'text']
+    assert summary_type in ['summary', 'title']
+    assert len_class in ['vshort', 'short', 'normal']
+    assert tone in ['info', 'promo']
+
+    text = force_dict_to_text(text)
+    token = md5_text(text) + '_' + text_type + '_' + summary_type + '_' + len_class + '_' + tone
     return token
 
 
