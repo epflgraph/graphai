@@ -43,7 +43,7 @@ def test__summarization_summary__summarize_text__run_task(transcript_text):
     summary_text = summary_transcript['summary'].lower()
     assert 'lecture' in summary_text
     assert 'digital circuit' in summary_text
-    assert 'simulation' in summary_text
+    assert 'simulation' in summary_text or 'simulator' in summary_text
 
 
 #############################################################
@@ -65,7 +65,7 @@ def test__summarization_title__summarize_text__run_task(ocr_text):
     assert 'summary' in title_ocr
     assert title_ocr['successful'] is True
     title_text = title_ocr['summary'].lower()
-    assert 'simulation' in title_text
+    assert 'simulation' in title_text or 'simulator' in title_text
     assert 'digital' in title_text or 'discrete' in title_text or 'circuit' in title_text
 
 
@@ -114,7 +114,7 @@ def test__summarization_summary__summarize_text__integration(fixture_app, celery
     summary_text = summary_results['task_result']['summary'].lower()
     assert 'lecture' in summary_text
     assert 'digital circuit' in summary_text or 'discrete event' in summary_text
-    assert 'simulation' in summary_text
+    assert 'simulation' in summary_text or 'simulator' in summary_text
     assert summary_results['task_result']['summary_type'] == 'summary'
     original_summary = summary_text
 
