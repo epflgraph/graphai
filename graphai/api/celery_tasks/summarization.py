@@ -163,7 +163,7 @@ def summarize_text_task(self, token_and_text, text_type='text', summary_type='su
     summarizer = ChatGPTSummarizer()
     results, too_many_tokens, n_tokens_total = summarizer.generate_summary(
         text, text_type=text_type, summary_type=summary_type, len_class=len_class, tone=tone,
-        max_len=title_len if summary_type == 'title' else summary_len)
+        max_normal_len=title_len if summary_type == 'title' else summary_len)
     return {
         'token': token,
         'text': text,

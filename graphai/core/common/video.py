@@ -1337,7 +1337,7 @@ class ChatGPTSummarizer:
         return completion.choices[0].message.content, False, completion.usage.total_tokens
 
     def generate_summary(self, text_or_dict, text_type='lecture', summary_type='summary',
-                         len_class='normal', tone='info', max_len=100):
+                         len_class='normal', tone='info', max_normal_len=100, max_short_len=40):
         """
         Generates a summary or a title for the provided text
         Args:
@@ -1347,7 +1347,7 @@ class ChatGPTSummarizer:
             len_class: Whether there's a constraint on the number of sentences ('vshort' for 1, 'short' for 2)
                        or not ('normal', default).
             tone: Whether to use a marketing tone ('promo') or an informative tone ('info', default)
-            max_len: Approximate maximum length of result (in words)
+            max_normal_len: Approximate maximum length of result (in words)
 
         Returns:
             Result of summarization, plus a flag indicating whether there were too many tokens
@@ -1368,10 +1368,13 @@ class ChatGPTSummarizer:
 
         # We have certain constraints on the length of the response.
         n_sentences = None
+        max_len = max_normal_len
         if len_class == 'vshort':
             n_sentences = 1
+            max_len = max_short_len / 2
         elif len_class == 'short':
             n_sentences = 2
+            max_len = max_short_len
         if n_sentences is not None:
             sentences = f" {n_sentences}-sentence"
         else:
@@ -1380,11 +1383,9 @@ class ChatGPTSummarizer:
 
         # Based on the text_type, we may have additional constraints.
         if text_type == "person":
-            additional_constraints = " INCLUDE their current job title (if available)"
+            additional_constraints = " INCLUDE their current job title (if available)."
             if n_sentences == 1:
-                additional_constraints += " and EXCLUDE their name."
-            else:
-                additional_constraints += "."
+                additional_constraints += " EXCLUDE their name."
         else:
             additional_constraints = ""
 
@@ -1402,10 +1403,13 @@ class ChatGPTSummarizer:
             system_message += " Write in a promotional tone."
         else:
             system_message += " Write in an informative tone."
+        system_message += f"Give your response in the form: \"{summary_type}: [RESPONSE]\""
 
         if isinstance(text_or_dict, dict):
             text = "\n\n".join([f"{k}: {v}" for k, v in text_or_dict.items()])
         else:
             text = f"Text: {text_or_dict}"
 
-        return self._generate_completion(text, system_message, max_len)
+        results, too_many_tokens, n_total_tokens = self._generate_completion(text, system_message, max_normal_len)
+        results = ':'.join(results.split(':')[1:]).strip()
+        return results, too_many_tokens, n_total_tokens
