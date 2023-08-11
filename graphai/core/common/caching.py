@@ -855,7 +855,7 @@ class SummaryDBCachingManager(DBCachingManagerBase):
               `summary` LONGTEXT DEFAULT NULL,
               `summary_type` VARCHAR(10) DEFAULT NULL,
               `summary_len_class` VARCHAR(10) DEFAULT NULL,
-              `summary_tone` VARCHART(10) DEFAULT NULL,
+              `summary_tone` VARCHAR(10) DEFAULT NULL,
               `summary_length` INT DEFAULT NULL,
               `summary_token_total` INT DEFAULT NULL,
               `date_added` DATETIME DEFAULT NULL,
