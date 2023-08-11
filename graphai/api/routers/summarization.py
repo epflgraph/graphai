@@ -30,13 +30,13 @@ from graphai.api.celery_tasks.summarization import (
 )
 
 from graphai.core.common.video import FingerprintParameters, generate_summary_type_dict, \
-    generate_summary_text_token, force_dict_to_text
+    generate_summary_text_token
 from graphai.core.interfaces.celery_config import get_task_info
 
 
 router = APIRouter(
-    prefix='/summarization',
-    tags=['summarization'],
+    prefix='/completion',
+    tags=['completion'],
     responses={404: {'description': 'Not found'}}
 )
 
