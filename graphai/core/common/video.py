@@ -1382,6 +1382,7 @@ class ChatGPTSummarizer:
         max_len_str = f" with under {max_len} words."
 
         # Based on the text_type, we may have additional constraints.
+        # Need to expand this part based on feedback
         if text_type == "person":
             additional_constraints = " INCLUDE their current job title (if available)."
             if n_sentences == 1:
