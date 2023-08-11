@@ -33,7 +33,8 @@ class SummaryFingerprintRequest(BaseModel):
     tone: Literal['info', 'promo'] = Field(
         title="Tone of the summary",
         description="What tone to use in the summarization. Defaults to 'info', which is an informative tone. "
-                    "'promo' results in a marketing tone."
+                    "'promo' results in a marketing tone.",
+        default="info"
     )
 
     force: bool = Field(
@@ -103,7 +104,8 @@ class SummarizationRequest(BaseModel):
     tone: Literal['info', 'promo'] = Field(
         title="Tone of the summary",
         description="What tone to use in the summarization. Defaults to 'info', which is an informative tone. "
-                    "'promo' results in a marketing tone."
+                    "'promo' results in a marketing tone.",
+        default="info"
     )
 
     force: bool = Field(
