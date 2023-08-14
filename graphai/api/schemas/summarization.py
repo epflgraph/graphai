@@ -80,7 +80,7 @@ class SummarizationRequest(BaseModel):
         description="Text to summarize. Can be one string or a string to string dictionary."
     )
 
-    text_type: Literal['person', 'unit', 'concept', 'course', 'lecture', 'MOOC', 'text'] = Field(
+    text_type: Literal['person', 'unit', 'concept', 'course', 'lecture', 'publication', 'MOOC', 'text'] = Field(
         title="Text type",
         description="What the text being summarized describes/comes from. Defaults to 'text', which results in "
                     "generic summarization behavior.",
