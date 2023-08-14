@@ -1382,7 +1382,7 @@ class ChatGPTSummarizer:
         max_len_str = f" with under {max_len} words."
 
         # Based on the text_type, we may have additional constraints.
-        # Need to expand this part based on feedback
+        # This section should be expanded based on feedback
         if text_type == "person":
             additional_constraints = " INCLUDE their job title and place of work in the response (if available)."
             if n_sentences is not None:
@@ -1408,6 +1408,7 @@ class ChatGPTSummarizer:
         # Now we compile the response format
         response_format = f"\"{summary_type}: "
         sample_response = ""
+        # This section should also be expanded based on feedback
         if text_type == 'person':
             if n_sentences == 1:
                 response_format += "[DESCRIPTION OF CURRENT JOB]\""
