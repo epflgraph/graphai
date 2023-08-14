@@ -1407,16 +1407,24 @@ class ChatGPTSummarizer:
 
         # Now we compile the response format
         response_format = f"\"{summary_type}: "
+        sample_response = ""
         if text_type == 'person':
             if n_sentences == 1:
                 response_format += "[DESCRIPTION OF CURRENT JOB]\""
+                sample_response = \
+                    f"\"{summary_type}: Associate Professor at EPFL working on social network analysis"
             elif n_sentences == 2:
-                response_format += "[DESCRIPTION OF CURRENT JOB]. [DESCRIPTION OF INTERESTS].\""
+                response_format += "[DESCRIPTION OF CURRENT JOB], [DESCRIPTION OF INTERESTS].\""
+                sample_response = \
+                    f"\"{summary_type}: Associate Professor at EPFL working on social network analysis, " \
+                    f"with contributions to graph theory and graph neural networks\""
             else:
                 response_format += "[RESPONSE]\""
         else:
             response_format += "[RESPONSE]\""
         system_message += f"Give your response in the form: {response_format}"
+        if sample_response != "":
+            system_message += f"\nHere's an example of an acceptable response: {sample_response}"
 
         if isinstance(text_or_dict, dict):
             text = "\n\n".join([f"{k}: {v}" for k, v in text_or_dict.items()])
