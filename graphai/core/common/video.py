@@ -1383,13 +1383,15 @@ class ChatGPTSummarizer:
 
         # Based on the text_type, we may have additional constraints.
         # This section should be expanded based on feedback
+        exclude_name = (summary_type == 'summary' and n_sentences == 1) or \
+                       (summary_type == 'title' and n_sentences is not None)
         if text_type == "person":
             additional_constraints = " INCLUDE their job title and place of work in the response (if available)."
-            if n_sentences is not None:
+            if exclude_name:
                 additional_constraints += " EXCLUDE their name from the response."
         elif text_type == "unit":
             additional_constraints = " INCLUDE the institution that it is part of in the response (if available)."
-            if n_sentences is not None:
+            if exclude_name:
                 additional_constraints += " EXCLUDE its name from the response."
         else:
             additional_constraints = ""
