@@ -1384,7 +1384,7 @@ class ChatGPTSummarizer:
         # Based on the text_type, we may have additional constraints.
         # Need to expand this part based on feedback
         if text_type == "person":
-            additional_constraints = " INCLUDE their job title in the response."
+            additional_constraints = " INCLUDE their job title and place of work in the response (if available)."
             if n_sentences is not None:
                 additional_constraints += " EXCLUDE their name from the response."
         else:
@@ -1403,7 +1403,7 @@ class ChatGPTSummarizer:
         if tone == 'promo':
             system_message += " Write in a promotional tone."
         else:
-            system_message += " Write in an informative tone."
+            system_message += " Write in a neutral, informative tone."
 
         # Now we compile the response format
         response_format = f"\"{summary_type}: "
