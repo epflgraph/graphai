@@ -1387,6 +1387,10 @@ class ChatGPTSummarizer:
             additional_constraints = " INCLUDE their job title and place of work in the response (if available)."
             if n_sentences is not None:
                 additional_constraints += " EXCLUDE their name from the response."
+        elif text_type == "unit":
+            additional_constraints = " INCLUDE the institution that it is part of in the response (if available)."
+            if n_sentences is not None:
+                additional_constraints += " EXCLUDE its name from the response."
         else:
             additional_constraints = ""
 
@@ -1419,6 +1423,13 @@ class ChatGPTSummarizer:
                 sample_response = \
                     f"\"{summary_type}: Associate Professor at EPFL working on social network analysis, " \
                     f"with contributions to graph theory and graph neural networks\""
+            else:
+                response_format += "[RESPONSE]\""
+        elif text_type == 'unit':
+            if n_sentences is not None:
+                response_format += "[DESCRIPTION OF RESEARCH OR DEVELOPMENT AREAS]\""
+                sample_response = \
+                    f"\"{summary_type}: Laboratory at EPFL working on social network analysis and graph neural networks"
             else:
                 response_format += "[RESPONSE]\""
         else:
