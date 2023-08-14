@@ -1384,9 +1384,9 @@ class ChatGPTSummarizer:
         # Based on the text_type, we may have additional constraints.
         # Need to expand this part based on feedback
         if text_type == "person":
-            additional_constraints = " INCLUDE their current job title (if available)."
+            additional_constraints = " INCLUDE their job title in the response."
             if n_sentences is not None:
-                additional_constraints += " EXCLUDE their name."
+                additional_constraints += " EXCLUDE their name from the response."
         else:
             additional_constraints = ""
 
@@ -1404,7 +1404,19 @@ class ChatGPTSummarizer:
             system_message += " Write in a promotional tone."
         else:
             system_message += " Write in an informative tone."
-        system_message += f"Give your response in the form: \"{summary_type}: [RESPONSE]\""
+
+        # Now we compile the response format
+        response_format = f"\"{summary_type}: "
+        if text_type == 'person':
+            if n_sentences == 1:
+                response_format += "[DESCRIPTION OF CURRENT JOB]\""
+            elif n_sentences == 2:
+                response_format += "[DESCRIPTION OF CURRENT JOB]. [DESCRIPTION OF INTERESTS].\""
+            else:
+                response_format += "[RESPONSE]\""
+        else:
+            response_format += "[RESPONSE]\""
+        system_message += f"Give your response in the form: {response_format}"
 
         if isinstance(text_or_dict, dict):
             text = "\n\n".join([f"{k}: {v}" for k, v in text_or_dict.items()])
@@ -1413,5 +1425,5 @@ class ChatGPTSummarizer:
 
         results, too_many_tokens, n_total_tokens = self._generate_completion(text, system_message, max_normal_len)
         # Now we remove the "Title:" or "Summary:" at the beginning
-        results = ':'.join(results.split(':')[1:]).strip()
+        results = ':'.join(results.split(':')[1:]).strip().strip('"')
         return results, too_many_tokens, n_total_tokens
