@@ -110,7 +110,7 @@ def get_keywords_for_summarization_task(self, input_dict, use_keywords=True):
         input_dict['is_keywords'] = False
         return input_dict
     if isinstance(text, dict):
-        new_text = {k: ', '.join(get_keywords(v)) for k,v in text.items()}
+        new_text = {k: ', '.join(get_keywords(v)) for k, v in text.items()}
     else:
         new_text = ', '.join(get_keywords(text))
     if len(new_text) > 0:
