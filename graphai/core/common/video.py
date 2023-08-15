@@ -925,7 +925,7 @@ def force_dict_to_text(t):
 
 
 def generate_summary_text_token(text, text_type='text', summary_type='summary', len_class='normal', tone='info'):
-    assert text_type in ['person', 'unit', 'concept', 'course', 'lecture', 'MOOC', 'text']
+    assert text_type in ['person', 'unit', 'concept', 'course', 'lecture', 'MOOC', 'publication', 'text']
     assert summary_type in ['summary', 'title']
     assert len_class in ['vshort', 'short', 'normal']
     assert tone in ['info', 'promo']
@@ -1385,16 +1385,35 @@ class ChatGPTSummarizer:
         # This section should be expanded based on feedback
         exclude_name = (summary_type == 'summary' and n_sentences == 1) or \
                        (summary_type == 'title' and n_sentences is not None)
+        additional_constraints = ""
         if text_type == "person":
             additional_constraints = " INCLUDE their job title and place of work in the response (if available)."
             if exclude_name:
-                additional_constraints += " EXCLUDE their name from the response."
+                additional_constraints += " EXCLUDE the name of the person from the response."
         elif text_type == "unit":
             additional_constraints = " INCLUDE the institution that it is part of in the response (if available)."
             if exclude_name:
-                additional_constraints += " EXCLUDE its name from the response."
-        else:
-            additional_constraints = ""
+                additional_constraints += " EXCLUDE the name of the unit from the response."
+        elif text_type == 'concept':
+            if exclude_name:
+                additional_constraints += " EXCLUDE the name of the concept from the response."
+        elif text_type == 'course':
+            additional_constraints = " INCLUDE the name of the professor teaching it (if available)."
+            if exclude_name:
+                additional_constraints += " EXCLUDE the name of the course from the response."
+        elif text_type == 'MOOC':
+            additional_constraints = " INCLUDE the name of the professor teaching it (if available)."
+            if exclude_name:
+                additional_constraints += " EXCLUDE the name of the MOOC from the response."
+        elif text_type == 'lecture':
+            if exclude_name:
+                additional_constraints += " EXCLUDE the name of the lecture from the response."
+        elif text_type == 'publication':
+            additional_constraints += " EXCLUDE the paper's name from the response."
+            if exclude_name:
+                additional_constraints += " EXCLUDE the names of the authors from the response."
+            else:
+                additional_constraints = " INCLUDE the names of the first few authors in the response."
 
         # This is the main part that determines whether we get a title or a summary
         if summary_type == 'title':
@@ -1417,11 +1436,11 @@ class ChatGPTSummarizer:
         # This section should also be expanded based on feedback
         if text_type == 'person':
             if n_sentences == 1:
-                response_format += "[DESCRIPTION OF CURRENT JOB]\""
+                response_format += "[BRIEF DESCRIPTION OF CURRENT JOB]\""
                 sample_response = \
                     f"\"{summary_type}: Associate Professor at EPFL working on social network analysis"
             elif n_sentences == 2:
-                response_format += "[DESCRIPTION OF CURRENT JOB], [DESCRIPTION OF INTERESTS].\""
+                response_format += "[BRIEF DESCRIPTION OF CURRENT JOB], [BRIEF DESCRIPTION OF INTERESTS].\""
                 sample_response = \
                     f"\"{summary_type}: Associate Professor at EPFL working on social network analysis, " \
                     f"with contributions to graph theory and graph neural networks\""
@@ -1429,9 +1448,44 @@ class ChatGPTSummarizer:
                 response_format += "[RESPONSE]\""
         elif text_type == 'unit':
             if n_sentences is not None:
-                response_format += "[DESCRIPTION OF RESEARCH OR DEVELOPMENT AREAS]\""
+                response_format += "[BRIEF DESCRIPTION OF RESEARCH OR DEVELOPMENT AREAS]\""
                 sample_response = \
                     f"\"{summary_type}: Laboratory at EPFL working on social network analysis and graph neural networks"
+            else:
+                response_format += "[RESPONSE]\""
+        elif text_type == 'concept':
+            if n_sentences is not None:
+                response_format += "[BRIEF EXPLANATION OF THE CONCEPT]\""
+                sample_response = \
+                    f"\"{summary_type}: Algorithm in graph theory that finds a minimum cut in a given graph"
+            else:
+                response_format += "[RESPONSE]\""
+        elif text_type == 'course':
+            if n_sentences is not None:
+                response_format += "[BRIEF DESCRIPTION OF COURSE CONTENTS]\""
+                sample_response = \
+                    f"\"{summary_type}: Course on graph theory and graph algorithms for BSc Computer Science students"
+            else:
+                response_format += "[RESPONSE]\""
+        elif text_type == 'MOOC':
+            if n_sentences is not None:
+                response_format += "[BRIEF DESCRIPTION OF MOOC CONTENTS]\""
+                sample_response = \
+                    f"\"{summary_type}: Introductory-level MOOC on graph theory and graph algorithms"
+            else:
+                response_format += "[RESPONSE]\""
+        elif text_type == 'lecture':
+            if n_sentences is not None:
+                response_format += "[BRIEF DESCRIPTION OF LECTURE CONTENTS]\""
+                sample_response = \
+                    f"\"{summary_type}: Lecture introducing directed acyclic graphs and presenting a number of theorems"
+            else:
+                response_format += "[RESPONSE]\""
+        elif text_type == 'publication':
+            if n_sentences is not None:
+                response_format += "[BRIEF DESCRIPTION OF PUBLICATION CONTENTS]\""
+                sample_response = \
+                    f"\"{summary_type}: Paper by Dillenbourg et al. introducing the concept of collaborative learning"
             else:
                 response_format += "[RESPONSE]\""
         else:
