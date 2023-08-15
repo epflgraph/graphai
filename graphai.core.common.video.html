@@ -647,16 +647,29 @@ satisfy the minimum similarity criterion.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="graphai.core.common.video.count_tokens_for_openai">
 <span class="sig-prename descclassname"><span class="pre">graphai.core.common.video.</span></span><span class="sig-name descname"><span class="pre">count_tokens_for_openai</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'cl100k_base'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.video.count_tokens_for_openai" title="Permalink to this definition"></a></dt>
+<dd><p>Counts the number of tokens in a given text for a given OpenAI model
+:param text: The text to tokenize
+:param model: The OpenAI model to use</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Number of tokens</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.core.common.video.force_dict_to_text">
+<span class="sig-prename descclassname"><span class="pre">graphai.core.common.video.</span></span><span class="sig-name descname"><span class="pre">force_dict_to_text</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.video.force_dict_to_text" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="graphai.core.common.video.generate_summary_text_token">
-<span class="sig-prename descclassname"><span class="pre">graphai.core.common.video.</span></span><span class="sig-name descname"><span class="pre">generate_summary_text_token</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.video.generate_summary_text_token" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">graphai.core.common.video.</span></span><span class="sig-name descname"><span class="pre">generate_summary_text_token</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">text_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'text'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">summary_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'summary'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">len_class</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'normal'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tone</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'info'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.video.generate_summary_text_token" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="graphai.core.common.video.generate_summary_type_dict">
-<span class="sig-prename descclassname"><span class="pre">graphai.core.common.video.</span></span><span class="sig-name descname"><span class="pre">generate_summary_type_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">summary_type</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.video.generate_summary_type_dict" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">graphai.core.common.video.</span></span><span class="sig-name descname"><span class="pre">generate_summary_type_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">summary_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">len_class</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tone</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.video.generate_summary_type_dict" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py class">
@@ -838,21 +851,38 @@ translated segments which can be used as subtitles, and ‘language’ which con
 <dl class="py method">
 <dt class="sig sig-object py" id="graphai.core.common.video.ChatGPTSummarizer.establish_connection">
 <span class="sig-name descname"><span class="pre">establish_connection</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.video.ChatGPTSummarizer.establish_connection" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Ensures that an API key exists and sets it as the OpenAI key
+:returns: Boolean indicating whether an API key was found</p>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="graphai.core.common.video.ChatGPTSummarizer.generate_summary">
-<span class="sig-name descname"><span class="pre">generate_summary</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">text_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'lecture'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keywords</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ordered</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_len</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.video.ChatGPTSummarizer.generate_summary" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">generate_summary</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text_or_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">text_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'lecture'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">summary_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'summary'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">len_class</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'normal'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tone</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'info'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_normal_len</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_short_len</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">40</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.video.ChatGPTSummarizer.generate_summary" title="Permalink to this definition"></a></dt>
 <dd><p>Generates a summary or a title for the provided text
-:param text: Text to summarize
+:param text_or_dict: String or dictionary containing all the text to summarize and synthesize into one summary
 :param text_type: Type of text, e.g. “lecture”, “course”. Useful for summaries.
-:param keywords: Whether the provided text is in the form of keywords or raw text
-:param ordered: If keywords, whether the provided keywords are in some chronological order
-:param title: Whether to generate a title (True) or a summary (False)
-:param max_len: Approximate maximum length of result (in words)</p>
+:param summary_type: The type of the summary to be produced, either ‘title’ or ‘summary’ (default)
+:param len_class: Whether there’s a constraint on the number of sentences (‘vshort’ for 1, ‘short’ for 2)</p>
+<aside class="system-message">
+<p class="system-message-title">System Message: ERROR/3 (<span class="docutils literal">/home/ubuntu/actions-runner/_work/graphai/graphai/main/graphai/core/common/video.py:docstring of graphai.core.common.video.ChatGPTSummarizer.generate_summary</span>, line 6)</p>
+<p>Unexpected indentation.</p>
+</aside>
+<blockquote>
+<div><p>or not (‘normal’, default).</p>
+</div></blockquote>
+<aside class="system-message">
+<p class="system-message-title">System Message: WARNING/2 (<span class="docutils literal">/home/ubuntu/actions-runner/_work/graphai/graphai/main/graphai/core/common/video.py:docstring of graphai.core.common.video.ChatGPTSummarizer.generate_summary</span>, line 7)</p>
+<p>Block quote ends without a blank line; unexpected unindent.</p>
+</aside>
 <dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Result of summarization, plus a flag indicating whether there were too many tokens</p>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>tone</strong> – Whether to use a marketing tone (‘promo’) or an informative tone (‘info’, default)</p></li>
+<li><p><strong>max_normal_len</strong> – Approximate maximum length of result (in words)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Result of summarization, plus a flag indicating whether there were too many tokens</p>
 </dd>
 </dl>
 </dd></dl>
