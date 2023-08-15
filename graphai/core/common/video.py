@@ -905,21 +905,43 @@ def detect_text_language(s):
 
 
 def count_tokens_for_openai(text, model="cl100k_base"):
+    """
+    Counts the number of tokens in a given text for a given OpenAI model
+    Args:
+        text: The text to tokenize
+        model: The OpenAI model to use
+
+    Returns:
+        Number of tokens
+    """
     encoding = tiktoken.get_encoding(model)
     return len(encoding.encode(text))
 
 
-def generate_summary_text_token(text, title=False):
-    token = md5_text(text)
-    if title:
-        token += '_title'
-    else:
-        token += '_summary'
+def force_dict_to_text(t):
+    if isinstance(t, dict):
+        return json.dumps(t)
+    return t
+
+
+def generate_summary_text_token(text, text_type='text', summary_type='summary', len_class='normal', tone='info'):
+    assert text_type in ['person', 'unit', 'concept', 'course', 'lecture', 'MOOC', 'publication', 'text']
+    assert summary_type in ['summary', 'title']
+    assert len_class in ['vshort', 'short', 'normal']
+    assert tone in ['info', 'promo']
+
+    text = force_dict_to_text(text)
+    token = md5_text(text) + '_' + text_type + '_' + summary_type + '_' + len_class + '_' + tone
     return token
 
 
-def generate_summary_type_dict(summary_type):
-    return {'summary_type': summary_type}
+def generate_summary_type_dict(text_type, summary_type, len_class, tone):
+    return {
+        'input_type': text_type,
+        'summary_type': summary_type,
+        'summary_len_class': len_class,
+        'summary_tone': tone
+    }
 
 
 class WhisperTranscriptionModel():
@@ -1253,6 +1275,11 @@ class ChatGPTSummarizer:
                   f'default API key.')
 
     def establish_connection(self):
+        """
+        Ensures that an API key exists and sets it as the OpenAI key
+        Returns:
+            Boolean indicating whether an API key was found
+        """
         if self.api_key is not None:
             openai.api_key = self.api_key
             return True
@@ -1268,21 +1295,25 @@ class ChatGPTSummarizer:
             max_len: Approximate maximum length of the response in words
 
         Returns:
-            Results returned by ChatGPT, plus a flag that is True if there were too many tokens.
-            A (None, True) result means that the completion failed because the message had too many tokens,
-            while a (None, False) result indicates a different error (e.g. failed connection).
+            Results returned by ChatGPT, a flag that is True if there were too many tokens, and the total # of tokens
+            if (and only if) the request is successful (0 otherwise).
+            A (None, True, 0) result means that the completion failed because the message had too many tokens,
+            while a (None, False, 0) result indicates a different error (e.g. failed connection).
         """
         has_api_key = self.establish_connection()
         if not has_api_key:
-            return None, False
+            return None, False, 0
+        # We count the approximate number of tokens in order to choose the right model (i.e. context size)
         approx_token_count = count_tokens_for_openai(text) + count_tokens_for_openai(system_message) + int(2 * max_len)
         if approx_token_count < 4096:
             model_type = 'gpt-3.5-turbo'
         elif 4096 < approx_token_count < 16384:
             model_type = 'gpt-3.5-turbo-16k'
         else:
-            return None, True
+            # If the token count is above 16384, the text is too large and we can't summarize it
+            return None, True, 0
         try:
+            # Generate the completion
             completion = openai.ChatCompletion.create(
                 model=model_type,
                 messages=[
@@ -1296,41 +1327,179 @@ class ChatGPTSummarizer:
             # We check to see if the exception was caused by too many tokens in the input
             print(e)
             if "This model's maximum context length is" in e:
-                return None, True
+                return None, True, 0
             else:
-                return None, False
+                return None, False, 0
         except Exception as e:
+            # Any error other than "too many tokens" is dealt with here
             print(e)
-            return None, False
-        return completion.choices[0].message.content, False
+            return None, False, 0
+        return completion.choices[0].message.content, False, completion.usage.total_tokens
 
-    def generate_summary(self, text, text_type='lecture', keywords=True, ordered=False, title=False, max_len=100):
+    def generate_summary(self, text_or_dict, text_type='lecture', summary_type='summary',
+                         len_class='normal', tone='info', max_normal_len=100, max_short_len=40):
         """
         Generates a summary or a title for the provided text
         Args:
-            text: Text to summarize
+            text_or_dict: String or dictionary containing all the text to summarize and synthesize into one summary
             text_type: Type of text, e.g. "lecture", "course". Useful for summaries.
-            keywords: Whether the provided text is in the form of keywords or raw text
-            ordered: If keywords, whether the provided keywords are in some chronological order
-            title: Whether to generate a title (True) or a summary (False)
-            max_len: Approximate maximum length of result (in words)
+            summary_type: The type of the summary to be produced, either 'title' or 'summary' (default)
+            len_class: Whether there's a constraint on the number of sentences ('vshort' for 1, 'short' for 2)
+                       or not ('normal', default).
+            tone: Whether to use a marketing tone ('promo') or an informative tone ('info', default)
+            max_normal_len: Approximate maximum length of result (in words)
 
         Returns:
             Result of summarization, plus a flag indicating whether there were too many tokens
         """
-        if keywords:
-            system_message = "Given the following set of keywords"
+        if isinstance(text_or_dict, dict):
+            text_dict_fields = [x.lower() for x in text_or_dict.keys()]
         else:
-            system_message = "Given the following text"
-        system_message += f" extracted from a {text_type}"
-        if keywords and not ordered:
-            system_message += " in no particular order,"
-        else:
-            system_message += ","
-        if title:
-            system_message += f" generate a title for the {text_type} "
-        else:
-            system_message += f" generate a summary for the {text_type} "
-        system_message += f"with under {max_len} words for the input."
+            if text_type != "text":
+                text_dict_fields = ["text"]
+            else:
+                text_dict_fields = list()
 
-        return self._generate_completion(text, system_message, max_len)
+        # Telling the API what information is being provided on the entity
+        if len(text_dict_fields) > 0:
+            system_message = f"You will be given the {', '.join(text_dict_fields)} of a {text_type}."
+        else:
+            system_message = f"You will be given a {text_type}."
+
+        # We have certain constraints on the length of the response.
+        n_sentences = None
+        max_len = max_normal_len
+        if len_class == 'vshort':
+            n_sentences = 1
+            max_len = max_short_len / 2
+        elif len_class == 'short':
+            n_sentences = 2
+            max_len = max_short_len
+        if n_sentences is not None:
+            sentences = f" {n_sentences}-sentence"
+        else:
+            sentences = ""
+        max_len_str = f" with under {max_len} words."
+
+        # Based on the text_type, we may have additional constraints.
+        # This section should be expanded based on feedback
+        exclude_name = (summary_type == 'summary' and n_sentences == 1) or \
+                       (summary_type == 'title' and n_sentences is not None)
+        additional_constraints = ""
+        if text_type == "person":
+            additional_constraints = " INCLUDE their job title and place of work in the response (if available)."
+            if exclude_name:
+                additional_constraints += " EXCLUDE the name of the person from the response."
+        elif text_type == "unit":
+            additional_constraints = " INCLUDE the institution that it is part of in the response (if available)."
+            if exclude_name:
+                additional_constraints += " EXCLUDE the name of the unit from the response."
+        elif text_type == 'concept':
+            if exclude_name:
+                additional_constraints += " EXCLUDE the name of the concept from the response."
+        elif text_type == 'course':
+            additional_constraints = " INCLUDE the name of the professor teaching it (if available)."
+            if exclude_name:
+                additional_constraints += " EXCLUDE the name of the course from the response."
+        elif text_type == 'MOOC':
+            additional_constraints = " INCLUDE the name of the professor teaching it (if available)."
+            if exclude_name:
+                additional_constraints += " EXCLUDE the name of the MOOC from the response."
+        elif text_type == 'lecture':
+            if exclude_name:
+                additional_constraints += " EXCLUDE the name of the lecture from the response."
+        elif text_type == 'publication':
+            additional_constraints += " EXCLUDE the paper's name from the response."
+            if exclude_name:
+                additional_constraints += " EXCLUDE the names of the authors from the response."
+            else:
+                additional_constraints = " INCLUDE the names of the first few authors in the response."
+
+        # This is the main part that determines whether we get a title or a summary
+        if summary_type == 'title':
+            system_message += f" Generate a title for the {text_type}{max_len_str}."
+        else:
+            system_message += f" Generate a{sentences} summary for the " \
+                              f"{text_type}{max_len_str}."
+
+        # Adding the additional constraints
+        system_message += additional_constraints
+
+        if tone == 'promo':
+            system_message += " Write in a promotional tone."
+        else:
+            system_message += " Write in a neutral, informative tone."
+
+        # Now we compile the response format
+        response_format = f"\"{summary_type}: "
+        sample_response = ""
+        # This section should also be expanded based on feedback
+        if text_type == 'person':
+            if n_sentences == 1:
+                response_format += "[BRIEF DESCRIPTION OF CURRENT JOB]\""
+                sample_response = \
+                    f"\"{summary_type}: Associate Professor at EPFL working on social network analysis"
+            elif n_sentences == 2:
+                response_format += "[BRIEF DESCRIPTION OF CURRENT JOB], [BRIEF DESCRIPTION OF INTERESTS].\""
+                sample_response = \
+                    f"\"{summary_type}: Associate Professor at EPFL working on social network analysis, " \
+                    f"with contributions to graph theory and graph neural networks\""
+            else:
+                response_format += "[RESPONSE]\""
+        elif text_type == 'unit':
+            if n_sentences is not None:
+                response_format += "[BRIEF DESCRIPTION OF RESEARCH OR DEVELOPMENT AREAS]\""
+                sample_response = \
+                    f"\"{summary_type}: Laboratory at EPFL working on social network analysis and graph neural networks"
+            else:
+                response_format += "[RESPONSE]\""
+        elif text_type == 'concept':
+            if n_sentences is not None:
+                response_format += "[BRIEF EXPLANATION OF THE CONCEPT]\""
+                sample_response = \
+                    f"\"{summary_type}: Algorithm in graph theory that finds a minimum cut in a given graph"
+            else:
+                response_format += "[RESPONSE]\""
+        elif text_type == 'course':
+            if n_sentences is not None:
+                response_format += "[BRIEF DESCRIPTION OF COURSE CONTENTS]\""
+                sample_response = \
+                    f"\"{summary_type}: Course on graph theory and graph algorithms for BSc Computer Science students"
+            else:
+                response_format += "[RESPONSE]\""
+        elif text_type == 'MOOC':
+            if n_sentences is not None:
+                response_format += "[BRIEF DESCRIPTION OF MOOC CONTENTS]\""
+                sample_response = \
+                    f"\"{summary_type}: Introductory-level MOOC on graph theory and graph algorithms"
+            else:
+                response_format += "[RESPONSE]\""
+        elif text_type == 'lecture':
+            if n_sentences is not None:
+                response_format += "[BRIEF DESCRIPTION OF LECTURE CONTENTS]\""
+                sample_response = \
+                    f"\"{summary_type}: Lecture introducing directed acyclic graphs and presenting a number of theorems"
+            else:
+                response_format += "[RESPONSE]\""
+        elif text_type == 'publication':
+            if n_sentences is not None:
+                response_format += "[BRIEF DESCRIPTION OF PUBLICATION CONTENTS]\""
+                sample_response = \
+                    f"\"{summary_type}: Paper by Dillenbourg et al. introducing the concept of collaborative learning"
+            else:
+                response_format += "[RESPONSE]\""
+        else:
+            response_format += "[RESPONSE]\""
+        system_message += f"Give your response in the form: {response_format}"
+        if sample_response != "":
+            system_message += f"\nHere's an example of an acceptable response: {sample_response}"
+
+        if isinstance(text_or_dict, dict):
+            text = "\n\n".join([f"{k}: {v}" for k, v in text_or_dict.items()])
+        else:
+            text = f"Text: {text_or_dict}"
+
+        results, too_many_tokens, n_total_tokens = self._generate_completion(text, system_message, max_normal_len)
+        # Now we remove the "Title:" or "Summary:" at the beginning
+        results = ':'.join(results.split(':')[1:]).strip().strip('"')
+        return results, too_many_tokens, n_total_tokens

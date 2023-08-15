@@ -1,19 +1,40 @@
 from pydantic import BaseModel, Field
-from typing import Union, Literal
+from typing import Union, Literal, Dict
 
 from graphai.api.schemas.common import TaskStatusResponse
 
 
 class SummaryFingerprintRequest(BaseModel):
-    text: str = Field(
+    text: Union[str, Dict[str, str]] = Field(
         title="Text",
-        description="Text to summarize"
+        description="Text to summarize. Can be one string or a string to string dictionary."
     )
 
     summary_type: Literal['title', 'summary'] = Field(
         title="Summary type",
         description="Whether the summarization to be performed is title or summary generation",
         default='summary'
+    )
+
+    text_type: Literal['person', 'unit', 'concept', 'course', 'lecture', 'MOOC', 'text'] = Field(
+        title="Text type",
+        description="What the text being summarized describes/comes from. Defaults to 'text', which results in "
+                    "generic summarization behavior.",
+        default="text"
+    )
+
+    len_class: Literal['vshort', 'short', 'normal'] = Field(
+        title="Length class",
+        description="Whether the summary is to be one sentence (vshort), two sentences (short), "
+                    "or without a sentence count limit (normal). Default is 'normal'.",
+        default="normal"
+    )
+
+    tone: Literal['info', 'promo'] = Field(
+        title="Tone of the summary",
+        description="What tone to use in the summarization. Defaults to 'info', which is an informative tone. "
+                    "'promo' results in a marketing tone.",
+        default="info"
     )
 
     force: bool = Field(
@@ -54,21 +75,37 @@ class SummaryFingerprintResponse(TaskStatusResponse):
 
 
 class SummarizationRequest(BaseModel):
-    text: str = Field(
+    text: Union[str, Dict[str, str]] = Field(
         title="Text",
-        description="Text to summarize"
+        description="Text to summarize. Can be one string or a string to string dictionary."
     )
 
-    text_type: str = Field(
+    text_type: Literal['person', 'unit', 'concept', 'course', 'lecture', 'publication', 'MOOC', 'text'] = Field(
         title="Text type",
-        description="What the text being summarized describes/comes from. Example: 'lecture', 'course', 'person'."
+        description="What the text being summarized describes/comes from. Defaults to 'text', which results in "
+                    "generic summarization behavior.",
+        default="text"
+    )
+
+    len_class: Literal['vshort', 'short', 'normal'] = Field(
+        title="Length class",
+        description="Whether the summary is to be one sentence (vshort), two sentences (short), "
+                    "or without a sentence count limit (normal). Default is 'normal'.",
+        default="normal"
     )
 
     use_keywords: bool = Field(
         title="Use keywords",
         description="Whether to use keywords for summarization or to "
                     "use the raw text, default true (keywords are used).",
-        default=True
+        default=False
+    )
+
+    tone: Literal['info', 'promo'] = Field(
+        title="Tone of the summary",
+        description="What tone to use in the summarization. Defaults to 'info', which is an informative tone. "
+                    "'promo' results in a marketing tone.",
+        default="info"
     )
 
     force: bool = Field(

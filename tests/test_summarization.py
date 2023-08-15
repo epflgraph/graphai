@@ -7,8 +7,8 @@ from time import sleep
 from graphai.api.celery_tasks.summarization import summarize_text_task, compute_summarization_text_fingerprint_task
 
 ################################################################
-# /summarization/summary                                       #
-# /summarization/title                                         #
+# /completion/summary                                       #
+# /completion/title                                         #
 ################################################################
 
 
@@ -34,7 +34,7 @@ def test__summarization_summary__summarize_text__run_task(transcript_text):
         'text': transcript_text,
         'original_text': transcript_text
     }
-    summary_transcript = summarize_text_task.run(token_and_text, 'lecture', False)
+    summary_transcript = summarize_text_task.run(token_and_text, 'lecture', 'summary')
 
     # Assert that the results are correct
     assert isinstance(summary_transcript, dict)
@@ -43,7 +43,7 @@ def test__summarization_summary__summarize_text__run_task(transcript_text):
     summary_text = summary_transcript['summary'].lower()
     assert 'lecture' in summary_text
     assert 'digital circuit' in summary_text
-    assert 'simulation' in summary_text
+    assert 'simulation' in summary_text or 'simulator' in summary_text
 
 
 #############################################################
@@ -58,14 +58,14 @@ def test__summarization_title__summarize_text__run_task(ocr_text):
         'text': ocr_text,
         'original_text': ocr_text
     }
-    title_ocr = summarize_text_task.run(token_and_text, 'lecture', True)
+    title_ocr = summarize_text_task.run(token_and_text, 'lecture', 'title')
 
     # Assert that the results are correct
     assert isinstance(title_ocr, dict)
     assert 'summary' in title_ocr
     assert title_ocr['successful'] is True
     title_text = title_ocr['summary'].lower()
-    assert 'simulation' in title_text
+    assert 'simulation' in title_text or 'simulator' in title_text
     assert 'digital' in title_text or 'discrete' in title_text or 'circuit' in title_text
 
 
@@ -79,7 +79,7 @@ def test__summarization_summary__summarize_text__integration(fixture_app, celery
     # PENDING.
 
     # First, we call the summary endpoint with force=True to test the full task pipeline working
-    response = fixture_app.post('/summarization/summary',
+    response = fixture_app.post('/completion/summary',
                                 data=json.dumps({"text": transcript_text, "text_type": "lecture",
                                                  "force": True}),
                                 timeout=timeout)
@@ -95,13 +95,13 @@ def test__summarization_summary__summarize_text__integration(fixture_app, celery
         # Wait a few seconds
         sleep(3)
         # Now get status
-        response = fixture_app.get(f'/summarization/summary/status/{task_id}',
+        response = fixture_app.get(f'/completion/summary/status/{task_id}',
                                    timeout=timeout)
         current_status = response.json()['task_status']
         n_tries += 1
 
     # Now get status
-    response = fixture_app.get(f'/summarization/summary/status/{task_id}',
+    response = fixture_app.get(f'/completion/summary/status/{task_id}',
                                timeout=timeout)
     # Parse result
     summary_results = response.json()
@@ -113,15 +113,15 @@ def test__summarization_summary__summarize_text__integration(fixture_app, celery
     assert summary_results['task_result']['fresh'] is True
     summary_text = summary_results['task_result']['summary'].lower()
     assert 'lecture' in summary_text
-    assert 'digital circuit' in summary_text
-    assert 'simulation' in summary_text
+    assert 'digital circuit' in summary_text or 'discrete event' in summary_text
+    assert 'simulation' in summary_text or 'simulator' in summary_text
     assert summary_results['task_result']['summary_type'] == 'summary'
     original_summary = summary_text
 
     ################################################
 
     # Now, we call the summary endpoint again with the same input to make sure the caching works correctly
-    response = fixture_app.post('/summarization/summary',
+    response = fixture_app.post('/completion/summary',
                                 data=json.dumps({"text": transcript_text, "text_type": "lecture",
                                                  "force": False}),
                                 timeout=timeout)
@@ -137,13 +137,13 @@ def test__summarization_summary__summarize_text__integration(fixture_app, celery
         # Wait a few seconds
         sleep(3)
         # Now get status
-        response = fixture_app.get(f'/summarization/summary/status/{task_id}',
+        response = fixture_app.get(f'/completion/summary/status/{task_id}',
                                    timeout=timeout)
         current_status = response.json()['task_status']
         n_tries += 1
 
     # Now get status
-    response = fixture_app.get(f'/summarization/summary/status/{task_id}',
+    response = fixture_app.get(f'/completion/summary/status/{task_id}',
                                timeout=timeout)
     # Parse result
     summary_results = response.json()
@@ -157,7 +157,7 @@ def test__summarization_summary__summarize_text__integration(fixture_app, celery
 
 
 ################################################################
-# /summarization/calculate_fingerprint                           #
+# /completion/calculate_fingerprint                           #
 ################################################################
 
 
@@ -185,7 +185,7 @@ def test__summarization_calculate_fingerprint__compute_text_fingerprint__integra
     # PENDING.
 
     # Call the calculate_fingerprint endpoint with force=True
-    response = fixture_app.post('/summarization/calculate_fingerprint',
+    response = fixture_app.post('/completion/calculate_fingerprint',
                                 data=json.dumps({"text": transcript_text, "text_type": "lecture",
                                                  "force": True}),
                                 timeout=timeout)
@@ -203,13 +203,13 @@ def test__summarization_calculate_fingerprint__compute_text_fingerprint__integra
         # Wait a few seconds
         sleep(3)
         # Now get status
-        response = fixture_app.get(f'/summarization/calculate_fingerprint/status/{task_id}',
+        response = fixture_app.get(f'/completion/calculate_fingerprint/status/{task_id}',
                                    timeout=timeout)
         current_status = response.json()['task_status']
         n_tries += 1
 
     # Now get status
-    response = fixture_app.get(f'/summarization/calculate_fingerprint/status/{task_id}',
+    response = fixture_app.get(f'/completion/calculate_fingerprint/status/{task_id}',
                                timeout=timeout)
     # Parse result
     content = response.json()
