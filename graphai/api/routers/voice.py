@@ -115,7 +115,7 @@ async def transcribe(data: AudioTranscriptionRequest):
         else:
             task_list = [transcribe_task.s({'token': token, 'language': lang}, force)]
     else:
-        n_divs = 5
+        n_divs = 7
         len_segment = 30
         if not force:
             task_list = get_audio_fingerprint_chain_list(token, force, ignore_fp_results=True,
@@ -158,7 +158,7 @@ async def detect_language(data: AudioDetectLanguageRequest):
     print('Detecting language')
     token = data.token
     force = data.force
-    n_divs = 5
+    n_divs = 7
     len_segment = 30
     # If force=True, fingerprinting is skipped
     # The tasks are splitting the audio into n_divs segments of 30 seconds each, parallel language detection,
