@@ -1185,12 +1185,18 @@ class TranslationModels:
         Returns:
             Translated text, plus a flag denoting whether any of the sentences was too long and unpunctuated
         """
-        sentences = segmenter.segment(text)
+        sentences = segmenter.segment(text.replace('\n', '. '))
+        sentences = [sentence.strip() for sentence in sentences]
         full_result = ''
         for sentence in sentences:
+            print(sentence)
             if len(sentence) == 0:
                 continue
+            if len(sentence) < 4:
+                full_result += ' ' + sentence
+                continue
             decoded = self._tokenize_and_get_model_output(sentence, tokenizer, model)
+            print(decoded)
             if decoded is None:
                 return None, True
             full_result += ' ' + decoded
