@@ -479,6 +479,8 @@ def perceptual_hash_text(s, min_window_length=5, max_window_length=50, hash_len=
     string_length = len(s)
     window_length = max([min_window_length, string_length // hash_len])
     window_length = min([max_window_length, window_length])
+    if string_length < window_length:
+        s = s + ''.join([' ']*(window_length - string_length + 1))
     kgram_length = max([10, int(window_length / 2)])
 
     fprinter = fingerprint.Fingerprint(kgram_len=kgram_length, window_len=window_length, base=10, modulo=256)
