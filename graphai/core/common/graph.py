@@ -85,7 +85,7 @@ class ConceptsGraph:
         print('Setting graph as loaded...')
         self.loaded = True
 
-    def compute_scores(self, source_page_ids, target_page_ids):
+    def old_compute_scores(self, source_page_ids, target_page_ids):
         """
         Computes the graph scores for all possible source-target pairs from two lists of page ids.
         The graph score of a pair (s, t) is computed as:
@@ -178,6 +178,18 @@ class ConceptsGraph:
         return results
 
     def add_graph_score(self, results, smoothing=True):
+        """
+        Computes GraphScore for the provided intermediate wikify results.
+
+        Args:
+            results (pd.DataFrame): A pandas DataFrame including the columns ['Keywords', 'PageID', 'PageTitle', 'SearchScore', 'LevenshteinScore'].
+            smoothing (bool): Whether to apply a transformation to the GraphScore that bumps scores to avoid
+            a negative exponential shape. Default: True.
+
+        Returns:
+            pd.DataFrame: A pandas DataFrame with the original columns plus ['GraphScore'].
+        """
+
         self.fetch_from_db()
 
         # Extract concept ids from set of results
