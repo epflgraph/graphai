@@ -92,12 +92,59 @@
 <dl class="py function">
 <dt class="sig sig-object py" id="graphai.core.text.draw.draw_ontology">
 <span class="sig-prename descclassname"><span class="pre">graphai.core.text.draw.</span></span><span class="sig-name descname"><span class="pre">draw_ontology</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">results</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ontology</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">level</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.text.draw.draw_ontology" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Draws the ontology neighbourhood induced by the given set of wikify results. The resulting svg is not returned but stored in /tmp/file.svg.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>results</strong> (<em>list</em><em>(</em><em>dict</em><em>)</em>) – A serialised (orient=’records’) pandas DataFrame with columns [‘PageID’, ‘PageTitle’, ‘SearchScore’,</p></li>
+<li><p><strong>'LevenshteinScore'</strong> – </p></li>
+<li><p><strong>'GraphScore'</strong> – </p></li>
+<li><p><strong>'OntologyLocalScore'</strong> – </p></li>
+<li><p><strong>'OntologyGlobalScore'</strong> – </p></li>
+<li><p><strong>'KeywordsScore'</strong> – </p></li>
+<li><p><strong>'MixedScore'</strong><strong>]</strong><strong>.</strong> – </p></li>
+<li><p><strong>ontology</strong> (<a class="reference internal" href="graphai.core.common.ontology.html#graphai.core.common.ontology.Ontology" title="graphai.core.common.ontology.Ontology"><em>Ontology</em></a>) – The ontology object.</p></li>
+<li><p><strong>level</strong> (<em>int</em>) – How many levels to go up in the ontology from the concepts.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Whether the drawing succeeded.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="graphai.core.text.draw.draw_graph">
 <span class="sig-prename descclassname"><span class="pre">graphai.core.text.draw.</span></span><span class="sig-name descname"><span class="pre">draw_graph</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">results</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">graph</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">concept_score_threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">edge_threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_component_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.text.draw.draw_graph" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Celery task that draws the concepts graph neighbourhood induced by the given set of wikify results. The resulting svg is not returned
+but stored in /tmp/file.svg.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>results</strong> (<em>list</em><em>(</em><em>dict</em><em>)</em>) – A serialised (orient=’records’) pandas DataFrame with columns [‘PageID’, ‘PageTitle’, ‘SearchScore’,</p></li>
+<li><p><strong>'LevenshteinScore'</strong> – </p></li>
+<li><p><strong>'GraphScore'</strong> – </p></li>
+<li><p><strong>'OntologyLocalScore'</strong> – </p></li>
+<li><p><strong>'OntologyGlobalScore'</strong> – </p></li>
+<li><p><strong>'KeywordsScore'</strong> – </p></li>
+<li><p><strong>'MixedScore'</strong><strong>]</strong><strong>.</strong> – </p></li>
+<li><p><strong>graph</strong> (<a class="reference internal" href="graphai.core.common.graph.html#graphai.core.common.graph.ConceptsGraph" title="graphai.core.common.graph.ConceptsGraph"><em>ConceptsGraph</em></a>) – The concepts graph object.</p></li>
+<li><p><strong>concept_score_threshold</strong> (<em>float</em>) – Score threshold below which concepts are filtered out. Default: 0.3.</p></li>
+<li><p><strong>edge_threshold</strong> (<em>float</em>) – Score threshold below which edges are filtered out. Default: 0.3.</p></li>
+<li><p><strong>min_component_size</strong> (<em>int</em>) – Size threshold below which connected components are filtered out. Default: 3.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Whether the drawing succeeded.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
 
 </section>
 

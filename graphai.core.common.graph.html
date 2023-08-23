@@ -100,8 +100,8 @@
 <dd></dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="graphai.core.common.graph.ConceptsGraph.compute_scores">
-<span class="sig-name descname"><span class="pre">compute_scores</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source_page_ids</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_page_ids</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.graph.ConceptsGraph.compute_scores" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="graphai.core.common.graph.ConceptsGraph.old_compute_scores">
+<span class="sig-name descname"><span class="pre">old_compute_scores</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source_page_ids</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_page_ids</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.graph.ConceptsGraph.old_compute_scores" title="Permalink to this definition"></a></dt>
 <dd><p>Computes the graph scores for all possible source-target pairs from two lists of page ids.
 The graph score of a pair (s, t) is computed as:</p>
 <p><span class="math notranslate nohighlight">\(\displaystyle score(s, t) = 1 - \frac{1}{1 + \ln(1 + rebound(s, t) * \ln(out(s, t)))}\)</span>, with</p>
@@ -134,7 +134,23 @@ has keys ‘source_page_id’ (int), ‘target_page_id’ (int) and ‘score’ 
 <dl class="py method">
 <dt class="sig sig-object py" id="graphai.core.common.graph.ConceptsGraph.add_graph_score">
 <span class="sig-name descname"><span class="pre">add_graph_score</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">results</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">smoothing</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.graph.ConceptsGraph.add_graph_score" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Computes GraphScore for the provided intermediate wikify results.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>results</strong> (<em>pd.DataFrame</em>) – A pandas DataFrame including the columns [‘Keywords’, ‘PageID’, ‘PageTitle’, ‘SearchScore’, ‘LevenshteinScore’].</p></li>
+<li><p><strong>smoothing</strong> (<em>bool</em>) – Whether to apply a transformation to the GraphScore that bumps scores to avoid</p></li>
+<li><p><strong>Default</strong> (<em>a negative exponential shape.</em>) – True.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A pandas DataFrame with the original columns plus [‘GraphScore’].</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
 
 </dd></dl>
 

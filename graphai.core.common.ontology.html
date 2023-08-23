@@ -134,14 +134,24 @@
 <dd></dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="graphai.core.common.ontology.Ontology.old_add_ontology_scores">
-<span class="sig-name descname"><span class="pre">old_add_ontology_scores</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">results</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">smoothing</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.ontology.Ontology.old_add_ontology_scores" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="graphai.core.common.ontology.Ontology.add_ontology_scores">
 <span class="sig-name descname"><span class="pre">add_ontology_scores</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">results</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">smoothing</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.ontology.Ontology.add_ontology_scores" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Computes OntologyLocalScore and OntologyGlobalScore for the provided intermediate wikify results.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>results</strong> (<em>pd.DataFrame</em>) – A pandas DataFrame including the columns [‘Keywords’, ‘PageID’, ‘PageTitle’, ‘SearchScore’, ‘LevenshteinScore’].</p></li>
+<li><p><strong>smoothing</strong> (<em>bool</em>) – Whether to apply a transformation to the ontology scores that pushes scores away from 0.5. Default: True.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A pandas DataFrame with the original columns plus [‘OntologyLocalScore’, ‘OntologyGlobalScore’].</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
 
 </dd></dl>
 
