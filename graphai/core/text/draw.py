@@ -6,6 +6,18 @@ import matplotlib.pyplot as plt
 
 
 def draw_ontology(results, ontology, level):
+    """
+    Draws the ontology neighbourhood induced by the given set of wikify results. The resulting svg is not returned but stored in /tmp/file.svg.
+
+    Args:
+        results (list(dict)): A serialised (orient='records') pandas DataFrame with columns ['PageID', 'PageTitle', 'SearchScore',
+        'LevenshteinScore', 'GraphScore', 'OntologyLocalScore', 'OntologyGlobalScore', 'KeywordsScore', 'MixedScore'].
+        ontology (Ontology): The ontology object.
+        level (int): How many levels to go up in the ontology from the concepts.
+
+    Returns:
+        bool: Whether the drawing succeeded.
+    """
 
     # Turn off pyplot's interactive mode and use non-rendering backend
     plt.switch_backend('Agg')
@@ -139,6 +151,21 @@ def draw_ontology(results, ontology, level):
 
 
 def draw_graph(results, graph, concept_score_threshold=0.3, edge_threshold=0.3, min_component_size=3):
+    """
+    Celery task that draws the concepts graph neighbourhood induced by the given set of wikify results. The resulting svg is not returned
+    but stored in /tmp/file.svg.
+
+    Args:
+        results (list(dict)): A serialised (orient='records') pandas DataFrame with columns ['PageID', 'PageTitle', 'SearchScore',
+        'LevenshteinScore', 'GraphScore', 'OntologyLocalScore', 'OntologyGlobalScore', 'KeywordsScore', 'MixedScore'].
+        graph (ConceptsGraph): The concepts graph object.
+        concept_score_threshold (float): Score threshold below which concepts are filtered out. Default: 0.3.
+        edge_threshold (float): Score threshold below which edges are filtered out. Default: 0.3.
+        min_component_size (int): Size threshold below which connected components are filtered out. Default: 3.
+
+    Returns:
+        bool: Whether the drawing succeeded.
+    """
 
     # Turn off pyplot's interactive mode and use non-rendering backend
     plt.switch_backend('Agg')

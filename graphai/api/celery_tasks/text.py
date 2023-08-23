@@ -18,6 +18,17 @@ from graphai.core.text.draw import draw_ontology, draw_graph
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={'max_retries': 2},
              name='text_10.extract_keywords', ignore_result=False)
 def extract_keywords_task(self, raw_text, use_nltk=False):
+    """
+    Celery task that extracts keywords from a given text.
+
+    Args:
+        raw_text (str): Text to extract keywords from.
+        use_nltk (bool): Whether to use nltk-rake for keyword extraction, otherwise python-rake is used. Default: False.
+
+    Returns:
+        list[str]: A list containing the keywords extracted from the text.
+    """
+
     keywords_list = get_keywords(raw_text, use_nltk)
 
     return keywords_list
@@ -27,19 +38,19 @@ def extract_keywords_task(self, raw_text, use_nltk=False):
              name='text_10.wikisearch', ignore_result=False, wp=WP(), es=ES('aitor_concepts'))
 def wikisearch_task(self, keywords_list, fraction=(0, 1), method='es-base'):
     """
-    Returns top 10 results for Wikipedia pages relevant to the keywords.
+    Celery task that finds 10 relevant Wikipedia pages for each set of keywords in a list.
 
     Args:
-        keywords_list (list(str)): List containing the keyword sets to search for among Wikipedia pages.
-        fraction (tuple): Portion of the keywords_list to be processed, e.g. (1/3, 2/3) means only the middle third of
-        the list is considered.
+        keywords_list (list(str)): List containing the sets of keywords for which to search Wikipedia pages.
+        fraction (tuple(int, int)): Portion of the keywords_list to be processed, e.g. (1/3, 2/3) means only
+        the middle third of the list is considered.
         method (str): Method to retrieve the wikipedia pages. It can be either "wikipedia-api", to use the
         Wikipedia API, or one of {"es-base", "es-score"}, to use elasticsearch, returning as score the inverse
         of the searchrank or the actual elasticsearch score, respectively. Default: 'es-base'. Fallback:
         'wikipedia-api'.
 
     Returns:
-        pd.DataFrame: A pandas DataFrame with columns ['Keywords', 'PageID', 'PageTitle', 'Searchrank', 'SearchScore'],
+        pd.DataFrame: A pandas DataFrame with columns ['Keywords', 'PageID', 'PageTitle', 'Searchrank', 'SearchScore', 'LevenshteinScore'],
         constant on 'Keywords' and unique in 'PageID', with the wikisearch results the given keywords set.
     """
 
@@ -98,6 +109,17 @@ def wikisearch_task(self, keywords_list, fraction=(0, 1), method='es-base'):
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={'max_retries': 2},
              name='text_10.wikisearch_callback', ignore_result=False)
 def wikisearch_callback_task(self, results):
+    """
+    Celery task that aggregates the results from the wikisearch task. It combines all parallel results into one single DataFrame.
+
+    Args:
+        results (list(pd.DataFrame)): List of DataFrames with columns ['Keywords', 'PageID', 'PageTitle', 'Searchrank',
+        'SearchScore', 'LevenshteinScore'].
+
+    Returns:
+        pd.DataFrame: A pandas DataFrame with columns ['Keywords', 'PageID', 'PageTitle', 'Searchrank', 'SearchScore', 'LevenshteinScore'].
+    """
+
     # Concatenate all results in a single DataFrame
     results = pd.concat(results, ignore_index=True)
 
@@ -107,6 +129,24 @@ def wikisearch_callback_task(self, results):
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={'max_retries': 2},
              name='text_10.compute_scores', ignore_result=False, graph=graph, ontology=ontology)
 def compute_scores_task(self, results, restrict_to_ontology=False, graph_score_smoothing=True, ontology_score_smoothing=True, keywords_score_smoothing=True):
+    """
+    Celery task that computes the GraphScore, OntologyLocalScore, OntologyGlobalScore and KeywordsScore to a DataFrame of wikisearch results.
+
+    Args:
+        results (pd.DataFrame): A pandas DataFrame containing the results of a wikisearch.
+        It must contain the columns ['Keywords', 'PageID', 'PageTitle', 'Searchrank', 'SearchScore'].
+        restrict_to_ontology (bool): Whether to filter Wikipedia pages that are not in the ontology. Default: False.
+        graph_score_smoothing (bool): Whether to apply a transformation to the GraphScore that bumps scores to avoid
+        a negative exponential shape. Default: True.
+        ontology_score_smoothing (bool): Whether to apply a transformation to the ontology scores that pushes scores away from 0.5. Default: True.
+        keywords_score_smoothing (bool): Whether to apply a transformation to the KeywordsScore that bumps scores to avoid
+        a negative exponential shape. Default: True.
+
+    Returns:
+        pd.DataFrame: A pandas DataFrame with columns ['Keywords', 'PageID', 'PageTitle', 'SearchScore', 'LevenshteinScore', 'GraphScore',
+        'OntologyLocalScore', 'OntologyGlobalScore', 'KeywordsScore'].
+    """
+
     if len(results) == 0:
         return results
 
@@ -140,6 +180,22 @@ def compute_scores_task(self, results, restrict_to_ontology=False, graph_score_s
 
 
 def aggregate_results(results, coef=0.5):
+    """
+    Aggregates a pandas DataFrame of intermediate wikify results, unique by (Keywords, PageID), into a pandas DataFrame
+    of final wikify results, unique by PageID. Then computes the MixedScore for every page as a convex combination of the other scores.
+
+    Args:
+        results (pd.DataFrame): A pandas DataFrame with columns ['Keywords', 'PageID', 'PageTitle', 'SearchScore', 'LevenshteinScore', 'GraphScore',
+        'OntologyLocalScore', 'OntologyGlobalScore', 'KeywordsScore'].
+        coef (float): A number in [0, 1] that controls how the scores of the aggregated pages are computed.
+        A value of 0 takes the sum of scores over Keywords, then normalises in [0, 1]. A value of 1 takes the max of scores over Keywords.
+        Any value in between linearly interpolates those two approaches. Default: 0.5.
+
+    Returns:
+        pd.DataFrame: A pandas DataFrame with columns ['PageID', 'PageTitle', 'SearchScore', 'LevenshteinScore', 'GraphScore',
+        'OntologyLocalScore', 'OntologyGlobalScore', 'KeywordsScore', 'MixedScore'].
+    """
+
     if len(results) == 0:
         return results
 
@@ -244,6 +300,22 @@ def aggregate_results(results, coef=0.5):
 
 
 def filter_results(results, epsilon=0.1, min_votes=5):
+    """
+    Filters a DataFrame of aggregated wikify results depending on their scores, based on some criteria specified in the parameters.
+
+    Args:
+        results (pd.DataFrame): A pandas DataFrame with columns ['PageID', 'PageTitle', 'SearchScore', 'LevenshteinScore', 'GraphScore',
+        'OntologyLocalScore', 'OntologyGlobalScore', 'KeywordsScore', 'MixedScore'].
+        epsilon (float): A number in [0, 1] that is used as a threshold for all the scores to decide whether the page is good enough
+        from that score's perspective. Default: 0.1.
+        min_votes (int): A number between 0 and the number of scores (excluding MixedScore). A page will be kept iff it is good enough
+        for at least this amount of scores. Default: 5.
+
+    Returns:
+        pd.DataFrame: A pandas DataFrame with columns ['PageID', 'PageTitle', 'SearchScore', 'LevenshteinScore', 'GraphScore',
+        'OntologyLocalScore', 'OntologyGlobalScore', 'KeywordsScore', 'MixedScore'].
+    """
+
     if len(results) == 0:
         return results
 
@@ -269,6 +341,25 @@ def filter_results(results, epsilon=0.1, min_votes=5):
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={'max_retries': 2},
              name='text_10.purge_irrelevant', ignore_result=False)
 def purge_irrelevant_task(self, results, coef=0.5, epsilon=0.1, min_votes=5):
+    """
+    Celery task that aggregates intermediate wikify results and filters irrelevant pages,
+    then drops all scores that don't apply anymore for recomputation.
+
+    Args:
+        results (pd.DataFrame): A pandas DataFrame with columns ['Keywords', 'PageID', 'PageTitle', 'SearchScore', 'LevenshteinScore', 'GraphScore',
+        'OntologyLocalScore', 'OntologyGlobalScore', 'KeywordsScore'].
+        coef (float): A number in [0, 1] that controls how the scores of the aggregated pages are computed.
+        A value of 0 takes the sum of scores over Keywords, then normalises in [0, 1]. A value of 1 takes the max of scores over Keywords.
+        Any value in between linearly interpolates those two approaches. Default: 0.5.
+        epsilon (float): A number in [0, 1] that is used as a threshold for all the scores to decide whether the page is good enough
+        from that score's perspective. Default: 0.1.
+        min_votes (int): A number between 0 and the number of scores (excluding MixedScore). A page will be kept iff it is good enough
+        for at least this amount of scores. Default: 5.
+
+    Returns:
+        pd.DataFrame: A pandas DataFrame with columns ['Keywords', 'PageID', 'PageTitle', 'SearchScore', 'LevenshteinScore'].
+    """
+
     # Aggregate and filter to know which pages are relevant
     relevant = filter_results(aggregate_results(results, coef=coef), epsilon=epsilon, min_votes=min_votes)
 
@@ -287,6 +378,28 @@ def purge_irrelevant_task(self, results, coef=0.5, epsilon=0.1, min_votes=5):
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={'max_retries': 2},
              name='text_10.aggregate', ignore_result=False)
 def aggregate_task(self, results, coef=0.5, filter=False, epsilon=0.1, min_votes=5):
+    """
+    Celery task that aggregates a pandas DataFrame of intermediate wikify results, unique by (Keywords, PageID), into a pandas DataFrame
+    of final wikify results, unique by PageID. Then computes the MixedScore for every page as a convex combination of the other scores.
+    Finally, it optionally filters pages depending on their scores, based on some criteria specified in the parameters.
+
+    Args:
+        results (pd.DataFrame): A pandas DataFrame with columns ['Keywords', 'PageID', 'PageTitle', 'SearchScore', 'LevenshteinScore', 'GraphScore',
+        'OntologyLocalScore', 'OntologyGlobalScore', 'KeywordsScore'].
+        coef (float): A number in [0, 1] that controls how the scores of the aggregated pages are computed.
+        A value of 0 takes the sum of scores over Keywords, then normalises in [0, 1]. A value of 1 takes the max of scores over Keywords.
+        Any value in between linearly interpolates those two approaches. Default: 0.5.
+        filter (bool): Whether to filter any page. Default: False.
+        epsilon (float): A number in [0, 1] that is used as a threshold for all the scores to decide whether the page is good enough
+        from that score's perspective. Default: 0.1.
+        min_votes (int): A number between 0 and the number of scores (excluding MixedScore). A page will be kept iff it is good enough
+        for at least this amount of scores. Default: 5.
+
+    Returns:
+        pd.DataFrame: A pandas DataFrame with columns ['PageID', 'PageTitle', 'SearchScore', 'LevenshteinScore', 'GraphScore',
+        'OntologyLocalScore', 'OntologyGlobalScore', 'KeywordsScore', 'MixedScore'].
+    """
+
     results = aggregate_results(results, coef=coef)
 
     if filter:
@@ -298,12 +411,38 @@ def aggregate_task(self, results, coef=0.5, filter=False, epsilon=0.1, min_votes
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={'max_retries': 2},
              name='text_10.draw_ontology', ignore_result=False, ontology=ontology)
 def draw_ontology_task(self, results, level=2):
+    """
+    Celery task that draws the ontology neighbourhood induced by the given set of wikify results.
+
+    Args:
+        results (list(dict)): A serialised (orient='records') pandas DataFrame with columns ['PageID', 'PageTitle', 'SearchScore',
+        'LevenshteinScore', 'GraphScore', 'OntologyLocalScore', 'OntologyGlobalScore', 'KeywordsScore', 'MixedScore'].
+        level (int): How many levels to go up in the ontology from the concepts. Default: 2.
+
+    Returns:
+        bool: Whether the drawing succeeded.
+    """
+
     return draw_ontology(results, self.ontology, level)
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={'max_retries': 2},
              name='text_10.draw_graph', ignore_result=False, graph=graph)
 def draw_graph_task(self, results, concept_score_threshold=0.3, edge_threshold=0.3, min_component_size=3):
+    """
+    Celery task that draws the concepts graph neighbourhood induced by the given set of wikify results.
+
+    Args:
+        results (list(dict)): A serialised (orient='records') pandas DataFrame with columns ['PageID', 'PageTitle', 'SearchScore',
+        'LevenshteinScore', 'GraphScore', 'OntologyLocalScore', 'OntologyGlobalScore', 'KeywordsScore', 'MixedScore'].
+        concept_score_threshold (float): Score threshold below which concepts are filtered out. Default: 0.3.
+        edge_threshold (float): Score threshold below which edges are filtered out. Default: 0.3.
+        min_component_size (int): Size threshold below which connected components are filtered out. Default: 3.
+
+    Returns:
+        bool: Whether the drawing succeeded.
+    """
+
     return draw_graph(results, self.graph, concept_score_threshold, edge_threshold, min_component_size)
 
 
@@ -318,6 +457,10 @@ def text_test_task(self):
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={'max_retries': 2},
              name='text_10.init', ignore_result=False, graph=graph, ontology=ontology)
 def text_init_task(self):
+    """
+    Celery task that spawns and populates graph and ontology objects so that they are held in memory ready for requests to arrive.
+    """
+
     # This task initialises the text celery worker by loading into memory the graph and ontology tables
     print('Start text_init task')
 
