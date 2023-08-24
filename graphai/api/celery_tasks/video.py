@@ -462,6 +462,8 @@ def compute_slide_transitions_callback_task(self, results):
 
     list_of_slide_transition_lists = [x['transitions'] for x in results]
     all_transitions = list(chain.from_iterable(list_of_slide_transition_lists))
+    # Making sure there are no duplicates
+    all_transitions = sorted(list(set(all_transitions)))
 
     return {
         'result': results[0]['result'],
