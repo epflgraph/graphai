@@ -194,7 +194,7 @@ async def detect_slides(data: DetectSlidesRequest):
                   compute_noise_threshold_callback_task.s(hash_thresh),
                   dummy_task.s(),
                   group(compute_slide_transitions_parallel_task.s(i, n_jobs, language) for i in range(n_jobs)),
-                  compute_slide_transitions_callback_task.s(),
+                  compute_slide_transitions_callback_task.s(language),
                   detect_slides_callback_task.s(token, force)]
     task = chain(task_list)
     task = task.apply_async(priority=2)
