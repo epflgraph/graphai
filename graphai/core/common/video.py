@@ -873,6 +873,8 @@ def compute_video_ocr_transitions(input_folder_with_path, frame_sample_indices, 
     Returns:
         List of transitory slides
     """
+    if len(frame_sample_indices) == 0:
+        return list()
     transition_list = [frame_sample_indices[0]]
     for k in range(1, len(frame_sample_indices)):
         [t, d] = frame_ocr_transition(
