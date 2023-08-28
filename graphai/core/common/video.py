@@ -814,6 +814,14 @@ def compute_ocr_threshold(distance_list, default_threshold=0.1):
     return threshold
 
 
+def check_ocr_and_hash_thresholds(input_folder_with_path, k_l, k_r,
+                                  ocr_dist_threshold, hash_similarity_threshold, nlp_models,
+                                  language=None):
+    d = frame_ocr_distance(input_folder_with_path, k_l, k_r, nlp_models, language)
+    s_hash = frame_hash_similarity(input_folder_with_path, k_l, k_r)
+    return (d > ocr_dist_threshold and s_hash < hash_similarity_threshold), d, s_hash
+
+
 def frame_ocr_transition(input_folder_with_path, k_l, k_r, ocr_dist_threshold, hash_similarity_threshold, nlp_models,
                          language=None):
     """
@@ -831,12 +839,13 @@ def frame_ocr_transition(input_folder_with_path, k_l, k_r, ocr_dist_threshold, h
         [transition frame index, distance] if a transition is found, [None, None] otherwise
     """
     k_m = int(np.mean([k_l, k_r]))
-    d = frame_ocr_distance(input_folder_with_path, k_l, k_r, nlp_models, language)
-    s_hash = frame_hash_similarity(input_folder_with_path, k_l, k_r)
+    threshold_check, d, s_hash = check_ocr_and_hash_thresholds(input_folder_with_path, k_l, k_r,
+                                                               ocr_dist_threshold, hash_similarity_threshold,
+                                                               nlp_models, language)
     if k_m == k_l or k_m == k_r:
         return [k_r, d]
     else:
-        if d > ocr_dist_threshold and s_hash < hash_similarity_threshold:
+        if threshold_check:
             [k_sep_l, d_l] = frame_ocr_transition(input_folder_with_path, k_l, k_m, ocr_dist_threshold,
                                                   hash_similarity_threshold,
                                                   nlp_models, language)
@@ -859,7 +868,7 @@ def frame_ocr_transition(input_folder_with_path, k_l, k_r, ocr_dist_threshold, h
 
 
 def compute_video_ocr_transitions(input_folder_with_path, frame_sample_indices, ocr_dist_threshold, hash_dist_threshold,
-                                  nlp_models, language=None):
+                                  nlp_models, language=None, keep_first=True):
     """
     Computes all the slide transitions for slides extracted from a video file
     Args:
@@ -869,13 +878,17 @@ def compute_video_ocr_transitions(input_folder_with_path, frame_sample_indices, 
         hash_dist_threshold: Threshold for perceptual hash similarity (above which they are considered to be the same)
         nlp_models: NLP models for parsing the OCR results
         language: Language of the slides
+        keep_first: Whether to return the first frame index as a slide, True by default
 
     Returns:
         List of transitory slides
     """
     if len(frame_sample_indices) == 0:
         return list()
-    transition_list = [frame_sample_indices[0]]
+    if keep_first:
+        transition_list = [frame_sample_indices[0]]
+    else:
+        transition_list = list()
     for k in range(1, len(frame_sample_indices)):
         [t, d] = frame_ocr_transition(
             input_folder_with_path,
@@ -889,8 +902,13 @@ def compute_video_ocr_transitions(input_folder_with_path, frame_sample_indices, 
         if t is not None and t < frame_sample_indices[-1]:
             transition_list.append(t)
     # Making sure the first and second elements are not the same
-    if len(transition_list) >= 2 and transition_list[0] == transition_list[1]:
-        transition_list = transition_list[1:]
+    if len(transition_list) >= 2:
+        t_check, d, s_hash = check_ocr_and_hash_thresholds(input_folder_with_path,
+                                                           transition_list[0], transition_list[1],
+                                                           ocr_dist_threshold, hash_dist_threshold, nlp_models,
+                                                           language)
+        if not t_check:
+            transition_list = transition_list[1:]
     return transition_list
 
 

@@ -7,8 +7,9 @@ from graphai.api.common.video import file_management_config, local_ocr_nlp_model
     transcription_model, translation_models
 from graphai.core.common.video import retrieve_file_from_url, retrieve_file_from_kaltura, \
     detect_audio_format_and_duration, extract_audio_from_video, extract_frames, generate_frame_sample_indices, \
-    compute_ocr_noise_level, compute_ocr_threshold, compute_video_ocr_transitions, generate_random_token, \
-    md5_video_or_audio, generate_symbolic_token, get_current_datetime, FRAME_FORMAT_PNG, TESSERACT_OCR_FORMAT
+    compute_ocr_noise_level, compute_ocr_threshold, compute_video_ocr_transitions, check_ocr_and_hash_thresholds, \
+    generate_random_token, md5_video_or_audio, generate_symbolic_token, get_current_datetime, \
+    FRAME_FORMAT_PNG, TESSERACT_OCR_FORMAT
 from graphai.core.common.caching import AudioDBCachingManager, SlideDBCachingManager, \
     VideoDBCachingManager, file_exists
 from itertools import chain
@@ -424,6 +425,8 @@ def compute_slide_transitions_parallel_task(self, results, i, n, language=None):
         return {
             'result': None,
             'transitions': None,
+            'threshold': None,
+            'hash_threshold': None,
             'fresh': False,
             'slide_tokens': results['slide_tokens']
         }
@@ -438,20 +441,24 @@ def compute_slide_transitions_parallel_task(self, results, i, n, language=None):
         results['threshold'],
         results['hash_threshold'],
         self.nlp_model.get_nlp_models(),
-        language=language
+        language=language,
+        keep_first=True
     )
 
     return {
         'result': results['result'],
         'transitions': slide_transition_list,
+        'threshold': results['threshold'],
+        'hash_threshold': results['hash_threshold'],
         'fresh': True,
         'slide_tokens': None
     }
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='video_2.slide_transitions_callback', ignore_result=False)
-def compute_slide_transitions_callback_task(self, results):
+             name='video_2.slide_transitions_callback', ignore_result=False,
+             file_manager=file_management_config, nlp_model=local_ocr_nlp_models)
+def compute_slide_transitions_callback_task(self, results, language=None):
     if not results[0]['fresh']:
         return {
             'result': None,
@@ -460,9 +467,27 @@ def compute_slide_transitions_callback_task(self, results):
             'slide_tokens': results[0]['slide_tokens']
         }
 
-    list_of_slide_transition_lists = [x['transitions'] for x in results]
+    # Cleaning up the slides in-between slices
+    original_list_of_slide_transition_lists = [x['transitions'] for x in results]
+    original_list_of_slide_transition_lists = [x for x in original_list_of_slide_transition_lists if len(x) > 0]
+    list_of_slide_transition_lists = list()
+    for i in range(len(original_list_of_slide_transition_lists) - 1):
+        l1 = original_list_of_slide_transition_lists[i]
+        l2 = original_list_of_slide_transition_lists[i + 1]
+        t_check, d, s_hash = check_ocr_and_hash_thresholds(self.file_manager.generate_filepath(results[0]['result']),
+                                                           l1[-1], l2[0],
+                                                           results[0]['threshold'],
+                                                           results[0]['hash_threshold'],
+                                                           self.nlp_model.get_nlp_models(),
+                                                           language)
+        if not t_check:
+            l1 = l1[:-1]
+        if len(l1) > 0:
+            list_of_slide_transition_lists.append(l1)
+
+    list_of_slide_transition_lists.append(original_list_of_slide_transition_lists[-1])
     all_transitions = list(chain.from_iterable(list_of_slide_transition_lists))
-    # Making sure there are no duplicates
+    # Making doubly sure there are no duplicates
     all_transitions = sorted(list(set(all_transitions)))
 
     return {
