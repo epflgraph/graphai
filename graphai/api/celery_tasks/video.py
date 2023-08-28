@@ -471,7 +471,7 @@ def compute_slide_transitions_callback_task(self, results, language=None):
     original_list_of_slide_transition_lists = [x['transitions'] for x in results]
     original_list_of_slide_transition_lists = [x for x in original_list_of_slide_transition_lists if len(x) > 0]
     list_of_slide_transition_lists = list()
-    for i in range(len(original_list_of_slide_transition_lists)-1):
+    for i in range(len(original_list_of_slide_transition_lists) - 1):
         l1 = original_list_of_slide_transition_lists[i]
         l2 = original_list_of_slide_transition_lists[i + 1]
         t_check, d, s_hash = check_ocr_and_hash_thresholds(self.file_manager.generate_filepath(results[0]['result']),
