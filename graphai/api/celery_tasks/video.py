@@ -473,7 +473,7 @@ def compute_slide_transitions_callback_task(self, results, language=None):
     list_of_slide_transition_lists = list()
     for i in range(len(original_list_of_slide_transition_lists)-1):
         l1 = original_list_of_slide_transition_lists[i]
-        l2 = original_list_of_slide_transition_lists[i+1]
+        l2 = original_list_of_slide_transition_lists[i + 1]
         t_check, d, s_hash = check_ocr_and_hash_thresholds(self.file_manager.generate_filepath(results[0]['result']),
                                                            l1[-1], l2[0],
                                                            results[0]['threshold'],
