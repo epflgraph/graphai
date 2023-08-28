@@ -598,6 +598,11 @@ satisfy the minimum similarity criterion.</p>
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="graphai.core.common.video.check_ocr_and_hash_thresholds">
+<span class="sig-prename descclassname"><span class="pre">graphai.core.common.video.</span></span><span class="sig-name descname"><span class="pre">check_ocr_and_hash_thresholds</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_folder_with_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k_l</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k_r</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ocr_dist_threshold</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hash_similarity_threshold</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nlp_models</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">language</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.video.check_ocr_and_hash_thresholds" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="graphai.core.common.video.frame_ocr_transition">
 <span class="sig-prename descclassname"><span class="pre">graphai.core.common.video.</span></span><span class="sig-name descname"><span class="pre">frame_ocr_transition</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_folder_with_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k_l</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k_r</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ocr_dist_threshold</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hash_similarity_threshold</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nlp_models</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">language</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.video.frame_ocr_transition" title="Permalink to this definition"></a></dt>
 <dd><p>Recursive function that finds slide transitions through binary tree search
@@ -617,14 +622,15 @@ satisfy the minimum similarity criterion.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="graphai.core.common.video.compute_video_ocr_transitions">
-<span class="sig-prename descclassname"><span class="pre">graphai.core.common.video.</span></span><span class="sig-name descname"><span class="pre">compute_video_ocr_transitions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_folder_with_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frame_sample_indices</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ocr_dist_threshold</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hash_dist_threshold</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nlp_models</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">language</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.video.compute_video_ocr_transitions" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">graphai.core.common.video.</span></span><span class="sig-name descname"><span class="pre">compute_video_ocr_transitions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_folder_with_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frame_sample_indices</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ocr_dist_threshold</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hash_dist_threshold</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nlp_models</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">language</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keep_first</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.video.compute_video_ocr_transitions" title="Permalink to this definition"></a></dt>
 <dd><p>Computes all the slide transitions for slides extracted from a video file
 :param input_folder_with_path: Path of the slide folder
 :param frame_sample_indices: Indices of sampled frames
 :param ocr_dist_threshold: Threshold for OCR distance (below which slides are considered to be the same)
 :param hash_dist_threshold: Threshold for perceptual hash similarity (above which they are considered to be the same)
 :param nlp_models: NLP models for parsing the OCR results
-:param language: Language of the slides</p>
+:param language: Language of the slides
+:param keep_first: Whether to return the first frame index as a slide, True by default</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>List of transitory slides</p>
