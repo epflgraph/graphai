@@ -13,6 +13,7 @@ import gzip
 import wget
 
 import numpy as np
+from bisect import bisect
 
 import hashlib
 import acoustid
@@ -464,7 +465,7 @@ def perceptual_hash_image(input_filename_with_path, hash_size=16):
     return str(results)
 
 
-def perceptual_hash_text(s, min_window_length=5, max_window_length=50, hash_len=32):
+def perceptual_hash_text(s):
     """
     Computes the perceptual hash of a strong
     Args:
@@ -476,12 +477,13 @@ def perceptual_hash_text(s, min_window_length=5, max_window_length=50, hash_len=
     Returns:
         Perceptual hash of string
     """
+    hash_len = 32
     string_length = len(s)
-    window_length = max([min_window_length, string_length // hash_len])
-    window_length = min([max_window_length, window_length])
-    if string_length < window_length:
-        s = s + ''.join([' '] * (window_length - string_length + 1))
-    kgram_length = max([10, int(window_length / 2)])
+    window_lengths = [1, 10, 20, 50]
+    kgram_lengths = [int(np.ceil(x / 2)) for x in window_lengths]
+    length_index = bisect(window_lengths, string_length) - 1
+    window_length = window_lengths[length_index]
+    kgram_length = kgram_lengths[length_index]
 
     fprinter = fingerprint.Fingerprint(kgram_len=kgram_length, window_len=window_length, base=10, modulo=256)
     hash_numbers = fprinter.generate(str=s)
@@ -493,7 +495,7 @@ def perceptual_hash_text(s, min_window_length=5, max_window_length=50, hash_len=
     elif len(hash_numbers) < hash_len:
         hash_numbers = hash_numbers + [(0, 0)] * (32 - len(hash_numbers))
     fp_result = ''.join([f"{n[0]:02x}" for n in hash_numbers])
-    return fp_result
+    return "%s_%02d_%02d" % (fp_result, window_length, kgram_length)
 
 
 def compare_decoded_fingerprints(decoded_1, decoded_2):
