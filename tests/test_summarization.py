@@ -171,7 +171,7 @@ def test__summarization_calculate_fingerprint__compute_text_fingerprint__run_tas
     assert 'result' in fp
     assert fp['fresh']
     assert fp['fp_token'] == 'mock_token_transcript'
-    assert fp['result'] == '020c000800021008020208000e0a120008000408080a30060208020c00000804'
+    assert fp['result'] == '020c000800021008020208000e0a120008000408080a30060208020c00000804_50_25'
 
 
 ################################################################
@@ -219,4 +219,4 @@ def test__summarization_calculate_fingerprint__compute_text_fingerprint__integra
     assert content['task_status'] == 'SUCCESS'
     assert content['task_result']['successful'] is True
     assert content['task_result']['fresh'] is True
-    assert content['task_result']['result'] == '020c000800021008020208000e0a120008000408080a30060208020c00000804'
+    assert content['task_result']['result'] == '020c000800021008020208000e0a120008000408080a30060208020c00000804_50_25'
