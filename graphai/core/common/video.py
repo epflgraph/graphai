@@ -486,15 +486,18 @@ def perceptual_hash_text(s):
     kgram_length = kgram_lengths[length_index]
 
     fprinter = fingerprint.Fingerprint(kgram_len=kgram_length, window_len=window_length, base=10, modulo=256)
-    hash_numbers = fprinter.generate(str=s)
-    if len(hash_numbers) > hash_len:
-        sample_indices = np.linspace(start=0, stop=len(hash_numbers) - 1, num=hash_len - 1, endpoint=False).tolist()
-        sample_indices.append(len(hash_numbers) - 1)
-        sample_indices = [int(x) for x in sample_indices]
-        hash_numbers = [hash_numbers[i] for i in sample_indices]
-    elif len(hash_numbers) < hash_len:
-        hash_numbers = hash_numbers + [(0, 0)] * (32 - len(hash_numbers))
-    fp_result = ''.join([f"{n[0]:02x}" for n in hash_numbers])
+    try:
+        hash_numbers = fprinter.generate(str=s)
+        if len(hash_numbers) > hash_len:
+            sample_indices = np.linspace(start=0, stop=len(hash_numbers) - 1, num=hash_len - 1, endpoint=False).tolist()
+            sample_indices.append(len(hash_numbers) - 1)
+            sample_indices = [int(x) for x in sample_indices]
+            hash_numbers = [hash_numbers[i] for i in sample_indices]
+        elif len(hash_numbers) < hash_len:
+            hash_numbers = hash_numbers + [(0, 0)] * (32 - len(hash_numbers))
+        fp_result = ''.join([f"{n[0]:02x}" for n in hash_numbers])
+    except fingerprint.FingerprintException:
+        fp_result = ''.join(['0']*64)
     return "%s_%02d_%02d" % (fp_result, window_length, kgram_length)
 
 
