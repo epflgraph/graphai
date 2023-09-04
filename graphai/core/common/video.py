@@ -479,9 +479,9 @@ def perceptual_hash_text(s):
     """
     hash_len = 32
     string_length = len(s)
-    window_lengths = [1, 10, 20, 50]
+    window_lengths = [1, 4, 10, 20, 50]
     kgram_lengths = [int(np.ceil(x / 2)) for x in window_lengths]
-    length_index = bisect(window_lengths, string_length) - 1
+    length_index = bisect(window_lengths, int(np.ceil(string_length / hash_len))) - 1
     window_length = window_lengths[length_index]
     kgram_length = kgram_lengths[length_index]
 
