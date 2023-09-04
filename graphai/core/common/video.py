@@ -497,7 +497,7 @@ def perceptual_hash_text(s):
             hash_numbers = hash_numbers + [(0, 0)] * (32 - len(hash_numbers))
         fp_result = ''.join([f"{n[0]:02x}" for n in hash_numbers])
     except fingerprint.FingerprintException:
-        fp_result = ''.join(['0']*64)
+        fp_result = ''.join(['0'] * 64)
     return "%s_%02d_%02d" % (fp_result, window_length, kgram_length)
 
 
