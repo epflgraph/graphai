@@ -284,8 +284,6 @@ def extract_text_from_url(url, request_headers=None, max_length=None, tag_search
                            'Accept': 'application/json'}
     if tag_search_sequence is None:
         tag_search_sequence = ['main', 'body', 'html']
-    # Initialise output text as empty string
-    text = ''
 
     # Fetch webpage from URL
     response = requests.get(url, allow_redirects=True, headers=request_headers)
