@@ -4,6 +4,58 @@ import requests
 import re
 from bs4 import BeautifulSoup
 from unidecode import unidecode
+import hashlib
+
+
+REQ_HEADERS = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 '
+                             '(KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36',
+               'Accept': 'application/json'}
+
+PAGE_TYPES_DICT = {
+    'homepage'   			: 'homepage',
+    'home'   				: 'homepage',
+    'about' 				: 'about',
+    'about-us' 				: 'about',
+    'alumni' 				: 'people',
+    'alumni-interns' 		: 'people',
+    'completed-projects' 	: 'research',
+    'contact' 				: 'contacts',
+    'contacts' 				: 'contacts',
+    'current-projects' 		: 'research',
+    'education' 			: 'teaching',
+    'events' 				: 'activities',
+    'facilities' 			: 'facilities',
+    'former-members' 		: 'people',
+    'funding' 				: 'funding',
+    'group' 				: 'people',
+    'lab-members' 			: 'people',
+    'lectures' 				: 'teaching',
+    'members' 				: 'people',
+    'news' 					: 'news',
+    'open-positions' 		: 'jobs',
+    'openings' 				: 'jobs',
+    'openpositions' 		: 'jobs',
+    'our-research' 			: 'research',
+    'outreach' 				: 'activities',
+    'past-members' 			: 'people',
+    'past-research' 		: 'research',
+    'people' 				: 'people',
+    'previousresearch' 		: 'research',
+    'projects' 				: 'research',
+    'publications' 			: 'publications',
+    'research' 				: 'research',
+    'research-projects' 	: 'research',
+    'resources' 			: 'resources',
+    'scientific-activities' : 'activities',
+    'seminars' 				: 'activities',
+    'student-projects' 		: 'student projects',
+    'student_projects' 		: 'student projects',
+    'studentprojects' 		: 'student projects',
+    'teaching' 				: 'teaching',
+    'teaching-projects' 	: 'teaching',
+    'team'					: 'people',
+    'technical-reports' 	: 'publications',
+}
 
 
 def compare_strings(string1, string2):
@@ -279,9 +331,7 @@ def extract_text_from_url(url, request_headers=None, max_length=None, tag_search
         Contents of the page
     """
     if request_headers is None:
-        request_headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 '
-                                         '(KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36',
-                           'Accept': 'application/json'}
+        request_headers = REQ_HEADERS
     if tag_search_sequence is None:
         tag_search_sequence = ['main', 'body', 'html']
 
@@ -331,3 +381,303 @@ def extract_text_from_url(url, request_headers=None, max_length=None, tag_search
     # Return content
     return text
 
+
+def check_url(test_url, request_headers=None):
+    """
+    Checks if a URL is accessible and returns the fully resolved URL if so
+    Args:
+        test_url: Starting URL
+        request_headers: Headers of the request, uses defaults if None
+
+    Returns:
+        The validated URL, status message, and status code
+    """
+    if request_headers is None:
+        request_headers = REQ_HEADERS
+
+    validated_url = None
+
+    try:
+        # Fetch webpage from URL
+        response = requests.get(test_url, allow_redirects=True, headers=request_headers)
+
+        # Get status code and store locally
+        status_code = response.status_code
+
+        # Is the URL reachable?
+        # Yes.
+        if response.status_code == 200:
+
+            # Update status message
+            status_msg = f"The URL is reachable. Final URL after redirection (if any) is: {response.url}"
+
+            # Get validated URL
+            validated_url = response.url
+
+            # Remove trailing forward slash from URL
+            if validated_url.endswith('/'):
+                validated_url = validated_url[:-1]
+
+        # No. (all bellow)
+        elif response.status_code >= 300 and response.status_code < 400:
+            status_msg = "The URL is a redirect"
+
+        elif response.status_code == 400:
+            status_msg = "Bad Request"
+
+        elif response.status_code == 401:
+            status_msg = "Unauthorized"
+
+        elif response.status_code == 403:
+            status_msg = "Forbidden"
+
+        elif response.status_code == 404:
+            status_msg = "The URL is not found"
+
+        elif response.status_code == 500:
+            status_msg = "Internal Server Error"
+
+        elif response.status_code == 501:
+            status_msg = "Not Implemented"
+
+        elif response.status_code == 502:
+            status_msg = "Bad Gateway"
+
+        elif response.status_code == 503:
+            status_msg = "Service Unavailable"
+
+        else:
+            status_msg = f"An error occurred while trying to access the URL. Error Code: {response.status_code}"
+
+    # Parse general errors
+    except requests.exceptions.RequestException as err:
+        status_msg = f"URL does not exist or the URL request failed. Error: {err}"
+        status_code = -1
+    # if type(err) is requests.exceptions.SSLError:
+    # 	self.ssl_error = True
+    # elif type(err) is requests.exceptions.ConnectionError:
+    # 	self.connection_error = True
+
+    return validated_url, status_msg, status_code
+
+
+def initialize_url(url):
+    """
+    Initializes the provided URL by determining its protocol (http or https) and validating it
+    Args:
+        url: The URL to initialize
+
+    Returns:
+        The validated base URL and the original (corrected) base URL
+    """
+
+    # Ignore initial tasks if no input URL is provided
+    if url is None:
+        return None, None
+
+    # Extract base URL from input
+    base_url = url.replace('https://www.','').replace('http://www.','').replace('https://','').replace('http://','')
+
+    # Test for all 4 URL combinations
+    for test_url in ['https://www.'+base_url, 'http://www.'+base_url, 'https://'+base_url, 'http://'+base_url]:
+
+        # Check URL for a valid address
+        validated_url = check_url(test_url=test_url)
+
+        # Stop the test if a reachable URL was found
+        if validated_url is not None:
+            return validated_url, base_url
+    return None, base_url
+
+
+def get_sublinks(validated_url, request_headers=None):
+    """
+    Retrieves all the sublinks of a URL
+    Args:
+        validated_url: Base validated URL
+        request_headers: Headers of the request, uses defaults if None
+
+    Returns:
+        List of sublinks, a data dictionary mapping each sublink to a dict to be filled later, and the validated URL
+    """
+    if request_headers is None:
+        request_headers = REQ_HEADERS
+    # Return empty list if URL hasn't been validated
+    if validated_url is None:
+        return []
+
+    # Remove trailing forward slash from URL
+    if validated_url.endswith('/'):
+        validated_url = validated_url[:-1]
+
+    # Fetch webpage from URL
+    response = requests.get(validated_url, allow_redirects=True, headers=request_headers)
+
+    # Parse and extract links
+    soup = BeautifulSoup(response.text, 'lxml')
+    links = []
+    for link in soup.find_all('a'):
+        link_url = link.get('href')
+        if link_url is not None and (link_url.startswith('http') or link_url.startswith('/')):
+            if link_url.startswith('/'):
+                if validated_url.endswith('/'):
+                    link_url = validated_url[:-1]+link_url
+                else:
+                    link_url = validated_url+link_url
+            if validated_url in link_url:
+                if link_url.endswith('/'):
+                    link_url = link_url[:-1]
+                if not link_url.endswith('.pdf') and not link_url.endswith('.png') and not link_url.endswith('.jpg') and not link_url.endswith('.mp3') and not link_url.endswith('.mp4') and not link_url.endswith('wp-admin'):
+                    links.append(link_url)
+
+    # Sort and make sublinks list unique
+    sublinks = sorted(list(set([validated_url]+links)))
+    data = dict()
+
+    # Initialise data dictionary
+    for sublink in sublinks:
+        if sublink not in data:
+            data.update({sublink : {'id':None, 'content':'', 'pagetype':None}})
+
+    # Return list of sublinks
+    return sublinks, data, validated_url
+
+
+def parse_page_type(url, validated_url):
+    """
+    Parses the type of a page according to predefined types
+    Args:
+        url: Given URL
+        validated_url: Base validated URL
+
+    Returns:
+        Page type
+    """
+
+    # Check if it's home page
+    if url == validated_url:
+        return 'homepage'
+
+    # Search for common keywords in URL
+    for keywords in PAGE_TYPES_DICT:
+        if keywords in url:
+            page_type = PAGE_TYPES_DICT[keywords]
+            return page_type
+
+    # Return NoneType if not found
+    return None
+
+
+def process_all_sublinks(data, base_url, validated_url):
+    """
+    Processes all the sublinks and extracts their contents
+    Args:
+        data: Data dict (which will be modified)
+        base_url: Corrected (but not validated) base URL (used for the id of the sublink)
+        validated_url: Validated base URL
+
+    Returns:
+        Modified data dict
+    """
+    # Loop over all sublinks
+    for sublink in data:
+
+        # Print status
+        print('Extracting content from:', sublink)
+
+        # Generate unique identifier
+        sublink_id = base_url.split('/')[0].replace('.', '-') + '-' + \
+                     hashlib.md5(sublink.encode('utf-8')).hexdigest()[:8]
+
+        # Parse webpage type from URL
+        page_type = parse_page_type(sublink, validated_url)
+
+        # Fetch content from webpage
+        content = extract_text_from_url(sublink, max_length=16384)
+
+        # Update data dictionary
+        data[sublink].update({'id': sublink_id, 'pagetype': page_type, 'content': content})
+
+    # Return modified data dictionary
+    return data
+
+
+def remove_headers(data):
+    """
+    Removes all headers and footers from the data dict, which contains the contents of all the sublinks of a base URL
+    Args:
+        data: Data dict
+
+    Returns:
+        Modified data dict with all headers and footers eliminated
+    """
+
+    # Return if no data to process
+    if len(data) == 0:
+        return False
+
+    # Generate list of sublinks (data keys)
+    sublinks_list = sorted(list(data.keys()))
+
+    # Generate content stack
+    content_stack = [data[k]['content'] for k in data if len(data[k]['content'])>=2]
+
+    # Detect headers
+    headers_to_delete = find_edge_patterns(content_stack=content_stack, flip_strings=False)
+
+    # Remove headers from all extracted text
+    for h in headers_to_delete:
+        print('\nDeleting header:', h)
+        for k in range(len(data)):
+            if data[sublinks_list[k]]['content'].startswith(h):
+                data[sublinks_list[k]]['content'] = data[sublinks_list[k]]['content'].replace(h,'').strip()
+
+    # Generate content stack
+    content_stack = [data[k]['content'] for k in data]
+
+    # Detect footers
+    footers_to_delete = find_edge_patterns(content_stack=content_stack, flip_strings=True)
+
+    # Remove footers from all extracted text
+    for f in footers_to_delete:
+        print('\nDeleting footer:', f)
+        for k in range(len(data)):
+            if data[sublinks_list[k]]['content'].endswith(f):
+                data[sublinks_list[k]]['content'] = data[sublinks_list[k]]['content'].replace(f,'').strip()
+
+    # Return modified data dictionary
+    return data
+
+
+def remove_long_patterns(data, min_length=1024):
+    """
+    Removes all long patterns from the data dict, which contains the contents of all the sublinks of a base URL
+    Args:
+        data: Data dict
+        min_length: Minimum length of a long pattern
+
+    Returns:
+        Modified data dict with all long patterns eliminated
+    """
+
+    # Return if no data to process
+    if len(data)==0:
+        return False
+
+    # Generate list of sublinks (data keys)
+    sublinks_list = sorted(list(data.keys()))
+
+    # Generate content stack
+    content_stack = [data[k]['content'] for k in data if len(data[k]['content'])>=2]
+
+    # Detect long patterns
+    patterns_to_delete = find_repeated_patterns(content_stack, min_length=min_length)
+
+    # Remove footers from all extracted text
+    for p in patterns_to_delete:
+        print('Deleting pattern of length', len(p), ' ---> ', p)
+        for k in range(len(data)):
+            data[sublinks_list[k]]['content'] = data[sublinks_list[k]]['content'].replace(p,'').strip()
+
+    # Return modified data dictionary
+    return data
