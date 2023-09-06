@@ -473,21 +473,38 @@ def initialize_url(url):
 
     # Ignore initial tasks if no input URL is provided
     if url is None:
-        return None, None
+        return {
+            'base_url': None,
+            'validated_url': None,
+            'status_msg': None,
+            'status_code': None
+        }
 
     # Extract base URL from input
-    base_url = url.replace('https://www.','').replace('http://www.','').replace('https://','').replace('http://','')
+    base_url = url.replace('https://www.', '').replace('http://www.', '').replace('https://', '').replace('http://', '')
 
     # Test for all 4 URL combinations
-    for test_url in ['https://www.'+base_url, 'http://www.'+base_url, 'https://'+base_url, 'http://'+base_url]:
+    for test_url in ['https://www.' + base_url, 'http://www.' + base_url,
+                     'https://' + base_url, 'http://' + base_url]:
 
         # Check URL for a valid address
-        validated_url = check_url(test_url=test_url)
+        validated_url, status_msg, status_code = check_url(test_url=test_url)
 
         # Stop the test if a reachable URL was found
         if validated_url is not None:
-            return validated_url, base_url
-    return None, base_url
+            return {
+                'base_url': base_url,
+                'validated_url': validated_url,
+                'status_msg': status_msg,
+                'status_code': status_code
+            }
+
+    return {
+        'base_url': base_url,
+        'validated_url': None,
+        'status_msg': status_msg,
+        'status_code': status_code
+    }
 
 
 def get_sublinks(validated_url, request_headers=None):
@@ -521,26 +538,32 @@ def get_sublinks(validated_url, request_headers=None):
         if link_url is not None and (link_url.startswith('http') or link_url.startswith('/')):
             if link_url.startswith('/'):
                 if validated_url.endswith('/'):
-                    link_url = validated_url[:-1]+link_url
+                    link_url = validated_url[:-1] + link_url
                 else:
-                    link_url = validated_url+link_url
+                    link_url = validated_url + link_url
             if validated_url in link_url:
                 if link_url.endswith('/'):
                     link_url = link_url[:-1]
-                if not link_url.endswith('.pdf') and not link_url.endswith('.png') and not link_url.endswith('.jpg') and not link_url.endswith('.mp3') and not link_url.endswith('.mp4') and not link_url.endswith('wp-admin'):
+                if not link_url.endswith('.pdf') and not link_url.endswith('.png') \
+                        and not link_url.endswith('.jpg') and not link_url.endswith('.mp3') \
+                        and not link_url.endswith('.mp4') and not link_url.endswith('wp-admin'):
                     links.append(link_url)
 
     # Sort and make sublinks list unique
-    sublinks = sorted(list(set([validated_url]+links)))
+    sublinks = sorted(list(set([validated_url] + links)))
     data = dict()
 
     # Initialise data dictionary
     for sublink in sublinks:
         if sublink not in data:
-            data.update({sublink : {'id':None, 'content':'', 'pagetype':None}})
+            data.update({sublink : {'id': None, 'content': '', 'pagetype': None}})
 
     # Return list of sublinks
-    return sublinks, data, validated_url
+    return {
+        'sublinks': sublinks,
+        'data': data,
+        'validated_url': validated_url
+    }
 
 
 def parse_page_type(url, validated_url):
@@ -661,7 +684,7 @@ def remove_long_patterns(data, min_length=1024):
     """
 
     # Return if no data to process
-    if len(data)==0:
+    if len(data) == 0:
         return False
 
     # Generate list of sublinks (data keys)
