@@ -7,54 +7,56 @@ from unidecode import unidecode
 import hashlib
 
 
-REQ_HEADERS = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 '
-                             '(KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36',
-               'Accept': 'application/json'}
+REQ_HEADERS = {
+    'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 '
+                  '(KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36',
+    'Accept': 'application/json'
+}
 
 PAGE_TYPES_DICT = {
-    'homepage'   			: 'homepage',
-    'home'   				: 'homepage',
-    'about' 				: 'about',
-    'about-us' 				: 'about',
-    'alumni' 				: 'people',
-    'alumni-interns' 		: 'people',
-    'completed-projects' 	: 'research',
-    'contact' 				: 'contacts',
-    'contacts' 				: 'contacts',
-    'current-projects' 		: 'research',
-    'education' 			: 'teaching',
-    'events' 				: 'activities',
-    'facilities' 			: 'facilities',
-    'former-members' 		: 'people',
-    'funding' 				: 'funding',
-    'group' 				: 'people',
-    'lab-members' 			: 'people',
-    'lectures' 				: 'teaching',
-    'members' 				: 'people',
-    'news' 					: 'news',
-    'open-positions' 		: 'jobs',
-    'openings' 				: 'jobs',
-    'openpositions' 		: 'jobs',
-    'our-research' 			: 'research',
-    'outreach' 				: 'activities',
-    'past-members' 			: 'people',
-    'past-research' 		: 'research',
-    'people' 				: 'people',
-    'previousresearch' 		: 'research',
-    'projects' 				: 'research',
-    'publications' 			: 'publications',
-    'research' 				: 'research',
-    'research-projects' 	: 'research',
-    'resources' 			: 'resources',
-    'scientific-activities' : 'activities',
-    'seminars' 				: 'activities',
-    'student-projects' 		: 'student projects',
-    'student_projects' 		: 'student projects',
-    'studentprojects' 		: 'student projects',
-    'teaching' 				: 'teaching',
-    'teaching-projects' 	: 'teaching',
-    'team'					: 'people',
-    'technical-reports' 	: 'publications',
+    'homepage': 'homepage',
+    'home': 'homepage',
+    'about': 'about',
+    'about-us': 'about',
+    'alumni': 'people',
+    'alumni-interns': 'people',
+    'completed-projects': 'research',
+    'contact': 'contacts',
+    'contacts': 'contacts',
+    'current-projects': 'research',
+    'education': 'teaching',
+    'events': 'activities',
+    'facilities': 'facilities',
+    'former-members': 'people',
+    'funding': 'funding',
+    'group': 'people',
+    'lab-members': 'people',
+    'lectures': 'teaching',
+    'members': 'people',
+    'news': 'news',
+    'open-positions': 'jobs',
+    'openings': 'jobs',
+    'openpositions': 'jobs',
+    'our-research': 'research',
+    'outreach': 'activities',
+    'past-members': 'people',
+    'past-research': 'research',
+    'people': 'people',
+    'previousresearch': 'research',
+    'projects': 'research',
+    'publications': 'publications',
+    'research': 'research',
+    'research-projects': 'research',
+    'resources': 'resources',
+    'scientific-activities': 'activities',
+    'seminars': 'activities',
+    'student-projects': 'student projects',
+    'student_projects': 'student projects',
+    'studentprojects': 'student projects',
+    'teaching': 'teaching',
+    'teaching-projects': 'teaching',
+    'team': 'people',
+    'technical-reports': 'publications',
 }
 
 
@@ -691,7 +693,7 @@ def remove_long_patterns(data, min_length=1024):
     sublinks_list = sorted(list(data.keys()))
 
     # Generate content stack
-    content_stack = [data[k]['content'] for k in data if len(data[k]['content'])>=2]
+    content_stack = [data[k]['content'] for k in data if len(data[k]['content']) >= 2]
 
     # Detect long patterns
     patterns_to_delete = find_repeated_patterns(content_stack, min_length=min_length)
