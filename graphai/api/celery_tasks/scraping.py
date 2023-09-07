@@ -16,7 +16,8 @@ def initialize_scraping_url_task(self, token, url, force=False):
         'token': token,
         'validated_url': validated_url,
         'status_msg': status_msg,
-        'sublink_results': None
+        'sublink_results': None,
+        'fresh': True
     }
     return validation_results
 
@@ -26,14 +27,21 @@ def initialize_scraping_url_task(self, token, url, force=False):
 def get_scraping_sublinks_task(self, results):
     # This condition is only met if force=False and there is a cache hit
     if results['sublink_results'] is not None:
-        return results['sublink_results']
-    sublinks, data, validated_url = get_sublinks(results.get('validated_url', None))
+        sublinks = results['sublink_results']['sublinks']
+        data = results['sublink_results']['data']
+        validated_url = results['sublink_results']['data']
+        fresh = False
+    else:
+        sublinks, data, validated_url = get_sublinks(results.get('validated_url', None))
+        fresh = sublinks is not None
     return {
         'token': results['token'],
         'sublinks': sublinks,
         'data': data,
         'validated_url': validated_url,
-        'status_msg': results['status_msg']
+        'status_msg': results['status_msg'],
+        'fresh': fresh,
+        'successful': sublinks is not None
     }
 
 
