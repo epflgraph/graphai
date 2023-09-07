@@ -475,17 +475,12 @@ def initialize_url(url, base_url=None):
         base_url: The token of the base URL, extracted from `url` if None
 
     Returns:
-        The validated base URL and the original (corrected) base URL
+        The validated base URL, the original (corrected) base URL, status message, and status code
     """
 
     # Ignore initial tasks if no input URL is provided
     if url is None:
-        return {
-            'base_url': None,
-            'validated_url': None,
-            'status_msg': None,
-            'status_code': None
-        }
+        return None, None, None, None
 
     # Extract base URL from input if None
     if base_url is None:
@@ -500,19 +495,9 @@ def initialize_url(url, base_url=None):
 
         # Stop the test if a reachable URL was found
         if validated_url is not None:
-            return {
-                'base_url': base_url,
-                'validated_url': validated_url,
-                'status_msg': status_msg,
-                'status_code': status_code
-            }
+            return base_url, validated_url, status_msg, status_code
 
-    return {
-        'base_url': base_url,
-        'validated_url': None,
-        'status_msg': status_msg,
-        'status_code': status_code
-    }
+    return base_url, None, status_msg, status_code
 
 
 def get_sublinks(validated_url, request_headers=None):
@@ -529,11 +514,7 @@ def get_sublinks(validated_url, request_headers=None):
         request_headers = REQ_HEADERS
     # Return empty list if URL hasn't been validated
     if validated_url is None:
-        return {
-            'sublinks': None,
-            'data': None,
-            'validated_url': None
-        }
+        return None, None, None
 
     # Remove trailing forward slash from URL
     if validated_url.endswith('/'):
@@ -571,11 +552,7 @@ def get_sublinks(validated_url, request_headers=None):
             data.update({sublink : {'id': None, 'content': '', 'pagetype': None}})
 
     # Return list of sublinks
-    return {
-        'sublinks': sublinks,
-        'data': data,
-        'validated_url': validated_url
-    }
+    return sublinks, data, validated_url
 
 
 def parse_page_type(url, validated_url):
