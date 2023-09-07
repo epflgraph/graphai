@@ -11,10 +11,13 @@ def initialize_scraping_url_task(self, token, url, force=False):
     if not force:
         # TODO database lookup
         pass
-    validation_results = initialize_url(url, base_url=token)
-    validation_results['sublink_results'] = None
-    validation_results['token'] = validation_results['base_url']
-    del validation_results['base_url']
+    base_url, validated_url, status_msg, status_code = initialize_url(url, base_url=token)
+    validation_results = {
+        'token': token,
+        'validated_url': validated_url,
+        'status_msg': status_msg,
+        'sublink_results': None
+    }
     return validation_results
 
 
@@ -24,8 +27,14 @@ def get_scraping_sublinks_task(self, results):
     # This condition is only met if force=False and there is a cache hit
     if results['sublink_results'] is not None:
         return results['sublink_results']
-    sublink_dict = get_sublinks(results.get('validated_url', None))
-    return sublink_dict
+    sublinks, data, validated_url = get_sublinks(results.get('validated_url', None))
+    return {
+        'token': results['token'],
+        'sublinks': sublinks,
+        'data': data,
+        'validated_url': validated_url,
+        'status_msg': results['status_msg']
+    }
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
