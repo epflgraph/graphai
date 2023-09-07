@@ -52,3 +52,45 @@ def scraping_sublinks_callback_task(self, results, token):
         # TODO do the db callback
         pass
     return results
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
+             name='text_6.process_all_scraping_sublinks_preprocess', ignore_result=False)
+def process_all_scraping_sublinks_preprocess_task(self, results, token, force=False):
+    # TODO do db lookup and return cached results if they exist
+    #  otherwise clean up the results dict and pass it on
+    #  The cached results should be in a `cached_results` attr
+    #  Also make sure sublinks are sorted
+
+    del results['successful']
+    del results['fresh']
+    results['cached_results'] = None
+    return results
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
+             name='text_6.process_all_scraping_sublinks_parallel', ignore_result=False)
+def process_all_scraping_sublinks_parallel_task(self, results, i, n_total):
+    if results['data'] is None or len(results['data']) == 0 or results['cached_results'] is not None:
+        return results
+    data = results['data']
+    sublinks = results['sublinks']
+    base_url = results['token']
+    validated_url = results['validated_url']
+    start_index = int(i * len(sublinks) / n_total)
+    end_index = int((i + 1) * len(sublinks) / n_total)
+    sublink_sublist = sublinks[start_index:end_index]
+    # TODO handle cache hits by finding the ones that exist in the cache, retrieving their results, and
+    #  keeping them in a separate dict and then deleting their sublinks from the dict that is given as arg
+    #  to processing function.
+    data = {k: data[k] for k in sublink_sublist}
+    data = process_all_sublinks(data, base_url, validated_url)
+    return {
+        'token': results['token'],
+        'sublinks': results['sublinks'],
+        'data': data,
+        'validated_url': results['validated_url'],
+        'status_msg': results['status_msg'],
+        'cached_results': None
+    }
+
