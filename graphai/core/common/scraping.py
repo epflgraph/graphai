@@ -463,11 +463,16 @@ def check_url(test_url, request_headers=None):
     return validated_url, status_msg, status_code
 
 
-def initialize_url(url):
+def create_base_url_token(url):
+    return url.replace('https://www.', '').replace('http://www.', '').replace('https://', '').replace('http://', '')
+
+
+def initialize_url(url, base_url=None):
     """
     Initializes the provided URL by determining its protocol (http or https) and validating it
     Args:
         url: The URL to initialize
+        base_url: The token of the base URL, extracted from `url` if None
 
     Returns:
         The validated base URL and the original (corrected) base URL
@@ -482,8 +487,9 @@ def initialize_url(url):
             'status_code': None
         }
 
-    # Extract base URL from input
-    base_url = url.replace('https://www.', '').replace('http://www.', '').replace('https://', '').replace('http://', '')
+    # Extract base URL from input if None
+    if base_url is None:
+        base_url = create_base_url_token(url)
 
     # Test for all 4 URL combinations
     for test_url in ['https://www.' + base_url, 'http://www.' + base_url,
@@ -523,7 +529,11 @@ def get_sublinks(validated_url, request_headers=None):
         request_headers = REQ_HEADERS
     # Return empty list if URL hasn't been validated
     if validated_url is None:
-        return []
+        return {
+            'sublinks': None,
+            'data': None,
+            'validated_url': None
+        }
 
     # Remove trailing forward slash from URL
     if validated_url.endswith('/'):
