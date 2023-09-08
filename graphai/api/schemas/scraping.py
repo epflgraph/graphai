@@ -27,9 +27,14 @@ class GetSublinksTaskResponse(BaseModel):
         description="The validated base url"
     )
 
-    sublinks: List[str] = Field(
+    sublinks: Union[List[str], None] = Field(
         title="Sublinks",
         description="List of page sublinks"
+    )
+
+    status_msg: str = Field(
+        title="Status message",
+        description="Message indicating the status of the response"
     )
 
     successful: bool = Field(
@@ -47,4 +52,32 @@ class GetSublinksResponse(TaskStatusResponse):
     task_result: Union[GetSublinksTaskResponse, None] = Field(
         title="Sublink extraction response",
         description="A dict containing the resulting extracted sublinks and a success flag."
+    )
+
+
+class ExtractContentRequest(GetSublinksRequest):
+    headers: bool = Field(
+        title="Remove headers",
+        description="Flag that determines whether headers are removed. False by default.",
+        default=False
+    )
+
+    long_patterns: bool = Field(
+        title="Remove long patterns",
+        description="Flag that determines whether long patterns are removed. False by default.",
+        default=False
+    )
+
+
+class ExtractContentTaskResponse(GetSublinksTaskResponse):
+    data: Union[Dict[str, Dict[str, str]], None] = Field(
+        title="Extracted content",
+        description="Dictionary mapping each sublink to content extracted from that sublink"
+    )
+
+
+class ExtractContentResponse(TaskStatusResponse):
+    task_result: Union[ExtractContentTaskResponse, None] = Field(
+        title="Content extraction response",
+        description="A dict containing the resulting extracted content and a success flag."
     )
