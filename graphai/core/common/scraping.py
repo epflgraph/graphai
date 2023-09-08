@@ -592,6 +592,12 @@ def process_all_sublinks(data, base_url, validated_url):
         Modified data dict
     """
     # Loop over all sublinks
+    if data is None or base_url is None or validated_url is None:
+        return None
+
+    if len(data) == 0:
+        return dict()
+
     for sublink in data:
 
         # Print status
