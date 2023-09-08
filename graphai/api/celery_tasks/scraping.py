@@ -123,7 +123,6 @@ def process_all_scraping_sublinks_callback_task(self, results):
     joint_data = dict()
     for r in results:
         joint_data.update(r['data'])
-    # TODO do the database callback
     return {
         'token': results[0]['token'],
         'sublinks': results[0]['sublinks'],
@@ -134,4 +133,58 @@ def process_all_scraping_sublinks_callback_task(self, results):
         'successful': True
     }
 
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
+             name='text_6.remove_junk_scraping_parallel', ignore_result=False)
+def remove_junk_scraping_parallel_task(self, results, i, n_total, headers=True, long_patterns=True):
+    if not headers and not long_patterns:
+        results['do_merge'] = False
+        return results
+    if results['data'] is None or len(results['data']) == 0 or not results['fresh']:
+        results['do_merge'] = False
+        return results
+    data = results['data']
+    sublinks = results['sublinks']
+    start_index = int(i * len(sublinks) / n_total)
+    end_index = int((i + 1) * len(sublinks) / n_total)
+    sublink_sublist = sublinks[start_index:end_index]
+    # TODO handle cache hits by finding the ones that exist in the cache, retrieving their results, and
+    #  keeping them in a separate dict and then deleting their sublinks from the dict that is given as arg
+    #  to processing function.
+    data = {k: data[k] for k in sublink_sublist}
+    if headers:
+        data = remove_headers(data)
+    if long_patterns:
+        data = remove_long_patterns(data)
+    return {
+        'token': results['token'],
+        'sublinks': results['sublinks'],
+        'data': data,
+        'validated_url': results['validated_url'],
+        'status_msg': results['status_msg'],
+        'fresh': True,
+        'successful': True,
+        'do_merge': True
+    }
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
+             name='text_6.extract_scraping_content_callback', ignore_result=False)
+def extract_scraping_content_callback_task(self, results):
+    if not results[0]['do_merge']:
+        del results[0]['do_merge']
+        return results[0]
+    # TODO do the database callback
+    joint_data = dict()
+    for r in results:
+        joint_data.update(r['data'])
+    return {
+        'token': results[0]['token'],
+        'sublinks': results[0]['sublinks'],
+        'validated_url': results[0]['validated_url'],
+        'status_msg': results[0]['status_msg'],
+        'data': joint_data,
+        'fresh': True,
+        'successful': True
+    }
 
