@@ -14,7 +14,8 @@ from graphai.api.schemas.video import (
     VideoFingerprintResponse
 )
 
-from graphai.api.celery_tasks.common import format_api_results, ignore_fingerprint_results_callback_task
+from graphai.api.celery_tasks.common import format_api_results, ignore_fingerprint_results_callback_task, \
+    video_dummy_task
 from graphai.api.celery_tasks.video import (
     retrieve_file_from_url_task,
     retrieve_file_from_url_callback_task,
@@ -27,7 +28,6 @@ from graphai.api.celery_tasks.video import (
     compute_slide_transitions_parallel_task,
     compute_slide_transitions_callback_task,
     detect_slides_callback_task,
-    dummy_task,
     compute_video_fingerprint_task,
     compute_video_fingerprint_callback_task,
     video_fingerprint_find_closest_retrieve_from_db_task,
@@ -192,7 +192,7 @@ async def detect_slides(data: DetectSlidesRequest):
     task_list += [extract_and_sample_frames_task.s(force, force_non_self)]
     task_list += [group(compute_noise_level_parallel_task.s(i, n_jobs, language) for i in range(n_jobs)),
                   compute_noise_threshold_callback_task.s(hash_thresh),
-                  dummy_task.s(),
+                  video_dummy_task.s(),
                   group(compute_slide_transitions_parallel_task.s(i, n_jobs, language) for i in range(n_jobs)),
                   compute_slide_transitions_callback_task.s(language),
                   detect_slides_callback_task.s(token, force)]
