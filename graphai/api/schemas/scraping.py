@@ -70,7 +70,7 @@ class ExtractContentRequest(GetSublinksRequest):
 
 
 class ExtractContentTaskResponse(GetSublinksTaskResponse):
-    data: Union[Dict[str, Dict[str, str]], None] = Field(
+    data: Union[Dict[str, Dict[str, Union[str, None]]], None] = Field(
         title="Extracted content",
         description="Dictionary mapping each sublink to content extracted from that sublink"
     )
