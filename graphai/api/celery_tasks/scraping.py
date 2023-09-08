@@ -11,6 +11,8 @@ def initialize_scraping_url_task(self, token, url, force=False):
     if not force:
         # TODO database lookup
         pass
+    # Initializing the URL by figuring out the exact correct URL and retrieving it to make sure it's accessible
+    # validated_url will be None if the URL is inaccessible
     base_url, validated_url, status_msg, status_code = initialize_url(url, base_url=token)
     validation_results = {
         'token': token,
@@ -35,7 +37,7 @@ def get_scraping_sublinks_task(self, results):
         sublinks, data, validated_url = get_sublinks(results.get('validated_url', None))
         fresh = sublinks is not None
     return {
-        'token': results['token'],
+        'token': results['token'] if sublinks is not None else None,
         'sublinks': sublinks,
         'data': data,
         'validated_url': validated_url,
@@ -48,7 +50,7 @@ def get_scraping_sublinks_task(self, results):
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='text_6.scraping_sublinks_callback', ignore_result=False)
 def scraping_sublinks_callback_task(self, results, token):
-    if results['sublinks'] is not None and len(results['sublinks']) > 0:
+    if results['token'] is not None and len(results['sublinks']) > 0:
         # TODO do the db callback
         pass
     return results
@@ -93,4 +95,43 @@ def process_all_scraping_sublinks_parallel_task(self, results, i, n_total):
         'status_msg': results['status_msg'],
         'cached_results': None
     }
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
+             name='text_6.process_all_scraping_sublinks_callback', ignore_result=False)
+def process_all_scraping_sublinks_callback_task(self, results):
+    if results[0]['data'] is None:
+        return {
+            'token': None,
+            'sublinks': None,
+            'validated_url': None,
+            'status_msg': results[0]['status_msg'],
+            'data': None,
+            'fresh': False,
+            'successful': False
+        }
+    if results[0]['cached_results'] is not None:
+        return {
+            'token': results[0]['token'],
+            'sublinks': results[0]['sublinks'],
+            'validated_url': results[0]['validated_url'],
+            'status_msg': results[0]['status_msg'],
+            'data': results[0]['cached_results'],
+            'fresh': False,
+            'successful': True
+        }
+    joint_data = dict()
+    for r in results:
+        joint_data.update(r['data'])
+    # TODO do the database callback
+    return {
+        'token': results[0]['token'],
+        'sublinks': results[0]['sublinks'],
+        'validated_url': results[0]['validated_url'],
+        'status_msg': results[0]['status_msg'],
+        'data': joint_data,
+        'fresh': True,
+        'successful': True
+    }
+
 
