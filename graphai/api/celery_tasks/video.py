@@ -582,15 +582,6 @@ def detect_slides_callback_task(self, results, token, force=False):
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='video_2.dummy_task', ignore_result=False)
-def dummy_task(self, results):
-    # This task is required for chaining groups due to the peculiarities of celery
-    # Whenever there are two groups in one chain of tasks, there need to be at least
-    # TWO tasks between them, and this dummy task is simply an f(x)=x function.
-    return results
-
-
-@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='video_2.init', ignore_result=False,
              transcription_obj=transcription_model,
              nlp_obj=local_ocr_nlp_models,
