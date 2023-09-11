@@ -89,14 +89,14 @@ def find_consecutive_runs(v, min_run=32):
     k2 = 1
     consecutive_runs = []
     while True:
-        if v[k1] == v[k2] and k2 <= len(v)-2:
+        if v[k1] == v[k2] and k2 <= len(v) - 2:
             k2 += 1
         else:
-            if k2-k1 > min_run:
-                consecutive_runs += [(k1, k2-1, k2-k1, v[k1])]
+            if k2 - k1 > min_run:
+                consecutive_runs += [(k1, k2 - 1, k2 - k1, v[k1])]
             k1 = k2
-            k2 = k1+1
-            if k1 >= len(v)-1:
+            k2 = k1 + 1
+            if k1 >= len(v) - 1:
                 break
     return consecutive_runs
 
@@ -135,10 +135,10 @@ def find_edge_patterns(content_stack, flip_strings=False):
     # Loop and compare consecutive strings in the stack ... (k,k+1)
     # Since we've sorted the strings alphabetically, it should be (mostly) safe to only compare consecutive strings,
     # which will save a lot of time (compared to performing comparisons between every possible pair)
-    for k in range(len(padded_content)-1):
+    for k in range(len(padded_content) - 1):
 
         # Compare two strings and find the indexes are they are equal
-        consecutive_runs = find_consecutive_runs(compare_strings(padded_content[k], padded_content[k+1]))
+        consecutive_runs = find_consecutive_runs(compare_strings(padded_content[k], padded_content[k + 1]))
 
         # Did it find repeated patterns?
         # (note: we only care about the first one)
@@ -149,7 +149,7 @@ def find_edge_patterns(content_stack, flip_strings=False):
             if consecutive_runs[0][0] == 0:
 
                 # If so, extract the repeated pattern
-                pattern = padded_content[k][consecutive_runs[0][0]:consecutive_runs[0][1]+1].strip()
+                pattern = padded_content[k][consecutive_runs[0][0]:consecutive_runs[0][1] + 1].strip()
 
                 # If it's a footer, flip the pattern string
                 if flip_strings:
@@ -179,7 +179,7 @@ def string_circular_shift(s, shift=1):
     if shift == 0:
         return s
     else:
-        return s[-shift:]+s[:len(s)-shift]
+        return s[-shift:] + s[:len(s) - shift]
 
 
 def find_spaces(s):
@@ -269,7 +269,7 @@ def shift_to_max_correlation(s1, s2):
         best_run = sorted(consecutive_runs, key=lambda tup: tup[2], reverse=True)[0]
 
         # For the best one, extract the actual substring of the repeated pattern
-        intersect_pattern = s1[best_run[0]:best_run[1]+1].strip()
+        intersect_pattern = s1[best_run[0]:best_run[1] + 1].strip()
 
     # If no patterns are found...
     else:
