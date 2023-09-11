@@ -549,7 +549,7 @@ def get_sublinks(validated_url, request_headers=None):
     # Initialise data dictionary
     for sublink in sublinks:
         if sublink not in data:
-            data.update({sublink : {'id': None, 'content': '', 'pagetype': None}})
+            data.update({sublink: {'id': None, 'content': '', 'pagetype': None}})
 
     # Return list of sublinks
     return sublinks, data, validated_url
@@ -604,8 +604,8 @@ def process_all_sublinks(data, base_url, validated_url):
         print('Extracting content from:', sublink)
 
         # Generate unique identifier
-        sublink_id = base_url.split('/')[0].replace('.', '-') + '-' + \
-                     hashlib.md5(sublink.encode('utf-8')).hexdigest()[:8]
+        sublink_id = base_url.split('/')[0].replace('.', '-') + '-' + hashlib.md5(
+            sublink.encode('utf-8')).hexdigest()[:8]
 
         # Parse webpage type from URL
         page_type = parse_page_type(sublink, validated_url)
@@ -638,7 +638,7 @@ def remove_headers(data):
     sublinks_list = sorted(list(data.keys()))
 
     # Generate content stack
-    content_stack = [data[k]['content'] for k in data if len(data[k]['content'])>=2]
+    content_stack = [data[k]['content'] for k in data if len(data[k]['content']) >= 2]
 
     # Detect headers
     headers_to_delete = find_edge_patterns(content_stack=content_stack, flip_strings=False)
@@ -648,7 +648,7 @@ def remove_headers(data):
         print('\nDeleting header:', h)
         for k in range(len(data)):
             if data[sublinks_list[k]]['content'].startswith(h):
-                data[sublinks_list[k]]['content'] = data[sublinks_list[k]]['content'].replace(h,'').strip()
+                data[sublinks_list[k]]['content'] = data[sublinks_list[k]]['content'].replace(h, '').strip()
 
     # Generate content stack
     content_stack = [data[k]['content'] for k in data]
@@ -661,7 +661,7 @@ def remove_headers(data):
         print('\nDeleting footer:', f)
         for k in range(len(data)):
             if data[sublinks_list[k]]['content'].endswith(f):
-                data[sublinks_list[k]]['content'] = data[sublinks_list[k]]['content'].replace(f,'').strip()
+                data[sublinks_list[k]]['content'] = data[sublinks_list[k]]['content'].replace(f, '').strip()
 
     # Return modified data dictionary
     return data
@@ -695,7 +695,7 @@ def remove_long_patterns(data, min_length=1024):
     for p in patterns_to_delete:
         print('Deleting pattern of length', len(p), ' ---> ', p)
         for k in range(len(data)):
-            data[sublinks_list[k]]['content'] = data[sublinks_list[k]]['content'].replace(p,'').strip()
+            data[sublinks_list[k]]['content'] = data[sublinks_list[k]]['content'].replace(p, '').strip()
 
     # Return modified data dictionary
     return data

@@ -12,7 +12,6 @@ from graphai.api.schemas.scraping import (
 
 from graphai.api.celery_tasks.common import (
     format_api_results,
-    ignore_fingerprint_results_callback_task,
     text_dummy_task
 )
 
@@ -36,6 +35,7 @@ router = APIRouter(
     tags=['scraping'],
     responses={404: {'description': 'Not found'}}
 )
+
 
 @router.post('/sublinks', response_model=TaskIDResponse)
 async def extract_sublinks(data: GetSublinksRequest):

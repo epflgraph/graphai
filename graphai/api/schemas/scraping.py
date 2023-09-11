@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from typing import Union, Literal, Dict, List
+from typing import Union, Dict, List
 
 from graphai.api.schemas.common import TaskStatusResponse
 

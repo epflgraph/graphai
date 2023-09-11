@@ -1,8 +1,6 @@
 from celery import shared_task
 from graphai.core.common.scraping import initialize_url, get_sublinks, process_all_sublinks, \
     remove_headers, remove_long_patterns
-from graphai.api.celery_tasks.common import compute_text_fingerprint_common, fingerprint_lookup_retrieve_from_db, \
-    fingerprint_lookup_parallel, fingerprint_lookup_direct, fingerprint_lookup_callback
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
@@ -187,4 +185,3 @@ def extract_scraping_content_callback_task(self, results):
         'fresh': True,
         'successful': True
     }
-
