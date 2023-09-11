@@ -1,0 +1,7 @@
+graphai.api.schemas.scraping module
+===================================
+
+.. automodule:: graphai.api.schemas.scraping
+   :members:
+   :undoc-members:
+   :show-inheritance:

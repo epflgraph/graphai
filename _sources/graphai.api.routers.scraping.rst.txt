@@ -1,0 +1,7 @@
+graphai.api.routers.scraping module
+===================================
+
+.. automodule:: graphai.api.routers.scraping
+   :members:
+   :undoc-members:
+   :show-inheritance:

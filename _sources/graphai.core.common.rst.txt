@@ -15,4 +15,5 @@ Submodules
    graphai.core.common.caching
    graphai.core.common.graph
    graphai.core.common.ontology
+   graphai.core.common.scraping
    graphai.core.common.video

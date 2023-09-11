@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>graphai.api.routers.ontology module &mdash; EPFL Graph AI</title>
+  <title>graphai.api.routers.scraping module &mdash; EPFL Graph AI</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -17,8 +17,8 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="graphai.api.routers.scraping module" href="graphai.api.routers.scraping.html" />
-    <link rel="prev" title="graphai.api.routers.image module" href="graphai.api.routers.image.html" /> 
+    <link rel="next" title="graphai.api.routers.summarization module" href="graphai.api.routers.summarization.html" />
+    <link rel="prev" title="graphai.api.routers.ontology module" href="graphai.api.routers.ontology.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -78,9 +78,9 @@
       <li><a href="graphai.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="graphai.api.html">graphai.api package</a></li>
           <li class="breadcrumb-item"><a href="graphai.api.routers.html">graphai.api.routers package</a></li>
-      <li class="breadcrumb-item active">graphai.api.routers.ontology module</li>
+      <li class="breadcrumb-item active">graphai.api.routers.scraping module</li>
       <li class="wy-breadcrumbs-aside">
-            <a href="_sources/graphai.api.routers.ontology.rst.txt" rel="nofollow"> View page source</a>
+            <a href="_sources/graphai.api.routers.scraping.rst.txt" rel="nofollow"> View page source</a>
       </li>
   </ul>
   <hr/>
@@ -88,26 +88,26 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="module-graphai.api.routers.ontology">
-<span id="graphai-api-routers-ontology-module"></span><h1>graphai.api.routers.ontology module<a class="headerlink" href="#module-graphai.api.routers.ontology" title="Permalink to this heading"></a></h1>
+  <section id="module-graphai.api.routers.scraping">
+<span id="graphai-api-routers-scraping-module"></span><h1>graphai.api.routers.scraping module<a class="headerlink" href="#module-graphai.api.routers.scraping" title="Permalink to this heading"></a></h1>
 <dl class="py function">
-<dt class="sig sig-object py" id="graphai.api.routers.ontology.ontology_tree_response_handler">
-<span class="sig-prename descclassname"><span class="pre">graphai.api.routers.ontology.</span></span><span class="sig-name descname"><span class="pre">ontology_tree_response_handler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id_and_results</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.api.routers.ontology.ontology_tree_response_handler" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="graphai.api.routers.scraping.extract_sublinks">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">graphai.api.routers.scraping.</span></span><span class="sig-name descname"><span class="pre">extract_sublinks</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="graphai.api.schemas.scraping.html#graphai.api.schemas.scraping.GetSublinksRequest" title="graphai.api.schemas.scraping.GetSublinksRequest"><span class="pre">GetSublinksRequest</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.api.routers.scraping.extract_sublinks" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="graphai.api.routers.ontology.tree">
-<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">graphai.api.routers.ontology.</span></span><span class="sig-name descname"><span class="pre">tree</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#graphai.api.routers.ontology.tree" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="graphai.api.routers.scraping.extract_sublinks_status">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">graphai.api.routers.scraping.</span></span><span class="sig-name descname"><span class="pre">extract_sublinks_status</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">task_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.api.routers.scraping.extract_sublinks_status" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="graphai.api.routers.ontology.parent">
-<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">graphai.api.routers.ontology.</span></span><span class="sig-name descname"><span class="pre">parent</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">category_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.api.routers.ontology.parent" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="graphai.api.routers.scraping.extract_page_content">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">graphai.api.routers.scraping.</span></span><span class="sig-name descname"><span class="pre">extract_page_content</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="graphai.api.schemas.scraping.html#graphai.api.schemas.scraping.ExtractContentRequest" title="graphai.api.schemas.scraping.ExtractContentRequest"><span class="pre">ExtractContentRequest</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.api.routers.scraping.extract_page_content" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="graphai.api.routers.ontology.children">
-<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">graphai.api.routers.ontology.</span></span><span class="sig-name descname"><span class="pre">children</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">category_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.api.routers.ontology.children" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="graphai.api.routers.scraping.extract_page_content_status">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">graphai.api.routers.scraping.</span></span><span class="sig-name descname"><span class="pre">extract_page_content_status</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">task_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.api.routers.scraping.extract_page_content_status" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 </section>
@@ -116,8 +116,8 @@
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="graphai.api.routers.image.html" class="btn btn-neutral float-left" title="graphai.api.routers.image module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="graphai.api.routers.scraping.html" class="btn btn-neutral float-right" title="graphai.api.routers.scraping module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="graphai.api.routers.ontology.html" class="btn btn-neutral float-left" title="graphai.api.routers.ontology module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="graphai.api.routers.summarization.html" class="btn btn-neutral float-right" title="graphai.api.routers.summarization module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
