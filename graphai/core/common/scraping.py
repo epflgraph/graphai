@@ -500,10 +500,37 @@ def initialize_url(url, base_url=None):
     return base_url, None, status_msg, status_code
 
 
-def get_sublinks(validated_url, request_headers=None):
+def generate_sublink_token(base_url, validated_url, sublink):
+    if sublink == validated_url:
+        return base_url
+    return base_url.split('/')[0].replace('.', '-') + '-' + hashlib.md5(sublink.encode('utf-8')).hexdigest()[:8]
+
+
+def reconstruct_data_dict(sublinks, tokens):
+    data = dict()
+    for i in range(len(sublinks)):
+        sublink = sublinks[i]
+        if sublink not in data:
+            data.update({sublink: {'id': tokens[i],
+                                   'content': '', 'pagetype': None}})
+    return data
+
+
+def initialize_data_dict(base_url, validated_url, sublinks):
+    data = dict()
+    # Initialise data dictionary
+    for sublink in sublinks:
+        if sublink not in data:
+            data.update({sublink: {'id': generate_sublink_token(base_url, validated_url, sublink),
+                                   'content': '', 'pagetype': None}})
+    return data
+
+
+def get_sublinks(base_url, validated_url, request_headers=None):
     """
     Retrieves all the sublinks of a URL
     Args:
+        base_url: Base URL
         validated_url: Base validated URL
         request_headers: Headers of the request, uses defaults if None
 
@@ -513,7 +540,7 @@ def get_sublinks(validated_url, request_headers=None):
     if request_headers is None:
         request_headers = REQ_HEADERS
     # Return empty list if URL hasn't been validated
-    if validated_url is None:
+    if validated_url is None or base_url is None:
         return None, None, None
 
     # Remove trailing forward slash from URL
@@ -544,12 +571,7 @@ def get_sublinks(validated_url, request_headers=None):
 
     # Sort and make sublinks list unique
     sublinks = sorted(list(set([validated_url] + links)))
-    data = dict()
-
-    # Initialise data dictionary
-    for sublink in sublinks:
-        if sublink not in data:
-            data.update({sublink: {'id': None, 'content': '', 'pagetype': None}})
+    data = initialize_data_dict(base_url, validated_url, sublinks)
 
     # Return list of sublinks
     return sublinks, data, validated_url
@@ -603,10 +625,6 @@ def process_all_sublinks(data, base_url, validated_url):
         # Print status
         print('Extracting content from:', sublink)
 
-        # Generate unique identifier
-        sublink_id = base_url.split('/')[0].replace('.', '-') + '-' + hashlib.md5(
-            sublink.encode('utf-8')).hexdigest()[:8]
-
         # Parse webpage type from URL
         page_type = parse_page_type(sublink, validated_url)
 
@@ -614,7 +632,7 @@ def process_all_sublinks(data, base_url, validated_url):
         content = extract_text_from_url(sublink, max_length=16384)
 
         # Update data dictionary
-        data[sublink].update({'id': sublink_id, 'pagetype': page_type, 'content': content})
+        data[sublink].update({'pagetype': page_type, 'content': content})
 
     # Return modified data dictionary
     return data

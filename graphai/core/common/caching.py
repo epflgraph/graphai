@@ -1,8 +1,9 @@
 import os
 import configparser
 import abc
+from datetime import datetime
 
-from graphai.core.common.common_utils import make_sure_path_exists, file_exists, get_current_datetime
+from graphai.core.common.common_utils import make_sure_path_exists, file_exists, parse_mysql_datetime
 from graphai.definitions import CONFIG_DIR
 from graphai.core.interfaces.db import DB
 
@@ -875,6 +876,7 @@ class ScrapingDBCachingManager(DBCachingManagerBase):
               `fingerprint` VARCHAR(255) DEFAULT NULL,
               `link` LONGTEXT,
               `content` LONGTEXT DEFAULT NULL,
+              `page_type` VARCHAR(255) DEFAULT NULL,
               `headers_removed` INT DEFAULT NULL,
               `long_patterns_removed` INT DEFAULT NULL,
               `date_added` DATETIME,
@@ -931,8 +933,10 @@ class ScrapingDBCachingManager(DBCachingManagerBase):
         results = self._get_details_using_origin(self.schema, self.cache_table, origin_token, cols, has_date_col=True)
         if results is None:
             return results
-
-
+        current_time = datetime.now()
+        # Only keep the results that are no older than the expiration period
+        results = [x for x in results if (current_time - x['date_added']).days < self.expiration_period]
+        return results
 
 
 class VideoConfig():

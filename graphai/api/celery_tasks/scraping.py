@@ -1,14 +1,39 @@
 from celery import shared_task
 from graphai.core.common.scraping import initialize_url, get_sublinks, process_all_sublinks, \
-    remove_headers, remove_long_patterns
+    remove_headers, remove_long_patterns, reconstruct_data_dict
+from graphai.core.common.common_utils import get_current_datetime
+from graphai.core.common.caching import ScrapingDBCachingManager
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='text_6.initialize_scraping_url', ignore_result=False)
 def initialize_scraping_url_task(self, token, url, force=False):
+    if token is None or url is None:
+        return {
+            'token': None,
+            'validated_url': None,
+            'status_msg': "Error: no input provided",
+            'sublink_results': None,
+        }
     if not force:
-
-        pass
+        db_manager = ScrapingDBCachingManager()
+        existing = db_manager.get_details_using_origin(token, ['link'])
+        if existing is not None:
+            sublinks = [r['link'] for r in existing]
+            tokens = [r['id_token'] for r in existing]
+            # There is always ONE row where the id_token and origin_token are the same. This is the sublink whose
+            # url is equal to the validated_url.
+            validated_url = [x for x in existing if x['id_token'] == x['origin_token']][0]['link']
+            sublink_results = {
+                'sublinks': sublinks,
+                'data': reconstruct_data_dict(sublinks, tokens)
+            }
+            return {
+                'token': token,
+                'validated_url': validated_url,
+                'status_msg': "Loaded cached results",
+                'sublink_results': sublink_results,
+            }
     # Initializing the URL by figuring out the exact correct URL and retrieving it to make sure it's accessible
     # validated_url will be None if the URL is inaccessible
     base_url, validated_url, status_msg, status_code = initialize_url(url, base_url=token)
@@ -17,7 +42,6 @@ def initialize_scraping_url_task(self, token, url, force=False):
         'validated_url': validated_url,
         'status_msg': status_msg,
         'sublink_results': None,
-        'fresh': True
     }
     return validation_results
 
@@ -29,10 +53,10 @@ def get_scraping_sublinks_task(self, results):
     if results['sublink_results'] is not None:
         sublinks = results['sublink_results']['sublinks']
         data = results['sublink_results']['data']
-        validated_url = results['sublink_results']['data']
+        validated_url = results['validated_url']
         fresh = False
     else:
-        sublinks, data, validated_url = get_sublinks(results.get('validated_url', None))
+        sublinks, data, validated_url = get_sublinks(results.get('token', None), results.get('validated_url', None))
         fresh = sublinks is not None
     return {
         'token': results['token'] if sublinks is not None else None,
@@ -48,9 +72,16 @@ def get_scraping_sublinks_task(self, results):
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='text_6.scraping_sublinks_callback', ignore_result=False)
 def scraping_sublinks_callback_task(self, results, token):
-    if results['token'] is not None and len(results['sublinks']) > 0:
-        # TODO do the db callback
-        pass
+    if results['token'] is not None and len(results['sublinks']) > 0 and results['fresh']:
+        current_datetime = get_current_datetime()
+        db_manager = ScrapingDBCachingManager()
+        data = results['data']
+        for sublink in data:
+            db_manager.insert_or_update_details(data['sublink']['id'], values_to_insert={
+                'origin_token': results['token'],
+                'link': sublink,
+                'date_added': current_datetime
+            })
     return results
 
 
