@@ -35,65 +35,11 @@ import tiktoken
 from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
 
 from graphai.definitions import CONFIG_DIR
-from graphai.core.common.caching import make_sure_path_exists, file_exists
+from graphai.core.common.common_utils import make_sure_path_exists, file_exists
 
 FRAME_FORMAT_PNG = 'frame-%06d.png'
 FRAME_FORMAT_JPG = 'frame-%06d.jpg'
 TESSERACT_OCR_FORMAT = 'ocr-%06d.txt.gz'
-
-
-def write_text_file(filename_with_path, contents):
-    """
-    Writes contents to text file
-    Args:
-        filename_with_path: Full path of the file
-        contents: Textual contents
-
-    Returns:
-        None
-    """
-    with open(filename_with_path, 'w') as f:
-        f.write(contents)
-
-
-def write_json_file(filename_with_path, d):
-    """
-    Writes dictionary to JSON file
-    Args:
-        filename_with_path: Full path of the file
-        d: Dictionary to write
-
-    Returns:
-        None
-    """
-    with open(filename_with_path, 'w') as f:
-        json.dump(d, f)
-
-
-def read_text_file(filename_with_path):
-    """
-    Opens and reads the contents of a text file
-    Args:
-        filename_with_path: Full path of the file
-
-    Returns:
-        Contents of the file
-    """
-    with open(filename_with_path, 'r') as f:
-        return f.read()
-
-
-def read_json_file(filename_with_path):
-    """
-    Reads the contents of a JSON file
-    Args:
-        filename_with_path: Full path of the file
-
-    Returns:
-        Dictionary containing contents of the JSON file
-    """
-    with open(filename_with_path, 'r') as f:
-        return json.load(f)
 
 
 def md5_text(s):
@@ -115,20 +61,6 @@ def generate_random_token():
         Random token
     """
     return ('%.06f' % time.time()).replace('.', '') + '%08d' % random.randint(0, int(1e7))
-
-
-def format_datetime_for_mysql(dt):
-    return dt.strftime("%Y-%m-%d %H:%M:%S")
-
-
-def get_current_datetime():
-    """
-    Returns current datetime formatted for MySQL
-    Returns:
-        Datetime string
-    """
-    current_datetime = format_datetime_for_mysql(datetime.now())
-    return current_datetime
 
 
 def generate_src_tgt_dict(src, tgt):

@@ -8,10 +8,10 @@ from graphai.api.common.video import file_management_config, local_ocr_nlp_model
 from graphai.core.common.video import retrieve_file_from_url, retrieve_file_from_kaltura, \
     detect_audio_format_and_duration, extract_audio_from_video, extract_frames, generate_frame_sample_indices, \
     compute_ocr_noise_level, compute_ocr_threshold, compute_video_ocr_transitions, check_ocr_and_hash_thresholds, \
-    generate_random_token, md5_video_or_audio, generate_symbolic_token, get_current_datetime, \
-    FRAME_FORMAT_PNG, TESSERACT_OCR_FORMAT
+    generate_random_token, md5_video_or_audio, generate_symbolic_token, FRAME_FORMAT_PNG, TESSERACT_OCR_FORMAT
 from graphai.core.common.caching import AudioDBCachingManager, SlideDBCachingManager, \
-    VideoDBCachingManager, file_exists
+    VideoDBCachingManager
+from graphai.core.common.common_utils import file_exists, get_current_datetime
 from itertools import chain
 from graphai.api.celery_tasks.common import fingerprint_lookup_retrieve_from_db, \
     fingerprint_lookup_parallel, fingerprint_lookup_callback

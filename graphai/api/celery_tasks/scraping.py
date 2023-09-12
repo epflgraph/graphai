@@ -7,7 +7,7 @@ from graphai.core.common.scraping import initialize_url, get_sublinks, process_a
              name='text_6.initialize_scraping_url', ignore_result=False)
 def initialize_scraping_url_task(self, token, url, force=False):
     if not force:
-        # TODO database lookup
+
         pass
     # Initializing the URL by figuring out the exact correct URL and retrieving it to make sure it's accessible
     # validated_url will be None if the URL is inaccessible

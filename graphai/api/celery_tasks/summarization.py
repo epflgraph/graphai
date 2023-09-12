@@ -1,5 +1,6 @@
 from celery import shared_task
-from graphai.core.common.video import ChatGPTSummarizer, get_current_datetime, force_dict_to_text
+from graphai.core.common.video import ChatGPTSummarizer, force_dict_to_text
+from graphai.core.common.common_utils import get_current_datetime
 from graphai.core.common.caching import SummaryDBCachingManager
 from graphai.core.text.keywords import get_keywords
 from graphai.api.celery_tasks.common import compute_text_fingerprint_common, fingerprint_lookup_retrieve_from_db, \
