@@ -887,6 +887,71 @@ class SummaryDBCachingManager(DBCachingManagerBase):
         )
 
 
+class ScrapingDBCachingManager(DBCachingManagerBase):
+    def __init__(self):
+        super().__init__(cache_table='Scraping_Main', most_similar_table='Scraping_Most_Similar')
+
+    def init_db(self):
+        # Making sure the schema exists
+        self.db.execute_query(
+            f"""
+            CREATE DATABASE IF NOT EXISTS `{self.schema}`
+            DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci
+            DEFAULT ENCRYPTION='N';
+            """
+        )
+
+        # Creating the cache table if it does not exist
+        self.db.execute_query(
+            f"""
+            CREATE TABLE IF NOT EXISTS `{self.schema}`.`{self.cache_table}` (
+              `id_token` VARCHAR(255),
+              `parent_token` VARCHAR(255),
+              `fingerprint` VARCHAR(255) DEFAULT NULL,
+              `link` LONGTEXT,
+              `content` LONGTEXT DEFAULT NULL,
+              `headers_removed` INT DEFAULT NULL,
+              `long_patterns_removed` INT DEFAULT NULL,
+              `date_added` DATETIME,
+              PRIMARY KEY id_token (id_token)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+            """
+        )
+
+        # Creating the fingerprint index if it doesn't exist
+        try:
+            self.db.execute_query(
+                f"""
+                CREATE INDEX `scraping_main_fp_index` ON `{self.schema}`.`{self.cache_table}` (`fingerprint`);
+                """
+            )
+        except Exception:
+            pass
+
+
+        # Creating the parent_token index if it doesn't exist
+        try:
+            self.db.execute_query(
+                f"""
+                CREATE INDEX `scraping_main_parent_index` ON `{self.schema}`.`{self.cache_table}` (`parent_token`);
+                """
+            )
+        except Exception:
+            pass
+
+        # Creating the closest match table
+        self.db.execute_query(
+            f"""
+            CREATE TABLE IF NOT EXISTS `{self.schema}`.`{self.most_similar_table}` (
+              `id_token` VARCHAR(255),
+              `most_similar_token` VARCHAR(255) DEFAULT NULL,
+              PRIMARY KEY id_token (id_token),
+              KEY most_similar_token (most_similar_token)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+            """
+        )
+
+
 class VideoConfig():
     def __init__(self):
         config_contents = configparser.ConfigParser()
