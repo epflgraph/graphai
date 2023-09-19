@@ -503,7 +503,7 @@ def initialize_url(url, base_url=None):
 def generate_sublink_token(base_url, validated_url, sublink):
     if sublink == validated_url:
         return base_url
-    return base_url.split('/')[0].replace('.', '-') + '-' + hashlib.md5(sublink.encode('utf-8')).hexdigest()[:8]
+    return base_url + '___' + hashlib.md5(sublink.encode('utf-8')).hexdigest()[:8]
 
 
 def reconstruct_data_dict(sublinks, tokens):

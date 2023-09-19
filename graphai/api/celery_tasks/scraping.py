@@ -7,13 +7,16 @@ from graphai.core.common.caching import ScrapingDBCachingManager
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='text_6.initialize_scraping_url', ignore_result=False)
-def initialize_scraping_url_task(self, token, url, force=False):
+def initialize_url_and_get_sublinks_task(self, token, url, force=False):
     if token is None or url is None:
         return {
             'token': None,
+            'sublinks': None,
+            'data': None,
             'validated_url': None,
             'status_msg': "Error: no input provided",
-            'sublink_results': None,
+            'fresh': False,
+            'successful': False
         }
     if not force:
         db_manager = ScrapingDBCachingManager()
@@ -24,60 +27,40 @@ def initialize_scraping_url_task(self, token, url, force=False):
             # There is always ONE row where the id_token and origin_token are the same. This is the sublink whose
             # url is equal to the validated_url.
             validated_url = [x for x in existing if x['id_token'] == x['origin_token']][0]['link']
-            sublink_results = {
-                'sublinks': sublinks,
-                'data': reconstruct_data_dict(sublinks, tokens)
-            }
             return {
                 'token': token,
+                'sublinks': sublinks,
+                'data': reconstruct_data_dict(sublinks, tokens),
                 'validated_url': validated_url,
                 'status_msg': "Loaded cached results",
-                'sublink_results': sublink_results,
+                'fresh': False,
+                'successful': True
             }
     # Initializing the URL by figuring out the exact correct URL and retrieving it to make sure it's accessible
     # validated_url will be None if the URL is inaccessible
     base_url, validated_url, status_msg, status_code = initialize_url(url, base_url=token)
-    validation_results = {
-        'token': token,
-        'validated_url': validated_url,
-        'status_msg': status_msg,
-        'sublink_results': None,
-    }
-    return validation_results
-
-
-@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='text_6.get_scraping_sublinks', ignore_result=False)
-def get_scraping_sublinks_task(self, results):
-    # This condition is only met if force=False and there is a cache hit
-    if results['sublink_results'] is not None:
-        sublinks = results['sublink_results']['sublinks']
-        data = results['sublink_results']['data']
-        validated_url = results['validated_url']
-        fresh = False
-    else:
-        sublinks, data, validated_url = get_sublinks(results.get('token', None), results.get('validated_url', None))
-        fresh = sublinks is not None
+    sublinks, data, validated_url = get_sublinks(token, validated_url)
+    fresh = sublinks is not None
     return {
-        'token': results['token'] if sublinks is not None else None,
+        'token': token if sublinks is not None else None,
         'sublinks': sublinks,
         'data': data,
         'validated_url': validated_url,
-        'status_msg': results['status_msg'],
+        'status_msg': status_msg,
         'fresh': fresh,
-        'successful': sublinks is not None
+        'successful': fresh
     }
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='text_6.scraping_sublinks_callback', ignore_result=False)
-def scraping_sublinks_callback_task(self, results, token):
-    if results['token'] is not None and len(results['sublinks']) > 0 and results['fresh']:
+def scraping_sublinks_callback_task(self, results):
+    if results['sublinks'] is not None and len(results['sublinks']) > 0 and results['fresh']:
         current_datetime = get_current_datetime()
         db_manager = ScrapingDBCachingManager()
         data = results['data']
         for sublink in data:
-            db_manager.insert_or_update_details(data['sublink']['id'], values_to_insert={
+            db_manager.insert_or_update_details(data[sublink]['id'], values_to_insert={
                 'origin_token': results['token'],
                 'link': sublink,
                 'date_added': current_datetime
