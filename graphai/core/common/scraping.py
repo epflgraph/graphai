@@ -506,13 +506,17 @@ def generate_sublink_token(base_url, validated_url, sublink):
     return base_url + '___' + hashlib.md5(sublink.encode('utf-8')).hexdigest()[:8]
 
 
-def reconstruct_data_dict(sublinks, tokens):
+def reconstruct_data_dict(sublinks, tokens, contents=None, page_types=None):
     data = dict()
+    if contents is None:
+        contents = [''] * len(sublinks)
+    if page_types is None:
+        page_types = [None] * len(sublinks)
     for i in range(len(sublinks)):
         sublink = sublinks[i]
         if sublink not in data:
             data.update({sublink: {'id': tokens[i],
-                                   'content': '', 'pagetype': None}})
+                                   'content': contents[i], 'pagetype': page_types[i]}})
     return data
 
 
