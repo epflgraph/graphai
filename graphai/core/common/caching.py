@@ -895,7 +895,6 @@ class ScrapingDBCachingManager(DBCachingManagerBase):
         except Exception:
             pass
 
-
         # Creating the parent_token index if it doesn't exist
         try:
             self.db.execute_query(
