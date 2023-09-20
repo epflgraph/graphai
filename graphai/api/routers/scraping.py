@@ -82,12 +82,12 @@ async def extract_page_content(data: ExtractContentRequest):
     task_list = [
         initialize_url_and_get_sublinks_task.s(token, url, force),
         scraping_sublinks_callback_task.s(),
-        process_all_scraping_sublinks_preprocess_task.s(token, force),
+        process_all_scraping_sublinks_preprocess_task.s(headers, long_patterns, force),
         group(process_all_scraping_sublinks_parallel_task.s(i, n_jobs) for i in range(n_jobs)),
         process_all_scraping_sublinks_callback_task.s(),
         text_dummy_task.s(),
         group(remove_junk_scraping_parallel_task.s(i, n_jobs, headers, long_patterns) for i in range(n_jobs)),
-        extract_scraping_content_callback_task.s()
+        extract_scraping_content_callback_task.s(headers, long_patterns)
     ]
     task = chain(task_list)
     task = task.apply_async(priority=6)

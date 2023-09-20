@@ -35,7 +35,7 @@ def initialize_url_and_get_sublinks_task(self, token, url, force=False):
                 'sublinks': sublinks,
                 'data': data_dict,
                 'validated_url': validated_url,
-                'status_msg': "Loaded cached results",
+                'status_msg': "",
                 'fresh': False,
                 'successful': True
             }
@@ -73,7 +73,7 @@ def scraping_sublinks_callback_task(self, results):
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='text_6.process_all_scraping_sublinks_preprocess', ignore_result=False)
-def process_all_scraping_sublinks_preprocess_task(self, results, headers=False, long_patterns=False, force=False):
+def process_all_scraping_sublinks_preprocess_task(self, results, headers, long_patterns, force=False):
     results['cached_results'] = None
     # If there are no results to begin with, we pass them on as-is
     if results['token'] is None or results['data'] is None:
@@ -89,8 +89,10 @@ def process_all_scraping_sublinks_preprocess_task(self, results, headers=False, 
             existing_long_patterns = existing[0]['long_patterns_removed'] == 1
             headers_match = existing_headers == headers
             long_patterns_match = existing_long_patterns == long_patterns
+            base_url_content = [x for x in existing if x['id_token'] == x['origin_token']][0]['content']
             # We only return the cached results if their header and pattern removal flags are the same as the request
-            if headers_match and long_patterns_match:
+            # and if the cached results are not null
+            if base_url_content is not None and headers_match and long_patterns_match:
                 sublinks = [r['link'] for r in existing]
                 tokens = [r['id_token'] for r in existing]
                 contents = [r['content'] for r in existing]
@@ -129,6 +131,7 @@ def process_all_scraping_sublinks_parallel_task(self, results, i, n_total):
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='text_6.process_all_scraping_sublinks_callback', ignore_result=False)
 def process_all_scraping_sublinks_callback_task(self, results):
+    # If the results are null (e.g. unreachable url)
     if results[0]['data'] is None:
         return {
             'token': None,
@@ -139,6 +142,7 @@ def process_all_scraping_sublinks_callback_task(self, results):
             'fresh': False,
             'successful': False
         }
+    # If the results came from a cache hit
     if results[0]['cached_results'] is not None:
         return {
             'token': results[0]['token'],
@@ -149,6 +153,7 @@ def process_all_scraping_sublinks_callback_task(self, results):
             'fresh': False,
             'successful': True
         }
+    # Merging fresh results
     joint_data = dict()
     for r in results:
         joint_data.update(r['data'])
@@ -165,10 +170,12 @@ def process_all_scraping_sublinks_callback_task(self, results):
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='text_6.remove_junk_scraping_parallel', ignore_result=False)
-def remove_junk_scraping_parallel_task(self, results, i, n_total, headers=True, long_patterns=True):
+def remove_junk_scraping_parallel_task(self, results, i, n_total, headers, long_patterns):
+    # If there is no junk removal, there's nothing to merge in the callback and nothing to do here
     if not headers and not long_patterns:
         results['do_merge'] = False
         return results
+    # If the results are null or the results are from the cache, again there's nothing to do and no merging
     if results['data'] is None or not results['fresh']:
         results['do_merge'] = False
         return results
@@ -196,14 +203,32 @@ def remove_junk_scraping_parallel_task(self, results, i, n_total, headers=True, 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='text_6.extract_scraping_content_callback', ignore_result=False)
-def extract_scraping_content_callback_task(self, results):
-    if not results[0]['do_merge']:
-        del results[0]['do_merge']
+def extract_scraping_content_callback_task(self, results, headers, long_patterns):
+    # If the results aren't fresh (whether cache hit or unsuccessful), there is nothing to merge and nothing to
+    # insert into the database
+    if not results[0]['fresh']:
         return results[0]
-    # TODO do the database callback
-    joint_data = dict()
-    for r in results:
-        joint_data.update(r['data'])
+    if results[0]['do_merge']:
+        # If 'do_merge' is True, the full data is the combination of all 'data' values and needs merging
+        joint_data = dict()
+        for r in results:
+            joint_data.update(r['data'])
+    else:
+        # If 'do_merge' is False (but 'fresh' is True, since we're here!), then all 'data' values are identical
+        joint_data = results[0]['data']
+    # Updating db rows
+    current_datetime = get_current_datetime()
+    db_manager = ScrapingDBCachingManager()
+    for sublink in joint_data:
+        db_manager.insert_or_update_details(joint_data[sublink]['id'], values_to_insert={
+            'origin_token': results[0]['token'],
+            'link': sublink,
+            'content': joint_data[sublink]['content'],
+            'page_type': joint_data[sublink]['pagetype'],
+            'headers_removed': 1 if headers else 0,
+            'long_patterns_removed': 1 if long_patterns else 0,
+            'date_added': current_datetime
+        })
     return {
         'token': results[0]['token'],
         'sublinks': results[0]['sublinks'],
