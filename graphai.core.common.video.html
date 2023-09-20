@@ -90,56 +90,6 @@
   <section id="module-graphai.core.common.video">
 <span id="graphai-core-common-video-module"></span><h1>graphai.core.common.video module<a class="headerlink" href="#module-graphai.core.common.video" title="Permalink to this heading"></a></h1>
 <dl class="py function">
-<dt class="sig sig-object py" id="graphai.core.common.video.write_text_file">
-<span class="sig-prename descclassname"><span class="pre">graphai.core.common.video.</span></span><span class="sig-name descname"><span class="pre">write_text_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename_with_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">contents</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.video.write_text_file" title="Permalink to this definition"></a></dt>
-<dd><p>Writes contents to text file
-:param filename_with_path: Full path of the file
-:param contents: Textual contents</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>None</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="graphai.core.common.video.write_json_file">
-<span class="sig-prename descclassname"><span class="pre">graphai.core.common.video.</span></span><span class="sig-name descname"><span class="pre">write_json_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename_with_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.video.write_json_file" title="Permalink to this definition"></a></dt>
-<dd><p>Writes dictionary to JSON file
-:param filename_with_path: Full path of the file
-:param d: Dictionary to write</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>None</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="graphai.core.common.video.read_text_file">
-<span class="sig-prename descclassname"><span class="pre">graphai.core.common.video.</span></span><span class="sig-name descname"><span class="pre">read_text_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename_with_path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.video.read_text_file" title="Permalink to this definition"></a></dt>
-<dd><p>Opens and reads the contents of a text file
-:param filename_with_path: Full path of the file</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Contents of the file</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="graphai.core.common.video.read_json_file">
-<span class="sig-prename descclassname"><span class="pre">graphai.core.common.video.</span></span><span class="sig-name descname"><span class="pre">read_json_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename_with_path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.video.read_json_file" title="Permalink to this definition"></a></dt>
-<dd><p>Reads the contents of a JSON file
-:param filename_with_path: Full path of the file</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Dictionary containing contents of the JSON file</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
 <dt class="sig sig-object py" id="graphai.core.common.video.md5_text">
 <span class="sig-prename descclassname"><span class="pre">graphai.core.common.video.</span></span><span class="sig-name descname"><span class="pre">md5_text</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.video.md5_text" title="Permalink to this definition"></a></dt>
 <dd><p>Computes the md5 hash of a string
@@ -156,18 +106,6 @@
 <span class="sig-prename descclassname"><span class="pre">graphai.core.common.video.</span></span><span class="sig-name descname"><span class="pre">generate_random_token</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.video.generate_random_token" title="Permalink to this definition"></a></dt>
 <dd><p>Generates a random string using the current time and a random number to be used as a token.
 :returns: Random token</p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="graphai.core.common.video.format_datetime_for_mysql">
-<span class="sig-prename descclassname"><span class="pre">graphai.core.common.video.</span></span><span class="sig-name descname"><span class="pre">format_datetime_for_mysql</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dt</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.video.format_datetime_for_mysql" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="graphai.core.common.video.get_current_datetime">
-<span class="sig-prename descclassname"><span class="pre">graphai.core.common.video.</span></span><span class="sig-name descname"><span class="pre">get_current_datetime</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.video.get_current_datetime" title="Permalink to this definition"></a></dt>
-<dd><p>Returns current datetime formatted for MySQL
-:returns: Datetime string</p>
 </dd></dl>
 
 <dl class="py function">

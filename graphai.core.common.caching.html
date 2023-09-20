@@ -17,7 +17,7 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="graphai.core.common.graph module" href="graphai.core.common.graph.html" />
+    <link rel="next" title="graphai.core.common.common_utils module" href="graphai.core.common.common_utils.html" />
     <link rel="prev" title="graphai.core.common package" href="graphai.core.common.html" /> 
 </head>
 
@@ -89,31 +89,6 @@
              
   <section id="module-graphai.core.common.caching">
 <span id="graphai-core-common-caching-module"></span><h1>graphai.core.common.caching module<a class="headerlink" href="#module-graphai.core.common.caching" title="Permalink to this heading"></a></h1>
-<dl class="py function">
-<dt class="sig sig-object py" id="graphai.core.common.caching.make_sure_path_exists">
-<span class="sig-prename descclassname"><span class="pre">graphai.core.common.caching.</span></span><span class="sig-name descname"><span class="pre">make_sure_path_exists</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_at_the_end</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">full_perm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.caching.make_sure_path_exists" title="Permalink to this definition"></a></dt>
-<dd><p>Recursively creates the folders in a path.
-:param path: The path that needs to exist (and will thus be created if it doesn’t)
-:param file_at_the_end: Whether there is a filename at the end of the path</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>None</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="graphai.core.common.caching.file_exists">
-<span class="sig-prename descclassname"><span class="pre">graphai.core.common.caching.</span></span><span class="sig-name descname"><span class="pre">file_exists</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.caching.file_exists" title="Permalink to this definition"></a></dt>
-<dd><p>Checks whether a given file exists
-:param file_path: Path of the file</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>True if file exists, False otherwise</p>
-</dd>
-</dl>
-</dd></dl>
-
 <dl class="py function">
 <dt class="sig sig-object py" id="graphai.core.common.caching.delete_file">
 <span class="sig-prename descclassname"><span class="pre">graphai.core.common.caching.</span></span><span class="sig-name descname"><span class="pre">delete_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.caching.delete_file" title="Permalink to this definition"></a></dt>
@@ -414,6 +389,30 @@ second result is None.</p>
 </dd></dl>
 
 <dl class="py class">
+<dt class="sig sig-object py" id="graphai.core.common.caching.ScrapingDBCachingManager">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">graphai.core.common.caching.</span></span><span class="sig-name descname"><span class="pre">ScrapingDBCachingManager</span></span><a class="headerlink" href="#graphai.core.common.caching.ScrapingDBCachingManager" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#graphai.core.common.caching.DBCachingManagerBase" title="graphai.core.common.caching.DBCachingManagerBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">DBCachingManagerBase</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="graphai.core.common.caching.ScrapingDBCachingManager.init_db">
+<span class="sig-name descname"><span class="pre">init_db</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.caching.ScrapingDBCachingManager.init_db" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="graphai.core.common.caching.ScrapingDBCachingManager.get_details_using_origin">
+<span class="sig-name descname"><span class="pre">get_details_using_origin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">origin_token</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cols</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.caching.ScrapingDBCachingManager.get_details_using_origin" title="Permalink to this definition"></a></dt>
+<dd><p>Gets details of cache row(s) using origin token instead of id token
+:param origin_token: Origin token
+:param cols: List of columns to retrieve</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Cache row detail dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
 <dt class="sig sig-object py" id="graphai.core.common.caching.VideoConfig">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">graphai.core.common.caching.</span></span><span class="sig-name descname"><span class="pre">VideoConfig</span></span><a class="headerlink" href="#graphai.core.common.caching.VideoConfig" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
@@ -490,7 +489,7 @@ second result is None.</p>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="graphai.core.common.html" class="btn btn-neutral float-left" title="graphai.core.common package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="graphai.core.common.graph.html" class="btn btn-neutral float-right" title="graphai.core.common.graph module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="graphai.core.common.common_utils.html" class="btn btn-neutral float-right" title="graphai.core.common.common_utils module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
