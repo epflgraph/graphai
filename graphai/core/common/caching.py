@@ -3,7 +3,7 @@ import configparser
 import abc
 from datetime import datetime
 
-from graphai.core.common.common_utils import make_sure_path_exists, file_exists, parse_mysql_datetime
+from graphai.core.common.common_utils import make_sure_path_exists, file_exists
 from graphai.definitions import CONFIG_DIR
 from graphai.core.interfaces.db import DB
 
@@ -900,7 +900,7 @@ class ScrapingDBCachingManager(DBCachingManagerBase):
         try:
             self.db.execute_query(
                 f"""
-                CREATE INDEX `scraping_main_parent_index` ON `{self.schema}`.`{self.cache_table}` (`parent_token`);
+                CREATE INDEX `scraping_main_origin_index` ON `{self.schema}`.`{self.cache_table}` (`origin_token`);
                 """
             )
         except Exception:
