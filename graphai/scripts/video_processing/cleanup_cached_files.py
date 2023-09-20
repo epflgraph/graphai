@@ -8,7 +8,7 @@ from graphai.core.common.caching import (
     delete_file
 )
 from graphai.definitions import CONFIG_DIR
-from graphai.core.common.video import format_datetime_for_mysql
+from graphai.core.common.common_utils import format_datetime_for_mysql
 
 from datetime import datetime, timedelta
 import configparser

@@ -1,8 +1,9 @@
 import os
 import configparser
-import errno
 import abc
+from datetime import datetime
 
+from graphai.core.common.common_utils import make_sure_path_exists, file_exists
 from graphai.definitions import CONFIG_DIR
 from graphai.core.interfaces.db import DB
 
@@ -20,43 +21,6 @@ TRANSCRIPT_FORMATS = ['_transcript.txt', '_subtitle_segments.json']
 TEMP_SUBFOLDER = 'Temp'
 
 DEFAULT_SCHEMA = 'cache_graphai'
-
-
-def make_sure_path_exists(path, file_at_the_end=False, full_perm=True):
-    """
-    Recursively creates the folders in a path.
-    Args:
-        path: The path that needs to exist (and will thus be created if it doesn't)
-        file_at_the_end: Whether there is a filename at the end of the path
-
-    Returns:
-        None
-    """
-    if path == '/' or path == '':
-        return
-    if file_at_the_end:
-        path = '/'.join(path.split('/')[:-1])
-    try:
-        parent_path = '/'.join(path.split('/')[:-1])
-        make_sure_path_exists(parent_path)
-        os.mkdir(path)
-        if full_perm:
-            os.chmod(path, 0o777)
-    except OSError as exception:
-        if exception.errno != errno.EEXIST and exception.errno != errno.EPERM:
-            raise
-
-
-def file_exists(file_path):
-    """
-    Checks whether a given file exists
-    Args:
-        file_path: Path of the file
-
-    Returns:
-        True if file exists, False otherwise
-    """
-    return os.path.exists(file_path)
 
 
 def delete_file(file_path):
@@ -885,6 +849,93 @@ class SummaryDBCachingManager(DBCachingManagerBase):
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
             """
         )
+
+
+class ScrapingDBCachingManager(DBCachingManagerBase):
+    def __init__(self):
+        super().__init__(cache_table='Scraping_Main', most_similar_table='Scraping_Most_Similar')
+        # Expiration period in days
+        self.expiration_period = 7
+
+    def init_db(self):
+        # Making sure the schema exists
+        self.db.execute_query(
+            f"""
+            CREATE DATABASE IF NOT EXISTS `{self.schema}`
+            DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci
+            DEFAULT ENCRYPTION='N';
+            """
+        )
+
+        # Creating the cache table if it does not exist
+        self.db.execute_query(
+            f"""
+            CREATE TABLE IF NOT EXISTS `{self.schema}`.`{self.cache_table}` (
+              `id_token` VARCHAR(255),
+              `origin_token` VARCHAR(255),
+              `fingerprint` VARCHAR(255) DEFAULT NULL,
+              `link` LONGTEXT,
+              `content` LONGTEXT DEFAULT NULL,
+              `page_type` VARCHAR(255) DEFAULT NULL,
+              `headers_removed` INT DEFAULT NULL,
+              `long_patterns_removed` INT DEFAULT NULL,
+              `date_added` DATETIME,
+              PRIMARY KEY id_token (id_token)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+            """
+        )
+
+        # Creating the fingerprint index if it doesn't exist
+        try:
+            self.db.execute_query(
+                f"""
+                CREATE INDEX `scraping_main_fp_index` ON `{self.schema}`.`{self.cache_table}` (`fingerprint`);
+                """
+            )
+        except Exception:
+            pass
+
+        # Creating the parent_token index if it doesn't exist
+        try:
+            self.db.execute_query(
+                f"""
+                CREATE INDEX `scraping_main_origin_index` ON `{self.schema}`.`{self.cache_table}` (`origin_token`);
+                """
+            )
+        except Exception:
+            pass
+
+        # Creating the closest match table
+        self.db.execute_query(
+            f"""
+            CREATE TABLE IF NOT EXISTS `{self.schema}`.`{self.most_similar_table}` (
+              `id_token` VARCHAR(255),
+              `most_similar_token` VARCHAR(255) DEFAULT NULL,
+              PRIMARY KEY id_token (id_token),
+              KEY most_similar_token (most_similar_token)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+            """
+        )
+
+    def get_details_using_origin(self, origin_token, cols):
+        """
+        Gets details of cache row(s) using origin token instead of id token
+        Args:
+            origin_token: Origin token
+            cols: List of columns to retrieve
+
+        Returns:
+            Cache row detail dict
+        """
+        if 'date_added' not in cols:
+            cols = cols + ['date_added']
+        results = self._get_details_using_origin(self.schema, self.cache_table, origin_token, cols, has_date_col=True)
+        if results is None:
+            return results
+        current_time = datetime.now()
+        # Only keep the results that are no older than the expiration period
+        results = [x for x in results if (current_time - x['date_added']).days < self.expiration_period]
+        return results
 
 
 class VideoConfig():

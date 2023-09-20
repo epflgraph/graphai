@@ -16,8 +16,7 @@ from graphai.api.celery_tasks.common import (
 )
 
 from graphai.api.celery_tasks.scraping import (
-    initialize_scraping_url_task,
-    get_scraping_sublinks_task,
+    initialize_url_and_get_sublinks_task,
     scraping_sublinks_callback_task,
     process_all_scraping_sublinks_preprocess_task,
     process_all_scraping_sublinks_parallel_task,
@@ -44,9 +43,8 @@ async def extract_sublinks(data: GetSublinksRequest):
 
     token = create_base_url_token(url)
     task_list = [
-        initialize_scraping_url_task.s(token, url, force),
-        get_scraping_sublinks_task.s(),
-        scraping_sublinks_callback_task.s(token)
+        initialize_url_and_get_sublinks_task.s(token, url, force),
+        scraping_sublinks_callback_task.s()
     ]
     task = chain(task_list)
     task = task.apply_async(priority=6)
@@ -82,15 +80,14 @@ async def extract_page_content(data: ExtractContentRequest):
 
     token = create_base_url_token(url)
     task_list = [
-        initialize_scraping_url_task.s(token, url, force),
-        get_scraping_sublinks_task.s(),
-        scraping_sublinks_callback_task.s(token),
-        process_all_scraping_sublinks_preprocess_task.s(token, force),
+        initialize_url_and_get_sublinks_task.s(token, url, force),
+        scraping_sublinks_callback_task.s(),
+        process_all_scraping_sublinks_preprocess_task.s(headers, long_patterns, force),
         group(process_all_scraping_sublinks_parallel_task.s(i, n_jobs) for i in range(n_jobs)),
         process_all_scraping_sublinks_callback_task.s(),
         text_dummy_task.s(),
         group(remove_junk_scraping_parallel_task.s(i, n_jobs, headers, long_patterns) for i in range(n_jobs)),
-        extract_scraping_content_callback_task.s()
+        extract_scraping_content_callback_task.s(headers, long_patterns)
     ]
     task = chain(task_list)
     task = task.apply_async(priority=6)
