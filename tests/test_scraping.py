@@ -48,7 +48,7 @@ def test__scraping_sublinks__initialize_url_and_get_sublinks_task__run_task(test
 @pytest.mark.celery(accept_content=['pickle', 'json'], result_serializer='pickle', task_serializer='pickle')
 @pytest.mark.usefixtures('test_url')
 def test__scraping_content__process_all_sublinks__integration(fixture_app, celery_worker, test_url,
-                                                                               timeout=30):
+                                                              timeout=30):
     # The celery_worker object is necessary for async tasks, otherwise the status will be permanently stuck on
     # PENDING.
     # First, we call the summary endpoint with force=True to test the full task pipeline working
