@@ -7,3 +7,5 @@ from fixtures.translation import *
 from fixtures.video import *
 
 from fixtures.summarization import *
+
+from fixtures.scraping import *
