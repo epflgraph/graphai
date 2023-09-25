@@ -108,7 +108,7 @@ async def get_retrieve_file_status(task_id):
 
 
 @router.post('/calculate_fingerprint', response_model=TaskIDResponse)
-async def calculate_fingerprint(data: VideoFingerprintRequest):
+async def calculate_video_fingerprint(data: VideoFingerprintRequest):
     token = data.token
     force = data.force
     # This is the fingerprinting endpoint, so ignore_fp_results is False
@@ -120,7 +120,7 @@ async def calculate_fingerprint(data: VideoFingerprintRequest):
 
 
 @router.get('/calculate_fingerprint/status/{task_id}', response_model=VideoFingerprintResponse)
-async def calculate_fingerprint_status(task_id):
+async def calculate_video_fingerprint_status(task_id):
     full_results = get_task_info(task_id)
     task_results = full_results['results']
     if task_results is not None:

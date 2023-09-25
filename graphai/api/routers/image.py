@@ -64,7 +64,7 @@ def get_slide_fingerprint_chain_list(token, force, min_similarity=None, n_jobs=8
 
 
 @router.post('/calculate_fingerprint', response_model=TaskIDResponse)
-async def calculate_fingerprint(data: ImageFingerprintRequest):
+async def calculate_slide_fingerprint(data: ImageFingerprintRequest):
     token = data.token
     force = data.force
     task_list = get_slide_fingerprint_chain_list(token, force)
@@ -74,7 +74,7 @@ async def calculate_fingerprint(data: ImageFingerprintRequest):
 
 
 @router.get('/calculate_fingerprint/status/{task_id}', response_model=ImageFingerprintResponse)
-async def calculate_fingerprint_status(task_id):
+async def calculate_slide_fingerprint_status(task_id):
     full_results = get_task_info(task_id)
     task_results = full_results['results']
     if task_results is not None:
