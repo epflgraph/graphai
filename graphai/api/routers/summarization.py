@@ -89,7 +89,7 @@ def get_summary_task_chain(token, text, text_type, summary_type, len_class, tone
 
 
 @router.post('/calculate_fingerprint', response_model=TaskIDResponse)
-async def calculate_summary_fingerprint(data: SummaryFingerprintRequest):
+async def calculate_summary_text_fingerprint(data: SummaryFingerprintRequest):
     text = data.text
     summary_type = data.summary_type
     text_type = data.text_type
@@ -105,7 +105,7 @@ async def calculate_summary_fingerprint(data: SummaryFingerprintRequest):
 
 
 @router.get('/calculate_fingerprint/status/{task_id}', response_model=SummaryFingerprintResponse)
-async def calculate_summary_fingerprint_status(task_id):
+async def calculate_summary_text_fingerprint_status(task_id):
     full_results = get_task_info(task_id)
     task_results = full_results['results']
     if task_results is not None:
