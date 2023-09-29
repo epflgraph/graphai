@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>graphai.core.common.text_utils module &mdash; EPFL Graph AI</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="graphai.core.common.video module" href="graphai.core.common.video.html" />
+    <link rel="prev" title="graphai.core.common.scraping module" href="graphai.core.common.scraping.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="graphai.html" class="icon icon-home">
+            graphai
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="graphai.api.html">graphai.api package</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="graphai.core.html">graphai.core package</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="graphai.core.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="graphai.core.common.html">graphai.core.common package</a><ul class="current">
+<li class="toctree-l4 current"><a class="reference internal" href="graphai.core.common.html#submodules">Submodules</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="graphai.core.interfaces.html">graphai.core.interfaces package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="graphai.core.text.html">graphai.core.text package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="graphai.core.utils.html">graphai.core.utils package</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="graphai.pipelines.html">graphai.pipelines package</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="graphai.definitions.html">graphai.definitions module</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="graphai.html">graphai</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="graphai.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="graphai.core.html">graphai.core package</a></li>
+          <li class="breadcrumb-item"><a href="graphai.core.common.html">graphai.core.common package</a></li>
+      <li class="breadcrumb-item active">graphai.core.common.text_utils module</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/graphai.core.common.text_utils.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-graphai.core.common.text_utils">
+<span id="graphai-core-common-text-utils-module"></span><h1>graphai.core.common.text_utils module<a class="headerlink" href="#module-graphai.core.common.text_utils" title="Permalink to this heading"></a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.core.common.text_utils.md5_text">
+<span class="sig-prename descclassname"><span class="pre">graphai.core.common.text_utils.</span></span><span class="sig-name descname"><span class="pre">md5_text</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.text_utils.md5_text" title="Permalink to this definition"></a></dt>
+<dd><p>Computes the md5 hash of a string
+:param s: The string</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>MD5 hash</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.core.common.text_utils.generate_src_tgt_dict">
+<span class="sig-prename descclassname"><span class="pre">graphai.core.common.text_utils.</span></span><span class="sig-name descname"><span class="pre">generate_src_tgt_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">src</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tgt</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.text_utils.generate_src_tgt_dict" title="Permalink to this definition"></a></dt>
+<dd><p>Creates a source language and target language dictionary for translation
+:param src: Source lang
+:param tgt: Target lang</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.core.common.text_utils.generate_translation_text_token">
+<span class="sig-prename descclassname"><span class="pre">graphai.core.common.text_utils.</span></span><span class="sig-name descname"><span class="pre">generate_translation_text_token</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">src</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tgt</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.text_utils.generate_translation_text_token" title="Permalink to this definition"></a></dt>
+<dd><p>Generates an md5-based token for a string
+:param s: The string
+:param src: Source lang
+:param tgt: Target lang</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Token</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.core.common.text_utils.perceptual_hash_text">
+<span class="sig-prename descclassname"><span class="pre">graphai.core.common.text_utils.</span></span><span class="sig-name descname"><span class="pre">perceptual_hash_text</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.text_utils.perceptual_hash_text" title="Permalink to this definition"></a></dt>
+<dd><p>Computes the perceptual hash of a strong
+:param s: String to hash
+:param min_window_length: Minimum window length for k-grams
+:param max_window_length: Maximum window length for k-grams
+:param hash_len: Length of the hash</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Perceptual hash of string</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.core.common.text_utils.detect_text_language">
+<span class="sig-prename descclassname"><span class="pre">graphai.core.common.text_utils.</span></span><span class="sig-name descname"><span class="pre">detect_text_language</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.text_utils.detect_text_language" title="Permalink to this definition"></a></dt>
+<dd><p>Detects the language of the provided string
+:param s: String to detect language for</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Language of the string</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.core.common.text_utils.count_tokens_for_openai">
+<span class="sig-prename descclassname"><span class="pre">graphai.core.common.text_utils.</span></span><span class="sig-name descname"><span class="pre">count_tokens_for_openai</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'cl100k_base'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.text_utils.count_tokens_for_openai" title="Permalink to this definition"></a></dt>
+<dd><p>Counts the number of tokens in a given text for a given OpenAI model
+:param text: The text to tokenize
+:param model: The OpenAI model to use</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Number of tokens</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.core.common.text_utils.force_dict_to_text">
+<span class="sig-prename descclassname"><span class="pre">graphai.core.common.text_utils.</span></span><span class="sig-name descname"><span class="pre">force_dict_to_text</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.text_utils.force_dict_to_text" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.core.common.text_utils.generate_summary_text_token">
+<span class="sig-prename descclassname"><span class="pre">graphai.core.common.text_utils.</span></span><span class="sig-name descname"><span class="pre">generate_summary_text_token</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">text_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'text'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">summary_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'summary'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">len_class</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'normal'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tone</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'info'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.text_utils.generate_summary_text_token" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.core.common.text_utils.generate_summary_type_dict">
+<span class="sig-prename descclassname"><span class="pre">graphai.core.common.text_utils.</span></span><span class="sig-name descname"><span class="pre">generate_summary_type_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">summary_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">len_class</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tone</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.text_utils.generate_summary_type_dict" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="graphai.core.common.text_utils.ChatGPTSummarizer">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">graphai.core.common.text_utils.</span></span><span class="sig-name descname"><span class="pre">ChatGPTSummarizer</span></span><a class="headerlink" href="#graphai.core.common.text_utils.ChatGPTSummarizer" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="graphai.core.common.text_utils.ChatGPTSummarizer.establish_connection">
+<span class="sig-name descname"><span class="pre">establish_connection</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.text_utils.ChatGPTSummarizer.establish_connection" title="Permalink to this definition"></a></dt>
+<dd><p>Ensures that an API key exists and sets it as the OpenAI key
+:returns: Boolean indicating whether an API key was found</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="graphai.core.common.text_utils.ChatGPTSummarizer.generate_summary">
+<span class="sig-name descname"><span class="pre">generate_summary</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text_or_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">text_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'lecture'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">summary_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'summary'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">len_class</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'normal'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tone</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'info'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_normal_len</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_short_len</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">40</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.text_utils.ChatGPTSummarizer.generate_summary" title="Permalink to this definition"></a></dt>
+<dd><p>Generates a summary or a title for the provided text
+:param text_or_dict: String or dictionary containing all the text to summarize and synthesize into one summary
+:param text_type: Type of text, e.g. “lecture”, “course”. Useful for summaries.
+:param summary_type: The type of the summary to be produced, either ‘title’ or ‘summary’ (default)
+:param len_class: Whether there’s a constraint on the number of sentences (‘vshort’ for 1, ‘short’ for 2)</p>
+<aside class="system-message">
+<p class="system-message-title">System Message: ERROR/3 (<span class="docutils literal">/home/ubuntu/actions-runner/_work/graphai/graphai/main/graphai/core/common/text_utils.py:docstring of graphai.core.common.text_utils.ChatGPTSummarizer.generate_summary</span>, line 6)</p>
+<p>Unexpected indentation.</p>
+</aside>
+<blockquote>
+<div><p>or not (‘normal’, default).</p>
+</div></blockquote>
+<aside class="system-message">
+<p class="system-message-title">System Message: WARNING/2 (<span class="docutils literal">/home/ubuntu/actions-runner/_work/graphai/graphai/main/graphai/core/common/text_utils.py:docstring of graphai.core.common.text_utils.ChatGPTSummarizer.generate_summary</span>, line 7)</p>
+<p>Block quote ends without a blank line; unexpected unindent.</p>
+</aside>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>tone</strong> – Whether to use a marketing tone (‘promo’) or an informative tone (‘info’, default)</p></li>
+<li><p><strong>max_normal_len</strong> – Approximate maximum length of result (in words)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Result of summarization, plus a flag indicating whether there were too many tokens</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="graphai.core.common.text_utils.TranslationModels">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">graphai.core.common.text_utils.</span></span><span class="sig-name descname"><span class="pre">TranslationModels</span></span><a class="headerlink" href="#graphai.core.common.text_utils.TranslationModels" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="graphai.core.common.text_utils.TranslationModels.load_models">
+<span class="sig-name descname"><span class="pre">load_models</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.text_utils.TranslationModels.load_models" title="Permalink to this definition"></a></dt>
+<dd><p>Loads Huggingface translation and tokenization models plus a pysbd segmenter
+:returns: None</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="graphai.core.common.text_utils.TranslationModels.translate">
+<span class="sig-name descname"><span class="pre">translate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">how</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'en-fr'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.text_utils.TranslationModels.translate" title="Permalink to this definition"></a></dt>
+<dd><p>Translates provided text
+:param text: Text to translate
+:param how: source-target language</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Translated text and ‘unpunctuated text too long’ flag</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="graphai.core.common.scraping.html" class="btn btn-neutral float-left" title="graphai.core.common.scraping module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="graphai.core.common.video.html" class="btn btn-neutral float-right" title="graphai.core.common.video module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Aitor Pérez.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

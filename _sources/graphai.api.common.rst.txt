@@ -16,4 +16,5 @@ Submodules
    graphai.api.common.graph
    graphai.api.common.log
    graphai.api.common.ontology
+   graphai.api.common.translation
    graphai.api.common.video

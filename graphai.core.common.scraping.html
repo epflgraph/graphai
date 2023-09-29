@@ -17,7 +17,7 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="graphai.core.common.video module" href="graphai.core.common.video.html" />
+    <link rel="next" title="graphai.core.common.text_utils module" href="graphai.core.common.text_utils.html" />
     <link rel="prev" title="graphai.core.common.ontology module" href="graphai.core.common.ontology.html" /> 
 </head>
 
@@ -212,7 +212,14 @@ position of intersections, largest matching string pattern with optimal shift)</
 <dl class="py function">
 <dt class="sig sig-object py" id="graphai.core.common.scraping.create_base_url_token">
 <span class="sig-prename descclassname"><span class="pre">graphai.core.common.scraping.</span></span><span class="sig-name descname"><span class="pre">create_base_url_token</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">url</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.scraping.create_base_url_token" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Creates a standard token for a given base URL.
+:param url: Base url</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Token</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="graphai.core.common.scraping.initialize_url">
@@ -229,18 +236,46 @@ position of intersections, largest matching string pattern with optimal shift)</
 
 <dl class="py function">
 <dt class="sig sig-object py" id="graphai.core.common.scraping.generate_sublink_token">
-<span class="sig-prename descclassname"><span class="pre">graphai.core.common.scraping.</span></span><span class="sig-name descname"><span class="pre">generate_sublink_token</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">base_url</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">validated_url</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sublink</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.scraping.generate_sublink_token" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
+<span class="sig-prename descclassname"><span class="pre">graphai.core.common.scraping.</span></span><span class="sig-name descname"><span class="pre">generate_sublink_token</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">base_token</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">validated_url</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sublink</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.scraping.generate_sublink_token" title="Permalink to this definition"></a></dt>
+<dd><p>Generates the token for a sublink based on the base token
+:param base_token: Token created for the base URL
+:param validated_url: Validated base URL
+:param sublink: Sublink to generate the token for</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Token for the sublink</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="graphai.core.common.scraping.reconstruct_data_dict">
 <span class="sig-prename descclassname"><span class="pre">graphai.core.common.scraping.</span></span><span class="sig-name descname"><span class="pre">reconstruct_data_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sublinks</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tokens</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">contents</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">page_types</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.scraping.reconstruct_data_dict" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Reconstructs the data dict that is used for processing the content of sublinks using precalculated inputs
+:param sublinks: List of sublinks
+:param tokens: List of tokens
+:param contents: List of contents, optional
+:param page_types: List of page types, optional</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Reconstructed data dictionary</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="graphai.core.common.scraping.initialize_data_dict">
-<span class="sig-prename descclassname"><span class="pre">graphai.core.common.scraping.</span></span><span class="sig-name descname"><span class="pre">initialize_data_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">base_url</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">validated_url</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sublinks</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.scraping.initialize_data_dict" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
+<span class="sig-prename descclassname"><span class="pre">graphai.core.common.scraping.</span></span><span class="sig-name descname"><span class="pre">initialize_data_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">base_token</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">validated_url</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sublinks</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.scraping.initialize_data_dict" title="Permalink to this definition"></a></dt>
+<dd><p>Initializes the data dictionary used for processing the content of sublinks
+:param base_token: Base URL token
+:param validated_url: Validated base URL
+:param sublinks: List of sublinks</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Data dictionary with ids filled in and content/pagetype fields vacant</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="graphai.core.common.scraping.get_sublinks">
@@ -315,7 +350,7 @@ position of intersections, largest matching string pattern with optimal shift)</
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="graphai.core.common.ontology.html" class="btn btn-neutral float-left" title="graphai.core.common.ontology module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="graphai.core.common.video.html" class="btn btn-neutral float-right" title="graphai.core.common.video module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="graphai.core.common.text_utils.html" class="btn btn-neutral float-right" title="graphai.core.common.text_utils module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
