@@ -27,7 +27,8 @@ from graphai.api.celery_tasks.common import (
     format_api_results,
     ignore_fingerprint_results_callback_task,
 )
-from graphai.core.common.video import FingerprintParameters, generate_src_tgt_dict, generate_translation_text_token
+from graphai.core.common.text_utils import generate_src_tgt_dict, generate_translation_text_token
+from graphai.core.common.caching import FingerprintParameters
 from graphai.core.interfaces.celery_config import get_task_info
 
 

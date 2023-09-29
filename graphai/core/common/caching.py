@@ -1024,3 +1024,44 @@ class VideoConfig():
         new_path = self.generate_filepath(new_filename)
         # Only creating the symlink if it doesn't already exist
         create_symlink_between_paths(old_path, new_path)
+
+
+class FingerprintParameters:
+    def __init__(self):
+        self.min_similarity = dict()
+        self.load_values()
+
+    def load_values(self):
+        """
+        Loads the values of fingerprinting similarity thresholds from file, or failing that, sets them to defaults
+        Returns:
+            None
+        """
+        defaults = {
+            'text': '1.0',
+            'image': '1.0',
+            'audio': '0.8',
+            'video': '1.0'
+        }
+        config_contents = configparser.ConfigParser()
+        try:
+            print('Reading fingerprint min similarity values from file')
+            config_contents.read(f'{CONFIG_DIR}/fingerprint.ini')
+            self.min_similarity['text'] = float(config_contents['FP'].get('text', fallback=defaults['text']))
+            self.min_similarity['image'] = float(config_contents['FP'].get('image', fallback=defaults['image']))
+            self.min_similarity['audio'] = float(config_contents['FP'].get('audio', fallback=defaults['audio']))
+            self.min_similarity['video'] = float(config_contents['FP'].get('video', fallback=defaults['video']))
+        except Exception:
+            self.min_similarity = {k: float(v) for k, v in defaults.items()}
+
+    def get_min_sim_text(self):
+        return self.min_similarity['text']
+
+    def get_min_sim_image(self):
+        return self.min_similarity['image']
+
+    def get_min_sim_audio(self):
+        return self.min_similarity['audio']
+
+    def get_min_sim_video(self):
+        return self.min_similarity['video']

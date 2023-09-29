@@ -29,8 +29,8 @@ from graphai.api.celery_tasks.summarization import (
     summarize_text_callback_task
 )
 
-from graphai.core.common.video import FingerprintParameters, generate_summary_type_dict, \
-    generate_summary_text_token
+from graphai.core.common.text_utils import generate_summary_text_token, generate_summary_type_dict
+from graphai.core.common.caching import FingerprintParameters
 from graphai.core.interfaces.celery_config import get_task_info
 
 

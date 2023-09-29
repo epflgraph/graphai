@@ -4,7 +4,8 @@ import shutil
 from celery import shared_task
 
 from graphai.api.common.video import file_management_config, local_ocr_nlp_models, \
-    transcription_model, translation_models
+    transcription_model
+from graphai.api.common.translation import translation_models
 from graphai.core.common.video import retrieve_file_from_url, retrieve_file_from_kaltura, \
     detect_audio_format_and_duration, extract_audio_from_video, extract_frames, generate_frame_sample_indices, \
     compute_ocr_noise_level, compute_ocr_threshold, compute_video_ocr_transitions, check_ocr_and_hash_thresholds, \

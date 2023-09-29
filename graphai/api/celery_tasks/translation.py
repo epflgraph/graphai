@@ -1,6 +1,6 @@
 from celery import shared_task
-from graphai.api.common.video import translation_models
-from graphai.core.common.video import detect_text_language
+from graphai.api.common.translation import translation_models
+from graphai.core.common.text_utils import detect_text_language
 from graphai.core.common.common_utils import get_current_datetime
 from graphai.core.common.caching import TextDBCachingManager
 from graphai.api.celery_tasks.common import compute_text_fingerprint_common, fingerprint_lookup_retrieve_from_db, \

@@ -26,8 +26,7 @@ from graphai.api.celery_tasks.image import (
     extract_slide_text_callback_task,
 )
 from graphai.core.interfaces.celery_config import get_task_info
-from graphai.core.common.video import FingerprintParameters
-
+from graphai.core.common.caching import FingerprintParameters
 
 # Initialise video router
 router = APIRouter(
