@@ -27,7 +27,8 @@ from graphai.api.celery_tasks.common import (
     format_api_results,
     ignore_fingerprint_results_callback_task,
 )
-from graphai.core.common.video import FingerprintParameters, generate_src_tgt_dict, generate_translation_text_token
+from graphai.core.common.text_utils import generate_src_tgt_dict, generate_translation_text_token
+from graphai.core.common.caching import FingerprintParameters
 from graphai.core.interfaces.celery_config import get_task_info
 
 
@@ -70,7 +71,7 @@ def get_translation_text_fingerprint_chain_list(token, text, src, tgt, force, mi
 
 
 @router.post('/calculate_fingerprint', response_model=TaskIDResponse)
-async def calculate_fingerprint(data: TextFingerprintRequest):
+async def calculate_translation_text_fingerprint(data: TextFingerprintRequest):
     text = data.text
     src = data.source
     tgt = data.target
@@ -84,7 +85,7 @@ async def calculate_fingerprint(data: TextFingerprintRequest):
 
 
 @router.get('/calculate_fingerprint/status/{task_id}', response_model=TextFingerprintResponse)
-async def calculate_fingerprint_status(task_id):
+async def calculate_translation_text_fingerprint_status(task_id):
     full_results = get_task_info(task_id)
     task_results = full_results['results']
     if task_results is not None:

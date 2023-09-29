@@ -7,7 +7,7 @@ from graphai.api.schemas.common import TaskStatusResponse
 class GetSublinksRequest(BaseModel):
     url: str = Field(
         title="URL",
-        description="Text to summarize. Can be one string or a string to string dictionary."
+        description="URL to scrape."
     )
 
     force: bool = Field(

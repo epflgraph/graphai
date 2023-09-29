@@ -464,6 +464,14 @@ def check_url(test_url, request_headers=None):
 
 
 def create_base_url_token(url):
+    """
+    Creates a standard token for a given base URL.
+    Args:
+        url: Base url
+
+    Returns:
+        Token
+    """
     return url.replace('https://www.', '').replace('http://www.', '').replace('https://', '').replace('http://', '')
 
 
@@ -473,7 +481,6 @@ def initialize_url(url, base_url=None):
     Args:
         url: The URL to initialize
         base_url: The token of the base URL, extracted from `url` if None
-
     Returns:
         The validated base URL, the original (corrected) base URL, status message, and status code
     """
@@ -500,13 +507,35 @@ def initialize_url(url, base_url=None):
     return base_url, None, status_msg, status_code
 
 
-def generate_sublink_token(base_url, validated_url, sublink):
+def generate_sublink_token(base_token, validated_url, sublink):
+    """
+    Generates the token for a sublink based on the base token
+    Args:
+        base_token: Token created for the base URL
+        validated_url: Validated base URL
+        sublink: Sublink to generate the token for
+
+    Returns:
+        Token for the sublink
+    """
+    # If the sublink is the same as the base validated URL, the base token is returned
     if sublink == validated_url:
-        return base_url
-    return base_url + '___' + hashlib.md5(sublink.encode('utf-8')).hexdigest()[:8]
+        return base_token
+    return base_token + '___' + hashlib.md5(sublink.encode('utf-8')).hexdigest()[:8]
 
 
 def reconstruct_data_dict(sublinks, tokens, contents=None, page_types=None):
+    """
+    Reconstructs the data dict that is used for processing the content of sublinks using precalculated inputs
+    Args:
+        sublinks: List of sublinks
+        tokens: List of tokens
+        contents: List of contents, optional
+        page_types: List of page types, optional
+
+    Returns:
+        Reconstructed data dictionary
+    """
     data = dict()
     if contents is None:
         contents = [''] * len(sublinks)
@@ -520,12 +549,22 @@ def reconstruct_data_dict(sublinks, tokens, contents=None, page_types=None):
     return data
 
 
-def initialize_data_dict(base_url, validated_url, sublinks):
+def initialize_data_dict(base_token, validated_url, sublinks):
+    """
+    Initializes the data dictionary used for processing the content of sublinks
+    Args:
+        base_token: Base URL token
+        validated_url: Validated base URL
+        sublinks: List of sublinks
+
+    Returns:
+        Data dictionary with ids filled in and content/pagetype fields vacant
+    """
     data = dict()
     # Initialise data dictionary
     for sublink in sublinks:
         if sublink not in data:
-            data.update({sublink: {'id': generate_sublink_token(base_url, validated_url, sublink),
+            data.update({sublink: {'id': generate_sublink_token(base_token, validated_url, sublink),
                                    'content': '', 'pagetype': None}})
     return data
 

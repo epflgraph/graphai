@@ -1,7 +1,8 @@
 from celery import shared_task
 
 from graphai.core.common.video import find_closest_audio_fingerprint_from_list, \
-    find_closest_image_fingerprint_from_list, perceptual_hash_text
+    find_closest_image_fingerprint_from_list
+from graphai.core.common.text_utils import perceptual_hash_text
 
 
 def format_api_results(id, name, status, result):
