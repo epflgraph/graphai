@@ -125,14 +125,14 @@ def get_keywords_for_summarization_task(self, input_dict, use_keywords=True):
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='text_6.summarize_text_chatgpt_compute', ignore_result=False)
 def summarize_text_task(self, token_and_text, text_type='text', summary_type='summary',
-                        len_class='normal', tone='info',
+                        len_class='normal', tone='info', debug=False,
                         title_len=20, summary_len=100):
     existing_results = token_and_text['existing_results']
     token = token_and_text['token']
     text = token_and_text['text']
     original_text = token_and_text['original_text']
     if text is None or len(text) == 0:
-        return {
+        result_dict = {
             'token': token,
             'text': text,
             'original_text': original_text,
@@ -144,8 +144,10 @@ def summarize_text_task(self, token_and_text, text_type='text', summary_type='su
             'fresh': False,
             'successful': False,
             'too_many_tokens': False,
-            'n_tokens_total': 0
+            'n_tokens_total': 0,
+            'full_message': None
         }
+        return result_dict
     if existing_results is not None:
         return {
             'token': token,
@@ -159,12 +161,15 @@ def summarize_text_task(self, token_and_text, text_type='text', summary_type='su
             'fresh': False,
             'successful': True,
             'too_many_tokens': False,
-            'n_tokens_total': 0
+            'n_tokens_total': 0,
+            'full_message': None
         }
     summarizer = ChatGPTSummarizer()
-    results, too_many_tokens, n_tokens_total = summarizer.generate_summary(
+    results, message, too_many_tokens, n_tokens_total = summarizer.generate_summary(
         text, text_type=text_type, summary_type=summary_type, len_class=len_class, tone=tone,
         max_normal_len=title_len if summary_type == 'title' else summary_len)
+    if not debug:
+        message = None
     return {
         'token': token,
         'text': text,
@@ -177,7 +182,8 @@ def summarize_text_task(self, token_and_text, text_type='text', summary_type='su
         'fresh': results is not None,
         'successful': results is not None,
         'too_many_tokens': too_many_tokens,
-        'n_tokens_total': n_tokens_total
+        'n_tokens_total': n_tokens_total,
+        'full_message': message
     }
 
 

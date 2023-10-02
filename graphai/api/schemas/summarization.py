@@ -113,6 +113,12 @@ class SummarizationRequest(BaseModel):
         default=False
     )
 
+    debug: bool = Field(
+        title="Debug",
+        description="Whether to return the system message sent to ChatGPT",
+        default=False
+    )
+
 
 class SummarizationTaskResponse(BaseModel):
     summary: Union[str, None] = Field(
@@ -142,8 +148,22 @@ class SummarizationTaskResponse(BaseModel):
     )
 
 
+class SummarizationDebugTaskResponse(SummarizationTaskResponse):
+    debug_message: Union[str, None] = Field(
+        title="Message",
+        description="System message sent to ChatGPT"
+    )
+
+
 class SummarizationResponse(TaskStatusResponse):
     task_result: Union[SummarizationTaskResponse, None] = Field(
+        title="Summarization response",
+        description="A dict containing the resulting summarized text and a success flag."
+    )
+
+
+class SummarizationDebugResponse(TaskStatusResponse):
+    task_result: Union[SummarizationDebugTaskResponse, None] = Field(
         title="Summarization response",
         description="A dict containing the resulting summarized text and a success flag."
     )
