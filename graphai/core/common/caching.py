@@ -348,6 +348,8 @@ class DBCachingManagerBase(abc.ABC):
         Returns:
             None
         """
+        if id_tokens is None or len(id_tokens) == 0:
+            return
         id_tokens_str = '(' + ', '.join([surround_with_character(id_token, "'") for id_token in id_tokens]) + ')'
         self.db.execute_query(
             f"""
@@ -931,11 +933,17 @@ class ScrapingDBCachingManager(DBCachingManagerBase):
             cols = cols + ['date_added']
         results = self._get_details_using_origin(self.schema, self.cache_table, origin_token, cols, has_date_col=True)
         if results is None:
-            return results
+            return None
         current_time = datetime.now()
         # Only keep the results that are no older than the expiration period
-        results = [x for x in results if (current_time - x['date_added']).days < self.expiration_period]
-        return results
+        correct_results = [x for x in results if (current_time - x['date_added']).days < self.expiration_period]
+        correct_ids = [x['id_token'] for x in correct_results]
+        incorrect_ids = [x['id_token'] for x in results if x['id_token'] not in correct_ids]
+        if len(incorrect_ids) > 0:
+            self.delete_cache_rows(incorrect_ids)
+        if len(correct_results) == 0:
+            return None
+        return correct_results
 
 
 class VideoConfig():
