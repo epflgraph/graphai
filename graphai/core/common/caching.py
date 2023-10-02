@@ -938,9 +938,12 @@ class ScrapingDBCachingManager(DBCachingManagerBase):
         # Only keep the results that are no older than the expiration period
         correct_results = [x for x in results if (current_time - x['date_added']).days < self.expiration_period]
         correct_ids = [x['id_token'] for x in correct_results]
+        # See if there are outdated results in the table
         incorrect_ids = [x['id_token'] for x in results if x['id_token'] not in correct_ids]
+        # If so, delete their cache rows (since we are not the Internet Archive)
         if len(incorrect_ids) > 0:
             self.delete_cache_rows(incorrect_ids)
+        # Return None in case of an empty results list to be consistent with caching logic elsewhere
         if len(correct_results) == 0:
             return None
         return correct_results
