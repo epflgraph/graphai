@@ -5,7 +5,7 @@ from graphai.api.schemas.common import TaskIDResponse
 
 from graphai.api.schemas.summarization import (
     SummarizationRequest,
-    SummarizationResponse,
+    SummarizationDebugResponse,
     SummaryFingerprintRequest,
     SummaryFingerprintResponse
 )
@@ -75,14 +75,14 @@ def get_summary_text_fingerprint_chain_list(token, text, text_type, summary_type
 
 
 def get_summary_task_chain(token, text, text_type, summary_type, len_class, tone,
-                           keywords=True, force=False, skip_token=False):
+                           keywords=True, force=False, skip_token=False, debug=False):
     if skip_token:
         task_list = [lookup_text_summary_task.s(text, force)]
     else:
         task_list = [lookup_text_summary_task.s(token, text, force)]
     task_list += [
         get_keywords_for_summarization_task.s(keywords),
-        summarize_text_task.s(text_type, summary_type, len_class, tone),
+        summarize_text_task.s(text_type, summary_type, len_class, tone, debug),
         summarize_text_callback_task.s(force)
     ]
     return task_list
@@ -129,6 +129,7 @@ async def summarize(data: SummarizationRequest):
     keywords = data.use_keywords
     tone = data.tone
     force = data.force
+    debug = data.debug
 
     token = generate_summary_text_token(text, text_type, 'summary', len_class, tone)
     if not force:
@@ -139,7 +140,7 @@ async def summarize(data: SummarizationRequest):
         task_list = []
         skip_token = False
     task_list += get_summary_task_chain(token, text, text_type, 'summary', len_class, tone,
-                                        keywords=keywords, force=force, skip_token=skip_token)
+                                        keywords=keywords, force=force, skip_token=skip_token, debug=debug)
     tasks = chain(task_list)
     tasks = tasks.apply_async(priority=6)
     return {'task_id': tasks.id}
@@ -153,6 +154,7 @@ async def create_title(data: SummarizationRequest):
     keywords = data.use_keywords
     tone = data.tone
     force = data.force
+    debug = data.debug
 
     token = generate_summary_text_token(text, text_type, 'title', len_class, tone)
     if not force:
@@ -163,14 +165,14 @@ async def create_title(data: SummarizationRequest):
         task_list = []
         skip_token = False
     task_list += get_summary_task_chain(token, text, text_type, 'title', len_class, tone,
-                                        keywords=keywords, force=force, skip_token=skip_token)
+                                        keywords=keywords, force=force, skip_token=skip_token, debug=debug)
     tasks = chain(task_list)
     tasks = tasks.apply_async(priority=6)
     return {'task_id': tasks.id}
 
 
-@router.get('/title/status/{task_id}', response_model=SummarizationResponse)
-@router.get('/summary/status/{task_id}', response_model=SummarizationResponse)
+@router.get('/title/status/{task_id}', response_model=SummarizationDebugResponse)
+@router.get('/summary/status/{task_id}', response_model=SummarizationDebugResponse)
 async def summarize_status(task_id):
     full_results = get_task_info(task_id)
     task_results = full_results['results']
@@ -181,7 +183,8 @@ async def summarize_status(task_id):
                 'summary_type': task_results['summary_type'],
                 'text_too_large': task_results['too_many_tokens'],
                 'successful': task_results['successful'],
-                'fresh': task_results['fresh']
+                'fresh': task_results['fresh'],
+                'debug_message': task_results['full_message']
             }
         else:
             task_results = None

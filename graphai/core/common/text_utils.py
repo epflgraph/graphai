@@ -266,7 +266,7 @@ class ChatGPTSummarizer:
             sentences = f" {n_sentences}-sentence"
         else:
             sentences = ""
-        max_len_str = f" with under {max_len} words."
+        max_len_str = f" with under {max_len} words"
 
         # Based on the text_type, we may have additional constraints.
         # This section should be expanded based on feedback
@@ -313,9 +313,9 @@ class ChatGPTSummarizer:
         system_message += additional_constraints
 
         if tone == 'promo':
-            system_message += " Write in a promotional tone."
+            system_message += " Write in a promotional tone. "
         else:
-            system_message += " Write in a neutral, informative tone."
+            system_message += " Write in a neutral, informative tone. "
 
         # Now we compile the response format
         response_format = f"\"{summary_type}: "
@@ -386,10 +386,11 @@ class ChatGPTSummarizer:
         else:
             text = f"Text: {text_or_dict}"
 
-        results, too_many_tokens, n_total_tokens = self._generate_completion(text, system_message, max_normal_len)
+        results, too_many_tokens, n_total_tokens = \
+            self._generate_completion(text, system_message, max_normal_len)
         # Now we remove the "Title:" or "Summary:" at the beginning
         results = ':'.join(results.split(':')[1:]).strip().strip('"')
-        return results, too_many_tokens, n_total_tokens
+        return results, system_message, too_many_tokens, n_total_tokens
 
 
 class TranslationModels:
