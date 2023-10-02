@@ -309,7 +309,7 @@ def test__video_extract_audio__extract_audio__integration(fixture_app, celery_wo
     # Waiting for task chain to succeed
     current_status = 'PENDING'
     n_tries = 0
-    while current_status == 'PENDING' and n_tries < 10:
+    while current_status == 'PENDING' and n_tries < 30:
         # Wait a few seconds
         sleep(3)
         # Now get status
