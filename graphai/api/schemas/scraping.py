@@ -56,13 +56,13 @@ class GetSublinksResponse(TaskStatusResponse):
 
 
 class ExtractContentRequest(GetSublinksRequest):
-    headers: bool = Field(
+    remove_headers: bool = Field(
         title="Remove headers",
         description="Flag that determines whether headers are removed. False by default.",
         default=False
     )
 
-    long_patterns: bool = Field(
+    remove_long_patterns: bool = Field(
         title="Remove long patterns",
         description="Flag that determines whether long patterns are removed. False by default.",
         default=False
