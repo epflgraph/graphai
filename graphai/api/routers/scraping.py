@@ -74,8 +74,8 @@ async def extract_sublinks_status(task_id):
 async def extract_page_content(data: ExtractContentRequest):
     url = data.url
     force = data.force
-    headers = data.headers
-    long_patterns = data.long_patterns
+    headers = data.remove_headers
+    long_patterns = data.remove_long_patterns
     n_jobs = 8
 
     token = create_base_url_token(url)
