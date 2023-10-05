@@ -22,6 +22,7 @@ from graphai.api.celery_tasks.scraping import (
     process_all_scraping_sublinks_parallel_task,
     process_all_scraping_sublinks_callback_task,
     remove_junk_scraping_parallel_task,
+    remove_junk_scraping_callback_task,
     extract_scraping_content_callback_task
 )
 
@@ -87,6 +88,7 @@ async def extract_page_content(data: ExtractContentRequest):
         process_all_scraping_sublinks_callback_task.s(),
         text_dummy_task.s(),
         group(remove_junk_scraping_parallel_task.s(i, n_jobs, headers, long_patterns) for i in range(n_jobs)),
+        remove_junk_scraping_callback_task.s(),
         extract_scraping_content_callback_task.s(headers, long_patterns)
     ]
     task = chain(task_list)

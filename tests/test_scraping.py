@@ -65,7 +65,7 @@ def test__scraping_content__process_all_sublinks__integration(fixture_app, celer
     # Waiting for task chain to succeed
     current_status = 'PENDING'
     n_tries = 0
-    while current_status == 'PENDING' and n_tries < 30:
+    while current_status == 'PENDING' and n_tries < 50:
         # Wait a few seconds
         sleep(3)
         # Now get status
@@ -109,7 +109,7 @@ def test__scraping_content__process_all_sublinks__integration(fixture_app, celer
     # Waiting for task chain to succeed
     current_status = 'PENDING'
     n_tries = 0
-    while current_status == 'PENDING' and n_tries < 30:
+    while current_status == 'PENDING' and n_tries < 80:
         # Wait a few seconds
         sleep(3)
         # Now get status
