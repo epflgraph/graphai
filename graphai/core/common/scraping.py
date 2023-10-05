@@ -692,8 +692,8 @@ def remove_headers(data):
     """
 
     # Return if no data to process
-    if len(data) == 0:
-        return False
+    if data is None or len(data) == 0:
+        return dict()
 
     # Generate list of sublinks (data keys)
     sublinks_list = sorted(list(data.keys()))
@@ -740,8 +740,8 @@ def remove_long_patterns(data, min_length=1024):
     """
 
     # Return if no data to process
-    if len(data) == 0:
-        return False
+    if data is None or len(data) == 0:
+        return dict()
 
     # Generate list of sublinks (data keys)
     sublinks_list = sorted(list(data.keys()))
