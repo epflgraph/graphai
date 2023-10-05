@@ -202,11 +202,12 @@ def remove_junk_scraping_parallel_task(self, results, i, n_total, headers, long_
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='text_6.extract_scraping_content_callback', ignore_result=False)
-def extract_scraping_content_callback_task(self, results, headers, long_patterns):
+             name='text_6.remove_junk_scraping_callback', ignore_result=False)
+def remove_junk_scraping_callback_task(self, results):
     # If the results aren't fresh (whether cache hit or unsuccessful), there is nothing to merge and nothing to
     # insert into the database
     if not results[0]['fresh']:
+        del results[0]['do_merge']
         return results[0]
     if results[0]['do_merge']:
         # If 'do_merge' is True, the full data is the combination of all 'data' values and needs merging
@@ -216,25 +217,26 @@ def extract_scraping_content_callback_task(self, results, headers, long_patterns
     else:
         # If 'do_merge' is False (but 'fresh' is True, since we're here!), then all 'data' values are identical
         joint_data = results[0]['data']
-    # Updating db rows
-    current_datetime = get_current_datetime()
-    db_manager = ScrapingDBCachingManager()
-    for sublink in joint_data:
-        db_manager.insert_or_update_details(joint_data[sublink]['id'], values_to_insert={
-            'origin_token': results[0]['token'],
-            'link': sublink,
-            'content': joint_data[sublink]['content'],
-            'page_type': joint_data[sublink]['pagetype'],
-            'headers_removed': 1 if headers else 0,
-            'long_patterns_removed': 1 if long_patterns else 0,
-            'date_added': current_datetime
-        })
-    return {
-        'token': results[0]['token'],
-        'sublinks': results[0]['sublinks'],
-        'validated_url': results[0]['validated_url'],
-        'status_msg': results[0]['status_msg'],
-        'data': joint_data,
-        'fresh': True,
-        'successful': True
-    }
+
+    new_results = results[0]
+    new_results['data'] = joint_data
+    return new_results
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
+             name='text_6.extract_scraping_content_callback', ignore_result=False)
+def extract_scraping_content_callback_task(self, results, headers, long_patterns):
+    if results['fresh']:
+        current_datetime = get_current_datetime()
+        db_manager = ScrapingDBCachingManager()
+        for sublink in results['data']:
+            db_manager.insert_or_update_details(results['data'][sublink]['id'], values_to_insert={
+                'origin_token': results['token'],
+                'link': sublink,
+                'content': results['data'][sublink]['content'],
+                'page_type': results['data'][sublink]['pagetype'],
+                'headers_removed': 1 if headers else 0,
+                'long_patterns_removed': 1 if long_patterns else 0,
+                'date_added': current_datetime
+            })
+    return results
