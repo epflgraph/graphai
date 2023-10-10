@@ -146,6 +146,14 @@ def generate_summary_type_dict(text_type, summary_type, len_class, tone):
     }
 
 
+def convert_text_or_dict_to_text(text_or_dict):
+    if isinstance(text_or_dict, dict):
+        text = "\n\n".join([f"{k}: {v}" for k, v in text_or_dict.items()])
+    else:
+        text = f"Text: {text_or_dict}"
+    return text
+
+
 class ChatGPTSummarizer:
     def __init__(self):
         config_contents = configparser.ConfigParser()
@@ -173,7 +181,7 @@ class ChatGPTSummarizer:
         else:
             return False
 
-    def _generate_completion(self, text, system_message, max_len):
+    def _generate_completion(self, text, system_message, max_len=None, temperature=1.0, top_p=1.0):
         """
         Internal method, generates a chat completion, which is the OpenAI API endpoint for ChatGPT interactions
         Args:
@@ -190,8 +198,14 @@ class ChatGPTSummarizer:
         has_api_key = self.establish_connection()
         if not has_api_key:
             return None, False, 0
+        text_token_count = count_tokens_for_openai(text)
+        system_token_count = count_tokens_for_openai(system_message)
+        if max_len is None:
+            max_len = 3 * text_token_count
+        else:
+            max_len = int(3 * max_len)
         # We count the approximate number of tokens in order to choose the right model (i.e. context size)
-        approx_token_count = count_tokens_for_openai(text) + count_tokens_for_openai(system_message) + int(2 * max_len)
+        approx_token_count = text_token_count + system_token_count + max_len
         if approx_token_count < 4096:
             model_type = 'gpt-3.5-turbo'
         elif 4096 < approx_token_count < 16384:
@@ -207,7 +221,9 @@ class ChatGPTSummarizer:
                     {"role": "system", "content": system_message},
                     {"role": "user", "content": text}
                 ],
-                max_tokens=int(2 * max_len)
+                max_tokens=max_len,
+                temperature=temperature,
+                top_p=top_p
             )
             print(completion)
         except openai.error.InvalidRequestError as e:
@@ -381,15 +397,48 @@ class ChatGPTSummarizer:
         if sample_response != "":
             system_message += f"\nHere's an example of an acceptable response: {sample_response}"
 
-        if isinstance(text_or_dict, dict):
-            text = "\n\n".join([f"{k}: {v}" for k, v in text_or_dict.items()])
-        else:
-            text = f"Text: {text_or_dict}"
+        text = convert_text_or_dict_to_text(text_or_dict)
 
         results, too_many_tokens, n_total_tokens = \
-            self._generate_completion(text, system_message, max_normal_len)
+            self._generate_completion(text, system_message, max_normal_len, temperature=0.5)
         # Now we remove the "Title:" or "Summary:" at the beginning
         results = ':'.join(results.split(':')[1:]).strip().strip('"')
+        return results, system_message, too_many_tokens, n_total_tokens
+
+    def cleanup_text(self, text_or_dict, text_type='slide', handwriting=True, temperature=1, top_p=1):
+        if handwriting:
+            system_message = "You will be given the contents of a %s, " \
+                             "which result from optical character recognition " \
+                             "and therefore are very messy." % text_type
+        else:
+            system_message = "You will be given the contents of a %s, which contain typos." % text_type
+        text = convert_text_or_dict_to_text(text_or_dict)
+        system_message += "Your task is to clean up the contents. " \
+                          "The text could potentially contain typos, scrambled sentences, " \
+                          "and mathematical notation. " \
+                          "Clean it up by performing the following steps, in order:\n" \
+                          "1. Detect the language of the text: [LANGUAGE].\n" \
+                          "2. Detect the subject matter of the text: [SUBJECT MATTER]." \
+                          "The subject matter must be a Wikipedia article. " \
+                          "Choose the most specific article possible.\n" \
+                          "3. Correct typos, with the assumption that the words are " \
+                          "either in [LANGUAGE] or in English. If [LANGUAGE] is not English, " \
+                          "then prioritize [LANGUAGE] over English. " \
+                          "Be very aggressive with your corrections. " \
+                          "Try to correct typos in a way that yields coherent sentences. " \
+                          "If a word in the text does not exist either in the thesaurus or on Wikipedia, " \
+                          "treat it as a typo, and correct it to the closest word that fits within " \
+                          "the topic of [SUBJECT MATTER] and is either in [LANGUAGE] or English.\n" \
+                          "Return the results in the following JSON format:\n" \
+                          "'{\"language\": [LANGUAGE],\n" \
+                          "\"subject\": [SUBJECT MATTER],\n" \
+                          "\"cleaned\": [CLEANED UP TEXT]}.\n" \
+                          "Do not provide any explanations as to how you performed the cleanup. " \
+                          "DO NOT translate or summarize the text."
+        results, too_many_tokens, n_total_tokens = \
+            self._generate_completion(text, system_message, temperature=temperature, top_p=top_p)
+        # Now we remove the "Title:" or "Summary:" at the beginning
+        results = json.loads(results)
         return results, system_message, too_many_tokens, n_total_tokens
 
 
