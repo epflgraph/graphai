@@ -418,10 +418,9 @@ class ChatGPTSummarizer:
                           "and mathematical notation. " \
                           "Clean it up by performing the following steps, in order:\n" \
                           "1. Detect the language of the text: [LANGUAGE].\n" \
-                          "2. Detect the subject matter of the text: [SUBJECT MATTER]." \
-                          "The subject matter must be a Wikipedia article. " \
-                          "Choose the most specific article possible.\n" \
-                          "3. Correct ALL typos, with the assumption that the words are " \
+                          "2. Find the Wikipedia article that best describes " \
+                          "the subject matter of the text: [SUBJECT MATTER].\n" \
+                          "3. Correct ALL typos, with the assumption that each word is " \
                           "either in [LANGUAGE] or in English. " \
                           "Correct every single word that does not exist either in the thesaurus or on Wikipedia, " \
                           "For each typo, correct it to the closest word that fits within " \
