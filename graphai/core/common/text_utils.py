@@ -421,24 +421,30 @@ class ChatGPTSummarizer:
                           "2. Detect the subject matter of the text: [SUBJECT MATTER]." \
                           "The subject matter must be a Wikipedia article. " \
                           "Choose the most specific article possible.\n" \
-                          "3. Correct typos, with the assumption that the words are " \
-                          "either in [LANGUAGE] or in English. If [LANGUAGE] is not English, " \
-                          "then prioritize [LANGUAGE] over English. " \
-                          "Be very aggressive with your corrections. " \
-                          "Try to correct typos in a way that yields coherent sentences. " \
-                          "If a word in the text does not exist either in the thesaurus or on Wikipedia, " \
-                          "treat it as a typo, and correct it to the closest word that fits within " \
+                          "3. Correct ALL typos, with the assumption that the words are " \
+                          "either in [LANGUAGE] or in English. " \
+                          "Correct every single word that does not exist either in the thesaurus or on Wikipedia, " \
+                          "For each typo, correct it to the closest word that fits within " \
                           "the topic of [SUBJECT MATTER] and is either in [LANGUAGE] or English.\n" \
+                          "4. Remove every character that doesn't exist in the [LANGUAGE] or English alphabet.\n" \
                           "Return the results in the following JSON format:\n" \
                           "'{\"language\": [LANGUAGE],\n" \
                           "\"subject\": [SUBJECT MATTER],\n" \
                           "\"cleaned\": [CLEANED UP TEXT]}.\n" \
                           "Do not provide any explanations as to how you performed the cleanup. " \
                           "DO NOT translate or summarize the text."
-        results, too_many_tokens, n_total_tokens = \
-            self._generate_completion(text, system_message, temperature=temperature, top_p=top_p)
-        # Now we remove the "Title:" or "Summary:" at the beginning
-        results = json.loads(results)
+        try:
+            # First we try using the default temperature and top_p values
+            results, too_many_tokens, n_total_tokens = \
+                self._generate_completion(text, system_message, temperature=temperature, top_p=top_p)
+            # Now we remove the "Title:" or "Summary:" at the beginning
+            results = json.loads(results)
+        except json.JSONDecodeError as e:
+            # If that fails to produce a coherent JSON, we fall back to conservative temperature and top_p values
+            results, too_many_tokens, n_total_tokens = \
+                self._generate_completion(text, system_message, temperature=0.3, top_p=0.2)
+            # Now we remove the "Title:" or "Summary:" at the beginning
+            results = json.loads(results)
         return results, system_message, too_many_tokens, n_total_tokens
 
 
