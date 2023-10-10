@@ -414,24 +414,23 @@ class ChatGPTSummarizer:
             system_message = "You will be given the contents of a %s, which contain typos." % text_type
         text = convert_text_or_dict_to_text(text_or_dict)
         system_message += "Your task is to clean up the contents. " \
-                          "The text could potentially contain typos, scrambled sentences, " \
+                          "The text could potentially contain typos, incorrect grammar, scrambled sentences, " \
                           "and mathematical notation. " \
-                          "Clean it up by performing the following steps, in order:\n" \
-                          "1. Detect the language of the text: [LANGUAGE].\n" \
-                          "2. Find the Wikipedia article that best describes " \
-                          "the subject matter of the text: [SUBJECT MATTER].\n" \
-                          "3. Correct ALL typos, with the assumption that each word is " \
-                          "either in [LANGUAGE] or in English. " \
-                          "Correct every single word that does not exist either in the thesaurus or on Wikipedia, " \
-                          "For each typo, correct it to the closest word that fits within " \
-                          "the topic of [SUBJECT MATTER] and is either in [LANGUAGE] or English.\n" \
-                          "4. Remove every character that doesn't exist in the [LANGUAGE] or English alphabet.\n" \
                           "Return the results in the following JSON format:\n" \
                           "'{\"language\": [LANGUAGE],\n" \
                           "\"subject\": [SUBJECT MATTER],\n" \
                           "\"cleaned\": [CLEANED UP TEXT]}.\n" \
-                          "Do not provide any explanations as to how you performed the cleanup. " \
-                          "DO NOT translate or summarize the text."
+                          "DO NOT provide any explanations as to how you performed the cleanup. " \
+                          "DO NOT translate or summarize the text.\n" \
+                          "Clean the text up by performing the following steps, in order:\n" \
+                          "1. Detect the language of the text: [LANGUAGE].\n" \
+                          "2. Find the Wikipedia article that best describes " \
+                          "the subject matter of the text: [SUBJECT MATTER].\n" \
+                          "3. Correct ALL typos. Typos are words that either:\n" \
+                          "\t* Exist neither in [LANGUAGE] nor in English, or\n" \
+                          "\t* Are completely unrelated to the [SUBJECT MATTER] or the other words\n" \
+                          "Correct every single typo to the closest word in [LANGUAGE] (or failing that, English) " \
+                          "that fits within the [SUBJECT MATTER]."
         try:
             # First we try using the default temperature and top_p values
             results, too_many_tokens, n_total_tokens = \
