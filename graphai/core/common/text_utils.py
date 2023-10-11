@@ -410,7 +410,7 @@ class ChatGPTSummarizer:
         results = ':'.join(results.split(':')[1:]).strip().strip('"')
         return results, system_message, too_many_tokens, n_total_tokens
 
-    def cleanup_text(self, text_or_dict, text_type='slide', handwriting=True, temperature=1, top_p=1):
+    def cleanup_text(self, text_or_dict, text_type='slide', handwriting=True, temperature=1, top_p=0.3):
         if handwriting:
             system_message = "You will be given the contents of a %s, " \
                              "which result from optical character recognition " \
@@ -438,13 +438,15 @@ class ChatGPTSummarizer:
                           "as typos. Treat words that are completely unrelated to the [SUBJECT MATTER] or " \
                           "the other words in the text as typos. Correct every single typo to the closest word " \
                           "in [LANGUAGE] (or failing that, English) that fits within the [SUBJECT MATTER].\n"
-        # First we try using the default temperature and top_p values
+
+        # Make a call to ChatGPT to generate initial results. These will still be full of typos.
         first_results, first_too_many_tokens, first_n_total_tokens = \
             self._generate_completion(text, system_message, temperature=temperature, top_p=top_p)
         print('FIRST')
         first_results = json.loads(first_results)
         print(first_results)
 
+        # Now make a second call to ChatGPT, asking it to improve its initial results.
         results, too_many_tokens, n_total_tokens = \
             self._generate_completion(
                 [text,
@@ -456,6 +458,7 @@ class ChatGPTSummarizer:
         results = json.loads(results)
         print(results)
 
+        # Return the results of the second call
         return results, system_message, too_many_tokens, n_total_tokens
 
 
