@@ -186,6 +186,8 @@ class ChatGPTSummarizer:
         Internal method, generates a chat completion, which is the OpenAI API endpoint for ChatGPT interactions
         Args:
             text: The text to be provided in the "user" role, i.e. the text that is to be processed by ChatGPT
+                  If this argument is a list, its elements are assumed to be, alternately, user and assistant
+                  messages. This enables the handling of a back-and-forth conversation.
             system_message: The text to be provided in the "system" role, which provides directives to ChatGPT
             max_len: Approximate maximum length of the response in words
 
@@ -198,7 +200,10 @@ class ChatGPTSummarizer:
         has_api_key = self.establish_connection()
         if not has_api_key:
             return None, False, 0
-        text_token_count = count_tokens_for_openai(text)
+        if isinstance(text, str):
+            text = [text]
+        concatenated_text = '\n'.join(text)
+        text_token_count = count_tokens_for_openai(concatenated_text)
         system_token_count = count_tokens_for_openai(system_message)
         if max_len is None:
             max_len = 3 * text_token_count
@@ -213,14 +218,14 @@ class ChatGPTSummarizer:
         else:
             # If the token count is above 16384, the text is too large and we can't summarize it
             return None, True, 0
+        messages = [{"role": "system", "content": system_message}]
+        messages += [{"role": "user", "content": text[i]} if i % 2 == 0 else {"role": "assistant", "content": text[i]}
+                     for i in range(len(text))]
         try:
             # Generate the completion
             completion = openai.ChatCompletion.create(
                 model=model_type,
-                messages=[
-                    {"role": "system", "content": system_message},
-                    {"role": "user", "content": text}
-                ],
+                messages=messages,
                 max_tokens=max_len,
                 temperature=temperature,
                 top_p=top_p
@@ -426,23 +431,31 @@ class ChatGPTSummarizer:
                           "1. Detect the language of the text: [LANGUAGE].\n" \
                           "2. Find the Wikipedia article that best describes " \
                           "the subject matter of the text: [SUBJECT MATTER].\n" \
-                          "3. Correct ALL typos. Typos are words that either:\n" \
-                          "\t* Exist neither in [LANGUAGE] nor in English, or\n" \
-                          "\t* Are completely unrelated to the [SUBJECT MATTER] or the other words\n" \
-                          "Correct every single typo to the closest word in [LANGUAGE] (or failing that, English) " \
-                          "that fits within the [SUBJECT MATTER]."
-        try:
-            # First we try using the default temperature and top_p values
-            results, too_many_tokens, n_total_tokens = \
-                self._generate_completion(text, system_message, temperature=temperature, top_p=top_p)
-            # Now we remove the "Title:" or "Summary:" at the beginning
-            results = json.loads(results)
-        except json.JSONDecodeError as e:
-            # If that fails to produce a coherent JSON, we fall back to conservative temperature and top_p values
-            results, too_many_tokens, n_total_tokens = \
-                self._generate_completion(text, system_message, temperature=0.3, top_p=0.2)
-            # Now we remove the "Title:" or "Summary:" at the beginning
-            results = json.loads(results)
+                          "3. Some sentences may have been split by line breaks into separate lines. Try to " \
+                          "detect and fix them, making sure that the entire sentence is in one line. " \
+                          "Put punctuation marks at the end of every detected sentence.\n" \
+                          "4. Correct ALL typos. Treat words that exist neither in [LANGUAGE] nor in English " \
+                          "as typos. Treat words that are completely unrelated to the [SUBJECT MATTER] or " \
+                          "the other words in the text as typos. Correct every single typo to the closest word " \
+                          "in [LANGUAGE] (or failing that, English) that fits within the [SUBJECT MATTER].\n"
+        # First we try using the default temperature and top_p values
+        first_results, first_too_many_tokens, first_n_total_tokens = \
+            self._generate_completion(text, system_message, temperature=temperature, top_p=top_p)
+        print('FIRST')
+        first_results = json.loads(first_results)
+        print(first_results)
+
+        results, too_many_tokens, n_total_tokens = \
+            self._generate_completion(
+                [text,
+                 first_results['cleaned'],
+                 'There are still typos in the text. Try to improve your previous response by correcting more typos. '
+                 'Do not provide any explanations on how you fix typos. Make sure the results are in JSON format.'],
+                 system_message, temperature=temperature, top_p=top_p)
+        print('SECOND')
+        results = json.loads(results)
+        print(results)
+
         return results, system_message, too_many_tokens, n_total_tokens
 
 
