@@ -120,7 +120,7 @@ class SummarizationRequest(BaseModel):
     )
 
 
-class SummarizationTaskResponse(BaseModel):
+class CompletionTaskResponse(BaseModel):
     summary: Union[str, None] = Field(
         title="Summarization results",
         description="Summarized text"
@@ -148,22 +148,22 @@ class SummarizationTaskResponse(BaseModel):
     )
 
 
-class SummarizationDebugTaskResponse(SummarizationTaskResponse):
+class CompletionDebugTaskResponse(CompletionTaskResponse):
     debug_message: Union[str, None] = Field(
         title="Message",
         description="System message sent to ChatGPT"
     )
 
 
-class SummarizationResponse(TaskStatusResponse):
-    task_result: Union[SummarizationTaskResponse, None] = Field(
+class CompletionResponse(TaskStatusResponse):
+    task_result: Union[CompletionTaskResponse, None] = Field(
         title="Summarization response",
         description="A dict containing the resulting summarized text and a success flag."
     )
 
 
-class SummarizationDebugResponse(TaskStatusResponse):
-    task_result: Union[SummarizationDebugTaskResponse, None] = Field(
+class CompletionDebugResponse(TaskStatusResponse):
+    task_result: Union[CompletionDebugTaskResponse, None] = Field(
         title="Summarization response",
         description="A dict containing the resulting summarized text and a success flag."
     )

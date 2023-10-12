@@ -84,7 +84,8 @@ def summarization_retrieve_text_fingerprint_callback_task(self, results):
 def lookup_text_summary_task(self, token, text, force=False):
     if not force:
         db_manager = SummaryDBCachingManager()
-        # The token is [text md5]_[text type]_[summary type]_[len class]_[tone]
+        # The token is [text md5]_[text type]_[summary type]_[len class]_[tone] for summary/title generation
+        # and [text md5]_[text type]_[summary type] for cleanup
         all_existing = db_manager.get_details(token, cols=['summary'], using_most_similar=True)
         for existing in all_existing:
             if existing is not None:
@@ -230,3 +231,65 @@ def summarize_text_callback_task(self, results, force=False):
         # If the summarization wasn't successful, we delete the cache row because it serves no other purpose
         db_manager.delete_cache_rows([token])
     return results
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
+             name='text_6.cleanup_text_chatgpt_compute', ignore_result=False)
+def cleanup_text_task(self, token_and_text, text_type='text', result_type='cleanup', debug=False):
+    existing_results = token_and_text['existing_results']
+    token = token_and_text['token']
+    text = token_and_text['text']
+    original_text = token_and_text['original_text']
+    if text is None or len(text) == 0:
+        result_dict = {
+            'token': token,
+            'text': text,
+            'original_text': original_text,
+            'summary': None,
+            'summary_type': None,
+            'text_type': None,
+            'len_class': None,
+            'tone': None,
+            'fresh': False,
+            'successful': False,
+            'too_many_tokens': False,
+            'n_tokens_total': 0,
+            'full_message': None
+        }
+        return result_dict
+    if existing_results is not None:
+        return {
+            'token': token,
+            'text': text,
+            'original_text': original_text,
+            'summary': existing_results,
+            'summary_type': result_type,
+            'text_type': text_type,
+            'len_class': None,
+            'tone': None,
+            'fresh': False,
+            'successful': True,
+            'too_many_tokens': False,
+            'n_tokens_total': 0,
+            'full_message': None
+        }
+    summarizer = ChatGPTSummarizer()
+    results, message, too_many_tokens, n_tokens_total = summarizer.cleanup_text(
+        text, text_type=text_type, handwriting=True)
+    if not debug:
+        message = None
+    return {
+        'token': token,
+        'text': text,
+        'original_text': original_text,
+        'summary': results,
+        'summary_type': result_type,
+        'text_type': text_type,
+        'len_class': None,
+        'tone': None,
+        'fresh': results is not None,
+        'successful': results is not None,
+        'too_many_tokens': too_many_tokens,
+        'n_tokens_total': n_tokens_total,
+        'full_message': message
+    }
