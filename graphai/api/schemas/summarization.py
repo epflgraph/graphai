@@ -120,13 +120,38 @@ class SummarizationRequest(BaseModel):
     )
 
 
+class CleanupRequest(BaseModel):
+    text: Union[str, Dict[str, str]] = Field(
+        title="Text",
+        description="Text to summarize. Can be one string or a string to string dictionary."
+    )
+
+    text_type: str = Field(
+        title="Text type",
+        description="The source of the text to be cleaned up. Defaults to 'slide', meaning that the text is extracted "
+                    "from a slide using OCR.",
+        default="slide"
+    )
+
+    force: bool = Field(
+        title="Force recomputation",
+        default=False
+    )
+
+    debug: bool = Field(
+        title="Debug",
+        description="Whether to return the system message sent to ChatGPT",
+        default=False
+    )
+
+
 class CompletionTaskResponse(BaseModel):
     result: Union[str, None] = Field(
         title="Completion results",
         description="Summarized/cleaned-up text"
     )
 
-    result_type: Union[Literal['title', 'summary'], None] = Field(
+    result_type: Union[Literal['title', 'summary', 'cleanup'], None] = Field(
         title="Summary type",
         description="Whether the result is a title, a summary, or cleaned-up text",
         default='summary'

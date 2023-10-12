@@ -5,6 +5,7 @@ from graphai.api.schemas.common import TaskIDResponse
 
 from graphai.api.schemas.summarization import (
     SummarizationRequest,
+    CleanupRequest,
     CompletionDebugResponse,
     SummaryFingerprintRequest,
     SummaryFingerprintResponse
@@ -186,7 +187,7 @@ async def create_title(data: SummarizationRequest):
 
 
 @router.post('/cleanup', response_model=TaskIDResponse)
-async def clean_up(data: SummarizationRequest):
+async def clean_up(data: CleanupRequest):
     text = data.text
     text_type = data.text_type
     force = data.force
