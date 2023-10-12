@@ -131,7 +131,7 @@ def summarize_text_task(self, token_and_text, text_type='text', summary_type='su
     existing_results = token_and_text['existing_results']
     token = token_and_text['token']
     text = token_and_text['text']
-    original_text = token_and_text['original_text']
+    original_text = token_and_text.get('original_text', text)
     if text is None or len(text) == 0:
         result_dict = {
             'token': token,
@@ -239,7 +239,7 @@ def cleanup_text_task(self, token_and_text, text_type='text', result_type='clean
     existing_results = token_and_text['existing_results']
     token = token_and_text['token']
     text = token_and_text['text']
-    original_text = token_and_text['original_text']
+    original_text = text
     if text is None or len(text) == 0:
         result_dict = {
             'token': token,
@@ -276,6 +276,7 @@ def cleanup_text_task(self, token_and_text, text_type='text', result_type='clean
     summarizer = ChatGPTSummarizer()
     results, message, too_many_tokens, n_tokens_total = summarizer.cleanup_text(
         text, text_type=text_type, handwriting=True)
+    results = results['cleaned']
     if not debug:
         message = None
     return {
