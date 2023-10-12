@@ -127,8 +127,9 @@ def force_dict_to_text(t):
 
 
 def generate_summary_text_token(text, text_type='text', summary_type='summary', len_class='normal', tone='info'):
-    assert text_type in ['person', 'unit', 'concept', 'course', 'lecture', 'MOOC', 'publication', 'text']
     assert summary_type in ['summary', 'title', 'cleanup']
+    if summary_type == 'title' or summary_type == 'summary':
+        assert text_type in ['person', 'unit', 'concept', 'course', 'lecture', 'MOOC', 'publication', 'text']
     assert len_class in ['vshort', 'short', 'normal', None]
     assert tone in ['info', 'promo', None]
 
@@ -421,9 +422,9 @@ class ChatGPTSummarizer:
         if handwriting:
             system_message = "You will be given the contents of a %s, " \
                              "which result from optical character recognition " \
-                             "and therefore are very messy." % text_type
+                             "and therefore are very messy. " % text_type
         else:
-            system_message = "You will be given the contents of a %s, which contain typos." % text_type
+            system_message = "You will be given the contents of a %s, which contain typos. " % text_type
         text = convert_text_or_dict_to_text(text_or_dict)
         system_message += "Your task is to clean up the contents. " \
                           "The text could potentially contain typos, incorrect grammar, scrambled sentences, " \
