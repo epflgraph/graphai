@@ -128,22 +128,29 @@ def force_dict_to_text(t):
 
 def generate_summary_text_token(text, text_type='text', summary_type='summary', len_class='normal', tone='info'):
     assert text_type in ['person', 'unit', 'concept', 'course', 'lecture', 'MOOC', 'publication', 'text']
-    assert summary_type in ['summary', 'title']
-    assert len_class in ['vshort', 'short', 'normal']
-    assert tone in ['info', 'promo']
+    assert summary_type in ['summary', 'title', 'cleanup']
+    assert len_class in ['vshort', 'short', 'normal', None]
+    assert tone in ['info', 'promo', None]
 
     text = force_dict_to_text(text)
-    token = md5_text(text) + '_' + text_type + '_' + summary_type + '_' + len_class + '_' + tone
+    token = md5_text(text) + '_' + text_type + '_' + summary_type
+    if len_class is not None:
+        token += '_' + len_class
+    if tone is not None:
+        token += '_' + tone
     return token
 
 
 def generate_summary_type_dict(text_type, summary_type, len_class, tone):
-    return {
+    d = {
         'input_type': text_type,
-        'summary_type': summary_type,
-        'summary_len_class': len_class,
-        'summary_tone': tone
+        'summary_type': summary_type
     }
+    if len_class is not None:
+        d['summary_len_class'] = len_class
+    if tone is not None:
+        d['summary_tone'] = tone
+    return d
 
 
 def convert_text_or_dict_to_text(text_or_dict):
