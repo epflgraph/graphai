@@ -216,7 +216,7 @@ async def summarize_status(task_id):
     full_results = get_task_info(task_id)
     task_results = full_results['results']
     if task_results is not None:
-        if 'summary' in task_results:
+        if 'result' in task_results:
             task_results = {
                 'result': task_results['result'],
                 'result_type': task_results['result_type'],
