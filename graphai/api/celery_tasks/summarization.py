@@ -137,8 +137,8 @@ def summarize_text_task(self, token_and_text, text_type='text', summary_type='su
             'token': token,
             'text': text,
             'original_text': original_text,
-            'summary': None,
-            'summary_type': None,
+            'result': None,
+            'result_type': None,
             'text_type': None,
             'len_class': None,
             'tone': None,
@@ -154,8 +154,8 @@ def summarize_text_task(self, token_and_text, text_type='text', summary_type='su
             'token': token,
             'text': text,
             'original_text': original_text,
-            'summary': existing_results,
-            'summary_type': summary_type,
+            'result': existing_results,
+            'result_type': summary_type,
             'text_type': text_type,
             'len_class': len_class,
             'tone': tone,
@@ -175,8 +175,8 @@ def summarize_text_task(self, token_and_text, text_type='text', summary_type='su
         'token': token,
         'text': text,
         'original_text': original_text,
-        'summary': results,
-        'summary_type': summary_type,
+        'result': results,
+        'result_type': summary_type,
         'text_type': text_type,
         'len_class': len_class,
         'tone': tone,
@@ -194,8 +194,8 @@ def summarize_text_callback_task(self, results, force=False):
     db_manager = SummaryDBCachingManager()
     token = results['token']
     original_text = results['original_text']
-    summary = results['summary']
-    summary_type = results['summary_type']
+    summary = results['result']
+    summary_type = results['result_type']
     text_type = results['text_type']
     len_class = results['len_class']
     tone = results['tone']
@@ -245,8 +245,8 @@ def cleanup_text_task(self, token_and_text, text_type='text', result_type='clean
             'token': token,
             'text': text,
             'original_text': original_text,
-            'summary': None,
-            'summary_type': None,
+            'result': None,
+            'result_type': None,
             'text_type': None,
             'len_class': None,
             'tone': None,
@@ -262,8 +262,8 @@ def cleanup_text_task(self, token_and_text, text_type='text', result_type='clean
             'token': token,
             'text': text,
             'original_text': original_text,
-            'summary': existing_results,
-            'summary_type': result_type,
+            'result': existing_results,
+            'result_type': result_type,
             'text_type': text_type,
             'len_class': None,
             'tone': None,
@@ -282,8 +282,8 @@ def cleanup_text_task(self, token_and_text, text_type='text', result_type='clean
         'token': token,
         'text': text,
         'original_text': original_text,
-        'summary': results,
-        'summary_type': result_type,
+        'result': results,
+        'result_type': result_type,
         'text_type': text_type,
         'len_class': None,
         'tone': None,

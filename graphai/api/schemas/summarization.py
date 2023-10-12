@@ -121,14 +121,14 @@ class SummarizationRequest(BaseModel):
 
 
 class CompletionTaskResponse(BaseModel):
-    summary: Union[str, None] = Field(
-        title="Summarization results",
-        description="Summarized text"
+    result: Union[str, None] = Field(
+        title="Completion results",
+        description="Summarized/cleaned-up text"
     )
 
-    summary_type: Union[Literal['title', 'summary'], None] = Field(
+    result_type: Union[Literal['title', 'summary'], None] = Field(
         title="Summary type",
-        description="Whether the result is a title or a summary",
+        description="Whether the result is a title, a summary, or cleaned-up text",
         default='summary'
     )
 

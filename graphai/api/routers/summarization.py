@@ -218,8 +218,8 @@ async def summarize_status(task_id):
     if task_results is not None:
         if 'summary' in task_results:
             task_results = {
-                'summary': task_results['summary'],
-                'summary_type': task_results['summary_type'],
+                'result': task_results['result'],
+                'result_type': task_results['result_type'],
                 'text_too_large': task_results['too_many_tokens'],
                 'successful': task_results['successful'],
                 'fresh': task_results['fresh'],
