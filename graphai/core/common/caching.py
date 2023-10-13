@@ -118,7 +118,7 @@ def add_non_null_conditions(cols):
 class DBCachingManagerBase(abc.ABC):
     def __init__(self, cache_table, most_similar_table):
         # Only four values are hardcoded into this class and need to be respected by its child classes:
-        # 1. The schema, 'cache_graphai', should not be changed
+        # 1. The schema, which is 'cache_graphai' by default, should not be changed
         # 2. The name of the id column for both the main and the most-similar tables is 'id_token'
         # 3. The cache tables must have a "date_added" column of the data type DATETIME,
         #    which has the following format: YYYY-MM-DD hh:mm:ss
@@ -159,11 +159,10 @@ class DBCachingManagerBase(abc.ABC):
             return token
         return self._resolve_most_similar_chain(prev_most_similar)
 
-    def _insert_or_update_details(self, schema, table_name, id_token, values_to_insert=None):
+    def _insert_or_update_details(self, table_name, id_token, values_to_insert=None):
         """
         Internal method that inserts a new row or updates an existing row.
         Args:
-            schema: The schema of the table
             table_name: Name of the table
             id_token: The id token
             values_to_insert: Dictionary of column names and values to be inserted/updated for `id_token`
@@ -181,7 +180,7 @@ class DBCachingManagerBase(abc.ABC):
         }
         existing = self.db.execute_query(
             f"""
-            SELECT COUNT(*) FROM `{schema}`.`{table_name}`
+            SELECT COUNT(*) FROM `{self.schema}`.`{table_name}`
             WHERE id_token={surround_with_character(id_token, "'")}
             """
         )[0][0]
@@ -191,7 +190,7 @@ class DBCachingManagerBase(abc.ABC):
             cols_and_values = [cols[i] + ' = ' + values[i] for i in range(len(cols))]
             self.db.execute_query(
                 f"""
-                UPDATE `{schema}`.`{table_name}`
+                UPDATE `{self.schema}`.`{table_name}`
                 SET
                 {', '.join(cols_and_values)}
                 WHERE id_token={surround_with_character(id_token, "'")};
@@ -204,18 +203,17 @@ class DBCachingManagerBase(abc.ABC):
 
             self.db.execute_query(
                 f"""
-                INSERT INTO `{schema}`.`{table_name}`
+                INSERT INTO `{self.schema}`.`{table_name}`
                     ({', '.join(cols)})
                     VALUES
                     ({', '.join(values)});
                 """
             )
 
-    def _get_details(self, schema, table_name, id_token, cols):
+    def _get_details(self, table_name, id_token, cols):
         """
         Internal method that retrieves the details of a given id_token.
         Args:
-            schema: Schema name
             table_name: Table name
             id_token: The identifier token
             cols: Columns to retrieve
@@ -226,7 +224,7 @@ class DBCachingManagerBase(abc.ABC):
         column_list = ['id_token'] + cols
         results = self.db.execute_query(
             f"""
-            SELECT {', '.join(column_list)} FROM `{schema}`.`{table_name}`
+            SELECT {', '.join(column_list)} FROM `{self.schema}`.`{table_name}`
             WHERE id_token={surround_with_character(id_token, "'")}
             """
         )
@@ -245,16 +243,15 @@ class DBCachingManagerBase(abc.ABC):
         Returns:
             Closest match of `id_token` if one exists in the corresponding table, None otherwise
         """
-        results = self._get_details(self.schema, self.most_similar_table, id_token, ['most_similar_token'])
+        results = self._get_details(self.most_similar_table, id_token, ['most_similar_token'])
         if results is not None:
             return results['most_similar_token']
         return None
 
-    def _get_details_using_origin(self, schema, table_name, origin_token, cols, has_date_col=True):
+    def _get_details_using_origin(self, table_name, origin_token, cols, has_date_col=True):
         """
         Internal method that gets details using an origin token (e.g. the video an audio file originated from).
         Args:
-            schema: Schema name
             table_name: Table name
             origin_token: Token of the origin file
             cols: Columns to retrieve
@@ -264,7 +261,7 @@ class DBCachingManagerBase(abc.ABC):
         """
         column_list = ['origin_token', 'id_token'] + cols
         query = f"""
-            SELECT {', '.join(column_list)} FROM `{schema}`.`{table_name}`
+            SELECT {', '.join(column_list)} FROM `{self.schema}`.`{table_name}`
             WHERE origin_token={surround_with_character(origin_token, "'")}
             """
         if has_date_col:
@@ -276,13 +273,11 @@ class DBCachingManagerBase(abc.ABC):
             results = None
         return results
 
-    def _get_all_details(self, schema, table_name, cols, start=0, limit=-1,
-                         exclude_token=None, allow_nulls=True, earliest_date=None, latest_date=None,
-                         equality_conditions=None, has_date_col=False):
+    def _get_all_details(self, table_name, cols, start=0, limit=-1, exclude_token=None, allow_nulls=True,
+                         earliest_date=None, latest_date=None, equality_conditions=None, has_date_col=False):
         """
         Internal method. Gets the details of all rows in a table, with some conditions.
         Args:
-            schema: Schema name
             table_name: Table name
             cols: Columns to retrieve
             start: The offset parameter of the LIMIT clause
@@ -298,7 +293,7 @@ class DBCachingManagerBase(abc.ABC):
         """
         column_list = ['id_token'] + cols
         query = f"""
-            SELECT {', '.join(column_list)} FROM `{schema}`.`{table_name}`
+            SELECT {', '.join(column_list)} FROM `{self.schema}`.`{table_name}`
             """
         if exclude_token is not None:
             if isinstance(exclude_token, str):
@@ -337,11 +332,10 @@ class DBCachingManagerBase(abc.ABC):
             results = None
         return results
 
-    def _delete_rows(self, schema, table_name, id_tokens):
+    def _delete_rows(self, table_name, id_tokens):
         """
         Internal method. Deletes rows using a list of ids to delete
         Args:
-            schema: Schema name
             table_name: Table name
             id_tokens: List of ids to delete
 
@@ -353,15 +347,14 @@ class DBCachingManagerBase(abc.ABC):
         id_tokens_str = '(' + ', '.join([surround_with_character(id_token, "'") for id_token in id_tokens]) + ')'
         self.db.execute_query(
             f"""
-            DELETE FROM `{schema}`.`{table_name}` WHERE id_token IN {id_tokens_str}
+            DELETE FROM `{self.schema}`.`{table_name}` WHERE id_token IN {id_tokens_str}
             """
         )
 
-    def _get_count(self, schema, table_name, non_null_cols=None, equality_conditions=None):
+    def _get_count(self, table_name, non_null_cols=None, equality_conditions=None):
         """
         Internal method. Gets the number of rows in a table, possibly with conditions on the rows.
         Args:
-            schema: Schema name
             table_name: Table name
             non_null_cols: List of columns that have a non-null condition
             equality_conditions: Dictionary of equality conditions
@@ -370,7 +363,7 @@ class DBCachingManagerBase(abc.ABC):
             Number of rows with the given conditions
         """
         query = f"""
-        SELECT COUNT(*) FROM `{schema}`.`{table_name}`
+        SELECT COUNT(*) FROM `{self.schema}`.`{table_name}`
         """
         if non_null_cols is not None:
             query += f"""
@@ -382,11 +375,10 @@ class DBCachingManagerBase(abc.ABC):
         results = self.db.execute_query(query)
         return results[0][0]
 
-    def _row_exists(self, schema, table_name, id_token):
+    def _row_exists(self, table_name, id_token):
         """
         Internal method. Checks whether a row with a given id token exists.
         Args:
-            schema: Schema name
             table_name: Table name
             id_token: Identifier token of the row
 
@@ -394,13 +386,16 @@ class DBCachingManagerBase(abc.ABC):
             True if the row exists, False otherwise
         """
         query = f"""
-        SELECT COUNT(*) FROM `{schema}`.`{table_name}`
+        SELECT COUNT(*) FROM `{self.schema}`.`{table_name}`
         WHERE id_token = '{id_token}'
         """
         results = self.db.execute_query(query)
         if len(results) > 0:
             return True
         return False
+
+    def add_columns(self, table_name):
+        pass
 
     def delete_cache_rows(self, id_tokens):
         """
@@ -411,7 +406,7 @@ class DBCachingManagerBase(abc.ABC):
         Returns:
             None
         """
-        self._delete_rows(self.schema, self.cache_table, id_tokens)
+        self._delete_rows(self.cache_table, id_tokens)
 
     def insert_or_update_details(self, id_token, values_to_insert=None):
         """
@@ -435,7 +430,7 @@ class DBCachingManagerBase(abc.ABC):
         Returns:
             None
         """
-        if not self._row_exists(self.schema, self.cache_table, id_token):
+        if not self._row_exists(self.cache_table, id_token):
             return
         self._insert_or_update_details(self.schema, self.cache_table, id_token, values_to_insert)
 
@@ -452,13 +447,13 @@ class DBCachingManagerBase(abc.ABC):
             is no closest match, or the closest match is the token itself, or using_most_similar is False, then the
             second result is None.
         """
-        own_results = self._get_details(self.schema, self.cache_table, id_token, cols)
+        own_results = self._get_details(self.cache_table, id_token, cols)
         if not using_most_similar:
             return [own_results, None]
         closest_token = self.get_closest_match(id_token)
         if closest_token is None or closest_token == id_token:
             return [own_results, None]
-        closest_match_results = self._get_details(self.schema, self.cache_table, closest_token, cols)
+        closest_match_results = self._get_details(self.cache_table, closest_token, cols)
         return [own_results, closest_match_results]
 
     def get_origin(self, id_token):
@@ -470,7 +465,7 @@ class DBCachingManagerBase(abc.ABC):
         Returns:
             Origin token if applicable
         """
-        results = self._get_details(self.schema, self.cache_table, id_token, ['origin_token'])
+        results = self._get_details(self.cache_table, id_token, ['origin_token'])
         if results is not None:
             return results['origin_token']
         return None
@@ -485,7 +480,7 @@ class DBCachingManagerBase(abc.ABC):
         Returns:
             Cache row detail dict
         """
-        return self._get_details_using_origin(self.schema, self.cache_table, origin_token, cols, has_date_col=True)
+        return self._get_details_using_origin(self.cache_table, origin_token, cols, has_date_col=True)
 
     def get_all_details(self, cols, start=0, limit=-1, exclude_token=None,
                         allow_nulls=True, earliest_date=None, latest_date=None, equality_conditions=None):
@@ -515,8 +510,7 @@ class DBCachingManagerBase(abc.ABC):
             exclude_tokens.add(exclude_token)
         else:
             exclude_tokens = None
-        results = self._get_all_details(self.schema, self.cache_table, cols,
-                                        start=start, limit=limit, exclude_token=exclude_tokens,
+        results = self._get_all_details(self.cache_table, cols, start=start, limit=limit, exclude_token=exclude_tokens,
                                         allow_nulls=allow_nulls, earliest_date=earliest_date, latest_date=latest_date,
                                         equality_conditions=equality_conditions, has_date_col=True)
         return results
@@ -531,7 +525,7 @@ class DBCachingManagerBase(abc.ABC):
         Returns:
             Number of rows that satisfy the given conditions from the cache table
         """
-        return self._get_count(self.schema, self.cache_table, non_null_cols, equality_conditions)
+        return self._get_count(self.cache_table, non_null_cols, equality_conditions)
 
     def insert_or_update_closest_match(self, id_token, values_to_insert):
         """
@@ -562,8 +556,7 @@ class DBCachingManagerBase(abc.ABC):
         Returns:
             All rows in most similar token table
         """
-        results = self._get_all_details(self.schema, self.most_similar_table,
-                                        ['most_similar_token'], has_date_col=False)
+        results = self._get_all_details(self.most_similar_table, ['most_similar_token'], has_date_col=False)
         if results is not None:
             return {x: results[x]['most_similar_token'] for x in results
                     if results[x]['most_similar_token'] is not None}
@@ -942,7 +935,7 @@ class ScrapingDBCachingManager(DBCachingManagerBase):
         """
         if 'date_added' not in cols:
             cols = cols + ['date_added']
-        results = self._get_details_using_origin(self.schema, self.cache_table, origin_token, cols, has_date_col=True)
+        results = self._get_details_using_origin(self.cache_table, origin_token, cols, has_date_col=True)
         if results is None:
             return None
         current_time = datetime.now()
