@@ -394,8 +394,23 @@ class DBCachingManagerBase(abc.ABC):
             return True
         return False
 
-    def add_columns(self, table_name):
-        pass
+    def add_columns(self, table_name, column_names, column_types, defaults=None):
+        if defaults is None:
+            defaults = ["NULL"] * len(column_names)
+        for i in range(len(column_names)):
+            query = f"""
+            ALTER TABLE `{self.schema}`.`{table_name}`
+            ADD {column_names[i]} {column_types[i]} DEFAULT {defaults[i]};
+            """
+            self.db.execute_query(query)
+
+    def remove_columns(self, table_name, column_names):
+        for i in range(len(column_names)):
+            query = f"""
+            ALTER TABLE `{self.schema}`.`{table_name}`
+            DROP COLUMN {column_names[i]};
+            """
+            self.db.execute_query(query)
 
     def delete_cache_rows(self, id_tokens):
         """
