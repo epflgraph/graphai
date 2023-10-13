@@ -127,23 +127,39 @@ def force_dict_to_text(t):
 
 
 def generate_summary_text_token(text, text_type='text', summary_type='summary', len_class='normal', tone='info'):
-    assert text_type in ['person', 'unit', 'concept', 'course', 'lecture', 'MOOC', 'publication', 'text']
-    assert summary_type in ['summary', 'title']
-    assert len_class in ['vshort', 'short', 'normal']
-    assert tone in ['info', 'promo']
+    assert summary_type in ['summary', 'title', 'cleanup']
+    if summary_type == 'title' or summary_type == 'summary':
+        assert text_type in ['person', 'unit', 'concept', 'course', 'lecture', 'MOOC', 'publication', 'text']
+    assert len_class in ['vshort', 'short', 'normal', None]
+    assert tone in ['info', 'promo', None]
 
     text = force_dict_to_text(text)
-    token = md5_text(text) + '_' + text_type + '_' + summary_type + '_' + len_class + '_' + tone
+    token = md5_text(text) + '_' + text_type + '_' + summary_type
+    if len_class is not None:
+        token += '_' + len_class
+    if tone is not None:
+        token += '_' + tone
     return token
 
 
 def generate_summary_type_dict(text_type, summary_type, len_class, tone):
-    return {
+    d = {
         'input_type': text_type,
-        'summary_type': summary_type,
-        'summary_len_class': len_class,
-        'summary_tone': tone
+        'summary_type': summary_type
     }
+    if len_class is not None:
+        d['summary_len_class'] = len_class
+    if tone is not None:
+        d['summary_tone'] = tone
+    return d
+
+
+def convert_text_or_dict_to_text(text_or_dict):
+    if isinstance(text_or_dict, dict):
+        text = "\n\n".join([f"{k}: {v}" for k, v in text_or_dict.items()])
+    else:
+        text = f"Text: {text_or_dict}"
+    return text
 
 
 class ChatGPTSummarizer:
@@ -173,11 +189,13 @@ class ChatGPTSummarizer:
         else:
             return False
 
-    def _generate_completion(self, text, system_message, max_len):
+    def _generate_completion(self, text, system_message, max_len=None, temperature=1.0, top_p=1.0):
         """
         Internal method, generates a chat completion, which is the OpenAI API endpoint for ChatGPT interactions
         Args:
             text: The text to be provided in the "user" role, i.e. the text that is to be processed by ChatGPT
+                  If this argument is a list, its elements are assumed to be, alternately, user and assistant
+                  messages. This enables the handling of a back-and-forth conversation.
             system_message: The text to be provided in the "system" role, which provides directives to ChatGPT
             max_len: Approximate maximum length of the response in words
 
@@ -190,8 +208,17 @@ class ChatGPTSummarizer:
         has_api_key = self.establish_connection()
         if not has_api_key:
             return None, False, 0
+        if isinstance(text, str):
+            text = [text]
+        concatenated_text = '\n'.join(text)
+        text_token_count = count_tokens_for_openai(concatenated_text)
+        system_token_count = count_tokens_for_openai(system_message)
+        if max_len is None:
+            max_len = 3 * text_token_count
+        else:
+            max_len = int(3 * max_len)
         # We count the approximate number of tokens in order to choose the right model (i.e. context size)
-        approx_token_count = count_tokens_for_openai(text) + count_tokens_for_openai(system_message) + int(2 * max_len)
+        approx_token_count = text_token_count + system_token_count + max_len
         if approx_token_count < 4096:
             model_type = 'gpt-3.5-turbo'
         elif 4096 < approx_token_count < 16384:
@@ -199,15 +226,17 @@ class ChatGPTSummarizer:
         else:
             # If the token count is above 16384, the text is too large and we can't summarize it
             return None, True, 0
+        messages = [{"role": "system", "content": system_message}]
+        messages += [{"role": "user", "content": text[i]} if i % 2 == 0 else {"role": "assistant", "content": text[i]}
+                     for i in range(len(text))]
         try:
             # Generate the completion
             completion = openai.ChatCompletion.create(
                 model=model_type,
-                messages=[
-                    {"role": "system", "content": system_message},
-                    {"role": "user", "content": text}
-                ],
-                max_tokens=int(2 * max_len)
+                messages=messages,
+                max_tokens=max_len,
+                temperature=temperature,
+                top_p=top_p
             )
             print(completion)
         except openai.error.InvalidRequestError as e:
@@ -381,15 +410,63 @@ class ChatGPTSummarizer:
         if sample_response != "":
             system_message += f"\nHere's an example of an acceptable response: {sample_response}"
 
-        if isinstance(text_or_dict, dict):
-            text = "\n\n".join([f"{k}: {v}" for k, v in text_or_dict.items()])
-        else:
-            text = f"Text: {text_or_dict}"
+        text = convert_text_or_dict_to_text(text_or_dict)
 
         results, too_many_tokens, n_total_tokens = \
-            self._generate_completion(text, system_message, max_normal_len)
+            self._generate_completion(text, system_message, max_normal_len, temperature=0.5)
         # Now we remove the "Title:" or "Summary:" at the beginning
         results = ':'.join(results.split(':')[1:]).strip().strip('"')
+        return results, system_message, too_many_tokens, n_total_tokens
+
+    def cleanup_text(self, text_or_dict, text_type='slide', handwriting=True, temperature=1, top_p=0.3):
+        if handwriting:
+            system_message = "You will be given the contents of a %s, " \
+                             "which result from optical character recognition " \
+                             "and therefore are very messy. " % text_type
+        else:
+            system_message = "You will be given the contents of a %s, which contain typos. " % text_type
+        text = convert_text_or_dict_to_text(text_or_dict)
+        system_message += "Your task is to clean up the contents. " \
+                          "The text could potentially contain typos, incorrect grammar, scrambled sentences, " \
+                          "and mathematical notation. " \
+                          "Return the results in the following JSON format:\n" \
+                          "'{\"language\": [LANGUAGE],\n" \
+                          "\"subject\": [SUBJECT MATTER],\n" \
+                          "\"cleaned\": [CLEANED UP TEXT]}.\n" \
+                          "DO NOT provide any explanations as to how you performed the cleanup. " \
+                          "DO NOT translate or summarize the text.\n" \
+                          "Clean the text up by performing the following steps, in order:\n" \
+                          "1. Detect the language of the text: [LANGUAGE].\n" \
+                          "2. Find the Wikipedia article that best describes " \
+                          "the subject matter of the text: [SUBJECT MATTER].\n" \
+                          "3. Some sentences may have been split by line breaks into separate lines. Try to " \
+                          "detect and fix them, making sure that the entire sentence is in one line. " \
+                          "Put punctuation marks at the end of every detected sentence.\n" \
+                          "4. Correct ALL typos. Treat words that exist neither in [LANGUAGE] nor in English " \
+                          "as typos. Treat words that are completely unrelated to the [SUBJECT MATTER] or " \
+                          "the other words in the text as typos. Correct every single typo to the closest word " \
+                          "in [LANGUAGE] (or failing that, English) that fits within the [SUBJECT MATTER].\n"
+
+        # Make a call to ChatGPT to generate initial results. These will still be full of typos.
+        first_results, first_too_many_tokens, first_n_total_tokens = \
+            self._generate_completion(text, system_message, temperature=temperature, top_p=top_p)
+        print('FIRST')
+        first_results = json.loads(first_results)
+        print(first_results)
+
+        # Now make a second call to ChatGPT, asking it to improve its initial results.
+        results, too_many_tokens, n_total_tokens = \
+            self._generate_completion(
+                [text,
+                 first_results['cleaned'],
+                 'There are still typos in the text. Try to improve your previous response by correcting more typos. '
+                 'Do not provide any explanations on how you fix typos. Make sure the results are in JSON format.'],
+                system_message, temperature=temperature, top_p=top_p)
+        print('SECOND')
+        results = json.loads(results)
+        print(results)
+
+        # Return the results of the second call
         return results, system_message, too_many_tokens, n_total_tokens
 
 

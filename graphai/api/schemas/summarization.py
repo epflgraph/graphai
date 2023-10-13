@@ -120,15 +120,40 @@ class SummarizationRequest(BaseModel):
     )
 
 
-class SummarizationTaskResponse(BaseModel):
-    summary: Union[str, None] = Field(
-        title="Summarization results",
-        description="Summarized text"
+class CleanupRequest(BaseModel):
+    text: Union[str, Dict[str, str]] = Field(
+        title="Text",
+        description="Text to summarize. Can be one string or a string to string dictionary."
     )
 
-    summary_type: Union[Literal['title', 'summary'], None] = Field(
+    text_type: str = Field(
+        title="Text type",
+        description="The source of the text to be cleaned up. Defaults to 'slide', meaning that the text is extracted "
+                    "from a slide using OCR.",
+        default="slide"
+    )
+
+    force: bool = Field(
+        title="Force recomputation",
+        default=False
+    )
+
+    debug: bool = Field(
+        title="Debug",
+        description="Whether to return the system message sent to ChatGPT",
+        default=False
+    )
+
+
+class CompletionTaskResponse(BaseModel):
+    result: Union[str, None] = Field(
+        title="Completion results",
+        description="Summarized/cleaned-up text"
+    )
+
+    result_type: Union[Literal['title', 'summary', 'cleanup'], None] = Field(
         title="Summary type",
-        description="Whether the result is a title or a summary",
+        description="Whether the result is a title, a summary, or cleaned-up text",
         default='summary'
     )
 
@@ -148,22 +173,22 @@ class SummarizationTaskResponse(BaseModel):
     )
 
 
-class SummarizationDebugTaskResponse(SummarizationTaskResponse):
+class CompletionDebugTaskResponse(CompletionTaskResponse):
     debug_message: Union[str, None] = Field(
         title="Message",
         description="System message sent to ChatGPT"
     )
 
 
-class SummarizationResponse(TaskStatusResponse):
-    task_result: Union[SummarizationTaskResponse, None] = Field(
+class CompletionResponse(TaskStatusResponse):
+    task_result: Union[CompletionTaskResponse, None] = Field(
         title="Summarization response",
         description="A dict containing the resulting summarized text and a success flag."
     )
 
 
-class SummarizationDebugResponse(TaskStatusResponse):
-    task_result: Union[SummarizationDebugTaskResponse, None] = Field(
+class CompletionDebugResponse(TaskStatusResponse):
+    task_result: Union[CompletionDebugTaskResponse, None] = Field(
         title="Summarization response",
         description="A dict containing the resulting summarized text and a success flag."
     )

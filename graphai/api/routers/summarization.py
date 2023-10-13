@@ -5,7 +5,8 @@ from graphai.api.schemas.common import TaskIDResponse
 
 from graphai.api.schemas.summarization import (
     SummarizationRequest,
-    SummarizationDebugResponse,
+    CleanupRequest,
+    CompletionDebugResponse,
     SummaryFingerprintRequest,
     SummaryFingerprintResponse
 )
@@ -26,7 +27,8 @@ from graphai.api.celery_tasks.summarization import (
     lookup_text_summary_task,
     get_keywords_for_summarization_task,
     summarize_text_task,
-    summarize_text_callback_task
+    summarize_text_callback_task,
+    cleanup_text_task
 )
 
 from graphai.core.common.text_utils import generate_summary_text_token, generate_summary_type_dict
@@ -83,6 +85,19 @@ def get_summary_task_chain(token, text, text_type, summary_type, len_class, tone
     task_list += [
         get_keywords_for_summarization_task.s(keywords),
         summarize_text_task.s(text_type, summary_type, len_class, tone, debug),
+        summarize_text_callback_task.s(force)
+    ]
+    return task_list
+
+
+def get_cleanup_task_chain(token, text, text_type, result_type='cleanup',
+                           force=False, skip_token=False, debug=False):
+    if skip_token:
+        task_list = [lookup_text_summary_task.s(text, force)]
+    else:
+        task_list = [lookup_text_summary_task.s(token, text, force)]
+    task_list += [
+        cleanup_text_task.s(text_type, result_type, debug),
         summarize_text_callback_task.s(force)
     ]
     return task_list
@@ -171,16 +186,41 @@ async def create_title(data: SummarizationRequest):
     return {'task_id': tasks.id}
 
 
-@router.get('/title/status/{task_id}', response_model=SummarizationDebugResponse)
-@router.get('/summary/status/{task_id}', response_model=SummarizationDebugResponse)
+@router.post('/cleanup', response_model=TaskIDResponse)
+async def clean_up(data: CleanupRequest):
+    text = data.text
+    text_type = data.text_type
+    force = data.force
+    debug = data.debug
+    len_class = None
+    tone = None
+
+    token = generate_summary_text_token(text, text_type, 'cleanup', len_class, tone)
+    if not force:
+        task_list = get_summary_text_fingerprint_chain_list(token, text, text_type, 'cleanup', len_class, tone, force,
+                                                            ignore_fp_results=True, results_to_return=token)
+        skip_token = True
+    else:
+        task_list = []
+        skip_token = False
+    task_list += get_cleanup_task_chain(token, text, text_type, 'cleanup',
+                                        force=force, skip_token=skip_token, debug=debug)
+    tasks = chain(task_list)
+    tasks = tasks.apply_async(priority=6)
+    return {'task_id': tasks.id}
+
+
+@router.get('/title/status/{task_id}', response_model=CompletionDebugResponse)
+@router.get('/summary/status/{task_id}', response_model=CompletionDebugResponse)
+@router.get('/cleanup/status/{task_id}', response_model=CompletionDebugResponse)
 async def summarize_status(task_id):
     full_results = get_task_info(task_id)
     task_results = full_results['results']
     if task_results is not None:
-        if 'summary' in task_results:
+        if 'result' in task_results:
             task_results = {
-                'summary': task_results['summary'],
-                'summary_type': task_results['summary_type'],
+                'result': task_results['result'],
+                'result_type': task_results['result_type'],
                 'text_too_large': task_results['too_many_tokens'],
                 'successful': task_results['successful'],
                 'fresh': task_results['fresh'],

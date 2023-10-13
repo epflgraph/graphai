@@ -23,17 +23,26 @@ from graphai.api.celery_tasks.common import fingerprint_lookup_retrieve_from_db,
              file_manager=file_management_config)
 def retrieve_file_from_url_task(self, url, is_kaltura=True, force=False, force_token=None):
     db_manager = VideoDBCachingManager()
+    existing = db_manager.get_details_using_origin(url, ['origin_token'])
+    # force=True works as follows:
+    # If the url has never been retrieved before, it retrieves it normally.
+    # If, however, the url has been retrieved before, it re-downloads it under the *same* token.
+    # Effectively, the assumption is: one url <-> one token. This helps handle cases where the
+    # cache files reside on multiple servers and we want to call different endpoints on the same token
+    # in the two different servers and have all the results in one place in the end.
     if not force:
-        existing = db_manager.get_details_using_origin(url, [])
         if existing is not None:
             return {
                 'token': existing[0]['id_token'],
                 'fresh': False
             }
-    if force_token is None:
-        token = generate_random_token()
-    else:
+    if force_token is not None:
         token = force_token
+    else:
+        if existing is not None and existing[0]['origin_token'] is not None:
+            token = existing[0]['origin_token']
+        else:
+            token = generate_random_token()
     file_format = url.split('.')[-1].lower()
     if file_format not in ['mp4', 'mkv', 'flv', 'avi', 'mov']:
         file_format = 'mp4'
@@ -52,8 +61,8 @@ def retrieve_file_from_url_task(self, url, is_kaltura=True, force=False, force_t
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='video_2.retrieve_url_callback', ignore_result=False,
              file_manager=file_management_config)
-def retrieve_file_from_url_callback_task(self, results, url):
-    if results['fresh']:
+def retrieve_file_from_url_callback_task(self, results, url, force=False):
+    if results['fresh'] and not force:
         db_manager = VideoDBCachingManager()
         current_datetime = get_current_datetime()
         db_manager.insert_or_update_details(results['token'],

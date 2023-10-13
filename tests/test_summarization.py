@@ -38,9 +38,9 @@ def test__summarization_summary__summarize_text__run_task(transcript_text):
 
     # Assert that the results are correct
     assert isinstance(summary_transcript, dict)
-    assert 'summary' in summary_transcript
+    assert 'result' in summary_transcript
     assert summary_transcript['successful'] is True
-    summary_text = summary_transcript['summary'].lower()
+    summary_text = summary_transcript['result'].lower()
     assert 'lecture' in summary_text
     assert 'digital circuit' in summary_text
     assert 'simulation' in summary_text or 'simulator' in summary_text
@@ -62,9 +62,9 @@ def test__summarization_title__summarize_text__run_task(ocr_text):
 
     # Assert that the results are correct
     assert isinstance(title_ocr, dict)
-    assert 'summary' in title_ocr
+    assert 'result' in title_ocr
     assert title_ocr['successful'] is True
-    title_text = title_ocr['summary'].lower()
+    title_text = title_ocr['result'].lower()
     assert 'simulation' in title_text or 'simulator' in title_text
     assert 'digital' in title_text or 'discrete' in title_text or 'circuit' in title_text
 
@@ -111,11 +111,11 @@ def test__summarization_summary__summarize_text__integration(fixture_app, celery
     assert summary_results['task_status'] == 'SUCCESS'
     assert summary_results['task_result']['successful'] is True
     assert summary_results['task_result']['fresh'] is True
-    summary_text = summary_results['task_result']['summary'].lower()
+    summary_text = summary_results['task_result']['result'].lower()
     assert 'lecture' in summary_text
     assert 'digital circuit' in summary_text or 'discrete event' in summary_text
     assert 'simulation' in summary_text or 'simulator' in summary_text
-    assert summary_results['task_result']['summary_type'] == 'summary'
+    assert summary_results['task_result']['result_type'] == 'summary'
     original_summary = summary_text
 
     ################################################
@@ -153,7 +153,7 @@ def test__summarization_summary__summarize_text__integration(fixture_app, celery
     assert summary_results['task_status'] == 'SUCCESS'
     assert summary_results['task_result']['successful'] is True
     assert summary_results['task_result']['fresh'] is False
-    assert summary_results['task_result']['summary'].lower() == original_summary
+    assert summary_results['task_result']['result'].lower() == original_summary
 
 
 ################################################################

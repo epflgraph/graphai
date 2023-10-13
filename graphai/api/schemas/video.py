@@ -10,6 +10,11 @@ class RetrieveURLRequest(BaseModel):
         description="The URL to be retrieved and stored for further processing"
     )
 
+    force: bool = Field(
+        title="Force redownload",
+        default=False
+    )
+
     playlist: bool = Field(
         title="Playlist flag",
         description="A boolean variable indicating whether the provided URL is an m3u8 playlist, rather "

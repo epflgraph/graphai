@@ -74,6 +74,7 @@ def get_video_fingerprint_chain_list(token, force, min_similarity=None, n_jobs=8
 async def retrieve_file(data: RetrieveURLRequest):
     # The URL to be retrieved
     url = data.url
+    force = data.force
     # This flag determines if the URL is that of an m3u8 playlist or a video file (like a .mp4)
     is_playlist = data.playlist
     # Overriding the is_playlist flag if the url ends with m3u8 (playlist) or mp4/mkv/flv/avi/mov (video file)
@@ -82,8 +83,8 @@ async def retrieve_file(data: RetrieveURLRequest):
     elif any([url.endswith(e) for e in ['.mp4', '.mkv', '.flv', '.avi', '.mov']]):
         is_playlist = False
     # First retrieve the file, and then do the database callback
-    task_list = [retrieve_file_from_url_task.s(url, is_playlist, False, None),
-                 retrieve_file_from_url_callback_task.s(url)]
+    task_list = [retrieve_file_from_url_task.s(url, is_playlist, force, None),
+                 retrieve_file_from_url_callback_task.s(url, force)]
     task = chain(task_list)
     task = task.apply_async(priority=2)
     return {'task_id': task.id}
