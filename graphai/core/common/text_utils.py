@@ -461,7 +461,7 @@ class ChatGPTSummarizer:
                  first_results['cleaned'],
                  'There are still typos in the text. Try to improve your previous response by correcting more typos. '
                  'Do not provide any explanations on how you fix typos. Make sure the results are in JSON format.'],
-                 system_message, temperature=temperature, top_p=top_p)
+                system_message, temperature=temperature, top_p=top_p)
         print('SECOND')
         results = json.loads(results)
         print(results)
