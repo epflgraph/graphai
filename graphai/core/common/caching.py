@@ -433,7 +433,7 @@ class DBCachingManagerBase(abc.ABC):
         Returns:
             None
         """
-        self._insert_or_update_details(self.schema, self.cache_table, id_token, values_to_insert)
+        self._insert_or_update_details(self.cache_table, id_token, values_to_insert)
 
     def update_details_if_exists(self, id_token, values_to_insert):
         """
@@ -447,7 +447,7 @@ class DBCachingManagerBase(abc.ABC):
         """
         if not self._row_exists(self.cache_table, id_token):
             return
-        self._insert_or_update_details(self.schema, self.cache_table, id_token, values_to_insert)
+        self._insert_or_update_details(self.cache_table, id_token, values_to_insert)
 
     def get_details(self, id_token, cols, using_most_similar=False):
         """
@@ -552,7 +552,7 @@ class DBCachingManagerBase(abc.ABC):
         Returns:
             None
         """
-        self._insert_or_update_details(self.schema, self.most_similar_table, id_token, values_to_insert)
+        self._insert_or_update_details(self.most_similar_table, id_token, values_to_insert)
 
     def get_closest_match(self, id_token):
         """
