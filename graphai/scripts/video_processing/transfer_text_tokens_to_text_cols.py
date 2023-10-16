@@ -15,8 +15,9 @@ def read_txt_gz_or_json(fp):
 
 def create_new_longtext_columns(db_manager, col_names):
     try:
-        db_manager.add_columns(db_manager.cache_table, col_names, ["LONGTEXT"]*len(col_names), ["NULL"]*len(col_names))
-    except Exception as e:
+        db_manager.add_columns(db_manager.cache_table, col_names,
+                               ["LONGTEXT"] * len(col_names), ["NULL"] * len(col_names))
+    except Exception:
         print('e')
 
 
