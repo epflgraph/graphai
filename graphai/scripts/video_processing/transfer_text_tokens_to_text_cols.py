@@ -3,6 +3,8 @@ from graphai.core.common.caching import SlideDBCachingManager, AudioDBCachingMan
 from graphai.core.common.video import read_txt_gz_file
 from graphai.core.common.common_utils import read_json_file, read_text_file
 import json
+import argparse
+import gc
 
 
 def read_txt_gz_or_json(fp):
@@ -22,12 +24,18 @@ def create_new_longtext_columns(db_manager, col_names):
         print('e')
 
 
-def transfer_results(db_manager, file_manager, input_cols, output_cols):
+def transfer_results(db_manager, file_manager, input_cols, output_cols, start=0, max_n=-1):
     create_new_longtext_columns(db_manager, output_cols)
     n_rows = db_manager.get_cache_count()
-    counter = 0
+    if start >= n_rows:
+        return
+    counter = start
     batch_size = 1000
-    while counter < n_rows:
+    if max_n == -1:
+        final_index = n_rows
+    else:
+        final_index = min([start + max_n, n_rows])
+    while counter < final_index:
         current_rows = db_manager.get_all_details(input_cols, start=counter,
                                                   limit=batch_size)
         for id_token in current_rows:
@@ -46,25 +54,39 @@ def transfer_results(db_manager, file_manager, input_cols, output_cols):
                 db_manager.insert_or_update_details(id_token, values_dict)
         counter += batch_size
         print(counter)
+        if (counter - start) % 10000 == 0:
+            gc.collect()
 
 
-def transfer_ocr_results():
+def transfer_ocr_results(start, max_n):
     transfer_results(SlideDBCachingManager(), VideoConfig(),
                      ['ocr_tesseract_token', 'ocr_google_1_token', 'ocr_google_2_token'],
-                     ['ocr_tesseract_results', 'ocr_google_1_results', 'ocr_google_2_results'])
+                     ['ocr_tesseract_results', 'ocr_google_1_results', 'ocr_google_2_results'],
+                     start, max_n)
 
 
-def transfer_transcription_results():
+def transfer_transcription_results(start, max_n):
     transfer_results(AudioDBCachingManager(), VideoConfig(),
                      ['transcript_token', 'subtitle_token'],
-                     ['transcript_results', 'subtitle_results'])
+                     ['transcript_results', 'subtitle_results'],
+                     start, max_n)
 
 
 def main():
-    print('Starting copy for slide tables')
-    transfer_ocr_results()
-    print('Starting copy for audio tables')
-    transfer_transcription_results()
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--slides', action='store_true',
+                        help='Transfer the results of OCR on slides.')
+    parser.add_argument('--audio', action='store_true',
+                        help='Transfer the results of transcription on audio.')
+    parser.add_argument('--start', type=int, help='Starting index', default=0)
+    parser.add_argument('--max_n', type=int, help='Maximum number of rows to handle', default=-1)
+    args = parser.parse_args()
+    if args.slides:
+        print('Starting copy for slide tables')
+        transfer_ocr_results(args.start, args.max_n)
+    if args.audio:
+        print('Starting copy for audio tables')
+        transfer_transcription_results(args.start, args.max_n)
 
 
 if __name__ == '__main__':
