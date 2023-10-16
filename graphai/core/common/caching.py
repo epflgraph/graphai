@@ -75,6 +75,14 @@ def escape_single_quotes(s):
     return s.replace("'", "''")
 
 
+def escape_backslashes(s):
+    return s.replace("\\", "\\\\")
+
+
+def escape_everything(s):
+    return escape_backslashes(escape_single_quotes(s))
+
+
 def add_where_or_and(query):
     """
     Prepares an SQL query for a new condition by adding a WHERE (if the query doesn't already have one)

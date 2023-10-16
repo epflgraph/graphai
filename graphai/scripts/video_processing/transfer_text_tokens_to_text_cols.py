@@ -1,5 +1,5 @@
 from graphai.core.common.caching import SlideDBCachingManager, AudioDBCachingManager, VideoConfig, \
-    escape_single_quotes
+    escape_everything
 from graphai.core.common.video import read_txt_gz_file
 from graphai.core.common.common_utils import read_json_file, read_text_file
 import json
@@ -42,7 +42,7 @@ def transfer_results(db_manager, file_manager, input_cols, output_cols):
                     )
                     if not isinstance(current_value, str):
                         current_value = json.dumps(current_value)
-                    current_value = escape_single_quotes(current_value)
+                    current_value = escape_everything(current_value)
                     values_dict[output_cols[i]] = current_value
             if len(values_dict) > 0:
                 db_manager.insert_or_update_details(id_token, values_dict)
