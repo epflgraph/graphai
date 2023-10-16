@@ -33,9 +33,7 @@ def transfer_results(db_manager, file_manager, input_cols, output_cols):
         for id_token in current_rows:
             values_dict = dict()
             row = current_rows[id_token]
-            print(row)
             for i in range(len(input_cols)):
-                print(input_cols[i])
                 if row[input_cols[i]] is not None:
                     current_value = read_txt_gz_or_json(
                         file_manager.generate_filepath(row[input_cols[i]])
