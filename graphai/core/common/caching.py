@@ -282,7 +282,8 @@ class DBCachingManagerBase(abc.ABC):
         return results
 
     def _get_all_details(self, table_name, cols, start=0, limit=-1, exclude_token=None, allow_nulls=True,
-                         earliest_date=None, latest_date=None, equality_conditions=None, has_date_col=False):
+                         earliest_date=None, latest_date=None, equality_conditions=None, has_date_col=False,
+                         sort_by_date_col=True):
         """
         Internal method. Gets the details of all rows in a table, with some conditions.
         Args:
@@ -325,7 +326,7 @@ class DBCachingManagerBase(abc.ABC):
             query += add_where_or_and(query)
             query += add_equality_conditions(equality_conditions)
         # ORDER BY comes before LIMIT but after WHERE
-        if has_date_col:
+        if has_date_col and sort_by_date_col:
             query += "\nORDER BY date_added"
         else:
             query += "\nORDER BY id_token"
@@ -506,7 +507,8 @@ class DBCachingManagerBase(abc.ABC):
         return self._get_details_using_origin(self.cache_table, origin_token, cols, has_date_col=True)
 
     def get_all_details(self, cols, start=0, limit=-1, exclude_token=None,
-                        allow_nulls=True, earliest_date=None, latest_date=None, equality_conditions=None):
+                        allow_nulls=True, earliest_date=None, latest_date=None, equality_conditions=None,
+                        do_date_sort=True):
         """
         Gets details of all rows in cache table, possibly with constraints
         Args:
@@ -518,6 +520,7 @@ class DBCachingManagerBase(abc.ABC):
             earliest_date: Earliest date to allow
             latest_date: Latest date to allow
             equality_conditions: Dict of equality conditions
+            do_date_sort: If False, the results will NOT be sorted by `date_added`, but by `id_token` (FASTER)
 
         Returns:
             Dict mapping id tokens to colname->value dicts
@@ -535,7 +538,8 @@ class DBCachingManagerBase(abc.ABC):
             exclude_tokens = None
         results = self._get_all_details(self.cache_table, cols, start=start, limit=limit, exclude_token=exclude_tokens,
                                         allow_nulls=allow_nulls, earliest_date=earliest_date, latest_date=latest_date,
-                                        equality_conditions=equality_conditions, has_date_col=True)
+                                        equality_conditions=equality_conditions, has_date_col=True,
+                                        sort_by_date_col=do_date_sort)
         return results
 
     def get_cache_count(self, non_null_cols=None, equality_conditions=None):

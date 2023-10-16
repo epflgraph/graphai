@@ -37,7 +37,7 @@ def transfer_results(db_manager, file_manager, input_cols, output_cols, start=0,
         final_index = min([start + max_n, n_rows])
     while counter < final_index:
         current_rows = db_manager.get_all_details(input_cols, start=counter,
-                                                  limit=batch_size)
+                                                  limit=batch_size, do_date_sort=False)
         for id_token in current_rows:
             values_dict = dict()
             row = current_rows[id_token]
