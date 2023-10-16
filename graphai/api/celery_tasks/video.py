@@ -23,7 +23,7 @@ from graphai.api.celery_tasks.common import fingerprint_lookup_retrieve_from_db,
              file_manager=file_management_config)
 def retrieve_file_from_url_task(self, url, is_kaltura=True, force=False, force_token=None):
     db_manager = VideoDBCachingManager()
-    existing = db_manager.get_details_using_origin(url, ['origin_token'])
+    existing = db_manager.get_details_using_origin(url, [])
     # force=True works as follows:
     # If the url has never been retrieved before, it retrieves it normally.
     # If, however, the url has been retrieved before, it re-downloads it under the *same* token.
@@ -39,9 +39,12 @@ def retrieve_file_from_url_task(self, url, is_kaltura=True, force=False, force_t
     if force_token is not None:
         token = force_token
     else:
-        if existing is not None and existing[0]['origin_token'] is not None:
-            token = existing[0]['origin_token']
+        if existing is not None:
+            # If the cache row already exists and force=True, then we don't create a new token, but instead
+            # use the id_token of the existing row
+            token = existing[0]['id_token']
         else:
+            # Otherwise, we generate a random token
             token = generate_random_token()
     file_format = url.split('.')[-1].lower()
     if file_format not in ['mp4', 'mkv', 'flv', 'avi', 'mov']:
