@@ -41,8 +41,8 @@ def retrieve_file_from_url_task(self, url, is_kaltura=True, force=False, force_t
     else:
         if existing is not None:
             # If the cache row already exists and force=True, then we don't create a new token, but instead
-            # use the id_token of the existing row
-            token = existing[0]['id_token']
+            # use the id_token of the existing row (we remove the file extension because it will be re-added soon)
+            token = existing[0]['id_token'].split('.')[0]
         else:
             # Otherwise, we generate a random token
             token = generate_random_token()
