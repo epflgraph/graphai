@@ -30,14 +30,17 @@ def transfer_results(db_manager, file_manager, input_cols, output_cols, start=0,
     if start >= n_rows:
         return
     counter = start
-    batch_size = 1000
+    batch_size = 100000
     if max_n == -1:
         final_index = n_rows
     else:
         final_index = min([start + max_n, n_rows])
     while counter < final_index:
+        print(f'Retrieving from db: LIMIT {counter},{batch_size}')
         current_rows = db_manager.get_all_details(input_cols, start=counter,
                                                   limit=batch_size, do_date_sort=False)
+        print('Processing')
+        temp_counter = 0
         for id_token in current_rows:
             values_dict = dict()
             row = current_rows[id_token]
@@ -52,10 +55,11 @@ def transfer_results(db_manager, file_manager, input_cols, output_cols, start=0,
                     values_dict[output_cols[i]] = current_value
             if len(values_dict) > 0:
                 db_manager.insert_or_update_details(id_token, values_dict)
+            temp_counter += 1
+            if temp_counter % 1000 == 0:
+                print((counter + temp_counter))
         counter += batch_size
-        print(counter)
-        if (counter - start) % 10000 == 0:
-            gc.collect()
+        gc.collect()
 
 
 def transfer_ocr_results(start, max_n):
