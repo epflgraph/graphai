@@ -140,10 +140,10 @@ async def transcribe_status(task_id):
     full_results = get_task_info(task_id)
     task_results = full_results['results']
     if task_results is not None:
-        if 'transcript_result' in task_results:
+        if 'transcript_results' in task_results:
             task_results = {
-                'transcript_result': task_results['transcript_result'],
-                'subtitle_result': task_results['subtitle_result'],
+                'transcript_results': task_results['transcript_results'],
+                'subtitle_results': task_results['subtitle_results'],
                 'language': task_results['language'],
                 'fresh': task_results['fresh']
             }

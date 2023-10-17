@@ -365,10 +365,8 @@ def transcribe_task(self, input_dict, force=False):
     # in language detection)
     if token is None:
         return {
-            'transcript_result': None,
-            'transcript_token': None,
-            'subtitle_result': None,
-            'subtitle_token': None,
+            'transcript_results': None,
+            'subtitle_results': None,
             'language': None,
             'fresh': False
         }
@@ -379,14 +377,12 @@ def transcribe_task(self, input_dict, force=False):
         # neighbor. However, it's also possible that the results have been computed for its closest
         # neighbor but not for itself.
         db_manager = AudioDBCachingManager()
-        existing_list = db_manager.get_details(token, ['transcript_token', 'subtitle_token', 'language'],
+        existing_list = db_manager.get_details(token, ['transcript_results', 'subtitle_results', 'language'],
                                                using_most_similar=True)
         if existing_list[0] is None:
             return {
-                'transcript_result': None,
-                'transcript_token': None,
-                'subtitle_result': None,
-                'subtitle_token': None,
+                'transcript_results': None,
+                'subtitle_results': None,
                 'language': None,
                 'fresh': False
             }
@@ -395,52 +391,38 @@ def transcribe_task(self, input_dict, force=False):
             if existing is None:
                 continue
 
-            if existing['transcript_token'] is not None and existing['subtitle_token'] is not None and \
+            if existing['transcript_results'] is not None and existing['subtitle_results'] is not None and \
                     existing['language'] is not None:
                 print('Returning cached result')
-                transcript_token = existing['transcript_token']
-                transcript_result = read_text_file(self.file_manager.generate_filepath(transcript_token))
-                subtitle_token = existing['subtitle_token']
-                subtitle_result = read_json_file(self.file_manager.generate_filepath(subtitle_token))
+                transcript_results = existing['transcript_results']
+                subtitle_results = existing['subtitle_results']
                 language_result = existing['language']
 
                 return {
-                    'transcript_result': transcript_result,
-                    'transcript_token': transcript_token,
-                    'subtitle_result': json.dumps(subtitle_result),
-                    'subtitle_token': subtitle_token,
+                    'transcript_results': transcript_results,
+                    'subtitle_results': json.dumps(subtitle_results),
                     'language': language_result,
                     'fresh': False
                 }
 
     input_filename_with_path = self.file_manager.generate_filepath(token)
-    transcript_token = token + '_transcript.txt'
-    subtitle_token = token + '_subtitle_segments.json'
     result_dict = self.model.transcribe_audio_whisper(input_filename_with_path, force_lang=lang, verbose=True)
 
     if result_dict is None:
         return {
-            'transcript_result': None,
-            'transcript_token': None,
-            'subtitle_result': None,
-            'subtitle_token': None,
+            'transcript_results': None,
+            'subtitle_results': None,
             'language': None,
             'fresh': False
         }
 
-    transcript_result = result_dict['text']
-    subtitle_result = json.dumps(result_dict['segments'])
+    transcript_results = result_dict['text']
+    subtitle_results = json.dumps(result_dict['segments'])
     language_result = result_dict['language']
-    transcript_filename_with_path = self.file_manager.generate_filepath(transcript_token)
-    subtitle_filename_with_path = self.file_manager.generate_filepath(subtitle_token)
-    write_text_file(transcript_filename_with_path, transcript_result)
-    write_text_file(subtitle_filename_with_path, subtitle_result)
 
     return {
-        'transcript_result': transcript_result,
-        'transcript_token': transcript_token,
-        'subtitle_result': subtitle_result,
-        'subtitle_token': subtitle_token,
+        'transcript_results': transcript_results,
+        'subtitle_results': subtitle_results,
         'language': language_result,
         'fresh': True
     }
@@ -452,8 +434,8 @@ def transcribe_task(self, input_dict, force=False):
 def transcribe_callback_task(self, results, token, force=False):
     if results['fresh']:
         values_dict = {
-            'transcript_token': results['transcript_token'],
-            'subtitle_token': results['subtitle_token'],
+            'transcript_results': results['transcript_results'],
+            'subtitle_results': results['subtitle_results'],
             'language': results['language']
         }
 
