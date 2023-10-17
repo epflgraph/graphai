@@ -130,12 +130,12 @@ class AudioTranscriptionRequest(BaseModel):
 
 
 class AudioTranscriptionTaskResponse(BaseModel):
-    transcript_result: Union[str, None] = Field(
+    transcript_results: Union[str, None] = Field(
         title="Transcript",
         description="The transcript of the requested audio file"
     )
 
-    subtitle_result: Union[Json[Any], None] = Field(
+    subtitle_results: Union[Json[Any], None] = Field(
         title="Subtitles",
         description="Timestamped transcript of the requested audio file."
     )
