@@ -9,7 +9,8 @@ from graphai.api.common.translation import translation_models
 from graphai.core.common.video import retrieve_file_from_url, retrieve_file_from_kaltura, \
     detect_audio_format_and_duration, extract_audio_from_video, extract_frames, generate_frame_sample_indices, \
     compute_ocr_noise_level, compute_ocr_threshold, compute_video_ocr_transitions, check_ocr_and_hash_thresholds, \
-    generate_random_token, md5_video_or_audio, generate_symbolic_token, FRAME_FORMAT_PNG, TESSERACT_OCR_FORMAT
+    generate_random_token, md5_video_or_audio, generate_symbolic_token, read_txt_gz_file, \
+    FRAME_FORMAT_PNG, TESSERACT_OCR_FORMAT
 from graphai.core.common.caching import AudioDBCachingManager, SlideDBCachingManager, \
     VideoDBCachingManager
 from graphai.core.common.common_utils import file_exists, get_current_datetime
@@ -548,7 +549,7 @@ def detect_slides_callback_task(self, results, token, force=False):
                     'origin_token': token,
                     'timestamp': slide_tokens[slide_number]['timestamp'],
                     'slide_number': slide_number,
-                    'ocr_tesseract_token': ocr_tokens[slide_number],
+                    'ocr_tesseract_results': read_txt_gz_file(ocr_tokens[slide_number]),
                     'date_added': current_datetime
                 }
             )
@@ -576,7 +577,7 @@ def detect_slides_callback_task(self, results, token, force=False):
                             'origin_token': closest_video_match,
                             'timestamp': slide_tokens[slide_number]['timestamp'],
                             'slide_number': slide_number,
-                            'ocr_tesseract_token': ocr_tokens[slide_number],
+                            'ocr_tesseract_results': read_txt_gz_file(ocr_tokens[slide_number]),
                             'date_added': current_datetime
                         }
                     )

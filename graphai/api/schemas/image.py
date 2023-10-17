@@ -77,10 +77,7 @@ class IndividualOCRResult(BaseModel):
         title="OCR method",
         description="OCR method of the result"
     )
-    token: str = Field(
-        title="OCR token",
-        description="Token of the file where the OCR results have been stored"
-    )
+
     text: str = Field(
         title="OCR text",
         description="Textual results of the OCR"

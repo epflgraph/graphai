@@ -130,9 +130,9 @@ def retrieve_slide_fingerprint_callback_task(self, results):
              file_manager=file_management_config)
 def extract_slide_text_task(self, token, method='tesseract', force=False):
     if method == 'tesseract':
-        ocr_colnames = ['ocr_tesseract_token']
+        ocr_colnames = ['ocr_tesseract_results']
     else:
-        ocr_colnames = ['ocr_google_1_token', 'ocr_google_2_token']
+        ocr_colnames = ['ocr_google_1_results', 'ocr_google_2_results']
 
     if not force:
         db_manager = SlideDBCachingManager()
@@ -155,8 +155,7 @@ def extract_slide_text_task(self, token, method='tesseract', force=False):
                 results = [
                     {
                         'method': ocr_colname,
-                        'token': existing[ocr_colname],
-                        'text': read_txt_gz_file(self.file_manager.generate_filepath(existing[ocr_colname]))
+                        'text': existing[ocr_colname],
                     }
                     for ocr_colname in ocr_colnames
                 ]
@@ -180,12 +179,9 @@ def extract_slide_text_task(self, token, method='tesseract', force=False):
             language = None
         else:
             language = detect_text_language(res)
-            res_token = token + '_' + ocr_colnames[0] + '.txt.gz'
-            write_txt_gz_file(res, self.file_manager.generate_filepath(res_token))
             results = [
                 {
                     'method': ocr_colnames[0],
-                    'token': res_token,
                     'text': res
                 }
             ]
@@ -201,15 +197,9 @@ def extract_slide_text_task(self, token, method='tesseract', force=False):
             # Since DTD usually performs better, method #1 is our point of reference for langdetect
             language = detect_text_language(res1)
             res_list = [res1, res2]
-            res_token_list = list()
-            for i in range(len(res_list)):
-                current_token = token + '_' + ocr_colnames[i] + '.txt.gz'
-                write_txt_gz_file(res_list[i], self.file_manager.generate_filepath(current_token))
-                res_token_list.append(current_token)
             results = [
                 {
                     'method': ocr_colnames[i],
-                    'token': res_token_list[i],
                     'text': res_list[i]
                 }
                 for i in range(len(res_list))
@@ -227,7 +217,7 @@ def extract_slide_text_task(self, token, method='tesseract', force=False):
 def extract_slide_text_callback_task(self, results, token, force=False):
     if results['fresh']:
         values_dict = {
-            result['method']: result['token']
+            result['method']: result['text']
             for result in results['results']
         }
 
