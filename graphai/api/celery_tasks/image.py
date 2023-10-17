@@ -3,7 +3,7 @@ from celery import shared_task
 from graphai.api.celery_tasks.common import fingerprint_lookup_retrieve_from_db, fingerprint_lookup_parallel, \
     fingerprint_lookup_callback, fingerprint_lookup_direct
 from graphai.api.common.video import file_management_config
-from graphai.core.common.video import perceptual_hash_image, read_txt_gz_file, write_txt_gz_file, perform_tesseract_ocr, \
+from graphai.core.common.video import perceptual_hash_image, perform_tesseract_ocr, \
     GoogleOCRModel
 from graphai.core.common.text_utils import detect_text_language
 from graphai.core.common.caching import SlideDBCachingManager

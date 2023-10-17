@@ -7,7 +7,6 @@ from celery import shared_task
 from graphai.api.common.video import file_management_config, transcription_model
 from graphai.core.common.video import remove_silence_doublesided, perceptual_hash_audio, \
     extract_media_segment
-from graphai.core.common.common_utils import write_text_file, read_text_file, read_json_file
 from graphai.core.common.caching import TEMP_SUBFOLDER, AudioDBCachingManager
 from graphai.api.celery_tasks.common import fingerprint_lookup_retrieve_from_db, fingerprint_lookup_parallel, \
     fingerprint_lookup_callback
