@@ -549,7 +549,8 @@ def detect_slides_callback_task(self, results, token, force=False):
                     'origin_token': token,
                     'timestamp': slide_tokens[slide_number]['timestamp'],
                     'slide_number': slide_number,
-                    'ocr_tesseract_results': read_txt_gz_file(ocr_tokens[slide_number]),
+                    'ocr_tesseract_results': read_txt_gz_file(
+                        file_management_config.generate_filepath(ocr_tokens[slide_number])),
                     'date_added': current_datetime
                 }
             )
@@ -577,7 +578,8 @@ def detect_slides_callback_task(self, results, token, force=False):
                             'origin_token': closest_video_match,
                             'timestamp': slide_tokens[slide_number]['timestamp'],
                             'slide_number': slide_number,
-                            'ocr_tesseract_results': read_txt_gz_file(ocr_tokens[slide_number]),
+                            'ocr_tesseract_results': read_txt_gz_file(
+                                file_management_config.generate_filepath(ocr_tokens[slide_number])),
                             'date_added': current_datetime
                         }
                     )

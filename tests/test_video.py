@@ -93,7 +93,7 @@ def test__video_extract_audio__extract_audio_task__run_task(test_video_token):
 def test__video_detect_slides__detect_slides__integration(fixture_app, celery_worker, test_video_url, timeout=30):
     # First retrieving the video (without `force` in order to use cached results if available)
     response = fixture_app.post('/video/retrieve_url',
-                                data=json.dumps({"url": test_video_url}),
+                                data=json.dumps({"url": test_video_url, "force": True}),
                                 timeout=timeout)
 
     assert response.status_code == 200
