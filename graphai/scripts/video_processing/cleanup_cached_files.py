@@ -23,7 +23,7 @@ def get_cleanup_interval():
     except Exception:
         print(f'Could not read file {CONFIG_DIR}/cache.ini or '
               f'file does not have section [CLEANUP], falling back to defaults.')
-        n_days = 30
+        n_days = 60
     return n_days
 
 
