@@ -124,7 +124,8 @@ def add_non_null_conditions(cols):
 
 
 class DBCachingManagerBase(abc.ABC):
-    def __init__(self, cache_table, most_similar_table):
+    def __init__(self, cache_table, most_similar_table, cache_date_added_col='date_added',
+                 cache_date_modified_col='date_added'):
         # Only four values are hardcoded into this class and need to be respected by its child classes:
         # 1. The schema, which is 'cache_graphai' by default, should not be changed
         # 2. The name of the id column for both the main and the most-similar tables is 'id_token'
@@ -144,6 +145,8 @@ class DBCachingManagerBase(abc.ABC):
             self.schema = DEFAULT_SCHEMA
         self.cache_table = cache_table
         self.most_similar_table = most_similar_table
+        self.cache_date_added_col = cache_date_added_col
+        self.cache_date_modified_col = cache_date_modified_col
         self.db = DB()
         self.init_db()
 
@@ -283,7 +286,7 @@ class DBCachingManagerBase(abc.ABC):
 
     def _get_all_details(self, table_name, cols, start=0, limit=-1, exclude_token=None, allow_nulls=True,
                          earliest_date=None, latest_date=None, equality_conditions=None, has_date_col=False,
-                         sort_by_date_col=True):
+                         sort_by_date_col=True, use_date_modified_col=False):
         """
         Internal method. Gets the details of all rows in a table, with some conditions.
         Args:
@@ -295,8 +298,9 @@ class DBCachingManagerBase(abc.ABC):
             allow_nulls: Whether to allow null values or to exclude rows where any of the required columns is null
             earliest_date: The earliest date to include
             equality_conditions: Equality conditions
-            has_date_col: Whether or not the table has a date_added column, which would be used to sort the results.
-
+            has_date_col: Whether the table has a date_added column, which would be used to sort the results.
+            use_date_modified_col: Whether to use the date_modified or the date_added column for comparisons
+                with `earliest_date` or `latest_date`.
         Returns:
             Dictionary mapping each id_token to a dictionary of column name : values.
         """
@@ -316,12 +320,15 @@ class DBCachingManagerBase(abc.ABC):
         if not allow_nulls:
             query += add_where_or_and(query)
             query += add_non_null_conditions(cols)
-        if earliest_date is not None and has_date_col:
-            query += add_where_or_and(query)
-            query += f" date_added >= '{earliest_date}'"
-        if latest_date is not None and has_date_col:
-            query += add_where_or_and(query)
-            query += f" date_added <= '{latest_date}'"
+        if has_date_col:
+            date_col_to_use_for_comp = \
+                self.cache_date_modified_col if use_date_modified_col else self.cache_date_added_col
+            if earliest_date is not None:
+                query += add_where_or_and(query)
+                query += f" {date_col_to_use_for_comp} >= '{earliest_date}'"
+            if latest_date is not None:
+                query += add_where_or_and(query)
+                query += f" {date_col_to_use_for_comp} <= '{latest_date}'"
         if equality_conditions is not None:
             query += add_where_or_and(query)
             query += add_equality_conditions(equality_conditions)
@@ -508,7 +515,7 @@ class DBCachingManagerBase(abc.ABC):
 
     def get_all_details(self, cols, start=0, limit=-1, exclude_token=None,
                         allow_nulls=True, earliest_date=None, latest_date=None, equality_conditions=None,
-                        do_date_sort=True):
+                        do_date_sort=True, use_date_modified_col=False):
         """
         Gets details of all rows in cache table, possibly with constraints
         Args:
@@ -521,7 +528,8 @@ class DBCachingManagerBase(abc.ABC):
             latest_date: Latest date to allow
             equality_conditions: Dict of equality conditions
             do_date_sort: If False, the results will NOT be sorted by `date_added`, but by `id_token` (FASTER)
-
+            use_date_modified_col: If True, date_modified will be used for earliest/latest date comparisons (
+                instead of date_added)
         Returns:
             Dict mapping id tokens to colname->value dicts
         """
@@ -539,7 +547,7 @@ class DBCachingManagerBase(abc.ABC):
         results = self._get_all_details(self.cache_table, cols, start=start, limit=limit, exclude_token=exclude_tokens,
                                         allow_nulls=allow_nulls, earliest_date=earliest_date, latest_date=latest_date,
                                         equality_conditions=equality_conditions, has_date_col=True,
-                                        sort_by_date_col=do_date_sort)
+                                        sort_by_date_col=do_date_sort, use_date_modified_col=use_date_modified_col)
         return results
 
     def get_cache_count(self, non_null_cols=None, equality_conditions=None):
@@ -592,7 +600,8 @@ class DBCachingManagerBase(abc.ABC):
 
 class VideoDBCachingManager(DBCachingManagerBase):
     def __init__(self):
-        super().__init__(cache_table='Video_Main', most_similar_table='Video_Most_Similar')
+        super().__init__(cache_table='Video_Main', most_similar_table='Video_Most_Similar',
+                         cache_date_modified_col='date_modified')
 
     def init_db(self):
         # Ensuring the schema's existence
@@ -672,7 +681,6 @@ class AudioDBCachingManager(DBCachingManagerBase):
               `language` VARCHAR(10) DEFAULT NULL,
               `fp_nosilence` INT DEFAULT NULL,
               `date_added` DATETIME DEFAULT NULL,
-              `date_modified` DATETIME DEFAULT NULL,
               PRIMARY KEY id_token (id_token)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
             """
@@ -732,7 +740,6 @@ class SlideDBCachingManager(DBCachingManagerBase):
               `ocr_google_2_results` LONGTEXT DEFAULT NULL,
               `language` VARCHAR(10) DEFAULT NULL,
               `date_added` DATETIME DEFAULT NULL,
-              `date_modified` DATETIME DEFAULT NULL,
               PRIMARY KEY id_token (id_token)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
             """
@@ -796,7 +803,6 @@ class TextDBCachingManager(DBCachingManagerBase):
               `source_lang` VARCHAR(10) DEFAULT NULL,
               `target_lang` VARCHAR(10) DEFAULT NULL,
               `date_added` DATETIME DEFAULT NULL,
-              `date_modified` DATETIME DEFAULT NULL,
               PRIMARY KEY id_token (id_token)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
             """
@@ -854,7 +860,6 @@ class SummaryDBCachingManager(DBCachingManagerBase):
               `summary_length` INT DEFAULT NULL,
               `summary_token_total` INT DEFAULT NULL,
               `date_added` DATETIME DEFAULT NULL,
-              `date_modified` DATETIME DEFAULT NULL,
               PRIMARY KEY id_token (id_token)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
             """
@@ -912,7 +917,6 @@ class ScrapingDBCachingManager(DBCachingManagerBase):
               `headers_removed` INT DEFAULT NULL,
               `long_patterns_removed` INT DEFAULT NULL,
               `date_added` DATETIME,
-              `date_modified` DATETIME,
               PRIMARY KEY id_token (id_token)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
             """

@@ -66,14 +66,21 @@ def retrieve_file_from_url_task(self, url, is_kaltura=True, force=False, force_t
              name='video_2.retrieve_url_callback', ignore_result=False,
              file_manager=file_management_config)
 def retrieve_file_from_url_callback_task(self, results, url, force=False):
-    if results['fresh'] and not force:
+    if results['fresh']:
         db_manager = VideoDBCachingManager()
         current_datetime = get_current_datetime()
-        db_manager.insert_or_update_details(results['token'],
-                                            {
-                                                'origin_token': url,
-                                                'date_added': current_datetime
-        })
+        values = {
+            'date_modified': current_datetime
+        }
+        if not force:
+            values.update(
+                {
+                    'origin_token': url,
+                    'date_added': current_datetime
+                }
+            )
+        db_manager.insert_or_update_details(results['token'], values_to_insert=values)
+
     return results
 
 
