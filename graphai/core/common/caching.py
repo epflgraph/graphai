@@ -672,7 +672,6 @@ class AudioDBCachingManager(DBCachingManagerBase):
               `language` VARCHAR(10) DEFAULT NULL,
               `fp_nosilence` INT DEFAULT NULL,
               `date_added` DATETIME DEFAULT NULL,
-              `date_modified` DATETIME DEFAULT NULL,
               PRIMARY KEY id_token (id_token)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
             """
@@ -732,7 +731,6 @@ class SlideDBCachingManager(DBCachingManagerBase):
               `ocr_google_2_results` LONGTEXT DEFAULT NULL,
               `language` VARCHAR(10) DEFAULT NULL,
               `date_added` DATETIME DEFAULT NULL,
-              `date_modified` DATETIME DEFAULT NULL,
               PRIMARY KEY id_token (id_token)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
             """
@@ -796,7 +794,6 @@ class TextDBCachingManager(DBCachingManagerBase):
               `source_lang` VARCHAR(10) DEFAULT NULL,
               `target_lang` VARCHAR(10) DEFAULT NULL,
               `date_added` DATETIME DEFAULT NULL,
-              `date_modified` DATETIME DEFAULT NULL,
               PRIMARY KEY id_token (id_token)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
             """
@@ -854,7 +851,6 @@ class SummaryDBCachingManager(DBCachingManagerBase):
               `summary_length` INT DEFAULT NULL,
               `summary_token_total` INT DEFAULT NULL,
               `date_added` DATETIME DEFAULT NULL,
-              `date_modified` DATETIME DEFAULT NULL,
               PRIMARY KEY id_token (id_token)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
             """
@@ -912,7 +908,6 @@ class ScrapingDBCachingManager(DBCachingManagerBase):
               `headers_removed` INT DEFAULT NULL,
               `long_patterns_removed` INT DEFAULT NULL,
               `date_added` DATETIME,
-              `date_modified` DATETIME,
               PRIMARY KEY id_token (id_token)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
             """
