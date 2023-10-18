@@ -41,7 +41,7 @@ def find_old_videos(oldest_acceptable_date):
     # We only get the rows whose origin_token is not null,
     # because those are the ones that have not been cleaned up.
     results = db_manager.get_all_details(['origin_token', 'date_added'], allow_nulls=False,
-                                         latest_date=oldest_acceptable_date)
+                                         latest_date=oldest_acceptable_date, use_date_modified_col=True)
     if results is None:
         return []
     id_list = list(results.keys())
