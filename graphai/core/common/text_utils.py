@@ -10,6 +10,7 @@ import openai
 import pysbd
 import tiktoken
 from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
+import torch
 
 from graphai.definitions import CONFIG_DIR
 
@@ -505,8 +506,12 @@ class TranslationModels:
             Translation result or None if translation fails
         """
         try:
+            device = "cuda" if torch.cuda.is_available() else "cpu"
+            print(device)
             input_ids = tokenizer.encode(sentence, return_tensors="pt")
+            input_ids.to(device)
             outputs = model.generate(input_ids, max_length=512)
+            outputs.to(device)
             decoded = tokenizer.decode(outputs[0], skip_special_tokens=True)
             return decoded
         except IndexError as e:
