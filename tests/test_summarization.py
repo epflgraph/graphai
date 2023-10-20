@@ -220,3 +220,49 @@ def test__summarization_calculate_fingerprint__compute_text_fingerprint__integra
     assert content['task_result']['successful'] is True
     assert content['task_result']['fresh'] is True
     assert content['task_result']['result'] == '020c000800021008020208000e0a120008000408080a30060208020c00000804_50_25'
+
+
+@pytest.mark.celery(accept_content=['pickle', 'json'], result_serializer='pickle', task_serializer='pickle')
+@pytest.mark.usefixtures('dirty_ocr_text')
+def test__summarization_cleanup__cleanup_text__integration(fixture_app, celery_worker, dirty_ocr_text, timeout=30):
+    # The celery_worker object is necessary for async tasks, otherwise the status will be permanently stuck on
+    # PENDING.
+
+    # First, we call the summary endpoint with force=True to test the full task pipeline working
+    response = fixture_app.post('/completion/cleanup',
+                                data=json.dumps({"text": dirty_ocr_text, "force": True}),
+                                timeout=timeout)
+    # Check status code is successful
+    assert response.status_code == 200
+    # Parse resulting task id
+    task_id = response.json()['task_id']
+
+    # Waiting for task chain to succeed
+    current_status = 'PENDING'
+    n_tries = 0
+    while current_status == 'PENDING' and n_tries < 10:
+        # Wait a few seconds
+        sleep(3)
+        # Now get status
+        response = fixture_app.get(f'/completion/cleanup/status/{task_id}',
+                                   timeout=timeout)
+        current_status = response.json()['task_status']
+        n_tries += 1
+
+    # Now get status
+    response = fixture_app.get(f'/completion/cleanup/status/{task_id}',
+                               timeout=timeout)
+    # Parse result
+    cleanup_results = response.json()
+    # Check returned value
+    assert isinstance(cleanup_results, dict)
+    assert 'task_result' in cleanup_results
+    assert cleanup_results['task_status'] == 'SUCCESS'
+    assert cleanup_results['task_result']['successful'] is True
+    assert cleanup_results['task_result']['fresh'] is True
+    cleaned_up_text = cleanup_results['task_result']['result'].lower()
+    assert 'formalisme de hamilton' in cleaned_up_text
+    assert 'legendre' in cleaned_up_text
+    assert 'fonction inverse' in cleaned_up_text
+    assert 'trouver' in cleaned_up_text
+    assert cleanup_results['task_result']['result_type'] == 'cleanup'
