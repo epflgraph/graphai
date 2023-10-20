@@ -502,6 +502,7 @@ class ChatGPTSummarizer:
 class TranslationModels:
     def __init__(self):
         self.models = None
+        self.device = None
 
     def load_models(self):
         """
@@ -522,6 +523,9 @@ class TranslationModels:
             self.models['fr-en']['model'] = AutoModelForSeq2SeqLM.from_pretrained("Helsinki-NLP/opus-mt-fr-en")
             self.models['fr-en']['segmenter'] = pysbd.Segmenter(language='fr', clean=False)
 
+    def get_device(self):
+        return self.device
+
     def _tokenize_and_get_model_output(self, sentence, tokenizer, model):
         """
         Internal method. Translates one single sentence.
@@ -534,12 +538,12 @@ class TranslationModels:
             Translation result or None if translation fails
         """
         try:
-            device = "cuda" if torch.cuda.is_available() else "cpu"
-            print(device)
+            self.device = "cuda" if torch.cuda.is_available() else "cpu"
+            print(self.device)
             input_ids = tokenizer.encode(sentence, return_tensors="pt")
-            input_ids.to(device)
+            input_ids.to(self.device)
             outputs = model.generate(input_ids, max_length=512)
-            outputs.to(device)
+            outputs.to(self.device)
             decoded = tokenizer.decode(outputs[0], skip_special_tokens=True)
             return decoded
         except IndexError as e:

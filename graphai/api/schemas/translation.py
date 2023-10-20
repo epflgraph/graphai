@@ -105,6 +105,11 @@ class TranslationTaskResponse(BaseModel):
         description="Whether or not the result is fresh"
     )
 
+    device: Union[str, None] = Field(
+        title="Translation device",
+        description="The device used ('cuda' or 'cpu') for the translation. `None` in case of cache hit or failure."
+    )
+
 
 class TranslationResponse(TaskStatusResponse):
     task_result: Union[TranslationTaskResponse, None] = Field(

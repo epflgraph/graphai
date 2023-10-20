@@ -88,7 +88,8 @@ def translate_text_task(self, token, text, src, tgt, force):
             'result': "'source' and 'target' languages must be different!",
             'text_too_large': False,
             'successful': False,
-            'fresh': False
+            'fresh': False,
+            'device': None
         }
 
     db_manager = TextDBCachingManager()
@@ -105,7 +106,8 @@ def translate_text_task(self, token, text, src, tgt, force):
                     'result': existing['target'],
                     'text_too_large': False,
                     'successful': True,
-                    'fresh': False
+                    'fresh': False,
+                    'device': None
                 }
 
     how = f"{src}-{tgt}"
@@ -127,7 +129,8 @@ def translate_text_task(self, token, text, src, tgt, force):
         'result': translated_text,
         'text_too_large': large_warning,
         'successful': success,
-        'fresh': success
+        'fresh': success,
+        'device': self.translation_obj.get_device()
     }
 
 

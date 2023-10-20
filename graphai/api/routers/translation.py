@@ -132,7 +132,8 @@ async def translate_status(task_id):
                 'result': task_results['result'],
                 'text_too_large': task_results['text_too_large'],
                 'successful': task_results['successful'],
-                'fresh': task_results['fresh']
+                'fresh': task_results['fresh'],
+                'device': task_results['device']
             }
         else:
             task_results = None
