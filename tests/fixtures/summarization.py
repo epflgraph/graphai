@@ -251,3 +251,38 @@ def ocr_text():
     We will construct a digital circuit simulator.
     This example also shows how to build programs that do discrete event
     simulation."""
+
+
+@pytest.fixture
+def dirty_ocr_text():
+    return """
+        09:41 Tue 9 Jan
+        * 100%
+        < 88 Q D O
+        formalisme de hamilton -
+        monare acion et contrainte
+        formalisme de hamilton
+        O ITI
+        x et 8 du type
+        Paolo De Los Rios
+        Lorsque
+        uue relabiou eutre
+        ou
+        la relatiou
+        est tiera lement comblée
+        par
+        8 = f"
+        c'est à olice la fouchon iverse.
+        La tansformatiou de Legenore est une façou torodue oe
+        faire la meme chose, en passput par
+        la derivée :
+        dy
+        et ou cher che
+        glx)
+        telle
+        que
+        y=
+        de
+        Pour tzouver gcx)
+        procede aiusi :
+        on substitue 8=8'(x)"""

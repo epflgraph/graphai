@@ -419,6 +419,30 @@ class ChatGPTSummarizer:
         results = ':'.join(results.split(':')[1:]).strip().strip('"')
         return results, system_message, too_many_tokens, n_total_tokens
 
+    def make_sure_json_is_valid(self, results, messages, system_message, temperature=1, top_p=0.3,
+                                n_retries=1):
+        try:
+            prev_results_json = json.loads(results)
+            return prev_results_json, (messages + [results])
+        except json.JSONDecodeError:
+            print('Results not in JSON, retrying')
+        messages = messages + [results]
+        retried = 0
+        while retried < n_retries:
+            try:
+                correction_message = ['The results were not in a JSON format. Improve your previous response by '
+                                      'making sure the results are in JSON.']
+                results, too_many_tokens, n_total_tokens = \
+                    self._generate_completion(
+                        messages + correction_message,
+                        system_message, temperature=temperature, top_p=top_p)
+                results_json = json.loads(results)
+                return results_json, (messages + correction_message + [results])
+            except Exception:
+                retried += 1
+        raise Exception(f"Could not get ChatGPT to produce a JSON result, "
+                        f"here are the final results produced: {results}")
+
     def cleanup_text(self, text_or_dict, text_type='slide', handwriting=True, temperature=1, top_p=0.3):
         if handwriting:
             system_message = "You will be given the contents of a %s, " \
@@ -446,25 +470,29 @@ class ChatGPTSummarizer:
                           "4. Correct ALL typos. Treat words that exist neither in [LANGUAGE] nor in English " \
                           "as typos. Treat words that are completely unrelated to the [SUBJECT MATTER] or " \
                           "the other words in the text as typos. Correct every single typo to the closest word " \
-                          "in [LANGUAGE] (or failing that, English) that fits within the [SUBJECT MATTER].\n"
+                          "in [LANGUAGE] (or failing that, English) that fits within the [SUBJECT MATTER].\n" \
+                          "Make sure the results are in JSON."
 
         # Make a call to ChatGPT to generate initial results. These will still be full of typos.
         first_results, first_too_many_tokens, first_n_total_tokens = \
             self._generate_completion(text, system_message, temperature=temperature, top_p=top_p)
         print('FIRST')
-        first_results = json.loads(first_results)
+        first_results, message_chain = self.make_sure_json_is_valid(first_results, [text], system_message,
+                                                                    temperature=temperature, top_p=top_p)
         print(first_results)
 
         # Now make a second call to ChatGPT, asking it to improve its initial results.
+        correction_message = \
+            ['There are still typos in the text. Try to improve your previous response by correcting more typos. '
+             'Do not provide any explanations on how you fix typos. Make sure the results are in JSON format.']
         results, too_many_tokens, n_total_tokens = \
             self._generate_completion(
-                [text,
-                 first_results['cleaned'],
-                 'There are still typos in the text. Try to improve your previous response by correcting more typos. '
-                 'Do not provide any explanations on how you fix typos. Make sure the results are in JSON format.'],
+                message_chain + correction_message,
                 system_message, temperature=temperature, top_p=top_p)
         print('SECOND')
-        results = json.loads(results)
+        results, message_chain = self.make_sure_json_is_valid(results, message_chain + correction_message,
+                                                              system_message,
+                                                              temperature=temperature, top_p=top_p)
         print(results)
 
         # Return the results of the second call
@@ -474,6 +502,7 @@ class ChatGPTSummarizer:
 class TranslationModels:
     def __init__(self):
         self.models = None
+        self.device = None
 
     def load_models(self):
         """
@@ -494,6 +523,9 @@ class TranslationModels:
             self.models['fr-en']['model'] = AutoModelForSeq2SeqLM.from_pretrained("Helsinki-NLP/opus-mt-fr-en")
             self.models['fr-en']['segmenter'] = pysbd.Segmenter(language='fr', clean=False)
 
+    def get_device(self):
+        return self.device
+
     def _tokenize_and_get_model_output(self, sentence, tokenizer, model):
         """
         Internal method. Translates one single sentence.
@@ -506,12 +538,12 @@ class TranslationModels:
             Translation result or None if translation fails
         """
         try:
-            device = "cuda" if torch.cuda.is_available() else "cpu"
-            print(device)
+            self.device = "cuda" if torch.cuda.is_available() else "cpu"
+            print(self.device)
             input_ids = tokenizer.encode(sentence, return_tensors="pt")
-            input_ids.to(device)
+            input_ids.to(self.device)
             outputs = model.generate(input_ids, max_length=512)
-            outputs.to(device)
+            outputs.to(self.device)
             decoded = tokenizer.decode(outputs[0], skip_special_tokens=True)
             return decoded
         except IndexError as e:
