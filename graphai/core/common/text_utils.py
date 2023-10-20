@@ -419,6 +419,30 @@ class ChatGPTSummarizer:
         results = ':'.join(results.split(':')[1:]).strip().strip('"')
         return results, system_message, too_many_tokens, n_total_tokens
 
+    def make_sure_json_is_valid(self, results, messages, system_message, temperature=1, top_p=0.3,
+                                n_retries=1):
+        try:
+            prev_results_json = json.loads(results)
+            return prev_results_json, (messages + [results])
+        except json.JSONDecodeError:
+            print('Results not in JSON, retrying')
+        messages = messages + [results]
+        retried = 0
+        while retried < n_retries:
+            try:
+                correction_message = ['The results were not in a JSON format. Improve your previous response by '
+                                      'making sure the results are in JSON.']
+                results, too_many_tokens, n_total_tokens = \
+                    self._generate_completion(
+                        messages + correction_message,
+                        system_message, temperature=temperature, top_p=top_p)
+                results_json = json.loads(results)
+                return results_json, (messages + correction_message + [results])
+            except Exception:
+                retried += 1
+        raise Exception(f"Could not get ChatGPT to produce a JSON result, "
+                        f"here are the final results produced: {results}")
+
     def cleanup_text(self, text_or_dict, text_type='slide', handwriting=True, temperature=1, top_p=0.3):
         if handwriting:
             system_message = "You will be given the contents of a %s, " \
@@ -446,25 +470,29 @@ class ChatGPTSummarizer:
                           "4. Correct ALL typos. Treat words that exist neither in [LANGUAGE] nor in English " \
                           "as typos. Treat words that are completely unrelated to the [SUBJECT MATTER] or " \
                           "the other words in the text as typos. Correct every single typo to the closest word " \
-                          "in [LANGUAGE] (or failing that, English) that fits within the [SUBJECT MATTER].\n"
+                          "in [LANGUAGE] (or failing that, English) that fits within the [SUBJECT MATTER].\n" \
+                          "Make sure the results are in JSON."
 
         # Make a call to ChatGPT to generate initial results. These will still be full of typos.
         first_results, first_too_many_tokens, first_n_total_tokens = \
             self._generate_completion(text, system_message, temperature=temperature, top_p=top_p)
         print('FIRST')
-        first_results = json.loads(first_results)
+        first_results, message_chain = self.make_sure_json_is_valid(first_results, [text], system_message,
+                                                                    temperature=temperature, top_p=top_p)
         print(first_results)
 
         # Now make a second call to ChatGPT, asking it to improve its initial results.
+        correction_message = \
+            ['There are still typos in the text. Try to improve your previous response by correcting more typos. '
+             'Do not provide any explanations on how you fix typos. Make sure the results are in JSON format.']
         results, too_many_tokens, n_total_tokens = \
             self._generate_completion(
-                [text,
-                 first_results['cleaned'],
-                 'There are still typos in the text. Try to improve your previous response by correcting more typos. '
-                 'Do not provide any explanations on how you fix typos. Make sure the results are in JSON format.'],
+                message_chain + correction_message,
                 system_message, temperature=temperature, top_p=top_p)
         print('SECOND')
-        results = json.loads(results)
+        results, message_chain = self.make_sure_json_is_valid(results, message_chain + correction_message,
+                                                              system_message,
+                                                              temperature=temperature, top_p=top_p)
         print(results)
 
         # Return the results of the second call
