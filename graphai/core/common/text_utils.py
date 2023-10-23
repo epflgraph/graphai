@@ -542,7 +542,7 @@ class TranslationModels:
         try:
             print(self.device)
             input_ids = tokenizer.encode(sentence, return_tensors="pt")
-            input_ids.to(self.device)
+            input_ids = input_ids.to(self.device)
             outputs = model.generate(input_ids, max_length=512)
             decoded = tokenizer.decode(outputs[0], skip_special_tokens=True)
             return decoded
