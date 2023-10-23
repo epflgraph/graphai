@@ -502,7 +502,7 @@ class ChatGPTSummarizer:
 class TranslationModels:
     def __init__(self):
         self.models = None
-        self.device = None
+        self.device = "cuda" if torch.cuda.is_available() else "cpu"
 
     def load_models(self):
         """
@@ -515,12 +515,14 @@ class TranslationModels:
             print('Loading EN-FR')
             self.models['en-fr'] = dict()
             self.models['en-fr']['tokenizer'] = AutoTokenizer.from_pretrained("Helsinki-NLP/opus-mt-en-fr")
-            self.models['en-fr']['model'] = AutoModelForSeq2SeqLM.from_pretrained("Helsinki-NLP/opus-mt-en-fr")
+            self.models['en-fr']['model'] = AutoModelForSeq2SeqLM.from_pretrained("Helsinki-NLP/opus-mt-en-fr").\
+                to(self.device)
             self.models['en-fr']['segmenter'] = pysbd.Segmenter(language='en', clean=False)
             print('Loading FR-EN')
             self.models['fr-en'] = dict()
             self.models['fr-en']['tokenizer'] = AutoTokenizer.from_pretrained("Helsinki-NLP/opus-mt-fr-en")
-            self.models['fr-en']['model'] = AutoModelForSeq2SeqLM.from_pretrained("Helsinki-NLP/opus-mt-fr-en")
+            self.models['fr-en']['model'] = AutoModelForSeq2SeqLM.from_pretrained("Helsinki-NLP/opus-mt-fr-en").\
+                to(self.device)
             self.models['fr-en']['segmenter'] = pysbd.Segmenter(language='fr', clean=False)
 
     def get_device(self):
@@ -538,12 +540,10 @@ class TranslationModels:
             Translation result or None if translation fails
         """
         try:
-            self.device = "cuda" if torch.cuda.is_available() else "cpu"
             print(self.device)
             input_ids = tokenizer.encode(sentence, return_tensors="pt")
             input_ids.to(self.device)
             outputs = model.generate(input_ids, max_length=512)
-            outputs.to(self.device)
             decoded = tokenizer.decode(outputs[0], skip_special_tokens=True)
             return decoded
         except IndexError as e:
