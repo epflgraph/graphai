@@ -82,7 +82,7 @@ def translation_retrieve_text_fingerprint_callback_task(self, results):
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='text_6.translate_text', translation_obj=translation_models, ignore_result=False)
-def translate_text_task(self, token, text, src, tgt, force):
+def translate_text_task(self, token, text, src, tgt, force=False):
     if src == tgt:
         return {
             'result': "'source' and 'target' languages must be different!",
@@ -136,7 +136,7 @@ def translate_text_task(self, token, text, src, tgt, force):
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='text_6.translate_text_callback', translation_obj=translation_models, ignore_result=False)
-def translate_text_callback_task(self, results, token, text, src, tgt, force=False):
+def translate_text_callback_task(self, results, token, text, src, tgt, force=False, return_list=False):
     db_manager = TextDBCachingManager()
     if results['fresh']:
         values_dict = {
@@ -164,7 +164,7 @@ def translate_text_callback_task(self, results, token, text, src, tgt, force=Fal
     elif not results['successful']:
         # in case we fingerprinted something and then failed to translate it, we delete its cache row
         db_manager.delete_cache_rows([token])
-
+    results['return_list'] = return_list
     return results
 
 

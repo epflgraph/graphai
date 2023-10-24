@@ -110,6 +110,7 @@ async def translate(data: TranslationRequest):
     tgt = data.target
     force = data.force
     token = generate_translation_text_token(text, src, tgt)
+    return_list = isinstance(text, list)
     text = translation_list_to_text(text)
     # If force=True, fingerprinting is skipped
     # The tasks are translation and its callback
@@ -119,7 +120,7 @@ async def translate(data: TranslationRequest):
         task_list += [translate_text_task.s(text, src, tgt, force)]
     else:
         task_list = [translate_text_task.s(token, text, src, tgt, force)]
-    task_list += [translate_text_callback_task.s(token, text, src, tgt, force)]
+    task_list += [translate_text_callback_task.s(token, text, src, tgt, force, return_list)]
     task = chain(task_list)
     task = task.apply_async(priority=6)
     return {'task_id': task.id}
@@ -132,7 +133,8 @@ async def translate_status(task_id):
     if task_results is not None:
         if 'result' in task_results:
             task_results = {
-                'result': translation_text_back_to_list(task_results['result']),
+                'result': translation_text_back_to_list(task_results['result'],
+                                                        return_list=task_results['return_list']),
                 'text_too_large': task_results['text_too_large'],
                 'successful': task_results['successful'],
                 'fresh': task_results['fresh'],

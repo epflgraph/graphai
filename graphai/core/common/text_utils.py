@@ -22,9 +22,9 @@ def translation_list_to_text(str_or_list):
     return TRANSLATION_LIST_SEPARATOR.join(str_or_list)
 
 
-def translation_text_back_to_list(s):
+def translation_text_back_to_list(s, return_list=False):
     results = s.split(TRANSLATION_LIST_SEPARATOR)
-    if len(results) == 1:
+    if len(results) == 1 and not return_list:
         return results[0]
     return results
 
@@ -616,9 +616,6 @@ class TranslationModels:
         tokenizer = self.models[how]['tokenizer']
         model = self.models[how]['model']
         segmenter = self.models[how]['segmenter']
-        text = translation_text_back_to_list(text)
-        if isinstance(text, str):
-            return self._translate(text, tokenizer, model, segmenter)
-        else:
-            results = [self._translate(current_text, tokenizer, model, segmenter) for current_text in text]
-            return translation_list_to_text([x[0] for x in results]), any([x[1] for x in results])
+        text = translation_text_back_to_list(text, return_list=True)
+        results = [self._translate(current_text, tokenizer, model, segmenter) for current_text in text]
+        return translation_list_to_text([x[0] for x in results]), any([x[1] for x in results])
