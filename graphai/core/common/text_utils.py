@@ -13,6 +13,20 @@ from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
 import torch
 
 from graphai.definitions import CONFIG_DIR
+TRANSLATION_LIST_SEPARATOR = ' [{[!!SEP!!]}] '
+
+
+def translation_list_to_text(str_or_list):
+    if not isinstance(str_or_list, list):
+        return str_or_list
+    return TRANSLATION_LIST_SEPARATOR.join(str_or_list)
+
+
+def translation_text_back_to_list(s):
+    results = s.split(TRANSLATION_LIST_SEPARATOR)
+    if len(results) == 1:
+        return results[0]
+    return results
 
 
 def md5_text(s):
@@ -51,7 +65,11 @@ def generate_translation_text_token(s, src, tgt):
     Returns:
         Token
     """
-    return md5_text(s) + '_' + src + '_' + tgt
+    assert isinstance(s, str) or isinstance(s, list)
+    if isinstance(s, str):
+        return md5_text(s) + '_' + src + '_' + tgt
+    else:
+        return md5_text(translation_list_to_text(s)) + '_' + src + '_' + tgt
 
 
 def perceptual_hash_text(s):
@@ -542,7 +560,7 @@ class TranslationModels:
         try:
             print(self.device)
             input_ids = tokenizer.encode(sentence, return_tensors="pt")
-            input_ids.to(self.device)
+            input_ids = input_ids.to(self.device)
             outputs = model.generate(input_ids, max_length=512)
             decoded = tokenizer.decode(outputs[0], skip_special_tokens=True)
             return decoded
@@ -593,9 +611,14 @@ class TranslationModels:
         self.load_models()
         if how not in self.models.keys():
             raise NotImplementedError("Source or target language not implemented")
-        if text is None or text == '':
+        if text is None or len(text) == 0:
             return None, False
         tokenizer = self.models[how]['tokenizer']
         model = self.models[how]['model']
         segmenter = self.models[how]['segmenter']
-        return self._translate(text, tokenizer, model, segmenter)
+        text = translation_text_back_to_list(text)
+        if isinstance(text, str):
+            return self._translate(text, tokenizer, model, segmenter)
+        else:
+            results = [self._translate(current_text, tokenizer, model, segmenter) for current_text in text]
+            return translation_list_to_text([x[0] for x in results]), any([x[1] for x in results])
