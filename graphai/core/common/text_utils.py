@@ -16,10 +16,10 @@ from graphai.definitions import CONFIG_DIR
 TRANSLATION_LIST_SEPARATOR = ' [{[!!SEP!!]}] '
 
 
-def translation_list_to_text(l):
-    if not isinstance(l, list):
-        return l
-    return TRANSLATION_LIST_SEPARATOR.join(l)
+def translation_list_to_text(str_or_list):
+    if not isinstance(str_or_list, list):
+        return str_or_list
+    return TRANSLATION_LIST_SEPARATOR.join(str_or_list)
 
 
 def translation_text_back_to_list(s):
