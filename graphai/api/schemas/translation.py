@@ -1,13 +1,13 @@
 from pydantic import BaseModel, Field
-from typing import Union, Literal
+from typing import Union, Literal, List
 
 from graphai.api.schemas.common import TaskStatusResponse
 
 
 class TextFingerprintRequest(BaseModel):
-    text: str = Field(
+    text: Union[str, List[str]] = Field(
         title="Text",
-        description="Text to translate"
+        description="Text to translate, can be one string or a list of strings."
     )
 
     source: Literal['en', 'fr', 'de', 'it'] = Field(
@@ -60,9 +60,9 @@ class TextFingerprintResponse(TaskStatusResponse):
 
 
 class TranslationRequest(BaseModel):
-    text: str = Field(
+    text: Union[str, List[str]] = Field(
         title="Text",
-        description="Text to translate"
+        description="Text to translate, can be one string or a list of strings."
     )
 
     source: Literal['en', 'fr', 'de', 'it'] = Field(
@@ -84,7 +84,7 @@ class TranslationRequest(BaseModel):
 
 
 class TranslationTaskResponse(BaseModel):
-    result: Union[str, None] = Field(
+    result: Union[str, List[str], None] = Field(
         title="Translation results",
         description="Translated text"
     )
@@ -119,7 +119,7 @@ class TranslationResponse(TaskStatusResponse):
 
 
 class TextDetectLanguageRequest(BaseModel):
-    text: str = Field(
+    text: Union[str, List[str]] = Field(
         title="Text",
         description="Text to detect the language of"
     )

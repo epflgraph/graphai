@@ -27,7 +27,8 @@ from graphai.api.celery_tasks.common import (
     format_api_results,
     ignore_fingerprint_results_callback_task,
 )
-from graphai.core.common.text_utils import generate_src_tgt_dict, generate_translation_text_token
+from graphai.core.common.text_utils import generate_src_tgt_dict, generate_translation_text_token, \
+    translation_list_to_text, translation_text_back_to_list
 from graphai.core.common.caching import FingerprintParameters
 from graphai.core.interfaces.celery_config import get_task_info
 
@@ -77,6 +78,7 @@ async def calculate_translation_text_fingerprint(data: TextFingerprintRequest):
     tgt = data.target
     force = data.force
     token = generate_translation_text_token(text, src, tgt)
+    text = translation_list_to_text(text)
     task_list = get_translation_text_fingerprint_chain_list(token, text, src, tgt, force,
                                                             ignore_fp_results=False)
     task = chain(task_list)
@@ -108,6 +110,7 @@ async def translate(data: TranslationRequest):
     tgt = data.target
     force = data.force
     token = generate_translation_text_token(text, src, tgt)
+    text = translation_list_to_text(text)
     # If force=True, fingerprinting is skipped
     # The tasks are translation and its callback
     if not force:
@@ -129,7 +132,7 @@ async def translate_status(task_id):
     if task_results is not None:
         if 'result' in task_results:
             task_results = {
-                'result': task_results['result'],
+                'result': translation_text_back_to_list(task_results['result']),
                 'text_too_large': task_results['text_too_large'],
                 'successful': task_results['successful'],
                 'fresh': task_results['fresh'],
@@ -143,6 +146,7 @@ async def translate_status(task_id):
 @router.post('/detect_language', response_model=TaskIDResponse)
 async def text_detect_language(data: TextDetectLanguageRequest):
     text = data.text
+    text = translation_list_to_text(text)
     # The only task is language detection because this task does not go through the caching logic
     task = (detect_text_language_task.s(text)).apply_async(priority=6)
     return {'task_id': task.id}
