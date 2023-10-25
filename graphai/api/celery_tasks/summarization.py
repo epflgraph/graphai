@@ -209,7 +209,8 @@ def summarize_text_callback_task(self, results, force=False):
             'summary_len_class': len_class,
             'summary_tone': tone,
             'summary_length': len(summary.split(' ')),
-            'summary_token_total': n_tokens_total
+            'summary_token_total': n_tokens_total['total_tokens'],
+            'summary_cost': n_tokens_total['cost']
         }
         existing = db_manager.get_details(token, ['date_added'], using_most_similar=False)[0]
         if existing is None or existing['date_added'] is None:

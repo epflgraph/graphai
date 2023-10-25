@@ -224,7 +224,10 @@ async def summarize_status(task_id):
                 'text_too_large': task_results['too_many_tokens'],
                 'successful': task_results['successful'],
                 'fresh': task_results['fresh'],
-                'debug_message': task_results['full_message']
+                'debug_message': task_results['full_message'],
+                'tokens': {k: task_results['n_tokens_total'][k] for k in task_results['n_tokens_total']
+                           if 'tokens' in k},
+                'approx_cost': task_results['n_tokens_total']['cost']
             }
         else:
             task_results = None

@@ -172,6 +172,18 @@ class CompletionTaskResponse(BaseModel):
         description="Whether or not the result is fresh"
     )
 
+    tokens: Union[Dict[str, int], None] = Field(
+        title="Number of input/output tokens",
+        description="A dictionary containing the total number of input and output tokens of the full request, "
+                    "plus the total number of ChatGPT API requests that were made."
+    )
+
+    approx_cost: Union[float, None] = Field(
+        title="Cost approximation",
+        description="Approximate cost of all the requests made, taking into account the different costs of "
+                    "input and output tokens."
+    )
+
 
 class CompletionDebugTaskResponse(CompletionTaskResponse):
     debug_message: Union[str, None] = Field(
