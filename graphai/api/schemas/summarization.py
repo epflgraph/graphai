@@ -144,6 +144,13 @@ class CleanupRequest(BaseModel):
         default=False
     )
 
+    simulate: bool = Field(
+        title="Simulate",
+        description="Simulation flag. If true, only simulates the request and estimates the # of tokens and "
+                    "total cost of the request.",
+        default=False
+    )
+
 
 class CompletionTaskResponse(BaseModel):
     result: Union[str, None] = Field(
