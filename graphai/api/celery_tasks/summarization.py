@@ -254,7 +254,7 @@ def cleanup_text_task(self, token_and_text, text_type='text', result_type='clean
             'fresh': False,
             'successful': False,
             'too_many_tokens': False,
-            'n_tokens_total': 0,
+            'n_tokens_total': None,
             'full_message': None
         }
         return result_dict
@@ -271,7 +271,7 @@ def cleanup_text_task(self, token_and_text, text_type='text', result_type='clean
             'fresh': False,
             'successful': True,
             'too_many_tokens': False,
-            'n_tokens_total': 0,
+            'n_tokens_total': None,
             'full_message': None
         }
     summarizer = ChatGPTSummarizer()
