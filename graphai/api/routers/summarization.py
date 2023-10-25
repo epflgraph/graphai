@@ -225,9 +225,11 @@ async def summarize_status(task_id):
                 'successful': task_results['successful'],
                 'fresh': task_results['fresh'],
                 'debug_message': task_results['full_message'],
-                'tokens': {k: task_results['n_tokens_total'][k] for k in task_results['n_tokens_total']
-                           if 'tokens' in k},
-                'approx_cost': task_results['n_tokens_total']['cost']
+                'tokens':
+                    {k: task_results['n_tokens_total'][k] for k in task_results['n_tokens_total']
+                     if 'tokens' in k} if task_results['n_tokens_total'] is not None else None,
+                'approx_cost':
+                    task_results['n_tokens_total']['cost'] if task_results['n_tokens_total'] is not None else None
             }
         else:
             task_results = None
