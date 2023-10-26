@@ -295,3 +295,20 @@ def cleanup_text_task(self, token_and_text, text_type='text', result_type='clean
         'n_tokens_total': n_tokens_total,
         'full_message': message
     }
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
+             name='text_6.cleanup_text_chatgpt_simulate', ignore_result=False)
+def simulate_cleanup_task(self, text, text_type='text', result_type='cleanup'):
+    summarizer = ChatGPTSummarizer()
+    _, system_message, too_many_tokens, token_count = summarizer.cleanup_text(
+        text, text_type=text_type, handwriting=True, simulate=True)
+    return {
+        'result': None,
+        'result_type': result_type,
+        'fresh': False,
+        'successful': True,
+        'too_many_tokens': too_many_tokens,
+        'n_tokens_total': token_count,
+        'full_message': system_message
+    }

@@ -28,7 +28,8 @@ from graphai.api.celery_tasks.summarization import (
     get_keywords_for_summarization_task,
     summarize_text_task,
     summarize_text_callback_task,
-    cleanup_text_task
+    cleanup_text_task,
+    simulate_cleanup_task
 )
 
 from graphai.core.common.text_utils import generate_summary_text_token, generate_summary_type_dict
@@ -192,19 +193,22 @@ async def clean_up(data: CleanupRequest):
     text_type = data.text_type
     force = data.force
     debug = data.debug
+    simulate = data.simulate
     len_class = None
     tone = None
-
-    token = generate_summary_text_token(text, text_type, 'cleanup', len_class, tone)
-    if not force:
-        task_list = get_summary_text_fingerprint_chain_list(token, text, text_type, 'cleanup', len_class, tone, force,
-                                                            ignore_fp_results=True, results_to_return=token)
-        skip_token = True
+    if not simulate:
+        token = generate_summary_text_token(text, text_type, 'cleanup', len_class, tone)
+        if not force:
+            task_list = get_summary_text_fingerprint_chain_list(token, text, text_type, 'cleanup', len_class, tone, force,
+                                                                ignore_fp_results=True, results_to_return=token)
+            skip_token = True
+        else:
+            task_list = []
+            skip_token = False
+        task_list += get_cleanup_task_chain(token, text, text_type, 'cleanup',
+                                            force=force, skip_token=skip_token, debug=debug)
     else:
-        task_list = []
-        skip_token = False
-    task_list += get_cleanup_task_chain(token, text, text_type, 'cleanup',
-                                        force=force, skip_token=skip_token, debug=debug)
+        task_list = [simulate_cleanup_task.s(text, text_type, 'cleanup')]
     tasks = chain(task_list)
     tasks = tasks.apply_async(priority=6)
     return {'task_id': tasks.id}
