@@ -264,7 +264,7 @@ class ChatGPTSummarizer:
         if max_len is None:
             max_len = 3 * text_token_count
         else:
-            max_len = int(3 * max_len)
+            max_len = int(2 * max_len)
         # We count the approximate number of tokens in order to choose the right model (i.e. context size)
         approx_token_count = text_token_count + system_token_count + max_len
         if approx_token_count < 4096:
