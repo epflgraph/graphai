@@ -145,7 +145,7 @@ def summarize_text_task(self, token_and_text, text_type='text', summary_type='su
             'fresh': False,
             'successful': False,
             'too_many_tokens': False,
-            'n_tokens_total': 0,
+            'n_tokens_total': None,
             'full_message': None
         }
         return result_dict
@@ -162,7 +162,7 @@ def summarize_text_task(self, token_and_text, text_type='text', summary_type='su
             'fresh': False,
             'successful': True,
             'too_many_tokens': False,
-            'n_tokens_total': 0,
+            'n_tokens_total': None,
             'full_message': None
         }
     summarizer = ChatGPTSummarizer()
@@ -209,7 +209,8 @@ def summarize_text_callback_task(self, results, force=False):
             'summary_len_class': len_class,
             'summary_tone': tone,
             'summary_length': len(summary.split(' ')),
-            'summary_token_total': n_tokens_total
+            'summary_token_total': n_tokens_total['total_tokens'],
+            'summary_cost': n_tokens_total['cost']
         }
         existing = db_manager.get_details(token, ['date_added'], using_most_similar=False)[0]
         if existing is None or existing['date_added'] is None:
@@ -253,7 +254,7 @@ def cleanup_text_task(self, token_and_text, text_type='text', result_type='clean
             'fresh': False,
             'successful': False,
             'too_many_tokens': False,
-            'n_tokens_total': 0,
+            'n_tokens_total': None,
             'full_message': None
         }
         return result_dict
@@ -270,7 +271,7 @@ def cleanup_text_task(self, token_and_text, text_type='text', result_type='clean
             'fresh': False,
             'successful': True,
             'too_many_tokens': False,
-            'n_tokens_total': 0,
+            'n_tokens_total': None,
             'full_message': None
         }
     summarizer = ChatGPTSummarizer()
@@ -293,4 +294,21 @@ def cleanup_text_task(self, token_and_text, text_type='text', result_type='clean
         'too_many_tokens': too_many_tokens,
         'n_tokens_total': n_tokens_total,
         'full_message': message
+    }
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
+             name='text_6.cleanup_text_chatgpt_simulate', ignore_result=False)
+def simulate_cleanup_task(self, text, text_type='text', result_type='cleanup'):
+    summarizer = ChatGPTSummarizer()
+    _, system_message, too_many_tokens, token_count = summarizer.cleanup_text(
+        text, text_type=text_type, handwriting=True, simulate=True)
+    return {
+        'result': None,
+        'result_type': result_type,
+        'fresh': False,
+        'successful': True,
+        'too_many_tokens': too_many_tokens,
+        'n_tokens_total': token_count,
+        'full_message': system_message
     }

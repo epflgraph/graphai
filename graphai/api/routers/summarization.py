@@ -28,7 +28,8 @@ from graphai.api.celery_tasks.summarization import (
     get_keywords_for_summarization_task,
     summarize_text_task,
     summarize_text_callback_task,
-    cleanup_text_task
+    cleanup_text_task,
+    simulate_cleanup_task
 )
 
 from graphai.core.common.text_utils import generate_summary_text_token, generate_summary_type_dict
@@ -192,19 +193,22 @@ async def clean_up(data: CleanupRequest):
     text_type = data.text_type
     force = data.force
     debug = data.debug
+    simulate = data.simulate
     len_class = None
     tone = None
-
-    token = generate_summary_text_token(text, text_type, 'cleanup', len_class, tone)
-    if not force:
-        task_list = get_summary_text_fingerprint_chain_list(token, text, text_type, 'cleanup', len_class, tone, force,
-                                                            ignore_fp_results=True, results_to_return=token)
-        skip_token = True
+    if not simulate:
+        token = generate_summary_text_token(text, text_type, 'cleanup', len_class, tone)
+        if not force:
+            task_list = get_summary_text_fingerprint_chain_list(token, text, text_type, 'cleanup', len_class, tone, force,
+                                                                ignore_fp_results=True, results_to_return=token)
+            skip_token = True
+        else:
+            task_list = []
+            skip_token = False
+        task_list += get_cleanup_task_chain(token, text, text_type, 'cleanup',
+                                            force=force, skip_token=skip_token, debug=debug)
     else:
-        task_list = []
-        skip_token = False
-    task_list += get_cleanup_task_chain(token, text, text_type, 'cleanup',
-                                        force=force, skip_token=skip_token, debug=debug)
+        task_list = [simulate_cleanup_task.s(text, text_type, 'cleanup')]
     tasks = chain(task_list)
     tasks = tasks.apply_async(priority=6)
     return {'task_id': tasks.id}
@@ -224,7 +228,12 @@ async def summarize_status(task_id):
                 'text_too_large': task_results['too_many_tokens'],
                 'successful': task_results['successful'],
                 'fresh': task_results['fresh'],
-                'debug_message': task_results['full_message']
+                'debug_message': task_results['full_message'],
+                'tokens':
+                    {k: task_results['n_tokens_total'][k] for k in task_results['n_tokens_total']
+                     if 'tokens' in k} if task_results['n_tokens_total'] is not None else None,
+                'approx_cost':
+                    task_results['n_tokens_total']['cost'] if task_results['n_tokens_total'] is not None else None
             }
         else:
             task_results = None

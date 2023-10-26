@@ -14,6 +14,16 @@ import torch
 
 from graphai.definitions import CONFIG_DIR
 TRANSLATION_LIST_SEPARATOR = ' [{[!!SEP!!]}] '
+CHATGPT_COSTS_PER_1K = {
+    'gpt-3.5-turbo': {
+        'prompt_tokens': 0.0015,
+        'completion_tokens': 0.002
+    },
+    'gpt-3.5-turbo-16k': {
+        'prompt_tokens': 0.003,
+        'completion_tokens': 0.004
+    },
+}
 
 
 def translation_list_to_text(str_or_list):
@@ -181,6 +191,23 @@ def convert_text_or_dict_to_text(text_or_dict):
     return text
 
 
+def update_token_count(old_token_counts=None, token_counts=None):
+    print(old_token_counts, token_counts)
+    if token_counts is None or len(token_counts) == 0:
+        return old_token_counts
+    if old_token_counts is None or len(old_token_counts) == 0:
+        return token_counts
+    return {
+        k: token_counts[k] + old_token_counts[k]
+        for k in token_counts
+    }
+
+
+def compute_chatgpt_request_cost(token_counts, model_type):
+    return sum([token_counts[x] * CHATGPT_COSTS_PER_1K[model_type][x] / 1000
+                for x in CHATGPT_COSTS_PER_1K[model_type]])
+
+
 class ChatGPTSummarizer:
     def __init__(self):
         config_contents = configparser.ConfigParser()
@@ -208,7 +235,8 @@ class ChatGPTSummarizer:
         else:
             return False
 
-    def _generate_completion(self, text, system_message, max_len=None, temperature=1.0, top_p=1.0):
+    def _generate_completion(self, text, system_message, max_len=None, temperature=1.0, top_p=1.0,
+                             simulate=False):
         """
         Internal method, generates a chat completion, which is the OpenAI API endpoint for ChatGPT interactions
         Args:
@@ -225,8 +253,9 @@ class ChatGPTSummarizer:
             while a (None, False, 0) result indicates a different error (e.g. failed connection).
         """
         has_api_key = self.establish_connection()
-        if not has_api_key:
-            return None, False, 0
+        # If there's no api key, only simulate mode is possible
+        if not has_api_key and not simulate:
+            return None, False, None
         if isinstance(text, str):
             text = [text]
         concatenated_text = '\n'.join(text)
@@ -235,7 +264,7 @@ class ChatGPTSummarizer:
         if max_len is None:
             max_len = 3 * text_token_count
         else:
-            max_len = int(3 * max_len)
+            max_len = int(2 * max_len)
         # We count the approximate number of tokens in order to choose the right model (i.e. context size)
         approx_token_count = text_token_count + system_token_count + max_len
         if approx_token_count < 4096:
@@ -244,32 +273,46 @@ class ChatGPTSummarizer:
             model_type = 'gpt-3.5-turbo-16k'
         else:
             # If the token count is above 16384, the text is too large and we can't summarize it
-            return None, True, 0
-        messages = [{"role": "system", "content": system_message}]
-        messages += [{"role": "user", "content": text[i]} if i % 2 == 0 else {"role": "assistant", "content": text[i]}
-                     for i in range(len(text))]
-        try:
-            # Generate the completion
-            completion = openai.ChatCompletion.create(
-                model=model_type,
-                messages=messages,
-                max_tokens=max_len,
-                temperature=temperature,
-                top_p=top_p
-            )
-            print(completion)
-        except openai.error.InvalidRequestError as e:
-            # We check to see if the exception was caused by too many tokens in the input
-            print(e)
-            if "This model's maximum context length is" in e:
-                return None, True, 0
-            else:
-                return None, False, 0
-        except Exception as e:
-            # Any error other than "too many tokens" is dealt with here
-            print(e)
-            return None, False, 0
-        return completion.choices[0].message.content, False, completion.usage.total_tokens
+            return None, True, None
+        if not simulate:
+            messages = [{"role": "system", "content": system_message}]
+            messages += [{"role": "user", "content": text[i]} if i % 2 == 0 else {"role": "assistant", "content": text[i]}
+                         for i in range(len(text))]
+            try:
+                # Generate the completion
+                completion = openai.ChatCompletion.create(
+                    model=model_type,
+                    messages=messages,
+                    max_tokens=max_len,
+                    temperature=temperature,
+                    top_p=top_p
+                )
+                print(completion)
+            except openai.error.InvalidRequestError as e:
+                # We check to see if the exception was caused by too many tokens in the input
+                print(e)
+                if "This model's maximum context length is" in e:
+                    return None, True, None
+                else:
+                    return None, False, None
+            except Exception as e:
+                # Any error other than "too many tokens" is dealt with here
+                print(e)
+                return None, False, None
+            token_count_dict = dict(completion.usage)
+            final_result = completion.choices[0].message.content
+        else:
+            input_token_estimate = system_token_count + text_token_count
+            output_token_estimate = max_len
+            token_count_dict = {
+                'prompt_tokens': input_token_estimate,
+                'completion_tokens': output_token_estimate,
+                'total_tokens': input_token_estimate + output_token_estimate
+            }
+            final_result = None
+        cost = compute_chatgpt_request_cost(token_count_dict, model_type)
+        token_count_dict['cost'] = cost
+        return final_result, False, token_count_dict
 
     def generate_summary(self, text_or_dict, text_type='lecture', summary_type='summary',
                          len_class='normal', tone='info', max_normal_len=100, max_short_len=40):
@@ -433,6 +476,8 @@ class ChatGPTSummarizer:
 
         results, too_many_tokens, n_total_tokens = \
             self._generate_completion(text, system_message, max_normal_len, temperature=0.5)
+        if results is None:
+            return results, system_message, too_many_tokens, n_total_tokens
         # Now we remove the "Title:" or "Summary:" at the beginning
         results = ':'.join(results.split(':')[1:]).strip().strip('"')
         return results, system_message, too_many_tokens, n_total_tokens
@@ -441,7 +486,7 @@ class ChatGPTSummarizer:
                                 n_retries=1):
         try:
             prev_results_json = json.loads(results)
-            return prev_results_json, (messages + [results])
+            return prev_results_json, (messages + [results]), False, dict()
         except json.JSONDecodeError:
             print('Results not in JSON, retrying')
         messages = messages + [results]
@@ -454,14 +499,17 @@ class ChatGPTSummarizer:
                     self._generate_completion(
                         messages + correction_message,
                         system_message, temperature=temperature, top_p=top_p)
+                if results is None:
+                    return None, (messages + correction_message), too_many_tokens, n_total_tokens
                 results_json = json.loads(results)
-                return results_json, (messages + correction_message + [results])
+                return results_json, (messages + correction_message + [results]), too_many_tokens, n_total_tokens
             except Exception:
                 retried += 1
         raise Exception(f"Could not get ChatGPT to produce a JSON result, "
                         f"here are the final results produced: {results}")
 
-    def cleanup_text(self, text_or_dict, text_type='slide', handwriting=True, temperature=1, top_p=0.3):
+    def cleanup_text(self, text_or_dict, text_type='slide', handwriting=True, temperature=1, top_p=0.3,
+                     simulate=False):
         if handwriting:
             system_message = "You will be given the contents of a %s, " \
                              "which result from optical character recognition " \
@@ -492,12 +540,27 @@ class ChatGPTSummarizer:
                           "Make sure the results are in JSON."
 
         # Make a call to ChatGPT to generate initial results. These will still be full of typos.
-        first_results, first_too_many_tokens, first_n_total_tokens = \
-            self._generate_completion(text, system_message, temperature=temperature, top_p=top_p)
+        results, too_many_tokens, n_total_tokens = \
+            self._generate_completion(text, system_message, temperature=temperature, top_p=top_p, simulate=simulate)
         print('FIRST')
-        first_results, message_chain = self.make_sure_json_is_valid(first_results, [text], system_message,
-                                                                    temperature=temperature, top_p=top_p)
-        print(first_results)
+        token_count = n_total_tokens
+        if not simulate:
+            if results is None:
+                return None, system_message, too_many_tokens, token_count
+
+            results, message_chain, too_many_tokens, n_total_tokens = \
+                self.make_sure_json_is_valid(results, [text], system_message,
+                                             temperature=temperature, top_p=top_p)
+            token_count = update_token_count(token_count, n_total_tokens)
+            if results is None:
+                return None, system_message, too_many_tokens, token_count
+            print(results)
+        else:
+            # If we're simulating the run, then there's no need to double check the JSON
+            # We don't count potential JSON corrections in our estimation because they are quite rare anyway
+            # Since no actual result has been generated, we assume that the result is roughly the same as the
+            # original input, since token-wise they should actually be pretty close.
+            message_chain = [text, text]
 
         # Now make a second call to ChatGPT, asking it to improve its initial results.
         correction_message = \
@@ -505,16 +568,29 @@ class ChatGPTSummarizer:
              'Do not provide any explanations on how you fix typos. Make sure the results are in JSON format.']
         results, too_many_tokens, n_total_tokens = \
             self._generate_completion(
-                message_chain + correction_message,
-                system_message, temperature=temperature, top_p=top_p)
+                message_chain + correction_message, system_message, max_len=len(text) if simulate else None,
+                temperature=temperature, top_p=top_p, simulate=simulate)
         print('SECOND')
-        results, message_chain = self.make_sure_json_is_valid(results, message_chain + correction_message,
-                                                              system_message,
-                                                              temperature=temperature, top_p=top_p)
+        token_count = update_token_count(token_count, n_total_tokens)
+
+        if results is None or simulate:
+            # If simulate is True, the results will always be None, but this if is as explicit as possible
+            # for the sake of readability
+            # Again, simulate=True means that we do not try to fix the JSON
+            return None, system_message, too_many_tokens, token_count
+
+        results, message_chain, too_many_tokens, n_total_tokens = \
+            self.make_sure_json_is_valid(results, message_chain + correction_message,
+                                         system_message,
+                                         temperature=temperature, top_p=top_p)
+        token_count = update_token_count(token_count, n_total_tokens)
+        if results is None:
+            return None, system_message, too_many_tokens, token_count
+
         print(results)
 
         # Return the results of the second call
-        return results, system_message, too_many_tokens, n_total_tokens
+        return results, system_message, too_many_tokens, token_count
 
 
 class TranslationModels:

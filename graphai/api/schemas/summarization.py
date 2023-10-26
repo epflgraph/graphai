@@ -144,6 +144,13 @@ class CleanupRequest(BaseModel):
         default=False
     )
 
+    simulate: bool = Field(
+        title="Simulate",
+        description="Simulation flag. If true, only simulates the request and estimates the # of tokens and "
+                    "total cost of the request.",
+        default=False
+    )
+
 
 class CompletionTaskResponse(BaseModel):
     result: Union[str, None] = Field(
@@ -170,6 +177,18 @@ class CompletionTaskResponse(BaseModel):
     fresh: bool = Field(
         title="Freshness flag",
         description="Whether or not the result is fresh"
+    )
+
+    tokens: Union[Dict[str, int], None] = Field(
+        title="Number of input/output tokens",
+        description="A dictionary containing the total number of input and output tokens of the full request, "
+                    "plus the total number of ChatGPT API requests that were made."
+    )
+
+    approx_cost: Union[float, None] = Field(
+        title="Cost approximation",
+        description="Approximate cost of all the requests made, taking into account the different costs of "
+                    "input and output tokens."
     )
 
 
