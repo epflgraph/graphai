@@ -562,7 +562,6 @@ class ChatGPTSummarizer:
             # original input, since token-wise they should actually be pretty close.
             message_chain = [text, text]
 
-
         # Now make a second call to ChatGPT, asking it to improve its initial results.
         correction_message = \
             ['There are still typos in the text. Try to improve your previous response by correcting more typos. '
