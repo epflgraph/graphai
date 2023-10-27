@@ -145,7 +145,8 @@ def find_set_cover(list_of_sets, coverage=1.0):
         subset = max(list_of_sets, key=lambda s: len(s - covered))
         cover.append(subset)
         covered |= subset
-    return cover
+    cover_indices = [list_of_sets.index(s) for s in cover]
+    return cover, cover_indices
 
 
 def count_tokens_for_openai(text, model="cl100k_base"):
