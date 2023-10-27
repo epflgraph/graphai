@@ -2,6 +2,7 @@ import configparser
 import hashlib
 import json
 from bisect import bisect
+from itertools import chain
 
 import fingerprint
 import langdetect
@@ -133,6 +134,18 @@ def detect_text_language(s):
         return langdetect.detect(s)
     except langdetect.lang_detect_exception.LangDetectException:
         return None
+
+
+def find_set_cover(list_of_sets, coverage=1.0):
+    assert isinstance(list_of_sets, list) and all(isinstance(s, set) for s in list_of_sets)
+    elements = set(chain.from_iterable(list_of_sets))
+    covered = set()
+    cover = list()
+    while len(covered) / len(elements) < coverage:
+        subset = max(list_of_sets, key=lambda s: len(s - covered))
+        cover.append(subset)
+        covered |= subset
+    return cover
 
 
 def count_tokens_for_openai(text, model="cl100k_base"):
