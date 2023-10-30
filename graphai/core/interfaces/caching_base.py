@@ -29,10 +29,26 @@ def escape_single_quotes(s):
 
 
 def escape_backslashes(s):
+    """
+    Escapes backslashes for SQL queries
+    Args:
+        s: Input string
+
+    Returns:
+    Original string with backslashes escaped
+    """
     return s.replace("\\", "\\\\")
 
 
 def escape_everything(s):
+    """
+    Escapes both single quotes and backslashes
+    Args:
+        s: Input string
+
+    Returns:
+    Original string with everything escaped
+    """
     return escape_backslashes(escape_single_quotes(s))
 
 
@@ -61,7 +77,7 @@ def add_equality_conditions(conditions):
     Returns:
         A string containing the conditions.
     """
-    return " AND ".join([f"{k}='{escape_single_quotes(v)}'" for k, v in conditions.items()])
+    return " AND ".join([f"{k}='{escape_everything(v)}'" for k, v in conditions.items()])
 
 
 def add_non_null_conditions(cols):
@@ -127,7 +143,8 @@ class DBCachingManagerBase(abc.ABC):
         if values_to_insert is None:
             values_to_insert = dict()
         values_to_insert = {
-            x: surround_with_character(escape_single_quotes(values_to_insert[x]), "'") if isinstance(values_to_insert[x], str)
+            x: surround_with_character(escape_everything(values_to_insert[x]), "'")
+            if isinstance(values_to_insert[x], str)
             else str(values_to_insert[x]) if values_to_insert[x] is not None
             else 'null'
             for x in values_to_insert
