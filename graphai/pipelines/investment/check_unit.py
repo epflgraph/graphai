@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 
 from graphai.core.interfaces.db import DB
+from graphai.core.interfaces.config_loader import load_db_config
 
 from graphai.core.utils.text.io import cprint
 
@@ -180,7 +181,7 @@ def show_matchmaking_chart_view(investors_concepts, unit_concepts, unit_investor
 
 def main(unit_id):
     # Instantiate db interface to communicate with database
-    db = DB()
+    db = DB(load_db_config())
 
     # Unit for which to produce results
     cprint(('#' * 20) + f' {unit_id} ' + ('#' * 20), color='green')

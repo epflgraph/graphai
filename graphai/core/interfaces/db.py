@@ -3,9 +3,6 @@ import sys
 import pandas as pd
 
 import mysql.connector
-import configparser
-
-from graphai.definitions import CONFIG_DIR
 
 
 def quote_value(v):
@@ -20,15 +17,15 @@ class DB:
     Base class to communicate with the EPFLGraph database.
     """
 
-    def __init__(self):
+    def __init__(self, db_config):
         # Read db config from file and open connection
-        db_config = configparser.ConfigParser()
-        db_config.read(f'{CONFIG_DIR}/db.ini')
+        # db_config is a dictionary containing four keys: "host", "port", "user", and "pass"
+        # All except port (which is an int) are strings
 
-        self.host = db_config['DB'].get('host')
-        self.port = db_config['DB'].getint('port')
-        self.user = db_config['DB'].get('user')
-        self.password = db_config['DB'].get('password')
+        self.host = db_config['host']
+        self.port = db_config['port']
+        self.user = db_config['user']
+        self.password = db_config['pass']
 
         self.cnx = mysql.connector.connect(host=self.host, port=self.port, user=self.user, password=self.password)
 
