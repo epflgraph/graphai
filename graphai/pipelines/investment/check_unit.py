@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 
-from graphai.core.interfaces.db_cache_manager import DB
+from graphai.core.interfaces.db import DB
 from graphai.core.interfaces.config_loader import load_db_config
 
 from graphai.core.utils.text.io import cprint
