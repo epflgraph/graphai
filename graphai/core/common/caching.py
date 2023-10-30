@@ -3,7 +3,7 @@ import configparser
 from datetime import datetime
 
 from graphai.core.common.common_utils import make_sure_path_exists, file_exists
-from graphai.core.interfaces.db import DBCachingManagerBase
+from graphai.core.interfaces.db_cache_manager import DBCachingManagerBase
 from graphai.core.interfaces.config_loader import load_db_config, load_schema_name
 from graphai.definitions import CONFIG_DIR
 

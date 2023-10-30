@@ -5,7 +5,7 @@ Compare results from the old and new concept detection algorithm.
 import pandas as pd
 import matplotlib.pyplot as plt
 
-from graphai.core.interfaces.db import DB
+from graphai.core.interfaces.db_cache_manager import DB
 from graphai.core.interfaces.config_loader import load_db_config
 
 pd.set_option('display.max_rows', 500)
