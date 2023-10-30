@@ -60,7 +60,8 @@ dependencies = [
     "sphinx",
     "sphinx-material",
     "sphinx-rtd-theme",
-    "pytest-celery"
+    "pytest-celery",
+    "db-cache-manager"
 ]
 
 [tool.setuptools]
