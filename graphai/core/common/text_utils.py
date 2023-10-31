@@ -136,13 +136,15 @@ def detect_text_language(s):
         return None
 
 
-def find_set_cover(list_of_sets, coverage=1.0):
+def find_set_cover(list_of_sets, coverage=1.0, scores=None):
     assert isinstance(list_of_sets, list) and all(isinstance(s, set) for s in list_of_sets)
     elements = set(chain.from_iterable(list_of_sets))
     covered = set()
     cover = list()
+    if scores is None:
+        scores = [1] * len(list_of_sets)
     while len(covered) / len(elements) < coverage:
-        subset = max(list_of_sets, key=lambda s: len(s - covered))
+        subset = max(list_of_sets, key=lambda s: len(s - covered) * scores[list_of_sets.index(s)])
         cover.append(subset)
         covered |= subset
     cover_indices = [list_of_sets.index(s) for s in cover]

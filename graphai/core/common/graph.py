@@ -1,7 +1,8 @@
 import numpy as np
 import pandas as pd
 
-from graphai.core.interfaces.db import DB
+from db_cache_manager.db import DB
+from graphai.core.interfaces.config_loader import load_db_config
 
 
 class ConceptsGraph:
@@ -42,7 +43,7 @@ class ConceptsGraph:
 
         print('Actually loading the graph tables...')
 
-        db = DB()
+        db = DB(load_db_config())
 
         print('Loading concept nodes table...', end=' ')
 

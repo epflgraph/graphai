@@ -2,7 +2,8 @@ import requests
 
 import pandas as pd
 
-from graphai.core.interfaces.db import DB
+from db_cache_manager.db import DB
+from graphai.core.interfaces.config_loader import load_db_config
 
 from graphai.core.utils.breadcrumb import Breadcrumb
 
@@ -15,7 +16,7 @@ def detect_fundraisers_concepts(params):
     bc = Breadcrumb()
 
     # Instantiate db interface to communicate with database
-    db = DB()
+    db = DB(load_db_config())
 
     # Define url of endpoint
     WIKIFY_URL = 'http://localhost:28800/text/wikify'
