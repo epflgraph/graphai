@@ -114,258 +114,10 @@
 </dl>
 </dd></dl>
 
-<dl class="py function">
-<dt class="sig sig-object py" id="graphai.core.common.caching.surround_with_character">
-<span class="sig-prename descclassname"><span class="pre">graphai.core.common.caching.</span></span><span class="sig-name descname"><span class="pre">surround_with_character</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">&quot;'&quot;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.caching.surround_with_character" title="Permalink to this definition"></a></dt>
-<dd><p>Surrounds a string with a character
-:param s: The string
-:param c: The character</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Resulting string</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="graphai.core.common.caching.escape_single_quotes">
-<span class="sig-prename descclassname"><span class="pre">graphai.core.common.caching.</span></span><span class="sig-name descname"><span class="pre">escape_single_quotes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.caching.escape_single_quotes" title="Permalink to this definition"></a></dt>
-<dd><p>Escapes single quotes for SQL queries
-:param s: The original string</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Original string with single quotes escaped</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="graphai.core.common.caching.escape_backslashes">
-<span class="sig-prename descclassname"><span class="pre">graphai.core.common.caching.</span></span><span class="sig-name descname"><span class="pre">escape_backslashes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.caching.escape_backslashes" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="graphai.core.common.caching.escape_everything">
-<span class="sig-prename descclassname"><span class="pre">graphai.core.common.caching.</span></span><span class="sig-name descname"><span class="pre">escape_everything</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.caching.escape_everything" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="graphai.core.common.caching.add_where_or_and">
-<span class="sig-prename descclassname"><span class="pre">graphai.core.common.caching.</span></span><span class="sig-name descname"><span class="pre">add_where_or_and</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">query</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.caching.add_where_or_and" title="Permalink to this definition"></a></dt>
-<dd><p>Prepares an SQL query for a new condition by adding a WHERE (if the query doesn’t already have one)
-or an AND (if it does).
-:param query: The original query</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>The query with WHERE or AND added to it</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="graphai.core.common.caching.add_equality_conditions">
-<span class="sig-prename descclassname"><span class="pre">graphai.core.common.caching.</span></span><span class="sig-name descname"><span class="pre">add_equality_conditions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">conditions</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.caching.add_equality_conditions" title="Permalink to this definition"></a></dt>
-<dd><p>Generates equality conditions that can be added to a query
-:param conditions: A dictionary where the conditions would be of the form “key=value”</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>A string containing the conditions.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="graphai.core.common.caching.add_non_null_conditions">
-<span class="sig-prename descclassname"><span class="pre">graphai.core.common.caching.</span></span><span class="sig-name descname"><span class="pre">add_non_null_conditions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cols</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.caching.add_non_null_conditions" title="Permalink to this definition"></a></dt>
-<dd><p>Generates non-null conditions that can be added to a query
-:param cols: List of columns that cannot be null, which would turn into conditions of the form “col IS NOT NULL”</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>A string containing the conditions</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="graphai.core.common.caching.DBCachingManagerBase">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">graphai.core.common.caching.</span></span><span class="sig-name descname"><span class="pre">DBCachingManagerBase</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cache_table</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">most_similar_table</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cache_date_added_col</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'date_added'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cache_date_modified_col</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'date_added'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.caching.DBCachingManagerBase" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
-<dl class="py method">
-<dt class="sig sig-object py" id="graphai.core.common.caching.DBCachingManagerBase.init_db">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">init_db</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.caching.DBCachingManagerBase.init_db" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="graphai.core.common.caching.DBCachingManagerBase.add_columns">
-<span class="sig-name descname"><span class="pre">add_columns</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">table_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">column_names</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">column_types</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">defaults</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.caching.DBCachingManagerBase.add_columns" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="graphai.core.common.caching.DBCachingManagerBase.remove_columns">
-<span class="sig-name descname"><span class="pre">remove_columns</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">table_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">column_names</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.caching.DBCachingManagerBase.remove_columns" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="graphai.core.common.caching.DBCachingManagerBase.delete_cache_rows">
-<span class="sig-name descname"><span class="pre">delete_cache_rows</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id_tokens</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.caching.DBCachingManagerBase.delete_cache_rows" title="Permalink to this definition"></a></dt>
-<dd><p>Deletes rows from the cache table
-:param id_tokens: List of id tokens to delete the rows of</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>None</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="graphai.core.common.caching.DBCachingManagerBase.insert_or_update_details">
-<span class="sig-name descname"><span class="pre">insert_or_update_details</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id_token</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">values_to_insert</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.caching.DBCachingManagerBase.insert_or_update_details" title="Permalink to this definition"></a></dt>
-<dd><p>Inserts or updates values in the cache table
-:param id_token: Identifier token
-:param values_to_insert: Dictionary of column to value mappings</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>None</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="graphai.core.common.caching.DBCachingManagerBase.update_details_if_exists">
-<span class="sig-name descname"><span class="pre">update_details_if_exists</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id_token</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">values_to_insert</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.caching.DBCachingManagerBase.update_details_if_exists" title="Permalink to this definition"></a></dt>
-<dd><p>Only updates values if the row exists and does not insert otherwise
-:param id_token: Identifier token
-:param values_to_insert: Column to value dict</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>None</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="graphai.core.common.caching.DBCachingManagerBase.get_details">
-<span class="sig-name descname"><span class="pre">get_details</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id_token</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cols</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">using_most_similar</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.caching.DBCachingManagerBase.get_details" title="Permalink to this definition"></a></dt>
-<dd><p>Gets details from the cache table for a given id token.
-:param id_token: Identifier token
-:param cols: Columns to retrieve
-:param using_most_similar: Whether to resolve the most similar chain or not</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>the token’s own results and the results of the token’s closest match. If there
-is no closest match, or the closest match is the token itself, or using_most_similar is False, then the
-second result is None.</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>A list of two results</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="graphai.core.common.caching.DBCachingManagerBase.get_origin">
-<span class="sig-name descname"><span class="pre">get_origin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id_token</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.caching.DBCachingManagerBase.get_origin" title="Permalink to this definition"></a></dt>
-<dd><p>Gets the origin of a given id token
-:param id_token: Identifier token</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Origin token if applicable</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="graphai.core.common.caching.DBCachingManagerBase.get_details_using_origin">
-<span class="sig-name descname"><span class="pre">get_details_using_origin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">origin_token</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cols</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.caching.DBCachingManagerBase.get_details_using_origin" title="Permalink to this definition"></a></dt>
-<dd><p>Gets details of cache row(s) using origin token instead of id token
-:param origin_token: Origin token
-:param cols: List of columns to retrieve</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Cache row detail dict</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="graphai.core.common.caching.DBCachingManagerBase.get_all_details">
-<span class="sig-name descname"><span class="pre">get_all_details</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cols</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">limit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exclude_token</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">allow_nulls</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">earliest_date</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">latest_date</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">equality_conditions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">do_date_sort</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_date_modified_col</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.caching.DBCachingManagerBase.get_all_details" title="Permalink to this definition"></a></dt>
-<dd><p>Gets details of all rows in cache table, possibly with constraints
-:param cols: Columns to retrieve
-:param start: Offset of LIMIT clause
-:param limit: count of LIMIT clause
-:param exclude_token: List of tokens to exclude
-:param allow_nulls: Whether to allow null values for requested cols
-:param earliest_date: Earliest date to allow
-:param latest_date: Latest date to allow
-:param equality_conditions: Dict of equality conditions
-:param do_date_sort: If False, the results will NOT be sorted by <cite>date_added</cite>, but by <cite>id_token</cite> (FASTER)
-:param use_date_modified_col: If True, date_modified will be used for earliest/latest date comparisons (</p>
-<aside class="system-message">
-<p class="system-message-title">System Message: ERROR/3 (<span class="docutils literal">/home/ubuntu/actions-runner/_work/graphai/graphai/main/graphai/core/common/caching.py:docstring of graphai.core.common.caching.DBCachingManagerBase.get_all_details</span>, line 12)</p>
-<p>Unexpected indentation.</p>
-</aside>
-<blockquote>
-<div><p>instead of date_added)</p>
-</div></blockquote>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Dict mapping id tokens to colname-&gt;value dicts</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="graphai.core.common.caching.DBCachingManagerBase.get_cache_count">
-<span class="sig-name descname"><span class="pre">get_cache_count</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">non_null_cols</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">equality_conditions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.caching.DBCachingManagerBase.get_cache_count" title="Permalink to this definition"></a></dt>
-<dd><p>Gets number of rows in cache table, possibly with constraints
-:param non_null_cols: Columns to enforce a non-null constraint on
-:param equality_conditions: Equality conditions dict</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Number of rows that satisfy the given conditions from the cache table</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="graphai.core.common.caching.DBCachingManagerBase.insert_or_update_closest_match">
-<span class="sig-name descname"><span class="pre">insert_or_update_closest_match</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id_token</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">values_to_insert</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.caching.DBCachingManagerBase.insert_or_update_closest_match" title="Permalink to this definition"></a></dt>
-<dd><p>Inserts or updates the value of a row in the closest match table
-:param id_token: Identifier token
-:param values_to_insert: Dict of values to insert</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>None</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="graphai.core.common.caching.DBCachingManagerBase.get_closest_match">
-<span class="sig-name descname"><span class="pre">get_closest_match</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id_token</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.caching.DBCachingManagerBase.get_closest_match" title="Permalink to this definition"></a></dt>
-<dd><p>Gets closest match of given token by resolving the closest match chain.
-:param id_token: Starting identifier token</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Final id token in the chain</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="graphai.core.common.caching.DBCachingManagerBase.get_all_closest_matches">
-<span class="sig-name descname"><span class="pre">get_all_closest_matches</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.caching.DBCachingManagerBase.get_all_closest_matches" title="Permalink to this definition"></a></dt>
-<dd><p>Retrieves all the rows in the closest match table
-:returns: All rows in most similar token table</p>
-</dd></dl>
-
-</dd></dl>
-
 <dl class="py class">
 <dt class="sig sig-object py" id="graphai.core.common.caching.VideoDBCachingManager">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">graphai.core.common.caching.</span></span><span class="sig-name descname"><span class="pre">VideoDBCachingManager</span></span><a class="headerlink" href="#graphai.core.common.caching.VideoDBCachingManager" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="#graphai.core.common.caching.DBCachingManagerBase" title="graphai.core.common.caching.DBCachingManagerBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">DBCachingManagerBase</span></code></a></p>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">DBCachingManagerBase</span></code></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="graphai.core.common.caching.VideoDBCachingManager.init_db">
 <span class="sig-name descname"><span class="pre">init_db</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.caching.VideoDBCachingManager.init_db" title="Permalink to this definition"></a></dt>
@@ -376,7 +128,7 @@ second result is None.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="graphai.core.common.caching.AudioDBCachingManager">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">graphai.core.common.caching.</span></span><span class="sig-name descname"><span class="pre">AudioDBCachingManager</span></span><a class="headerlink" href="#graphai.core.common.caching.AudioDBCachingManager" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="#graphai.core.common.caching.DBCachingManagerBase" title="graphai.core.common.caching.DBCachingManagerBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">DBCachingManagerBase</span></code></a></p>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">DBCachingManagerBase</span></code></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="graphai.core.common.caching.AudioDBCachingManager.init_db">
 <span class="sig-name descname"><span class="pre">init_db</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.caching.AudioDBCachingManager.init_db" title="Permalink to this definition"></a></dt>
@@ -387,7 +139,7 @@ second result is None.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="graphai.core.common.caching.SlideDBCachingManager">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">graphai.core.common.caching.</span></span><span class="sig-name descname"><span class="pre">SlideDBCachingManager</span></span><a class="headerlink" href="#graphai.core.common.caching.SlideDBCachingManager" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="#graphai.core.common.caching.DBCachingManagerBase" title="graphai.core.common.caching.DBCachingManagerBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">DBCachingManagerBase</span></code></a></p>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">DBCachingManagerBase</span></code></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="graphai.core.common.caching.SlideDBCachingManager.init_db">
 <span class="sig-name descname"><span class="pre">init_db</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.caching.SlideDBCachingManager.init_db" title="Permalink to this definition"></a></dt>
@@ -398,7 +150,7 @@ second result is None.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="graphai.core.common.caching.TextDBCachingManager">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">graphai.core.common.caching.</span></span><span class="sig-name descname"><span class="pre">TextDBCachingManager</span></span><a class="headerlink" href="#graphai.core.common.caching.TextDBCachingManager" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="#graphai.core.common.caching.DBCachingManagerBase" title="graphai.core.common.caching.DBCachingManagerBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">DBCachingManagerBase</span></code></a></p>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">DBCachingManagerBase</span></code></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="graphai.core.common.caching.TextDBCachingManager.init_db">
 <span class="sig-name descname"><span class="pre">init_db</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.caching.TextDBCachingManager.init_db" title="Permalink to this definition"></a></dt>
@@ -409,7 +161,7 @@ second result is None.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="graphai.core.common.caching.SummaryDBCachingManager">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">graphai.core.common.caching.</span></span><span class="sig-name descname"><span class="pre">SummaryDBCachingManager</span></span><a class="headerlink" href="#graphai.core.common.caching.SummaryDBCachingManager" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="#graphai.core.common.caching.DBCachingManagerBase" title="graphai.core.common.caching.DBCachingManagerBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">DBCachingManagerBase</span></code></a></p>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">DBCachingManagerBase</span></code></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="graphai.core.common.caching.SummaryDBCachingManager.init_db">
 <span class="sig-name descname"><span class="pre">init_db</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.caching.SummaryDBCachingManager.init_db" title="Permalink to this definition"></a></dt>
@@ -420,7 +172,7 @@ second result is None.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="graphai.core.common.caching.ScrapingDBCachingManager">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">graphai.core.common.caching.</span></span><span class="sig-name descname"><span class="pre">ScrapingDBCachingManager</span></span><a class="headerlink" href="#graphai.core.common.caching.ScrapingDBCachingManager" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="#graphai.core.common.caching.DBCachingManagerBase" title="graphai.core.common.caching.DBCachingManagerBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">DBCachingManagerBase</span></code></a></p>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">DBCachingManagerBase</span></code></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="graphai.core.common.caching.ScrapingDBCachingManager.init_db">
 <span class="sig-name descname"><span class="pre">init_db</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.caching.ScrapingDBCachingManager.init_db" title="Permalink to this definition"></a></dt>

@@ -1,7 +1,0 @@
-graphai.core.interfaces.db module
-=================================
-
-.. automodule:: graphai.core.interfaces.db
-   :members:
-   :undoc-members:
-   :show-inheritance:
