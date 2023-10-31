@@ -1,6 +1,6 @@
 import pandas as pd
 
-from graphai.core.interfaces.db import DB
+from db_cache_manager.db import DB
 from graphai.core.interfaces.config_loader import load_db_config
 
 
