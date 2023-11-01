@@ -30,6 +30,15 @@ def detect_concepts(list_of_slides_text):
     return results_list
 
 
+def clean_slides_up(slides):
+    results = list()
+    c = ChatGPTSummarizer()
+    for slide_content in slides:
+        cleaned, _, _, _ = c.cleanup_text(slide_content)
+        results.append(cleaned)
+    return results
+
+
 def make_slide_summarization_request(slides):
     system_message = "You will be given a set of slides, extracted from a course lecture. " \
                      "For each slide, you will be given the slide number and a list of concepts " \
@@ -75,12 +84,18 @@ def main():
 
     # Now we compute the results for multiple coverage values
     priorities = True
-    for coverage in [0.8, 0.9, 1.0]:
+    for coverage in [0.8, 0.9]:
         print(f"Computing results for coverage={coverage}, priorities={priorities}")
         # Choose the optimal subset
         best_subset, best_indices = find_best_slide_subset(slides_concepts_raw, coverage, priorities, min_freq=2)
         best_indices_sorted = sorted(best_indices)
-        slides_for_summarization = {f'Slide {i+1}': ';'.join(slides_concepts_raw[i]) for i in best_indices_sorted}
+        print(len(best_indices_sorted))
+        print(best_indices_sorted)
+        slides_for_summarization = [slides_text_list[i] for i in best_indices_sorted]
+        slides_for_summarization = clean_slides_up(slides_for_summarization)
+        slides_for_summarization = detect_concepts(slides_for_summarization)
+        slides_for_summarization = {f'Slide {best_indices_sorted[i]+1}': slides_for_summarization[i]
+                                    for i in range(len(slides_for_summarization))}
         results, cost = make_slide_summarization_request(convert_text_or_dict_to_text(slides_for_summarization))
         print('Results:')
         print(results)
