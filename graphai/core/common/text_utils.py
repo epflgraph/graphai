@@ -142,7 +142,8 @@ def compute_slide_tfidf_scores(list_of_sets, min_freq=1):
     list_of_strings = [sep.join(s) for s in list_of_sets]
     vectorizer = TfidfVectorizer(analyzer=lambda x: x.split(sep), norm=None, min_df=min_freq)
     tfidf_matrix = vectorizer.fit_transform(list_of_strings)
-    scores = np.array(tfidf_matrix.sum(axis=1)).flatten().tolist()
+    scores = np.array(tfidf_matrix.sum(axis=1)).flatten() + 0.001
+    scores = scores.tolist()
     return scores
 
 
@@ -154,6 +155,7 @@ def find_set_cover(list_of_sets, coverage=1.0, scores=None):
     if scores is None:
         scores = [1] * len(list_of_sets)
     while len(covered) / len(elements) < coverage:
+        print(len(covered), len(elements))
         subset = max(list_of_sets, key=lambda s: len(s - covered) * scores[list_of_sets.index(s)])
         cover.append(subset)
         covered |= subset
