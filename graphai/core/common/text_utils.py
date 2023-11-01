@@ -12,6 +12,7 @@ import pysbd
 import tiktoken
 from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
 import torch
+from sklearn.feature_extraction.text import TfidfVectorizer
 
 from graphai.definitions import CONFIG_DIR
 TRANSLATION_LIST_SEPARATOR = ' [{[!!SEP!!]}] '
@@ -136,6 +137,15 @@ def detect_text_language(s):
         return None
 
 
+def compute_slide_tfidf_scores(list_of_sets):
+    sep = ' [{!!}] '
+    list_of_strings = [sep.join(s) for s in list_of_sets]
+    vectorizer = TfidfVectorizer(analyzer=lambda x: x.split(sep), norm=None)
+    tfidf_matrix = vectorizer.fit_transform(list_of_strings)
+    scores = np.array(tfidf_matrix.sum(axis=1)).flatten().tolist()
+    return scores
+
+
 def find_set_cover(list_of_sets, coverage=1.0, scores=None):
     assert isinstance(list_of_sets, list) and all(isinstance(s, set) for s in list_of_sets)
     elements = set(chain.from_iterable(list_of_sets))
@@ -149,6 +159,14 @@ def find_set_cover(list_of_sets, coverage=1.0, scores=None):
         covered |= subset
     cover_indices = [list_of_sets.index(s) for s in cover]
     return cover, cover_indices
+
+
+def find_best_slide_subset(slides_and_concepts, coverage=1.0, priorities=True):
+    if priorities:
+        scores = compute_slide_tfidf_scores(slides_and_concepts)
+    else:
+        scores = None
+    return find_set_cover(slides_and_concepts, coverage, scores)
 
 
 def count_tokens_for_openai(text, model="cl100k_base"):
