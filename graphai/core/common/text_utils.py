@@ -137,10 +137,10 @@ def detect_text_language(s):
         return None
 
 
-def compute_slide_tfidf_scores(list_of_sets):
+def compute_slide_tfidf_scores(list_of_sets, min_freq=1):
     sep = ' [{!!}] '
     list_of_strings = [sep.join(s) for s in list_of_sets]
-    vectorizer = TfidfVectorizer(analyzer=lambda x: x.split(sep), norm=None)
+    vectorizer = TfidfVectorizer(analyzer=lambda x: x.split(sep), norm=None, min_df=min_freq)
     tfidf_matrix = vectorizer.fit_transform(list_of_strings)
     scores = np.array(tfidf_matrix.sum(axis=1)).flatten().tolist()
     return scores
@@ -161,9 +161,9 @@ def find_set_cover(list_of_sets, coverage=1.0, scores=None):
     return cover, cover_indices
 
 
-def find_best_slide_subset(slides_and_concepts, coverage=1.0, priorities=True):
+def find_best_slide_subset(slides_and_concepts, coverage=1.0, priorities=True, min_freq=2):
     if priorities:
-        scores = compute_slide_tfidf_scores(slides_and_concepts)
+        scores = compute_slide_tfidf_scores(slides_and_concepts, min_freq)
     else:
         scores = None
     return find_set_cover(slides_and_concepts, coverage, scores)
