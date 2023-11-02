@@ -35,7 +35,10 @@ def clean_slides_up(slides):
     c = ChatGPTSummarizer()
     for slide_content in slides:
         cleaned, _, _, _ = c.cleanup_text(slide_content)
-        results.append(cleaned['cleaned'])
+        if cleaned is not None:
+            results.append(cleaned['cleaned'])
+        else:
+            print('REQUEST TIMED OUT!')
     return results
 
 

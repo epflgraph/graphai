@@ -608,7 +608,6 @@ class ChatGPTSummarizer:
             token_count = update_token_count(token_count, n_total_tokens)
             if results is None:
                 return None, system_message, too_many_tokens, token_count
-            print(results)
         else:
             # If we're simulating the run, then there's no need to double check the JSON
             # We don't count potential JSON corrections in our estimation because they are quite rare anyway
@@ -640,8 +639,6 @@ class ChatGPTSummarizer:
         token_count = update_token_count(token_count, n_total_tokens)
         if results is None:
             return None, system_message, too_many_tokens, token_count
-
-        print(results)
 
         # Return the results of the second call
         return results, system_message, too_many_tokens, token_count
