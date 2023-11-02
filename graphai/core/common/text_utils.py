@@ -228,7 +228,6 @@ def convert_text_or_dict_to_text(text_or_dict):
 
 
 def update_token_count(old_token_counts=None, token_counts=None):
-    print(old_token_counts, token_counts)
     if token_counts is None or len(token_counts) == 0:
         return old_token_counts
     if old_token_counts is None or len(old_token_counts) == 0:
@@ -321,7 +320,8 @@ class ChatGPTSummarizer:
                     messages=messages,
                     max_tokens=max_len,
                     temperature=temperature,
-                    top_p=top_p
+                    top_p=top_p,
+                    timeout=60
                 )
                 print(completion)
             except openai.error.InvalidRequestError as e:
