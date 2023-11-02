@@ -35,7 +35,7 @@ def clean_slides_up(slides):
     c = ChatGPTSummarizer()
     for slide_content in slides:
         cleaned, _, _, _ = c.cleanup_text(slide_content)
-        results.append(cleaned)
+        results.append(cleaned['cleaned'])
     return results
 
 
@@ -84,7 +84,7 @@ def main():
 
     # Now we compute the results for multiple coverage values
     priorities = True
-    for coverage in [0.8, 0.9]:
+    for coverage in [0.7, 0.8]:
         print(f"Computing results for coverage={coverage}, priorities={priorities}")
         # Choose the optimal subset
         best_subset, best_indices = find_best_slide_subset(slides_concepts_raw, coverage, priorities, min_freq=2)
