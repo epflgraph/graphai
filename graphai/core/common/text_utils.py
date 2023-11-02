@@ -523,6 +523,7 @@ class ChatGPTSummarizer:
         try:
             print('Parsing JSON...')
             prev_results_json = json.loads(results)
+            print('JSON parsed successfully')
             return prev_results_json, (messages + [results]), False, dict()
         except json.JSONDecodeError:
             print(results)
@@ -542,6 +543,7 @@ class ChatGPTSummarizer:
                     return None, (messages + correction_message), too_many_tokens, n_total_tokens
                 print('Parsing JSON...')
                 results_json = json.loads(results)
+                print('JSON parsed successfully')
                 return results_json, (messages + correction_message + [results]), too_many_tokens, n_total_tokens
             except json.JSONDecodeError:
                 retried += 1
