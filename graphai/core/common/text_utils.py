@@ -521,31 +521,48 @@ class ChatGPTSummarizer:
     def make_sure_json_is_valid(self, results, messages, system_message, temperature=1, top_p=0.3,
                                 n_retries=1):
         try:
+            print('Parsing JSON...')
             prev_results_json = json.loads(results)
             return prev_results_json, (messages + [results]), False, dict()
         except json.JSONDecodeError:
+            print(results)
             print('Results not in JSON, retrying')
         messages = messages + [results]
         retried = 0
         while retried < n_retries:
             try:
                 correction_message = ['The results were not in a JSON format. Improve your previous response by '
-                                      'making sure the results are in JSON.']
+                                      'making sure the results are in JSON. Be sure to escape double quotes and '
+                                      'backslashes. Double quotes should be escaped to \\", and backslashes to \\\\.']
                 results, too_many_tokens, n_total_tokens = \
                     self._generate_completion(
                         messages + correction_message,
                         system_message, temperature=temperature, top_p=top_p)
                 if results is None:
                     return None, (messages + correction_message), too_many_tokens, n_total_tokens
+                print('Parsing JSON...')
                 results_json = json.loads(results)
                 return results_json, (messages + correction_message + [results]), too_many_tokens, n_total_tokens
-            except Exception:
+            except json.JSONDecodeError:
                 retried += 1
         raise Exception(f"Could not get ChatGPT to produce a JSON result, "
                         f"here are the final results produced: {results}")
 
     def cleanup_text(self, text_or_dict, text_type='slide', handwriting=True, temperature=1, top_p=0.3,
                      simulate=False):
+        """
+        Cleans up dirty text that contains typos and unnecessary line breaks.
+        Args:
+            text_or_dict: Input, can be one string or a dictionary of strings
+            text_type: Source of the input, 'slide' by default
+            handwriting: Whether the text comes from OCR on handwriting
+            temperature: Temperature for GPT, determines creativity/determinism
+            top_p: Top P for GPT, determines which parts of the distribution are considered.
+            simulate: Whether to just simulate the costs
+
+        Returns:
+            Results, system message sent to GPT, whether there were too many tokens, and # of tokens/cost
+        """
         if handwriting:
             system_message = "You will be given the contents of a %s, " \
                              "which result from optical character recognition " \
@@ -573,7 +590,8 @@ class ChatGPTSummarizer:
                           "as typos. Treat words that are completely unrelated to the [SUBJECT MATTER] or " \
                           "the other words in the text as typos. Correct every single typo to the closest word " \
                           "in [LANGUAGE] (or failing that, English) that fits within the [SUBJECT MATTER].\n" \
-                          "Make sure the results are in JSON."
+                          "Make sure the results are in JSON, and that double quotes and backslashes are escaped " \
+                          "properly (double quotes should be \\\" and backslashes should be \\\\)."
 
         # Make a call to ChatGPT to generate initial results. These will still be full of typos.
         results, too_many_tokens, n_total_tokens = \
