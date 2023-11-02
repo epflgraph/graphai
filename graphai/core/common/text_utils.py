@@ -142,9 +142,10 @@ def compute_slide_tfidf_scores(list_of_sets, min_freq=1):
     list_of_strings = [sep.join(s) for s in list_of_sets]
     vectorizer = TfidfVectorizer(analyzer=lambda x: x.split(sep), norm=None, min_df=min_freq)
     tfidf_matrix = vectorizer.fit_transform(list_of_strings)
-    scores = np.array(tfidf_matrix.sum(axis=1)).flatten() + 0.001
+    scores = np.array(tfidf_matrix.sum(axis=1)).flatten()
     scores = scores.tolist()
-    return scores
+    words_kept = set(vectorizer.vocabulary_.keys())
+    return scores, words_kept
 
 
 def find_set_cover(list_of_sets, coverage=1.0, scores=None):
@@ -154,18 +155,28 @@ def find_set_cover(list_of_sets, coverage=1.0, scores=None):
     cover = list()
     if scores is None:
         scores = [1] * len(list_of_sets)
-    while len(covered) / len(elements) < coverage:
+    current_coverage = 0
+    while current_coverage < coverage:
         print(len(covered), len(elements))
         subset = max(list_of_sets, key=lambda s: len(s - covered) * scores[list_of_sets.index(s)])
         cover.append(subset)
         covered |= subset
+        new_coverage = len(covered) / len(elements)
+        # If the selection of this subset has not increased coverage, then we're stuck in a loop with all remaining
+        # scores being equal to 0, and we should stop the algorithm.
+        if new_coverage == current_coverage:
+            print(f'Max coverage reached at {new_coverage}')
+            break
+        current_coverage = new_coverage
+
     cover_indices = [list_of_sets.index(s) for s in cover]
     return cover, cover_indices
 
 
 def find_best_slide_subset(slides_and_concepts, coverage=1.0, priorities=True, min_freq=2):
     if priorities:
-        scores = compute_slide_tfidf_scores(slides_and_concepts, min_freq)
+        scores, words_to_keep = compute_slide_tfidf_scores(slides_and_concepts, min_freq)
+        slides_and_concepts = [{w for w in s if w in words_to_keep} for s in slides_and_concepts]
     else:
         scores = None
     return find_set_cover(slides_and_concepts, coverage, scores)
