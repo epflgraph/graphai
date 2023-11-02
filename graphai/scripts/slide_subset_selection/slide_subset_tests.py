@@ -120,9 +120,13 @@ def main():
                         help='Minimum frequency that a concept must have to not get filtered out', default=2)
     args = parser.parse_args()
     token = args.token
+    coverage = args.coverage
+    min_freq = args.min_freq
 
+    print('Looking for cached results...')
     existing_results = load_results(token)
     if existing_results is None:
+        print('Results not found, starting retrieval...')
         # Retrieve the slides of the video
         slides_list = get_video_slides(token)
         print(len(slides_list))
@@ -133,53 +137,52 @@ def main():
         # Detect concepts on every slide's raw OCR
         slides_concepts_raw = detect_concepts(slides_text_list)
         slides_cleaned_up = clean_slides_up(slides_text_list)
-        slides_concepts_cleaned = clean_slides_up(slides_cleaned_up)
+        slides_concepts_cleaned = detect_concepts(slides_cleaned_up)
 
         # Store the results
+        print('Saving...')
         save_results(token, slides_list, slides_concepts_raw, slides_cleaned_up, slides_concepts_cleaned)
+        print('Processing...')
     else:
-        slides_concepts_raw = [x['concepts_raw'] for x in existing_results]
-        slides_concepts_cleaned = [x['concepts_clean'] for x in existing_results]
+        print('Results loaded, processing...')
+        keys = list(existing_results.keys())
+        slides_concepts_raw = [existing_results[k]['concepts_raw'] for k in keys]
+        slides_concepts_cleaned = [existing_results[k]['concepts_clean'] for k in keys]
 
-
-    # Now we compute the results for multiple coverage values
     priorities = True
-    for coverage in [0.9]:
-        print(f"Computing results for coverage={coverage}, priorities={priorities}")
-        # Choose the optimal subset
-        best_subset, best_indices = find_best_slide_subset(slides_concepts_raw, coverage, priorities, min_freq=2)
-        best_indices_sorted = sorted(best_indices)
-        print(len(best_indices_sorted))
-        print(best_indices_sorted)
-        # Summarize using raw concepts
-        slides_for_summarization_no_cleanup = [slides_concepts_raw[i] for i in best_indices_sorted]
-        slides_for_summarization_no_cleanup = {
-            f'Slide {best_indices_sorted[i]+1}': slides_for_summarization_no_cleanup[i]
-            for i in range(len(slides_for_summarization_no_cleanup))
-        }
-        print(slides_for_summarization_no_cleanup)
-        nocleanup_results, nocleanup_cost = \
-            make_slide_summarization_request(convert_text_or_dict_to_text(slides_for_summarization_no_cleanup))
-        print('********WITHOUT CLEANUP********')
-        print('Results:')
-        print(nocleanup_results)
-        print('Cost:')
-        print(nocleanup_cost)
-        # Summarize using clean concepts
-        slides_for_summarization_with_cleanup = [slides_concepts_cleaned[i] for i in best_indices_sorted]
-        slides_for_summarization_with_cleanup = {
-            f'Slide {best_indices_sorted[i]+1}': slides_for_summarization_with_cleanup[i]
-            for i in range(len(slides_for_summarization_with_cleanup))
-        }
-        print(slides_for_summarization_with_cleanup)
-        results, cost = make_slide_summarization_request(
-            convert_text_or_dict_to_text(slides_for_summarization_with_cleanup)
-        )
-        print('********WITH CLEANUP********')
-        print('Results:')
-        print(results)
-        print('Cost:')
-        print(cost)
+    print(f"Computing results for coverage={coverage}, priorities={priorities}")
+    # Choose the optimal subset
+    best_subset, best_indices = find_best_slide_subset(slides_concepts_raw, coverage, priorities, min_freq=min_freq)
+    best_indices_sorted = sorted(best_indices)
+    print(len(best_indices_sorted))
+    print(best_indices_sorted)
+    # Summarize using raw concepts
+    slides_for_summarization_no_cleanup = {
+        f'Slide {i+1}': slides_concepts_raw[i]
+        for i in best_indices_sorted
+    }
+    print(slides_for_summarization_no_cleanup)
+    nocleanup_results, nocleanup_cost = \
+        make_slide_summarization_request(convert_text_or_dict_to_text(slides_for_summarization_no_cleanup))
+    print('********WITHOUT CLEANUP********')
+    print('Results:')
+    print(nocleanup_results)
+    print('Cost:')
+    print(nocleanup_cost)
+    # Summarize using clean concepts
+    slides_for_summarization_with_cleanup = {
+        f'Slide {i+1}': slides_concepts_cleaned[i]
+        for i in best_indices_sorted
+    }
+    print(slides_for_summarization_with_cleanup)
+    results, cost = make_slide_summarization_request(
+        convert_text_or_dict_to_text(slides_for_summarization_with_cleanup)
+    )
+    print('********WITH CLEANUP********')
+    print('Results:')
+    print(results)
+    print('Cost:')
+    print(cost)
 
 
 if __name__ == '__main__':
