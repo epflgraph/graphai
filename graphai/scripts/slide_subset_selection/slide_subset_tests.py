@@ -22,11 +22,12 @@ def detect_concepts(list_of_slides_text):
         url = API_BASE + '/text/wikify'
         data = json.dumps({"raw_text": slide_text})
         response = requests.post(url, data).json()
-        current_results = sorted([(c['PageTitle'], c['MixedScore']) for c in response], key=lambda x: -x[1])
-        results_list.append({c[0] for c in current_results if c[1] > 0.5})
+        current_results = sorted([(c['PageTitle'], c['MixedScore'], c['LevenshteinScore']) for c in response],
+                                 key=lambda x: -x[1])
+        results_list.append({c[0] for c in current_results if c[1] > 0.7 and c[2] > 0.1})
         counter += 1
-        if counter % 20 == 0:
-            print(response)
+        if counter % 10 == 0:
+            print(counter)
     return results_list
 
 
@@ -87,7 +88,7 @@ def main():
 
     # Now we compute the results for multiple coverage values
     priorities = True
-    for coverage in [0.7, 0.8]:
+    for coverage in [0.9]:
         print(f"Computing results for coverage={coverage}, priorities={priorities}")
         # Choose the optimal subset
         best_subset, best_indices = find_best_slide_subset(slides_concepts_raw, coverage, priorities, min_freq=2)
@@ -95,11 +96,30 @@ def main():
         print(len(best_indices_sorted))
         print(best_indices_sorted)
         slides_for_summarization = [slides_text_list[i] for i in best_indices_sorted]
-        slides_for_summarization = clean_slides_up(slides_for_summarization)
-        slides_for_summarization = detect_concepts(slides_for_summarization)
-        slides_for_summarization = {f'Slide {best_indices_sorted[i]+1}': slides_for_summarization[i]
-                                    for i in range(len(slides_for_summarization))}
-        results, cost = make_slide_summarization_request(convert_text_or_dict_to_text(slides_for_summarization))
+        slides_for_summarization_no_cleanup = [slides_concepts_raw[i] for i in best_indices_sorted]
+        slides_for_summarization_no_cleanup = {
+            f'Slide {best_indices_sorted[i]+1}': slides_for_summarization_no_cleanup[i]
+            for i in range(len(slides_for_summarization_no_cleanup))
+        }
+        print(slides_for_summarization_no_cleanup)
+        nocleanup_results, nocleanup_cost = \
+            make_slide_summarization_request(convert_text_or_dict_to_text(slides_for_summarization_no_cleanup))
+        print('********WITHOUT CLEANUP********')
+        print('Results:')
+        print(nocleanup_results)
+        print('Cost:')
+        print(nocleanup_cost)
+        slides_for_summarization_with_cleanup = clean_slides_up(slides_for_summarization)
+        slides_for_summarization_with_cleanup = detect_concepts(slides_for_summarization_with_cleanup)
+        slides_for_summarization_with_cleanup = {
+            f'Slide {best_indices_sorted[i]+1}': slides_for_summarization_with_cleanup[i]
+            for i in range(len(slides_for_summarization_with_cleanup))
+        }
+        print(slides_for_summarization_with_cleanup)
+        results, cost = make_slide_summarization_request(
+            convert_text_or_dict_to_text(slides_for_summarization_with_cleanup)
+        )
+        print('********WITH CLEANUP********')
         print('Results:')
         print(results)
         print('Cost:')
