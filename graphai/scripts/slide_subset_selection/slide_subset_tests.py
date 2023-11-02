@@ -174,6 +174,8 @@ def main():
         f'Slide {i+1}': slides_concepts_cleaned[i]
         for i in best_indices_sorted
     }
+    slides_for_summarization_with_cleanup = {k: v for k, v in slides_for_summarization_with_cleanup.items()
+                                             if len(v) > 0}
     print(slides_for_summarization_with_cleanup)
     results, cost = make_slide_summarization_request(
         convert_text_or_dict_to_text(slides_for_summarization_with_cleanup)
