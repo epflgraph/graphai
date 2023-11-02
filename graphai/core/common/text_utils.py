@@ -282,7 +282,7 @@ class ChatGPTSummarizer:
             return False
 
     def _generate_completion(self, text, system_message, max_len=None, temperature=1.0, top_p=1.0,
-                             simulate=False):
+                             simulate=False, verbose=False):
         """
         Internal method, generates a chat completion, which is the OpenAI API endpoint for ChatGPT interactions
         Args:
@@ -334,7 +334,8 @@ class ChatGPTSummarizer:
                     top_p=top_p,
                     timeout=30
                 )
-                print(completion)
+                if verbose:
+                    print(completion)
             except openai.error.InvalidRequestError as e:
                 # We check to see if the exception was caused by too many tokens in the input
                 print(e)
