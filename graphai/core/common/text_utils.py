@@ -321,7 +321,7 @@ class ChatGPTSummarizer:
                     max_tokens=max_len,
                     temperature=temperature,
                     top_p=top_p,
-                    timeout=60
+                    timeout=30
                 )
                 print(completion)
             except openai.error.InvalidRequestError as e:
