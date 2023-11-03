@@ -332,7 +332,7 @@ class ChatGPTSummarizer:
                     max_tokens=max_len,
                     temperature=temperature,
                     top_p=top_p,
-                    timeout=30
+                    request_timeout=30
                 )
                 if verbose:
                     print(completion)
