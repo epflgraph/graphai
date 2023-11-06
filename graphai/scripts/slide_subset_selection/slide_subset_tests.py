@@ -16,13 +16,15 @@ def get_video_slides(token):
     return slide_list
 
 
-def detect_concepts(list_of_slides_text):
+def detect_concepts(list_of_slides_text, threshold=None):
     results_list = list()
     counter = 0
     for slide_text in list_of_slides_text:
         if slide_text is None:
             results_list.append(set())
         url = API_BASE + '/text/wikify'
+        if threshold is not None:
+            url += f"?filtering_thresold={threshold}"
         data = json.dumps({"raw_text": slide_text})
         response = requests.post(url, data).json()
         try:
@@ -47,7 +49,7 @@ def clean_slides_up(slides, retries=3):
         for retry in range(retries):
             cleaned, _, _, _ = c.cleanup_text(slide_content)
             if cleaned is not None:
-                current_results = cleaned['cleaned']
+                current_results = cleaned['subject'] + '\n\n' + cleaned['cleaned']
                 break
         if current_results is None:
             print(f'REQUEST TIMED OUT AFTER {retries} RETRIES!')
