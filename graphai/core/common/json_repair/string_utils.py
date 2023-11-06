@@ -1,4 +1,6 @@
 # Constants for ASCII codes
+import numpy as np
+
 codeBackslash = 0x5c  # "\"
 codeSlash = 0x2f  # "/"
 codeAsterisk = 0x2a  # "*"
@@ -71,6 +73,8 @@ regex_start_of_value = re.compile(r'[\[{\w-]')
 
 
 def is_start_of_value(char):
+    if char is None:
+        return False
     return regex_start_of_value.match(char) or (char and is_quote(ord(char)))
 
 
@@ -138,3 +142,17 @@ def next_non_white_space_character(text, start):
     while is_whitespace(ord(text[i])):
         i += 1
     return text[i]
+
+
+def char_code_at(text, ind):
+    try:
+        return ord(text[ind])
+    except Exception:
+        return np.NaN
+
+
+def char_at(text, ind, default=''):
+    try:
+        return text[ind]
+    except Exception:
+        return default
