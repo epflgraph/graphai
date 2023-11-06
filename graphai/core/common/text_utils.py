@@ -3,6 +3,7 @@ import hashlib
 import json
 from bisect import bisect
 from itertools import chain
+import re
 
 import fingerprint
 import langdetect
@@ -15,6 +16,8 @@ import torch
 from sklearn.feature_extraction.text import TfidfVectorizer
 
 from graphai.definitions import CONFIG_DIR
+from graphai.core.common.json_repair.json_repair import repair_json
+
 TRANSLATION_LIST_SEPARATOR = ' [{[!!SEP!!]}] '
 CHATGPT_COSTS_PER_1K = {
     'gpt-3.5-turbo': {
@@ -532,6 +535,7 @@ class ChatGPTSummarizer:
 
     def make_sure_json_is_valid(self, results, messages, system_message, temperature=1, top_p=0.3,
                                 n_retries=1):
+        # Trying to directly parse the JSON...
         try:
             print('Parsing JSON...')
             prev_results_json = json.loads(results)
@@ -540,6 +544,17 @@ class ChatGPTSummarizer:
         except json.JSONDecodeError:
             print(results)
             print('Results not in JSON, retrying')
+        # Trying to fix the JSON programmatically...
+        try:
+            print('Trying to programmatically fix the JSON...')
+            repaired_json = repair_json(results)
+            prev_results_json = json.loads(repaired_json)
+            print('JSON parsed successfully')
+            return prev_results_json, (messages + [repaired_json]), False, dict()
+        except json.JSONDecodeError:
+            print(results)
+            print('Results still not in JSON, retrying')
+        # Trying to fix the JSON by asking ChatGPT again...
         messages = messages + [results]
         retried = 0
         while retried < n_retries:
