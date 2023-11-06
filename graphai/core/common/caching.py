@@ -289,10 +289,10 @@ class TextDBCachingManager(DBCachingManagerBase):
         )
 
 
-class SummaryDBCachingManager(DBCachingManagerBase):
+class CompletionDBCachingManager(DBCachingManagerBase):
     def __init__(self):
         super().__init__(db_config=load_db_config(),
-                         cache_table='Summary_Main', most_similar_table='Summary_Most_Similar',
+                         cache_table='Completion_Main', most_similar_table='Completion_Most_Similar',
                          schema=load_schema_name())
 
     def init_db(self):
@@ -313,12 +313,13 @@ class SummaryDBCachingManager(DBCachingManagerBase):
               `fingerprint` VARCHAR(255) DEFAULT NULL,
               `input_text` LONGTEXT DEFAULT NULL,
               `input_type` VARCHAR(255) DEFAULT NULL,
-              `summary` LONGTEXT DEFAULT NULL,
-              `summary_type` VARCHAR(10) DEFAULT NULL,
-              `summary_len_class` VARCHAR(10) DEFAULT NULL,
-              `summary_tone` VARCHAR(10) DEFAULT NULL,
-              `summary_length` INT DEFAULT NULL,
-              `summary_token_total` INT DEFAULT NULL,
+              `completion` LONGTEXT DEFAULT NULL,
+              `completion_type` VARCHAR(10) DEFAULT NULL,
+              `completion_len_class` VARCHAR(10) DEFAULT NULL,
+              `completion_tone` VARCHAR(10) DEFAULT NULL,
+              `completion_length` INT DEFAULT NULL,
+              `completion_token_total` INT DEFAULT NULL,
+              `is_json` INT DEFAULT 0,
               `date_added` DATETIME DEFAULT NULL,
               PRIMARY KEY id_token (id_token)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;

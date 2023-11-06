@@ -1,7 +1,9 @@
+import json
+
 from celery import shared_task
 from graphai.core.common.text_utils import force_dict_to_text, ChatGPTSummarizer
 from graphai.core.common.common_utils import get_current_datetime
-from graphai.core.common.caching import SummaryDBCachingManager
+from graphai.core.common.caching import CompletionDBCachingManager
 from graphai.core.text.keywords import get_keywords
 from graphai.api.celery_tasks.common import compute_text_fingerprint_common, fingerprint_lookup_retrieve_from_db, \
     fingerprint_lookup_parallel, fingerprint_lookup_direct, fingerprint_lookup_callback
@@ -10,7 +12,7 @@ from graphai.api.celery_tasks.common import compute_text_fingerprint_common, fin
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='text_6.fingerprint_summarization_text', ignore_result=False)
 def compute_summarization_text_fingerprint_task(self, token, text, force=False):
-    db_manager = SummaryDBCachingManager()
+    db_manager = CompletionDBCachingManager()
     return compute_text_fingerprint_common(db_manager, token, force_dict_to_text(text), force)
 
 
@@ -20,14 +22,14 @@ def compute_summarization_text_fingerprint_callback_task(self, results, text, te
                                                          summary_type, len_class, tone):
     if results['fresh']:
         token = results['fp_token']
-        db_manager = SummaryDBCachingManager()
+        db_manager = CompletionDBCachingManager()
         values_dict = {
             'fingerprint': results['result'],
             'input_text': force_dict_to_text(text),
             'input_type': text_type,
-            'summary_type': summary_type,
-            'summary_len_class': len_class,
-            'summary_tone': tone
+            'completion_type': summary_type,
+            'completion_len_class': len_class,
+            'completion_tone': tone
         }
         existing = db_manager.get_details(token, ['date_added'], using_most_similar=False)[0]
         if existing is None or existing['date_added'] is None:
@@ -40,7 +42,7 @@ def compute_summarization_text_fingerprint_callback_task(self, results, text, te
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='text_6.summarization_text_fingerprint_find_closest_retrieve_from_db', ignore_result=False)
 def summarization_text_fingerprint_find_closest_retrieve_from_db_task(self, results, equality_conditions):
-    db_manager = SummaryDBCachingManager()
+    db_manager = CompletionDBCachingManager()
     return fingerprint_lookup_retrieve_from_db(results, db_manager, equality_conditions=equality_conditions)
 
 
@@ -48,7 +50,7 @@ def summarization_text_fingerprint_find_closest_retrieve_from_db_task(self, resu
              name='text_6.summarization_text_fingerprint_find_closest_parallel', ignore_result=False)
 def summarization_text_fingerprint_find_closest_parallel_task(self, input_dict, i, n_total, equality_conditions,
                                                               min_similarity=1):
-    db_manager = SummaryDBCachingManager()
+    db_manager = CompletionDBCachingManager()
     # The equality conditions make sure that the fingerprint lookup happens only among the cached texts with
     # the same summary_type. This is because we don't want a request for the title of a given text to return a
     # hit on the summary of the same text (and vice versa).
@@ -59,14 +61,14 @@ def summarization_text_fingerprint_find_closest_parallel_task(self, input_dict, 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='text_6.summarization_text_fingerprint_find_closest_direct', ignore_result=False)
 def summarization_text_fingerprint_find_closest_direct_task(self, results, equality_conditions):
-    db_manager = SummaryDBCachingManager()
+    db_manager = CompletionDBCachingManager()
     return fingerprint_lookup_direct(results, db_manager, equality_conditions=equality_conditions)
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='text_6.summarization_text_fingerprint_find_closest_callback', ignore_result=False)
 def summarization_text_fingerprint_find_closest_callback_task(self, results_list):
-    db_manager = SummaryDBCachingManager()
+    db_manager = CompletionDBCachingManager()
     return fingerprint_lookup_callback(results_list, db_manager)
 
 
@@ -83,17 +85,21 @@ def summarization_retrieve_text_fingerprint_callback_task(self, results):
              name='text_6.summarize_text_db_lookup', ignore_result=False)
 def lookup_text_summary_task(self, token, text, force=False):
     if not force:
-        db_manager = SummaryDBCachingManager()
+        db_manager = CompletionDBCachingManager()
         # The token is [text md5]_[text type]_[summary type]_[len class]_[tone] for summary/title generation
         # and [text md5]_[text type]_[summary type] for cleanup
-        all_existing = db_manager.get_details(token, cols=['summary'], using_most_similar=True)
+        all_existing = db_manager.get_details(token, cols=['completion', 'is_json'], using_most_similar=True)
         for existing in all_existing:
             if existing is not None:
-                if existing['summary'] is not None:
+                if existing['completion'] is not None:
+                    if existing['is_json'] == 1:
+                        s = json.loads(existing['completion'])
+                    else:
+                        s = existing['completion']
                     return {
                         'token': token,
                         'text': text,
-                        'existing_results': existing['summary']
+                        'existing_results': s
                     }
     return {
         'token': token,
@@ -191,26 +197,32 @@ def summarize_text_task(self, token_and_text, text_type='text', summary_type='su
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='text_6.summarize_text_db_callback', ignore_result=False)
 def summarize_text_callback_task(self, results, force=False):
-    db_manager = SummaryDBCachingManager()
+    db_manager = CompletionDBCachingManager()
     token = results['token']
     original_text = results['original_text']
-    summary = results['result']
-    summary_type = results['result_type']
+    completion = results['result']
+    completion_type = results['result_type']
     text_type = results['text_type']
     len_class = results['len_class']
     tone = results['tone']
     n_tokens_total = results['n_tokens_total']
     if results['fresh']:
+        if isinstance(completion, dict):
+            completion = json.dumps(completion)
+            is_json = 1
+        else:
+            is_json = 0
         values_dict = {
             'input_text': original_text,
-            'summary': summary,
-            'summary_type': summary_type,
+            'completion': completion,
+            'completion_type': completion_type,
             'input_type': text_type,
-            'summary_len_class': len_class,
-            'summary_tone': tone,
-            'summary_length': len(summary.split(' ')),
-            'summary_token_total': n_tokens_total['total_tokens'],
-            'summary_cost': n_tokens_total['cost']
+            'completion_len_class': len_class,
+            'completion_tone': tone,
+            'completion_length': len(completion.split(' ')),
+            'completion_token_total': n_tokens_total['total_tokens'],
+            'completion_cost': n_tokens_total['cost'],
+            'is_json': is_json
         }
         existing = db_manager.get_details(token, ['date_added'], using_most_similar=False)[0]
         if existing is None or existing['date_added'] is None:
@@ -277,7 +289,7 @@ def cleanup_text_task(self, token_and_text, text_type='text', result_type='clean
     summarizer = ChatGPTSummarizer()
     results, message, too_many_tokens, n_tokens_total = summarizer.cleanup_text(
         text, text_type=text_type, handwriting=True)
-    results = results['cleaned']
+    results = {'subject': results['subject'], 'cleaned': results['cleaned']}
     if not debug:
         message = None
     return {

@@ -10,7 +10,7 @@ class SummaryFingerprintRequest(BaseModel):
         description="Text to summarize. Can be one string or a string to string dictionary."
     )
 
-    summary_type: Literal['title', 'summary'] = Field(
+    completion_type: Literal['title', 'summary'] = Field(
         title="Summary type",
         description="Whether the summarization to be performed is title or summary generation",
         default='summary'
@@ -153,7 +153,7 @@ class CleanupRequest(BaseModel):
 
 
 class CompletionTaskResponse(BaseModel):
-    result: Union[str, None] = Field(
+    result: Union[Dict[str, str], str, None] = Field(
         title="Completion results",
         description="Summarized/cleaned-up text"
     )

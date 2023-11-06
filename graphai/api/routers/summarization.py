@@ -107,7 +107,7 @@ def get_cleanup_task_chain(token, text, text_type, result_type='cleanup',
 @router.post('/calculate_fingerprint', response_model=TaskIDResponse)
 async def calculate_summary_text_fingerprint(data: SummaryFingerprintRequest):
     text = data.text
-    summary_type = data.summary_type
+    summary_type = data.completion_type
     text_type = data.text_type
     len_class = data.len_class
     tone = data.tone
