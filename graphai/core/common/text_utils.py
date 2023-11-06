@@ -285,7 +285,7 @@ class ChatGPTSummarizer:
             return False
 
     def _generate_completion(self, text, system_message, max_len=None, temperature=1.0, top_p=1.0,
-                             simulate=False, verbose=False):
+                             simulate=False, verbose=False, timeout=60):
         """
         Internal method, generates a chat completion, which is the OpenAI API endpoint for ChatGPT interactions
         Args:
@@ -335,7 +335,7 @@ class ChatGPTSummarizer:
                     max_tokens=max_len,
                     temperature=temperature,
                     top_p=top_p,
-                    request_timeout=30
+                    request_timeout=timeout
                 )
                 if verbose:
                     print(completion)
@@ -566,7 +566,9 @@ class ChatGPTSummarizer:
                 results, too_many_tokens, n_total_tokens = \
                     self._generate_completion(
                         messages + correction_message,
-                        system_message, temperature=temperature, top_p=top_p)
+                        system_message, temperature=temperature, top_p=top_p,
+                        timeout=10
+                    )
                 if results is None:
                     return None, (messages + correction_message), too_many_tokens, n_total_tokens
                 print('Parsing JSON...')
@@ -623,14 +625,18 @@ class ChatGPTSummarizer:
                           "4. Correct ALL typos. Treat words that exist neither in [LANGUAGE] nor in English " \
                           "as typos. Treat words that are completely unrelated to the [SUBJECT MATTER] or " \
                           "the other words in the text as typos. Correct every single typo to the closest word " \
-                          "in [LANGUAGE] (or failing that, English) that fits within the [SUBJECT MATTER].\n" \
+                          "in [LANGUAGE] (or failing that, English) that fits within the [SUBJECT MATTER]. " \
+                          "If you encounter a non-word and cannot correct it to anything meaningful, remove " \
+                          "it from the text entirely.\n" \
+                          "5. Remove all mathematical formulae.\n" \
                           "Make sure the results are in JSON, and that double quotes and backslashes are escaped " \
                           "properly (double quotes should be \\\" and backslashes should be \\\\)."
 
         # Make a call to ChatGPT to generate initial results. These will still be full of typos.
         text = text + "\n\nBe sure to respond in JSON format!"
         results, too_many_tokens, n_total_tokens = \
-            self._generate_completion(text, system_message, temperature=temperature, top_p=top_p, simulate=simulate)
+            self._generate_completion(text, system_message, temperature=temperature, top_p=top_p, simulate=simulate,
+                                      timeout=10)
         print('FIRST')
         token_count = n_total_tokens
         if not simulate:
@@ -657,7 +663,7 @@ class ChatGPTSummarizer:
         results, too_many_tokens, n_total_tokens = \
             self._generate_completion(
                 message_chain + correction_message, system_message, max_len=len(text) if simulate else None,
-                temperature=temperature, top_p=top_p, simulate=simulate)
+                temperature=temperature, top_p=top_p, simulate=simulate, timeout=10)
         print('SECOND')
         token_count = update_token_count(token_count, n_total_tokens)
 
@@ -671,6 +677,7 @@ class ChatGPTSummarizer:
             self.make_sure_json_is_valid(results, message_chain + correction_message,
                                          system_message,
                                          temperature=temperature, top_p=top_p)
+        print(results)
         token_count = update_token_count(token_count, n_total_tokens)
         if results is None:
             return None, system_message, too_many_tokens, token_count
