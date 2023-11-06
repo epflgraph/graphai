@@ -544,16 +544,15 @@ class ChatGPTSummarizer:
         except json.JSONDecodeError:
             print(results)
             print('Results not in JSON, retrying')
-        # Trying to fix the JSON programmatically...
+        # Trying to fix the JSON algorithmically...
         try:
-            print('Trying to programmatically fix the JSON...')
+            print('Trying to algorithmically fix the JSON...')
             repaired_json = repair_json(results)
             prev_results_json = json.loads(repaired_json)
             print('JSON parsed successfully')
             return prev_results_json, (messages + [repaired_json]), False, dict()
-        except json.JSONDecodeError:
-            print(results)
-            print('Results still not in JSON, retrying')
+        except Exception:
+            print('Algorithmic JSON fix unsuccessful, retrying')
         # Trying to fix the JSON by asking ChatGPT again...
         messages = messages + [results]
         retried = 0
@@ -561,7 +560,9 @@ class ChatGPTSummarizer:
             try:
                 correction_message = ['The results were not in a JSON format. Improve your previous response by '
                                       'making sure the results are in JSON. Be sure to escape double quotes and '
-                                      'backslashes. Double quotes should be escaped to \\", and backslashes to \\\\.']
+                                      'backslashes. Double quotes should be escaped to \\", and backslashes to \\\\.'
+                                      ' Do NOT return the exact same results as the input: the input is not a valid '
+                                      'JSON and the results must be a valid JSON.']
                 results, too_many_tokens, n_total_tokens = \
                     self._generate_completion(
                         messages + correction_message,
@@ -569,9 +570,11 @@ class ChatGPTSummarizer:
                 if results is None:
                     return None, (messages + correction_message), too_many_tokens, n_total_tokens
                 print('Parsing JSON...')
-                results_json = json.loads(results)
+                repaired_json = repair_json(results)
+                results_json = json.loads(repaired_json)
                 print('JSON parsed successfully')
-                return results_json, (messages + correction_message + [results]), too_many_tokens, n_total_tokens
+                return results_json, (messages + correction_message + [repaired_json]), \
+                       too_many_tokens, n_total_tokens
             except json.JSONDecodeError:
                 retried += 1
         raise Exception(f"Could not get ChatGPT to produce a JSON result, "
@@ -603,9 +606,11 @@ class ChatGPTSummarizer:
                           "The text could potentially contain typos, incorrect grammar, scrambled sentences, " \
                           "and mathematical notation. " \
                           "Return the results in the following JSON format:\n" \
-                          "'{\"language\": [LANGUAGE],\n" \
+                          "```\n" \
+                          "{\"language\": [LANGUAGE],\n" \
                           "\"subject\": [SUBJECT MATTER],\n" \
                           "\"cleaned\": [CLEANED UP TEXT]}.\n" \
+                          "```\n" \
                           "DO NOT provide any explanations as to how you performed the cleanup. " \
                           "DO NOT translate or summarize the text.\n" \
                           "Clean the text up by performing the following steps, in order:\n" \
@@ -623,6 +628,7 @@ class ChatGPTSummarizer:
                           "properly (double quotes should be \\\" and backslashes should be \\\\)."
 
         # Make a call to ChatGPT to generate initial results. These will still be full of typos.
+        text = text + "\n\nBe sure to respond in JSON format!"
         results, too_many_tokens, n_total_tokens = \
             self._generate_completion(text, system_message, temperature=temperature, top_p=top_p, simulate=simulate)
         print('FIRST')
