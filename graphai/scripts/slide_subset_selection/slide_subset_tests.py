@@ -21,13 +21,18 @@ def detect_concepts(list_of_slides_text):
     counter = 0
     for slide_text in list_of_slides_text:
         if slide_text is None:
-            results_list.append(None)
+            results_list.append(set())
         url = API_BASE + '/text/wikify'
         data = json.dumps({"raw_text": slide_text})
         response = requests.post(url, data).json()
-        current_results = sorted([(c['PageTitle'], c['MixedScore'], c['LevenshteinScore']) for c in response],
-                                 key=lambda x: -x[1])
-        results_list.append({c[0] for c in current_results if c[1] > 0.7 and c[2] > 0.1})
+        try:
+            current_results = sorted([(c['PageTitle'], c['MixedScore'], c['LevenshteinScore']) for c in response],
+                                     key=lambda x: -x[1])
+            results_list.append({c[0] for c in current_results if c[1] > 0.7 and c[2] > 0.1})
+        except Exception as e:
+            print('An error occurred, here is the response')
+            print(response)
+            results_list.append(set())
         counter += 1
         if counter % 10 == 0:
             print(counter)
@@ -38,7 +43,7 @@ def clean_slides_up(slides, retries=3):
     results = list()
     c = ChatGPTSummarizer()
     for slide_content in slides:
-        current_results = None
+        current_results = ''
         for retry in range(retries):
             cleaned, _, _, _ = c.cleanup_text(slide_content)
             if cleaned is not None:
