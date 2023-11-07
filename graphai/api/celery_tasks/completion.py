@@ -289,7 +289,7 @@ def cleanup_text_task(self, token_and_text, text_type='text', result_type='clean
     summarizer = ChatGPTSummarizer()
     results, message, too_many_tokens, n_tokens_total = summarizer.cleanup_text(
         text, text_type=text_type, handwriting=True)
-    results = {'subject': results['subject'], 'cleaned': results['cleaned']}
+    results = {'subject': results['subject'], 'text': results['cleaned']}
     if not debug:
         message = None
     return {
