@@ -330,9 +330,7 @@ def simulate_cleanup_task(self, text, text_type='text', result_type='cleanup'):
 def choose_best_subset_task(self, slide_number_to_concepts, coverage=1.0, min_freq=2):
     slide_numbers = sorted(list(slide_number_to_concepts.keys()))
     slide_concept_list = [slide_number_to_concepts[n]['concepts'] for n in slide_numbers]
-    # slide_raw_list = [slide_number_to_concepts[n].get('raw', None) for n in slide_numbers]
     cover, best_indices = find_best_slide_subset(slide_concept_list, coverage, True, min_freq)
     return {
-        'subset': [slide_numbers[i] for i in best_indices],
-        # 'raw': [slide_raw_list[i] for i in best_indices]
+        'subset': [slide_numbers[i] for i in best_indices]
     }

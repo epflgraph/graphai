@@ -9,7 +9,9 @@ from graphai.api.schemas.completion import (
     SummaryResponse,
     CleanupResponse,
     SummaryFingerprintRequest,
-    SummaryFingerprintResponse
+    SummaryFingerprintResponse,
+    SlideSubsetRequest,
+    SlideSubsetResponse
 )
 
 from graphai.api.celery_tasks.common import (
@@ -30,7 +32,8 @@ from graphai.api.celery_tasks.completion import (
     summarize_text_task,
     completion_text_callback_task,
     cleanup_text_task,
-    simulate_cleanup_task
+    simulate_cleanup_task,
+    choose_best_subset_task
 )
 
 from graphai.core.common.text_utils import generate_summary_text_token, generate_completion_type_dict
@@ -239,3 +242,15 @@ async def summarize_status(task_id):
         else:
             task_results = None
     return format_api_results(full_results['id'], full_results['name'], full_results['status'], task_results)
+
+
+@router.post('/subset', response_model=SlideSubsetResponse)
+async def choose_best_subset(data: SlideSubsetRequest):
+    slides_and_concepts = data.slides
+    slides_and_concepts = {slide.number: {'concepts': slide.concepts} for slide in slides_and_concepts}
+    coverage = data.coverage
+    min_freq = data.min_freq
+    task_list = [choose_best_subset_task.s(slides_and_concepts, coverage, min_freq)]
+    tasks = chain(task_list)
+    results = tasks.apply_async(priority=6).get(timeout=300)
+    return results
