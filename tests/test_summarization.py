@@ -265,8 +265,6 @@ def test__summarization_cleanup__cleanup_text__integration(fixture_app, celery_w
     assert 'formalisme de hamilton' in cleaned_up_text
     assert 'legendre' in cleaned_up_text
     assert 'fonction inverse' in cleaned_up_text
-
-
     assert 'trouver' in cleaned_up_text
     assert 'hamilton' in cleaned_up_subject or 'legendre' in cleaned_up_subject
     assert cleanup_results['task_result']['result_type'] == 'cleanup'
