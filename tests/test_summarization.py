@@ -260,7 +260,7 @@ def test__summarization_cleanup__cleanup_text__integration(fixture_app, celery_w
     assert cleanup_results['task_status'] == 'SUCCESS'
     assert cleanup_results['task_result']['successful'] is True
     assert cleanup_results['task_result']['fresh'] is True
-    cleaned_up_text = cleanup_results['task_result']['result']['cleaned'].lower()
+    cleaned_up_text = cleanup_results['task_result']['result']['text'].lower()
     cleaned_up_subject = cleanup_results['task_result']['result']['subject'].lower()
     assert 'formalisme de hamilton' in cleaned_up_text
     assert 'legendre' in cleaned_up_text
