@@ -10,14 +10,14 @@ from graphai.api.celery_tasks.common import compute_text_fingerprint_common, fin
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='text_6.fingerprint_summarization_text', ignore_result=False)
+             name='text_6.fingerprint_completion_text', ignore_result=False)
 def compute_summarization_text_fingerprint_task(self, token, text, force=False):
     db_manager = CompletionDBCachingManager()
     return compute_text_fingerprint_common(db_manager, token, force_dict_to_text(text), force)
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='text_6.fingerprint_summarization_text_callback', ignore_result=False)
+             name='text_6.fingerprint_completion_text_callback', ignore_result=False)
 def compute_summarization_text_fingerprint_callback_task(self, results, text, text_type,
                                                          summary_type, len_class, tone):
     if results['fresh']:
@@ -40,14 +40,14 @@ def compute_summarization_text_fingerprint_callback_task(self, results, text, te
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='text_6.summarization_text_fingerprint_find_closest_retrieve_from_db', ignore_result=False)
+             name='text_6.completion_text_fingerprint_find_closest_retrieve_from_db', ignore_result=False)
 def summarization_text_fingerprint_find_closest_retrieve_from_db_task(self, results, equality_conditions):
     db_manager = CompletionDBCachingManager()
     return fingerprint_lookup_retrieve_from_db(results, db_manager, equality_conditions=equality_conditions)
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='text_6.summarization_text_fingerprint_find_closest_parallel', ignore_result=False)
+             name='text_6.completion_text_fingerprint_find_closest_parallel', ignore_result=False)
 def summarization_text_fingerprint_find_closest_parallel_task(self, input_dict, i, n_total, equality_conditions,
                                                               min_similarity=1):
     db_manager = CompletionDBCachingManager()
@@ -59,21 +59,21 @@ def summarization_text_fingerprint_find_closest_parallel_task(self, input_dict, 
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='text_6.summarization_text_fingerprint_find_closest_direct', ignore_result=False)
+             name='text_6.completion_text_fingerprint_find_closest_direct', ignore_result=False)
 def summarization_text_fingerprint_find_closest_direct_task(self, results, equality_conditions):
     db_manager = CompletionDBCachingManager()
     return fingerprint_lookup_direct(results, db_manager, equality_conditions=equality_conditions)
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='text_6.summarization_text_fingerprint_find_closest_callback', ignore_result=False)
+             name='text_6.completion_text_fingerprint_find_closest_callback', ignore_result=False)
 def summarization_text_fingerprint_find_closest_callback_task(self, results_list):
     db_manager = CompletionDBCachingManager()
     return fingerprint_lookup_callback(results_list, db_manager)
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='text_6.retrieve_summarization_text_fingerprint_final_callback', ignore_result=False)
+             name='text_6.retrieve_completion_text_fingerprint_final_callback', ignore_result=False)
 def summarization_retrieve_text_fingerprint_callback_task(self, results):
     # Returning the fingerprinting results, which is the part of this task whose results are sent back to the user.
     results_to_return = results['fp_results']
@@ -82,8 +82,8 @@ def summarization_retrieve_text_fingerprint_callback_task(self, results):
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='text_6.summarize_text_db_lookup', ignore_result=False)
-def lookup_text_summary_task(self, token, text, force=False):
+             name='text_6.completion_text_db_lookup', ignore_result=False)
+def lookup_text_completion_task(self, token, text, force=False):
     if not force:
         db_manager = CompletionDBCachingManager()
         # The token is [text md5]_[text type]_[summary type]_[len class]_[tone] for summary/title generation
@@ -195,8 +195,8 @@ def summarize_text_task(self, token_and_text, text_type='text', summary_type='su
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='text_6.summarize_text_db_callback', ignore_result=False)
-def summarize_text_callback_task(self, results, force=False):
+             name='text_6.completion_text_db_callback', ignore_result=False)
+def completion_text_callback_task(self, results, force=False):
     db_manager = CompletionDBCachingManager()
     token = results['token']
     original_text = results['original_text']

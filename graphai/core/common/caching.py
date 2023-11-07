@@ -319,6 +319,7 @@ class CompletionDBCachingManager(DBCachingManagerBase):
               `completion_tone` VARCHAR(10) DEFAULT NULL,
               `completion_length` INT DEFAULT NULL,
               `completion_token_total` INT DEFAULT NULL,
+              `completion_cost` FLOAT DEFAULT NULL,
               `is_json` INT DEFAULT 0,
               `date_added` DATETIME DEFAULT NULL,
               PRIMARY KEY id_token (id_token)

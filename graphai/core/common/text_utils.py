@@ -221,15 +221,15 @@ def generate_summary_text_token(text, text_type='text', summary_type='summary', 
     return token
 
 
-def generate_summary_type_dict(text_type, summary_type, len_class, tone):
+def generate_completion_type_dict(text_type, completion_type, len_class, tone):
     d = {
         'input_type': text_type,
-        'summary_type': summary_type
+        'completion_type': completion_type
     }
     if len_class is not None:
-        d['summary_len_class'] = len_class
+        d['completion_len_class'] = len_class
     if tone is not None:
-        d['summary_tone'] = tone
+        d['completion_tone'] = tone
     return d
 
 

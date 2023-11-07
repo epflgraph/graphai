@@ -4,7 +4,7 @@ import pytest
 from unittest.mock import patch
 from time import sleep
 
-from graphai.api.celery_tasks.summarization import summarize_text_task, compute_summarization_text_fingerprint_task
+from graphai.api.celery_tasks.completion import summarize_text_task, compute_summarization_text_fingerprint_task
 
 ################################################################
 # /completion/summary                                       #
@@ -12,7 +12,7 @@ from graphai.api.celery_tasks.summarization import summarize_text_task, compute_
 ################################################################
 
 
-@patch('graphai.api.celery_tasks.summarization.summarize_text_task.run')
+@patch('graphai.api.celery_tasks.completion.summarize_text_task.run')
 @pytest.mark.usefixtures('transcript_text')
 def test__summarization_summary__summarize_text__mock_task(mock_run, transcript_text):
     # Mock calling the task
@@ -260,9 +260,11 @@ def test__summarization_cleanup__cleanup_text__integration(fixture_app, celery_w
     assert cleanup_results['task_status'] == 'SUCCESS'
     assert cleanup_results['task_result']['successful'] is True
     assert cleanup_results['task_result']['fresh'] is True
-    cleaned_up_text = cleanup_results['task_result']['result'].lower()
+    cleaned_up_text = cleanup_results['task_result']['result']['cleaned'].lower()
+    cleaned_up_subject = cleanup_results['task_result']['result']['subject'].lower()
     assert 'formalisme de hamilton' in cleaned_up_text
     assert 'legendre' in cleaned_up_text
     assert 'fonction inverse' in cleaned_up_text
     assert 'trouver' in cleaned_up_text
+    assert 'hamilton' in cleaned_up_subject or 'legendre' in cleaned_up_subject
     assert cleanup_results['task_result']['result_type'] == 'cleanup'
