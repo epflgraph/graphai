@@ -152,12 +152,23 @@ class CleanupRequest(BaseModel):
     )
 
 
-class CompletionTaskResponse(BaseModel):
-    result: Union[Dict[str, str], str, None] = Field(
-        title="Completion results",
-        description="Summarized/cleaned-up text"
+class CleanupResponseDict(BaseModel):
+    subject: str = Field(
+        title="Subject matter",
+        description="Subject matter of the input, which is the name of a Wikipedia page"
     )
 
+    text: str = Field(
+        title="Cleaned up text"
+    )
+
+    for_wikify: str = Field(
+        title="Results for /text/wikify endpoint",
+        description="The subject matter and cleaned up text combined into one for better concept detection performance"
+    )
+
+
+class CompletionTaskResponseBase(BaseModel):
     result_type: Union[Literal['title', 'summary', 'cleanup'], None] = Field(
         title="Summary type",
         description="Whether the result is a title, a summary, or cleaned-up text",
@@ -191,23 +202,35 @@ class CompletionTaskResponse(BaseModel):
                     "input and output tokens."
     )
 
-
-class CompletionDebugTaskResponse(CompletionTaskResponse):
     debug_message: Union[str, None] = Field(
         title="Message",
         description="System message sent to ChatGPT"
     )
 
 
-class CompletionResponse(TaskStatusResponse):
-    task_result: Union[CompletionTaskResponse, None] = Field(
+class SummaryTaskResponse(CompletionTaskResponseBase):
+    result: Union[str, None] = Field(
+        title="Summary results",
+        description="Summarized text"
+    )
+
+
+class CleanupTaskResponse(CompletionTaskResponseBase):
+    result: Union[CleanupResponseDict, None] = Field(
+        title="Cleanup results",
+        description="Cleaned-up text"
+    )
+
+
+class SummaryResponse(TaskStatusResponse):
+    task_result: Union[SummaryTaskResponse, None] = Field(
         title="Summarization response",
         description="A dict containing the resulting summarized text and a success flag."
     )
 
 
-class CompletionDebugResponse(TaskStatusResponse):
-    task_result: Union[CompletionDebugTaskResponse, None] = Field(
+class CleanupResponse(TaskStatusResponse):
+    task_result: Union[CleanupTaskResponse, None] = Field(
         title="Summarization response",
         description="A dict containing the resulting summarized text and a success flag."
     )

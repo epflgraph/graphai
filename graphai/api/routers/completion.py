@@ -6,7 +6,8 @@ from graphai.api.schemas.common import TaskIDResponse
 from graphai.api.schemas.completion import (
     SummarizationRequest,
     CleanupRequest,
-    CompletionDebugResponse,
+    SummaryResponse,
+    CleanupResponse,
     SummaryFingerprintRequest,
     SummaryFingerprintResponse
 )
@@ -214,9 +215,9 @@ async def clean_up(data: CleanupRequest):
     return {'task_id': tasks.id}
 
 
-@router.get('/title/status/{task_id}', response_model=CompletionDebugResponse)
-@router.get('/summary/status/{task_id}', response_model=CompletionDebugResponse)
-@router.get('/cleanup/status/{task_id}', response_model=CompletionDebugResponse)
+@router.get('/title/status/{task_id}', response_model=SummaryResponse)
+@router.get('/summary/status/{task_id}', response_model=SummaryResponse)
+@router.get('/cleanup/status/{task_id}', response_model=CleanupResponse)
 async def summarize_status(task_id):
     full_results = get_task_info(task_id)
     task_results = full_results['results']

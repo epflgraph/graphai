@@ -84,6 +84,7 @@ def summarization_retrieve_text_fingerprint_callback_task(self, results):
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='text_6.completion_text_db_lookup', ignore_result=False)
 def lookup_text_completion_task(self, token, text, force=False):
+    s = None
     if not force:
         db_manager = CompletionDBCachingManager()
         # The token is [text md5]_[text type]_[summary type]_[len class]_[tone] for summary/title generation
@@ -96,15 +97,11 @@ def lookup_text_completion_task(self, token, text, force=False):
                         s = json.loads(existing['completion'])
                     else:
                         s = existing['completion']
-                    return {
-                        'token': token,
-                        'text': text,
-                        'existing_results': s
-                    }
+                    break
     return {
         'token': token,
         'text': text,
-        'existing_results': None
+        'existing_results': s
     }
 
 
@@ -289,7 +286,9 @@ def cleanup_text_task(self, token_and_text, text_type='text', result_type='clean
     summarizer = ChatGPTSummarizer()
     results, message, too_many_tokens, n_tokens_total = summarizer.cleanup_text(
         text, text_type=text_type, handwriting=True)
-    results = {'subject': results['subject'], 'text': results['cleaned']}
+    if results is not None:
+        results = {'subject': results['subject'], 'text': results['cleaned'],
+                   'for_wikify': f'{results["subject"]}\n\n{results["cleaned"]}'}
     if not debug:
         message = None
     return {
