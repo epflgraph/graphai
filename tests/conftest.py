@@ -6,6 +6,6 @@ from fixtures.translation import *
 
 from fixtures.video import *
 
-from fixtures.summarization import *
+from fixtures.completion import *
 
 from fixtures.scraping import *
