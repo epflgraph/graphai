@@ -315,8 +315,6 @@ class CompletionDBCachingManager(DBCachingManagerBase):
               `input_type` VARCHAR(255) DEFAULT NULL,
               `completion` LONGTEXT DEFAULT NULL,
               `completion_type` VARCHAR(10) DEFAULT NULL,
-              `completion_len_class` VARCHAR(10) DEFAULT NULL,
-              `completion_tone` VARCHAR(10) DEFAULT NULL,
               `completion_length` INT DEFAULT NULL,
               `completion_token_total` INT DEFAULT NULL,
               `completion_cost` FLOAT DEFAULT NULL,

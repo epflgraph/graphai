@@ -23,20 +23,6 @@ class SummaryFingerprintRequest(BaseModel):
         default="text"
     )
 
-    len_class: Literal['vshort', 'short', 'normal'] = Field(
-        title="Length class",
-        description="Whether the summary is to be one sentence (vshort), two sentences (short), "
-                    "or without a sentence count limit (normal). Default is 'normal'.",
-        default="normal"
-    )
-
-    tone: Literal['info', 'promo'] = Field(
-        title="Tone of the summary",
-        description="What tone to use in the summarization. Defaults to 'info', which is an informative tone. "
-                    "'promo' results in a marketing tone.",
-        default="info"
-    )
-
     force: bool = Field(
         title="Force recomputation",
         default=False
@@ -87,25 +73,11 @@ class SummarizationRequest(BaseModel):
         default="text"
     )
 
-    len_class: Literal['vshort', 'short', 'normal'] = Field(
-        title="Length class",
-        description="Whether the summary is to be one sentence (vshort), two sentences (short), "
-                    "or without a sentence count limit (normal). Default is 'normal'.",
-        default="normal"
-    )
-
     use_keywords: bool = Field(
         title="Use keywords",
         description="Whether to use keywords for summarization or to "
                     "use the raw text, default true (keywords are used).",
         default=False
-    )
-
-    tone: Literal['info', 'promo'] = Field(
-        title="Tone of the summary",
-        description="What tone to use in the summarization. Defaults to 'info', which is an informative tone. "
-                    "'promo' results in a marketing tone.",
-        default="info"
     )
 
     force: bool = Field(

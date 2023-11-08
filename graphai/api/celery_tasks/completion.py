@@ -19,7 +19,7 @@ def compute_summarization_text_fingerprint_task(self, token, text, force=False):
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='text_6.fingerprint_completion_text_callback', ignore_result=False)
 def compute_summarization_text_fingerprint_callback_task(self, results, text, text_type,
-                                                         summary_type, len_class, tone):
+                                                         summary_type):
     if results['fresh']:
         token = results['fp_token']
         db_manager = CompletionDBCachingManager()
@@ -27,9 +27,7 @@ def compute_summarization_text_fingerprint_callback_task(self, results, text, te
             'fingerprint': results['result'],
             'input_text': force_dict_to_text(text),
             'input_type': text_type,
-            'completion_type': summary_type,
-            'completion_len_class': len_class,
-            'completion_tone': tone
+            'completion_type': summary_type
         }
         existing = db_manager.get_details(token, ['date_added'], using_most_similar=False)[0]
         if existing is None or existing['date_added'] is None:
@@ -87,8 +85,7 @@ def lookup_text_completion_task(self, token, text, force=False):
     s = None
     if not force:
         db_manager = CompletionDBCachingManager()
-        # The token is [text md5]_[text type]_[summary type]_[len class]_[tone] for summary/title generation
-        # and [text md5]_[text type]_[summary type] for cleanup
+        # The token is [text md5]_[text type]_[summary type]
         all_existing = db_manager.get_details(token, cols=['completion', 'is_json'], using_most_similar=True)
         for existing in all_existing:
             if existing is not None:
@@ -128,9 +125,7 @@ def get_keywords_for_summarization_task(self, input_dict, use_keywords=True):
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='text_6.summarize_text_chatgpt_compute', ignore_result=False)
-def summarize_text_task(self, token_and_text, text_type='text', summary_type='summary',
-                        len_class='normal', tone='info', debug=False,
-                        title_len=20, summary_len=100):
+def summarize_text_task(self, token_and_text, text_type='text', summary_type='summary', debug=False):
     existing_results = token_and_text['existing_results']
     token = token_and_text['token']
     text = token_and_text['text']
@@ -143,8 +138,6 @@ def summarize_text_task(self, token_and_text, text_type='text', summary_type='su
             'result': None,
             'result_type': None,
             'text_type': None,
-            'len_class': None,
-            'tone': None,
             'fresh': False,
             'successful': False,
             'too_many_tokens': False,
@@ -160,8 +153,6 @@ def summarize_text_task(self, token_and_text, text_type='text', summary_type='su
             'result': existing_results,
             'result_type': summary_type,
             'text_type': text_type,
-            'len_class': len_class,
-            'tone': tone,
             'fresh': False,
             'successful': True,
             'too_many_tokens': False,
@@ -170,8 +161,7 @@ def summarize_text_task(self, token_and_text, text_type='text', summary_type='su
         }
     summarizer = ChatGPTSummarizer()
     results, message, too_many_tokens, n_tokens_total = summarizer.generate_summary(
-        text, text_type=text_type, summary_type=summary_type, len_class=len_class, tone=tone,
-        max_normal_len=title_len if summary_type == 'title' else summary_len)
+        text, text_type=text_type, summary_type=summary_type)
     if not debug:
         message = None
     return {
@@ -181,8 +171,6 @@ def summarize_text_task(self, token_and_text, text_type='text', summary_type='su
         'result': results,
         'result_type': summary_type,
         'text_type': text_type,
-        'len_class': len_class,
-        'tone': tone,
         'fresh': results is not None,
         'successful': results is not None,
         'too_many_tokens': too_many_tokens,
@@ -200,8 +188,6 @@ def completion_text_callback_task(self, results, force=False):
     completion = results['result']
     completion_type = results['result_type']
     text_type = results['text_type']
-    len_class = results['len_class']
-    tone = results['tone']
     n_tokens_total = results['n_tokens_total']
     if results['fresh']:
         if isinstance(completion, dict):
@@ -214,8 +200,6 @@ def completion_text_callback_task(self, results, force=False):
             'completion': completion,
             'completion_type': completion_type,
             'input_type': text_type,
-            'completion_len_class': len_class,
-            'completion_tone': tone,
             'completion_length': len(completion.split(' ')),
             'completion_token_total': n_tokens_total['total_tokens'],
             'completion_cost': n_tokens_total['cost'],
@@ -258,8 +242,6 @@ def cleanup_text_task(self, token_and_text, text_type='text', result_type='clean
             'result': None,
             'result_type': None,
             'text_type': None,
-            'len_class': None,
-            'tone': None,
             'fresh': False,
             'successful': False,
             'too_many_tokens': False,
@@ -275,8 +257,6 @@ def cleanup_text_task(self, token_and_text, text_type='text', result_type='clean
             'result': existing_results,
             'result_type': result_type,
             'text_type': text_type,
-            'len_class': None,
-            'tone': None,
             'fresh': False,
             'successful': True,
             'too_many_tokens': False,
@@ -298,8 +278,6 @@ def cleanup_text_task(self, token_and_text, text_type='text', result_type='clean
         'result': results,
         'result_type': result_type,
         'text_type': text_type,
-        'len_class': None,
-        'tone': None,
         'fresh': results is not None,
         'successful': results is not None,
         'too_many_tokens': too_many_tokens,
