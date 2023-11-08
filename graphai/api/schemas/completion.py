@@ -5,18 +5,19 @@ from graphai.api.schemas.common import TaskStatusResponse
 
 
 class SummaryFingerprintRequest(BaseModel):
-    text: Union[str, Dict[str, str]] = Field(
+    text: Union[str, Dict[str, str], Dict[int, List[str]]] = Field(
         title="Text",
-        description="Text to summarize. Can be one string or a string to string dictionary."
+        description="Text to summarize. Can be one string (generic), a string to string dictionary, "
+                    "or an integer to list of strings dictionary (lecture summarization)."
     )
 
-    completion_type: Literal['title', 'summary'] = Field(
+    completion_type: Literal['cleanup', 'summary'] = Field(
         title="Summary type",
         description="Whether the summarization to be performed is title or summary generation",
         default='summary'
     )
 
-    text_type: Literal['person', 'unit', 'concept', 'course', 'lecture', 'MOOC', 'text'] = Field(
+    text_type: Literal['lecture', 'slide', 'academic_entity', 'text'] = Field(
         title="Text type",
         description="What the text being summarized describes/comes from. Defaults to 'text', which results in "
                     "generic summarization behavior.",

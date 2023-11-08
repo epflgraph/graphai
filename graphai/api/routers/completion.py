@@ -162,29 +162,6 @@ async def summarize(data: SummarizationRequest):
     return {'task_id': tasks.id}
 
 
-@router.post('/title', response_model=TaskIDResponse)
-async def create_title(data: SummarizationRequest):
-    text = data.text
-    text_type = data.text_type
-    keywords = data.use_keywords
-    force = data.force
-    debug = data.debug
-
-    token = generate_summary_text_token(text, text_type, 'title')
-    if not force:
-        task_list = get_completion_text_fingerprint_chain_list(token, text, text_type, 'title', force,
-                                                               ignore_fp_results=True, results_to_return=token)
-        skip_token = True
-    else:
-        task_list = []
-        skip_token = False
-    task_list += get_summary_task_chain(token, text, text_type, 'title',
-                                        keywords=keywords, force=force, skip_token=skip_token, debug=debug)
-    tasks = chain(task_list)
-    tasks = tasks.apply_async(priority=6)
-    return {'task_id': tasks.id}
-
-
 @router.post('/cleanup', response_model=TaskIDResponse)
 async def clean_up(data: CleanupRequest):
     text = data.text
@@ -210,7 +187,6 @@ async def clean_up(data: CleanupRequest):
     return {'task_id': tasks.id}
 
 
-@router.get('/title/status/{task_id}', response_model=SummaryResponse)
 @router.get('/summary/status/{task_id}', response_model=SummaryResponse)
 @router.get('/cleanup/status/{task_id}', response_model=CleanupResponse)
 async def summarize_status(task_id):
