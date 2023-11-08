@@ -1,7 +1,20 @@
+import abc
+
 from pydantic import BaseModel, Field
 from typing import Union, Literal, Dict, List
 
 from graphai.api.schemas.common import TaskStatusResponse
+
+
+class SlideConceptsMap(BaseModel):
+    number: int = Field(
+        title="Slide Number"
+    )
+
+    concepts: List[str] = Field(
+        title="Concepts",
+        description="List of concepts for this slide"
+    )
 
 
 class SummaryFingerprintRequest(BaseModel):
@@ -61,49 +74,10 @@ class SummaryFingerprintResponse(TaskStatusResponse):
     )
 
 
-class SummarizationRequest(BaseModel):
-    text: Union[str, Dict[str, str]] = Field(
+class CompletionRequestBase(BaseModel, abc.ABC):
+    text: str = Field(
         title="Text",
-        description="Text to summarize. Can be one string or a string to string dictionary."
-    )
-
-    text_type: Literal['person', 'unit', 'concept', 'course', 'lecture', 'publication', 'MOOC', 'text'] = Field(
-        title="Text type",
-        description="What the text being summarized describes/comes from. Defaults to 'text', which results in "
-                    "generic summarization behavior.",
-        default="text"
-    )
-
-    use_keywords: bool = Field(
-        title="Use keywords",
-        description="Whether to use keywords for summarization or to "
-                    "use the raw text, default true (keywords are used).",
-        default=False
-    )
-
-    force: bool = Field(
-        title="Force recomputation",
-        default=False
-    )
-
-    debug: bool = Field(
-        title="Debug",
-        description="Whether to return the system message sent to ChatGPT",
-        default=False
-    )
-
-
-class CleanupRequest(BaseModel):
-    text: Union[str, Dict[str, str]] = Field(
-        title="Text",
-        description="Text to summarize. Can be one string or a string to string dictionary."
-    )
-
-    text_type: str = Field(
-        title="Text type",
-        description="The source of the text to be cleaned up. Defaults to 'slide', meaning that the text is extracted "
-                    "from a slide using OCR.",
-        default="slide"
+        description="Text of request"
     )
 
     force: bool = Field(
@@ -125,6 +99,35 @@ class CleanupRequest(BaseModel):
     )
 
 
+class LectureSummarizationRequest(CompletionRequestBase):
+    text: List[SlideConceptsMap] = Field(
+        title="Text",
+        description="Text to summarize. Dictionary mapping each slide number to a list of concepts extracted from "
+                    "that slide."
+    )
+
+
+class GenericSummarizationRequest(CompletionRequestBase):
+    text: Union[str, Dict[str, str]] = Field(
+        title="Text",
+        description="Text to summarize. Either a plain string or a string to string dictionary."
+    )
+
+
+class CleanupRequest(CompletionRequestBase):
+    text: Union[str, Dict[str, str]] = Field(
+        title="Text",
+        description="Text to summarize. Can be one string or a string to string dictionary."
+    )
+
+    text_type: str = Field(
+        title="Text type",
+        description="The source of the text to be cleaned up. Defaults to 'slide', meaning that the text is extracted "
+                    "from a slide using OCR.",
+        default="slide"
+    )
+
+
 class CleanupResponseDict(BaseModel):
     subject: str = Field(
         title="Subject matter",
@@ -138,6 +141,20 @@ class CleanupResponseDict(BaseModel):
     for_wikify: str = Field(
         title="Results for /text/wikify endpoint",
         description="The subject matter and cleaned up text combined into one for better concept detection performance"
+    )
+
+
+class SummaryResponseDict(BaseModel):
+    summary_long: str = Field(
+        title="Long summary"
+    )
+
+    summary_short: str = Field(
+        title="Short summary"
+    )
+
+    title: str = Field(
+        title="Title"
     )
 
 
@@ -182,7 +199,7 @@ class CompletionTaskResponseBase(BaseModel):
 
 
 class SummaryTaskResponse(CompletionTaskResponseBase):
-    result: Union[str, None] = Field(
+    result: Union[SummaryResponseDict, None] = Field(
         title="Summary results",
         description="Summarized text"
     )
@@ -206,17 +223,6 @@ class CleanupResponse(TaskStatusResponse):
     task_result: Union[CleanupTaskResponse, None] = Field(
         title="Summarization response",
         description="A dict containing the resulting summarized text and a success flag."
-    )
-
-
-class SlideConceptsMap(BaseModel):
-    number: int = Field(
-        title="Slide Number"
-    )
-
-    concepts: List[str] = Field(
-        title="Concepts",
-        description="List of concepts for this slide"
     )
 
 

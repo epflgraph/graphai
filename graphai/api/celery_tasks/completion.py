@@ -98,18 +98,17 @@ def lookup_text_completion_task(self, token, text, force=False):
     return {
         'token': token,
         'text': text,
+        'original_text': force_dict_to_text(text),
         'existing_results': s
     }
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='text_6.summarize_text_get_keywords', ignore_result=False)
-def get_keywords_for_summarization_task(self, input_dict, use_keywords=True):
+def get_keywords_for_summarization_task(self, input_dict):
     existing_results = input_dict['existing_results']
     text = input_dict['text']
-    input_dict['original_text'] = force_dict_to_text(text)
-    if existing_results is not None or not use_keywords or text is None or len(text) == 0:
-        input_dict['is_keywords'] = False
+    if existing_results is not None or text is None or len(text) == 0:
         return input_dict
     if isinstance(text, dict):
         new_text = {k: ', '.join(get_keywords(v)) for k, v in text.items()}
@@ -117,66 +116,7 @@ def get_keywords_for_summarization_task(self, input_dict, use_keywords=True):
         new_text = ', '.join(get_keywords(text))
     if len(new_text) > 0:
         input_dict['text'] = new_text
-        input_dict['is_keywords'] = True
-    else:
-        input_dict['is_keywords'] = False
     return input_dict
-
-
-@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='text_6.summarize_text_chatgpt_compute', ignore_result=False)
-def summarize_text_task(self, token_and_text, text_type='text', summary_type='summary', debug=False):
-    existing_results = token_and_text['existing_results']
-    token = token_and_text['token']
-    text = token_and_text['text']
-    original_text = token_and_text.get('original_text', text)
-    if text is None or len(text) == 0:
-        result_dict = {
-            'token': token,
-            'text': text,
-            'original_text': original_text,
-            'result': None,
-            'result_type': None,
-            'text_type': None,
-            'fresh': False,
-            'successful': False,
-            'too_many_tokens': False,
-            'n_tokens_total': None,
-            'full_message': None
-        }
-        return result_dict
-    if existing_results is not None:
-        return {
-            'token': token,
-            'text': text,
-            'original_text': original_text,
-            'result': existing_results,
-            'result_type': summary_type,
-            'text_type': text_type,
-            'fresh': False,
-            'successful': True,
-            'too_many_tokens': False,
-            'n_tokens_total': None,
-            'full_message': None
-        }
-    summarizer = ChatGPTSummarizer()
-    results, message, too_many_tokens, n_tokens_total = summarizer.generate_summary(
-        text, text_type=text_type, summary_type=summary_type)
-    if not debug:
-        message = None
-    return {
-        'token': token,
-        'text': text,
-        'original_text': original_text,
-        'result': results,
-        'result_type': summary_type,
-        'text_type': text_type,
-        'fresh': results is not None,
-        'successful': results is not None,
-        'too_many_tokens': too_many_tokens,
-        'n_tokens_total': n_tokens_total,
-        'full_message': message
-    }
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
@@ -228,12 +168,13 @@ def completion_text_callback_task(self, results, force=False):
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='text_6.cleanup_text_chatgpt_compute', ignore_result=False)
-def cleanup_text_task(self, token_and_text, text_type='text', result_type='cleanup', debug=False):
+             name='text_6.completion_text_chatgpt_compute', ignore_result=False)
+def request_text_completion_task(self, token_and_text, text_type='text', result_type='cleanup', debug=False):
+    assert result_type in ['summary', 'cleanup']
     existing_results = token_and_text['existing_results']
     token = token_and_text['token']
     text = token_and_text['text']
-    original_text = text
+    original_text = token_and_text.get('original_text', text)
     if text is None or len(text) == 0:
         result_dict = {
             'token': token,
@@ -264,11 +205,24 @@ def cleanup_text_task(self, token_and_text, text_type='text', result_type='clean
             'full_message': None
         }
     summarizer = ChatGPTSummarizer()
-    results, message, too_many_tokens, n_tokens_total = summarizer.cleanup_text(
-        text, text_type=text_type, handwriting=True)
-    if results is not None:
-        results = {'subject': results['subject'], 'text': results['cleaned'],
-                   'for_wikify': f'{results["subject"]}\n\n{results["cleaned"]}'}
+    if result_type == 'cleanup':
+        # Cleanup
+        results, message, too_many_tokens, n_tokens_total = summarizer.cleanup_text(
+            text, text_type=text_type, handwriting=True)
+        if results is not None:
+            results = {'subject': results['subject'], 'text': results['cleaned'],
+                       'for_wikify': f'{results["subject"]}\n\n{results["cleaned"]}'}
+    else:
+        # Summary
+        if text_type == 'lecture':
+            fn = summarizer.summarize_lecture
+        else:
+            fn = summarizer.summarize_generic
+        results, message, too_many_tokens, n_tokens_total = fn(text)
+        if results is not None:
+            results = {'summary_long': results['summary_long'],
+                       'summary_short': results['summary_short'],
+                       'title': results['title']}
     if not debug:
         message = None
     return {
@@ -307,7 +261,7 @@ def simulate_cleanup_task(self, text, text_type='text', result_type='cleanup'):
              name='text_6.choose_best_subset', ignore_result=False)
 def choose_best_subset_task(self, slide_number_to_concepts, coverage=1.0, min_freq=2):
     slide_numbers = sorted(list(slide_number_to_concepts.keys()))
-    slide_concept_list = [slide_number_to_concepts[n]['concepts'] for n in slide_numbers]
+    slide_concept_list = [slide_number_to_concepts[n] for n in slide_numbers]
     cover, best_indices = find_best_slide_subset(slide_concept_list, coverage, True, min_freq)
     return {
         'subset': [slide_numbers[i] for i in best_indices]

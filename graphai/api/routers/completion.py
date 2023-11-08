@@ -4,7 +4,8 @@ from celery import group, chain
 from graphai.api.schemas.common import TaskIDResponse
 
 from graphai.api.schemas.completion import (
-    SummarizationRequest,
+    LectureSummarizationRequest,
+    GenericSummarizationRequest,
     CleanupRequest,
     SummaryResponse,
     CleanupResponse,
@@ -29,9 +30,8 @@ from graphai.api.celery_tasks.completion import (
     summarization_retrieve_text_fingerprint_callback_task,
     lookup_text_completion_task,
     get_keywords_for_summarization_task,
-    summarize_text_task,
     completion_text_callback_task,
-    cleanup_text_task,
+    request_text_completion_task,
     simulate_cleanup_task,
     choose_best_subset_task
 )
@@ -81,17 +81,16 @@ def get_completion_text_fingerprint_chain_list(token, text, text_type, completio
     return task_list
 
 
-def get_summary_task_chain(token, text, text_type, summary_type,
-                           keywords=True, force=False, skip_token=False, debug=False):
+def get_completion_task_chain(token, text, text_type, result_type,
+                              keywords=True, force=False, skip_token=False, debug=False):
     if skip_token:
         task_list = [lookup_text_completion_task.s(text, force)]
     else:
         task_list = [lookup_text_completion_task.s(token, text, force)]
-    task_list += [
-        get_keywords_for_summarization_task.s(keywords),
-        summarize_text_task.s(text_type, summary_type, debug),
-        completion_text_callback_task.s(force)
-    ]
+    if keywords:
+        task_list.append(get_keywords_for_summarization_task.s())
+    task_list.append(request_text_completion_task.s(text_type, result_type, debug))
+    task_list.append(completion_text_callback_task.s(force))
     return task_list
 
 
@@ -102,7 +101,7 @@ def get_cleanup_task_chain(token, text, text_type, result_type='cleanup',
     else:
         task_list = [lookup_text_completion_task.s(token, text, force)]
     task_list += [
-        cleanup_text_task.s(text_type, result_type, debug),
+        request_text_completion_task.s(text_type, result_type, debug),
         completion_text_callback_task.s(force)
     ]
     return task_list
@@ -139,11 +138,11 @@ async def calculate_summary_text_fingerprint_status(task_id):
     return format_api_results(full_results['id'], full_results['name'], full_results['status'], task_results)
 
 
-@router.post('/summary', response_model=TaskIDResponse)
-async def summarize(data: SummarizationRequest):
+@router.post('/summary/lecture', response_model=TaskIDResponse)
+async def summarize_lecture(data: LectureSummarizationRequest):
     text = data.text
-    text_type = data.text_type
-    keywords = data.use_keywords
+    text = {slide.number: slide.concepts for slide in text}
+    text_type = 'lecture'
     force = data.force
     debug = data.debug
 
@@ -155,8 +154,30 @@ async def summarize(data: SummarizationRequest):
     else:
         task_list = []
         skip_token = False
-    task_list += get_summary_task_chain(token, text, text_type, 'summary',
-                                        keywords=keywords, force=force, skip_token=skip_token, debug=debug)
+    task_list += get_completion_task_chain(token, text, text_type, 'summary',
+                                           keywords=False, force=force, skip_token=skip_token, debug=debug)
+    tasks = chain(task_list)
+    tasks = tasks.apply_async(priority=6)
+    return {'task_id': tasks.id}
+
+
+@router.post('/summary/generic', response_model=TaskIDResponse)
+async def summarize_text(data: GenericSummarizationRequest):
+    text = data.text
+    text_type = 'text'
+    force = data.force
+    debug = data.debug
+
+    token = generate_summary_text_token(text, text_type, 'summary')
+    if not force:
+        task_list = get_completion_text_fingerprint_chain_list(token, text, text_type, 'summary', force,
+                                                               ignore_fp_results=True, results_to_return=token)
+        skip_token = True
+    else:
+        task_list = []
+        skip_token = False
+    task_list += get_completion_task_chain(token, text, text_type, 'summary',
+                                           keywords=False, force=force, skip_token=skip_token, debug=debug)
     tasks = chain(task_list)
     tasks = tasks.apply_async(priority=6)
     return {'task_id': tasks.id}
@@ -169,6 +190,7 @@ async def clean_up(data: CleanupRequest):
     force = data.force
     debug = data.debug
     simulate = data.simulate
+
     if not simulate:
         token = generate_summary_text_token(text, text_type, 'cleanup')
         if not force:
@@ -178,8 +200,8 @@ async def clean_up(data: CleanupRequest):
         else:
             task_list = []
             skip_token = False
-        task_list += get_cleanup_task_chain(token, text, text_type, 'cleanup',
-                                            force=force, skip_token=skip_token, debug=debug)
+        task_list += get_completion_task_chain(token, text, text_type, 'cleanup',
+                                               keywords=False, force=force, skip_token=skip_token, debug=debug)
     else:
         task_list = [simulate_cleanup_task.s(text, text_type, 'cleanup')]
     tasks = chain(task_list)
@@ -187,7 +209,8 @@ async def clean_up(data: CleanupRequest):
     return {'task_id': tasks.id}
 
 
-@router.get('/summary/status/{task_id}', response_model=SummaryResponse)
+@router.get('/summary/lecture/status/{task_id}', response_model=SummaryResponse)
+@router.get('/summary/generic/status/{task_id}', response_model=SummaryResponse)
 @router.get('/cleanup/status/{task_id}', response_model=CleanupResponse)
 async def summarize_status(task_id):
     full_results = get_task_info(task_id)
@@ -215,7 +238,7 @@ async def summarize_status(task_id):
 @router.post('/subset', response_model=SlideSubsetResponse)
 async def choose_best_subset(data: SlideSubsetRequest):
     slides_and_concepts = data.slides
-    slides_and_concepts = {slide.number: {'concepts': slide.concepts} for slide in slides_and_concepts}
+    slides_and_concepts = {slide.number: slide.concepts for slide in slides_and_concepts}
     coverage = data.coverage
     min_freq = data.min_freq
     task_list = [choose_best_subset_task.s(slides_and_concepts, coverage, min_freq)]
