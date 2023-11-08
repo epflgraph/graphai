@@ -17,7 +17,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 
 from graphai.definitions import CONFIG_DIR
 from graphai.core.common.json_repair.json_repair import repair_json
-from graphai.core.common.gpt_message_presets import generate_lecture_summary_message
+from graphai.core.common.gpt_message_presets import generate_lecture_summary_message, generate_generic_summary_message
 
 TRANSLATION_LIST_SEPARATOR = ' [{[!!SEP!!]}] '
 CHATGPT_COSTS_PER_1K = {
@@ -207,9 +207,9 @@ def force_dict_to_text(t):
 
 
 def generate_summary_text_token(text, text_type='text', summary_type='summary'):
-    assert summary_type in ['summary', 'title', 'cleanup']
-    if summary_type == 'title' or summary_type == 'summary':
-        assert text_type in ['person', 'unit', 'concept', 'course', 'lecture', 'MOOC', 'publication', 'text']
+    assert summary_type in ['summary', 'cleanup']
+    if summary_type == 'summary':
+        assert text_type in ['lecture', 'academic_entity', 'text']
 
     text = force_dict_to_text(text)
     token = md5_text(text) + '_' + text_type + '_' + summary_type
@@ -355,13 +355,7 @@ class ChatGPTSummarizer:
         token_count_dict['cost'] = cost
         return final_result, False, token_count_dict
 
-    def summarize_lecture(self, slide_to_concepts, long_len=200, short_len=50, title_len=10,
-                          temperature=1.0, top_p=0.3, simulate=False):
-        system_message = generate_lecture_summary_message(long_len, short_len, title_len)
-        slide_to_concepts = {k: v for k, v in slide_to_concepts.items() if len(v) > 0}
-        slide_numbers_sorted = sorted(list(slide_to_concepts.keys()))
-        text = '\n\n'.join([f'Slide {i}: ' + '; '.join(slide_to_concepts[i]) for i in slide_numbers_sorted])
-        print(text)
+    def _summarize(self, text, system_message, temperature=1.0, top_p=0.3, simulate=False):
         results, too_many_tokens, n_total_tokens = \
             self._generate_completion(text, system_message, temperature=temperature, top_p=top_p, simulate=simulate,
                                       timeout=20)
@@ -377,6 +371,21 @@ class ChatGPTSummarizer:
 
         return results, system_message, too_many_tokens, token_count
 
+    def summarize_generic(self, text, long_len=200, short_len=50, title_len=10,
+                          temperature=1.0, top_p=0.3, simulate=False):
+        assert isinstance(text, str) or isinstance(text, dict)
+        system_message = generate_generic_summary_message(long_len, short_len, title_len)
+        text = convert_text_or_dict_to_text(text)
+        return self._summarize(text, system_message, temperature, top_p, simulate)
+
+    def summarize_lecture(self, slide_to_concepts, long_len=200, short_len=50, title_len=10,
+                          temperature=1.0, top_p=0.3, simulate=False):
+        assert isinstance(slide_to_concepts, dict)
+        system_message = generate_lecture_summary_message(long_len, short_len, title_len)
+        slide_to_concepts = {k: v for k, v in slide_to_concepts.items() if len(v) > 0}
+        slide_numbers_sorted = sorted(list(slide_to_concepts.keys()))
+        text = '\n\n'.join([f'Slide {i}: ' + '; '.join(slide_to_concepts[i]) for i in slide_numbers_sorted])
+        return self._summarize(text, system_message, temperature, top_p, simulate)
 
     def generate_summary(self, text_or_dict, text_type='lecture', summary_type='summary',
                          len_class='normal', tone='info', max_normal_len=100, max_short_len=40):
