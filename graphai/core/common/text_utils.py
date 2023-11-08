@@ -17,6 +17,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 
 from graphai.definitions import CONFIG_DIR
 from graphai.core.common.json_repair.json_repair import repair_json
+from graphai.core.common.gpt_message_presets import generate_lecture_summary_message
 
 TRANSLATION_LIST_SEPARATOR = ' [{[!!SEP!!]}] '
 CHATGPT_COSTS_PER_1K = {
@@ -205,32 +206,21 @@ def force_dict_to_text(t):
     return t
 
 
-def generate_summary_text_token(text, text_type='text', summary_type='summary', len_class='normal', tone='info'):
+def generate_summary_text_token(text, text_type='text', summary_type='summary'):
     assert summary_type in ['summary', 'title', 'cleanup']
     if summary_type == 'title' or summary_type == 'summary':
         assert text_type in ['person', 'unit', 'concept', 'course', 'lecture', 'MOOC', 'publication', 'text']
-    assert len_class in ['vshort', 'short', 'normal', None]
-    assert tone in ['info', 'promo', None]
 
     text = force_dict_to_text(text)
     token = md5_text(text) + '_' + text_type + '_' + summary_type
-    if len_class is not None:
-        token += '_' + len_class
-    if tone is not None:
-        token += '_' + tone
     return token
 
 
-def generate_completion_type_dict(text_type, completion_type, len_class, tone):
-    d = {
+def generate_completion_type_dict(text_type, completion_type):
+    return {
         'input_type': text_type,
         'completion_type': completion_type
     }
-    if len_class is not None:
-        d['completion_len_class'] = len_class
-    if tone is not None:
-        d['completion_tone'] = tone
-    return d
 
 
 def convert_text_or_dict_to_text(text_or_dict):
@@ -364,6 +354,29 @@ class ChatGPTSummarizer:
         cost = compute_chatgpt_request_cost(token_count_dict, model_type)
         token_count_dict['cost'] = cost
         return final_result, False, token_count_dict
+
+    def summarize_lecture(self, slide_to_concepts, long_len=200, short_len=50, title_len=10,
+                          temperature=1.0, top_p=0.3, simulate=False):
+        system_message = generate_lecture_summary_message(long_len, short_len, title_len)
+        slide_to_concepts = {k: v for k, v in slide_to_concepts.items() if len(v) > 0}
+        slide_numbers_sorted = sorted(list(slide_to_concepts.keys()))
+        text = '\n\n'.join([f'Slide {i}: ' + '; '.join(slide_to_concepts[i]) for i in slide_numbers_sorted])
+        print(text)
+        results, too_many_tokens, n_total_tokens = \
+            self._generate_completion(text, system_message, temperature=temperature, top_p=top_p, simulate=simulate,
+                                      timeout=20)
+        token_count = n_total_tokens
+        if results is None:
+            return None, system_message, too_many_tokens, token_count
+
+        # Making sure the results are in a valid JSON format
+        results, message_chain, too_many_tokens, n_total_tokens = \
+            self.make_sure_json_is_valid(results, [text], system_message,
+                                         temperature=temperature, top_p=top_p)
+        token_count = update_token_count(token_count, token_count)
+
+        return results, system_message, too_many_tokens, token_count
+
 
     def generate_summary(self, text_or_dict, text_type='lecture', summary_type='summary',
                          len_class='normal', tone='info', max_normal_len=100, max_short_len=40):
@@ -533,7 +546,7 @@ class ChatGPTSummarizer:
         results = ':'.join(results.split(':')[1:]).strip().strip('"')
         return results, system_message, too_many_tokens, n_total_tokens
 
-    def make_sure_json_is_valid(self, results, messages, system_message, temperature=1, top_p=0.3,
+    def make_sure_json_is_valid(self, results, messages, system_message, temperature=1.0, top_p=0.3,
                                 n_retries=1):
         # Trying to directly parse the JSON...
         try:
