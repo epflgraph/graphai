@@ -18,7 +18,7 @@ class SlideConceptsMap(BaseModel):
 
 
 class SummaryFingerprintRequest(BaseModel):
-    text: Union[str, Dict[str, str], Dict[int, List[str]]] = Field(
+    text: Union[str, Dict[str, str], List[SlideConceptsMap]] = Field(
         title="Text",
         description="Text to summarize. Can be one string (generic), a string to string dictionary, "
                     "or an integer to list of strings dictionary (lecture summarization)."

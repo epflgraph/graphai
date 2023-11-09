@@ -4,7 +4,8 @@ import pytest
 from unittest.mock import patch
 from time import sleep
 
-from graphai.api.celery_tasks.completion import summarize_text_task, compute_summarization_text_fingerprint_task
+from graphai.api.celery_tasks.completion import request_text_completion_task, \
+    compute_summarization_text_fingerprint_task
 
 ################################################################
 # /completion/summary                                       #
@@ -12,14 +13,14 @@ from graphai.api.celery_tasks.completion import summarize_text_task, compute_sum
 ################################################################
 
 
-@patch('graphai.api.celery_tasks.completion.summarize_text_task.run')
+@patch('graphai.api.celery_tasks.completion.request_text_completion_task.run')
 @pytest.mark.usefixtures('transcript_text')
 def test__summarization_summary__summarize_text__mock_task(mock_run, transcript_text):
     # Mock calling the task
-    summarize_text_task.run(transcript_text)
+    request_text_completion_task.run(transcript_text)
 
     # Assert that the task has been called
-    assert summarize_text_task.run.call_count == 1
+    assert request_text_completion_task.run.call_count == 1
 
 
 ################################################################
@@ -34,13 +35,15 @@ def test__summarization_summary__summarize_text__run_task(transcript_text):
         'text': transcript_text,
         'original_text': transcript_text
     }
-    summary_transcript = summarize_text_task.run(token_and_text, 'lecture', 'summary')
+    summary_transcript = request_text_completion_task.run(token_and_text, 'text', 'summary')
 
     # Assert that the results are correct
     assert isinstance(summary_transcript, dict)
     assert 'result' in summary_transcript
+    assert 'summary_long' in summary_transcript['result'] and 'summary_short' in summary_transcript['result'] and \
+           'title' in summary_transcript['result']
     assert summary_transcript['successful'] is True
-    summary_text = summary_transcript['result'].lower()
+    summary_text = summary_transcript['result']['summary_long'].lower()
     assert 'lecture' in summary_text
     assert 'digital circuit' in summary_text
     assert 'simulation' in summary_text or 'simulator' in summary_text
@@ -58,13 +61,15 @@ def test__summarization_title__summarize_text__run_task(ocr_text):
         'text': ocr_text,
         'original_text': ocr_text
     }
-    title_ocr = summarize_text_task.run(token_and_text, 'lecture', 'title')
+    title_ocr = request_text_completion_task.run(token_and_text, 'slide', 'summary')
 
     # Assert that the results are correct
     assert isinstance(title_ocr, dict)
     assert 'result' in title_ocr
+    assert 'summary_long' in title_ocr['result'] and 'summary_short' in title_ocr['result'] and \
+           'title' in title_ocr['result']
     assert title_ocr['successful'] is True
-    title_text = title_ocr['result'].lower()
+    title_text = title_ocr['result']['summary_long'].lower()
     assert 'simulation' in title_text or 'simulator' in title_text
     assert 'digital' in title_text or 'discrete' in title_text or 'circuit' in title_text
 
@@ -73,14 +78,15 @@ def test__summarization_title__summarize_text__run_task(ocr_text):
 
 
 @pytest.mark.celery(accept_content=['pickle', 'json'], result_serializer='pickle', task_serializer='pickle')
-@pytest.mark.usefixtures('transcript_text')
-def test__summarization_summary__summarize_text__integration(fixture_app, celery_worker, transcript_text, timeout=30):
+@pytest.mark.usefixtures('slides_and_clean_concepts')
+def test__summarization_summary__summarize_text__integration(fixture_app, celery_worker, slides_and_clean_concepts,
+                                                             timeout=30):
     # The celery_worker object is necessary for async tasks, otherwise the status will be permanently stuck on
     # PENDING.
 
     # First, we call the summary endpoint with force=True to test the full task pipeline working
-    response = fixture_app.post('/completion/summary',
-                                data=json.dumps({"text": transcript_text, "text_type": "lecture",
+    response = fixture_app.post('/completion/summary/lecture',
+                                data=json.dumps({"text": slides_and_clean_concepts,
                                                  "force": True}),
                                 timeout=timeout)
     # Check status code is successful
@@ -95,13 +101,13 @@ def test__summarization_summary__summarize_text__integration(fixture_app, celery
         # Wait a few seconds
         sleep(3)
         # Now get status
-        response = fixture_app.get(f'/completion/summary/status/{task_id}',
+        response = fixture_app.get(f'/completion/summary/lecture/status/{task_id}',
                                    timeout=timeout)
         current_status = response.json()['task_status']
         n_tries += 1
 
     # Now get status
-    response = fixture_app.get(f'/completion/summary/status/{task_id}',
+    response = fixture_app.get(f'/completion/summary/lecture/status/{task_id}',
                                timeout=timeout)
     # Parse result
     summary_results = response.json()
@@ -111,18 +117,17 @@ def test__summarization_summary__summarize_text__integration(fixture_app, celery
     assert summary_results['task_status'] == 'SUCCESS'
     assert summary_results['task_result']['successful'] is True
     assert summary_results['task_result']['fresh'] is True
-    summary_text = summary_results['task_result']['result'].lower()
+    summary_text = summary_results['task_result']['result']['summary_long'].lower()
     assert 'lecture' in summary_text
-    assert 'digital circuit' in summary_text or 'discrete event' in summary_text
-    assert 'simulation' in summary_text or 'simulator' in summary_text
+    assert 'climate change' in summary_text and 'ice caps' in summary_text and 'model' in summary_text
     assert summary_results['task_result']['result_type'] == 'summary'
     original_summary = summary_text
 
     ################################################
 
     # Now, we call the summary endpoint again with the same input to make sure the caching works correctly
-    response = fixture_app.post('/completion/summary',
-                                data=json.dumps({"text": transcript_text, "text_type": "lecture",
+    response = fixture_app.post('/completion/summary/lecture',
+                                data=json.dumps({"text": slides_and_clean_concepts,
                                                  "force": False}),
                                 timeout=timeout)
     # Check status code is successful
@@ -137,13 +142,13 @@ def test__summarization_summary__summarize_text__integration(fixture_app, celery
         # Wait a few seconds
         sleep(3)
         # Now get status
-        response = fixture_app.get(f'/completion/summary/status/{task_id}',
+        response = fixture_app.get(f'/completion/summary/lecture/status/{task_id}',
                                    timeout=timeout)
         current_status = response.json()['task_status']
         n_tries += 1
 
     # Now get status
-    response = fixture_app.get(f'/completion/summary/status/{task_id}',
+    response = fixture_app.get(f'/completion/summary/lecture/status/{task_id}',
                                timeout=timeout)
     # Parse result
     summary_results = response.json()
@@ -153,7 +158,7 @@ def test__summarization_summary__summarize_text__integration(fixture_app, celery
     assert summary_results['task_status'] == 'SUCCESS'
     assert summary_results['task_result']['successful'] is True
     assert summary_results['task_result']['fresh'] is False
-    assert summary_results['task_result']['result'].lower() == original_summary
+    assert summary_results['task_result']['result']['summary_long'].lower() == original_summary
 
 
 ################################################################
@@ -186,7 +191,7 @@ def test__summarization_calculate_fingerprint__compute_text_fingerprint__integra
 
     # Call the calculate_fingerprint endpoint with force=True
     response = fixture_app.post('/completion/calculate_fingerprint',
-                                data=json.dumps({"text": transcript_text, "text_type": "lecture",
+                                data=json.dumps({"text": transcript_text, "text_type": "text",
                                                  "force": True}),
                                 timeout=timeout)
     # Check status code is successful

@@ -286,3 +286,20 @@ def dirty_ocr_text():
         Pour tzouver gcx)
         procede aiusi :
         on substitue 8=8'(x)"""
+
+
+@pytest.fixture
+def slides_and_clean_concepts():
+    return [
+        {'number': 16, 'concepts': ['Antarctic ice sheet', 'Ice-sheet model', 'Arctic sea ice decline',
+                                    'Polar ice cap', 'Arctic sea ice ecology and history', 'Greenland ice sheet',
+                                    'Arctic ice pack', 'Ice sheet', 'Ice stream', 'Drift ice', 'Sea ice']},
+        {'number': 38, 'concepts': []},
+        {'number': 31, 'concepts': ['Climate model', 'General circulation model', 'Climate change']},
+        {'number': 9, 'concepts': []},
+        {'number': 2, 'concepts': []},
+        {'number': 34, 'concepts': ['German language', 'German dialects', 'European integration', 'German studies',
+                                    'Europe', 'Western Europe']},
+        {'number': 24, 'concepts': ['Partial differential equation', 'Nonlinear system',
+                                    'Euler equations (fluid dynamics)']}
+    ]

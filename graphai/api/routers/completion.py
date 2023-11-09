@@ -12,7 +12,8 @@ from graphai.api.schemas.completion import (
     SummaryFingerprintRequest,
     SummaryFingerprintResponse,
     SlideSubsetRequest,
-    SlideSubsetResponse
+    SlideSubsetResponse,
+    SlideConceptsMap
 )
 
 from graphai.api.celery_tasks.common import (
@@ -112,6 +113,16 @@ async def calculate_summary_text_fingerprint(data: SummaryFingerprintRequest):
     text = data.text
     completion_type = data.completion_type
     text_type = data.text_type
+    assert (
+        (completion_type == 'cleanup' and (isinstance(text, str) or isinstance(text, dict)))
+        or
+        (completion_type == 'summary' and text_type != 'lecture' and (isinstance(text, str) or isinstance(text, dict)))
+        or
+        (completion_type == 'summary' and text_type == 'lecture' and isinstance(text, list))
+    )
+    if completion_type == 'summary' and text_type == 'lecture':
+        text = {slide.number: slide.concepts for slide in text}
+
     force = data.force
     token = generate_summary_text_token(text, text_type, completion_type)
     task_list = get_completion_text_fingerprint_chain_list(token, text, text_type, completion_type, force,
