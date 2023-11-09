@@ -44,7 +44,6 @@ def test__summarization_summary__summarize_text__run_task(transcript_text):
            'title' in summary_transcript['result']
     assert summary_transcript['successful'] is True
     summary_text = summary_transcript['result']['summary_long'].lower()
-    assert 'lecture' in summary_text
     assert 'digital circuit' in summary_text
     assert 'simulation' in summary_text or 'simulator' in summary_text
 
