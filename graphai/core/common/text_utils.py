@@ -307,6 +307,7 @@ class ChatGPTSummarizer:
             max_len = int(2 * max_len)
         # We count the approximate number of tokens in order to choose the right model (i.e. context size)
         approx_token_count = text_token_count + system_token_count + max_len
+        print(approx_token_count)
         if approx_token_count < 4096:
             model_type = 'gpt-3.5-turbo'
         elif 4096 < approx_token_count < 16384:
@@ -357,10 +358,10 @@ class ChatGPTSummarizer:
         token_count_dict['cost'] = cost
         return final_result, False, token_count_dict
 
-    def _summarize(self, text, system_message, temperature=1.0, top_p=0.3, simulate=False):
+    def _summarize(self, text, system_message, temperature=1.0, top_p=0.3, simulate=False, max_len=None):
         results, too_many_tokens, n_total_tokens = \
             self._generate_completion(text, system_message, temperature=temperature, top_p=top_p, simulate=simulate,
-                                      timeout=30)
+                                      timeout=30, max_len=max_len)
         token_count = n_total_tokens
         if results is None:
             return None, system_message, too_many_tokens, token_count
@@ -381,14 +382,16 @@ class ChatGPTSummarizer:
                        f'[n words (long)] = {n_words_long}\n[n words (short)] = {n_words_short}\n'
 
         system_message, assistant_message = generate_unit_summary_message()
-        return self._summarize([user_message, assistant_message], system_message, temperature, top_p, simulate)
+        max_len = int(1.5 * (n_words_long + n_words_short))
+        return self._summarize([user_message, assistant_message], system_message, temperature, top_p, simulate, max_len)
 
     def summarize_generic(self, text, long_len=200, short_len=50, title_len=10,
                           temperature=1.0, top_p=0.3, simulate=False):
         assert isinstance(text, str) or isinstance(text, dict)
         system_message = generate_generic_summary_message(long_len, short_len, title_len)
         text = convert_text_or_dict_to_text(text)
-        return self._summarize(text, system_message, temperature, top_p, simulate)
+        max_len = int(1.5 * (long_len + short_len + title_len))
+        return self._summarize(text, system_message, temperature, top_p, simulate, max_len)
 
     def summarize_lecture(self, slide_to_concepts, long_len=200, short_len=50, title_len=10,
                           temperature=1.0, top_p=0.3, simulate=False):
@@ -397,7 +400,8 @@ class ChatGPTSummarizer:
         slide_to_concepts = {k: v for k, v in slide_to_concepts.items() if len(v) > 0}
         slide_numbers_sorted = sorted(list(slide_to_concepts.keys()))
         text = '\n\n'.join([f'Slide {i}: ' + '; '.join(slide_to_concepts[i]) for i in slide_numbers_sorted])
-        return self._summarize(text, system_message, temperature, top_p, simulate)
+        max_len = int(1.5 * (long_len + short_len + title_len))
+        return self._summarize(text, system_message, temperature, top_p, simulate, max_len)
 
     def generate_summary(self, text_or_dict, text_type='lecture', summary_type='summary',
                          len_class='normal', tone='info', max_normal_len=100, max_short_len=40):
