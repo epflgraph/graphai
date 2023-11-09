@@ -246,7 +246,7 @@ async def summarize_status(task_id):
     return format_api_results(full_results['id'], full_results['name'], full_results['status'], task_results)
 
 
-@router.post('/subset', response_model=SlideSubsetResponse)
+@router.post('/slide_subset', response_model=SlideSubsetResponse)
 async def choose_best_subset(data: SlideSubsetRequest):
     slides_and_concepts = data.slides
     slides_and_concepts = {slide.number: slide.concepts for slide in slides_and_concepts}
