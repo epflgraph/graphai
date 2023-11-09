@@ -178,6 +178,7 @@ async def summarize_text(data: GenericSummarizationRequest):
     text_type = 'text'
     force = data.force
     debug = data.debug
+    keywords = data.keywords
 
     token = generate_summary_text_token(text, text_type, 'summary')
     if not force:
@@ -188,7 +189,7 @@ async def summarize_text(data: GenericSummarizationRequest):
         task_list = []
         skip_token = False
     task_list += get_completion_task_chain(token, text, text_type, 'summary',
-                                           keywords=False, force=force, skip_token=skip_token, debug=debug)
+                                           keywords=keywords, force=force, skip_token=skip_token, debug=debug)
     tasks = chain(task_list)
     tasks = tasks.apply_async(priority=6)
     return {'task_id': tasks.id}

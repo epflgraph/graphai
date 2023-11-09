@@ -113,6 +113,12 @@ class GenericSummarizationRequest(CompletionRequestBase):
         description="Text to summarize. Either a plain string or a string to string dictionary."
     )
 
+    keywords: bool = Field(
+        title="Extract keywords",
+        description="Whether to extract keywords before summarization. Helps especially in cases where the text "
+                    "itself would have too many tokens and thus result in a failure."
+    )
+
 
 class CleanupRequest(CompletionRequestBase):
     text: Union[str, Dict[str, str]] = Field(
