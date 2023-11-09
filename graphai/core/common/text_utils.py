@@ -17,7 +17,8 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 
 from graphai.definitions import CONFIG_DIR
 from graphai.core.common.json_repair.json_repair import repair_json
-from graphai.core.common.gpt_message_presets import generate_lecture_summary_message, generate_generic_summary_message
+from graphai.core.common.gpt_message_presets import generate_lecture_summary_message, \
+    generate_generic_summary_message, generate_unit_summary_message
 
 TRANSLATION_LIST_SEPARATOR = ' [{[!!SEP!!]}] '
 CHATGPT_COSTS_PER_1K = {
@@ -315,7 +316,8 @@ class ChatGPTSummarizer:
             return None, True, None
         if not simulate:
             messages = [{"role": "system", "content": system_message}]
-            messages += [{"role": "user", "content": text[i]} if i % 2 == 0 else {"role": "assistant", "content": text[i]}
+            messages += [{"role": "user", "content": text[i]} if i % 2 == 0
+                         else {"role": "assistant", "content": text[i]}
                          for i in range(len(text))]
             try:
                 # Generate the completion
@@ -358,18 +360,28 @@ class ChatGPTSummarizer:
     def _summarize(self, text, system_message, temperature=1.0, top_p=0.3, simulate=False):
         results, too_many_tokens, n_total_tokens = \
             self._generate_completion(text, system_message, temperature=temperature, top_p=top_p, simulate=simulate,
-                                      timeout=20)
+                                      timeout=30)
         token_count = n_total_tokens
         if results is None:
             return None, system_message, too_many_tokens, token_count
 
         # Making sure the results are in a valid JSON format
         results, message_chain, too_many_tokens, n_total_tokens = \
-            self.make_sure_json_is_valid(results, [text], system_message,
+            self.make_sure_json_is_valid(results, text, system_message,
                                          temperature=temperature, top_p=top_p)
         token_count = update_token_count(token_count, token_count)
 
         return results, system_message, too_many_tokens, token_count
+
+    def summarize_unit(self, name, subtype, possible_subtypes, text, categories, n_words_long, n_words_short,
+                       temperature=1.0, top_p=0.3, simulate=False):
+        user_message = f'[entity] = Unit\n[name] = {name}\n' \
+                       f'[subtype] = {subtype}\n[possible subtypes] = {possible_subtypes}\n' \
+                       f'[text] = "{text}"\n[categories] = {categories}\n' \
+                       f'[n words (long)] = {n_words_long}\n[n words (short)] = {n_words_short}\n'
+
+        system_message, assistant_message = generate_unit_summary_message()
+        return self._summarize([user_message, assistant_message], system_message, temperature, top_p, simulate)
 
     def summarize_generic(self, text, long_len=200, short_len=50, title_len=10,
                           temperature=1.0, top_p=0.3, simulate=False):
@@ -558,6 +570,8 @@ class ChatGPTSummarizer:
     def make_sure_json_is_valid(self, results, messages, system_message, temperature=1.0, top_p=0.3,
                                 n_retries=1):
         # Trying to directly parse the JSON...
+        if isinstance(messages, str):
+            messages = [messages]
         try:
             print('Parsing JSON...')
             prev_results_json = json.loads(results)
@@ -666,7 +680,7 @@ class ChatGPTSummarizer:
                 return None, system_message, too_many_tokens, token_count
 
             results, message_chain, too_many_tokens, n_total_tokens = \
-                self.make_sure_json_is_valid(results, [text], system_message,
+                self.make_sure_json_is_valid(results, text, system_message,
                                              temperature=temperature, top_p=top_p)
             token_count = update_token_count(token_count, n_total_tokens)
             if results is None:
