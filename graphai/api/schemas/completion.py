@@ -100,10 +100,43 @@ class CompletionRequestBase(BaseModel, abc.ABC):
 
 
 class LectureSummarizationRequest(CompletionRequestBase):
-    text: List[SlideConceptsMap] = Field(
+    slides: List[SlideConceptsMap] = Field(
         title="Text",
         description="Text to summarize. Dictionary mapping each slide number to a list of concepts extracted from "
                     "that slide."
+    )
+
+
+class AcademicEntitySummarizationRequest(CompletionRequestBase):
+    entity: str = Field(
+        title="Entity type",
+        description="Type of academic entity"
+    )
+
+    name: str = Field(
+        title="Name",
+        description="Entity name"
+    )
+
+    subtype: str = Field(
+        title="Subtype",
+        description="Subtype of the academic entity"
+    )
+
+    possible_subtypes: List[str] = Field(
+        title="Possible subtypes",
+        description="List of possible subtypes of academic entities"
+    )
+
+    text: str = Field(
+        title="Text",
+        description="Text describing the entity"
+    )
+
+    categories: List[str] = Field(
+        title="Categories",
+        description="List of research categories extracted from scientific publications authored by people related to "
+                    "the entity, sorted in descending order of importance."
     )
 
 
@@ -164,6 +197,16 @@ class SummaryResponseDict(BaseModel):
     )
 
 
+class AcademicEntitySummaryResponseDict(SummaryResponseDict):
+    inferred_subtype: str = Field(
+        title="Inferred subtype"
+    )
+
+    top_3_categories: List[str] = Field(
+        title="Top 3 categories"
+    )
+
+
 class CompletionTaskResponseBase(BaseModel):
     result_type: Union[Literal['title', 'summary', 'cleanup'], None] = Field(
         title="Summary type",
@@ -211,6 +254,13 @@ class SummaryTaskResponse(CompletionTaskResponseBase):
     )
 
 
+class AcademicEntitySummaryTaskResponse(CompletionTaskResponseBase):
+    result: Union[AcademicEntitySummaryResponseDict, None] = Field(
+        title="Summary results",
+        description="Summarized text"
+    )
+
+
 class CleanupTaskResponse(CompletionTaskResponseBase):
     result: Union[CleanupResponseDict, None] = Field(
         title="Cleanup results",
@@ -220,6 +270,13 @@ class CleanupTaskResponse(CompletionTaskResponseBase):
 
 class SummaryResponse(TaskStatusResponse):
     task_result: Union[SummaryTaskResponse, None] = Field(
+        title="Summarization response",
+        description="A dict containing the resulting summarized text and a success flag."
+    )
+
+
+class AcademicEntitySummaryResponse(TaskStatusResponse):
+    task_result: Union[AcademicEntitySummaryTaskResponse, None] = Field(
         title="Summarization response",
         description="A dict containing the resulting summarized text and a success flag."
     )

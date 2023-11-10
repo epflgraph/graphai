@@ -213,16 +213,18 @@ def request_text_completion_task(self, token_and_text, text_type='text', result_
             results = {'subject': results['subject'], 'text': results['cleaned'],
                        'for_wikify': f'{results["subject"]}\n\n{results["cleaned"]}'}
     else:
+        fields = ['summary_long', 'summary_short', 'title']
         # Summary
         if text_type == 'lecture':
             fn = summarizer.summarize_lecture
+        elif text_type == 'academic_entity':
+            fn = summarizer.summarize_academic_entity
+            fields += ['top_3_categories', 'inferred_subtype']
         else:
             fn = summarizer.summarize_generic
         results, message, too_many_tokens, n_tokens_total = fn(text)
         if results is not None:
-            results = {'summary_long': results['summary_long'],
-                       'summary_short': results['summary_short'],
-                       'title': results['title']}
+            results = {field: results[field] for field in fields}
     if not debug:
         message = None
     return {

@@ -18,7 +18,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from graphai.definitions import CONFIG_DIR
 from graphai.core.common.json_repair.json_repair import repair_json
 from graphai.core.common.gpt_message_presets import generate_lecture_summary_message, \
-    generate_generic_summary_message, generate_unit_summary_message
+    generate_generic_summary_message, generate_academic_entity_summary_message
 
 TRANSLATION_LIST_SEPARATOR = ' [{[!!SEP!!]}] '
 CHATGPT_COSTS_PER_1K = {
@@ -374,18 +374,25 @@ class ChatGPTSummarizer:
 
         return results, system_message, too_many_tokens, token_count
 
-    def summarize_unit(self, name, subtype, possible_subtypes, text, categories, n_words_long, n_words_short,
-                       temperature=1.0, top_p=0.3, simulate=False):
-        user_message = f'[entity] = Unit\n[name] = {name}\n' \
+    def summarize_academic_entity(self, input_dict, long_len=200, short_len=32, title_len=10,
+                                  temperature=1.0, top_p=0.3, simulate=False):
+        entity = input_dict['entity']
+        name = input_dict['name']
+        subtype = input_dict['subtype']
+        possible_subtypes = input_dict['possible_subtypes']
+        text = input_dict['text']
+        categories = input_dict['categories']
+        user_message = f'[entity] = {entity}\n[name] = {name}\n' \
                        f'[subtype] = {subtype}\n[possible subtypes] = {possible_subtypes}\n' \
                        f'[text] = "{text}"\n[categories] = {categories}\n' \
-                       f'[n words (long)] = {n_words_long}\n[n words (short)] = {n_words_short}\n'
+                       f'[n words (long)] = {long_len}\n[n words (short)] = {short_len}\n' \
+                       f'[n words (title)] = {title_len}\n'
+        system_message, assistant_message = generate_academic_entity_summary_message()
+        max_len = int(1.5 * (long_len + short_len))
+        return self._summarize([user_message, assistant_message], system_message,
+                               temperature, top_p, simulate, max_len)
 
-        system_message, assistant_message = generate_unit_summary_message()
-        max_len = int(1.5 * (n_words_long + n_words_short))
-        return self._summarize([user_message, assistant_message], system_message, temperature, top_p, simulate, max_len)
-
-    def summarize_generic(self, text, long_len=200, short_len=50, title_len=10,
+    def summarize_generic(self, text, long_len=200, short_len=32, title_len=10,
                           temperature=1.0, top_p=0.3, simulate=False):
         assert isinstance(text, str) or isinstance(text, dict)
         system_message = generate_generic_summary_message(long_len, short_len, title_len)
@@ -393,7 +400,7 @@ class ChatGPTSummarizer:
         max_len = int(1.5 * (long_len + short_len + title_len))
         return self._summarize(text, system_message, temperature, top_p, simulate, max_len)
 
-    def summarize_lecture(self, slide_to_concepts, long_len=200, short_len=50, title_len=10,
+    def summarize_lecture(self, slide_to_concepts, long_len=200, short_len=32, title_len=10,
                           temperature=1.0, top_p=0.3, simulate=False):
         assert isinstance(slide_to_concepts, dict)
         system_message = generate_lecture_summary_message(long_len, short_len, title_len)

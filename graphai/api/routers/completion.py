@@ -13,7 +13,8 @@ from graphai.api.schemas.completion import (
     SummaryFingerprintResponse,
     SlideSubsetRequest,
     SlideSubsetResponse,
-    SlideConceptsMap
+    AcademicEntitySummarizationRequest,
+    AcademicEntitySummaryResponse
 )
 
 from graphai.api.celery_tasks.common import (
@@ -151,9 +152,38 @@ async def calculate_summary_text_fingerprint_status(task_id):
 
 @router.post('/summary/lecture', response_model=TaskIDResponse)
 async def summarize_lecture(data: LectureSummarizationRequest):
-    text = data.text
+    text = data.slides
     text = {slide.number: slide.concepts for slide in text}
     text_type = 'lecture'
+    force = data.force
+    debug = data.debug
+
+    token = generate_summary_text_token(text, text_type, 'summary')
+    if not force:
+        task_list = get_completion_text_fingerprint_chain_list(token, text, text_type, 'summary', force,
+                                                               ignore_fp_results=True, results_to_return=token)
+        skip_token = True
+    else:
+        task_list = []
+        skip_token = False
+    task_list += get_completion_task_chain(token, text, text_type, 'summary',
+                                           keywords=False, force=force, skip_token=skip_token, debug=debug)
+    tasks = chain(task_list)
+    tasks = tasks.apply_async(priority=6)
+    return {'task_id': tasks.id}
+
+
+@router.post('/summary/academic_entity', response_model=TaskIDResponse)
+async def summarize_academic_entity(data: AcademicEntitySummarizationRequest):
+    text = {
+        'entity': data.entity,
+        'name': data.name,
+        'subtype': data.subtype,
+        'possible_subtypes': data.possible_subtypes,
+        'text': data.text,
+        'categories': data.categories
+    }
+    text_type = 'academic_entity'
     force = data.force
     debug = data.debug
 
@@ -223,6 +253,7 @@ async def clean_up(data: CleanupRequest):
 
 @router.get('/summary/lecture/status/{task_id}', response_model=SummaryResponse)
 @router.get('/summary/generic/status/{task_id}', response_model=SummaryResponse)
+@router.get('/summary/academic_entity/status/{task_id}', response_model=AcademicEntitySummaryResponse)
 @router.get('/cleanup/status/{task_id}', response_model=CleanupResponse)
 async def summarize_status(task_id):
     full_results = get_task_info(task_id)

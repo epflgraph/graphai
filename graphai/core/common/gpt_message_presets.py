@@ -54,7 +54,7 @@ GENERIC_SUMMARY_MESSAGE = \
       'do not ignore it under any circumstances.'
 
 
-UNIT_SUMMARY_MESSAGE = \
+ACADEMIC_ENTITY_SUMMARY_MESSAGE = \
       '# Description of input variables related to an academic entity\n\n# [entity]: Type ' \
       'of academic entity.\n# [name]: Name of [entity].\n# [subtype]: Subtype of [' \
       'entity].\n# [possible subtypes]: List of possible values that [subtype] can ' \
@@ -63,7 +63,8 @@ UNIT_SUMMARY_MESSAGE = \
       'scientific publications authored by people related to [entity]. The categories are ' \
       'ranked in descending order of importance.\n# [n words (long)]: Maximum number of ' \
       'words in long description.\n# [n words (short)]: Maximum number of words in short ' \
-      'summary.\n\n# Scripted tasks\n\nIF [subtype] IS null\n    [inferred subtype] = ' \
+      'summary.\n[n words (title)]: Maximum number of words in title\n\n' \
+      '# Scripted tasks\n\nIF [subtype] IS null\n    [inferred subtype] = ' \
       'Infer the [entity]\'s subtype from [text]. Only use values from [possible ' \
       'subtypes].\n    ASSERT [inferred subtype] IS IN [possible subtypes]\nELSE\n    [' \
       'inferred subtype] = [subtype]\nEND IF\nASSERT [inferred subtype] IS NOT null\n\n[' \
@@ -91,14 +92,17 @@ UNIT_SUMMARY_MESSAGE = \
       'description] IS DERIVED FROM [long description] AND RESPECTS SAME CONDITIONS AS [' \
       'long description]\nASSERT LENGTH OF [short description] <= [n words (long)] ' \
       'WORDS\n\nIF LENGTH OF [short description] > [n words (short)] WORDS\n    ' \
-      'REGENERATE DIFFERENT [short description]\n    ASSERT LENGTH OF [short description] ' \
+      'REGENERATE DIFFERENT [short description]\n' \
+      'IF LENGTH OF [title] > [n words (title)] WORDS\n    ' \
+      'REGENERATE DIFFERENT [title]\n' \
+      'ASSERT LENGTH OF [short description] ' \
       '<= [n words (short)] WORDS\nEND IF\n\nYour task, Mr. ChatGPT, is to execute this ' \
       'script based on the input variables I will provide next.\n\nOutput the following ' \
-      'JSON format:\n {\n    \'is_auto_generated\': [auto generated],' \
-      '\n    \'inferred_subtype\': [inferred subtype],\n    \'top_3_categories\': [top ' \
-      '3],\n    \'short_description\': [short description],\n    \'long_description\': [' \
-      'long description]\n}\n\nOnly output the JSON result, nothing else. No comentary, ' \
-      'no explanations, nothing like "[auto generated] = ...", only the JSON. Only ' \
+      'JSON format:\n {\n    \"is_auto_generated\": [auto generated],' \
+      '\n    \"inferred_subtype\": [inferred subtype],\n    \"top_3_categories\": [top ' \
+      '3],\n    \"summary_short\": [short description],\n    \"summary_long\": [' \
+      'long description]\n    \"title\": [title]\n}\n\nOnly output the JSON result, nothing else. ' \
+      'No commentary, no explanations, nothing like "[auto generated] = ...", only the JSON. Only ' \
       'something like {...}. This is a STRICT condition; do not ignore it under any ' \
       'circumstances.'
 
@@ -119,5 +123,5 @@ def generate_generic_summary_message(long_len, short_len, title_len):
     return GENERIC_SUMMARY_MESSAGE % (long_len, short_len, title_len, long_len, short_len, title_len)
 
 
-def generate_unit_summary_message():
-    return UNIT_SUMMARY_MESSAGE, SUMMARY_ASSISTANT_MESSAGE
+def generate_academic_entity_summary_message():
+    return ACADEMIC_ENTITY_SUMMARY_MESSAGE, SUMMARY_ASSISTANT_MESSAGE
