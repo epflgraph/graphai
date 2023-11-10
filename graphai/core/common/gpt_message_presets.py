@@ -90,13 +90,16 @@ ACADEMIC_ENTITY_SUMMARY_MESSAGE = \
       'LENGTH OF [long description] <= [n words (long)] WORDS\nEND IF\n\n[short ' \
       'description] =  one sentence derived from [long description]\nASSERT [short ' \
       'description] IS DERIVED FROM [long description] AND RESPECTS SAME CONDITIONS AS [' \
-      'long description]\nASSERT LENGTH OF [short description] <= [n words (long)] ' \
-      'WORDS\n\nIF LENGTH OF [short description] > [n words (short)] WORDS\n    ' \
+      'long description]\nASSERT LENGTH OF [short description] <= [n words (short)] ' \
+      'WORDS\n\n' \
+      'IF LENGTH OF [short description] > [n words (short)] WORDS\n    ' \
       'REGENERATE DIFFERENT [short description]\n' \
+      'END IF\n\n' \
+      '[title] =  title derived from [short description]\n' \
+      'ASSERT LENGTH OF [title] <= [n words (title)] WORDS\n\n' \
       'IF LENGTH OF [title] > [n words (title)] WORDS\n    ' \
       'REGENERATE DIFFERENT [title]\n' \
-      'ASSERT LENGTH OF [short description] ' \
-      '<= [n words (short)] WORDS\nEND IF\n\nYour task, Mr. ChatGPT, is to execute this ' \
+      '\nEND IF\n\nYour task, Mr. ChatGPT, is to execute this ' \
       'script based on the input variables I will provide next.\n\nOutput the following ' \
       'JSON format:\n {\n    \"is_auto_generated\": [auto generated],' \
       '\n    \"inferred_subtype\": [inferred subtype],\n    \"top_3_categories\": [top ' \
