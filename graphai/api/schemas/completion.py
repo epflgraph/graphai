@@ -75,11 +75,6 @@ class SummaryFingerprintResponse(TaskStatusResponse):
 
 
 class CompletionRequestBase(BaseModel, abc.ABC):
-    text: str = Field(
-        title="Text",
-        description="Text of request"
-    )
-
     force: bool = Field(
         title="Force recomputation",
         default=False
@@ -101,8 +96,8 @@ class CompletionRequestBase(BaseModel, abc.ABC):
 
 class LectureSummarizationRequest(CompletionRequestBase):
     slides: List[SlideConceptsMap] = Field(
-        title="Text",
-        description="Text to summarize. Dictionary mapping each slide number to a list of concepts extracted from "
+        title="Slides",
+        description="Slides to summarize. Dictionary mapping each slide number to a list of concepts extracted from "
                     "that slide."
     )
 
