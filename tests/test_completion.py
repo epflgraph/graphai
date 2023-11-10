@@ -85,7 +85,7 @@ def test__summarization_summary__summarize_text__integration(fixture_app, celery
 
     # First, we call the summary endpoint with force=True to test the full task pipeline working
     response = fixture_app.post('/completion/summary/lecture',
-                                data=json.dumps({"text": slides_and_clean_concepts,
+                                data=json.dumps({"slides": slides_and_clean_concepts,
                                                  "force": True}),
                                 timeout=timeout)
     # Check status code is successful
@@ -126,7 +126,7 @@ def test__summarization_summary__summarize_text__integration(fixture_app, celery
 
     # Now, we call the summary endpoint again with the same input to make sure the caching works correctly
     response = fixture_app.post('/completion/summary/lecture',
-                                data=json.dumps({"text": slides_and_clean_concepts,
+                                data=json.dumps({"slides": slides_and_clean_concepts,
                                                  "force": False}),
                                 timeout=timeout)
     # Check status code is successful

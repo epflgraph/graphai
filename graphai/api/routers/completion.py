@@ -152,8 +152,8 @@ async def calculate_summary_text_fingerprint_status(task_id):
 
 @router.post('/summary/lecture', response_model=TaskIDResponse)
 async def summarize_lecture(data: LectureSummarizationRequest):
-    text = data.slides
-    text = {slide.number: slide.concepts for slide in text}
+    slides = data.slides
+    text = {slide.number: slide.concepts for slide in slides}
     text_type = 'lecture'
     force = data.force
     debug = data.debug
