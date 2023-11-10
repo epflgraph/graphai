@@ -101,8 +101,7 @@ ACADEMIC_ENTITY_SUMMARY_MESSAGE = \
       'REGENERATE DIFFERENT [title]\n' \
       '\nEND IF\n\nYour task, Mr. ChatGPT, is to execute this ' \
       'script based on the input variables I will provide next.\n\nOutput the following ' \
-      'JSON format:\n {\n    \"is_auto_generated\": [auto generated],' \
-      '\n    \"inferred_subtype\": [inferred subtype],\n    \"top_3_categories\": [top ' \
+      'JSON format:\n {\n    \"inferred_subtype\": [inferred subtype],\n    \"top_3_categories\": [top ' \
       '3],\n    \"summary_short\": [short description],\n    \"summary_long\": [' \
       'long description]\n    \"title\": [title]\n}\n\nOnly output the JSON result, nothing else. ' \
       'No commentary, no explanations, nothing like "[auto generated] = ...", only the JSON. Only ' \
@@ -110,12 +109,13 @@ ACADEMIC_ENTITY_SUMMARY_MESSAGE = \
       'circumstances.'
 
 
-SUMMARY_ASSISTANT_MESSAGE = 'Output the following JSON format:\n {\n    \'is_auto_generated\': [auto generated],' \
-                            '\n    \'inferred_subtype\': [inferred subtype],\n    \'top_3_categories\': [top 3],' \
-                            '\n    \'short_description\': [short description],\n    \'long_description\': [long ' \
-                            'description]\n}\n\nOnly output the JSON result, nothing else. No comentary, ' \
-                            'no explanations, nothing like "[auto generated] = ...", only the JSON. Only something ' \
-                            'like {...}. This is a STRICT condition; do not ignore it under any circumstances. '
+SUMMARY_ASSISTANT_MESSAGE = \
+      'Output the following JSON format:\n {\n    \"inferred_subtype\": [inferred subtype],\n    ' \
+      '\"top_3_categories\": [top 3],\n    \"summary_short\": [short description],\n    \"summary_long\": [' \
+      'long description]\n    \"title\": [title]\n}\n\nOnly output the JSON result, nothing else. ' \
+      'No commentary, no explanations, nothing like "[auto generated] = ...", only the JSON. Only ' \
+      'something like {...}. This is a STRICT condition; do not ignore it under any ' \
+      'circumstances.'
 
 
 def generate_lecture_summary_message(long_len, short_len, title_len):
