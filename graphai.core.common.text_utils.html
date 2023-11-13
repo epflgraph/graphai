@@ -251,38 +251,6 @@
 <dd></dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="graphai.core.common.text_utils.ChatGPTSummarizer.generate_summary">
-<span class="sig-name descname"><span class="pre">generate_summary</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text_or_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">text_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'lecture'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">summary_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'summary'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">len_class</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'normal'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tone</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'info'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_normal_len</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_short_len</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">40</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.text_utils.ChatGPTSummarizer.generate_summary" title="Permalink to this definition"></a></dt>
-<dd><p>Generates a summary or a title for the provided text
-:param text_or_dict: String or dictionary containing all the text to summarize and synthesize into one summary
-:param text_type: Type of text, e.g. “lecture”, “course”. Useful for summaries.
-:param summary_type: The type of the summary to be produced, either ‘title’ or ‘summary’ (default)
-:param len_class: Whether there’s a constraint on the number of sentences (‘vshort’ for 1, ‘short’ for 2)</p>
-<aside class="system-message">
-<p class="system-message-title">System Message: ERROR/3 (<span class="docutils literal">/home/ubuntu/actions-runner/_work/graphai/graphai/main/graphai/core/common/text_utils.py:docstring of graphai.core.common.text_utils.ChatGPTSummarizer.generate_summary</span>, line 6)</p>
-<p>Unexpected indentation.</p>
-</aside>
-<blockquote>
-<div><p>or not (‘normal’, default).</p>
-</div></blockquote>
-<aside class="system-message">
-<p class="system-message-title">System Message: WARNING/2 (<span class="docutils literal">/home/ubuntu/actions-runner/_work/graphai/graphai/main/graphai/core/common/text_utils.py:docstring of graphai.core.common.text_utils.ChatGPTSummarizer.generate_summary</span>, line 7)</p>
-<p>Block quote ends without a blank line; unexpected unindent.</p>
-</aside>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>tone</strong> – Whether to use a marketing tone (‘promo’) or an informative tone (‘info’, default)</p></li>
-<li><p><strong>max_normal_len</strong> – Approximate maximum length of result (in words)</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Result of summarization, plus a flag indicating whether there were too many tokens</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="graphai.core.common.text_utils.ChatGPTSummarizer.make_sure_json_is_valid">
 <span class="sig-name descname"><span class="pre">make_sure_json_is_valid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">results</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">messages</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">system_message</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temperature</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">top_p</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_retries</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.text_utils.ChatGPTSummarizer.make_sure_json_is_valid" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
