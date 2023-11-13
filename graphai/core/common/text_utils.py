@@ -21,14 +21,10 @@ from graphai.core.common.gpt_message_presets import generate_lecture_summary_mes
 
 TRANSLATION_LIST_SEPARATOR = ' [{[!!SEP!!]}] '
 CHATGPT_COSTS_PER_1K = {
-    'gpt-3.5-turbo': {
-        'prompt_tokens': 0.0015,
+    'gpt-3.5-turbo-1106': {
+        'prompt_tokens': 0.001,
         'completion_tokens': 0.002
-    },
-    'gpt-3.5-turbo-16k': {
-        'prompt_tokens': 0.003,
-        'completion_tokens': 0.004
-    },
+    }
 }
 
 
@@ -315,7 +311,7 @@ class ChatGPTSummarizer:
         print(approx_token_count)
         if approx_token_count < 16384:
             # This is now the 16K context model for 3.5
-            model_type = 'gpt-3.5-turbo'
+            model_type = 'gpt-3.5-turbo-1106'
         else:
             # If the token count is above 16384, the text is too large and we can't summarize it
             return None, text, True, None
@@ -337,7 +333,7 @@ class ChatGPTSummarizer:
             except openai.error.InvalidRequestError as e:
                 # We check to see if the exception was caused by too many tokens in the input
                 print(e)
-                if "This model's maximum context length is" in e:
+                if "This model's maximum context length is" in str(e):
                     return None, text, True, None
                 else:
                     return None, text, False, None
@@ -363,7 +359,7 @@ class ChatGPTSummarizer:
     def _summarize(self, text, system_message, temperature=1.0, top_p=0.3, simulate=False, max_len=None):
         results, message_chain, too_many_tokens, n_total_tokens = \
             self._generate_completion(text, system_message, temperature=temperature, top_p=top_p, simulate=simulate,
-                                      timeout=30, max_len=max_len)
+                                      timeout=60, max_len=max_len)
         token_count = n_total_tokens
         if results is None:
             return None, system_message, too_many_tokens, token_count
@@ -456,7 +452,7 @@ class ChatGPTSummarizer:
                     self._generate_completion(
                         messages + correction_message,
                         system_message, temperature=temperature, top_p=top_p,
-                        timeout=10
+                        timeout=20
                     )
                 if results is None:
                     return None, message_chain, too_many_tokens, n_total_tokens
@@ -527,7 +523,7 @@ class ChatGPTSummarizer:
         text = text + "\n\nBe sure to respond in JSON format!"
         results, message_chain, too_many_tokens, n_total_tokens = \
             self._generate_completion(text, system_message, temperature=temperature, top_p=top_p, simulate=simulate,
-                                      timeout=10)
+                                      timeout=20)
         print('FIRST')
         token_count = n_total_tokens
         if not simulate:
@@ -558,7 +554,7 @@ class ChatGPTSummarizer:
         results, message_chain, too_many_tokens, n_total_tokens = \
             self._generate_completion(
                 message_chain + correction_message, system_message, max_len=len(text) if simulate else None,
-                temperature=temperature, top_p=top_p, simulate=simulate, timeout=10)
+                temperature=temperature, top_p=top_p, simulate=simulate, timeout=20)
         print('SECOND')
         token_count = update_token_count(token_count, n_total_tokens)
 
