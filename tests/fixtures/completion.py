@@ -378,7 +378,7 @@ def slides_and_raw_concepts():
 @pytest.fixture
 def unit_info():
     return {
-        'entity': 'Unit',
+        'entity': 'unit',
         'name': 'Audiovisual Communications Laboratory',
         'subtype': 'Laboratory',
         'possible_subtypes': ['Laboratory', 'Center', 'Group', 'Institute', 'Chair'],

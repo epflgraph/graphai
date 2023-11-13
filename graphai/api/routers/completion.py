@@ -13,6 +13,7 @@ from graphai.api.schemas.completion import (
     SummaryFingerprintResponse,
     SlideSubsetRequest,
     SlideSubsetResponse,
+    AcademicEntityDescriptor,
     AcademicEntitySummarizationRequest,
     AcademicEntitySummaryResponse
 )
@@ -48,6 +49,22 @@ router = APIRouter(
     tags=['completion'],
     responses={404: {'description': 'Not found'}}
 )
+
+
+def populate_academic_entity_dict(data):
+    text = {
+        'entity': data.entity,
+        'name': data.name,
+        'subtype': data.subtype,
+        'possible_subtypes': data.possible_subtypes,
+        'text': data.text,
+        'categories': data.categories
+    }
+    return text
+
+
+def populate_slide_concepts_dict(slides):
+    return {slide.number: slide.concepts for slide in slides}
 
 
 def get_completion_text_fingerprint_chain_list(token, text, text_type, completion_type,
@@ -120,9 +137,14 @@ async def calculate_summary_text_fingerprint(data: SummaryFingerprintRequest):
         (completion_type == 'summary' and text_type != 'lecture' and (isinstance(text, str) or isinstance(text, dict)))
         or
         (completion_type == 'summary' and text_type == 'lecture' and isinstance(text, list))
+        or
+        (completion_type == 'summary' and (text_type == 'unit' or text_type == 'person') and
+         isinstance(text, AcademicEntityDescriptor))
     )
     if completion_type == 'summary' and text_type == 'lecture':
-        text = {slide.number: slide.concepts for slide in text}
+        text = populate_slide_concepts_dict(text)
+    if completion_type == 'summary' and (text_type == 'unit' or text_type == 'person'):
+        text = populate_academic_entity_dict(text)
 
     force = data.force
     token = generate_summary_text_token(text, text_type, completion_type)
@@ -153,7 +175,7 @@ async def calculate_summary_text_fingerprint_status(task_id):
 @router.post('/summary/lecture', response_model=TaskIDResponse)
 async def summarize_lecture(data: LectureSummarizationRequest):
     slides = data.slides
-    text = {slide.number: slide.concepts for slide in slides}
+    text = populate_slide_concepts_dict(slides)
     text_type = 'lecture'
     force = data.force
     debug = data.debug
@@ -175,14 +197,7 @@ async def summarize_lecture(data: LectureSummarizationRequest):
 
 @router.post('/summary/academic_entity', response_model=TaskIDResponse)
 async def summarize_academic_entity(data: AcademicEntitySummarizationRequest):
-    text = {
-        'entity': data.entity,
-        'name': data.name,
-        'subtype': data.subtype,
-        'possible_subtypes': data.possible_subtypes,
-        'text': data.text,
-        'categories': data.categories
-    }
+    text = populate_academic_entity_dict(data)
     text_type = 'academic_entity'
     force = data.force
     debug = data.debug

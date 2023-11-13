@@ -17,63 +17,6 @@ class SlideConceptsMap(BaseModel):
     )
 
 
-class SummaryFingerprintRequest(BaseModel):
-    text: Union[str, Dict[str, str], List[SlideConceptsMap]] = Field(
-        title="Text",
-        description="Text to summarize. Can be one string (generic), a string to string dictionary, "
-                    "or an integer to list of strings dictionary (lecture summarization)."
-    )
-
-    completion_type: Literal['cleanup', 'summary'] = Field(
-        title="Summary type",
-        description="Whether the summarization to be performed is title or summary generation",
-        default='summary'
-    )
-
-    text_type: Literal['lecture', 'slide', 'academic_entity', 'text'] = Field(
-        title="Text type",
-        description="What the text being summarized describes/comes from. Defaults to 'text', which results in "
-                    "generic summarization behavior.",
-        default="text"
-    )
-
-    force: bool = Field(
-        title="Force recomputation",
-        default=False
-    )
-
-
-class SummaryFingerprintTaskResponse(BaseModel):
-    result: Union[str, None] = Field(
-        title="Fingerprint",
-        description="Fingerprint of the provided text."
-    )
-
-    fresh: bool = Field(
-        title="Freshness flag",
-        description="Whether the result was computed freshly or an existing cached result was returned."
-    )
-
-    closest_token: Union[str, None] = Field(
-        title="Closest token",
-        description="The token of the most similar existing text that the fingerprint lookup was able to find. Equal "
-                    "to original token if the most similar existing text did not satisfy the minimum similarity "
-                    "threshold."
-    )
-
-    successful: bool = Field(
-        title="Success flag",
-        description="Whether the computation was successful."
-    )
-
-
-class SummaryFingerprintResponse(TaskStatusResponse):
-    task_result: Union[SummaryFingerprintTaskResponse, None] = Field(
-        title="Text fingerprinting response",
-        description="A dict containing the resulting text fingerprint and a freshness flag."
-    )
-
-
 class CompletionRequestBase(BaseModel, abc.ABC):
     force: bool = Field(
         title="Force recomputation",
@@ -102,8 +45,8 @@ class LectureSummarizationRequest(CompletionRequestBase):
     )
 
 
-class AcademicEntitySummarizationRequest(CompletionRequestBase):
-    entity: str = Field(
+class AcademicEntityDescriptor(BaseModel):
+    entity: Literal['unit', 'person'] = Field(
         title="Entity type",
         description="Type of academic entity"
     )
@@ -133,6 +76,10 @@ class AcademicEntitySummarizationRequest(CompletionRequestBase):
         description="List of research categories extracted from scientific publications authored by people related to "
                     "the entity, sorted in descending order of importance."
     )
+
+
+class AcademicEntitySummarizationRequest(CompletionRequestBase, AcademicEntityDescriptor):
+    pass
 
 
 class GenericSummarizationRequest(CompletionRequestBase):
@@ -310,4 +257,61 @@ class SlideSubsetResponse(BaseModel):
         title="Optimal subset",
         description="The Slide Numbers of the slides that were chosen as part of the "
                     "optimal set cover for the concepts."
+    )
+
+
+class SummaryFingerprintRequest(BaseModel):
+    text: Union[str, Dict[str, str], List[SlideConceptsMap], AcademicEntityDescriptor] = Field(
+        title="Text",
+        description="Text to summarize. Can be one string (generic), a string to string dictionary, "
+                    "or an integer to list of strings dictionary (lecture summarization)."
+    )
+
+    completion_type: Literal['cleanup', 'summary'] = Field(
+        title="Summary type",
+        description="Whether the summarization to be performed is title or summary generation",
+        default='summary'
+    )
+
+    text_type: Literal['lecture', 'slide', 'academic_entity', 'text'] = Field(
+        title="Text type",
+        description="What the text being summarized describes/comes from. Defaults to 'text', which results in "
+                    "generic summarization behavior.",
+        default="text"
+    )
+
+    force: bool = Field(
+        title="Force recomputation",
+        default=False
+    )
+
+
+class SummaryFingerprintTaskResponse(BaseModel):
+    result: Union[str, None] = Field(
+        title="Fingerprint",
+        description="Fingerprint of the provided text."
+    )
+
+    fresh: bool = Field(
+        title="Freshness flag",
+        description="Whether the result was computed freshly or an existing cached result was returned."
+    )
+
+    closest_token: Union[str, None] = Field(
+        title="Closest token",
+        description="The token of the most similar existing text that the fingerprint lookup was able to find. Equal "
+                    "to original token if the most similar existing text did not satisfy the minimum similarity "
+                    "threshold."
+    )
+
+    successful: bool = Field(
+        title="Success flag",
+        description="Whether the computation was successful."
+    )
+
+
+class SummaryFingerprintResponse(TaskStatusResponse):
+    task_result: Union[SummaryFingerprintTaskResponse, None] = Field(
+        title="Text fingerprinting response",
+        description="A dict containing the resulting text fingerprint and a freshness flag."
     )
