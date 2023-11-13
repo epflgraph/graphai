@@ -3,7 +3,6 @@ import hashlib
 import json
 from bisect import bisect
 from itertools import chain
-import re
 
 import fingerprint
 import langdetect
@@ -623,7 +622,7 @@ class ChatGPTSummarizer:
                 results_json = json.loads(repaired_json)
                 print('JSON parsed successfully')
                 return results_json, (messages + correction_message + [repaired_json]), \
-                       too_many_tokens, n_total_tokens
+                    too_many_tokens, n_total_tokens
             except json.JSONDecodeError:
                 retried += 1
         raise Exception(f"Could not get ChatGPT to produce a JSON result, "

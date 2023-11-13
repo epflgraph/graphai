@@ -284,8 +284,8 @@ def repair_json(text):
         if is_quote(char_code_at(text, i)):
             is_end_quote = (is_double_quote if is_double_quote(char_code_at(text, i))
                             else is_single_quote if is_single_quote(char_code_at(text, i))
-            else is_single_quote_like if is_single_quote_like(char_code_at(text, i))
-            else is_double_quote_like)
+                            else is_single_quote_like if is_single_quote_like(char_code_at(text, i))
+                            else is_double_quote_like)
 
             i_before = i
             output_before = output
@@ -424,7 +424,6 @@ def repair_json(text):
 
         return False
 
-
     def parse_keywords():
         result = parse_keyword('true', 'true')
         if result:
@@ -453,7 +452,6 @@ def repair_json(text):
 
         return False
 
-
     def parse_keyword(name, value):
         nonlocal i, output
         if text[i:i + len(name)] == name:
@@ -462,7 +460,6 @@ def repair_json(text):
             return True
 
         return False
-
 
     def parse_unquoted_string():
         nonlocal i, output
@@ -477,7 +474,7 @@ def repair_json(text):
                 # repair a JSONP function call like callback({...});
                 i += 1
 
-                processed = parse_value()
+                parse_value()
 
                 if char_code_at(text, i) == codeCloseParenthesis:
                     # repair: skip close bracket of function call
