@@ -307,10 +307,9 @@ class ChatGPTSummarizer:
         # We count the approximate number of tokens in order to choose the right model (i.e. context size)
         approx_token_count = text_token_count + system_token_count + max_len
         print(approx_token_count)
-        if approx_token_count < 4096:
+        if approx_token_count < 16384:
+            # This is now the 16K context model for 3.5
             model_type = 'gpt-3.5-turbo'
-        elif 4096 < approx_token_count < 16384:
-            model_type = 'gpt-3.5-turbo-16k'
         else:
             # If the token count is above 16384, the text is too large and we can't summarize it
             return None, True, None
