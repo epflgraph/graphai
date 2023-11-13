@@ -172,8 +172,8 @@ def repair_json(text):
                             char_code_at(text, i) == codeClosingBrace
                             or char_code_at(text, i) == codeOpeningBrace
                             or char_code_at(text, i) == codeClosingBracket
-                            or char_code_at(text, i) == codeOpeningBracket or
-                            char_at(text, i, None) is None
+                            or char_code_at(text, i) == codeOpeningBracket
+                            or char_at(text, i, None) is None
                     ):
                         # repair trailing comma
                         output = strip_last_occurrence(output, ',')
