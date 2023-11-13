@@ -6,6 +6,14 @@ graphai.core.common package
    :undoc-members:
    :show-inheritance:
 
+Subpackages
+-----------
+
+.. toctree::
+   :maxdepth: 1
+
+   graphai.core.common.json_repair
+
 Submodules
 ----------
 
@@ -14,6 +22,7 @@ Submodules
 
    graphai.core.common.caching
    graphai.core.common.common_utils
+   graphai.core.common.gpt_message_presets
    graphai.core.common.graph
    graphai.core.common.ontology
    graphai.core.common.scraping

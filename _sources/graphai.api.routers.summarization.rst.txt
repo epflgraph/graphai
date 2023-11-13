@@ -1,7 +1,0 @@
-graphai.api.routers.summarization module
-========================================
-
-.. automodule:: graphai.api.routers.summarization
-   :members:
-   :undoc-members:
-   :show-inheritance:

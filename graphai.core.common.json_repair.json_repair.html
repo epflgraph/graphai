@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>graphai.core.common package &mdash; EPFL Graph AI</title>
+  <title>graphai.core.common.json_repair.json_repair module &mdash; EPFL Graph AI</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -17,8 +17,8 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="graphai.core.common.json_repair package" href="graphai.core.common.json_repair.html" />
-    <link rel="prev" title="graphai.core package" href="graphai.core.html" /> 
+    <link rel="next" title="graphai.core.common.json_repair.json_repair_error module" href="graphai.core.common.json_repair.json_repair_error.html" />
+    <link rel="prev" title="graphai.core.common.json_repair package" href="graphai.core.common.json_repair.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -44,9 +44,9 @@
 <li class="toctree-l1"><a class="reference internal" href="graphai.api.html">graphai.api package</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="graphai.core.html">graphai.core package</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="graphai.core.html#subpackages">Subpackages</a><ul class="current">
-<li class="toctree-l3 current"><a class="current reference internal" href="#">graphai.core.common package</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#subpackages">Subpackages</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#submodules">Submodules</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="graphai.core.common.html">graphai.core.common package</a><ul class="current">
+<li class="toctree-l4 current"><a class="reference internal" href="graphai.core.common.html#subpackages">Subpackages</a></li>
+<li class="toctree-l4"><a class="reference internal" href="graphai.core.common.html#submodules">Submodules</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="graphai.core.interfaces.html">graphai.core.interfaces package</a></li>
@@ -77,9 +77,11 @@
   <ul class="wy-breadcrumbs">
       <li><a href="graphai.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="graphai.core.html">graphai.core package</a></li>
-      <li class="breadcrumb-item active">graphai.core.common package</li>
+          <li class="breadcrumb-item"><a href="graphai.core.common.html">graphai.core.common package</a></li>
+          <li class="breadcrumb-item"><a href="graphai.core.common.json_repair.html">graphai.core.common.json_repair package</a></li>
+      <li class="breadcrumb-item active">graphai.core.common.json_repair.json_repair module</li>
       <li class="wy-breadcrumbs-aside">
-            <a href="_sources/graphai.core.common.rst.txt" rel="nofollow"> View page source</a>
+            <a href="_sources/graphai.core.common.json_repair.json_repair.rst.txt" rel="nofollow"> View page source</a>
       </li>
   </ul>
   <hr/>
@@ -87,39 +89,26 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="module-graphai.core.common">
-<span id="graphai-core-common-package"></span><h1>graphai.core.common package<a class="headerlink" href="#module-graphai.core.common" title="Permalink to this heading"></a></h1>
-<section id="subpackages">
-<h2>Subpackages<a class="headerlink" href="#subpackages" title="Permalink to this heading"></a></h2>
-<div class="toctree-wrapper compound">
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="graphai.core.common.json_repair.html">graphai.core.common.json_repair package</a></li>
-</ul>
-</div>
-</section>
-<section id="submodules">
-<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this heading"></a></h2>
-<div class="toctree-wrapper compound">
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="graphai.core.common.caching.html">graphai.core.common.caching module</a></li>
-<li class="toctree-l1"><a class="reference internal" href="graphai.core.common.common_utils.html">graphai.core.common.common_utils module</a></li>
-<li class="toctree-l1"><a class="reference internal" href="graphai.core.common.gpt_message_presets.html">graphai.core.common.gpt_message_presets module</a></li>
-<li class="toctree-l1"><a class="reference internal" href="graphai.core.common.graph.html">graphai.core.common.graph module</a></li>
-<li class="toctree-l1"><a class="reference internal" href="graphai.core.common.ontology.html">graphai.core.common.ontology module</a></li>
-<li class="toctree-l1"><a class="reference internal" href="graphai.core.common.scraping.html">graphai.core.common.scraping module</a></li>
-<li class="toctree-l1"><a class="reference internal" href="graphai.core.common.text_utils.html">graphai.core.common.text_utils module</a></li>
-<li class="toctree-l1"><a class="reference internal" href="graphai.core.common.video.html">graphai.core.common.video module</a></li>
-</ul>
-</div>
-</section>
+  <section id="module-graphai.core.common.json_repair.json_repair">
+<span id="graphai-core-common-json-repair-json-repair-module"></span><h1>graphai.core.common.json_repair.json_repair module<a class="headerlink" href="#module-graphai.core.common.json_repair.json_repair" title="Permalink to this heading"></a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.core.common.json_repair.json_repair.repair_json">
+<span class="sig-prename descclassname"><span class="pre">graphai.core.common.json_repair.json_repair.</span></span><span class="sig-name descname"><span class="pre">repair_json</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.json_repair.json_repair.repair_json" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.core.common.json_repair.json_repair.at_end_of_block_comment">
+<span class="sig-prename descclassname"><span class="pre">graphai.core.common.json_repair.json_repair.</span></span><span class="sig-name descname"><span class="pre">at_end_of_block_comment</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">i</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.json_repair.json_repair.at_end_of_block_comment" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
 </section>
 
 
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="graphai.core.html" class="btn btn-neutral float-left" title="graphai.core package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="graphai.core.common.json_repair.html" class="btn btn-neutral float-right" title="graphai.core.common.json_repair package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="graphai.core.common.json_repair.html" class="btn btn-neutral float-left" title="graphai.core.common.json_repair package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="graphai.core.common.json_repair.json_repair_error.html" class="btn btn-neutral float-right" title="graphai.core.common.json_repair.json_repair_error module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

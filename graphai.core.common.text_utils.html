@@ -45,6 +45,7 @@
 <li class="toctree-l1 current"><a class="reference internal" href="graphai.core.html">graphai.core package</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="graphai.core.html#subpackages">Subpackages</a><ul class="current">
 <li class="toctree-l3 current"><a class="reference internal" href="graphai.core.common.html">graphai.core.common package</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="graphai.core.common.html#subpackages">Subpackages</a></li>
 <li class="toctree-l4 current"><a class="reference internal" href="graphai.core.common.html#submodules">Submodules</a></li>
 </ul>
 </li>
@@ -166,8 +167,18 @@
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="graphai.core.common.text_utils.compute_slide_tfidf_scores">
+<span class="sig-prename descclassname"><span class="pre">graphai.core.common.text_utils.</span></span><span class="sig-name descname"><span class="pre">compute_slide_tfidf_scores</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">list_of_sets</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_freq</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.text_utils.compute_slide_tfidf_scores" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="graphai.core.common.text_utils.find_set_cover">
 <span class="sig-prename descclassname"><span class="pre">graphai.core.common.text_utils.</span></span><span class="sig-name descname"><span class="pre">find_set_cover</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">list_of_sets</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coverage</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scores</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.text_utils.find_set_cover" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.core.common.text_utils.find_best_slide_subset">
+<span class="sig-prename descclassname"><span class="pre">graphai.core.common.text_utils.</span></span><span class="sig-name descname"><span class="pre">find_best_slide_subset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">slides_and_concepts</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coverage</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">priorities</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_freq</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.text_utils.find_best_slide_subset" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
@@ -190,12 +201,12 @@
 
 <dl class="py function">
 <dt class="sig sig-object py" id="graphai.core.common.text_utils.generate_summary_text_token">
-<span class="sig-prename descclassname"><span class="pre">graphai.core.common.text_utils.</span></span><span class="sig-name descname"><span class="pre">generate_summary_text_token</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">text_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'text'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">summary_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'summary'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">len_class</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'normal'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tone</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'info'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.text_utils.generate_summary_text_token" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">graphai.core.common.text_utils.</span></span><span class="sig-name descname"><span class="pre">generate_summary_text_token</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">text_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'text'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">summary_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'summary'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.text_utils.generate_summary_text_token" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="graphai.core.common.text_utils.generate_summary_type_dict">
-<span class="sig-prename descclassname"><span class="pre">graphai.core.common.text_utils.</span></span><span class="sig-name descname"><span class="pre">generate_summary_type_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">summary_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">len_class</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tone</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.text_utils.generate_summary_type_dict" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="graphai.core.common.text_utils.generate_completion_type_dict">
+<span class="sig-prename descclassname"><span class="pre">graphai.core.common.text_utils.</span></span><span class="sig-name descname"><span class="pre">generate_completion_type_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">completion_type</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.text_utils.generate_completion_type_dict" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
@@ -223,6 +234,21 @@
 <dd><p>Ensures that an API key exists and sets it as the OpenAI key
 :returns: Boolean indicating whether an API key was found</p>
 </dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="graphai.core.common.text_utils.ChatGPTSummarizer.summarize_academic_entity">
+<span class="sig-name descname"><span class="pre">summarize_academic_entity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">long_len</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">200</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">short_len</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">32</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title_len</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temperature</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">top_p</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">simulate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.text_utils.ChatGPTSummarizer.summarize_academic_entity" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="graphai.core.common.text_utils.ChatGPTSummarizer.summarize_generic">
+<span class="sig-name descname"><span class="pre">summarize_generic</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">long_len</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">200</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">short_len</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">32</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title_len</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temperature</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">top_p</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">simulate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.text_utils.ChatGPTSummarizer.summarize_generic" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="graphai.core.common.text_utils.ChatGPTSummarizer.summarize_lecture">
+<span class="sig-name descname"><span class="pre">summarize_lecture</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">slide_to_concepts</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">long_len</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">200</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">short_len</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">32</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title_len</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temperature</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">top_p</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">simulate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.text_utils.ChatGPTSummarizer.summarize_lecture" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="graphai.core.common.text_utils.ChatGPTSummarizer.generate_summary">
@@ -258,13 +284,25 @@
 
 <dl class="py method">
 <dt class="sig sig-object py" id="graphai.core.common.text_utils.ChatGPTSummarizer.make_sure_json_is_valid">
-<span class="sig-name descname"><span class="pre">make_sure_json_is_valid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">results</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">messages</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">system_message</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temperature</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">top_p</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_retries</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.text_utils.ChatGPTSummarizer.make_sure_json_is_valid" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">make_sure_json_is_valid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">results</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">messages</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">system_message</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temperature</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">top_p</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_retries</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.text_utils.ChatGPTSummarizer.make_sure_json_is_valid" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="graphai.core.common.text_utils.ChatGPTSummarizer.cleanup_text">
 <span class="sig-name descname"><span class="pre">cleanup_text</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text_or_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">text_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'slide'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">handwriting</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temperature</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">top_p</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">simulate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.text_utils.ChatGPTSummarizer.cleanup_text" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Cleans up dirty text that contains typos and unnecessary line breaks.
+:param text_or_dict: Input, can be one string or a dictionary of strings
+:param text_type: Source of the input, ‘slide’ by default
+:param handwriting: Whether the text comes from OCR on handwriting
+:param temperature: Temperature for GPT, determines creativity/determinism
+:param top_p: Top P for GPT, determines which parts of the distribution are considered.
+:param simulate: Whether to just simulate the costs</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Results, system message sent to GPT, whether there were too many tokens, and # of tokens/cost</p>
+</dd>
+</dl>
+</dd></dl>
 
 </dd></dl>
 

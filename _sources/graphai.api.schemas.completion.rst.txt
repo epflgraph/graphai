@@ -1,0 +1,7 @@
+graphai.api.schemas.completion module
+=====================================
+
+.. automodule:: graphai.api.schemas.completion
+   :members:
+   :undoc-members:
+   :show-inheritance:

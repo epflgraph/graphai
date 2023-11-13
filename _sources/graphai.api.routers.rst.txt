@@ -12,10 +12,10 @@ Submodules
 .. toctree::
    :maxdepth: 1
 
+   graphai.api.routers.completion
    graphai.api.routers.image
    graphai.api.routers.ontology
    graphai.api.routers.scraping
-   graphai.api.routers.summarization
    graphai.api.routers.text
    graphai.api.routers.translation
    graphai.api.routers.video
