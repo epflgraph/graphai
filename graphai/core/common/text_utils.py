@@ -12,8 +12,13 @@ import pysbd
 import tiktoken
 from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
 import torch
+from sklearn.feature_extraction.text import TfidfVectorizer
 
 from graphai.definitions import CONFIG_DIR
+from graphai.core.common.json_repair.json_repair import repair_json
+from graphai.core.common.gpt_message_presets import generate_lecture_summary_message, \
+    generate_generic_summary_message, generate_academic_entity_summary_message
+
 TRANSLATION_LIST_SEPARATOR = ' [{[!!SEP!!]}] '
 CHATGPT_COSTS_PER_1K = {
     'gpt-3.5-turbo': {
@@ -136,6 +141,17 @@ def detect_text_language(s):
         return None
 
 
+def compute_slide_tfidf_scores(list_of_sets, min_freq=1):
+    sep = ' [{!!}] '
+    list_of_strings = [sep.join(s) for s in list_of_sets]
+    vectorizer = TfidfVectorizer(analyzer=lambda x: x.split(sep), norm=None, min_df=min_freq)
+    tfidf_matrix = vectorizer.fit_transform(list_of_strings)
+    scores = np.array(tfidf_matrix.sum(axis=1)).flatten()
+    scores = scores.tolist()
+    words_kept = set(vectorizer.vocabulary_.keys())
+    return scores, words_kept
+
+
 def find_set_cover(list_of_sets, coverage=1.0, scores=None):
     assert isinstance(list_of_sets, list) and all(isinstance(s, set) for s in list_of_sets)
     elements = set(chain.from_iterable(list_of_sets))
@@ -143,12 +159,31 @@ def find_set_cover(list_of_sets, coverage=1.0, scores=None):
     cover = list()
     if scores is None:
         scores = [1] * len(list_of_sets)
-    while len(covered) / len(elements) < coverage:
+    current_coverage = 0
+    while current_coverage < coverage:
+        print(len(covered), len(elements))
         subset = max(list_of_sets, key=lambda s: len(s - covered) * scores[list_of_sets.index(s)])
         cover.append(subset)
         covered |= subset
+        new_coverage = len(covered) / len(elements)
+        # If the selection of this subset has not increased coverage, then we're stuck in a loop with all remaining
+        # scores being equal to 0, and we should stop the algorithm.
+        if new_coverage == current_coverage:
+            print(f'Max coverage reached at {new_coverage}')
+            break
+        current_coverage = new_coverage
+
     cover_indices = [list_of_sets.index(s) for s in cover]
     return cover, cover_indices
+
+
+def find_best_slide_subset(slides_and_concepts, coverage=1.0, priorities=True, min_freq=2):
+    if priorities:
+        scores, words_to_keep = compute_slide_tfidf_scores(slides_and_concepts, min_freq)
+        slides_and_concepts = [{w for w in s if w in words_to_keep} for s in slides_and_concepts]
+    else:
+        scores = None
+    return find_set_cover(slides_and_concepts, coverage, scores)
 
 
 def count_tokens_for_openai(text, model="cl100k_base"):
@@ -171,32 +206,21 @@ def force_dict_to_text(t):
     return t
 
 
-def generate_summary_text_token(text, text_type='text', summary_type='summary', len_class='normal', tone='info'):
-    assert summary_type in ['summary', 'title', 'cleanup']
-    if summary_type == 'title' or summary_type == 'summary':
-        assert text_type in ['person', 'unit', 'concept', 'course', 'lecture', 'MOOC', 'publication', 'text']
-    assert len_class in ['vshort', 'short', 'normal', None]
-    assert tone in ['info', 'promo', None]
+def generate_summary_text_token(text, text_type='text', summary_type='summary'):
+    assert summary_type in ['summary', 'cleanup']
+    if summary_type == 'summary':
+        assert text_type in ['lecture', 'academic_entity', 'text']
 
     text = force_dict_to_text(text)
     token = md5_text(text) + '_' + text_type + '_' + summary_type
-    if len_class is not None:
-        token += '_' + len_class
-    if tone is not None:
-        token += '_' + tone
     return token
 
 
-def generate_summary_type_dict(text_type, summary_type, len_class, tone):
-    d = {
+def generate_completion_type_dict(text_type, completion_type):
+    return {
         'input_type': text_type,
-        'summary_type': summary_type
+        'completion_type': completion_type
     }
-    if len_class is not None:
-        d['summary_len_class'] = len_class
-    if tone is not None:
-        d['summary_tone'] = tone
-    return d
 
 
 def convert_text_or_dict_to_text(text_or_dict):
@@ -208,7 +232,6 @@ def convert_text_or_dict_to_text(text_or_dict):
 
 
 def update_token_count(old_token_counts=None, token_counts=None):
-    print(old_token_counts, token_counts)
     if token_counts is None or len(token_counts) == 0:
         return old_token_counts
     if old_token_counts is None or len(old_token_counts) == 0:
@@ -252,7 +275,7 @@ class ChatGPTSummarizer:
             return False
 
     def _generate_completion(self, text, system_message, max_len=None, temperature=1.0, top_p=1.0,
-                             simulate=False):
+                             simulate=False, verbose=False, timeout=60):
         """
         Internal method, generates a chat completion, which is the OpenAI API endpoint for ChatGPT interactions
         Args:
@@ -283,6 +306,7 @@ class ChatGPTSummarizer:
             max_len = int(2 * max_len)
         # We count the approximate number of tokens in order to choose the right model (i.e. context size)
         approx_token_count = text_token_count + system_token_count + max_len
+        print(approx_token_count)
         if approx_token_count < 4096:
             model_type = 'gpt-3.5-turbo'
         elif 4096 < approx_token_count < 16384:
@@ -292,7 +316,8 @@ class ChatGPTSummarizer:
             return None, True, None
         if not simulate:
             messages = [{"role": "system", "content": system_message}]
-            messages += [{"role": "user", "content": text[i]} if i % 2 == 0 else {"role": "assistant", "content": text[i]}
+            messages += [{"role": "user", "content": text[i]} if i % 2 == 0
+                         else {"role": "assistant", "content": text[i]}
                          for i in range(len(text))]
             try:
                 # Generate the completion
@@ -301,9 +326,11 @@ class ChatGPTSummarizer:
                     messages=messages,
                     max_tokens=max_len,
                     temperature=temperature,
-                    top_p=top_p
+                    top_p=top_p,
+                    request_timeout=timeout
                 )
-                print(completion)
+                if verbose:
+                    print(completion)
             except openai.error.InvalidRequestError as e:
                 # We check to see if the exception was caused by too many tokens in the input
                 print(e)
@@ -329,6 +356,58 @@ class ChatGPTSummarizer:
         cost = compute_chatgpt_request_cost(token_count_dict, model_type)
         token_count_dict['cost'] = cost
         return final_result, False, token_count_dict
+
+    def _summarize(self, text, system_message, temperature=1.0, top_p=0.3, simulate=False, max_len=None):
+        results, too_many_tokens, n_total_tokens = \
+            self._generate_completion(text, system_message, temperature=temperature, top_p=top_p, simulate=simulate,
+                                      timeout=30, max_len=max_len)
+        token_count = n_total_tokens
+        if results is None:
+            return None, system_message, too_many_tokens, token_count
+
+        # Making sure the results are in a valid JSON format
+        results, message_chain, too_many_tokens, n_total_tokens = \
+            self.make_sure_json_is_valid(results, text, system_message,
+                                         temperature=temperature, top_p=top_p)
+        token_count = update_token_count(token_count, token_count)
+
+        return results, system_message, too_many_tokens, token_count
+
+    def summarize_academic_entity(self, input_dict, long_len=200, short_len=32, title_len=10,
+                                  temperature=1.0, top_p=0.3, simulate=False):
+        entity = input_dict['entity']
+        name = input_dict['name']
+        subtype = input_dict['subtype']
+        possible_subtypes = input_dict['possible_subtypes']
+        text = input_dict['text']
+        categories = input_dict['categories']
+        user_message = f'[entity] = {entity}\n[name] = {name}\n' \
+                       f'[subtype] = {subtype}\n[possible subtypes] = {possible_subtypes}\n' \
+                       f'[text] = "{text}"\n[categories] = {categories}\n' \
+                       f'[n words (long)] = {long_len}\n[n words (short)] = {short_len}\n' \
+                       f'[n words (title)] = {title_len}\n'
+        system_message, assistant_message = generate_academic_entity_summary_message()
+        max_len = int(1.5 * (long_len + short_len))
+        return self._summarize([user_message, assistant_message], system_message,
+                               temperature, top_p, simulate, max_len)
+
+    def summarize_generic(self, text, long_len=200, short_len=32, title_len=10,
+                          temperature=1.0, top_p=0.3, simulate=False):
+        assert isinstance(text, str) or isinstance(text, dict)
+        system_message = generate_generic_summary_message(long_len, short_len, title_len)
+        text = convert_text_or_dict_to_text(text)
+        max_len = int(1.5 * (long_len + short_len + title_len))
+        return self._summarize(text, system_message, temperature, top_p, simulate, max_len)
+
+    def summarize_lecture(self, slide_to_concepts, long_len=200, short_len=32, title_len=10,
+                          temperature=1.0, top_p=0.3, simulate=False):
+        assert isinstance(slide_to_concepts, dict)
+        system_message = generate_lecture_summary_message(long_len, short_len, title_len)
+        slide_to_concepts = {k: v for k, v in slide_to_concepts.items() if len(v) > 0}
+        slide_numbers_sorted = sorted(list(slide_to_concepts.keys()))
+        text = '\n\n'.join([f'Slide {i}: ' + '; '.join(slide_to_concepts[i]) for i in slide_numbers_sorted])
+        max_len = int(1.5 * (long_len + short_len + title_len))
+        return self._summarize(text, system_message, temperature, top_p, simulate, max_len)
 
     def generate_summary(self, text_or_dict, text_type='lecture', summary_type='summary',
                          len_class='normal', tone='info', max_normal_len=100, max_short_len=40):
@@ -498,34 +577,72 @@ class ChatGPTSummarizer:
         results = ':'.join(results.split(':')[1:]).strip().strip('"')
         return results, system_message, too_many_tokens, n_total_tokens
 
-    def make_sure_json_is_valid(self, results, messages, system_message, temperature=1, top_p=0.3,
+    def make_sure_json_is_valid(self, results, messages, system_message, temperature=1.0, top_p=0.3,
                                 n_retries=1):
+        # Trying to directly parse the JSON...
+        if isinstance(messages, str):
+            messages = [messages]
         try:
+            print('Parsing JSON...')
             prev_results_json = json.loads(results)
+            print('JSON parsed successfully')
             return prev_results_json, (messages + [results]), False, dict()
         except json.JSONDecodeError:
+            print(results)
             print('Results not in JSON, retrying')
+        # Trying to fix the JSON algorithmically...
+        try:
+            print('Trying to algorithmically fix the JSON...')
+            repaired_json = repair_json(results)
+            prev_results_json = json.loads(repaired_json)
+            print('JSON parsed successfully')
+            return prev_results_json, (messages + [repaired_json]), False, dict()
+        except Exception:
+            print('Algorithmic JSON fix unsuccessful, retrying')
+        # Trying to fix the JSON by asking ChatGPT again...
         messages = messages + [results]
         retried = 0
         while retried < n_retries:
             try:
                 correction_message = ['The results were not in a JSON format. Improve your previous response by '
-                                      'making sure the results are in JSON.']
+                                      'making sure the results are in JSON. Be sure to escape double quotes and '
+                                      'backslashes. Double quotes should be escaped to \\", and backslashes to \\\\.'
+                                      ' Do NOT return the exact same results as the input: the input is not a valid '
+                                      'JSON and the results must be a valid JSON.']
                 results, too_many_tokens, n_total_tokens = \
                     self._generate_completion(
                         messages + correction_message,
-                        system_message, temperature=temperature, top_p=top_p)
+                        system_message, temperature=temperature, top_p=top_p,
+                        timeout=10
+                    )
                 if results is None:
                     return None, (messages + correction_message), too_many_tokens, n_total_tokens
-                results_json = json.loads(results)
-                return results_json, (messages + correction_message + [results]), too_many_tokens, n_total_tokens
-            except Exception:
+                print('Parsing JSON...')
+                repaired_json = repair_json(results)
+                results_json = json.loads(repaired_json)
+                print('JSON parsed successfully')
+                return results_json, (messages + correction_message + [repaired_json]), \
+                    too_many_tokens, n_total_tokens
+            except json.JSONDecodeError:
                 retried += 1
         raise Exception(f"Could not get ChatGPT to produce a JSON result, "
                         f"here are the final results produced: {results}")
 
     def cleanup_text(self, text_or_dict, text_type='slide', handwriting=True, temperature=1, top_p=0.3,
                      simulate=False):
+        """
+        Cleans up dirty text that contains typos and unnecessary line breaks.
+        Args:
+            text_or_dict: Input, can be one string or a dictionary of strings
+            text_type: Source of the input, 'slide' by default
+            handwriting: Whether the text comes from OCR on handwriting
+            temperature: Temperature for GPT, determines creativity/determinism
+            top_p: Top P for GPT, determines which parts of the distribution are considered.
+            simulate: Whether to just simulate the costs
+
+        Returns:
+            Results, system message sent to GPT, whether there were too many tokens, and # of tokens/cost
+        """
         if handwriting:
             system_message = "You will be given the contents of a %s, " \
                              "which result from optical character recognition " \
@@ -537,9 +654,11 @@ class ChatGPTSummarizer:
                           "The text could potentially contain typos, incorrect grammar, scrambled sentences, " \
                           "and mathematical notation. " \
                           "Return the results in the following JSON format:\n" \
-                          "'{\"language\": [LANGUAGE],\n" \
+                          "```\n" \
+                          "{\"language\": [LANGUAGE],\n" \
                           "\"subject\": [SUBJECT MATTER],\n" \
                           "\"cleaned\": [CLEANED UP TEXT]}.\n" \
+                          "```\n" \
                           "DO NOT provide any explanations as to how you performed the cleanup. " \
                           "DO NOT translate or summarize the text.\n" \
                           "Clean the text up by performing the following steps, in order:\n" \
@@ -552,12 +671,18 @@ class ChatGPTSummarizer:
                           "4. Correct ALL typos. Treat words that exist neither in [LANGUAGE] nor in English " \
                           "as typos. Treat words that are completely unrelated to the [SUBJECT MATTER] or " \
                           "the other words in the text as typos. Correct every single typo to the closest word " \
-                          "in [LANGUAGE] (or failing that, English) that fits within the [SUBJECT MATTER].\n" \
-                          "Make sure the results are in JSON."
+                          "in [LANGUAGE] (or failing that, English) that fits within the [SUBJECT MATTER]. " \
+                          "If you encounter a non-word and cannot correct it to anything meaningful, remove " \
+                          "it from the text entirely.\n" \
+                          "5. Remove all mathematical formulae.\n" \
+                          "Make sure the results are in JSON, and that double quotes and backslashes are escaped " \
+                          "properly (double quotes should be \\\" and backslashes should be \\\\)."
 
         # Make a call to ChatGPT to generate initial results. These will still be full of typos.
+        text = text + "\n\nBe sure to respond in JSON format!"
         results, too_many_tokens, n_total_tokens = \
-            self._generate_completion(text, system_message, temperature=temperature, top_p=top_p, simulate=simulate)
+            self._generate_completion(text, system_message, temperature=temperature, top_p=top_p, simulate=simulate,
+                                      timeout=10)
         print('FIRST')
         token_count = n_total_tokens
         if not simulate:
@@ -565,12 +690,11 @@ class ChatGPTSummarizer:
                 return None, system_message, too_many_tokens, token_count
 
             results, message_chain, too_many_tokens, n_total_tokens = \
-                self.make_sure_json_is_valid(results, [text], system_message,
+                self.make_sure_json_is_valid(results, text, system_message,
                                              temperature=temperature, top_p=top_p)
             token_count = update_token_count(token_count, n_total_tokens)
             if results is None:
                 return None, system_message, too_many_tokens, token_count
-            print(results)
         else:
             # If we're simulating the run, then there's no need to double check the JSON
             # We don't count potential JSON corrections in our estimation because they are quite rare anyway
@@ -585,7 +709,7 @@ class ChatGPTSummarizer:
         results, too_many_tokens, n_total_tokens = \
             self._generate_completion(
                 message_chain + correction_message, system_message, max_len=len(text) if simulate else None,
-                temperature=temperature, top_p=top_p, simulate=simulate)
+                temperature=temperature, top_p=top_p, simulate=simulate, timeout=10)
         print('SECOND')
         token_count = update_token_count(token_count, n_total_tokens)
 
@@ -599,11 +723,10 @@ class ChatGPTSummarizer:
             self.make_sure_json_is_valid(results, message_chain + correction_message,
                                          system_message,
                                          temperature=temperature, top_p=top_p)
+        print(results)
         token_count = update_token_count(token_count, n_total_tokens)
         if results is None:
             return None, system_message, too_many_tokens, token_count
-
-        print(results)
 
         # Return the results of the second call
         return results, system_message, too_many_tokens, token_count

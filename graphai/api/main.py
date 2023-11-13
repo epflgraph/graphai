@@ -11,7 +11,7 @@ import graphai.api.routers.text as text_router
 import graphai.api.routers.video as video_router
 import graphai.api.routers.voice as voice_router
 import graphai.api.routers.translation as translation_router
-import graphai.api.routers.summarization as summarization_router
+import graphai.api.routers.completion as summarization_router
 import graphai.api.routers.scraping as scraping_router
 
 from graphai.api.celery_tasks.text import text_init_task
