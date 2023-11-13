@@ -133,13 +133,11 @@ async def calculate_summary_text_fingerprint(data: SummaryFingerprintRequest):
     text_type = data.text_type
     assert (
         (completion_type == 'cleanup' and (isinstance(text, str) or isinstance(text, dict)))
-        or
-        (completion_type == 'summary' and text_type != 'lecture' and (isinstance(text, str) or isinstance(text, dict)))
-        or
-        (completion_type == 'summary' and text_type == 'lecture' and isinstance(text, list))
-        or
-        (completion_type == 'summary' and (text_type == 'unit' or text_type == 'person') and
-         isinstance(text, AcademicEntityDescriptor))
+        or (completion_type == 'summary' and text_type != 'lecture'
+            and (isinstance(text, str) or isinstance(text, dict)))
+        or (completion_type == 'summary' and text_type == 'lecture' and isinstance(text, list))
+        or (completion_type == 'summary' and (text_type == 'unit' or text_type == 'person')
+            and isinstance(text, AcademicEntityDescriptor))
     )
     if completion_type == 'summary' and text_type == 'lecture':
         text = populate_slide_concepts_dict(text)

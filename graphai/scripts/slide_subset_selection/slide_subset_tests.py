@@ -31,7 +31,7 @@ def detect_concepts(list_of_slides_text, threshold=None):
             current_results = sorted([(c['PageTitle'], c['MixedScore'], c['LevenshteinScore']) for c in response],
                                      key=lambda x: -x[1])
             results_list.append({c[0] for c in current_results if c[1] > 0.7 and c[2] > 0.1})
-        except Exception as e:
+        except Exception:
             print('An error occurred, here is the response')
             print(response)
             results_list.append(set())

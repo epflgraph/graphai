@@ -1,6 +1,7 @@
-# Constants for ASCII codes
 import numpy as np
+import re
 
+# Constants for ASCII codes
 codeBackslash = 0x5c  # "\"
 codeSlash = 0x2f  # "/"
 codeAsterisk = 0x2a  # "*"
@@ -45,8 +46,6 @@ codeQuoteRight = 0x2019  # ’
 codeGraveAccent = 0x0060  # `
 codeAcuteAccent = 0x00b4  # ´
 
-import re
-
 
 def is_hex(code):
     return (codeZero <= code <= codeNine) or \
@@ -87,11 +86,8 @@ def is_whitespace(code):
 
 
 def is_special_whitespace(code):
-    return code == codeNonBreakingSpace or \
-           (codeEnQuad <= code <= codeHairSpace) or \
-           code == codeNarrowNoBreakSpace or \
-           code == codeMediumMathematicalSpace or \
-           code == codeIdeographicSpace
+    return (code == codeNonBreakingSpace or (codeEnQuad <= code <= codeHairSpace)
+            or code == codeNarrowNoBreakSpace or code == codeMediumMathematicalSpace or code == codeIdeographicSpace)
 
 
 def is_quote(code):

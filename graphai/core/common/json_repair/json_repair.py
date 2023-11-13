@@ -73,12 +73,8 @@ def repair_json(text):
     def parse_value():
         parse_whitespace_and_skip_comments()
         processed = (
-                parse_object() or
-                parse_array() or
-                parse_string() or
-                parse_number() or
-                parse_keywords() or
-                parse_unquoted_string()
+            parse_object() or parse_array() or parse_string() or parse_number()
+            or parse_keywords() or parse_unquoted_string()
         )
         parse_whitespace_and_skip_comments()
         return processed
@@ -173,10 +169,10 @@ def repair_json(text):
                 processed_key = parse_string() or parse_unquoted_string()
                 if not processed_key:
                     if (
-                            char_code_at(text, i) == codeClosingBrace or
-                            char_code_at(text, i) == codeOpeningBrace or
-                            char_code_at(text, i) == codeClosingBracket or
-                            char_code_at(text, i) == codeOpeningBracket or
+                            char_code_at(text, i) == codeClosingBrace
+                            or char_code_at(text, i) == codeOpeningBrace
+                            or char_code_at(text, i) == codeClosingBracket
+                            or char_code_at(text, i) == codeOpeningBracket or
                             char_at(text, i, None) is None
                     ):
                         # repair trailing comma
@@ -293,8 +289,8 @@ def repair_json(text):
             output += '"'
             i += 1
 
-            is_end_of_string = (lambda i: is_delimiter(char_at(text, i, None))) if stop_at_delimiter else \
-                (lambda i: is_end_quote(char_code_at(text, i)))
+            is_end_of_string = (lambda j: is_delimiter(char_at(text, j, None))) if stop_at_delimiter else \
+                (lambda j: is_end_quote(char_code_at(text, j)))
 
             while i < len(text) and not is_end_of_string(i):
                 if char_code_at(text, i) == codeBackslash:
@@ -304,8 +300,8 @@ def repair_json(text):
                         output += text[i:i + 2]
                         i += 2
                     elif char == 'u':
-                        if (is_hex(char_code_at(text, i + 2)) and is_hex(char_code_at(text, i + 3)) and
-                                is_hex(char_code_at(text, i + 4)) and is_hex(char_code_at(text, i + 5))):
+                        if (is_hex(char_code_at(text, i + 2)) and is_hex(char_code_at(text, i + 3))
+                                and is_hex(char_code_at(text, i + 4)) and is_hex(char_code_at(text, i + 5))):
                             output += text[i:i + 6]
                             i += 6
                         else:
@@ -339,8 +335,8 @@ def repair_json(text):
 
             try:
                 has_end_quote = is_quote(char_code_at(text, i))
-                valid = (has_end_quote and
-                         (i + 1 >= len(text) or is_delimiter(next_non_white_space_character(text, i + 1))))
+                valid = (has_end_quote
+                         and (i + 1 >= len(text) or is_delimiter(next_non_white_space_character(text, i + 1))))
             except Exception:
                 valid = False
                 has_end_quote = False
