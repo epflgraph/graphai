@@ -288,7 +288,7 @@ class ChatGPTSummarizer:
             while a (None, False, 0) result indicates a different error (e.g. failed connection).
         """
         assert isinstance(text, str) or (isinstance(text, list) and all(isinstance(t, str) for t in text)) \
-            or (isinstance(text, list) and all(isinstance(t, dict) for t in text))
+               or (isinstance(text, list) and all(isinstance(t, dict) for t in text))
         if isinstance(text, str):
             text = [{'role': 'user', 'content': text}]
         elif isinstance(text[0], str):
@@ -298,7 +298,7 @@ class ChatGPTSummarizer:
         has_api_key = self.establish_connection()
         # If there's no api key, only simulate mode is possible
         if not has_api_key and not simulate:
-            return None, text,  False, None
+            return None, text, False, None
         concatenated_text = '\n'.join([t['content'] for t in text])
         text_token_count = count_tokens_for_openai(concatenated_text)
         system_token_count = count_tokens_for_openai(system_message)
@@ -447,7 +447,7 @@ class ChatGPTSummarizer:
                                    'backslashes. Double quotes should be escaped to \\", and backslashes to \\\\.'
                                    ' Do NOT return the exact same results as the input: the input is not a valid '
                                    'JSON and the results must be a valid JSON.'
-                     }
+                    }
                 ]
                 results, message_chain, too_many_tokens, n_total_tokens = \
                     self._generate_completion(
@@ -461,10 +461,8 @@ class ChatGPTSummarizer:
                 repaired_json = repair_json(results)
                 results_json = json.loads(repaired_json)
                 print('JSON parsed successfully')
-                return results_json, (
-                        message_chain +
-                        [{'role': 'assistant', 'content': repaired_json}]
-                ), too_many_tokens, n_total_tokens
+                return results_json, (message_chain + [{'role': 'assistant', 'content': repaired_json}]), \
+                    too_many_tokens, n_total_tokens
             except json.JSONDecodeError:
                 retried += 1
         raise Exception(f"Could not get ChatGPT to produce a JSON result, "
@@ -594,13 +592,13 @@ class TranslationModels:
             print('Loading EN-FR')
             self.models['en-fr'] = dict()
             self.models['en-fr']['tokenizer'] = AutoTokenizer.from_pretrained("Helsinki-NLP/opus-mt-en-fr")
-            self.models['en-fr']['model'] = AutoModelForSeq2SeqLM.from_pretrained("Helsinki-NLP/opus-mt-en-fr").\
+            self.models['en-fr']['model'] = AutoModelForSeq2SeqLM.from_pretrained("Helsinki-NLP/opus-mt-en-fr"). \
                 to(self.device)
             self.models['en-fr']['segmenter'] = pysbd.Segmenter(language='en', clean=False)
             print('Loading FR-EN')
             self.models['fr-en'] = dict()
             self.models['fr-en']['tokenizer'] = AutoTokenizer.from_pretrained("Helsinki-NLP/opus-mt-fr-en")
-            self.models['fr-en']['model'] = AutoModelForSeq2SeqLM.from_pretrained("Helsinki-NLP/opus-mt-fr-en").\
+            self.models['fr-en']['model'] = AutoModelForSeq2SeqLM.from_pretrained("Helsinki-NLP/opus-mt-fr-en"). \
                 to(self.device)
             self.models['fr-en']['segmenter'] = pysbd.Segmenter(language='fr', clean=False)
 
