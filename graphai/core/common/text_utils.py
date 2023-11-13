@@ -291,13 +291,19 @@ class ChatGPTSummarizer:
             A (None, True, 0) result means that the completion failed because the message had too many tokens,
             while a (None, False, 0) result indicates a different error (e.g. failed connection).
         """
+        assert isinstance(text, str) or (isinstance(text, list) and all(isinstance(t, str) for t in text)) \
+            or (isinstance(text, list) and all(isinstance(t, dict) for t in text))
+        if isinstance(text, str):
+            text = [{'role': 'user', 'content': text}]
+        elif isinstance(text[0], str):
+            text = [{"role": "user", "content": text[i]} if i % 2 == 0
+                    else {"role": "assistant", "content": text[i]}
+                    for i in range(len(text))]
         has_api_key = self.establish_connection()
         # If there's no api key, only simulate mode is possible
         if not has_api_key and not simulate:
-            return None, False, None
-        if isinstance(text, str):
-            text = [text]
-        concatenated_text = '\n'.join(text)
+            return None, text,  False, None
+        concatenated_text = '\n'.join([t['content'] for t in text])
         text_token_count = count_tokens_for_openai(concatenated_text)
         system_token_count = count_tokens_for_openai(system_message)
         if max_len is None:
@@ -312,12 +318,10 @@ class ChatGPTSummarizer:
             model_type = 'gpt-3.5-turbo'
         else:
             # If the token count is above 16384, the text is too large and we can't summarize it
-            return None, True, None
+            return None, text, True, None
         if not simulate:
             messages = [{"role": "system", "content": system_message}]
-            messages += [{"role": "user", "content": text[i]} if i % 2 == 0
-                         else {"role": "assistant", "content": text[i]}
-                         for i in range(len(text))]
+            messages += text
             try:
                 # Generate the completion
                 completion = openai.ChatCompletion.create(
@@ -334,13 +338,13 @@ class ChatGPTSummarizer:
                 # We check to see if the exception was caused by too many tokens in the input
                 print(e)
                 if "This model's maximum context length is" in e:
-                    return None, True, None
+                    return None, text, True, None
                 else:
-                    return None, False, None
+                    return None, text, False, None
             except Exception as e:
                 # Any error other than "too many tokens" is dealt with here
                 print(e)
-                return None, False, None
+                return None, text, False, None
             token_count_dict = dict(completion.usage)
             final_result = completion.choices[0].message.content
         else:
@@ -354,10 +358,10 @@ class ChatGPTSummarizer:
             final_result = None
         cost = compute_chatgpt_request_cost(token_count_dict, model_type)
         token_count_dict['cost'] = cost
-        return final_result, False, token_count_dict
+        return final_result, text, False, token_count_dict
 
     def _summarize(self, text, system_message, temperature=1.0, top_p=0.3, simulate=False, max_len=None):
-        results, too_many_tokens, n_total_tokens = \
+        results, message_chain, too_many_tokens, n_total_tokens = \
             self._generate_completion(text, system_message, temperature=temperature, top_p=top_p, simulate=simulate,
                                       timeout=30, max_len=max_len)
         token_count = n_total_tokens
@@ -366,7 +370,7 @@ class ChatGPTSummarizer:
 
         # Making sure the results are in a valid JSON format
         results, message_chain, too_many_tokens, n_total_tokens = \
-            self.make_sure_json_is_valid(results, text, system_message,
+            self.make_sure_json_is_valid(results, message_chain, system_message,
                                          temperature=temperature, top_p=top_p)
         token_count = update_token_count(token_count, token_count)
 
@@ -386,8 +390,12 @@ class ChatGPTSummarizer:
                        f'[n words (long)] = {long_len}\n[n words (short)] = {short_len}\n' \
                        f'[n words (title)] = {title_len}\n'
         system_message, assistant_message = generate_academic_entity_summary_message()
+        message_chain = [
+            {'role': 'user', 'content': user_message},
+            {'role': 'assistant', 'content': assistant_message}
+        ]
         max_len = int(1.5 * (long_len + short_len))
-        return self._summarize([user_message, assistant_message], system_message,
+        return self._summarize(message_chain, system_message,
                                temperature, top_p, simulate, max_len)
 
     def summarize_generic(self, text, long_len=200, short_len=32, title_len=10,
@@ -408,184 +416,15 @@ class ChatGPTSummarizer:
         max_len = int(1.5 * (long_len + short_len + title_len))
         return self._summarize(text, system_message, temperature, top_p, simulate, max_len)
 
-    def generate_summary(self, text_or_dict, text_type='lecture', summary_type='summary',
-                         len_class='normal', tone='info', max_normal_len=100, max_short_len=40):
-        """
-        Generates a summary or a title for the provided text
-        Args:
-            text_or_dict: String or dictionary containing all the text to summarize and synthesize into one summary
-            text_type: Type of text, e.g. "lecture", "course". Useful for summaries.
-            summary_type: The type of the summary to be produced, either 'title' or 'summary' (default)
-            len_class: Whether there's a constraint on the number of sentences ('vshort' for 1, 'short' for 2)
-                       or not ('normal', default).
-            tone: Whether to use a marketing tone ('promo') or an informative tone ('info', default)
-            max_normal_len: Approximate maximum length of result (in words)
-
-        Returns:
-            Result of summarization, plus a flag indicating whether there were too many tokens
-        """
-        if isinstance(text_or_dict, dict):
-            text_dict_fields = [x.lower() for x in text_or_dict.keys()]
-        else:
-            if text_type != "text":
-                text_dict_fields = ["text"]
-            else:
-                text_dict_fields = list()
-
-        # Telling the API what information is being provided on the entity
-        if len(text_dict_fields) > 0:
-            system_message = f"You will be given the {', '.join(text_dict_fields)} of a {text_type}."
-        else:
-            system_message = f"You will be given a {text_type}."
-
-        # We have certain constraints on the length of the response.
-        n_sentences = None
-        max_len = max_normal_len
-        if len_class == 'vshort':
-            n_sentences = 1
-            max_len = max_short_len / 2
-        elif len_class == 'short':
-            n_sentences = 2
-            max_len = max_short_len
-        if n_sentences is not None:
-            sentences = f" {n_sentences}-sentence"
-        else:
-            sentences = ""
-        max_len_str = f" with under {max_len} words"
-
-        # Based on the text_type, we may have additional constraints.
-        # This section should be expanded based on feedback
-        exclude_name = (summary_type == 'summary' and n_sentences == 1) or \
-                       (summary_type == 'title' and n_sentences is not None)
-        additional_constraints = ""
-        if text_type == "person":
-            additional_constraints = " INCLUDE their job title and place of work in the response (if available)."
-            if exclude_name:
-                additional_constraints += " EXCLUDE the name of the person from the response."
-        elif text_type == "unit":
-            additional_constraints = " INCLUDE the institution that it is part of in the response (if available)."
-            if exclude_name:
-                additional_constraints += " EXCLUDE the name of the unit from the response."
-        elif text_type == 'concept':
-            if exclude_name:
-                additional_constraints += " EXCLUDE the name of the concept from the response."
-        elif text_type == 'course':
-            additional_constraints = " INCLUDE the name of the professor teaching it (if available)."
-            if exclude_name:
-                additional_constraints += " EXCLUDE the name of the course from the response."
-        elif text_type == 'MOOC':
-            additional_constraints = " INCLUDE the name of the professor teaching it (if available)."
-            if exclude_name:
-                additional_constraints += " EXCLUDE the name of the MOOC from the response."
-        elif text_type == 'lecture':
-            if exclude_name:
-                additional_constraints += " EXCLUDE the name of the lecture from the response."
-        elif text_type == 'publication':
-            additional_constraints += " EXCLUDE the paper's name from the response."
-            if exclude_name:
-                additional_constraints += " EXCLUDE the names of the authors from the response."
-            else:
-                additional_constraints = " INCLUDE the names of the first few authors in the response."
-
-        # This is the main part that determines whether we get a title or a summary
-        if summary_type == 'title':
-            system_message += f" Generate a title for the {text_type}{max_len_str}."
-        else:
-            system_message += f" Generate a{sentences} summary for the " \
-                              f"{text_type}{max_len_str}."
-
-        # Adding the additional constraints
-        system_message += additional_constraints
-
-        if tone == 'promo':
-            system_message += " Write in a promotional tone. "
-        else:
-            system_message += " Write in a neutral, informative tone. "
-
-        # Now we compile the response format
-        response_format = f"\"{summary_type}: "
-        sample_response = ""
-        # This section should also be expanded based on feedback
-        if text_type == 'person':
-            if n_sentences == 1:
-                response_format += "[BRIEF DESCRIPTION OF CURRENT JOB]\""
-                sample_response = \
-                    f"\"{summary_type}: Associate Professor at EPFL working on social network analysis"
-            elif n_sentences == 2:
-                response_format += "[BRIEF DESCRIPTION OF CURRENT JOB], [BRIEF DESCRIPTION OF INTERESTS].\""
-                sample_response = \
-                    f"\"{summary_type}: Associate Professor at EPFL working on social network analysis, " \
-                    f"with contributions to graph theory and graph neural networks\""
-            else:
-                response_format += "[RESPONSE]\""
-        elif text_type == 'unit':
-            if n_sentences is not None:
-                response_format += "[BRIEF DESCRIPTION OF RESEARCH OR DEVELOPMENT AREAS]\""
-                sample_response = \
-                    f"\"{summary_type}: Laboratory at EPFL working on social network analysis and graph neural networks"
-            else:
-                response_format += "[RESPONSE]\""
-        elif text_type == 'concept':
-            if n_sentences is not None:
-                response_format += "[BRIEF EXPLANATION OF THE CONCEPT]\""
-                sample_response = \
-                    f"\"{summary_type}: Algorithm in graph theory that finds a minimum cut in a given graph"
-            else:
-                response_format += "[RESPONSE]\""
-        elif text_type == 'course':
-            if n_sentences is not None:
-                response_format += "[BRIEF DESCRIPTION OF COURSE CONTENTS]\""
-                sample_response = \
-                    f"\"{summary_type}: Course on graph theory and graph algorithms for BSc Computer Science students"
-            else:
-                response_format += "[RESPONSE]\""
-        elif text_type == 'MOOC':
-            if n_sentences is not None:
-                response_format += "[BRIEF DESCRIPTION OF MOOC CONTENTS]\""
-                sample_response = \
-                    f"\"{summary_type}: Introductory-level MOOC on graph theory and graph algorithms"
-            else:
-                response_format += "[RESPONSE]\""
-        elif text_type == 'lecture':
-            if n_sentences is not None:
-                response_format += "[BRIEF DESCRIPTION OF LECTURE CONTENTS]\""
-                sample_response = \
-                    f"\"{summary_type}: Lecture introducing directed acyclic graphs and presenting a number of theorems"
-            else:
-                response_format += "[RESPONSE]\""
-        elif text_type == 'publication':
-            if n_sentences is not None:
-                response_format += "[BRIEF DESCRIPTION OF PUBLICATION CONTENTS]\""
-                sample_response = \
-                    f"\"{summary_type}: Paper by Dillenbourg et al. introducing the concept of collaborative learning"
-            else:
-                response_format += "[RESPONSE]\""
-        else:
-            response_format += "[RESPONSE]\""
-        system_message += f"Give your response in the form: {response_format}"
-        if sample_response != "":
-            system_message += f"\nHere's an example of an acceptable response: {sample_response}"
-
-        text = convert_text_or_dict_to_text(text_or_dict)
-
-        results, too_many_tokens, n_total_tokens = \
-            self._generate_completion(text, system_message, max_normal_len, temperature=0.5)
-        if results is None:
-            return results, system_message, too_many_tokens, n_total_tokens
-        # Now we remove the "Title:" or "Summary:" at the beginning
-        results = ':'.join(results.split(':')[1:]).strip().strip('"')
-        return results, system_message, too_many_tokens, n_total_tokens
-
     def make_sure_json_is_valid(self, results, messages, system_message, temperature=1.0, top_p=0.3,
                                 n_retries=1):
         # Trying to directly parse the JSON...
-        if isinstance(messages, str):
-            messages = [messages]
+        assert isinstance(messages, list) and all(isinstance(message, dict) for message in messages)
         try:
             print('Parsing JSON...')
             prev_results_json = json.loads(results)
             print('JSON parsed successfully')
-            return prev_results_json, (messages + [results]), False, dict()
+            return prev_results_json, (messages + [{'role': 'assistant', 'content': results}]), False, dict()
         except json.JSONDecodeError:
             print(results)
             print('Results not in JSON, retrying')
@@ -595,33 +434,40 @@ class ChatGPTSummarizer:
             repaired_json = repair_json(results)
             prev_results_json = json.loads(repaired_json)
             print('JSON parsed successfully')
-            return prev_results_json, (messages + [repaired_json]), False, dict()
+            return prev_results_json, (messages + [{'role': 'assistant', 'content': repaired_json}]), False, dict()
         except Exception:
             print('Algorithmic JSON fix unsuccessful, retrying')
         # Trying to fix the JSON by asking ChatGPT again...
-        messages = messages + [results]
+        messages = messages + [{'role': 'assistant', 'content': results}]
         retried = 0
         while retried < n_retries:
             try:
-                correction_message = ['The results were not in a JSON format. Improve your previous response by '
-                                      'making sure the results are in JSON. Be sure to escape double quotes and '
-                                      'backslashes. Double quotes should be escaped to \\", and backslashes to \\\\.'
-                                      ' Do NOT return the exact same results as the input: the input is not a valid '
-                                      'JSON and the results must be a valid JSON.']
-                results, too_many_tokens, n_total_tokens = \
+                correction_message = [
+                    {
+                        'role': 'user',
+                        'content': 'The results were not in a JSON format. Improve your previous response by '
+                                   'making sure the results are in JSON. Be sure to escape double quotes and '
+                                   'backslashes. Double quotes should be escaped to \\", and backslashes to \\\\.'
+                                   ' Do NOT return the exact same results as the input: the input is not a valid '
+                                   'JSON and the results must be a valid JSON.'
+                     }
+                ]
+                results, message_chain, too_many_tokens, n_total_tokens = \
                     self._generate_completion(
                         messages + correction_message,
                         system_message, temperature=temperature, top_p=top_p,
                         timeout=10
                     )
                 if results is None:
-                    return None, (messages + correction_message), too_many_tokens, n_total_tokens
+                    return None, message_chain, too_many_tokens, n_total_tokens
                 print('Parsing JSON...')
                 repaired_json = repair_json(results)
                 results_json = json.loads(repaired_json)
                 print('JSON parsed successfully')
-                return results_json, (messages + correction_message + [repaired_json]), \
-                    too_many_tokens, n_total_tokens
+                return results_json, (
+                        message_chain +
+                        [{'role': 'assistant', 'content': repaired_json}]
+                ), too_many_tokens, n_total_tokens
             except json.JSONDecodeError:
                 retried += 1
         raise Exception(f"Could not get ChatGPT to produce a JSON result, "
@@ -679,7 +525,7 @@ class ChatGPTSummarizer:
 
         # Make a call to ChatGPT to generate initial results. These will still be full of typos.
         text = text + "\n\nBe sure to respond in JSON format!"
-        results, too_many_tokens, n_total_tokens = \
+        results, message_chain, too_many_tokens, n_total_tokens = \
             self._generate_completion(text, system_message, temperature=temperature, top_p=top_p, simulate=simulate,
                                       timeout=10)
         print('FIRST')
@@ -689,7 +535,7 @@ class ChatGPTSummarizer:
                 return None, system_message, too_many_tokens, token_count
 
             results, message_chain, too_many_tokens, n_total_tokens = \
-                self.make_sure_json_is_valid(results, text, system_message,
+                self.make_sure_json_is_valid(results, message_chain, system_message,
                                              temperature=temperature, top_p=top_p)
             token_count = update_token_count(token_count, n_total_tokens)
             if results is None:
@@ -699,13 +545,17 @@ class ChatGPTSummarizer:
             # We don't count potential JSON corrections in our estimation because they are quite rare anyway
             # Since no actual result has been generated, we assume that the result is roughly the same as the
             # original input, since token-wise they should actually be pretty close.
-            message_chain = [text, text]
+            message_chain = [{'role': 'user', 'content': text}, {'role': 'assistant', 'content': text}]
 
         # Now make a second call to ChatGPT, asking it to improve its initial results.
         correction_message = \
-            ['There are still typos in the text. Try to improve your previous response by correcting more typos. '
-             'Do not provide any explanations on how you fix typos. Make sure the results are in JSON format.']
-        results, too_many_tokens, n_total_tokens = \
+            [{
+                'role': 'user',
+                'content': 'There are still typos in the text. Try to improve your previous response by correcting '
+                           'more typos. Do not provide any explanations on how you fix typos. Make sure the results '
+                           'are in JSON format.'
+            }]
+        results, message_chain, too_many_tokens, n_total_tokens = \
             self._generate_completion(
                 message_chain + correction_message, system_message, max_len=len(text) if simulate else None,
                 temperature=temperature, top_p=top_p, simulate=simulate, timeout=10)
@@ -719,7 +569,7 @@ class ChatGPTSummarizer:
             return None, system_message, too_many_tokens, token_count
 
         results, message_chain, too_many_tokens, n_total_tokens = \
-            self.make_sure_json_is_valid(results, message_chain + correction_message,
+            self.make_sure_json_is_valid(results, message_chain,
                                          system_message,
                                          temperature=temperature, top_p=top_p)
         print(results)
