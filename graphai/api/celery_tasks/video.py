@@ -529,18 +529,25 @@ def detect_slides_callback_task(self, results, token, force=False):
         list_of_ocr_results = [(TESSERACT_OCR_FORMAT) % (x) for x in results['slides']]
         base_folder = results['result']
         base_folder_with_path = self.file_manager.generate_filepath(base_folder)
-        for f in os.listdir(base_folder_with_path):
-            if f not in list_of_slides and f not in list_of_ocr_results:
-                os.remove(os.path.join(base_folder_with_path, f))
+        if self.request.retries <= 1:
+            # We only do this on retry #1, because otherwise, the _all_frames folder no longer exists
+            for f in os.listdir(base_folder_with_path):
+                if f not in list_of_slides and f not in list_of_ocr_results:
+                    os.remove(os.path.join(base_folder_with_path, f))
         # Renaming the `all_frames` directory to `slides`
         slides_folder = base_folder.replace('_all_frames', '_slides')
         slides_folder_with_path = self.file_manager.generate_filepath(slides_folder)
-        # Make sure the slides folder doesn't already exist, and recursively delete it if it does (force==True)
-        if os.path.exists(slides_folder_with_path) and os.path.isdir(slides_folder_with_path):
+        # Make sure the slides and all_frames folders don't both exist. If that is the case, it means that
+        # the slides folder is left over from before (because force==True), so we have to delete it (recursively)
+        # before we rename _all_frames to _slides.
+        if os.path.exists(slides_folder_with_path) and os.path.exists(base_folder_with_path):
             shutil.rmtree(slides_folder_with_path)
         # Now rename _all_frames to _slides
-        os.rename(base_folder_with_path,
-                  slides_folder_with_path)
+        if os.path.exists(base_folder_with_path):
+            os.rename(base_folder_with_path, slides_folder_with_path)
+        else:
+            # If the _all_frames folder doesn't exist, assert that the slides folder does!
+            assert os.path.exists(slides_folder_with_path)
         slide_tokens = [os.path.join(slides_folder, s) for s in list_of_slides]
         ocr_tokens = [os.path.join(slides_folder, s) for s in list_of_ocr_results]
         slide_tokens = {i + 1: {'token': slide_tokens[i], 'timestamp': results['slides'][i]}

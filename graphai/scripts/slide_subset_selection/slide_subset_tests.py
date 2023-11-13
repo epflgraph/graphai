@@ -82,7 +82,7 @@ def make_slide_summarization_request(slides):
                      "Only provide the JSON response. No explanations. The respones must conform to the " \
                      "length requiements provided above."
     c = ChatGPTSummarizer()
-    results, _, cost = c._generate_completion(slides, system_message)
+    results, _, _, cost = c._generate_completion(slides, system_message)
     return results, cost
 
 

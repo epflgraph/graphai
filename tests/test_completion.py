@@ -118,7 +118,8 @@ def test__summarization_summary_lecture__summarize_text__integration(
     assert summary_results['task_result']['fresh'] is True
     summary_text = summary_results['task_result']['result']['summary_long'].lower()
     assert 'lecture' in summary_text
-    assert 'climate change' in summary_text and 'ice caps' in summary_text and 'model' in summary_text
+    assert 'climate' in summary_text and 'ice' in summary_text \
+           and 'model' in summary_text and 'antarctic' in summary_text
     assert summary_results['task_result']['result_type'] == 'summary'
     original_summary = summary_text
 
