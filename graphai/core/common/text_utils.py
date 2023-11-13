@@ -362,6 +362,7 @@ class ChatGPTSummarizer:
                                       timeout=60, max_len=max_len)
         token_count = n_total_tokens
         if results is None:
+            # This includes simulate==True
             return None, system_message, too_many_tokens, token_count
 
         # Making sure the results are in a valid JSON format

@@ -35,7 +35,7 @@ from graphai.api.celery_tasks.completion import (
     get_keywords_for_summarization_task,
     completion_text_callback_task,
     request_text_completion_task,
-    simulate_cleanup_task,
+    simulate_completion_task,
     choose_best_subset_task
 )
 
@@ -177,17 +177,21 @@ async def summarize_lecture(data: LectureSummarizationRequest):
     text_type = 'lecture'
     force = data.force
     debug = data.debug
+    simulate = data.simulate
 
-    token = generate_summary_text_token(text, text_type, 'summary')
-    if not force:
-        task_list = get_completion_text_fingerprint_chain_list(token, text, text_type, 'summary', force,
-                                                               ignore_fp_results=True, results_to_return=token)
-        skip_token = True
+    if not simulate:
+        token = generate_summary_text_token(text, text_type, 'summary')
+        if not force:
+            task_list = get_completion_text_fingerprint_chain_list(token, text, text_type, 'summary', force,
+                                                                   ignore_fp_results=True, results_to_return=token)
+            skip_token = True
+        else:
+            task_list = []
+            skip_token = False
+        task_list += get_completion_task_chain(token, text, text_type, 'summary',
+                                               keywords=False, force=force, skip_token=skip_token, debug=debug)
     else:
-        task_list = []
-        skip_token = False
-    task_list += get_completion_task_chain(token, text, text_type, 'summary',
-                                           keywords=False, force=force, skip_token=skip_token, debug=debug)
+        task_list = [simulate_completion_task.s(text, text_type, 'summary')]
     tasks = chain(task_list)
     tasks = tasks.apply_async(priority=6)
     return {'task_id': tasks.id}
@@ -199,17 +203,22 @@ async def summarize_academic_entity(data: AcademicEntitySummarizationRequest):
     text_type = 'academic_entity'
     force = data.force
     debug = data.debug
+    simulate = data.simulate
 
-    token = generate_summary_text_token(text, text_type, 'summary')
-    if not force:
-        task_list = get_completion_text_fingerprint_chain_list(token, text, text_type, 'summary', force,
-                                                               ignore_fp_results=True, results_to_return=token)
-        skip_token = True
+    if not simulate:
+        token = generate_summary_text_token(text, text_type, 'summary')
+        if not force:
+            task_list = get_completion_text_fingerprint_chain_list(token, text, text_type, 'summary', force,
+                                                                   ignore_fp_results=True, results_to_return=token)
+            skip_token = True
+        else:
+            task_list = []
+            skip_token = False
+        task_list += get_completion_task_chain(token, text, text_type, 'summary',
+                                               keywords=False, force=force, skip_token=skip_token, debug=debug)
     else:
-        task_list = []
-        skip_token = False
-    task_list += get_completion_task_chain(token, text, text_type, 'summary',
-                                           keywords=False, force=force, skip_token=skip_token, debug=debug)
+        task_list = [simulate_completion_task.s(text, text_type, 'summary')]
+
     tasks = chain(task_list)
     tasks = tasks.apply_async(priority=6)
     return {'task_id': tasks.id}
@@ -222,17 +231,21 @@ async def summarize_text(data: GenericSummarizationRequest):
     force = data.force
     debug = data.debug
     keywords = data.keywords
+    simulate = data.simulate
 
-    token = generate_summary_text_token(text, text_type, 'summary')
-    if not force:
-        task_list = get_completion_text_fingerprint_chain_list(token, text, text_type, 'summary', force,
-                                                               ignore_fp_results=True, results_to_return=token)
-        skip_token = True
+    if not simulate:
+        token = generate_summary_text_token(text, text_type, 'summary')
+        if not force:
+            task_list = get_completion_text_fingerprint_chain_list(token, text, text_type, 'summary', force,
+                                                                   ignore_fp_results=True, results_to_return=token)
+            skip_token = True
+        else:
+            task_list = []
+            skip_token = False
+        task_list += get_completion_task_chain(token, text, text_type, 'summary',
+                                               keywords=keywords, force=force, skip_token=skip_token, debug=debug)
     else:
-        task_list = []
-        skip_token = False
-    task_list += get_completion_task_chain(token, text, text_type, 'summary',
-                                           keywords=keywords, force=force, skip_token=skip_token, debug=debug)
+        task_list = [simulate_completion_task.s(text, text_type, 'summary')]
     tasks = chain(task_list)
     tasks = tasks.apply_async(priority=6)
     return {'task_id': tasks.id}
@@ -258,7 +271,7 @@ async def clean_up(data: CleanupRequest):
         task_list += get_completion_task_chain(token, text, text_type, 'cleanup',
                                                keywords=False, force=force, skip_token=skip_token, debug=debug)
     else:
-        task_list = [simulate_cleanup_task.s(text, text_type, 'cleanup')]
+        task_list = [simulate_completion_task.s(text, text_type, 'cleanup')]
     tasks = chain(task_list)
     tasks = tasks.apply_async(priority=6)
     return {'task_id': tasks.id}

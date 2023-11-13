@@ -244,10 +244,23 @@ def request_text_completion_task(self, token_and_text, text_type='text', result_
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='text_6.cleanup_text_chatgpt_simulate', ignore_result=False)
-def simulate_cleanup_task(self, text, text_type='text', result_type='cleanup'):
+def simulate_completion_task(self, text, text_type='text', result_type='cleanup'):
     summarizer = ChatGPTSummarizer()
-    _, system_message, too_many_tokens, token_count = summarizer.cleanup_text(
-        text, text_type=text_type, handwriting=True, simulate=True)
+    if result_type == 'cleanup':
+        # cleanup
+        _, system_message, too_many_tokens, token_count = summarizer.cleanup_text(
+            text, text_type=text_type, handwriting=True, simulate=True)
+    else:
+        # summary
+        if text_type == 'lecture':
+            _, system_message, too_many_tokens, token_count = summarizer.summarize_lecture(
+                text, simulate=True)
+        elif text_type == 'academic_entity':
+            _, system_message, too_many_tokens, token_count = summarizer.summarize_academic_entity(
+                text, simulate=True)
+        else:
+            _, system_message, too_many_tokens, token_count = summarizer.summarize_generic(
+                text, simulate=True)
     return {
         'result': None,
         'result_type': result_type,
