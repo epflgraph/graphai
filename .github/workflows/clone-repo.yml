@@ -62,6 +62,7 @@ jobs:
           python -c "import whisper; whisper.load_model('${{ vars.whisper_model_type }}');"
           python -c "from transformers import AutoModelForSeq2SeqLM; AutoModelForSeq2SeqLM.from_pretrained('Helsinki-NLP/opus-mt-en-fr')"
           python -c "from transformers import AutoModelForSeq2SeqLM; AutoModelForSeq2SeqLM.from_pretrained('Helsinki-NLP/opus-mt-fr-en')"
+          opentelemetry-bootstrap --action=install
 
       - name: Run linter
         run: |
