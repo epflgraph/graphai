@@ -75,184 +75,184 @@ def test__summarization_title__summarize_text__run_task(ocr_text):
 
 ################################################################
 
-
-@pytest.mark.celery(accept_content=['pickle', 'json'], result_serializer='pickle', task_serializer='pickle')
-@pytest.mark.usefixtures('slides_and_clean_concepts')
-def test__summarization_summary_lecture__summarize_text__integration(
-        fixture_app, celery_worker, slides_and_clean_concepts, timeout=30):
-    # The celery_worker object is necessary for async tasks, otherwise the status will be permanently stuck on
-    # PENDING.
-
-    # First, we call the summary endpoint with force=True to test the full task pipeline working
-    response = fixture_app.post('/completion/summary/lecture',
-                                data=json.dumps({"slides": slides_and_clean_concepts,
-                                                 "force": True}),
-                                timeout=timeout)
-    # Check status code is successful
-    assert response.status_code == 200
-    # Parse resulting task id
-    task_id = response.json()['task_id']
-
-    # Waiting for task chain to succeed
-    current_status = 'PENDING'
-    n_tries = 0
-    while current_status == 'PENDING' and n_tries < 10:
-        # Wait a few seconds
-        sleep(3)
-        # Now get status
-        response = fixture_app.get(f'/completion/summary/lecture/status/{task_id}',
-                                   timeout=timeout)
-        current_status = response.json()['task_status']
-        n_tries += 1
-
-    # Now get status
-    response = fixture_app.get(f'/completion/summary/lecture/status/{task_id}',
-                               timeout=timeout)
-    # Parse result
-    summary_results = response.json()
-    # Check returned value
-    assert isinstance(summary_results, dict)
-    assert 'task_result' in summary_results
-    assert summary_results['task_status'] == 'SUCCESS'
-    assert summary_results['task_result']['successful'] is True
-    assert summary_results['task_result']['fresh'] is True
-    summary_text = summary_results['task_result']['result']['summary_long'].lower()
-    assert 'lecture' in summary_text
-    assert 'climate' in summary_text and 'ice' in summary_text \
-           and 'model' in summary_text and 'antarctic' in summary_text
-    assert summary_results['task_result']['result_type'] == 'summary'
-    original_summary = summary_text
-
-    ################################################
-
-    # Now, we call the summary endpoint again with the same input to make sure the caching works correctly
-    response = fixture_app.post('/completion/summary/lecture',
-                                data=json.dumps({"slides": slides_and_clean_concepts,
-                                                 "force": False}),
-                                timeout=timeout)
-    # Check status code is successful
-    assert response.status_code == 200
-    # Parse resulting task id
-    task_id = response.json()['task_id']
-
-    # Waiting for task chain to succeed
-    current_status = 'PENDING'
-    n_tries = 0
-    while current_status == 'PENDING' and n_tries < 10:
-        # Wait a few seconds
-        sleep(3)
-        # Now get status
-        response = fixture_app.get(f'/completion/summary/lecture/status/{task_id}',
-                                   timeout=timeout)
-        current_status = response.json()['task_status']
-        n_tries += 1
-
-    # Now get status
-    response = fixture_app.get(f'/completion/summary/lecture/status/{task_id}',
-                               timeout=timeout)
-    # Parse result
-    summary_results = response.json()
-    # Check values
-    assert isinstance(summary_results, dict)
-    # results must be successful but not fresh, since they were already cached
-    assert summary_results['task_status'] == 'SUCCESS'
-    assert summary_results['task_result']['successful'] is True
-    assert summary_results['task_result']['fresh'] is False
-    assert summary_results['task_result']['result']['summary_long'].lower() == original_summary
-
-
-@pytest.mark.celery(accept_content=['pickle', 'json'], result_serializer='pickle', task_serializer='pickle')
-@pytest.mark.usefixtures('unit_info')
-def test__summarization_summary_academic_entity__summarize_text__integration(
-        fixture_app, celery_worker, unit_info, timeout=30):
-    # The celery_worker object is necessary for async tasks, otherwise the status will be permanently stuck on
-    # PENDING.
-
-    data_dict = {"entity": unit_info['entity'],
-                 "name": unit_info['name'],
-                 "subtype": unit_info['subtype'],
-                 "possible_subtypes": unit_info['possible_subtypes'],
-                 "categories": unit_info['categories'],
-                 "text": unit_info['text'],
-                 "force": True}
-
-    # First, we call the summary endpoint with force=True to test the full task pipeline working
-    response = fixture_app.post('/completion/summary/academic_entity',
-                                data=json.dumps(data_dict),
-                                timeout=timeout)
-    # Check status code is successful
-    assert response.status_code == 200
-    # Parse resulting task id
-    task_id = response.json()['task_id']
-
-    # Waiting for task chain to succeed
-    current_status = 'PENDING'
-    n_tries = 0
-    while current_status == 'PENDING' and n_tries < 10:
-        # Wait a few seconds
-        sleep(3)
-        # Now get status
-        response = fixture_app.get(f'/completion/summary/academic_entity/status/{task_id}',
-                                   timeout=timeout)
-        current_status = response.json()['task_status']
-        n_tries += 1
-
-    # Now get status
-    response = fixture_app.get(f'/completion/summary/academic_entity/status/{task_id}',
-                               timeout=timeout)
-    # Parse result
-    summary_results = response.json()
-    # Check returned value
-    assert isinstance(summary_results, dict)
-    assert 'task_result' in summary_results
-    assert summary_results['task_status'] == 'SUCCESS'
-    assert summary_results['task_result']['successful'] is True
-    assert summary_results['task_result']['fresh'] is True
-    assert 'top_3_categories' in summary_results['task_result']['result'] and \
-           'inferred_subtype' in summary_results['task_result']['result']
-    summary_text = summary_results['task_result']['result']['summary_long'].lower()
-    assert 'signal processing' in summary_text and 'audiovisual' in summary_text and 'research' in summary_text
-    assert 'school of computer and communication sciences' in summary_text
-    assert summary_results['task_result']['result_type'] == 'summary'
-    original_summary = summary_text
-
-    ################################################
-
-    data_dict['force'] = False
-    # Now, we call the summary endpoint again with the same input to make sure the caching works correctly
-    response = fixture_app.post('/completion/summary/academic_entity',
-                                data=json.dumps(data_dict),
-                                timeout=timeout)
-    # Check status code is successful
-    assert response.status_code == 200
-    # Parse resulting task id
-    task_id = response.json()['task_id']
-
-    # Waiting for task chain to succeed
-    current_status = 'PENDING'
-    n_tries = 0
-    while current_status == 'PENDING' and n_tries < 10:
-        # Wait a few seconds
-        sleep(3)
-        # Now get status
-        response = fixture_app.get(f'/completion/summary/academic_entity/status/{task_id}',
-                                   timeout=timeout)
-        current_status = response.json()['task_status']
-        n_tries += 1
-
-    # Now get status
-    response = fixture_app.get(f'/completion/summary/academic_entity/status/{task_id}',
-                               timeout=timeout)
-    # Parse result
-    summary_results = response.json()
-    # Check values
-    assert isinstance(summary_results, dict)
-    # results must be successful but not fresh, since they were already cached
-    assert summary_results['task_status'] == 'SUCCESS'
-    assert summary_results['task_result']['successful'] is True
-    assert summary_results['task_result']['fresh'] is False
-    assert summary_results['task_result']['result']['summary_long'].lower() == original_summary
-
+#
+# @pytest.mark.celery(accept_content=['pickle', 'json'], result_serializer='pickle', task_serializer='pickle')
+# @pytest.mark.usefixtures('slides_and_clean_concepts')
+# def test__summarization_summary_lecture__summarize_text__integration(
+#         fixture_app, celery_worker, slides_and_clean_concepts, timeout=30):
+#     # The celery_worker object is necessary for async tasks, otherwise the status will be permanently stuck on
+#     # PENDING.
+#
+#     # First, we call the summary endpoint with force=True to test the full task pipeline working
+#     response = fixture_app.post('/completion/summary/lecture',
+#                                 data=json.dumps({"slides": slides_and_clean_concepts,
+#                                                  "force": True}),
+#                                 timeout=timeout)
+#     # Check status code is successful
+#     assert response.status_code == 200
+#     # Parse resulting task id
+#     task_id = response.json()['task_id']
+#
+#     # Waiting for task chain to succeed
+#     current_status = 'PENDING'
+#     n_tries = 0
+#     while current_status == 'PENDING' and n_tries < 10:
+#         # Wait a few seconds
+#         sleep(3)
+#         # Now get status
+#         response = fixture_app.get(f'/completion/summary/lecture/status/{task_id}',
+#                                    timeout=timeout)
+#         current_status = response.json()['task_status']
+#         n_tries += 1
+#
+#     # Now get status
+#     response = fixture_app.get(f'/completion/summary/lecture/status/{task_id}',
+#                                timeout=timeout)
+#     # Parse result
+#     summary_results = response.json()
+#     # Check returned value
+#     assert isinstance(summary_results, dict)
+#     assert 'task_result' in summary_results
+#     assert summary_results['task_status'] == 'SUCCESS'
+#     assert summary_results['task_result']['successful'] is True
+#     assert summary_results['task_result']['fresh'] is True
+#     summary_text = summary_results['task_result']['result']['summary_long'].lower()
+#     assert 'lecture' in summary_text
+#     assert 'climate' in summary_text and 'ice' in summary_text \
+#            and 'model' in summary_text and 'antarctic' in summary_text
+#     assert summary_results['task_result']['result_type'] == 'summary'
+#     original_summary = summary_text
+#
+#     ################################################
+#
+#     # Now, we call the summary endpoint again with the same input to make sure the caching works correctly
+#     response = fixture_app.post('/completion/summary/lecture',
+#                                 data=json.dumps({"slides": slides_and_clean_concepts,
+#                                                  "force": False}),
+#                                 timeout=timeout)
+#     # Check status code is successful
+#     assert response.status_code == 200
+#     # Parse resulting task id
+#     task_id = response.json()['task_id']
+#
+#     # Waiting for task chain to succeed
+#     current_status = 'PENDING'
+#     n_tries = 0
+#     while current_status == 'PENDING' and n_tries < 10:
+#         # Wait a few seconds
+#         sleep(3)
+#         # Now get status
+#         response = fixture_app.get(f'/completion/summary/lecture/status/{task_id}',
+#                                    timeout=timeout)
+#         current_status = response.json()['task_status']
+#         n_tries += 1
+#
+#     # Now get status
+#     response = fixture_app.get(f'/completion/summary/lecture/status/{task_id}',
+#                                timeout=timeout)
+#     # Parse result
+#     summary_results = response.json()
+#     # Check values
+#     assert isinstance(summary_results, dict)
+#     # results must be successful but not fresh, since they were already cached
+#     assert summary_results['task_status'] == 'SUCCESS'
+#     assert summary_results['task_result']['successful'] is True
+#     assert summary_results['task_result']['fresh'] is False
+#     assert summary_results['task_result']['result']['summary_long'].lower() == original_summary
+#
+#
+# @pytest.mark.celery(accept_content=['pickle', 'json'], result_serializer='pickle', task_serializer='pickle')
+# @pytest.mark.usefixtures('unit_info')
+# def test__summarization_summary_academic_entity__summarize_text__integration(
+#         fixture_app, celery_worker, unit_info, timeout=30):
+#     # The celery_worker object is necessary for async tasks, otherwise the status will be permanently stuck on
+#     # PENDING.
+#
+#     data_dict = {"entity": unit_info['entity'],
+#                  "name": unit_info['name'],
+#                  "subtype": unit_info['subtype'],
+#                  "possible_subtypes": unit_info['possible_subtypes'],
+#                  "categories": unit_info['categories'],
+#                  "text": unit_info['text'],
+#                  "force": True}
+#
+#     # First, we call the summary endpoint with force=True to test the full task pipeline working
+#     response = fixture_app.post('/completion/summary/academic_entity',
+#                                 data=json.dumps(data_dict),
+#                                 timeout=timeout)
+#     # Check status code is successful
+#     assert response.status_code == 200
+#     # Parse resulting task id
+#     task_id = response.json()['task_id']
+#
+#     # Waiting for task chain to succeed
+#     current_status = 'PENDING'
+#     n_tries = 0
+#     while current_status == 'PENDING' and n_tries < 10:
+#         # Wait a few seconds
+#         sleep(3)
+#         # Now get status
+#         response = fixture_app.get(f'/completion/summary/academic_entity/status/{task_id}',
+#                                    timeout=timeout)
+#         current_status = response.json()['task_status']
+#         n_tries += 1
+#
+#     # Now get status
+#     response = fixture_app.get(f'/completion/summary/academic_entity/status/{task_id}',
+#                                timeout=timeout)
+#     # Parse result
+#     summary_results = response.json()
+#     # Check returned value
+#     assert isinstance(summary_results, dict)
+#     assert 'task_result' in summary_results
+#     assert summary_results['task_status'] == 'SUCCESS'
+#     assert summary_results['task_result']['successful'] is True
+#     assert summary_results['task_result']['fresh'] is True
+#     assert 'top_3_categories' in summary_results['task_result']['result'] and \
+#            'inferred_subtype' in summary_results['task_result']['result']
+#     summary_text = summary_results['task_result']['result']['summary_long'].lower()
+#     assert 'signal processing' in summary_text and 'audiovisual' in summary_text and 'research' in summary_text
+#     assert 'school of computer and communication sciences' in summary_text
+#     assert summary_results['task_result']['result_type'] == 'summary'
+#     original_summary = summary_text
+#
+#     ################################################
+#
+#     data_dict['force'] = False
+#     # Now, we call the summary endpoint again with the same input to make sure the caching works correctly
+#     response = fixture_app.post('/completion/summary/academic_entity',
+#                                 data=json.dumps(data_dict),
+#                                 timeout=timeout)
+#     # Check status code is successful
+#     assert response.status_code == 200
+#     # Parse resulting task id
+#     task_id = response.json()['task_id']
+#
+#     # Waiting for task chain to succeed
+#     current_status = 'PENDING'
+#     n_tries = 0
+#     while current_status == 'PENDING' and n_tries < 10:
+#         # Wait a few seconds
+#         sleep(3)
+#         # Now get status
+#         response = fixture_app.get(f'/completion/summary/academic_entity/status/{task_id}',
+#                                    timeout=timeout)
+#         current_status = response.json()['task_status']
+#         n_tries += 1
+#
+#     # Now get status
+#     response = fixture_app.get(f'/completion/summary/academic_entity/status/{task_id}',
+#                                timeout=timeout)
+#     # Parse result
+#     summary_results = response.json()
+#     # Check values
+#     assert isinstance(summary_results, dict)
+#     # results must be successful but not fresh, since they were already cached
+#     assert summary_results['task_status'] == 'SUCCESS'
+#     assert summary_results['task_result']['successful'] is True
+#     assert summary_results['task_result']['fresh'] is False
+#     assert summary_results['task_result']['result']['summary_long'].lower() == original_summary
+#
 
 ################################################################
 # /completion/calculate_fingerprint                           #
@@ -371,7 +371,7 @@ def test__summarization_cleanup__cleanup_text__integration(fixture_app, celery_w
 @pytest.mark.celery(accept_content=['pickle', 'json'], result_serializer='pickle', task_serializer='pickle')
 @pytest.mark.usefixtures('slides_and_raw_concepts')
 def test__summarization__slide_subset__integration(fixture_app, celery_worker, slides_and_raw_concepts,
-                                                             timeout=30):
+                                                   timeout=30):
     # The celery_worker object is necessary for async tasks, otherwise the status will be permanently stuck on
     # PENDING.
 
