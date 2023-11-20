@@ -31,6 +31,7 @@ CHATGPT_COSTS_PER_1K = {
 def translation_list_to_text(str_or_list):
     if not isinstance(str_or_list, list):
         return str_or_list
+    str_or_list = [x if x is not None else '' for x in str_or_list]
     return TRANSLATION_LIST_SEPARATOR.join(str_or_list)
 
 
