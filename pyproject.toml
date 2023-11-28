@@ -65,7 +65,8 @@ dependencies = [
     "scikit-learn",
     "opentelemetry-distro==0.40b0",
     "opentelemetry-exporter-otlp==1.19.0",
-    "opentelemetry-instrumentation-fastapi==0.40b0"
+    "opentelemetry-instrumentation-fastapi==0.40b0",
+    "pyamg"
 ]
 
 [tool.setuptools]
