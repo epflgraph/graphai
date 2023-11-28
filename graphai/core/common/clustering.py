@@ -1,6 +1,8 @@
 import numpy as np
+import pandas as pd
+from itertools import chain
 from pyamg import smoothed_aggregation_solver
-from scipy.sparse import csr_array, csr_matrix, diags, eye, lil_matrix
+from scipy.sparse import csr_array, csr_matrix, diags, eye, lil_matrix, spmatrix, vstack, hstack, csc_matrix
 from scipy.sparse.linalg import lobpcg
 from sklearn.utils import check_array
 from sklearn.cluster import AgglomerativeClustering
@@ -8,6 +10,7 @@ from sklearn.metrics import calinski_harabasz_score, davies_bouldin_score
 from sklearn.decomposition import PCA
 from sklearn.metrics.pairwise import cosine_distances, euclidean_distances
 
+from graphai.core.common.common_utils import invert_dict
 
 
 def convert_to_csr_matrix(g):
@@ -308,3 +311,114 @@ def cluster_using_embedding(embedding, n_clusters, params=None):
         print('Cannot compute unsupervised measures. '
               'It is likely that everything has been grouped into one single cluster.')
     return cluster_labels
+
+
+def group_clustered(data, labels, mode='mean', rows_and_cols=False, precomputed_map=None):
+    """
+    Groups the data points together based on provided clustering labels such that each cluster becomes one
+    single data point.
+    :param data: The data (ndarray or sparse matrix)
+    :param labels: The cluster labels
+    :param mode: What to aggregate with (mean/median)
+    :param rows_and_cols: Whether to perform the aggregation on both the rows and the columns of the data
+    :param precomputed_map: If provided, this will be used as the cluster to concept map. If not, the mapping
+                            will be computed.
+    :return: The transformed data and the cluster to concept map
+    """
+    list_of_rows = list()
+    if precomputed_map is not None:
+        label_map = precomputed_map
+        unique_labels = sorted(list(label_map.keys()))
+    else:
+        label_map = dict()
+        unique_labels = sorted(list(set(labels.tolist())))
+    for current_label in unique_labels:
+        current_indices = np.argwhere(labels==current_label).flatten().tolist()
+        if mode == 'mean':
+            list_of_rows.append(data[current_indices, :].sum(axis=0) / len(current_indices))
+        else:
+            list_of_rows.append(np.median(data[current_indices, :], axis=0, keepdims=True))
+        if precomputed_map is None:
+            label_map[current_label] = current_indices
+    if isinstance(data, spmatrix):
+        result = vstack([csr_matrix(x) for x in list_of_rows])
+    else:
+        result = np.vstack(list_of_rows)
+    if rows_and_cols:
+        list_of_cols = list()
+        for current_label in unique_labels:
+            current_indices = label_map[current_label]
+
+            if mode == 'mean':
+                list_of_cols.append(result[:, current_indices].sum(axis=1) / len(current_indices))
+            else:
+                list_of_cols.append(np.median(result[:, current_indices], axis=1, keepdims=True))
+        if isinstance(data, spmatrix):
+            result = hstack([csc_matrix(x) for x in list_of_cols])
+        else:
+            result = np.hstack(list_of_cols)
+    return result, label_map
+
+
+def reassign_outliers(labels, embeddings, min_n=3):
+    """
+    Reassigns outlier clusters to non-outlier clusters.
+    Arguments:
+        :param labels: Labels of each concept
+        :param embeddings: The concept embedding vectors
+        :param min_n: Minimum size for a cluster to not be considered an outlier
+    Returns:
+        New labels after reassignment
+    """
+    df = pd.DataFrame({'label': labels, 'page_index': list(range(len(labels)))})
+    print(df)
+    print('Computing sets of outlying and non-outlying concepts and clusters')
+    outlying_cluster_set = df.groupby('label').count().reset_index()
+    outlying_cluster_set = set(outlying_cluster_set.loc[
+                               outlying_cluster_set['page_index'] < min_n]['label'].values.tolist())
+    if len(outlying_cluster_set) == 0:
+        return labels
+    non_outlying_cluster_set = set(labels).difference(outlying_cluster_set)
+    print(outlying_cluster_set)
+    outlying_concept_set = set(
+        df.loc[df['label'].apply(lambda x: x in outlying_cluster_set)]['page_index'].values.tolist()
+    )
+
+    similarity_map = embeddings.dot(embeddings.transpose())
+
+    print('Computing outlier and non-outlier embeddings')
+    similarity_map, cluster_map = group_clustered(
+        similarity_map, np.array(labels), mode='median', rows_and_cols=True
+    )
+
+    outlying_map = {x: cluster_map[x] for x in outlying_cluster_set}
+    non_outlying_map = {x: cluster_map[x] for x in non_outlying_cluster_set}
+    outlying_concept_to_cluster_map = chain.from_iterable([[(y,x) for y in outlying_map[x]] for x in outlying_map])
+    outlying_concept_to_cluster_map = {x[0]:x[1] for x in outlying_concept_to_cluster_map}
+    outlying_cluster_labels = sorted(list(outlying_map.keys()))
+    outlying_cluster_labels_inverse = invert_dict(dict(enumerate(outlying_cluster_labels)))
+    non_outlying_cluster_labels = sorted(list(non_outlying_map.keys()))
+    non_outlying_cluster_labels_dict = dict(enumerate(non_outlying_cluster_labels))
+    non_outlying_cluster_labels_inverse = invert_dict(non_outlying_cluster_labels_dict)
+
+    similarity_map = similarity_map[outlying_cluster_labels, :][:, non_outlying_cluster_labels]
+    if isinstance(similarity_map, np.ndarray):
+        closest_cluster_to_outlying_cluster = np.argmax(similarity_map, axis=1).flatten()
+    else:
+        closest_cluster_to_outlying_cluster = np.array(similarity_map.argmax(axis=1)).flatten()
+    closest_cluster_to_outlying_cluster = [int(x) for x in closest_cluster_to_outlying_cluster]
+    # If the concept is part of the outlying concepts, we do the following:
+    # 1. Get the label of the corresponding cluster.
+    # 2. Get the index of that cluster for the aggregated embedding
+    # 3. Get the index of the closest non-outlying cluster
+    # 4. Get the label of the latter cluster
+    print('Computing new labels')
+    new_labels = [labels[i] if i not in outlying_concept_set
+                  else non_outlying_cluster_labels_dict[
+                            closest_cluster_to_outlying_cluster[
+                                outlying_cluster_labels_inverse[
+                                    outlying_concept_to_cluster_map[i]]]]
+                  for i in range(len(labels))]
+    new_labels = np.array([non_outlying_cluster_labels_inverse[x] for x in new_labels])
+
+    return new_labels
