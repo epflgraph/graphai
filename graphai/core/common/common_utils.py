@@ -111,3 +111,7 @@ def get_current_datetime():
     """
     current_datetime = format_datetime_for_mysql(datetime.now())
     return current_datetime
+
+
+def invert_dict(d):
+    return {d[k]: k for k in d}
