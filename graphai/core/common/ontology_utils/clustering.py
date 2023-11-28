@@ -66,9 +66,9 @@ def remove_invalid_pairs(l_main, l_secondary_1, l_secondary_2, ref_dict):
     :return: Two cleaned up lists in the order that they were provided in
     """
     valid_indices = [i for i in range(len(l_main)) if ref_dict.get(l_main[i], None) is not None]
-    return return_chosen_indices(l_main, valid_indices), \
-           return_chosen_indices(l_secondary_1, valid_indices), \
-           return_chosen_indices(l_secondary_2, valid_indices)
+    return (return_chosen_indices(l_main, valid_indices),
+            return_chosen_indices(l_secondary_1, valid_indices),
+            return_chosen_indices(l_secondary_2, valid_indices))
 
 
 def create_graph_from_df(df, source_col, target_col, weight_col=None,
