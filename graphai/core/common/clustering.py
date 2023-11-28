@@ -13,6 +13,172 @@ from sklearn.metrics.pairwise import cosine_distances, euclidean_distances
 from graphai.core.common.common_utils import invert_dict
 
 
+def get_id_dict(ids):
+    ids_set = list(set(ids))
+    return invert_dict(dict(enumerate(sorted(ids_set))))
+
+
+def make_adj_undirected(graph_adj):
+    """
+    Makes a directed graph undirected by making the adjacency matrix symmetric
+    :param graph_adj: Adjacency matrix
+    :return: Undirected graph adjacency matrix
+    """
+    return graph_adj + graph_adj.transpose()
+
+
+def derive_col_to_col_graph(orig_adj):
+    """
+    Derives the adjacency matrix of the graph induced on the columns of the original adjacency
+    matrix through its rows.
+    :param orig_adj: Original adjacency matrix
+    :return: A^T.A
+    """
+    return orig_adj.transpose().dot(orig_adj)
+
+
+def get_col_to_col_dict(df, source_col, target_col):
+    """
+    Gets a dictionary mapping the elements of one dataframe column to the elements of another
+    :param df: The dataframe
+    :param source_col: Source column (keys)
+    :param target_col: Target column (values)
+    :return: The dictionary
+    """
+    from_values = df[source_col].values.tolist()
+    to_values = df[target_col].values.tolist()
+    return {from_values[i]: to_values[i] for i in range(len(from_values))}
+
+
+def return_chosen_indices(l, indices):
+    return [l[i] for i in indices]
+
+
+def remove_invalid_pairs(l_main, l_secondary_1, l_secondary_2, ref_dict):
+    """
+    Takes two lists that refer to the rows and columns of a matrix plus a reference dictionary,
+    and only keeps those indices of the two lists whose elements in the "main" list appear in
+    the reference dictionary. In other words, eliminates the row-col or col-row pairs whose
+    row/col (respectively) does not appear in the reference dictionary.
+    :param l_main: The main list, which will be checked against the dictionary
+    :param l_secondary: The secondary list
+    :param ref_dict: The reference dictionary
+    :return: Two cleaned up lists in the order that they were provided in
+    """
+    valid_indices = [i for i in range(len(l_main)) if ref_dict.get(l_main[i], None) is not None]
+    return return_chosen_indices(l_main, valid_indices), \
+           return_chosen_indices(l_secondary_1, valid_indices), \
+           return_chosen_indices(l_secondary_2, valid_indices)
+
+
+def create_graph_from_df(df, source_col, target_col, weight_col=None,
+                         col_dict=None, row_dict=None, pool_rows_and_cols=False,
+                         make_symmetric=False):
+    """
+    Takes a dataframe containing the edges for a graph, and turns it into a directed or undirected
+    graph (represented by an adjacency matrix)
+    :param df: The dataframe
+    :param source_col: The column for the source nodes
+    :param target_col: The column for the target nodes
+    :param weight_col: The column for edge weights
+    :param col_dict: Precomputed dictionary for the adj matrix columns (targets), optional
+    :param row_dict: Precomputed dictionary for the adj matrix rows (sources), optional
+    :param pool_rows_and_cols: Whether to pool together the rows and columns, used for Wikipedia concept
+    :param make_symmetric: Whether to make the graph undirected
+    :return: The adjacency matrix, row dictionary, and column dictionary (id to index)
+    """
+    if weight_col is not None:
+        df = df.dropna(axis=0, how='all', subset=[weight_col], inplace=False)
+    rows = df[source_col].values.tolist()
+    cols = df[target_col].values.tolist()
+    if weight_col is not None:
+        data = df[weight_col].values.tolist()
+    else:
+        data = [1]*len(cols)
+    if pool_rows_and_cols:
+        rows_and_cols = rows + cols
+        row_dict = get_id_dict(rows_and_cols)
+        col_dict = row_dict
+    else:
+        if row_dict is None:
+            row_dict = get_id_dict(rows)
+        else:
+            rows, cols, data = remove_invalid_pairs(rows, cols, data, row_dict)
+        if col_dict is None:
+            col_dict = get_id_dict(cols)
+        else:
+            cols, rows, data = remove_invalid_pairs(cols, rows, data, col_dict)
+    row_inds = [row_dict[k] for k in rows]
+
+    col_inds = [col_dict[k] for k in cols]
+
+    print(len(data), len(row_inds), len(col_inds))
+
+    graph_adj = csr_array((data, (row_inds, col_inds)), shape=(len(row_dict), len(col_dict)))
+    graph_adj.eliminate_zeros()
+    if make_symmetric:
+        graph_adj = make_adj_undirected(graph_adj)
+
+    return graph_adj, row_dict, col_dict
+
+
+def compute_all_graphs_from_scratch(data_to_use_dict, concept_names, col_names,
+                                    types_to_keep=None):
+    """
+    Computes all the graphs from scratch using their corresponding dataframes.
+    Arguments:
+        :param data_to_use_dict: Dictionary mapping data source names to dataframes
+        :param concept_names: Dataframe containing concept names
+        :param col_names: Dictionary with dataframe column names
+    Returns:
+        The resulting data source to graph matrix dictionary, index to name dict, index to ID dict
+    """
+    assert all([k in ['graphscore', 'existing']
+                for k in data_to_use_dict])
+
+    data_to_use_list = list(data_to_use_dict.keys())
+    # We load the Nodes_N_Concept table first in order to only keep the concepts that exist in this collection
+    # and therefore have a name.
+    concept_id_to_name = get_col_to_col_dict(
+        concept_names,
+        col_names['concepts']['id'], col_names['concepts']['title']
+    )
+
+    concept_id_to_index = invert_dict(dict(enumerate(concept_id_to_name.keys())))
+
+    # Choosing the data sources
+    main_graphs = list()
+    data_to_use_list = [x for x in data_to_use_list]
+    for data_to_use in data_to_use_list:
+        print('Handling %s' % data_to_use)
+        if data_to_use == 'graphscore':
+            main_graph, discard1, discard2 = create_graph_from_df(
+                data_to_use_dict[data_to_use],
+                col_names[data_to_use]['source'], col_names[data_to_use]['target'],
+                weight_col=col_names[data_to_use]['weight'], row_dict=concept_id_to_index,
+                col_dict=concept_id_to_index, make_symmetric=True)
+
+            main_graphs.append(main_graph)
+
+        elif data_to_use == 'existing':
+            base_graph, discard1, discard2 = create_graph_from_df(
+                data_to_use_dict[data_to_use],
+                col_names[data_to_use]['source'], col_names[data_to_use]['target'],
+                weight_col=col_names[data_to_use]['weight'], pool_rows_and_cols=False,
+                row_dict=None, col_dict=concept_id_to_index, make_symmetric=False)
+            main_graph = derive_col_to_col_graph(base_graph)
+
+            main_graphs.append(main_graph)
+
+    concept_index_to_id = invert_dict(concept_id_to_index)
+    concept_index_to_name = {x:concept_id_to_name[concept_index_to_id[x]] for x in concept_index_to_id}
+    result_dict = {data_to_use_list[i]: main_graphs[i] for i in range(len(data_to_use_list))}
+
+    print(list(result_dict.keys()))
+
+    return result_dict, concept_index_to_name, concept_index_to_id
+
+
 def convert_to_csr_matrix(g):
     """
     Converts a given matrix or ndarray to a CSR matrix
