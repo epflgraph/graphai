@@ -19,7 +19,7 @@ DEFAULT_CLUSTERING_PARAMS = {
     "normalize": False,
     "affinity": "cosine",
     "linkage": "average",
-    "min_n": 3
+    "min_n": 1
 }
 
 
@@ -551,6 +551,8 @@ def reassign_outliers(labels, embeddings, min_n=3):
     Returns:
         New labels after reassignment
     """
+    if min_n <= 1:
+        return labels
     df = pd.DataFrame({'label': labels, 'page_index': list(range(len(labels)))})
     print(df)
     print('Computing sets of outlying and non-outlying concepts and clusters')
@@ -605,9 +607,11 @@ def reassign_outliers(labels, embeddings, min_n=3):
     return new_labels
 
 
-def cluster_and_reassign_outliers(embedding, n_clusters, params=None):
+def cluster_and_reassign_outliers(embedding, n_clusters, min_n=None, params=None):
     if params is None:
         params = DEFAULT_CLUSTERING_PARAMS
     labels = cluster_using_embedding(embedding, n_clusters, params)
-    labels = reassign_outliers(labels, embedding, params['min_n'])
+    if min_n is None:
+        min_n = params['min_n']
+    labels = reassign_outliers(labels, embedding, min_n)
     return labels
