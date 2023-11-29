@@ -13,6 +13,16 @@ from sklearn.metrics.pairwise import cosine_distances, euclidean_distances
 from graphai.core.common.common_utils import invert_dict
 
 
+DEFAULT_CLUSTERING_PARAMS = {
+    "PCA": 100,
+    "scaled_pca": True,
+    "normalize": False,
+    "affinity": "cosine",
+    "linkage": "average",
+    "min_n": 3
+}
+
+
 def get_id_dict(ids):
     ids_set = list(set(ids))
     return invert_dict(dict(enumerate(sorted(ids_set))))
@@ -122,14 +132,12 @@ def create_graph_from_df(df, source_col, target_col, weight_col=None,
     return graph_adj, row_dict, col_dict
 
 
-def compute_all_graphs_from_scratch(data_to_use_dict, concept_names, col_names,
-                                    types_to_keep=None):
+def compute_all_graphs_from_scratch(data_to_use_dict, concept_names):
     """
     Computes all the graphs from scratch using their corresponding dataframes.
     Arguments:
         :param data_to_use_dict: Dictionary mapping data source names to dataframes
         :param concept_names: Dataframe containing concept names
-        :param col_names: Dictionary with dataframe column names
     Returns:
         The resulting data source to graph matrix dictionary, index to name dict, index to ID dict
     """
@@ -141,7 +149,7 @@ def compute_all_graphs_from_scratch(data_to_use_dict, concept_names, col_names,
     # and therefore have a name.
     concept_id_to_name = get_col_to_col_dict(
         concept_names,
-        col_names['concepts']['id'], col_names['concepts']['title']
+        'id', 'name'
     )
 
     concept_id_to_index = invert_dict(dict(enumerate(concept_id_to_name.keys())))
@@ -152,26 +160,28 @@ def compute_all_graphs_from_scratch(data_to_use_dict, concept_names, col_names,
     for data_to_use in data_to_use_list:
         print('Handling %s' % data_to_use)
         if data_to_use == 'graphscore':
-            main_graph, discard1, discard2 = create_graph_from_df(
+            main_graph, _, _ = create_graph_from_df(
                 data_to_use_dict[data_to_use],
-                col_names[data_to_use]['source'], col_names[data_to_use]['target'],
-                weight_col=col_names[data_to_use]['weight'], row_dict=concept_id_to_index,
-                col_dict=concept_id_to_index, make_symmetric=True)
+                'from_id', 'to_id',
+                weight_col='score', row_dict=concept_id_to_index,
+                col_dict=concept_id_to_index, make_symmetric=True
+            )
 
             main_graphs.append(main_graph)
 
         elif data_to_use == 'existing':
-            base_graph, discard1, discard2 = create_graph_from_df(
+            base_graph, _, _ = create_graph_from_df(
                 data_to_use_dict[data_to_use],
-                col_names[data_to_use]['source'], col_names[data_to_use]['target'],
-                weight_col=col_names[data_to_use]['weight'], pool_rows_and_cols=False,
-                row_dict=None, col_dict=concept_id_to_index, make_symmetric=False)
+                'from_id', 'to_id',
+                weight_col=None, pool_rows_and_cols=False,
+                row_dict=None, col_dict=concept_id_to_index, make_symmetric=False
+            )
             main_graph = derive_col_to_col_graph(base_graph)
 
             main_graphs.append(main_graph)
 
     concept_index_to_id = invert_dict(concept_id_to_index)
-    concept_index_to_name = {x:concept_id_to_name[concept_index_to_id[x]] for x in concept_index_to_id}
+    concept_index_to_name = {x: concept_id_to_name[concept_index_to_id[x]] for x in concept_index_to_id}
     result_dict = {data_to_use_list[i]: main_graphs[i] for i in range(len(data_to_use_list))}
 
     print(list(result_dict.keys()))
@@ -349,17 +359,17 @@ def spec_embed_on_laplacian(laplacian, n_clusters, seed=420):
     return diffusion_map[:,:n_clusters]
 
 
-def combine_and_embed_laplacian(cleanedup_main_graphs, combination_method, n_dims):
+def combine_and_embed_laplacian(main_graphs, n_dims):
     """
     Computes and combines graph Laplacians and calculates their spectral embedding
     Arguments:
-        :param cleanedup_main_graphs: List of graphs to be used
+        :param main_graphs: List of graphs to be used
         :param combination_method: Method for combining the Laplacians, "armean" by default
         :param n_dims: Number of dimensions for the spectral embedding
     Returns:
         The combined Laplacian matrix and the spectral embedding
     """
-    laplacians = [get_laplacian(cleanedup_main_graph, normed=True) for cleanedup_main_graph in cleanedup_main_graphs]
+    laplacians = [get_laplacian(cleanedup_main_graph, normed=True) for cleanedup_main_graph in main_graphs]
     print('Laplacians computed')
     combined_laplacian = combine_laplacians(laplacians, mean=True)
     print('Laplacians combined')
@@ -453,7 +463,8 @@ def cluster_using_embedding(embedding, n_clusters, params=None):
     Returns:
         Clustering labels
     """
-
+    if params is None:
+        params = DEFAULT_CLUSTERING_PARAMS
     sub_embedding = perform_PCA(embedding, params['PCA'], center_and_scale=params['scaled_pca'])
     print('PCA done')
 
