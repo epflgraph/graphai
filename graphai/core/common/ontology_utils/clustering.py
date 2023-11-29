@@ -23,6 +23,10 @@ DEFAULT_CLUSTERING_PARAMS = {
 }
 
 
+def db_results_to_pandas_df(results, cols):
+    return pd.DataFrame(results, columns=cols)
+
+
 def get_id_dict(ids):
     ids_set = list(set(ids))
     return invert_dict(dict(enumerate(sorted(ids_set))))
@@ -359,7 +363,7 @@ def spec_embed_on_laplacian(laplacian, n_clusters, seed=420):
     return diffusion_map[:,:n_clusters]
 
 
-def combine_and_embed_laplacian(main_graphs, n_dims):
+def combine_and_embed_laplacian(main_graphs, n_dims=1000):
     """
     Computes and combines graph Laplacians and calculates their spectral embedding
     Arguments:
@@ -599,3 +603,11 @@ def reassign_outliers(labels, embeddings, min_n=3):
     new_labels = np.array([non_outlying_cluster_labels_inverse[x] for x in new_labels])
 
     return new_labels
+
+
+def cluster_and_reassign_outliers(embedding, n_clusters, params=None):
+    if params is None:
+        params = DEFAULT_CLUSTERING_PARAMS
+    labels = cluster_using_embedding(embedding, n_clusters, params)
+    labels = reassign_outliers(labels, embedding, params['min_n'])
+    return labels
