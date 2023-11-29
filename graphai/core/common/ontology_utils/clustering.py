@@ -431,7 +431,7 @@ def perform_constrained_agglomerative(data, n_clusters, normalize_vectors=False,
     assert n_clusters is not None
 
     precomputed_affinity = precompute_clustering_metric(data, affinity, normalize_vectors, random_state)
-    cluster_model = AgglomerativeClustering(n_clusters=n_clusters, affinity='precomputed',
+    cluster_model = AgglomerativeClustering(n_clusters=n_clusters, metric='precomputed',
                                             linkage=linkage, compute_full_tree=full_compute,
                                             compute_distances=False)
     predictions = cluster_model.fit_predict(precomputed_affinity)
