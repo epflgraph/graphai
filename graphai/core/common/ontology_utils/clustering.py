@@ -23,10 +23,6 @@ DEFAULT_CLUSTERING_PARAMS = {
 }
 
 
-def db_results_to_pandas_df(results, cols):
-    return pd.DataFrame(results, columns=cols)
-
-
 def get_id_dict(ids):
     ids_set = list(set(ids))
     return invert_dict(dict(enumerate(sorted(ids_set))))

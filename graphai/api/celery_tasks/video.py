@@ -5,6 +5,7 @@ from celery import shared_task
 
 from graphai.api.common.video import file_management_config, local_ocr_nlp_models, \
     transcription_model
+from graphai.api.common.ontology import ontology_data
 from graphai.api.common.translation import translation_models
 from graphai.core.common.video import retrieve_file_from_url, retrieve_file_from_kaltura, \
     detect_audio_format_and_duration, extract_audio_from_video, extract_frames, generate_frame_sample_indices, \
@@ -615,7 +616,8 @@ def detect_slides_callback_task(self, results, token, force=False):
              name='video_2.init', ignore_result=False,
              transcription_obj=transcription_model,
              nlp_obj=local_ocr_nlp_models,
-             translation_obj=translation_models)
+             translation_obj=translation_models,
+             ontology_data_obj=ontology_data)
 def video_init_task(self):
     # This task initialises the video celery worker by loading into memory the transcription and NLP models
     print('Start video_init task')
@@ -628,6 +630,9 @@ def video_init_task(self):
 
     print('Loading translation models...')
     self.translation_obj.load_models()
+
+    print('Loading ontology data...')
+    self.ontology_data_obj.load_data()
 
     print('All video processing objects loaded')
     return True
