@@ -155,7 +155,10 @@ def compute_all_graphs_from_scratch(data_to_use_dict, concept_names):
     concept_id_to_index = invert_dict(dict(enumerate(concept_id_to_name.keys())))
 
     # Choosing the data sources
-    main_graphs = list()
+    main_graphs = dict()
+    base_graphs = dict()
+    row_dicts = dict()
+
     data_to_use_list = [x for x in data_to_use_list]
     for data_to_use in data_to_use_list:
         print('Handling %s' % data_to_use)
@@ -166,11 +169,12 @@ def compute_all_graphs_from_scratch(data_to_use_dict, concept_names):
                 weight_col='score', row_dict=concept_id_to_index,
                 col_dict=concept_id_to_index, make_symmetric=True
             )
-
-            main_graphs.append(main_graph)
+            base_graphs[data_to_use] = main_graph
+            main_graphs[data_to_use] = main_graph
+            row_dicts[data_to_use] = concept_id_to_index
 
         elif data_to_use == 'existing':
-            base_graph, _, _ = create_graph_from_df(
+            base_graph, row_dict, _ = create_graph_from_df(
                 data_to_use_dict[data_to_use],
                 'from_id', 'to_id',
                 weight_col=None, pool_rows_and_cols=False,
@@ -178,15 +182,16 @@ def compute_all_graphs_from_scratch(data_to_use_dict, concept_names):
             )
             main_graph = derive_col_to_col_graph(base_graph)
 
-            main_graphs.append(main_graph)
+            base_graphs[data_to_use] = base_graph
+            main_graphs[data_to_use] = main_graph
+            row_dicts[data_to_use] = row_dict
 
     concept_index_to_id = invert_dict(concept_id_to_index)
     concept_index_to_name = {x: concept_id_to_name[concept_index_to_id[x]] for x in concept_index_to_id}
-    result_dict = {data_to_use_list[i]: main_graphs[i] for i in range(len(data_to_use_list))}
 
-    print(list(result_dict.keys()))
+    print(list(main_graphs.keys()))
 
-    return result_dict, concept_index_to_name, concept_index_to_id
+    return main_graphs, base_graphs, row_dicts, concept_index_to_name, concept_index_to_id
 
 
 def convert_to_csr_matrix(g):
@@ -611,3 +616,21 @@ def cluster_and_reassign_outliers(embedding, n_clusters, min_n=None, params=None
         min_n = params['min_n']
     labels = reassign_outliers(labels, embedding, min_n)
     return labels
+
+
+def assign_to_categories_using_existing(labels, category_concept, category_id_to_index):
+    category_index_to_id = invert_dict(category_id_to_index)
+    unique_labels = set(labels.tolist())
+    impurity_count = 0
+    cluster_category_map = dict()
+    for label in unique_labels:
+        label_concepts = np.where(labels == label)[0]
+        category_submatrix = category_concept[:, label_concepts]
+        category_scores = np.array(category_submatrix.sum(axis=1)).flatten()
+        chosen_category_index = np.argmax(category_scores)
+        chosen_category = category_index_to_id[chosen_category_index]
+        cluster_category_map[label] = chosen_category
+        impurity_count += np.sum(category_scores) - category_scores[chosen_category_index]
+
+    impurity_proportion = impurity_count / len(labels)
+    return cluster_category_map, impurity_count, impurity_proportion

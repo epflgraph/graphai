@@ -62,6 +62,24 @@ class RecomputeClustersTaskResponse(BaseModel):
                     "is a dictionary with the 'name' and 'id' of the concept)."
     )
 
+    category_assignments: Union[Dict[int, str], None] = Field(
+        title="Cluster to category assignments",
+        description="A mapping of each cluster to its category"
+    )
+
+    impurity_count: int = Field(
+        title="Impurity count",
+        description="Number of concepts that, through the process of cluster recomputation, ended up assigned "
+                    "to a category different than their original."
+    )
+
+    impurity_proportion: float = Field(
+        title="Impurity proportion",
+        description="Proportion of concepts that, through the process of cluster recomputation, ended up assigned "
+                    "to a category different than their original. Equal to impurity_count divided by number of "
+                    "ontology concepts."
+    )
+
     successful: bool = Field(
         title="Success flag",
         description="Whether the computation was successful."

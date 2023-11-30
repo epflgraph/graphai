@@ -92,6 +92,9 @@ async def recompute_clusters_status(task_id):
         if 'results' in task_results:
             task_results = {
                 'results': task_results['results'],
+                'category_assignments': task_results['category_assignments'],
+                'impurity_count': task_results['impurity_count'],
+                'impurity_proportion': task_results['impurity_proportion'],
                 'successful': task_results['results'] is not None
             }
         else:
