@@ -1,7 +1,7 @@
 from celery import shared_task
 import numpy as np
 from graphai.api.common.ontology import ontology, ontology_data
-from graphai.core.common.ontology_utils.clustering import (db_results_to_pandas_df, compute_all_graphs_from_scratch,
+from graphai.core.common.ontology_utils.clustering import (compute_all_graphs_from_scratch,
                                                            combine_and_embed_laplacian, cluster_and_reassign_outliers)
 
 
@@ -24,11 +24,11 @@ def get_category_children_task(self, parent_id):
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 5},
-             name='ontology_6.recompute_clusters', ignore_result=False, ontology_obj=ontology_data)
+             name='ontology_6.recompute_clusters', ignore_result=False, ontology_data_obj=ontology_data)
 def recompute_clusters_task(self, n_clusters, min_n=None):
-    concept_concept = self.ontology_obj.get_concept_concept_graphscore()
-    concept_names = self.ontology_obj.get_ontology_concept_names()
-    category_concept = self.ontology_obj.get_category_concept()
+    concept_concept = self.ontology_data_obj.get_concept_concept_graphscore()
+    concept_names = self.ontology_data_obj.get_ontology_concept_names()
+    category_concept = self.ontology_data_obj.get_category_concept()
 
     graphs_dict, concept_index_to_name, concept_index_to_id = (
         compute_all_graphs_from_scratch(
