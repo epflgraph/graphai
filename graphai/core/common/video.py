@@ -11,6 +11,7 @@ import time
 from datetime import datetime
 import gzip
 import wget
+import subprocess
 
 import numpy as np
 
@@ -87,6 +88,25 @@ def retrieve_file_from_kaltura(url, output_filename_with_path, output_token):
         err = str(e)
     # If the file exists and there were no errors, the download has been successful
     if file_exists(output_filename_with_path) and ('ffmpeg error' not in err.lower()):
+        return output_token
+    else:
+        return None
+
+
+def retrieve_file_from_youtube(url, output_filename_with_path, output_token):
+    """
+    Downloads a video from YouTube
+    Args:
+        url: Youtube URL
+        output_filename_with_path: Full path of output file
+        output_token: Token of output file
+
+    Returns:
+        Token of output file if successful, None otherwise
+    """
+    cmd_str = f"yt-dlp -o '{output_filename_with_path}' -f '[ext=mp4]' {url}"
+    result_code = subprocess.run(cmd_str, shell=True)
+    if file_exists(output_filename_with_path) and result_code.returncode == 0:
         return output_token
     else:
         return None
