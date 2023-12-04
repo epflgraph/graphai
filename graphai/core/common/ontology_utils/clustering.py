@@ -12,7 +12,6 @@ from sklearn.metrics.pairwise import cosine_distances, euclidean_distances
 
 from graphai.core.common.common_utils import invert_dict
 
-
 DEFAULT_CLUSTERING_PARAMS = {
     "PCA": 100,
     "scaled_pca": True,
@@ -60,8 +59,8 @@ def get_col_to_col_dict(df, source_col, target_col):
     return {from_values[i]: to_values[i] for i in range(len(from_values))}
 
 
-def return_chosen_indices(l, indices):
-    return [l[i] for i in indices]
+def return_chosen_indices(base_list, indices):
+    return [base_list[i] for i in indices]
 
 
 def remove_invalid_pairs(l_main, l_secondary_1, l_secondary_2, ref_dict):
@@ -104,7 +103,7 @@ def create_graph_from_df(df, source_col, target_col, weight_col=None,
     if weight_col is not None:
         data = df[weight_col].values.tolist()
     else:
-        data = [1]*len(cols)
+        data = [1] * len(cols)
     if pool_rows_and_cols:
         rows_and_cols = rows + cols
         row_dict = get_id_dict(rows_and_cols)
@@ -294,18 +293,18 @@ def get_laplacian(graph, normed=False):
     """
     if not isinstance(graph, csr_array):
         graph = convert_to_csr_matrix(graph)
-    W = graph.copy()
-    W.setdiag(0, k=0)
-    d = np.array(np.sum(W, axis=0)).flatten()
+    weights_mat = graph.copy()
+    weights_mat.setdiag(0, k=0)
+    d = np.array(np.sum(weights_mat, axis=0)).flatten()
     if normed:
         d = np.sqrt(d) + 1e-10
-        D = diags(1/d, offsets=0)
-        I = eye(W.get_shape()[0])
-        L = I - D.dot(W).dot(D)
+        diagonal_mat = diags(1 / d, offsets=0)
+        identity_mat = eye(weights_mat.get_shape()[0])
+        laplacian = identity_mat - diagonal_mat.dot(weights_mat).dot(diagonal_mat)
     else:
-        D = diags(d, offsets=0)
-        L = D - W
-    return lil_matrix(L)
+        diagonal_mat = diags(d, offsets=0)
+        laplacian = diagonal_mat - weights_mat
+    return lil_matrix(laplacian)
 
 
 def sum_laplacians(laplacians):
@@ -361,7 +360,7 @@ def spec_embed_on_laplacian(laplacian, n_clusters, seed=420):
     X = random_state.standard_normal(size=(laplacian.shape[0], n_clusters))
     X = X.astype(laplacian.dtype)
     _, diffusion_map = lobpcg(laplacian, X, M=M, tol=1.0e-5, largest=False, maxiter=30, verbosityLevel=1)
-    return diffusion_map[:,:n_clusters]
+    return diffusion_map[:, :n_clusters]
 
 
 def combine_and_embed_laplacian(main_graphs, n_dims=1000):
@@ -489,7 +488,7 @@ def cluster_using_embedding(embedding, n_clusters, params=None):
         print('Davies-Bouldin score (the lower the better): %f' % db_score)
         vr_score = variance_ratio_eval(sub_embedding, cluster_labels)
         print('Variance ratio (the higher the better): %f' % vr_score)
-    except:
+    except Exception:
         print('Cannot compute unsupervised measures. '
               'It is likely that everything has been grouped into one single cluster.')
     return cluster_labels
@@ -515,7 +514,7 @@ def group_clustered(data, labels, mode='mean', rows_and_cols=False, precomputed_
         label_map = dict()
         unique_labels = sorted(list(set(labels.tolist())))
     for current_label in unique_labels:
-        current_indices = np.argwhere(labels==current_label).flatten().tolist()
+        current_indices = np.argwhere(labels == current_label).flatten().tolist()
         if mode == 'mean':
             list_of_rows.append(data[current_indices, :].sum(axis=0) / len(current_indices))
         else:
@@ -559,7 +558,7 @@ def reassign_outliers(labels, embeddings, min_n=3):
     print('Computing sets of outlying and non-outlying concepts and clusters')
     outlying_cluster_set = df.groupby('label').count().reset_index()
     outlying_cluster_set = set(outlying_cluster_set.loc[
-                               outlying_cluster_set['page_index'] < min_n]['label'].values.tolist())
+                                   outlying_cluster_set['page_index'] < min_n]['label'].values.tolist())
     if len(outlying_cluster_set) == 0:
         return labels
     non_outlying_cluster_set = set(labels).difference(outlying_cluster_set)
@@ -577,8 +576,8 @@ def reassign_outliers(labels, embeddings, min_n=3):
 
     outlying_map = {x: cluster_map[x] for x in outlying_cluster_set}
     non_outlying_map = {x: cluster_map[x] for x in non_outlying_cluster_set}
-    outlying_concept_to_cluster_map = chain.from_iterable([[(y,x) for y in outlying_map[x]] for x in outlying_map])
-    outlying_concept_to_cluster_map = {x[0]:x[1] for x in outlying_concept_to_cluster_map}
+    outlying_concept_to_cluster_map = chain.from_iterable([[(y, x) for y in outlying_map[x]] for x in outlying_map])
+    outlying_concept_to_cluster_map = {x[0]: x[1] for x in outlying_concept_to_cluster_map}
     outlying_cluster_labels = sorted(list(outlying_map.keys()))
     outlying_cluster_labels_inverse = invert_dict(dict(enumerate(outlying_cluster_labels)))
     non_outlying_cluster_labels = sorted(list(non_outlying_map.keys()))
@@ -598,10 +597,14 @@ def reassign_outliers(labels, embeddings, min_n=3):
     # 4. Get the label of the latter cluster
     print('Computing new labels')
     new_labels = [labels[i] if i not in outlying_concept_set
-                  else non_outlying_cluster_labels_dict[
-                            closest_cluster_to_outlying_cluster[
-                                outlying_cluster_labels_inverse[
-                                    outlying_concept_to_cluster_map[i]]]]
+                  else
+                  non_outlying_cluster_labels_dict[
+                      closest_cluster_to_outlying_cluster[
+                        outlying_cluster_labels_inverse[
+                            outlying_concept_to_cluster_map[i]
+                        ]
+                      ]
+                  ]
                   for i in range(len(labels))]
     new_labels = np.array([non_outlying_cluster_labels_inverse[x] for x in new_labels])
 
