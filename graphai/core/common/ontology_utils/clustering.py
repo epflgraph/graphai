@@ -557,8 +557,8 @@ def reassign_outliers(labels, embeddings, min_n=3):
     print(df)
     print('Computing sets of outlying and non-outlying concepts and clusters')
     outlying_cluster_set = df.groupby('label').count().reset_index()
-    outlying_cluster_set = set(outlying_cluster_set.loc[
-                                   outlying_cluster_set['page_index'] < min_n]['label'].values.tolist())
+    outlying_cluster_set = set(outlying_cluster_set.loc[outlying_cluster_set['page_index'] < min_n]['label'].
+                               values.tolist())
     if len(outlying_cluster_set) == 0:
         return labels
     non_outlying_cluster_set = set(labels).difference(outlying_cluster_set)
@@ -600,9 +600,9 @@ def reassign_outliers(labels, embeddings, min_n=3):
                   else
                   non_outlying_cluster_labels_dict[
                       closest_cluster_to_outlying_cluster[
-                        outlying_cluster_labels_inverse[
-                            outlying_concept_to_cluster_map[i]
-                        ]
+                          outlying_cluster_labels_inverse[
+                              outlying_concept_to_cluster_map[i]
+                          ]
                       ]
                   ]
                   for i in range(len(labels))]
