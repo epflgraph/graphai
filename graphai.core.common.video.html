@@ -98,8 +98,8 @@
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="graphai.core.common.video.retrieve_file_from_url">
-<span class="sig-prename descclassname"><span class="pre">graphai.core.common.video.</span></span><span class="sig-name descname"><span class="pre">retrieve_file_from_url</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">url</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_filename_with_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_token</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.video.retrieve_file_from_url" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="graphai.core.common.video.retrieve_file_from_generic_url">
+<span class="sig-prename descclassname"><span class="pre">graphai.core.common.video.</span></span><span class="sig-name descname"><span class="pre">retrieve_file_from_generic_url</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">url</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_filename_with_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_token</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.video.retrieve_file_from_generic_url" title="Permalink to this definition"></a></dt>
 <dd><p>Retrieves a file from a given URL using WGET and stores it locally.
 :param url: the URL
 :param output_filename_with_path: Path of output file
@@ -124,6 +124,25 @@
 </dd>
 </dl>
 </dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.core.common.video.retrieve_file_from_youtube">
+<span class="sig-prename descclassname"><span class="pre">graphai.core.common.video.</span></span><span class="sig-name descname"><span class="pre">retrieve_file_from_youtube</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">url</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_filename_with_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_token</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.video.retrieve_file_from_youtube" title="Permalink to this definition"></a></dt>
+<dd><p>Downloads a video from YouTube
+:param url: Youtube URL
+:param output_filename_with_path: Full path of output file
+:param output_token: Token of output file</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Token of output file if successful, None otherwise</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.core.common.video.retrieve_file_from_url">
+<span class="sig-prename descclassname"><span class="pre">graphai.core.common.video.</span></span><span class="sig-name descname"><span class="pre">retrieve_file_from_url</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">url</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_filename_with_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_token</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.video.retrieve_file_from_url" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="graphai.core.common.video.perform_probe">

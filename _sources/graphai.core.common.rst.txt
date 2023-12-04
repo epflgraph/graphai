@@ -13,6 +13,7 @@ Subpackages
    :maxdepth: 1
 
    graphai.core.common.json_repair
+   graphai.core.common.ontology_utils
 
 Submodules
 ----------
