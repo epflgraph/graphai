@@ -1,6 +1,8 @@
 from fastapi import APIRouter
+from celery import chain
 
-from graphai.api.schemas.ontology import TreeResponse
+from graphai.api.schemas.ontology import TreeResponse, RecomputeClustersRequest, RecomputeClustersResponse
+from graphai.api.schemas.common import TaskIDResponse
 
 from graphai.api.common.log import log
 from graphai.api.celery_tasks.common import format_api_results
@@ -8,6 +10,7 @@ from graphai.api.celery_tasks.ontology import (
     get_ontology_tree_task,
     get_category_parent_task,
     get_category_children_task,
+    recompute_clusters_task
 )
 from graphai.core.interfaces.celery_config import get_task_info
 
@@ -69,3 +72,31 @@ async def children(category_id):
         results = None
     id_and_results = {'id': task_id, 'results': results}
     return ontology_tree_response_handler(id_and_results)
+
+
+@router.post('/recompute_clusters', response_model=TaskIDResponse)
+async def recompute_clusters(data: RecomputeClustersRequest):
+    n_clusters = data.n_clusters
+    min_n = data.min_n
+    task_list = [recompute_clusters_task.s(n_clusters, min_n)]
+    task = chain(task_list)
+    task = task.apply_async(priority=6)
+    return {'task_id': task.id}
+
+
+@router.get('/recompute_clusters/status/{task_id}', response_model=RecomputeClustersResponse)
+async def recompute_clusters_status(task_id):
+    full_results = get_task_info(task_id)
+    task_results = full_results['results']
+    if task_results is not None:
+        if 'results' in task_results:
+            task_results = {
+                'results': task_results['results'],
+                'category_assignments': task_results['category_assignments'],
+                'impurity_count': task_results['impurity_count'],
+                'impurity_proportion': task_results['impurity_proportion'],
+                'successful': task_results['results'] is not None
+            }
+        else:
+            task_results = None
+    return format_api_results(full_results['id'], full_results['name'], full_results['status'], task_results)

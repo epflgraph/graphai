@@ -11,6 +11,7 @@ import time
 from datetime import datetime
 import gzip
 import wget
+import subprocess
 
 import numpy as np
 
@@ -43,7 +44,7 @@ def generate_random_token():
     return ('%.06f' % time.time()).replace('.', '') + '%08d' % random.randint(0, int(1e7))
 
 
-def retrieve_file_from_url(url, output_filename_with_path, output_token):
+def retrieve_file_from_generic_url(url, output_filename_with_path, output_token):
     """
     Retrieves a file from a given URL using WGET and stores it locally.
     Args:
@@ -90,6 +91,32 @@ def retrieve_file_from_kaltura(url, output_filename_with_path, output_token):
         return output_token
     else:
         return None
+
+
+def retrieve_file_from_youtube(url, output_filename_with_path, output_token):
+    """
+    Downloads a video from YouTube
+    Args:
+        url: Youtube URL
+        output_filename_with_path: Full path of output file
+        output_token: Token of output file
+
+    Returns:
+        Token of output file if successful, None otherwise
+    """
+    cmd_str = f"yt-dlp -o '{output_filename_with_path}' -f '[ext=mp4]' {url}"
+    result_code = subprocess.run(cmd_str, shell=True)
+    if file_exists(output_filename_with_path) and result_code.returncode == 0:
+        return output_token
+    else:
+        return None
+
+
+def retrieve_file_from_url(url, output_filename_with_path, output_token):
+    if 'youtube.com/' in url or 'youtu.be/' in url:
+        return retrieve_file_from_youtube(url, output_filename_with_path, output_token)
+    else:
+        return retrieve_file_from_generic_url(url, output_filename_with_path, output_token)
 
 
 def perform_probe(input_filename_with_path):
