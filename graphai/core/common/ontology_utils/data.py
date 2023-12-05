@@ -22,7 +22,7 @@ class OntologyData:
                 ['id', 'name']
             )
             self.concept_concept_graphscore = db_results_to_pandas_df(db_manager.execute_query(
-                "SELECT from_id, to_id, score FROM graph_new.Edges_N_Concept_N_Concept_T_Undirected"),
+                "SELECT from_id, to_id, score FROM graph_ontology.Edges_N_Concept_N_Concept_T_Undirected"),
                 ['from_id', 'to_id', 'score']
             )
             self.category_concept = db_results_to_pandas_df(db_manager.execute_query(
