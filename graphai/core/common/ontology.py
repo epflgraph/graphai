@@ -210,6 +210,12 @@ class Ontology:
         ontology_concepts = ontology_concepts_categories['PageID']
         non_ontology_concepts = concepts[~concepts.isin(ontology_concepts)]
 
+        # Fallback: Unlikely case when no concept in the results belongs to the ontology
+        if len(ontology_concepts) == 0:
+            results['OntologyLocalScore'] = 1
+            results['OntologyGlobalScore'] = 1
+            return results
+
         ################################################################
 
         # Build DataFrame with the non-ontology concepts and their neighbours

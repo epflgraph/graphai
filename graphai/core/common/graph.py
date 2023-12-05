@@ -202,6 +202,11 @@ class ConceptsGraph:
             & self.concepts_concepts['TargetPageID'].isin(concept_ids)
         ]
 
+        # Fallback: Unlikely case when no pair of concepts in the results share an edge, so induced graph are isolated vertices
+        if len(concepts_concepts) == 0:
+            results['GraphScore'] = 1
+            return results
+
         # Aggregate by SourcePageID adding up the scores (concepts_concepts contains edges and their reversed edges)
         concepts_concepts = concepts_concepts.groupby(by='SourcePageID').aggregate(GraphScore=('NormalisedScore', 'sum')).reset_index()
         concepts_concepts = concepts_concepts.rename(columns={'SourcePageID': 'PageID'})
@@ -217,6 +222,8 @@ class ConceptsGraph:
         #   NOTE: We purposely perform an inner merge as an extra filter to exclude concepts which don't have an edge
         #   to any of the other concepts in the results, as they are very often noise. This could be an issue
         #   for very short texts, but this is rarely the case and even in that case it is never dramatic.
+        #   Notice that if absolutely no edges are present among the concepts in the results,
+        #   we never reach this point as we fall back above and return scores of 1
         results = pd.merge(results, concepts_concepts, how='inner', on='PageID')
 
         return results
