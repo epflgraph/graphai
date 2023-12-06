@@ -136,7 +136,9 @@ class OntologyData:
         self.ontology_categories = None
         self.non_ontology_concept_names = None
         self.concept_concept_graphscore = None
-        self.concept_concept_matrix = None
+        self.ontology_and_anchor_concepts_id_to_index = None
+        self.ontology_neighbor_concepts_id_to_index = None
+        self.symmetric_concept_concept_matrix = dict()
         self.category_category = None
         self.category_concept = None
         self.category_concept_dict = None
@@ -151,7 +153,7 @@ class OntologyData:
             self.load_non_ontology_concept_names()
             # Now loading the concept-concept table and the matrix from neighborhood to ontology/anchors
             self.load_concept_concept_graphscore()
-            self.compute_concept_concept_matrix()
+            self.compute_symmetric_concept_concept_matrix()
             # Now loading category-category and category-concept tables
             self.load_category_category()
             self.load_category_concept()
@@ -242,8 +244,13 @@ class OntologyData:
         anchor_lists = anchors.anchor_ids.values.tolist()
         self.category_anchors_dict = {category_ids[i]: anchor_lists[i] for i in range(len(category_ids))}
 
-    def compute_concept_concept_matrix(self):
-        pass
+    def compute_symmetric_concept_concept_matrix(self):
+        adj, row_dict, _ = (create_graph_from_df(
+            self.concept_concept_graphscore, 'from_id', 'to_id', 'score',
+            pool_rows_and_cols=True, make_symmetric=True)
+        )
+        self.symmetric_concept_concept_matrix['id_to_index'] = row_dict
+        self.symmetric_concept_concept_matrix['matrix'] = adj
 
     def get_ontology_concept_names(self):
         self.load_data()
