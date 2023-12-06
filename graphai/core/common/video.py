@@ -1,7 +1,6 @@
 import os
 import sys
 import io
-import configparser
 import math
 import glob
 import re
@@ -27,7 +26,7 @@ from google.cloud import vision
 import spacy
 import whisper
 
-from graphai.definitions import CONFIG_DIR
+from graphai.core.common.config import config
 from graphai.core.common.common_utils import make_sure_path_exists, file_exists
 
 FRAME_FORMAT_PNG = 'frame-%06d.png'
@@ -793,18 +792,19 @@ def compute_video_ocr_transitions(input_folder_with_path, frame_sample_indices, 
     return transition_list
 
 
-class WhisperTranscriptionModel():
+class WhisperTranscriptionModel:
     def __init__(self):
-        # The actual Whisper model is lazy loaded in order not to load it twice (celery *and* gunicorn)
-        config_contents = configparser.ConfigParser()
         try:
-            print('Reading model configuration from file')
-            config_contents.read(f'{CONFIG_DIR}/models.ini')
-            self.model_type = config_contents['WHISPER'].get('model_type', fallback='medium')
+            print("Reading whisper model type from config")
+            self.model_type = config['whisper']['model_type']
         except Exception:
-            print(f'Could not read file {CONFIG_DIR}/models.ini or '
-                  f'file does not have section [WHISPER], falling back to defaults.')
+            print(
+                "The whisper model type could not be found in the config file, using the 'medium' model type as the default. "
+                "To use a different one, make sure to add a [whisper] section with the model_type parameter."
+            )
             self.model_type = 'medium'
+
+        # The actual Whisper model is lazy loaded in order not to load it twice (celery *and* gunicorn)
         self.model = None
 
     def load_model_whisper(self):
@@ -890,21 +890,23 @@ class NLPModels:
         return self.nlp_models
 
 
-class GoogleOCRModel():
+class GoogleOCRModel:
     def __init__(self):
-        self.model = None
-        config_contents = configparser.ConfigParser()
         try:
-            print('Reading API key from file')
-            config_contents.read(f'{CONFIG_DIR}/models.ini')
-            self.api_key = config_contents['GOOGLE'].get('api_key', fallback=None)
+            print("Reading Google API key from config")
+            self.api_key = config['google']['api_key']
         except Exception:
             self.api_key = None
+
         if self.api_key is None:
-            print(f'Could not read file {CONFIG_DIR}/models.ini or '
-                  f'file does not have section [GOOGLE], Google API '
-                  f'endpoints cannot be used as there is no '
-                  f'default API key.')
+            print(
+                "The Google API key could not be found in the config file. "
+                "Make sure to add a [google] section with the api_key parameter. "
+                "Google API endpoints cannot be used as there is no default API key."
+            )
+
+        # The actual Google model is lazy loaded in order not to load it twice (celery *and* gunicorn)
+        self.model = None
 
     def establish_connection(self):
         """

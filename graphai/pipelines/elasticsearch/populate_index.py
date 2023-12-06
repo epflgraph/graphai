@@ -11,10 +11,12 @@ from multiprocessing import Pool
 import pandas as pd
 
 from db_cache_manager.db import DB
-from graphai.core.interfaces.config_loader import load_db_config
+
+from graphai.core.common.config import config
 from graphai.core.interfaces.es import ES
 from graphai.core.utils.time.date import now
 from graphai.core.utils.breadcrumb import Breadcrumb
+
 
 ################################################################
 
@@ -36,7 +38,7 @@ if __name__ == '__main__':
     ################################################################
 
     # Init DB interface
-    db = DB(load_db_config())
+    db = DB(config['database'])
 
     # Init breadcrumb to log and time statements
     bc = Breadcrumb()

@@ -1,4 +1,5 @@
 import os
+from datetime import datetime, timedelta
 
 from graphai.core.common.caching import (
     VideoConfig,
@@ -7,23 +8,21 @@ from graphai.core.common.caching import (
     SlideDBCachingManager,
     delete_file
 )
-from graphai.definitions import CONFIG_DIR
 from graphai.core.common.common_utils import format_datetime_for_mysql
-
-from datetime import datetime, timedelta
-import configparser
+from graphai.core.common.config import config
 
 
 def get_cleanup_interval():
-    config_contents = configparser.ConfigParser()
     try:
-        print('Reading cache cleanup interval configuration from file')
-        config_contents.read(f'{CONFIG_DIR}/cache.ini')
-        n_days = int(config_contents['CLEANUP'].get('interval', fallback='30'))
+        print("Reading cache cleanup interval from config")
+        n_days = int(config['cleanup'].get('interval', 60))
     except Exception:
-        print(f'Could not read file {CONFIG_DIR}/cache.ini or '
-              f'file does not have section [CLEANUP], falling back to defaults.')
+        print(
+            "The cache cleanup interval could not be found in the config file, using 60 days as default. "
+            "To use a different one, make sure to add a [cleanup] section with the interval parameter in days."
+        )
         n_days = 60
+
     return n_days
 
 

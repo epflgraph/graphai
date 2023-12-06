@@ -1,11 +1,9 @@
-import configparser
-
 from ssl import create_default_context
 
 import pandas as pd
 from elasticsearch import Elasticsearch
 
-from graphai.definitions import CONFIG_DIR
+from graphai.core.common.config import config
 
 
 def es_bool(must=None, must_not=None, should=None, filter=None):
@@ -113,22 +111,24 @@ class ES:
     """
 
     def __init__(self, index):
-        self.index = index
-
         try:
-            self.es_config = configparser.ConfigParser()
-            self.es_config.read(f'{CONFIG_DIR}/es.ini')
-            self.host = self.es_config["ES"].get("host")
-            self.port = self.es_config["ES"].get("port")
-            self.username = self.es_config["ES"].get("username")
-            self.cafile = self.es_config["ES"].get("cafile")
-            password = self.es_config["ES"].get("password")
+            print("Reading elasticsearch configuration from config")
+            self.host = config['elasticsearch']['host']
+            self.port = config['elasticsearch']['port']
+            self.username = config['elasticsearch']['username']
+            self.cafile = config['elasticsearch']['cafile']
+            password = config['elasticsearch']['password']
 
             context = create_default_context(cafile=self.cafile)
             self.es = Elasticsearch([f'https://{self.username}:{password}@{self.host}:{self.port}'], ssl_context=context, request_timeout=3600)
         except Exception:
-            print('Warning: Unable to connect to the elasticsearch cluster. File config/es.ini is missing or has incorrect format.')
+            print(
+                "The elasticsearch configuration could not be found or is missing some keys in the config file. "
+                "Make sure to add a [celery] section with the corresponding parameters (host, port, username, password, cafile)."
+            )
             self.es = None
+
+        self.index = index
 
     def _search(self, query, limit=10, source=None, explain=False, rescore=None):
         return self.es.search(index=self.index, query=query, source=source, rescore=rescore, size=limit, explain=explain, profile=True)

@@ -5,7 +5,6 @@ import platform
 PKG_DIR = os.path.dirname(__file__)
 ROOT_DIR = os.path.dirname(PKG_DIR)
 
-CONFIG_DIR = f'{ROOT_DIR}/config'
 DOCS_DIR = f'{ROOT_DIR}/docs'
 DATA_DIR = f'{ROOT_DIR}/data'
 TESTS_DIR = f'{ROOT_DIR}/tests'

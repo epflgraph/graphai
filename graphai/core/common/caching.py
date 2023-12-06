@@ -1,11 +1,10 @@
 import os
-import configparser
 from datetime import datetime
 
-from graphai.core.common.common_utils import make_sure_path_exists, file_exists
 from db_cache_manager.db import DBCachingManagerBase
-from graphai.core.interfaces.config_loader import load_db_config, load_schema_name
-from graphai.definitions import CONFIG_DIR
+
+from graphai.core.common.common_utils import make_sure_path_exists, file_exists
+from graphai.core.common.config import config
 
 ROOT_VIDEO_DIR = os.path.normpath(os.path.join(os.path.dirname(__file__), '../../../Storage/'))
 # Formats with a . in their name indicate single files, whereas formats without a . indicate folders (e.g. '_slides')
@@ -19,6 +18,13 @@ OTHER_SUBFOLDER = 'Other'
 TRANSCRIPT_SUBFOLDER = 'Transcripts'
 TRANSCRIPT_FORMATS = ['_transcript.txt', '_subtitle_segments.json']
 TEMP_SUBFOLDER = 'Temp'
+
+# Cache config parameters
+DEFAULT_SCHEMA = 'cache_graphai'
+try:
+    cache_schema = config['cache']['schema']
+except Exception:
+    cache_schema = DEFAULT_SCHEMA
 
 
 def delete_file(file_path):
@@ -50,10 +56,13 @@ def create_symlink_between_paths(old_path, new_path):
 
 class VideoDBCachingManager(DBCachingManagerBase):
     def __init__(self):
-        super().__init__(db_config=load_db_config(),
-                         cache_table='Video_Main', most_similar_table='Video_Most_Similar',
-                         schema=load_schema_name(),
-                         cache_date_modified_col='date_modified')
+        super().__init__(
+            db_config=config['database'],
+            cache_table='Video_Main',
+            most_similar_table='Video_Most_Similar',
+            schema=cache_schema,
+            cache_date_modified_col='date_modified'
+        )
 
     def init_db(self):
         # Ensuring the schema's existence
@@ -104,9 +113,12 @@ class VideoDBCachingManager(DBCachingManagerBase):
 
 class AudioDBCachingManager(DBCachingManagerBase):
     def __init__(self):
-        super().__init__(db_config=load_db_config(),
-                         cache_table='Audio_Main', most_similar_table='Audio_Most_Similar',
-                         schema=load_schema_name())
+        super().__init__(
+            db_config=config['database'],
+            cache_table='Audio_Main',
+            most_similar_table='Audio_Most_Similar',
+            schema=cache_schema
+        )
 
     def init_db(self):
         # Ensuring the schema's existence
@@ -165,9 +177,12 @@ class AudioDBCachingManager(DBCachingManagerBase):
 
 class SlideDBCachingManager(DBCachingManagerBase):
     def __init__(self):
-        super().__init__(db_config=load_db_config(),
-                         cache_table='Slide_Main', most_similar_table='Slide_Most_Similar',
-                         schema=load_schema_name())
+        super().__init__(
+            db_config=config['database'],
+            cache_table='Slide_Main',
+            most_similar_table='Slide_Most_Similar',
+            schema=cache_schema
+        )
 
     def init_db(self):
         # Ensuring the schema's existence
@@ -236,9 +251,12 @@ class SlideDBCachingManager(DBCachingManagerBase):
 
 class TextDBCachingManager(DBCachingManagerBase):
     def __init__(self):
-        super().__init__(db_config=load_db_config(),
-                         cache_table='Text_Main', most_similar_table='Text_Most_Similar',
-                         schema=load_schema_name())
+        super().__init__(
+            db_config=config['database'],
+            cache_table='Text_Main',
+            most_similar_table='Text_Most_Similar',
+            schema=cache_schema
+        )
 
     def init_db(self):
         # Making sure the schema exists
@@ -291,9 +309,12 @@ class TextDBCachingManager(DBCachingManagerBase):
 
 class CompletionDBCachingManager(DBCachingManagerBase):
     def __init__(self):
-        super().__init__(db_config=load_db_config(),
-                         cache_table='Completion_Main', most_similar_table='Completion_Most_Similar',
-                         schema=load_schema_name())
+        super().__init__(
+            db_config=config['database'],
+            cache_table='Completion_Main',
+            most_similar_table='Completion_Most_Similar',
+            schema=cache_schema
+        )
 
     def init_db(self):
         # Making sure the schema exists
@@ -350,9 +371,12 @@ class CompletionDBCachingManager(DBCachingManagerBase):
 
 class ScrapingDBCachingManager(DBCachingManagerBase):
     def __init__(self):
-        super().__init__(db_config=load_db_config(),
-                         cache_table='Scraping_Main', most_similar_table='Scraping_Most_Similar',
-                         schema=load_schema_name())
+        super().__init__(
+            db_config=config['database'],
+            cache_table='Scraping_Main',
+            most_similar_table='Scraping_Most_Similar',
+            schema=cache_schema
+        )
         # Expiration period in days
         self.expiration_period = 7
 
@@ -446,16 +470,16 @@ class ScrapingDBCachingManager(DBCachingManagerBase):
         return correct_results
 
 
-class VideoConfig():
+class VideoConfig:
     def __init__(self):
-        config_contents = configparser.ConfigParser()
         try:
-            print('Reading cache storage configuration from file')
-            config_contents.read(f'{CONFIG_DIR}/cache.ini')
-            self.root_dir = config_contents['CACHE'].get('root', fallback=ROOT_VIDEO_DIR)
+            print("Reading cache storage directory from config")
+            self.root_dir = config['cache']['root']
         except Exception:
-            print(f'Could not read file {CONFIG_DIR}/cache.ini or '
-                  f'file does not have section [CACHE], falling back to defaults.')
+            print(
+                f"The cache storage directory could not be found in the config file, using {ROOT_VIDEO_DIR} as the default. "
+                "To use a different one, make sure to add a [cache] section with the root parameter."
+            )
             self.root_dir = ROOT_VIDEO_DIR
 
     def get_root_dir(self):
@@ -551,14 +575,12 @@ class FingerprintParameters:
             'audio': '0.8',
             'video': '1.0'
         }
-        config_contents = configparser.ConfigParser()
         try:
-            print('Reading fingerprint min similarity values from file')
-            config_contents.read(f'{CONFIG_DIR}/fingerprint.ini')
-            self.min_similarity['text'] = float(config_contents['FP'].get('text', fallback=defaults['text']))
-            self.min_similarity['image'] = float(config_contents['FP'].get('image', fallback=defaults['image']))
-            self.min_similarity['audio'] = float(config_contents['FP'].get('audio', fallback=defaults['audio']))
-            self.min_similarity['video'] = float(config_contents['FP'].get('video', fallback=defaults['video']))
+            print('Reading fingerprint min similarity values from config')
+            self.min_similarity['text'] = float(config['fingerprint'].get('text', defaults['text']))
+            self.min_similarity['image'] = float(config['fingerprint'].get('image', defaults['image']))
+            self.min_similarity['audio'] = float(config['fingerprint'].get('audio', defaults['audio']))
+            self.min_similarity['video'] = float(config['fingerprint'].get('video', defaults['video']))
         except Exception:
             self.min_similarity = {k: float(v) for k, v in defaults.items()}
 

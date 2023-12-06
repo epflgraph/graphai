@@ -2,11 +2,10 @@ import pandas as pd
 import networkx as nx
 
 from db_cache_manager.db import DB
-from graphai.core.interfaces.config_loader import load_db_config
 
+from graphai.core.common.config import config
 from graphai.core.utils.breadcrumb import Breadcrumb
-
-from graphai.scripts.investment.concept_configuration import normalise
+from graphai.pipelines.investment.concept_configuration import normalise
 
 
 def print_summary(startups, concepts, startups_concepts, concepts_concepts):
@@ -27,7 +26,7 @@ def create_startups_graph():
     bc = Breadcrumb()
 
     # Instantiate db interface to communicate with database
-    db = DB(load_db_config())
+    db = DB(config['database'])
 
     ############################################################
 
