@@ -323,7 +323,7 @@ class ChatGPTSummarizer:
             messages += text
             try:
                 # Generate the completion
-                client = openai.OpenAI()
+                client = openai.OpenAI(api_key=config['openai']['api_key'])
                 completion = client.chat.completions.create(
                     model=model_type,
                     messages=messages,
