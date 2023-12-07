@@ -323,17 +323,18 @@ class ChatGPTSummarizer:
             messages += text
             try:
                 # Generate the completion
-                completion = openai.ChatCompletion.create(
+                client = openai.OpenAI()
+                completion = client.chat.completions.create(
                     model=model_type,
                     messages=messages,
                     max_tokens=max_len,
                     temperature=temperature,
                     top_p=top_p,
-                    request_timeout=timeout
+                    timeout=timeout
                 )
                 if verbose:
                     print(completion)
-            except openai.error.InvalidRequestError as e:
+            except openai.OpenAIError as e:
                 # We check to see if the exception was caused by too many tokens in the input
                 print(e)
                 if "This model's maximum context length is" in str(e):
