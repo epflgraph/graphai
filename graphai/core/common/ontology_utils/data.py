@@ -1,6 +1,6 @@
 from db_cache_manager.db import DB
 import pandas as pd
-from scipy.sparse import csr_array, csr_matrix
+from scipy.sparse import csr_array, csr_matrix, vstack
 
 from graphai.core.common.common_utils import invert_dict
 from graphai.core.interfaces.config_loader import load_db_config
@@ -157,8 +157,10 @@ class OntologyData:
             # Now loading category-category and category-concept tables
             self.load_category_category()
             self.load_category_concept()
-            # Finally computing aggregated anchor concept lists for each category
+            # Now computing aggregated anchor concept lists for each category
             self.compute_category_anchors()
+            # Finally, we compute aggregated matrices that map each concept to each category
+            self.compute_precalculated_similarity_matrices()
             self.loaded = True
 
     def load_ontology_concept_names(self):
@@ -242,15 +244,48 @@ class OntologyData:
         anchors = anchors.loc[anchors.depth < 5]
         category_ids = anchors.category_id.values.tolist()
         anchor_lists = anchors.anchor_ids.values.tolist()
-        self.category_anchors_dict = {category_ids[i]: anchor_lists[i] for i in range(len(category_ids))}
+        depths_list = anchors.depth.values.tolist()
+        self.category_anchors_dict = {category_ids[i]: {'anchors': anchor_lists[i], 'depth': depths_list[i]}
+                                      for i in range(len(category_ids))}
 
     def compute_symmetric_concept_concept_matrix(self):
         adj, row_dict, _ = (create_graph_from_df(
             self.concept_concept_graphscore, 'from_id', 'to_id', 'score',
             pool_rows_and_cols=True, make_symmetric=True)
         )
-        self.symmetric_concept_concept_matrix['id_to_index'] = row_dict
+        self.symmetric_concept_concept_matrix['concept_id_to_index'] = row_dict
         self.symmetric_concept_concept_matrix['matrix'] = adj
+
+    def compute_precalculated_similarity_matrices(self):
+        depth4_categories_list = sorted([x for x in self.category_anchors_dict.keys()
+                                         if self.category_anchors_dict[x]['depth'] == 4])
+        self.symmetric_concept_concept_matrix['d4_cat_index_to_id'] = dict(enumerate(depth4_categories_list))
+        self.symmetric_concept_concept_matrix['d4_cat_anchors'] = {
+            x: [self.symmetric_concept_concept_matrix['concept_id_to_index'][y]
+                for y in self.category_anchors_dict[
+                    self.symmetric_concept_concept_matrix['d4_cat_index_to_id'][x]]['anchors']
+                if y in self.symmetric_concept_concept_matrix['concept_id_to_index']]
+            for x in range(len(depth4_categories_list))
+        }
+        self.symmetric_concept_concept_matrix['matrix_cat_concept_anchors'] = vstack(
+            [csr_matrix(self.symmetric_concept_concept_matrix['matrix'][
+                        self.symmetric_concept_concept_matrix['d4_cat_anchors'][x], :].sum(axis=0)
+                        )
+             for x in range(len(depth4_categories_list))]
+        )
+        self.symmetric_concept_concept_matrix['d4_cat_concepts'] = {
+            x: [self.symmetric_concept_concept_matrix['concept_id_to_index'][y]
+                for y in self.category_concept_dict.get(
+                    self.symmetric_concept_concept_matrix['d4_cat_index_to_id'][x], [])
+                if y in self.symmetric_concept_concept_matrix['concept_id_to_index']]
+            for x in range(len(depth4_categories_list))
+        }
+        self.symmetric_concept_concept_matrix['matrix_cat_concept_concepts'] = vstack(
+            [csr_matrix(self.symmetric_concept_concept_matrix['matrix'][
+                        self.symmetric_concept_concept_matrix['d4_cat_concepts'][x], :].sum(axis=0)
+                        )
+             for x in range(len(depth4_categories_list))]
+        )
 
     def get_ontology_concept_names(self):
         self.load_data()
