@@ -1,6 +1,8 @@
-from db_cache_manager.db import DB
 import pandas as pd
-from graphai.core.interfaces.config_loader import load_db_config
+
+from db_cache_manager.db import DB
+
+from graphai.core.common.config import config
 
 
 def db_results_to_pandas_df(results, cols):
@@ -16,7 +18,7 @@ class OntologyData:
 
     def load_data(self):
         if not self.loaded:
-            db_manager = DB(load_db_config())
+            db_manager = DB(config['database'])
             self.ontology_concept_names = db_results_to_pandas_df(db_manager.execute_query(
                 "SELECT id, name FROM graph_ontology.Nodes_N_Concept WHERE is_ontology_concept=1"),
                 ['id', 'name']

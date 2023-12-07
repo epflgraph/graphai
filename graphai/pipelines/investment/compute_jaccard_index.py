@@ -2,8 +2,8 @@ import numpy as np
 import pandas as pd
 
 from db_cache_manager.db import DB
-from graphai.core.interfaces.config_loader import load_db_config
 
+from graphai.core.common.config import config
 from graphai.core.utils.breadcrumb import Breadcrumb
 
 
@@ -17,7 +17,7 @@ def compute_jaccard_index(params):
     bc = Breadcrumb()
 
     # Instantiate db interface to communicate with database
-    db = DB(load_db_config())
+    db = DB(config['database'])
 
     ############################################################
     # FETCH GRAPH FROM DATABASE                                #

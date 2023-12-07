@@ -1,4 +1,3 @@
-import configparser
 import hashlib
 import json
 from bisect import bisect
@@ -14,10 +13,13 @@ from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
 import torch
 from sklearn.feature_extraction.text import TfidfVectorizer
 
-from graphai.definitions import CONFIG_DIR
+from graphai.core.common.config import config
 from graphai.core.common.json_repair.json_repair import repair_json
-from graphai.core.common.gpt_message_presets import generate_lecture_summary_message, \
-    generate_generic_summary_message, generate_academic_entity_summary_message
+from graphai.core.common.gpt_message_presets import (
+    generate_lecture_summary_message,
+    generate_generic_summary_message,
+    generate_academic_entity_summary_message,
+)
 
 TRANSLATION_LIST_SEPARATOR = ' [{[!!SEP!!]}] '
 CHATGPT_COSTS_PER_1K = {
@@ -246,18 +248,18 @@ def compute_chatgpt_request_cost(token_counts, model_type):
 
 class ChatGPTSummarizer:
     def __init__(self):
-        config_contents = configparser.ConfigParser()
         try:
-            print('Reading ChatGPT API key from file')
-            config_contents.read(f'{CONFIG_DIR}/models.ini')
-            self.api_key = config_contents['CHATGPT'].get('api_key', fallback=None)
+            print("Reading OpenAI API key from config")
+            self.api_key = config['openai']['api_key']
         except Exception:
             self.api_key = None
+
         if self.api_key is None:
-            print(f'Could not read file {CONFIG_DIR}/models.ini or '
-                  f'file does not have section [CHATGPT], ChatGPT API '
-                  f'endpoints cannot be used as there is no '
-                  f'default API key.')
+            print(
+                "The OpenAI API key could not be found in the config file. "
+                "Make sure to add a [openai] section with the api_key parameter. "
+                "OpenAI API endpoints cannot be used as there is no default API key."
+            )
 
     def establish_connection(self):
         """
@@ -321,17 +323,18 @@ class ChatGPTSummarizer:
             messages += text
             try:
                 # Generate the completion
-                completion = openai.ChatCompletion.create(
+                client = openai.OpenAI(api_key=config['openai']['api_key'])
+                completion = client.chat.completions.create(
                     model=model_type,
                     messages=messages,
                     max_tokens=max_len,
                     temperature=temperature,
                     top_p=top_p,
-                    request_timeout=timeout
+                    timeout=timeout
                 )
                 if verbose:
                     print(completion)
-            except openai.error.InvalidRequestError as e:
+            except openai.OpenAIError as e:
                 # We check to see if the exception was caused by too many tokens in the input
                 print(e)
                 if "This model's maximum context length is" in str(e):
