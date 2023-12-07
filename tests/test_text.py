@@ -77,8 +77,9 @@ def test__text_keywords__extract_keywords__run_task(sultans, wave_fields, schrei
 ################################################################
 
 
+@pytest.mark.celery(accept_content=['pickle', 'json'], result_serializer='pickle', task_serializer='pickle')
 @pytest.mark.usefixtures('sultans', 'wave_fields', 'schreier')
-def test__text_keywords__integration(fixture_app, sultans, wave_fields, schreier, timeout=30):
+def test__text_keywords__integration(fixture_app, celery_worker, sultans, wave_fields, schreier, timeout=30):
     # Make POST request to fixture fastapi app
     response = fixture_app.post('/text/keywords', data=json.dumps({'raw_text': ''}), timeout=timeout)
 
@@ -277,8 +278,9 @@ def test__text_keywords__aggregate__run_task(wave_fields_scores_df):
 ################################################################
 
 
+@pytest.mark.celery(accept_content=['pickle', 'json'], result_serializer='pickle', task_serializer='pickle')
 @pytest.mark.usefixtures('wave_fields', 'schreier')
-def test__text_wikify__integration(fixture_app, wave_fields, schreier, timeout=60):
+def test__text_wikify__integration(fixture_app, celery_worker, wave_fields, schreier, timeout=60):
     # Make POST request to fixture fastapi app
     response = fixture_app.post('/text/wikify', data=json.dumps({'raw_text': ''}), timeout=timeout)
 
@@ -366,8 +368,9 @@ def test__text_wikify_ontology_svg__draw_ontology__run_task(wave_fields_wikified
 ################################################################
 
 
+@pytest.mark.celery(accept_content=['pickle', 'json'], result_serializer='pickle', task_serializer='pickle')
 @pytest.mark.usefixtures('wave_fields_wikified_json')
-def test__text_wikify_ontology_svg__integration(fixture_app, wave_fields_wikified_json, timeout=30):
+def test__text_wikify_ontology_svg__integration(fixture_app, celery_worker, wave_fields_wikified_json, timeout=30):
     # Make POST request to fixture fastapi app
     response = fixture_app.post('/text/wikify_ontology_svg', data=json.dumps([]), timeout=timeout)
 
@@ -433,8 +436,9 @@ def test__text_wikify_graph_svg__draw_graph__run_task(wave_fields_wikified_json)
 ################################################################
 
 
+@pytest.mark.celery(accept_content=['pickle', 'json'], result_serializer='pickle', task_serializer='pickle')
 @pytest.mark.usefixtures('wave_fields_wikified_json')
-def test__text_wikify_graph_svg__integration(fixture_app, wave_fields_wikified_json, timeout=30):
+def test__text_wikify_graph_svg__integration(fixture_app, celery_worker, wave_fields_wikified_json, timeout=30):
     # Make POST request to fixture fastapi app
     response = fixture_app.post('/text/wikify_graph_svg', data=json.dumps([]), timeout=timeout)
 
