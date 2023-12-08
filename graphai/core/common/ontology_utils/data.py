@@ -256,7 +256,7 @@ class OntologyData:
         anchors = self.ontology_categories.loc[self.ontology_categories.depth == 5, ['category_id', 'depth', 'id']].\
             copy()
         anchors['anchor_ids'] = anchors['id'].apply(lambda x: [x])
-        for depth in range(4,-1,-1):
+        for depth in range(4, -1, -1):
             current_cat_df = self.ontology_categories.loc[
                 self.ontology_categories.depth == depth, ['category_id', 'depth', 'id']
             ]
@@ -326,7 +326,7 @@ class OntologyData:
         }
         self.symmetric_concept_concept_matrix['d4_cat_concepts_lengths'] = csr_matrix(
             ([len(v) for k, v in self.symmetric_concept_concept_matrix['d4_cat_concepts'].items()],
-             ([0]*len(self.symmetric_concept_concept_matrix['d4_cat_concepts']),
+             ([0] * len(self.symmetric_concept_concept_matrix['d4_cat_concepts']),
               [k for k, v in self.symmetric_concept_concept_matrix['d4_cat_concepts'].items()])),
             shape=(1, len(self.symmetric_concept_concept_matrix['d4_cat_concepts']))
         )
