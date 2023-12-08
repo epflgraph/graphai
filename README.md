@@ -43,62 +43,16 @@ pip install -e .
 ```
 All python dependencies will be automatically installed.
 
-### Configuration files
-The project has a [config](config) folder that is used to specify the configuration for the different connections and AI models. Only the database and Celery files are required, the rest have default fallback mechanisms when files are absent.
+### Configuration file
+The project requires a `config.ini` that is used to specify the configuration for the different connections and AI models. An [example-config.ini](example-config.ini) file is provided with some default values. Copy this file to `config.ini` with
 
-#### Database
-
-**db.ini**: Database config file, a file with this information:
 ```
-[DB]
-host: <db host>
-port: <db port>
-user: <db user>
-password: <db password>
+cp example-config.ini config.ini
 ```
 
-#### Celery
+then edit it with your credentials and preferences.
 
-**celery.ini**: Celery config file:
-```
-[CELERY]
-broker_url: <rabbitmq message broker url> (e.g. amqp://guest:guest@localhost:5672//)
-result_backend: <redis backend url> (e.g. redis://localhost:6379/0)
-```
-
-#### Elasticsearch
-
-**es.ini**: Elasticsearch config file, a file with this information:
-```
-[ES]
-host: <es host>
-port: <es port>
-username: <es username>
-password: <es password>
-cafile: <path to es cluster certificate> 
-```
-
-#### AI models
-
-**models.ini**: Config file for Whisper model (audio transcription) and Google Vision API (OCR):
-```
-[WHISPER]
-model_type: <whisper model type, default medium>
-
-[GOOGLE]
-api_key: <Google API key>
-```
-
-#### Caching
-
-**cache.ini**: Config file for results caching:
-```
-[CACHE]
-root: <root directory for the storage of all files (video, audio, image, etc.)>
-```
-
-> ℹ️ The caching additionally requires either the existence of the schema `cache_graphai` in your database or otherwise the 
-permission to create a new schema.
+> ℹ️ The caching additionally requires either the existence of the schema whose name is specified in the file (`cache_graphai` by default) in your database or otherwise the permission to create a new schema.
 
 ## Deployment
 To deploy the API, make sure the RabbitMQ and Redis services are running and accessible at the urls provided in the corresponding config file.

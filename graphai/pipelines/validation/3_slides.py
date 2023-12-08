@@ -6,7 +6,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 from db_cache_manager.db import DB
-from graphai.core.interfaces.config_loader import load_db_config
+
+from graphai.core.common.config import config
 
 pd.set_option('display.max_rows', 500)
 pd.set_option('display.max_columns', 500)
@@ -17,7 +18,7 @@ pages_old = pd.read_json('pages_old.json')
 pages_new = pd.read_json('pages_new.json')
 
 # Filter out concepts not in the ontology for the old algorithm
-db = DB(load_db_config())
+db = DB(config['database'])
 table_name = 'graph.Nodes_N_Concept'
 fields = ['PageID']
 pages_ontology = pd.DataFrame(db.find(table_name, fields=fields), columns=fields)

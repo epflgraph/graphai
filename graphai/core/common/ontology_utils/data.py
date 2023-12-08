@@ -4,7 +4,7 @@ import pandas as pd
 from scipy.sparse import csr_array, csr_matrix, vstack, spmatrix
 
 from graphai.core.common.common_utils import invert_dict
-from graphai.core.interfaces.config_loader import load_db_config
+from graphai.core.common.config import config
 
 
 def db_results_to_pandas_df(results, cols):
@@ -182,7 +182,7 @@ class OntologyData:
 
     def load_data(self):
         if not self.loaded:
-            self.db_config = load_db_config()
+            self.db_config = config['database']
             # First loading concepts: ontology concepts, anchor concepts, and ontology-neighborhood concepts
             self.load_ontology_concept_names()
             self.load_ontology_categories()

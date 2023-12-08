@@ -21,10 +21,10 @@ def francisco_score(df, x='out', y='in'):
     return 1 - 1 / (1 + np.log(1 + r * np.log(df[x])))
 
 
-def aitor_score(df, x='out', y='in'):
+def aitor_score(df, x='out', y='in', k=50):
     r = (1 + df['min_in_out']) / (1 + df['max_in_out'])
     power = np.power(df[x], r)
-    return (power - 1) / (power + (100 / (df[x] + df[y])))
+    return (power - 1) / (power + (2 * k / (df[x] + df[y])))
 
 
 def yves_score_sym(df):
@@ -39,9 +39,9 @@ def francisco_score_sym(df):
     return (s1 + s2) / 2
 
 
-def aitor_score_sym(df):
-    s1 = aitor_score(df, x='out', y='in')
-    s2 = aitor_score(df, x='in', y='out')
+def aitor_score_sym(df, k=50):
+    s1 = aitor_score(df, x='out', y='in', k=k)
+    s2 = aitor_score(df, x='in', y='out', k=k)
     return (s1 + s2) / 2
 
 

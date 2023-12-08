@@ -4,8 +4,11 @@ import pytest
 from unittest.mock import patch
 from time import sleep
 
-from graphai.api.celery_tasks.completion import request_text_completion_task, \
-    compute_summarization_text_fingerprint_task
+from graphai.api.celery_tasks.completion import (
+    request_text_completion_task,
+    compute_summarization_text_fingerprint_task,
+)
+
 
 ################################################################
 # /completion/summary                                       #

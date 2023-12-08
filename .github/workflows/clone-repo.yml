@@ -15,42 +15,11 @@ jobs:
         with:
           path: main
 
-      - name: Create config files
+      - name: Run linter
         run: |
           cd main
-          mkdir config
-          cd config
-          
-          echo "[DB]" >> db.ini
-          echo "host: ${{ vars.db_host }}" >> db.ini
-          echo "port: ${{ vars.db_port }}" >> db.ini
-          echo "user: ${{ vars.db_user }}" >> db.ini
-          echo "password: ${{ secrets.db_password }}" >> db.ini
-          
-          echo "[ES]" >> es.ini
-          echo "host: ${{ vars.es_host }}" >> es.ini
-          echo "port: ${{ vars.es_port }}" >> es.ini
-          echo "username: ${{ vars.es_username }}" >> es.ini
-          echo "password: ${{ secrets.es_password }}" >> es.ini
-          echo "cafile: ${{ vars.es_cafile }}" >> es.ini
-          
-          echo "[CELERY]" >> celery.ini
-          echo "broker_url: ${{ vars.celery_broker_url }}" >> celery.ini
-          echo "result_backend: ${{ vars.celery_result_backend }}" >> celery.ini
-          
-          echo "[WHISPER]" >> models.ini
-          echo "model_type: ${{ vars.whisper_model_type }}" >> models.ini
-          echo "" >> models.ini
-          echo "[GOOGLE]" >> models.ini
-          echo "api_key: ${{ secrets.google_api_key }}" >> models.ini
-          echo "" >> models.ini
-          echo "[CHATGPT]" >> models.ini
-          echo "api_key: ${{ secrets.openai_api_key }}" >> models.ini
-          
-          
-          echo "[CACHE]" >> cache.ini
-          echo "root: ${{ vars.cache_root }}" >> cache.ini
-          echo "schema: ${{ vars.cache_schema }}" >> cache.ini
+          source /data/venvs/test_venv/bin/activate
+          flake8 --ignore=E501,W503 graphai
 
       - name: Install python package in editable mode along with dependencies from the correct virtual environment
         run: |
@@ -64,8 +33,43 @@ jobs:
           python -c "from transformers import AutoModelForSeq2SeqLM; AutoModelForSeq2SeqLM.from_pretrained('Helsinki-NLP/opus-mt-fr-en')"
           opentelemetry-bootstrap --action=install
 
-      - name: Run linter
+      - name: Create config file
         run: |
           cd main
-          source /data/venvs/test_venv/bin/activate
-          flake8 --ignore=E501,W503 graphai
+          
+          echo "[celery]" >> config.ini
+          echo "broker_url: ${{ vars.celery_broker_url }}" >> config.ini
+          echo "result_backend: ${{ vars.celery_result_backend }}" >> config.ini
+          echo "" >> config.ini
+          
+          echo "[database]" >> config.ini
+          echo "host: ${{ vars.db_host }}" >> config.ini
+          echo "port: ${{ vars.db_port }}" >> config.ini
+          echo "user: ${{ vars.db_user }}" >> config.ini
+          echo "password: ${{ secrets.db_password }}" >> config.ini
+          echo "" >> config.ini
+
+          echo "[elasticsearch]" >> config.ini
+          echo "host: ${{ vars.es_host }}" >> config.ini
+          echo "port: ${{ vars.es_port }}" >> config.ini
+          echo "username: ${{ vars.es_username }}" >> config.ini
+          echo "password: ${{ secrets.es_password }}" >> config.ini
+          echo "cafile: ${{ vars.es_cafile }}" >> config.ini
+          echo "" >> config.ini
+
+          echo "[cache]" >> config.ini
+          echo "root: ${{ vars.cache_root }}" >> config.ini
+          echo "schema: ${{ vars.cache_schema }}" >> config.ini
+          echo "" >> config.ini
+
+          echo "[whisper]" >> config.ini
+          echo "model_type: ${{ vars.whisper_model_type }}" >> config.ini
+          echo "" >> config.ini
+          
+          echo "[google]" >> config.ini
+          echo "api_key: ${{ secrets.google_api_key }}" >> config.ini
+          echo "" >> config.ini
+          
+          echo "[openai]" >> config.ini
+          echo "api_key: ${{ secrets.openai_api_key }}" >> config.ini
+          echo "" >> config.ini

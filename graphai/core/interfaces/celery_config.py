@@ -1,15 +1,14 @@
 import os
-import configparser
 from functools import lru_cache
 
 from celery import current_app as current_celery_app
 from celery.result import AsyncResult
 from kombu import Queue
 
-from graphai.definitions import CONFIG_DIR
+from graphai.core.common.config import config
 
 DEFAULT_BROKER = "amqp://guest:guest@localhost:5672//"
-DEFAULT_CACHE = "redis://localhost:6379/0"
+DEFAULT_BACKEND = "redis://localhost:6379/0"
 
 
 def route_task(name, args, kwargs, options, task=None, **kw):
@@ -23,17 +22,17 @@ def route_task(name, args, kwargs, options, task=None, **kw):
 class BaseConfig:
 
     def __init__(self):
-        config_contents = configparser.ConfigParser()
         try:
-            print('Reading celery configuration from file')
-            config_contents.read(f'{CONFIG_DIR}/celery.ini')
-            self.broker_url = config_contents['CELERY'].get('broker_url', fallback=DEFAULT_BROKER)
-            self.result_backend = config_contents['CELERY'].get('result_backend', fallback=DEFAULT_CACHE)
+            print("Reading celery configuration from config")
+            self.broker_url = config['celery'].get('broker_url', DEFAULT_BROKER)
+            self.result_backend = config['celery'].get('result_backend', DEFAULT_BACKEND)
         except Exception:
-            print(f'Could not read file {CONFIG_DIR}/celery.ini or '
-                  f'file does not have section [CELERY], falling back to defaults.')
+            print(
+                "The celery configuration could not be found in the config file, using default parameters. "
+                "To use different ones, make sure to add a [celery] section with the corresponding parameters."
+            )
             self.broker_url = DEFAULT_BROKER
-            self.result_backend = DEFAULT_CACHE
+            self.result_backend = DEFAULT_BACKEND
 
         self.CELERY_WORKER_REDIRECT_STDOUTS: bool = False
         self.CELERY_TASK_QUEUES: list = [

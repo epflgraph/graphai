@@ -1,8 +1,8 @@
 import pandas as pd
 
 from db_cache_manager.db import DB
-from graphai.core.interfaces.config_loader import load_db_config
 
+from graphai.core.common.config import config
 from graphai.core.utils.breadcrumb import Breadcrumb
 from graphai.core.utils.time.date import rescale
 
@@ -102,7 +102,7 @@ def create_investments_graph(params):
     bc = Breadcrumb()
 
     # Instantiate db interface to communicate with database
-    db = DB(load_db_config())
+    db = DB(config['database'])
 
     bc.log('Creating investments graph...')
 

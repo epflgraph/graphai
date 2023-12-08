@@ -12,6 +12,6 @@ jobs:
     steps:
       - name: Run tests
         run: |
-          cd /home/ubuntu/graphai-test/tests
+          cd main/tests
           source /data/venvs/test_venv/bin/activate
           pytest

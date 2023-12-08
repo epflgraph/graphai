@@ -12,6 +12,7 @@ data
 
 # Config files (might include sensitive information or depend on the deployment)
 /config
+config.ini
 
 # Documentation build files
 docs/build
