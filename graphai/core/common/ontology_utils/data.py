@@ -1,6 +1,7 @@
+import numpy as np
 from db_cache_manager.db import DB
 import pandas as pd
-from scipy.sparse import csr_array, csr_matrix, vstack
+from scipy.sparse import csr_array, csr_matrix, vstack, spmatrix
 
 from graphai.core.common.common_utils import invert_dict
 from graphai.core.interfaces.config_loader import load_db_config
@@ -126,6 +127,41 @@ def convert_to_csr_matrix(g):
     :return: CSR matrix
     """
     return csr_matrix(g)
+
+
+def compute_average(score, n, avg):
+    assert avg in ['linear', 'log', 'none']
+
+    if avg == 'none':
+        return score
+
+    if isinstance(n, np.ndarray):
+        score = np.array(score).flatten()
+        n = np.array(n).flatten()
+        n[np.where(n == 0)[0]] = 1
+    if isinstance(n, spmatrix):
+        score = np.array(score.todense()).flatten()
+        n = np.array(n.todense()).flatten()
+        n[np.where(n == 0)[0]] = 1
+    else:
+        if n == 0:
+            n = 1
+
+    if avg == 'linear':
+        score /= n
+    elif avg == 'log':
+        score /= np.log(1 + n)
+    return score
+
+
+def average_and_combine(s1, s2, l1, l2, avg, coeffs):
+    if coeffs is None:
+        score = s1 + s2
+        denominator = l1 + l2
+        score = compute_average(score, denominator, avg)
+    else:
+        score = (coeffs[0] * compute_average(s1, l1, avg) + coeffs[1] * compute_average(s2, l2, avg)) / sum(coeffs)
+    return score
 
 
 class OntologyData:
@@ -260,6 +296,8 @@ class OntologyData:
         depth4_categories_list = sorted([x for x in self.category_anchors_dict.keys()
                                          if self.category_anchors_dict[x]['depth'] == 4])
         self.symmetric_concept_concept_matrix['d4_cat_index_to_id'] = dict(enumerate(depth4_categories_list))
+        self.symmetric_concept_concept_matrix['d4_cat_id_to_index'] = (
+            invert_dict(self.symmetric_concept_concept_matrix['d4_cat_index_to_id']))
         self.symmetric_concept_concept_matrix['d4_cat_anchors'] = {
             x: [self.symmetric_concept_concept_matrix['concept_id_to_index'][y]
                 for y in self.category_anchors_dict[
@@ -286,6 +324,20 @@ class OntologyData:
                         )
              for x in range(len(depth4_categories_list))]
         )
+
+    def get_concept_category_similarity(self, concept_id, category_id, avg='linear', coeffs=(1, 1)):
+        assert avg in ['linear', 'log', 'none']
+        d4_cats = self.symmetric_concept_concept_matrix['d4_cat_id_to_index']
+        concepts = self.symmetric_concept_concept_matrix['concept_id_to_index']
+        if category_id not in d4_cats or concept_id not in concepts:
+            return None
+        concept_index = concepts[concept_id]
+        cat_index = d4_cats[category_id]
+        s1 = self.symmetric_concept_concept_matrix['matrix_cat_concept_anchors'][cat_index, concept_index]
+        s2 = self.symmetric_concept_concept_matrix['matrix_cat_concept_concepts'][cat_index, concept_index]
+        l1 = len(self.symmetric_concept_concept_matrix['d4_cat_anchors'][cat_index])
+        l2 = len(self.symmetric_concept_concept_matrix['d4_cat_concepts'][concept_index])
+        return average_and_combine(s1, s2, l1, l2, avg, coeffs)
 
     def get_ontology_concept_names(self):
         self.load_data()
