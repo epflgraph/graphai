@@ -96,6 +96,90 @@
 <span class="sig-prename descclassname"><span class="pre">graphai.core.common.ontology_utils.data.</span></span><span class="sig-name descname"><span class="pre">db_results_to_pandas_df</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">results</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cols</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.ontology_utils.data.db_results_to_pandas_df" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.core.common.ontology_utils.data.get_id_dict">
+<span class="sig-prename descclassname"><span class="pre">graphai.core.common.ontology_utils.data.</span></span><span class="sig-name descname"><span class="pre">get_id_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ids</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.ontology_utils.data.get_id_dict" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.core.common.ontology_utils.data.make_adj_undirected">
+<span class="sig-prename descclassname"><span class="pre">graphai.core.common.ontology_utils.data.</span></span><span class="sig-name descname"><span class="pre">make_adj_undirected</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">graph_adj</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.ontology_utils.data.make_adj_undirected" title="Permalink to this definition"></a></dt>
+<dd><p>Makes a directed graph undirected by making the adjacency matrix symmetric
+:param graph_adj: Adjacency matrix
+:return: Undirected graph adjacency matrix</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.core.common.ontology_utils.data.derive_col_to_col_graph">
+<span class="sig-prename descclassname"><span class="pre">graphai.core.common.ontology_utils.data.</span></span><span class="sig-name descname"><span class="pre">derive_col_to_col_graph</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">orig_adj</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.ontology_utils.data.derive_col_to_col_graph" title="Permalink to this definition"></a></dt>
+<dd><p>Derives the adjacency matrix of the graph induced on the columns of the original adjacency
+matrix through its rows.
+:param orig_adj: Original adjacency matrix
+:return: A^T.A</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.core.common.ontology_utils.data.get_col_to_col_dict">
+<span class="sig-prename descclassname"><span class="pre">graphai.core.common.ontology_utils.data.</span></span><span class="sig-name descname"><span class="pre">get_col_to_col_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source_col</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_col</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.ontology_utils.data.get_col_to_col_dict" title="Permalink to this definition"></a></dt>
+<dd><p>Gets a dictionary mapping the elements of one dataframe column to the elements of another
+:param df: The dataframe
+:param source_col: Source column (keys)
+:param target_col: Target column (values)
+:return: The dictionary</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.core.common.ontology_utils.data.return_chosen_indices">
+<span class="sig-prename descclassname"><span class="pre">graphai.core.common.ontology_utils.data.</span></span><span class="sig-name descname"><span class="pre">return_chosen_indices</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">base_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">indices</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.ontology_utils.data.return_chosen_indices" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.core.common.ontology_utils.data.remove_invalid_pairs">
+<span class="sig-prename descclassname"><span class="pre">graphai.core.common.ontology_utils.data.</span></span><span class="sig-name descname"><span class="pre">remove_invalid_pairs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">l_main</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">l_secondary_1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">l_secondary_2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ref_dict</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.ontology_utils.data.remove_invalid_pairs" title="Permalink to this definition"></a></dt>
+<dd><p>Takes two lists that refer to the rows and columns of a matrix plus a reference dictionary,
+and only keeps those indices of the two lists whose elements in the “main” list appear in
+the reference dictionary. In other words, eliminates the row-col or col-row pairs whose
+row/col (respectively) does not appear in the reference dictionary.
+:param l_main: The main list, which will be checked against the dictionary
+:param l_secondary: The secondary list
+:param ref_dict: The reference dictionary
+:return: Two cleaned up lists in the order that they were provided in</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.core.common.ontology_utils.data.create_graph_from_df">
+<span class="sig-prename descclassname"><span class="pre">graphai.core.common.ontology_utils.data.</span></span><span class="sig-name descname"><span class="pre">create_graph_from_df</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source_col</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_col</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight_col</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">col_dict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">row_dict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pool_rows_and_cols</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">make_symmetric</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.ontology_utils.data.create_graph_from_df" title="Permalink to this definition"></a></dt>
+<dd><p>Takes a dataframe containing the edges for a graph, and turns it into a directed or undirected
+graph (represented by an adjacency matrix)
+:param df: The dataframe
+:param source_col: The column for the source nodes
+:param target_col: The column for the target nodes
+:param weight_col: The column for edge weights
+:param col_dict: Precomputed dictionary for the adj matrix columns (targets), optional
+:param row_dict: Precomputed dictionary for the adj matrix rows (sources), optional
+:param pool_rows_and_cols: Whether to pool together the rows and columns, used for Wikipedia concept
+:param make_symmetric: Whether to make the graph undirected
+:return: The adjacency matrix, row dictionary, and column dictionary (id to index)</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.core.common.ontology_utils.data.convert_to_csr_matrix">
+<span class="sig-prename descclassname"><span class="pre">graphai.core.common.ontology_utils.data.</span></span><span class="sig-name descname"><span class="pre">convert_to_csr_matrix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">g</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.ontology_utils.data.convert_to_csr_matrix" title="Permalink to this definition"></a></dt>
+<dd><p>Converts a given matrix or ndarray to a CSR matrix
+:param g: Matrix or ndarray
+:return: CSR matrix</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.core.common.ontology_utils.data.compute_average">
+<span class="sig-prename descclassname"><span class="pre">graphai.core.common.ontology_utils.data.</span></span><span class="sig-name descname"><span class="pre">compute_average</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">score</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">avg</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.ontology_utils.data.compute_average" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.core.common.ontology_utils.data.average_and_combine">
+<span class="sig-prename descclassname"><span class="pre">graphai.core.common.ontology_utils.data.</span></span><span class="sig-name descname"><span class="pre">average_and_combine</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">s2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">l1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">l2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">avg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coeffs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.ontology_utils.data.average_and_combine" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
 <dl class="py class">
 <dt class="sig sig-object py" id="graphai.core.common.ontology_utils.data.OntologyData">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">graphai.core.common.ontology_utils.data.</span></span><span class="sig-name descname"><span class="pre">OntologyData</span></span><a class="headerlink" href="#graphai.core.common.ontology_utils.data.OntologyData" title="Permalink to this definition"></a></dt>
@@ -106,8 +190,73 @@
 <dd></dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="graphai.core.common.ontology_utils.data.OntologyData.load_ontology_concept_names">
+<span class="sig-name descname"><span class="pre">load_ontology_concept_names</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.ontology_utils.data.OntologyData.load_ontology_concept_names" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="graphai.core.common.ontology_utils.data.OntologyData.load_ontology_categories">
+<span class="sig-name descname"><span class="pre">load_ontology_categories</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.ontology_utils.data.OntologyData.load_ontology_categories" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="graphai.core.common.ontology_utils.data.OntologyData.load_non_ontology_concept_names">
+<span class="sig-name descname"><span class="pre">load_non_ontology_concept_names</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.ontology_utils.data.OntologyData.load_non_ontology_concept_names" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="graphai.core.common.ontology_utils.data.OntologyData.load_concept_concept_graphscore">
+<span class="sig-name descname"><span class="pre">load_concept_concept_graphscore</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.ontology_utils.data.OntologyData.load_concept_concept_graphscore" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="graphai.core.common.ontology_utils.data.OntologyData.load_category_category">
+<span class="sig-name descname"><span class="pre">load_category_category</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.ontology_utils.data.OntologyData.load_category_category" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="graphai.core.common.ontology_utils.data.OntologyData.load_category_concept">
+<span class="sig-name descname"><span class="pre">load_category_concept</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.ontology_utils.data.OntologyData.load_category_concept" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="graphai.core.common.ontology_utils.data.OntologyData.compute_category_anchors">
+<span class="sig-name descname"><span class="pre">compute_category_anchors</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.ontology_utils.data.OntologyData.compute_category_anchors" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="graphai.core.common.ontology_utils.data.OntologyData.compute_symmetric_concept_concept_matrix">
+<span class="sig-name descname"><span class="pre">compute_symmetric_concept_concept_matrix</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.ontology_utils.data.OntologyData.compute_symmetric_concept_concept_matrix" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="graphai.core.common.ontology_utils.data.OntologyData.compute_precalculated_similarity_matrices">
+<span class="sig-name descname"><span class="pre">compute_precalculated_similarity_matrices</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.ontology_utils.data.OntologyData.compute_precalculated_similarity_matrices" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="graphai.core.common.ontology_utils.data.OntologyData.get_concept_category_similarity">
+<span class="sig-name descname"><span class="pre">get_concept_category_similarity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">concept_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">category_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">avg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'linear'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coeffs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(1,</span> <span class="pre">1)</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.ontology_utils.data.OntologyData.get_concept_category_similarity" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="graphai.core.common.ontology_utils.data.OntologyData.get_concept_closest_category">
+<span class="sig-name descname"><span class="pre">get_concept_closest_category</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">concept_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">avg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'linear'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coeffs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(1,</span> <span class="pre">1)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">top_n</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.ontology_utils.data.OntologyData.get_concept_closest_category" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="graphai.core.common.ontology_utils.data.OntologyData.get_ontology_concept_names">
 <span class="sig-name descname"><span class="pre">get_ontology_concept_names</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.ontology_utils.data.OntologyData.get_ontology_concept_names" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="graphai.core.common.ontology_utils.data.OntologyData.get_ontology_category_names">
+<span class="sig-name descname"><span class="pre">get_ontology_category_names</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.ontology_utils.data.OntologyData.get_ontology_category_names" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="graphai.core.common.ontology_utils.data.OntologyData.get_non_ontology_concept_names">
+<span class="sig-name descname"><span class="pre">get_non_ontology_concept_names</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.ontology_utils.data.OntologyData.get_non_ontology_concept_names" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -116,8 +265,18 @@
 <dd></dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="graphai.core.common.ontology_utils.data.OntologyData.get_category_to_category">
+<span class="sig-name descname"><span class="pre">get_category_to_category</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.ontology_utils.data.OntologyData.get_category_to_category" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="graphai.core.common.ontology_utils.data.OntologyData.get_category_concept">
 <span class="sig-name descname"><span class="pre">get_category_concept</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.ontology_utils.data.OntologyData.get_category_concept" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="graphai.core.common.ontology_utils.data.OntologyData.get_category_anchor_pages">
+<span class="sig-name descname"><span class="pre">get_category_anchor_pages</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.ontology_utils.data.OntologyData.get_category_anchor_pages" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
