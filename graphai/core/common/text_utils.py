@@ -605,6 +605,18 @@ class TranslationModels:
             self.models['fr-en']['model'] = AutoModelForSeq2SeqLM.from_pretrained("Helsinki-NLP/opus-mt-fr-en"). \
                 to(self.device)
             self.models['fr-en']['segmenter'] = pysbd.Segmenter(language='fr', clean=False)
+            print('Loading DE-EN')
+            self.models['de-en'] = dict()
+            self.models['de-en']['tokenizer'] = AutoTokenizer.from_pretrained("Helsinki-NLP/opus-mt-de-en")
+            self.models['de-en']['model'] = AutoModelForSeq2SeqLM.from_pretrained("Helsinki-NLP/opus-mt-de-en"). \
+                to(self.device)
+            self.models['de-en']['segmenter'] = pysbd.Segmenter(language='de', clean=False)
+            print('Loading IT-EN')
+            self.models['it-en'] = dict()
+            self.models['it-en']['tokenizer'] = AutoTokenizer.from_pretrained("Helsinki-NLP/opus-mt-it-en")
+            self.models['it-en']['model'] = AutoModelForSeq2SeqLM.from_pretrained("Helsinki-NLP/opus-mt-it-en"). \
+                to(self.device)
+            self.models['it-en']['segmenter'] = pysbd.Segmenter(language='it', clean=False)
 
     def get_device(self):
         return self.device
