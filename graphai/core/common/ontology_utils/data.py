@@ -305,12 +305,18 @@ class OntologyData:
                 if y in self.symmetric_concept_concept_matrix['concept_id_to_index']]
             for x in range(len(depth4_categories_list))
         }
-        self.symmetric_concept_concept_matrix['matrix_cat_concept_anchors'] = vstack(
+        self.symmetric_concept_concept_matrix['d4_cat_anchors_lengths'] = csr_matrix(
+            ([len(v) for k, v in self.symmetric_concept_concept_matrix['d4_cat_anchors'].items()],
+             ([0] * len(self.symmetric_concept_concept_matrix['d4_cat_anchors']),
+              [k for k, v in self.symmetric_concept_concept_matrix['d4_cat_anchors'].items()])),
+            shape=(1, len(self.symmetric_concept_concept_matrix['d4_cat_anchors']))
+        )
+        self.symmetric_concept_concept_matrix['matrix_concept_cat_anchors'] = vstack(
             [csr_matrix(self.symmetric_concept_concept_matrix['matrix'][
                         self.symmetric_concept_concept_matrix['d4_cat_anchors'][x], :].sum(axis=0)
                         )
              for x in range(len(depth4_categories_list))]
-        )
+        ).transpose().tocsr()
         self.symmetric_concept_concept_matrix['d4_cat_concepts'] = {
             x: [self.symmetric_concept_concept_matrix['concept_id_to_index'][y]
                 for y in self.category_concept_dict.get(
@@ -318,26 +324,52 @@ class OntologyData:
                 if y in self.symmetric_concept_concept_matrix['concept_id_to_index']]
             for x in range(len(depth4_categories_list))
         }
-        self.symmetric_concept_concept_matrix['matrix_cat_concept_concepts'] = vstack(
+        self.symmetric_concept_concept_matrix['d4_cat_concepts_lengths'] = csr_matrix(
+            ([len(v) for k, v in self.symmetric_concept_concept_matrix['d4_cat_concepts'].items()],
+             ([0]*len(self.symmetric_concept_concept_matrix['d4_cat_concepts']),
+              [k for k, v in self.symmetric_concept_concept_matrix['d4_cat_concepts'].items()])),
+            shape=(1, len(self.symmetric_concept_concept_matrix['d4_cat_concepts']))
+        )
+        self.symmetric_concept_concept_matrix['matrix_concept_cat_concepts'] = vstack(
             [csr_matrix(self.symmetric_concept_concept_matrix['matrix'][
                         self.symmetric_concept_concept_matrix['d4_cat_concepts'][x], :].sum(axis=0)
                         )
              for x in range(len(depth4_categories_list))]
-        )
+        ).transpose().tocsr()
 
     def get_concept_category_similarity(self, concept_id, category_id, avg='linear', coeffs=(1, 1)):
-        assert avg in ['linear', 'log', 'none']
         d4_cats = self.symmetric_concept_concept_matrix['d4_cat_id_to_index']
         concepts = self.symmetric_concept_concept_matrix['concept_id_to_index']
         if category_id not in d4_cats or concept_id not in concepts:
             return None
         concept_index = concepts[concept_id]
         cat_index = d4_cats[category_id]
-        s1 = self.symmetric_concept_concept_matrix['matrix_cat_concept_anchors'][cat_index, concept_index]
-        s2 = self.symmetric_concept_concept_matrix['matrix_cat_concept_concepts'][cat_index, concept_index]
-        l1 = len(self.symmetric_concept_concept_matrix['d4_cat_anchors'][cat_index])
-        l2 = len(self.symmetric_concept_concept_matrix['d4_cat_concepts'][concept_index])
+        s1 = self.symmetric_concept_concept_matrix['matrix_concept_cat_anchors'][concept_index, cat_index]
+        s2 = self.symmetric_concept_concept_matrix['matrix_concept_cat_concepts'][concept_index, cat_index]
+        l1 = self.symmetric_concept_concept_matrix['d4_cat_anchors_lengths'][0, cat_index]
+        l2 = self.symmetric_concept_concept_matrix['d4_cat_concepts_lengths'][0, cat_index]
         return average_and_combine(s1, s2, l1, l2, avg, coeffs)
+
+    def get_concept_closest_category(self, concept_id, avg='linear', coeffs=(1, 1), top_n=1):
+        d4_cat_indices = self.symmetric_concept_concept_matrix['d4_cat_index_to_id']
+        concepts = self.symmetric_concept_concept_matrix['concept_id_to_index']
+        if concept_id not in concepts:
+            return None
+        concept_index = concepts[concept_id]
+        s1 = self.symmetric_concept_concept_matrix['matrix_concept_cat_anchors'][[concept_index], :]
+        s2 = self.symmetric_concept_concept_matrix['matrix_concept_cat_concepts'][[concept_index], :]
+        l1 = self.symmetric_concept_concept_matrix['d4_cat_anchors_lengths']
+        l2 = self.symmetric_concept_concept_matrix['d4_cat_concepts_lengths']
+        results = average_and_combine(s1, s2, l1, l2, avg, coeffs)
+        if top_n == 1:
+            best_cat_index = np.argmax(results)
+            best_cat = d4_cat_indices[best_cat_index]
+            return [best_cat]
+        else:
+            sorted_indices = np.argsort(results)[::-1]
+            best_cat_indices = sorted_indices[:top_n]
+            best_cats = [d4_cat_indices[i] for i in best_cat_indices]
+            return best_cats
 
     def get_ontology_concept_names(self):
         self.load_data()
