@@ -57,3 +57,23 @@ def recompute_clusters_task(self, n_clusters, min_n=None):
     # TODO add evaluation to ensure that concepts aren't moved around between categories, or just leave it be?
     return {'results': result_dict, 'category_assignments': category_assignments,
             'impurity_count': impurity_count, 'impurity_proportion': impurity_proportion}
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 5},
+             name='ontology_6.concept_category_similarity_graph_task',
+             ignore_result=False, ontology_data_obj=ontology_data)
+def get_concept_category_similarity_task(self, concept_id, category_id, avg='linear', coeffs=(1, 1)):
+    return {
+        'sim': self.ontology_data_obj.get_concept_category_similarity(concept_id, category_id, avg, coeffs)
+    }
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 5},
+             name='ontology_6.concept_closest_category_graph_task',
+             ignore_result=False, ontology_data_obj=ontology_data)
+def get_concept_category_closest_task(self, concept_id, avg='linear', coeffs=(1, 1), top_n=1):
+    closest, scores = self.ontology_data_obj.get_concept_closest_category(concept_id, avg, coeffs, top_n)
+    return {
+        'closest': closest,
+        'scores': scores
+    }

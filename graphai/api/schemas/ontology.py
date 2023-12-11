@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from typing import List, Union, Dict
+from typing import List, Union, Dict, Literal, Tuple
 
 from graphai.api.schemas.common import TaskStatusResponse
 
@@ -90,4 +90,81 @@ class RecomputeClustersResponse(TaskStatusResponse):
     task_result: Union[RecomputeClustersTaskResponse, None] = Field(
         title="Cluster recomputation response",
         description="A dict containing the resulting recomputed clusters and a freshness flag."
+    )
+
+
+class GraphDistanceRequest(BaseModel):
+    src: str = Field(
+        title="Source node"
+    )
+
+    src_type: Literal['concept', 'category'] = Field(
+        title="Type of source node",
+        default="concept"
+    )
+
+    dest: str = Field(
+        title="Destination node"
+    )
+
+    dest_type: Literal['concept', 'category'] = Field(
+        title="Type of destination node",
+        default="category"
+    )
+
+    avg: Literal['none', 'linear', 'log'] = Field(
+        title="Averaging",
+        default="linear"
+    )
+
+    coeffs: Union[None, Tuple] = Field(
+        title="Coefficients",
+        default="linear"
+    )
+
+
+class GraphDistanceResponse(BaseModel):
+    sim: Union[None, float] = Field(
+        title="Node similarity"
+    )
+
+
+class GraphNearestNeighborRequest(BaseModel):
+    src: str = Field(
+        title="Source node"
+    )
+
+    src_type: Literal['concept', 'category'] = Field(
+        title="Type of source node",
+        default="concept"
+    )
+
+    dest_type: Literal['concept', 'category'] = Field(
+        title="Type of destination node",
+        default="category"
+    )
+
+    avg: Literal['none', 'linear', 'log'] = Field(
+        title="Averaging",
+        default="linear"
+    )
+
+    coeffs: Union[None, Tuple] = Field(
+        title="Coefficients",
+        default="linear"
+    )
+
+    top_n: int = Field(
+        title="Top n",
+        default=1
+    )
+
+
+class GraphNearestNeighborResponse(BaseModel):
+    closest: Union[None, List[str]] = Field(
+        title="Closest matches"
+    )
+
+    scores: Union[None, float] = Field(
+        title="Scores"
     )

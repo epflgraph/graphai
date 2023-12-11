@@ -354,7 +354,7 @@ class OntologyData:
         d4_cat_indices = self.symmetric_concept_concept_matrix['d4_cat_index_to_id']
         concepts = self.symmetric_concept_concept_matrix['concept_id_to_index']
         if concept_id not in concepts:
-            return None
+            return None, None
         concept_index = concepts[concept_id]
         s1 = self.symmetric_concept_concept_matrix['matrix_concept_cat_anchors'][[concept_index], :]
         s2 = self.symmetric_concept_concept_matrix['matrix_concept_cat_concepts'][[concept_index], :]
@@ -364,12 +364,14 @@ class OntologyData:
         if top_n == 1:
             best_cat_index = np.argmax(results)
             best_cat = d4_cat_indices[best_cat_index]
-            return [best_cat]
+            best_score = results[best_cat_index]
+            return [best_cat], [best_score]
         else:
             sorted_indices = np.argsort(results)[::-1]
             best_cat_indices = sorted_indices[:top_n]
             best_cats = [d4_cat_indices[i] for i in best_cat_indices]
-            return best_cats
+            best_scores = [results[i] for i in best_cat_indices]
+            return best_cats, best_scores
 
     def get_ontology_concept_names(self):
         self.load_data()

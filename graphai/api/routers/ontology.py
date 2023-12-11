@@ -1,7 +1,15 @@
 from fastapi import APIRouter
 from celery import chain
 
-from graphai.api.schemas.ontology import TreeResponse, RecomputeClustersRequest, RecomputeClustersResponse
+from graphai.api.schemas.ontology import (
+    TreeResponse,
+    RecomputeClustersRequest,
+    RecomputeClustersResponse,
+    GraphDistanceRequest,
+    GraphDistanceResponse,
+    GraphNearestNeighborRequest,
+    GraphNearestNeighborResponse
+)
 from graphai.api.schemas.common import TaskIDResponse
 
 from graphai.api.common.log import log
@@ -10,7 +18,9 @@ from graphai.api.celery_tasks.ontology import (
     get_ontology_tree_task,
     get_category_parent_task,
     get_category_children_task,
-    recompute_clusters_task
+    recompute_clusters_task,
+    get_concept_category_similarity_task,
+    get_concept_category_closest_task
 )
 from graphai.core.interfaces.celery_config import get_task_info
 
@@ -100,3 +110,38 @@ async def recompute_clusters_status(task_id):
         else:
             task_results = None
     return format_api_results(full_results['id'], full_results['name'], full_results['status'], task_results)
+
+
+@router.post('/graph_distance', response_model=GraphDistanceResponse)
+async def compute_graph_distance(data: GraphDistanceRequest):
+    src = data.src
+    dest = data.dest
+    src_type = data.src_type
+    dest_type = data.dest_type
+    avg = data.avg
+    coeffs = data.coeffs
+    assert coeffs is None or len(coeffs) == 2
+    assert src_type != dest_type
+    if src_type == 'concept' and dest_type == 'category':
+        task = get_concept_category_similarity_task.s(src, dest, avg, coeffs)
+    if src_type == 'category' and dest_type == 'concept':
+        task = get_concept_category_similarity_task.s(dest, src, avg, coeffs)
+    res = task.apply_async(priority=6).get(timeout=30)
+    return res
+
+
+@router.post('/graph_nearest_neighbor', response_model=GraphNearestNeighborResponse)
+async def compute_graph_nearest_neighbor(data: GraphNearestNeighborRequest):
+    src = data.src
+    src_type = data.src_type
+    dest_type = data.dest_type
+    avg = data.avg
+    coeffs = data.coeffs
+    top_n = data.top_n
+    assert coeffs is None or len(coeffs) == 2
+    assert src_type != dest_type
+    assert src_type != 'category'
+    if src_type == 'concept' and dest_type == 'category':
+        task = get_concept_category_closest_task.s(src, avg, coeffs, top_n)
+    res = task.apply_async(priority=6).get(timeout=30)
+    return res
