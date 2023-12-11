@@ -117,9 +117,9 @@ class GraphDistanceRequest(BaseModel):
         default="linear"
     )
 
-    coeffs: Union[None, Tuple] = Field(
+    coeffs: Union[None, Tuple[float, float]] = Field(
         title="Coefficients",
-        default="linear"
+        default=(1.0, 1.0)
     )
 
 
@@ -149,9 +149,9 @@ class GraphNearestNeighborRequest(BaseModel):
         default="linear"
     )
 
-    coeffs: Union[None, Tuple] = Field(
+    coeffs: Union[None, Tuple[float, float]] = Field(
         title="Coefficients",
-        default="linear"
+        default=(1.0, 1.0)
     )
 
     top_n: int = Field(
