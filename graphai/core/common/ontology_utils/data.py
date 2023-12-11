@@ -154,13 +154,21 @@ def compute_average(score, n, avg):
     return score
 
 
-def average_and_combine(s1, s2, l1, l2, avg, coeffs):
+def average_and_combine(s1, s2, l1, l2, avg, coeffs, skip_zeros=False):
+    assert coeffs is None or (all([c >= 0 for c in coeffs]) and sum(coeffs) > 0)
     if coeffs is None:
         score = s1 + s2
         denominator = l1 + l2
         score = compute_average(score, denominator, avg)
     else:
-        score = (coeffs[0] * compute_average(s1, l1, avg) + coeffs[1] * compute_average(s2, l2, avg)) / sum(coeffs)
+        if skip_zeros:
+            lengths = [l1, l2]
+            coeff_sum = sum([coeffs[i] for i in range(len(coeffs)) if lengths[i] > 0])
+            if coeff_sum == 0:
+                coeff_sum = 1
+        else:
+            coeff_sum = sum(coeffs)
+        score = (coeffs[0] * compute_average(s1, l1, avg) + coeffs[1] * compute_average(s2, l2, avg)) / coeff_sum
     return score
 
 
