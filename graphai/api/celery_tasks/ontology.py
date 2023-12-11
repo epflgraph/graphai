@@ -57,3 +57,55 @@ def recompute_clusters_task(self, n_clusters, min_n=None):
     # TODO add evaluation to ensure that concepts aren't moved around between categories, or just leave it be?
     return {'results': result_dict, 'category_assignments': category_assignments,
             'impurity_count': impurity_count, 'impurity_proportion': impurity_proportion}
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 5},
+             name='ontology_6.concept_category_similarity_graph_task',
+             ignore_result=False, ontology_data_obj=ontology_data)
+def get_concept_category_similarity_task(self, concept_id, category_id, avg='linear', coeffs=(1, 1)):
+    sim = self.ontology_data_obj.get_concept_category_similarity(concept_id, category_id, avg, coeffs)
+    return {
+        'sim': sim
+    }
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 5},
+             name='ontology_6.category_category_similarity_graph_task',
+             ignore_result=False, ontology_data_obj=ontology_data)
+def get_category_category_similarity_task(self, category_1_id, category_2_id, avg='linear', coeffs=(1, 1)):
+    sim = self.ontology_data_obj.get_category_category_similarity(category_1_id, category_2_id, avg, coeffs)
+    return {
+        'sim': sim
+    }
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 5},
+             name='ontology_6.concept_concept_similarity_graph_task',
+             ignore_result=False, ontology_data_obj=ontology_data)
+def get_concept_concept_similarity_task(self, concept_1_id, concept_2_id):
+    sim = self.ontology_data_obj.get_concept_concept_similarity(concept_1_id, concept_2_id)
+    return {
+        'sim': sim
+    }
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 5},
+             name='ontology_6.concept_closest_category_graph_task',
+             ignore_result=False, ontology_data_obj=ontology_data)
+def get_concept_category_closest_task(self, concept_id, avg='linear', coeffs=(1, 1), top_n=1):
+    closest, scores = self.ontology_data_obj.get_concept_closest_category(concept_id, avg, coeffs, top_n)
+    return {
+        'closest': closest,
+        'scores': scores
+    }
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 5},
+             name='ontology_6.concept_closest_concept_graph_task',
+             ignore_result=False, ontology_data_obj=ontology_data)
+def get_concept_concept_closest_task(self, concept_id, top_n=1):
+    closest, scores = self.ontology_data_obj.get_concept_closest_concept(concept_id, top_n)
+    return {
+        'closest': closest,
+        'scores': scores
+    }
