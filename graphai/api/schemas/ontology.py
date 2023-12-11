@@ -165,6 +165,6 @@ class GraphNearestNeighborResponse(BaseModel):
         title="Closest matches"
     )
 
-    scores: Union[None, float] = Field(
+    scores: Union[None, List[float]] = Field(
         title="Scores"
     )
