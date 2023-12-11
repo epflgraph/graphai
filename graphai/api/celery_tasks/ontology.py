@@ -70,10 +70,20 @@ def get_concept_category_similarity_task(self, concept_id, category_id, avg='lin
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 5},
+             name='ontology_6.category_category_similarity_graph_task',
+             ignore_result=False, ontology_data_obj=ontology_data)
+def get_category_category_similarity_task(self, category_1_id, category_2_id, avg='linear', coeffs=(1, 1)):
+    sim = self.ontology_data_obj.get_category_category_similarity(category_1_id, category_2_id, avg, coeffs)
+    return {
+        'sim': sim
+    }
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 5},
              name='ontology_6.concept_concept_similarity_graph_task',
              ignore_result=False, ontology_data_obj=ontology_data)
-def get_concept_concept_similarity_task(self, concept_id, category_id):
-    sim = self.ontology_data_obj.get_concept_concept_similarity(concept_id, category_id)
+def get_concept_concept_similarity_task(self, concept_1_id, concept_2_id):
+    sim = self.ontology_data_obj.get_concept_concept_similarity(concept_1_id, concept_2_id)
     return {
         'sim': sim
     }

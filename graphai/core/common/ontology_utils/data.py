@@ -303,9 +303,11 @@ class OntologyData:
     def compute_precalculated_similarity_matrices(self):
         depth4_categories_list = sorted([x for x in self.category_anchors_dict.keys()
                                          if self.category_anchors_dict[x]['depth'] == 4])
+
         self.symmetric_concept_concept_matrix['d4_cat_index_to_id'] = dict(enumerate(depth4_categories_list))
         self.symmetric_concept_concept_matrix['d4_cat_id_to_index'] = (
             invert_dict(self.symmetric_concept_concept_matrix['d4_cat_index_to_id']))
+
         self.symmetric_concept_concept_matrix['d4_cat_anchors'] = {
             x: [self.symmetric_concept_concept_matrix['concept_id_to_index'][y]
                 for y in self.category_anchors_dict[
@@ -319,12 +321,20 @@ class OntologyData:
               [k for k, v in self.symmetric_concept_concept_matrix['d4_cat_anchors'].items()])),
             shape=(1, len(self.symmetric_concept_concept_matrix['d4_cat_anchors']))
         )
+
         self.symmetric_concept_concept_matrix['matrix_concept_cat_anchors'] = vstack(
             [csr_matrix(self.symmetric_concept_concept_matrix['matrix'][
                         self.symmetric_concept_concept_matrix['d4_cat_anchors'][x], :].sum(axis=0)
                         )
              for x in range(len(depth4_categories_list))]
         ).transpose().tocsr()
+        self.symmetric_concept_concept_matrix['matrix_cat_cat_anchors'] = vstack(
+            [csr_matrix(self.symmetric_concept_concept_matrix['matrix_concept_cat_anchors'][
+                        self.symmetric_concept_concept_matrix['d4_cat_anchors'][x], :].sum(axis=0)
+                        )
+             for x in range(len(depth4_categories_list))]
+        )
+
         self.symmetric_concept_concept_matrix['d4_cat_concepts'] = {
             x: [self.symmetric_concept_concept_matrix['concept_id_to_index'][y]
                 for y in self.category_concept_dict.get(
@@ -338,12 +348,19 @@ class OntologyData:
               [k for k, v in self.symmetric_concept_concept_matrix['d4_cat_concepts'].items()])),
             shape=(1, len(self.symmetric_concept_concept_matrix['d4_cat_concepts']))
         )
+
         self.symmetric_concept_concept_matrix['matrix_concept_cat_concepts'] = vstack(
             [csr_matrix(self.symmetric_concept_concept_matrix['matrix'][
                         self.symmetric_concept_concept_matrix['d4_cat_concepts'][x], :].sum(axis=0)
                         )
              for x in range(len(depth4_categories_list))]
         ).transpose().tocsr()
+        self.symmetric_concept_concept_matrix['matrix_cat_cat_concepts'] = vstack(
+            [csr_matrix(self.symmetric_concept_concept_matrix['matrix_concept_cat_concepts'][
+                        self.symmetric_concept_concept_matrix['d4_cat_concepts'][x], :].sum(axis=0)
+                        )
+             for x in range(len(depth4_categories_list))]
+        )
 
     def get_concept_concept_similarity(self, concept_1_id, concept_2_id):
         concepts = self.symmetric_concept_concept_matrix['concept_id_to_index']
@@ -364,6 +381,24 @@ class OntologyData:
         s2 = self.symmetric_concept_concept_matrix['matrix_concept_cat_concepts'][concept_index, cat_index]
         l1 = self.symmetric_concept_concept_matrix['d4_cat_anchors_lengths'][0, cat_index]
         l2 = self.symmetric_concept_concept_matrix['d4_cat_concepts_lengths'][0, cat_index]
+        return average_and_combine(s1, s2, l1, l2, avg, coeffs)
+
+    def get_category_category_similarity(self, category_1_id, category_2_id, avg='linear', coeffs=(1, 1)):
+        d4_cats = self.symmetric_concept_concept_matrix['d4_cat_id_to_index']
+        if category_1_id not in d4_cats or category_2_id not in d4_cats:
+            return None
+        category_1_index = d4_cats[category_1_id]
+        category_2_index = d4_cats[category_2_id]
+        s1 = self.symmetric_concept_concept_matrix['matrix_cat_cat_anchors'][category_1_index, category_2_index]
+        s2 = self.symmetric_concept_concept_matrix['matrix_cat_cat_concepts'][category_1_index, category_2_index]
+        l1 = (
+            self.symmetric_concept_concept_matrix['d4_cat_anchors_lengths'][0, category_1_index] *
+            self.symmetric_concept_concept_matrix['d4_cat_anchors_lengths'][0, category_2_index]
+        )
+        l2 = (
+            self.symmetric_concept_concept_matrix['d4_cat_concepts_lengths'][0, category_1_index] *
+            self.symmetric_concept_concept_matrix['d4_cat_concepts_lengths'][0, category_2_index]
+        )
         return average_and_combine(s1, s2, l1, l2, avg, coeffs)
 
     def get_concept_closest_concept(self, concept_id, top_n=1):

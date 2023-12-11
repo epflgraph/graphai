@@ -22,7 +22,8 @@ from graphai.api.celery_tasks.ontology import (
     get_concept_category_similarity_task,
     get_concept_category_closest_task,
     get_concept_concept_similarity_task,
-    get_concept_concept_closest_task
+    get_concept_concept_closest_task,
+    get_category_category_similarity_task
 )
 from graphai.core.interfaces.celery_config import get_task_info
 
@@ -123,11 +124,12 @@ async def compute_graph_distance(data: GraphDistanceRequest):
     avg = data.avg
     coeffs = data.coeffs
     assert coeffs is None or len(coeffs) == 2
-    assert src_type != 'category' or dest_type != 'category'
     if src_type == 'concept' and dest_type == 'category':
         task = get_concept_category_similarity_task.s(src, dest, avg, coeffs)
     elif src_type == 'category' and dest_type == 'concept':
         task = get_concept_category_similarity_task.s(dest, src, avg, coeffs)
+    elif src_type == 'category' and dest_type == 'category':
+        task = get_category_category_similarity_task.s(src, dest, avg, coeffs)
     else:
         task = get_concept_concept_similarity_task.s(src, dest)
     res = task.apply_async(priority=6).get(timeout=30)
