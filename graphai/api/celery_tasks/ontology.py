@@ -88,3 +88,14 @@ def get_concept_category_closest_task(self, concept_id, avg='linear', coeffs=(1,
         'closest': closest,
         'scores': scores
     }
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 5},
+             name='ontology_6.concept_closest_concept_graph_task',
+             ignore_result=False, ontology_data_obj=ontology_data)
+def get_concept_concept_closest_task(self, concept_id, top_n=1):
+    closest, scores = self.ontology_data_obj.get_concept_closest_concept(concept_id, top_n)
+    return {
+        'closest': closest,
+        'scores': scores
+    }

@@ -300,12 +300,6 @@ class OntologyData:
         self.symmetric_concept_concept_matrix['concept_id_to_index'] = row_dict
         self.symmetric_concept_concept_matrix['matrix'] = adj
 
-    def get_concept_concept_similarity(self, concept_1_id, concept_2_id):
-        concepts = self.symmetric_concept_concept_matrix['concept_id_to_index']
-        concept_1_index = concepts[concept_1_id]
-        concept_2_index = concepts[concept_2_id]
-        return self.symmetric_concept_concept_matrix['matrix'][concept_1_index, concept_2_index]
-
     def compute_precalculated_similarity_matrices(self):
         depth4_categories_list = sorted([x for x in self.category_anchors_dict.keys()
                                          if self.category_anchors_dict[x]['depth'] == 4])
@@ -351,6 +345,14 @@ class OntologyData:
              for x in range(len(depth4_categories_list))]
         ).transpose().tocsr()
 
+    def get_concept_concept_similarity(self, concept_1_id, concept_2_id):
+        concepts = self.symmetric_concept_concept_matrix['concept_id_to_index']
+        if concept_1_id not in concepts or concept_2_id not in concepts:
+            return None
+        concept_1_index = concepts[concept_1_id]
+        concept_2_index = concepts[concept_2_id]
+        return self.symmetric_concept_concept_matrix['matrix'][concept_1_index, concept_2_index]
+
     def get_concept_category_similarity(self, concept_id, category_id, avg='linear', coeffs=(1, 1)):
         d4_cats = self.symmetric_concept_concept_matrix['d4_cat_id_to_index']
         concepts = self.symmetric_concept_concept_matrix['concept_id_to_index']
@@ -363,6 +365,25 @@ class OntologyData:
         l1 = self.symmetric_concept_concept_matrix['d4_cat_anchors_lengths'][0, cat_index]
         l2 = self.symmetric_concept_concept_matrix['d4_cat_concepts_lengths'][0, cat_index]
         return average_and_combine(s1, s2, l1, l2, avg, coeffs)
+
+    def get_concept_closest_concept(self, concept_id, top_n=1):
+        concepts = self.symmetric_concept_concept_matrix['concept_id_to_index']
+        if concept_id not in concepts:
+            return None, None
+        concept_index = concepts[concept_id]
+        results = np.array(self.symmetric_concept_concept_matrix['matrix'][[concept_index], :].todense()).flatten()
+        concepts_inverse = invert_dict(concepts)
+        if top_n == 1:
+            best_concept_index = np.argmax(results)
+            best_concept = concepts_inverse[best_concept_index]
+            best_score = results[best_concept_index]
+            return [best_concept], [best_score]
+        else:
+            sorted_indices = np.argsort(results)[::-1]
+            best_concept_indices = sorted_indices[:top_n]
+            best_concepts = [concepts_inverse[i] for i in best_concept_indices]
+            best_scores = [results[i] for i in best_concept_indices]
+            return best_concepts, best_scores
 
     def get_concept_closest_category(self, concept_id, avg='linear', coeffs=(1, 1), top_n=1):
         d4_cat_indices = self.symmetric_concept_concept_matrix['d4_cat_index_to_id']
