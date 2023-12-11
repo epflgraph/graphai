@@ -177,7 +177,7 @@ graph (represented by an adjacency matrix)
 
 <dl class="py function">
 <dt class="sig sig-object py" id="graphai.core.common.ontology_utils.data.average_and_combine">
-<span class="sig-prename descclassname"><span class="pre">graphai.core.common.ontology_utils.data.</span></span><span class="sig-name descname"><span class="pre">average_and_combine</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">s2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">l1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">l2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">avg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coeffs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.ontology_utils.data.average_and_combine" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">graphai.core.common.ontology_utils.data.</span></span><span class="sig-name descname"><span class="pre">average_and_combine</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">s2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">l1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">l2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">avg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coeffs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skip_zeros</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.ontology_utils.data.average_and_combine" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py class">
@@ -235,8 +235,23 @@ graph (represented by an adjacency matrix)
 <dd></dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="graphai.core.common.ontology_utils.data.OntologyData.get_concept_concept_similarity">
+<span class="sig-name descname"><span class="pre">get_concept_concept_similarity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">concept_1_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">concept_2_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.ontology_utils.data.OntologyData.get_concept_concept_similarity" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="graphai.core.common.ontology_utils.data.OntologyData.get_concept_category_similarity">
 <span class="sig-name descname"><span class="pre">get_concept_category_similarity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">concept_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">category_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">avg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'linear'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coeffs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(1,</span> <span class="pre">1)</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.ontology_utils.data.OntologyData.get_concept_category_similarity" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="graphai.core.common.ontology_utils.data.OntologyData.get_category_category_similarity">
+<span class="sig-name descname"><span class="pre">get_category_category_similarity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">category_1_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">category_2_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">avg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'linear'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coeffs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(1,</span> <span class="pre">1)</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.ontology_utils.data.OntologyData.get_category_category_similarity" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="graphai.core.common.ontology_utils.data.OntologyData.get_concept_closest_concept">
+<span class="sig-name descname"><span class="pre">get_concept_closest_concept</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">concept_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">top_n</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.ontology_utils.data.OntologyData.get_concept_closest_concept" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
