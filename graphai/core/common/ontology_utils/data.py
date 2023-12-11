@@ -300,6 +300,12 @@ class OntologyData:
         self.symmetric_concept_concept_matrix['concept_id_to_index'] = row_dict
         self.symmetric_concept_concept_matrix['matrix'] = adj
 
+    def get_concept_concept_similarity(self, concept_1_id, concept_2_id):
+        concepts = self.symmetric_concept_concept_matrix['concept_id_to_index']
+        concept_1_index = concepts[concept_1_id]
+        concept_2_index = concepts[concept_2_id]
+        return self.symmetric_concept_concept_matrix['matrix'][concept_1_index, concept_2_index]
+
     def compute_precalculated_similarity_matrices(self):
         depth4_categories_list = sorted([x for x in self.category_anchors_dict.keys()
                                          if self.category_anchors_dict[x]['depth'] == 4])

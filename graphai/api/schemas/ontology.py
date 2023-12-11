@@ -134,7 +134,7 @@ class GraphNearestNeighborRequest(BaseModel):
         title="Source node"
     )
 
-    src_type: Literal['concept', 'category'] = Field(
+    src_type: Literal['concept'] = Field(
         title="Type of source node",
         default="concept"
     )
