@@ -128,6 +128,14 @@ class AudioTranscriptionRequest(BaseModel):
         default=None
     )
 
+    strict: bool = Field(
+        title="Strict silence detection",
+        description="If set, reduces the threshold (from 0.6 to 0.5) for a segment being detected as silent. "
+                    "If the 'no-speech probability' for a segment is above that threshold and the model's "
+                    "confidence in its predicted text is low, the segment is treated as silent. ",
+        default=False
+    )
+
 
 class AudioTranscriptionTaskResponse(BaseModel):
     transcript_results: Union[str, None] = Field(

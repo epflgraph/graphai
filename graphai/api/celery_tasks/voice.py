@@ -356,7 +356,7 @@ def detect_language_callback_task(self, results_list, token, force=False):
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True,
              retry_kwargs={"max_retries": 2}, name='video_2.transcribe', ignore_result=False,
              file_manager=file_management_config, model=transcription_model)
-def transcribe_task(self, input_dict, force=False):
+def transcribe_task(self, input_dict, strict_silence=False, force=False):
     token = input_dict['token']
     lang = input_dict['language']
 
@@ -399,13 +399,21 @@ def transcribe_task(self, input_dict, force=False):
 
                 return {
                     'transcript_results': transcript_results,
-                    'subtitle_results': json.dumps(subtitle_results),
+                    'subtitle_results': subtitle_results,
                     'language': language_result,
                     'fresh': False
                 }
 
+    if strict_silence:
+        no_speech_threshold = 0.5
+        logprob_threshold = -0.5
+    else:
+        no_speech_threshold = 0.6
+        logprob_threshold = -1
     input_filename_with_path = self.file_manager.generate_filepath(token)
-    result_dict = self.model.transcribe_audio_whisper(input_filename_with_path, force_lang=lang, verbose=True)
+    result_dict = self.model.transcribe_audio_whisper(input_filename_with_path, force_lang=lang, verbose=True,
+                                                      no_speech_threshold=no_speech_threshold,
+                                                      logprob_threshold=logprob_threshold)
 
     if result_dict is None:
         return {
@@ -416,9 +424,17 @@ def transcribe_task(self, input_dict, force=False):
         }
 
     transcript_results = result_dict['text']
-    subtitle_results = json.dumps(result_dict['segments'])
+    subtitle_results = result_dict['segments']
     language_result = result_dict['language']
 
+    if strict_silence:
+        subtitle_results = [
+            x for x in subtitle_results
+            if x['avg_logprob'] >= -1.0
+        ]
+        transcript_results = ''.join([x['text'] for x in subtitle_results])
+
+    subtitle_results = json.dumps(subtitle_results)
     return {
         'transcript_results': transcript_results,
         'subtitle_results': subtitle_results,
