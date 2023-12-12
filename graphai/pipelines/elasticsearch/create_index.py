@@ -1,4 +1,6 @@
-from graphai.core.interfaces.es import ES
+from elasticsearch_interface.es import ES
+
+from graphai.core.common.config import config
 
 from graphai.core.utils.time.date import now
 from graphai.core.utils.text.io import read_json
@@ -6,7 +8,7 @@ from graphai.core.utils.text.io import read_json
 number_of_shards = 1
 
 index = f'aitor_concepts_{now().date()}'
-es = ES(index)
+es = ES(config['elasticsearch'], index)
 
 settings = read_json('config/settings.json')
 settings['number_of_shards'] = number_of_shards
