@@ -356,7 +356,7 @@ def detect_language_callback_task(self, results_list, token, force=False):
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True,
              retry_kwargs={"max_retries": 2}, name='video_2.transcribe', ignore_result=False,
              file_manager=file_management_config, model=transcription_model)
-def transcribe_task(self, input_dict, force=False):
+def transcribe_task(self, input_dict, strict_silence=False, force=False):
     token = input_dict['token']
     lang = input_dict['language']
 
@@ -404,8 +404,13 @@ def transcribe_task(self, input_dict, force=False):
                     'fresh': False
                 }
 
+    if strict_silence:
+        no_speech_threshold = 0.5
+    else:
+        no_speech_threshold = 0.6
     input_filename_with_path = self.file_manager.generate_filepath(token)
-    result_dict = self.model.transcribe_audio_whisper(input_filename_with_path, force_lang=lang, verbose=True)
+    result_dict = self.model.transcribe_audio_whisper(input_filename_with_path, force_lang=lang, verbose=True,
+                                                      no_speech_threshold=no_speech_threshold)
 
     if result_dict is None:
         return {

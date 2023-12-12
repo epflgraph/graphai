@@ -841,7 +841,8 @@ class WhisperTranscriptionModel:
         _, probs = self.model.detect_language(mel)
         return max(probs, key=probs.get)
 
-    def transcribe_audio_whisper(self, input_filename_with_path, force_lang=None, verbose=False):
+    def transcribe_audio_whisper(self, input_filename_with_path, force_lang=None, verbose=False,
+                                 no_speech_threshold=0.6):
         """
         Transcribes an audio file using whisper
         Args:
@@ -849,6 +850,8 @@ class WhisperTranscriptionModel:
             force_lang: Whether to explicitly feed the model the language of the audio.
                         None results in automatic detection.
             verbose: Verbosity of the transcription
+            no_speech_threshold: If the probability of a segment containing no speech is above this threshold
+            (and the model has low confidence in the text it has predicted), it is treated as silent.
         Returns:
             A dictionary with three keys: 'text' contains the full transcript, 'segments' contains a JSON-like dict of
             translated segments which can be used as subtitles, and 'language' which contains the language code.
@@ -862,9 +865,11 @@ class WhisperTranscriptionModel:
             # setting fp16 to True makes sure that the model uses GPUs if available (otherwise
             # Whisper automatically switches to fp32)
             if force_lang is None:
-                result = self.model.transcribe(input_filename_with_path, verbose=verbose, fp16=True)
+                result = self.model.transcribe(input_filename_with_path, verbose=verbose, fp16=True,
+                                               no_speech_threshold=no_speech_threshold)
             else:
-                result = self.model.transcribe(input_filename_with_path, verbose=verbose, language=force_lang, fp16=True)
+                result = self.model.transcribe(input_filename_with_path, verbose=verbose, language=force_lang,
+                                               fp16=True, no_speech_threshold=no_speech_threshold)
         except Exception as e:
             print(e, file=sys.stderr)
             return None

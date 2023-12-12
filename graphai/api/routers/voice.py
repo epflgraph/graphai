@@ -102,6 +102,7 @@ async def transcribe(data: AudioTranscriptionRequest):
     token = data.token
     force = data.force
     lang = data.force_lang
+    strict_silence = data.strict
 
     # If the language is already provided, we won't need to detect it. Otherwise, detection tasks are added.
     # If force=True, fingerprinting is skipped
@@ -110,9 +111,9 @@ async def transcribe(data: AudioTranscriptionRequest):
         if not force:
             task_list = get_audio_fingerprint_chain_list(token, force, ignore_fp_results=True,
                                                          results_to_return={'token': token, 'language': lang})
-            task_list += [transcribe_task.s(force)]
+            task_list += [transcribe_task.s(strict_silence, force)]
         else:
-            task_list = [transcribe_task.s({'token': token, 'language': lang}, force)]
+            task_list = [transcribe_task.s({'token': token, 'language': lang}, strict_silence, force)]
     else:
         n_divs = 15
         len_segment = 30
@@ -126,7 +127,7 @@ async def transcribe(data: AudioTranscriptionRequest):
         task_list += [
             group(detect_language_parallel_task.s(i) for i in range(n_divs)),
             detect_language_callback_task.s(token, force),
-            transcribe_task.s(force),
+            transcribe_task.s(strict_silence, force),
         ]
     task_list += [transcribe_callback_task.s(token, force)]
     task = chain(task_list)
