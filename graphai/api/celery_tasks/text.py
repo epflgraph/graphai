@@ -5,11 +5,14 @@ from celery import shared_task
 
 import Levenshtein
 
+from elasticsearch_interface.es import ES
+
 from graphai.api.common.graph import graph
 from graphai.api.common.ontology import ontology
 
+from graphai.core.common.config import config
+
 from graphai.core.interfaces.wp import WP
-from graphai.core.interfaces.es import ES
 
 from graphai.core.text.keywords import get_keywords
 from graphai.core.text.draw import draw_ontology, draw_graph
@@ -35,7 +38,7 @@ def extract_keywords_task(self, raw_text, use_nltk=False):
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={'max_retries': 2},
-             name='text_10.wikisearch', ignore_result=False, wp=WP(), es=ES('aitor_concepts'))
+             name='text_10.wikisearch', ignore_result=False, wp=WP(), es=ES(config['elasticsearch'], 'aitor_concepts'))
 def wikisearch_task(self, keywords_list, fraction=(0, 1), method='es-base'):
     """
     Celery task that finds 10 relevant Wikipedia pages for each set of keywords in a list.
@@ -68,7 +71,20 @@ def wikisearch_task(self, keywords_list, fraction=(0, 1), method='es-base'):
         else:
             # Try to get elasticsearch results, fallback to Wikipedia API in case of error.
             try:
-                results = self.es.search(keywords)
+                hits = self.es.search(keywords)
+
+                results = pd.DataFrame(
+                    [
+                        [
+                            hits[i]['_source']['id'],
+                            hits[i]['_source']['title'],
+                            (i + 1),
+                            hits[i]['_score']
+                        ]
+                        for i in range(len(hits))
+                    ],
+                    columns=['PageID', 'PageTitle', 'Searchrank', 'SearchScore']
+                )
             except Exception as e:
                 print('[ERROR] Error connecting to elasticsearch cluster. Falling back to Wikipedia API.')
                 print(e)

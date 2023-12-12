@@ -10,10 +10,10 @@ from multiprocessing import Pool
 
 import pandas as pd
 
+from elasticsearch_interface.es import ES
 from db_cache_manager.db import DB
 
 from graphai.core.common.config import config
-from graphai.core.interfaces.es import ES
 from graphai.core.utils.time.date import now
 from graphai.core.utils.breadcrumb import Breadcrumb
 
@@ -21,7 +21,7 @@ from graphai.core.utils.breadcrumb import Breadcrumb
 ################################################################
 
 # Init ES interface for index 'aitor_concepts_YYYY-mm-DD'
-es = ES(f'aitor_concepts_{now().date()}')
+es = ES(config['elasticsearch'], f'aitor_concepts_{now().date()}')
 
 
 def index_doc(doc):
