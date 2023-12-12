@@ -399,7 +399,7 @@ def transcribe_task(self, input_dict, strict_silence=False, force=False):
 
                 return {
                     'transcript_results': transcript_results,
-                    'subtitle_results': json.dumps(subtitle_results),
+                    'subtitle_results': subtitle_results,
                     'language': language_result,
                     'fresh': False
                 }
