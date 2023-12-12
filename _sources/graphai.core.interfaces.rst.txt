@@ -13,5 +13,4 @@ Submodules
    :maxdepth: 1
 
    graphai.core.interfaces.celery_config
-   graphai.core.interfaces.es
    graphai.core.interfaces.wp

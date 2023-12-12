@@ -572,7 +572,7 @@ satisfy the minimum similarity criterion.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="graphai.core.common.video.WhisperTranscriptionModel.transcribe_audio_whisper">
-<span class="sig-name descname"><span class="pre">transcribe_audio_whisper</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_filename_with_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">force_lang</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.video.WhisperTranscriptionModel.transcribe_audio_whisper" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">transcribe_audio_whisper</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_filename_with_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">force_lang</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">no_speech_threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.6</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logprob_threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.video.WhisperTranscriptionModel.transcribe_audio_whisper" title="Permalink to this definition"></a></dt>
 <dd><p>Transcribes an audio file using whisper
 :param input_filename_with_path: Path to input file
 :param force_lang: Whether to explicitly feed the model the language of the audio.</p>
@@ -589,7 +589,13 @@ satisfy the minimum similarity criterion.</p>
 </aside>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>verbose</strong> – Verbosity of the transcription</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>verbose</strong> – Verbosity of the transcription</p></li>
+<li><p><strong>no_speech_threshold</strong> – If the probability of a segment containing no speech is above this threshold</p></li>
+<li><p><strong>predicted</strong><strong>)</strong> (<em>(</em><em>and the model has low confidence in the text it has</em>) – </p></li>
+<li><p><strong>silent.</strong> (<em>it is treated as</em>) – </p></li>
+<li><p><strong>logprob_threshold</strong> – Log probability threshold</p></li>
+</ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>‘text’ contains the full transcript, ‘segments’ contains a JSON-like dict of
