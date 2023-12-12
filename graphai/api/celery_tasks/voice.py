@@ -424,9 +424,17 @@ def transcribe_task(self, input_dict, strict_silence=False, force=False):
         }
 
     transcript_results = result_dict['text']
-    subtitle_results = json.dumps(result_dict['segments'])
+    subtitle_results = result_dict['segments']
     language_result = result_dict['language']
 
+    if strict_silence:
+        subtitle_results = [
+            x for x in subtitle_results
+            if x['avg_logprob'] >= -1.0
+        ]
+        transcript_results = ''.join([x['text'] for x in subtitle_results])
+
+    subtitle_results = json.dumps(subtitle_results)
     return {
         'transcript_results': transcript_results,
         'subtitle_results': subtitle_results,
