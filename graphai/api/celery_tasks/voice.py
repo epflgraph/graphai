@@ -406,11 +406,14 @@ def transcribe_task(self, input_dict, strict_silence=False, force=False):
 
     if strict_silence:
         no_speech_threshold = 0.5
+        logprob_threshold = -0.5
     else:
         no_speech_threshold = 0.6
+        logprob_threshold = -1
     input_filename_with_path = self.file_manager.generate_filepath(token)
     result_dict = self.model.transcribe_audio_whisper(input_filename_with_path, force_lang=lang, verbose=True,
-                                                      no_speech_threshold=no_speech_threshold)
+                                                      no_speech_threshold=no_speech_threshold,
+                                                      logprob_threshold=logprob_threshold)
 
     if result_dict is None:
         return {

@@ -842,7 +842,7 @@ class WhisperTranscriptionModel:
         return max(probs, key=probs.get)
 
     def transcribe_audio_whisper(self, input_filename_with_path, force_lang=None, verbose=False,
-                                 no_speech_threshold=0.6):
+                                 no_speech_threshold=0.6, logprob_threshold=-1):
         """
         Transcribes an audio file using whisper
         Args:
@@ -852,6 +852,7 @@ class WhisperTranscriptionModel:
             verbose: Verbosity of the transcription
             no_speech_threshold: If the probability of a segment containing no speech is above this threshold
             (and the model has low confidence in the text it has predicted), it is treated as silent.
+            logprob_threshold: Log probability threshold
         Returns:
             A dictionary with three keys: 'text' contains the full transcript, 'segments' contains a JSON-like dict of
             translated segments which can be used as subtitles, and 'language' which contains the language code.
@@ -866,10 +867,12 @@ class WhisperTranscriptionModel:
             # Whisper automatically switches to fp32)
             if force_lang is None:
                 result = self.model.transcribe(input_filename_with_path, verbose=verbose, fp16=True,
-                                               no_speech_threshold=no_speech_threshold)
+                                               no_speech_threshold=no_speech_threshold,
+                                               logprob_threshold=logprob_threshold)
             else:
                 result = self.model.transcribe(input_filename_with_path, verbose=verbose, language=force_lang,
-                                               fp16=True, no_speech_threshold=no_speech_threshold)
+                                               fp16=True, no_speech_threshold=no_speech_threshold,
+                                               logprob_threshold=logprob_threshold)
         except Exception as e:
             print(e, file=sys.stderr)
             return None
