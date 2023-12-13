@@ -861,7 +861,8 @@ class WhisperTranscriptionModel:
         if not file_exists(input_filename_with_path):
             print(f'File {input_filename_with_path} does not exist')
             return None
-        assert force_lang in [None, 'en', 'fr', 'de', 'it']
+        if force_lang not in [None, 'en', 'fr', 'de', 'it']:
+            force_lang = 'en'
         try:
             # setting fp16 to True makes sure that the model uses GPUs if available (otherwise
             # Whisper automatically switches to fp32)
