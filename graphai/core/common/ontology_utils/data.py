@@ -178,6 +178,7 @@ class OntologyData:
         self.db_config = None
         self.ontology_concept_names = None
         self.ontology_categories = None
+        self.category_depth_dict = None
         self.non_ontology_concept_names = None
         self.concept_concept_graphscore = None
         self.ontology_and_anchor_concepts_id_to_index = None
@@ -201,8 +202,8 @@ class OntologyData:
             # Now loading category-category and category-concept tables
             self.load_category_category()
             self.load_category_concept()
-            # Now computing aggregated anchor concept lists for each category
-            self.compute_category_anchors()
+            # Now loading aggregated anchor concept lists for each category
+            self.load_anchor_page_dict()
             # Finally, we compute aggregated matrices that map each concept to each category
             self.compute_precalculated_similarity_matrices()
             self.loaded = True
@@ -219,10 +220,13 @@ class OntologyData:
         self.ontology_categories = db_results_to_pandas_df(db_manager.execute_query(
             "SELECT a.id AS category_id, a.depth AS depth, b.id AS concept_id, b.name AS concept_name "
             "FROM graph_ontology.Nodes_N_Category a JOIN graph_ontology.Nodes_N_Concept b "
-            "ON a.anchor_page_id=b.id "
+            "ON a.reference_page_id=b.id "
             "WHERE b.is_ontology_category=1;"),
             ['category_id', 'depth', 'id', 'name']
         )
+        cat_ids = self.ontology_categories.category_id.values.tolist()
+        depths = self.ontology_categories.depth.values.tolist()
+        self.category_depth_dict = {cat_ids[i]: depths[i] for i in range(len(cat_ids))}
 
     def load_non_ontology_concept_names(self):
         db_manager = DB(self.db_config)
@@ -258,7 +262,20 @@ class OntologyData:
         concept_lists = category_concept_agg['id'].values.tolist()
         self.category_concept_dict = {category_ids[i]: concept_lists[i] for i in range(len(category_ids))}
 
-    def compute_category_anchors(self):
+    def load_anchor_page_dict(self):
+        db_manager = DB(self.db_config)
+        anchors = db_results_to_pandas_df(db_manager.execute_query(
+            "SELECT from_id, to_id FROM graph_ontology.Edges_N_Category_N_Concept_T_AnchorPage"
+        ), ['from_id', 'to_id'])
+        anchors['to_id'] = anchors['to_id'].apply(lambda x: [x])
+        anchors = anchors.groupby('from_id').agg(sum).reset_index()
+        category_ids = anchors.from_id.values.tolist()
+        anchor_lists = anchors.to_id.values.tolist()
+        depths_list = [self.category_depth_dict[x] for x in category_ids]
+        self.category_anchors_dict = {category_ids[i]: {'anchors': anchor_lists[i], 'depth': depths_list[i]}
+                                      for i in range(len(category_ids))}
+
+    def compute_category_anchors_using_references(self):
         assert self.category_category is not None and self.ontology_categories is not None
         print('computing category anchors')
         anchors = self.ontology_categories.loc[self.ontology_categories.depth == 5, ['category_id', 'depth', 'id']].\
@@ -289,8 +306,8 @@ class OntologyData:
         category_ids = anchors.category_id.values.tolist()
         anchor_lists = anchors.anchor_ids.values.tolist()
         depths_list = anchors.depth.values.tolist()
-        self.category_anchors_dict = {category_ids[i]: {'anchors': anchor_lists[i], 'depth': depths_list[i]}
-                                      for i in range(len(category_ids))}
+        return {category_ids[i]: {'anchors': anchor_lists[i], 'depth': depths_list[i]}
+                for i in range(len(category_ids))}
 
     def compute_symmetric_concept_concept_matrix(self):
         adj, row_dict, _ = (create_graph_from_df(
