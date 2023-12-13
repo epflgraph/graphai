@@ -405,8 +405,12 @@ def transcribe_task(self, input_dict, strict_silence=False, force=False):
                 }
 
     if strict_silence:
-        no_speech_threshold = 0.5
-        logprob_threshold = -0.5
+        if self.model.model_type == 'base':
+            no_speech_threshold = 0.5
+            logprob_threshold = -0.5
+        else:
+            no_speech_threshold = 0.5
+            logprob_threshold = -0.45
     else:
         no_speech_threshold = 0.6
         logprob_threshold = -1
