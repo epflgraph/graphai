@@ -346,6 +346,7 @@ class OntologyData:
         self.symmetric_concept_concept_matrix['matrix'] = adj
 
     def compute_precalculated_similarity_matrices(self):
+        # First, computations for depth 4 categories
         depth4_categories_list = sorted([x for x in self.category_anchors_dict.keys()
                                          if self.category_anchors_dict[x]['depth'] == 4])
 
@@ -353,6 +354,7 @@ class OntologyData:
         self.symmetric_concept_concept_matrix['d4_cat_id_to_index'] = (
             invert_dict(self.symmetric_concept_concept_matrix['d4_cat_index_to_id']))
 
+        # Anchors
         self.symmetric_concept_concept_matrix['d4_cat_anchors'] = {
             x: [self.symmetric_concept_concept_matrix['concept_id_to_index'][y]
                 for y in self.category_anchors_dict[
@@ -367,6 +369,7 @@ class OntologyData:
             shape=(1, len(self.symmetric_concept_concept_matrix['d4_cat_anchors']))
         )
 
+        # Anchor-based matrices
         self.symmetric_concept_concept_matrix['matrix_concept_cat_anchors'] = vstack(
             [csr_matrix(self.symmetric_concept_concept_matrix['matrix'][
                         self.symmetric_concept_concept_matrix['d4_cat_anchors'][x], :].sum(axis=0)
@@ -380,6 +383,7 @@ class OntologyData:
              for x in range(len(depth4_categories_list))]
         )
 
+        # Concepts
         self.symmetric_concept_concept_matrix['d4_cat_concepts'] = {
             x: [self.symmetric_concept_concept_matrix['concept_id_to_index'][y]
                 for y in self.category_concept_dict.get(
@@ -394,6 +398,7 @@ class OntologyData:
             shape=(1, len(self.symmetric_concept_concept_matrix['d4_cat_concepts']))
         )
 
+        # Concept-based matrices
         self.symmetric_concept_concept_matrix['matrix_concept_cat_concepts'] = vstack(
             [csr_matrix(self.symmetric_concept_concept_matrix['matrix'][
                         self.symmetric_concept_concept_matrix['d4_cat_concepts'][x], :].sum(axis=0)
@@ -403,6 +408,51 @@ class OntologyData:
         self.symmetric_concept_concept_matrix['matrix_cat_cat_concepts'] = vstack(
             [csr_matrix(self.symmetric_concept_concept_matrix['matrix_concept_cat_concepts'][
                         self.symmetric_concept_concept_matrix['d4_cat_concepts'][x], :].sum(axis=0)
+                        )
+             for x in range(len(depth4_categories_list))]
+        )
+
+        # Now, computations for depth 3 categories
+        # TODO
+
+        # Now, computations for clusters
+        clusters_list = sorted(list(self.cluster_concept_dict.keys()))
+
+        self.symmetric_concept_concept_matrix['cluster_index_to_id'] = dict(enumerate(clusters_list))
+        self.symmetric_concept_concept_matrix['cluster_id_to_index'] = (
+            invert_dict(self.symmetric_concept_concept_matrix['cluster_index_to_id']))
+
+        # Concepts
+        self.symmetric_concept_concept_matrix['cluster_concepts'] = {
+            x: [self.symmetric_concept_concept_matrix['concept_id_to_index'][y]
+                for y in self.cluster_concept_dict.get(
+                    self.symmetric_concept_concept_matrix['cluster_index_to_id'][x], [])
+                if y in self.symmetric_concept_concept_matrix['concept_id_to_index']]
+            for x in range(len(clusters_list))
+        }
+        self.symmetric_concept_concept_matrix['cluster_concepts_lengths'] = csr_matrix(
+            ([len(v) for k, v in self.symmetric_concept_concept_matrix['cluster_concepts'].items()],
+             ([0] * len(self.symmetric_concept_concept_matrix['cluster_concepts']),
+              [k for k, v in self.symmetric_concept_concept_matrix['cluster_concepts'].items()])),
+            shape=(1, len(self.symmetric_concept_concept_matrix['cluster_concepts']))
+        )
+
+        # Concept-based matrices
+        self.symmetric_concept_concept_matrix['matrix_concept_cluster_concepts'] = vstack(
+            [csr_matrix(self.symmetric_concept_concept_matrix['matrix'][
+                        self.symmetric_concept_concept_matrix['cluster_concepts'][x], :].sum(axis=0)
+                        )
+             for x in range(len(clusters_list))]
+        ).transpose().tocsr()
+        self.symmetric_concept_concept_matrix['matrix_cluster_cluster_concepts'] = vstack(
+            [csr_matrix(self.symmetric_concept_concept_matrix['matrix_concept_cluster_concepts'][
+                        self.symmetric_concept_concept_matrix['cluster_concepts'][x], :].sum(axis=0)
+                        )
+             for x in range(len(clusters_list))]
+        )
+        self.symmetric_concept_concept_matrix['matrix_cluster_cat_concepts'] = vstack(
+            [csr_matrix(self.symmetric_concept_concept_matrix['matrix_concept_cat_concepts'][
+                        self.symmetric_concept_concept_matrix['cluster_concepts'][x], :].sum(axis=0)
                         )
              for x in range(len(depth4_categories_list))]
         )
