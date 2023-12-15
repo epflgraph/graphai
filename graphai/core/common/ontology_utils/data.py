@@ -186,7 +186,11 @@ class OntologyData:
         self.symmetric_concept_concept_matrix = dict()
         self.category_category = None
         self.category_concept = None
+        self.category_cluster = None
+        self.cluster_concept = None
         self.category_concept_dict = None
+        self.category_cluster_dict = None
+        self.cluster_concept_dict = None
         self.category_anchors_dict = None
 
     def load_data(self):
@@ -251,16 +255,35 @@ class OntologyData:
 
     def load_category_concept(self):
         db_manager = DB(self.db_config)
-        self.category_concept = db_results_to_pandas_df(db_manager.execute_query(
-            "SELECT from_id, to_id FROM graph_ontology.Edges_N_Category_N_Concept_T_ParentToChild"),
+        self.category_cluster = db_results_to_pandas_df(db_manager.execute_query(
+            "SELECT from_id, to_id FROM graph_ontology.Edges_N_Category_N_ConceptsCluster_T_ParentToChild"),
             ['from_id', 'to_id']
         )
+        self.cluster_concept = db_results_to_pandas_df(db_manager.execute_query(
+            "SELECT from_id, to_id FROM graph_ontology.Edges_N_ConceptsCluster_N_Concept_T_ParentToChild"),
+            ['from_id', 'to_id']
+        )
+        self.category_concept = (
+            pd.merge(self.category_cluster, self.cluster_concept,
+                     left_on='to_id', right_on='from_id',
+                     suffixes=('_cat', '_concept'))[['from_id_cat', 'to_id_concept']].
+            rename(columns={'from_id_cat': 'from_id', 'to_id_concept': 'to_id'})
+        )
+
         category_concept_agg = self.category_concept.assign(
             id=self.category_concept.to_id.apply(lambda x: [x])
         )[['from_id', 'id']].groupby('from_id').agg(sum).reset_index()
-        category_ids = category_concept_agg['from_id'].values.tolist()
-        concept_lists = category_concept_agg['id'].values.tolist()
-        self.category_concept_dict = {category_ids[i]: concept_lists[i] for i in range(len(category_ids))}
+        self.category_concept_dict = get_col_to_col_dict(category_concept_agg, 'from_id', 'id')
+
+        cluster_concept_agg = self.cluster_concept.assign(
+            id=self.cluster_concept.to_id.apply(lambda x: [x])
+        )[['from_id', 'id']].groupby('from_id').agg(sum).reset_index()
+        self.cluster_concept_dict = get_col_to_col_dict(cluster_concept_agg, 'from_id', 'id')
+
+        category_cluster_agg = self.category_cluster.assign(
+            id=self.category_cluster.to_id.apply(lambda x: [x])
+        )[['from_id', 'id']].groupby('from_id').agg(sum).reset_index()
+        self.category_cluster_dict = get_col_to_col_dict(category_cluster_agg, 'from_id', 'id')
 
     def load_anchor_page_dict(self):
         db_manager = DB(self.db_config)
