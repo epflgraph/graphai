@@ -92,7 +92,7 @@ def get_concept_concept_similarity_task(self, concept_1_id, concept_2_id):
              name='ontology_6.concept_closest_category_graph_task',
              ignore_result=False, ontology_data_obj=ontology_data)
 def get_concept_category_closest_task(self, concept_id, avg='linear', coeffs=(1, 1), top_n=1):
-    closest, scores = self.ontology_data_obj.get_concept_closest_category(concept_id, avg, coeffs, top_n)
+    closest, scores, d3_cat = self.ontology_data_obj.get_concept_closest_category(concept_id, avg, coeffs, top_n)
     return {
         'closest': closest,
         'scores': scores

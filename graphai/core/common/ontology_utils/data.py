@@ -412,8 +412,17 @@ class OntologyData:
              for x in range(len(depth4_categories_list))]
         )
 
-        # Now, computations for depth 3 categories
-        # TODO
+        # A few computations for depth 3 categories
+        depth3_categories_list = sorted([x for x in self.category_anchors_dict.keys()
+                                         if self.category_anchors_dict[x]['depth'] == 3])
+        self.symmetric_concept_concept_matrix['d3_cat_index_to_id'] = dict(enumerate(depth3_categories_list))
+        self.symmetric_concept_concept_matrix['d3_cat_id_to_index'] = (
+            invert_dict(self.symmetric_concept_concept_matrix['d3_cat_index_to_id']))
+        self.symmetric_concept_concept_matrix['d3_to_d4'] = [
+            [self.symmetric_concept_concept_matrix['d4_cat_id_to_index'][y]
+             for y in self.category_category_dict[self.symmetric_concept_concept_matrix['d3_cat_index_to_id'][x]]]
+            for x in range(len(depth3_categories_list))
+        ]
 
         # Now, computations for clusters
         clusters_list = sorted(list(self.cluster_concept_dict.keys()))
@@ -515,7 +524,7 @@ class OntologyData:
             best_scores = [results[i] for i in best_concept_indices]
             return best_concepts, best_scores
 
-    def get_concept_closest_category(self, concept_id, avg='linear', coeffs=(1, 1), top_n=1):
+    def get_concept_closest_category(self, concept_id, avg='linear', coeffs=(1, 1), top_n=1, use_depth_3=False):
         d4_cat_indices = self.symmetric_concept_concept_matrix['d4_cat_index_to_id']
         concepts = self.symmetric_concept_concept_matrix['concept_id_to_index']
         if concept_id not in concepts:
@@ -526,17 +535,22 @@ class OntologyData:
         l1 = self.symmetric_concept_concept_matrix['d4_cat_anchors_lengths']
         l2 = self.symmetric_concept_concept_matrix['d4_cat_concepts_lengths']
         results = average_and_combine(s1, s2, l1, l2, avg, coeffs)
-        if top_n == 1:
-            best_cat_index = np.argmax(results)
-            best_cat = d4_cat_indices[best_cat_index]
-            best_score = results[best_cat_index]
-            return [best_cat], [best_score]
+        if use_depth_3:
+            results_d3 = np.array([sum(results[self.symmetric_concept_concept_matrix['d3_to_d4'][i]])
+                                   for i in range(len(self.symmetric_concept_concept_matrix['d3_to_d4']))])
+            best_d3_index = np.argmax(results_d3)
+            selected_d3_category = self.symmetric_concept_concept_matrix['d3_cat_index_to_id'][best_d3_index]
+            result_indices = self.symmetric_concept_concept_matrix['d3_to_d4'][best_d3_index]
+            new_results = results.copy()
+            new_results[result_indices] += (np.max(new_results) - np.min(new_results)) + 0.1
         else:
-            sorted_indices = np.argsort(results)[::-1]
-            best_cat_indices = sorted_indices[:top_n]
-            best_cats = [d4_cat_indices[i] for i in best_cat_indices]
-            best_scores = [results[i] for i in best_cat_indices]
-            return best_cats, best_scores
+            new_results = results
+            selected_d3_category = None
+        sorted_indices = np.argsort(new_results)[::-1]
+        best_cat_indices = sorted_indices[:top_n]
+        best_cats = [d4_cat_indices[i] for i in best_cat_indices]
+        best_scores = [results[i] for i in best_cat_indices]
+        return best_cats, best_scores, selected_d3_category
 
     def get_ontology_concept_names(self):
         self.load_data()
