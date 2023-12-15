@@ -185,6 +185,7 @@ class OntologyData:
         self.ontology_neighbor_concepts_id_to_index = None
         self.symmetric_concept_concept_matrix = dict()
         self.category_category = None
+        self.category_category_dict = None
         self.category_concept = None
         self.category_cluster = None
         self.cluster_concept = None
@@ -252,6 +253,10 @@ class OntologyData:
             "SELECT from_id, to_id FROM graph_ontology.Edges_N_Category_N_Category_T_ChildToParent;"),
             ['from_id', 'to_id']
         )
+        category_category_agg = self.category_category.assign(
+            id=self.category_category.from_id.apply(lambda x: [x])
+        )[['to_id', 'id']].groupby('to_id').agg(sum).reset_index()
+        self.category_category_dict = get_col_to_col_dict(category_category_agg, 'to_id', 'id')
 
     def load_category_concept(self):
         db_manager = DB(self.db_config)
@@ -502,6 +507,14 @@ class OntologyData:
     def get_category_to_category(self):
         self.load_data()
         return self.category_category
+
+    def get_category_parent(self, child_id):
+        self.load_data()
+        return self.category_category.loc[self.category_category.from_id == child_id]
+
+    def get_category_children(self, parent_id):
+        self.load_data()
+        return self.category_category.loc[self.category_category.to_id == parent_id]
 
     def get_category_concept(self):
         self.load_data()

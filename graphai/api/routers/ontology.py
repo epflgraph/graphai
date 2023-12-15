@@ -40,7 +40,9 @@ def ontology_tree_response_handler(id_and_results):
     task_results = id_and_results['results']
     if task_results is not None:
         if 'child_to_parent' in task_results:
-            task_results = task_results['child_to_parent']
+            task_results = (task_results['child_to_parent'].
+                            rename(columns={"from_id": "child_id", "to_id": "parent_id"}).
+                            to_dict(orient='records'))
         else:
             task_results = None
     return format_api_results(full_results['id'], full_results['name'], full_results['status'], task_results)

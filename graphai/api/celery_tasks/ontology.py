@@ -1,6 +1,6 @@
 from celery import shared_task
 import numpy as np
-from graphai.api.common.ontology import ontology, ontology_data
+from graphai.api.common.ontology import ontology_data
 from graphai.core.common.ontology_utils.clustering import (
     compute_all_graphs_from_scratch, assign_to_categories_using_existing,
     combine_and_embed_laplacian, cluster_and_reassign_outliers
@@ -8,19 +8,19 @@ from graphai.core.common.ontology_utils.clustering import (
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 5},
-             name='ontology_6.tree', ignore_result=False, ontology_obj=ontology)
+             name='ontology_6.tree', ignore_result=False, ontology_obj=ontology_data)
 def get_ontology_tree_task(self):
-    return {'child_to_parent': self.ontology_obj.get_predefined_tree()}
+    return {'child_to_parent': self.ontology_obj.get_category_to_category()}
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 5},
-             name='ontology_6.parent', ignore_result=False, ontology_obj=ontology)
+             name='ontology_6.parent', ignore_result=False, ontology_obj=ontology_data)
 def get_category_parent_task(self, child_id):
     return {'child_to_parent': self.ontology_obj.get_category_parent(child_id)}
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 5},
-             name='ontology_6.children', ignore_result=False, ontology_obj=ontology)
+             name='ontology_6.children', ignore_result=False, ontology_obj=ontology_data)
 def get_category_children_task(self, parent_id):
     return {'child_to_parent': self.ontology_obj.get_category_children(parent_id)}
 
@@ -54,7 +54,6 @@ def recompute_clusters_task(self, n_clusters, min_n=None):
         category_assignments = None
         impurity_count = 0
         impurity_proportion = 0
-    # TODO add evaluation to ensure that concepts aren't moved around between categories, or just leave it be?
     return {'results': result_dict, 'category_assignments': category_assignments,
             'impurity_count': impurity_count, 'impurity_proportion': impurity_proportion}
 

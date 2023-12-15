@@ -9,13 +9,13 @@ class TreeResponseElem(BaseModel):
     Object representing the output of the /ontology/tree endpoint.
     """
 
-    ChildCategoryID: int = Field(
+    child_id: int = Field(
         ...,
         title="Child category ID",
         description="ID of the child category"
     )
 
-    ParentCategoryID: int = Field(
+    parent_id: int = Field(
         ...,
         title="Parent category ID",
         description="ID of the parent category"
