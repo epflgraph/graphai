@@ -111,20 +111,20 @@ async def recompute_clusters_status(task_id):
 @router.post('/graph_distance', response_model=GraphDistanceResponse)
 async def compute_graph_distance(data: GraphDistanceRequest):
     src = data.src
-    dest = data.dest
+    tgt = data.tgt
     src_type = data.src_type
-    dest_type = data.dest_type
+    tgt_type = data.tgt_type
     avg = data.avg
     coeffs = data.coeffs
     assert coeffs is None or len(coeffs) == 2
-    if src_type == 'concept' and dest_type == 'category':
-        task = get_concept_category_similarity_task.s(src, dest, avg, coeffs)
-    elif src_type == 'category' and dest_type == 'concept':
-        task = get_concept_category_similarity_task.s(dest, src, avg, coeffs)
-    elif src_type == 'category' and dest_type == 'category':
-        task = get_category_category_similarity_task.s(src, dest, avg, coeffs)
+    if src_type == 'concept' and tgt_type == 'category':
+        task = get_concept_category_similarity_task.s(src, tgt, avg, coeffs)
+    elif src_type == 'category' and tgt_type == 'concept':
+        task = get_concept_category_similarity_task.s(tgt, src, avg, coeffs)
+    elif src_type == 'category' and tgt_type == 'category':
+        task = get_category_category_similarity_task.s(src, tgt, avg, coeffs)
     else:
-        task = get_concept_concept_similarity_task.s(src, dest)
+        task = get_concept_concept_similarity_task.s(src, tgt)
     res = task.apply_async(priority=6).get(timeout=30)
     return res
 

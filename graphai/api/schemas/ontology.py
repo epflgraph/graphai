@@ -156,12 +156,12 @@ class GraphDistanceRequest(BaseModel):
         default="concept"
     )
 
-    dest: str = Field(
-        title="Destination node"
+    tgt: str = Field(
+        title="Target node"
     )
 
-    dest_type: Literal['concept', 'category'] = Field(
-        title="Type of destination node",
+    tgt_type: Literal['concept', 'category'] = Field(
+        title="Type of target node",
         default="category"
     )
 
