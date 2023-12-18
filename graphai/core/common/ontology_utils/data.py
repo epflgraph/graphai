@@ -156,6 +156,9 @@ def compute_average(score, n, avg):
 
 def average_and_combine(s1, s2, l1, l2, avg, coeffs, skip_zeros=False):
     assert coeffs is None or (all([c >= 0 for c in coeffs]) and sum(coeffs) > 0)
+    if s2 is None or l2 is None:
+        s2 = 0
+        l2 = 0
     if coeffs is None:
         score = s1 + s2
         denominator = l1 + l2
@@ -538,6 +541,8 @@ class OntologyData:
         if use_depth_3:
             results_d3 = np.array([sum(results[self.symmetric_concept_concept_matrix['d3_to_d4'][i]])
                                    for i in range(len(self.symmetric_concept_concept_matrix['d3_to_d4']))])
+            results_d3 /= np.array([len(self.symmetric_concept_concept_matrix['d3_to_d4'][i])
+                                    for i in range(len(self.symmetric_concept_concept_matrix['d3_to_d4']))])
             best_d3_index = np.argmax(results_d3)
             selected_d3_category = self.symmetric_concept_concept_matrix['d3_cat_index_to_id'][best_d3_index]
             result_indices = self.symmetric_concept_concept_matrix['d3_to_d4'][best_d3_index]
