@@ -151,12 +151,22 @@ class GraphNearestNeighborRequest(BaseModel):
 
     coeffs: Union[None, Tuple[float, float]] = Field(
         title="Coefficients",
+        description="The coefficients for the concepts and anchor pages of a category, respectively. ",
         default=(1.0, 1.0)
     )
 
     top_n: int = Field(
         title="Top n",
         default=1
+    )
+
+    top_down_search: bool = Field(
+        title="Top-down search",
+        description="Only valid for concept-category. "
+                    "Whether to directly search in depth-4 categories or to start the search higher, at depth 3. "
+                    "True by default, as this generally yield better results. Set to False in order to get "
+                    "a ranking based on raw similarity scores between the given concept and depth-4 categories.",
+        default=True
     )
 
 
