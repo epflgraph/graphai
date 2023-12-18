@@ -3,6 +3,8 @@ from celery import chain
 
 from graphai.api.schemas.ontology import (
     TreeResponse,
+    CategoryParentResponse,
+    CategoryChildrenResponse,
     RecomputeClustersRequest,
     RecomputeClustersResponse,
     GraphDistanceRequest,
@@ -37,58 +39,25 @@ router = APIRouter(
 )
 
 
-def ontology_tree_response_handler(id_and_results):
-    full_results = get_task_info(id_and_results['id'], task_results=id_and_results['results'])
-    task_results = id_and_results['results']
-    if task_results is not None:
-        if 'child_to_parent' in task_results:
-            task_results = (task_results['child_to_parent'].
-                            rename(columns={"from_id": "child_id", "to_id": "parent_id"}).
-                            to_dict(orient='records'))
-        else:
-            task_results = None
-    return format_api_results(full_results['id'], full_results['name'], full_results['status'], task_results)
-
-
 @router.get('/tree', response_model=TreeResponse)
 async def tree():
     log('Returning the ontology tree')
-    task = (get_ontology_tree_task.s()).apply_async(priority=6)
-    task_id = task.id
-    try:
-        results = task.get(timeout=10)
-    except TimeoutError as e:
-        print(e)
-        results = None
-    id_and_results = {'id': task_id, 'results': results}
-    return ontology_tree_response_handler(id_and_results)
+    results = get_ontology_tree_task.s().apply_async(priority=6).get(timeout=10)
+    return results
 
 
-@router.get('/tree/parent/{category_id}', response_model=TreeResponse)
+@router.get('/tree/parent/{category_id}', response_model=CategoryParentResponse)
 async def parent(category_id):
     log('Returning the parent of category %s' % category_id)
-    task = (get_category_parent_task.s(int(category_id))).apply_async(priority=6)
-    try:
-        results = task.get(timeout=10)
-    except TimeoutError as e:
-        print(e)
-        results = None
-    id_and_results = {'id': task.id, 'results': results}
-    return ontology_tree_response_handler(id_and_results)
+    results = get_category_parent_task.s(category_id).apply_async(priority=6).get(timeout=10)
+    return results
 
 
-@router.get('/tree/children/{category_id}', response_model=TreeResponse)
+@router.get('/tree/children/{category_id}', response_model=CategoryChildrenResponse)
 async def children(category_id):
     log('Returning the children of category %s' % category_id)
-    task = (get_category_children_task.s(int(category_id))).apply_async(priority=6)
-    task_id = task.id
-    try:
-        results = task.get(timeout=10)
-    except TimeoutError as e:
-        print(e)
-        results = None
-    id_and_results = {'id': task_id, 'results': results}
-    return ontology_tree_response_handler(id_and_results)
+    results = get_category_children_task.s(category_id).apply_async(priority=6).get(timeout=10)
+    return results
 
 
 @router.post('/recompute_clusters', response_model=TaskIDResponse)

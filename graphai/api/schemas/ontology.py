@@ -22,7 +22,26 @@ class TreeResponseElem(BaseModel):
     )
 
 
-class TreeResponse(TaskStatusResponse):
+class TreeResponse(BaseModel):
+    child_to_parent: Union[List[TreeResponseElem], None] = Field(
+        title="Ontology tree results",
+        description="Child-parent relationships in the ontology's predefined tree."
+    )
+
+
+class CategoryParentResponse(BaseModel):
+    parent: Union[str, None] = Field(
+        title="Parent category"
+    )
+
+
+class CategoryChildrenResponse(BaseModel):
+    children: Union[List[str], None] = Field(
+        title="Child categories"
+    )
+
+
+class TreeParentResponse(TaskStatusResponse):
     task_result: Union[List[TreeResponseElem], None] = Field(
         title="Ontology tree results",
         description="Child-parent relationships in the ontology's predefined tree as a list of dicts."

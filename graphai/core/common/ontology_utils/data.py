@@ -477,6 +477,30 @@ class OntologyData:
         concept_2_index = concepts[concept_2_id]
         return self.symmetric_concept_concept_matrix['matrix'][concept_1_index, concept_2_index]
 
+    def get_concept_cluster_similarity(self, concept_id, cluster_id, avg='linear'):
+        concepts = self.symmetric_concept_concept_matrix['concept_id_to_index']
+        clusters = self.symmetric_concept_concept_matrix['cluster_id_to_index']
+        if concept_id not in concepts or cluster_id not in clusters:
+            return None
+        concept_index = concepts[concept_id]
+        cluster_index = clusters[cluster_id]
+        score = self.symmetric_concept_concept_matrix['matrix_concept_cluster_concepts'][concept_index, cluster_index]
+        denominator = self.symmetric_concept_concept_matrix['cluster_concepts_lengths'][0, cluster_index]
+        return compute_average(score, denominator, avg)
+
+    def get_cluster_cluster_similarity(self, cluster_1_id, cluster_2_id, avg='linear'):
+        clusters = self.symmetric_concept_concept_matrix['cluster_id_to_index']
+        if cluster_1_id not in clusters or cluster_2_id not in clusters:
+            return None
+        cluster_1_index = clusters[cluster_1_id]
+        cluster_2_index = clusters[cluster_2_id]
+        score = self.symmetric_concept_concept_matrix['matrix_cluster_cluster_concepts'][cluster_1_index, cluster_2_index]
+        denominator = (
+            self.symmetric_concept_concept_matrix['cluster_concepts_lengths'][0, cluster_1_index]
+            * self.symmetric_concept_concept_matrix['cluster_concepts_lengths'][0, cluster_2_index]
+        )
+        return compute_average(score, denominator, avg)
+
     def get_concept_category_similarity(self, concept_id, category_id, avg='linear', coeffs=(1, 1)):
         d4_cats = self.symmetric_concept_concept_matrix['d4_cat_id_to_index']
         concepts = self.symmetric_concept_concept_matrix['concept_id_to_index']
@@ -579,11 +603,17 @@ class OntologyData:
 
     def get_category_parent(self, child_id):
         self.load_data()
-        return self.category_category.loc[self.category_category.from_id == child_id]
+        results = self.category_category.loc[self.category_category.from_id == child_id, ['to_id']].values.tolist()
+        if len(results) > 0:
+            return results[0]
+        return None
 
     def get_category_children(self, parent_id):
         self.load_data()
-        return self.category_category.loc[self.category_category.to_id == parent_id]
+        results = self.category_category.loc[self.category_category.to_id == parent_id, ['from_id']].values.tolist()
+        if len(results) > 0:
+            return results
+        return None
 
     def get_category_concept(self):
         self.load_data()
