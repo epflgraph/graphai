@@ -7,8 +7,10 @@ from graphai.api.schemas.ontology import (
     RecomputeClustersResponse,
     GraphDistanceRequest,
     GraphDistanceResponse,
-    GraphNearestNeighborRequest,
-    GraphNearestNeighborResponse
+    GraphNearestCategoryRequest,
+    GraphNearestCategoryResponse,
+    GraphNearestConceptRequest,
+    GraphNearestConceptResponse,
 )
 from graphai.api.schemas.common import TaskIDResponse
 
@@ -138,20 +140,23 @@ async def compute_graph_distance(data: GraphDistanceRequest):
     return res
 
 
-@router.post('/graph_nearest_neighbor', response_model=GraphNearestNeighborResponse)
-async def compute_graph_nearest_neighbor(data: GraphNearestNeighborRequest):
+@router.post('/nearest_neighbor/category', response_model=GraphNearestCategoryResponse)
+async def compute_graph_nearest_category(data: GraphNearestCategoryRequest):
     src = data.src
-    src_type = data.src_type
-    dest_type = data.dest_type
     avg = data.avg
     coeffs = data.coeffs
     top_n = data.top_n
     use_depth_3 = data.top_down_search
     assert coeffs is None or len(coeffs) == 2
-    assert src_type != 'category'
-    if src_type == 'concept' and dest_type == 'category':
-        task = get_concept_category_closest_task.s(src, avg, coeffs, top_n, use_depth_3)
-    else:
-        task = get_concept_concept_closest_task.s(src, top_n)
+    task = get_concept_category_closest_task.s(src, avg, coeffs, top_n, use_depth_3)
+    res = task.apply_async(priority=6).get(timeout=30)
+    return res
+
+
+@router.post('/nearest_neighbor/concept', response_model=GraphNearestConceptResponse)
+async def compute_graph_nearest_concept(data: GraphNearestConceptRequest):
+    src = data.src
+    top_n = data.top_n
+    task = get_concept_concept_closest_task.s(src, top_n)
     res = task.apply_async(priority=6).get(timeout=30)
     return res

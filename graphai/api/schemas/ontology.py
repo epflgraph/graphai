@@ -129,19 +129,9 @@ class GraphDistanceResponse(BaseModel):
     )
 
 
-class GraphNearestNeighborRequest(BaseModel):
+class GraphNearestCategoryRequest(BaseModel):
     src: str = Field(
-        title="Source node"
-    )
-
-    src_type: Literal['concept'] = Field(
-        title="Type of source node",
-        default="concept"
-    )
-
-    dest_type: Literal['concept', 'category'] = Field(
-        title="Type of destination node",
-        default="category"
+        title="Source concept"
     )
 
     avg: Literal['none', 'linear', 'log'] = Field(
@@ -170,7 +160,35 @@ class GraphNearestNeighborRequest(BaseModel):
     )
 
 
-class GraphNearestNeighborResponse(BaseModel):
+class GraphNearestCategoryResponse(BaseModel):
+    closest: Union[None, List[str]] = Field(
+        title="Closest matches"
+    )
+
+    scores: Union[None, List[float]] = Field(
+        title="Scores"
+    )
+
+    parent_category: Union[None, str] = Field(
+        title="Parent category",
+        description="If the `top_down_search` flag was set, this field will contain the id of the closest "
+                    "depth-3 category. In that case, the top few categories (as many as this depth-3 category "
+                    "has children) will be children of this category. If the flag is not set, this value is null."
+    )
+
+
+class GraphNearestConceptRequest(BaseModel):
+    src: str = Field(
+        title="Source concept"
+    )
+
+    top_n: int = Field(
+        title="Top n",
+        default=1
+    )
+
+
+class GraphNearestConceptResponse(BaseModel):
     closest: Union[None, List[str]] = Field(
         title="Closest matches"
     )

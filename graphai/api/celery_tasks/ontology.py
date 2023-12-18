@@ -96,7 +96,8 @@ def get_concept_category_closest_task(self, concept_id, avg='linear', coeffs=(1,
                                                                                   use_depth_3=use_depth_3)
     return {
         'closest': closest,
-        'scores': scores
+        'scores': scores,
+        'parent_category': d3_cat,
     }
 
 
