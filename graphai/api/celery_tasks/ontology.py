@@ -129,12 +129,32 @@ def get_concept_concept_similarity_task(self, concept_1_id, concept_2_id):
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 5},
              name='ontology_6.concept_closest_category_graph_task',
              ignore_result=False, ontology_data_obj=ontology_data)
-def get_concept_category_closest_task(self, concept_id, avg='linear', coeffs=(1, 1), top_n=1, use_depth_3=False):
-    closest, scores, d3_cat = self.ontology_data_obj.get_concept_closest_category(concept_id, avg, coeffs, top_n,
-                                                                                  use_depth_3=use_depth_3)
+def get_concept_category_closest_task(self, concept_id, avg='linear', coeffs=(1, 1), top_n=1,
+                                      use_depth_3=False, return_clusters=False):
+    closest, scores, d3_cat, best_clusters = (
+        self.ontology_data_obj.get_concept_closest_category(concept_id, avg, coeffs, top_n,
+                                                            use_depth_3=use_depth_3,
+                                                            return_clusters=return_clusters)
+    )
+    result_dict = list()
+    for i in range(len(closest)):
+        current_cat = {
+            'category_id': closest[i],
+            'score': scores[i],
+            'rank': i + 1,
+        }
+        if best_clusters is not None:
+            current_cat['clusters'] = [
+                {
+                    'cluster_id': best_clusters[i][0][j],
+                    'score': best_clusters[i][1][j],
+                    'rank': j + 1
+                }
+                for j in range(len(best_clusters[i][0]))
+            ]
+        result_dict.append(current_cat)
     return {
-        'closest': closest,
-        'scores': scores,
+        'scores': result_dict,
         'parent_category': d3_cat,
     }
 

@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from typing import List, Union, Dict, Literal, Tuple
+from typing import List, Union, Dict, Literal, Tuple, Optional
 
 from graphai.api.schemas.common import TaskStatusResponse
 
@@ -212,14 +212,49 @@ class GraphNearestCategoryRequest(BaseModel):
         default=True
     )
 
-
-class GraphNearestCategoryResponse(BaseModel):
-    closest: Union[None, List[str]] = Field(
-        title="Closest matches"
+    return_clusters: bool = Field(
+        title="Return clusters",
+        description="If set, the results will include, for each of the most similar categories, "
+                    "the top 3 most similar clusters to the given concept.",
+        default=False
     )
 
-    scores: Union[None, List[float]] = Field(
-        title="Scores"
+
+class NearestClusterElement(BaseModel):
+    cluster_id: str = Field(
+        title="Cluster ID"
+    )
+
+    score: float = Field(
+        title="Score"
+    )
+
+    rank: int = Field(
+        title="Rank"
+    )
+
+
+class NearestCategoryElement(BaseModel):
+    category_id: str = Field(
+        title="Category ID"
+    )
+
+    score: float = Field(
+        title="Score"
+    )
+
+    rank: int = Field(
+        title="Rank"
+    )
+
+    clusters: Optional[NearestClusterElement] = Field(
+        title="Clusters"
+    )
+
+
+class GraphNearestCategoryResponse(BaseModel):
+    scores: Union[None, List[NearestCategoryElement]] = Field(
+        title="Closest matches"
     )
 
     parent_category: Union[None, str] = Field(

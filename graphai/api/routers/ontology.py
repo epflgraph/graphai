@@ -136,8 +136,9 @@ async def compute_graph_nearest_category(data: GraphNearestCategoryRequest):
     coeffs = data.coeffs
     top_n = data.top_n
     use_depth_3 = data.top_down_search
+    return_clusters = data.return_clusters
     assert coeffs is None or len(coeffs) == 2
-    task = get_concept_category_closest_task.s(src, avg, coeffs, top_n, use_depth_3)
+    task = get_concept_category_closest_task.s(src, avg, coeffs, top_n, use_depth_3, return_clusters)
     res = task.apply_async(priority=6).get(timeout=30)
     return res
 

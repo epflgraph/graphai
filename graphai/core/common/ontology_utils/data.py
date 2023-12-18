@@ -551,7 +551,28 @@ class OntologyData:
             best_scores = [results[i] for i in best_concept_indices]
             return best_concepts, best_scores
 
-    def get_concept_closest_category(self, concept_id, avg='linear', coeffs=(1, 1), top_n=1, use_depth_3=False):
+    def get_concept_closest_cluster_of_category(self, concept_id, category_id, avg='linear', top_n=3):
+        concepts = self.symmetric_concept_concept_matrix['concept_id_to_index']
+        if concept_id not in concepts or category_id not in self.category_cluster_dict:
+            return None
+        clusters = self.symmetric_concept_concept_matrix['cluster_id_to_index']
+        candidate_cluster_ids = self.category_cluster_dict[category_id]
+        concept_index = concepts[concept_id]
+        candidate_cluster_indices = [clusters[x] for x in candidate_cluster_ids]
+        score = (self.symmetric_concept_concept_matrix['matrix_concept_cluster_concepts']
+                 [[concept_index], candidate_cluster_indices])
+        denominator = (self.symmetric_concept_concept_matrix['cluster_concepts_lengths']
+                       [[concept_index], candidate_cluster_indices])
+        results = compute_average(score, denominator, avg)
+        sorted_indices = np.argsort(results)[::-1]
+        best_cluster_indices = sorted_indices[:top_n]
+        best_clusters = [self.symmetric_concept_concept_matrix['cluster_index_to_id'][candidate_cluster_indices[i]]
+                         for i in best_cluster_indices]
+        best_scores = [results[i] for i in best_cluster_indices]
+        return best_clusters, best_scores
+
+    def get_concept_closest_category(self, concept_id, avg='linear', coeffs=(1, 1), top_n=1,
+                                     use_depth_3=False, return_clusters=False):
         d4_cat_indices = self.symmetric_concept_concept_matrix['d4_cat_index_to_id']
         concepts = self.symmetric_concept_concept_matrix['concept_id_to_index']
         if concept_id not in concepts:
@@ -579,7 +600,12 @@ class OntologyData:
         best_cat_indices = sorted_indices[:top_n]
         best_cats = [d4_cat_indices[i] for i in best_cat_indices]
         best_scores = [results[i] for i in best_cat_indices]
-        return best_cats, best_scores, selected_d3_category
+        if return_clusters:
+            best_clusters = [self.get_concept_closest_cluster_of_category(concept_id, cat, avg, 5)
+                             for cat in best_cats]
+        else:
+            best_clusters = None
+        return best_cats, best_scores, selected_d3_category, best_clusters
 
     def get_ontology_concept_names(self):
         self.load_data()
