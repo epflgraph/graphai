@@ -3,7 +3,10 @@ from celery import chain
 
 from graphai.api.schemas.ontology import (
     TreeResponse,
+    CategoryInfoRequest,
+    CategoryInfoResponse,
     CategoryParentResponse,
+    CategoryChildrenRequest,
     CategoryChildrenResponse,
     RecomputeClustersRequest,
     RecomputeClustersResponse,
@@ -20,8 +23,11 @@ from graphai.api.common.log import log
 from graphai.api.celery_tasks.common import format_api_results
 from graphai.api.celery_tasks.ontology import (
     get_ontology_tree_task,
+    get_category_info_task,
     get_category_parent_task,
     get_category_children_task,
+    get_category_concepts_task,
+    get_category_clusters_task,
     recompute_clusters_task,
     get_concept_category_similarity_task,
     get_concept_category_closest_task,
@@ -46,17 +52,31 @@ async def tree():
     return results
 
 
+@router.get('/tree/info/{category_id}', response_model=CategoryInfoResponse)
+async def parent(data: CategoryInfoRequest):
+    category_id = data.category_id
+    results = get_category_info_task.s(category_id).apply_async(priority=6).get(timeout=10)
+    return results
+
+
 @router.get('/tree/parent/{category_id}', response_model=CategoryParentResponse)
-async def parent(category_id):
-    log('Returning the parent of category %s' % category_id)
+async def parent(data: CategoryInfoRequest):
+    category_id = data.category_id
     results = get_category_parent_task.s(category_id).apply_async(priority=6).get(timeout=10)
     return results
 
 
 @router.get('/tree/children/{category_id}', response_model=CategoryChildrenResponse)
-async def children(category_id):
-    log('Returning the children of category %s' % category_id)
-    results = get_category_children_task.s(category_id).apply_async(priority=6).get(timeout=10)
+async def children(data: CategoryChildrenRequest):
+    category_id = data.category_id
+    dest_type = data.tgt_type
+    if dest_type == 'category':
+        task = get_category_children_task.s(category_id)
+    elif dest_type == 'concept':
+        task = get_category_concepts_task.s(category_id)
+    else:
+        task = get_category_clusters_task.s(category_id)
+    results = task.apply_async(priority=6).get(timeout=10)
     return results
 
 

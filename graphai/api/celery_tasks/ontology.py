@@ -14,15 +14,33 @@ def get_ontology_tree_task(self):
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 5},
-             name='ontology_6.parent', ignore_result=False, ontology_obj=ontology_data)
+             name='ontology_6.category_info', ignore_result=False, ontology_obj=ontology_data)
+def get_category_info_task(self, cat_id):
+    return {'category': self.ontology_obj.get_ontology_category_info(cat_id)}
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 5},
+             name='ontology_6.category_parent', ignore_result=False, ontology_obj=ontology_data)
 def get_category_parent_task(self, child_id):
     return {'parent': self.ontology_obj.get_category_parent(child_id)}
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 5},
-             name='ontology_6.children', ignore_result=False, ontology_obj=ontology_data)
+             name='ontology_6.category_children', ignore_result=False, ontology_obj=ontology_data)
 def get_category_children_task(self, parent_id):
     return {'children': self.ontology_obj.get_category_children(parent_id)}
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 5},
+             name='ontology_6.category_concepts', ignore_result=False, ontology_obj=ontology_data)
+def get_category_concepts_task(self, parent_id):
+    return {'children': self.ontology_obj.get_category_concept_list(parent_id)}
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 5},
+             name='ontology_6.category_clusters', ignore_result=False, ontology_obj=ontology_data)
+def get_category_clusters_task(self, parent_id):
+    return {'children': self.ontology_obj.get_category_cluster_list(parent_id)}
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 5},
@@ -63,6 +81,26 @@ def recompute_clusters_task(self, n_clusters, min_n=None):
              ignore_result=False, ontology_data_obj=ontology_data)
 def get_concept_category_similarity_task(self, concept_id, category_id, avg='linear', coeffs=(1, 1)):
     sim = self.ontology_data_obj.get_concept_category_similarity(concept_id, category_id, avg, coeffs)
+    return {
+        'sim': sim
+    }
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 5},
+             name='ontology_6.concept_cluster_similarity_graph_task',
+             ignore_result=False, ontology_data_obj=ontology_data)
+def get_concept_cluster_similarity_task(self, concept_id, cluster_id, avg='linear'):
+    sim = self.ontology_data_obj.get_concept_cluster_similarity(concept_id, cluster_id, avg)
+    return {
+        'sim': sim
+    }
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 5},
+             name='ontology_6.cluster_cluster_similarity_graph_task',
+             ignore_result=False, ontology_data_obj=ontology_data)
+def get_cluster_cluster_similarity_task(self, cluster_1_id, cluster_2_id, avg='linear'):
+    sim = self.ontology_data_obj.get_cluster_cluster_similarity(cluster_1_id, cluster_2_id, avg)
     return {
         'sim': sim
     }

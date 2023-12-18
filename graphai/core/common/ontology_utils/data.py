@@ -589,6 +589,13 @@ class OntologyData:
         self.load_data()
         return self.ontology_categories
 
+    def get_ontology_category_info(self, cat_id):
+        self.load_data()
+        results = self.ontology_categories.loc[self.ontology_categories.category_id == cat_id].to_dict(orient='records')
+        if len(results) > 0:
+            return results[0]
+        return None
+
     def get_non_ontology_concept_names(self):
         self.load_data()
         return self.non_ontology_concept_names
@@ -614,6 +621,18 @@ class OntologyData:
         if len(results) > 0:
             return results
         return None
+
+    def get_category_cluster_list(self, cat_id):
+        self.load_data()
+        return self.category_cluster_dict.get(cat_id, None)
+
+    def get_category_concept_list(self, cat_id):
+        self.load_data()
+        return self.category_concept_dict.get(cat_id, None)
+
+    def get_cluster_concept_list(self, cluster_id):
+        self.load_data()
+        return self.cluster_concept_dict.get(cluster_id, None)
 
     def get_category_concept(self):
         self.load_data()

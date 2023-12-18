@@ -29,9 +29,43 @@ class TreeResponse(BaseModel):
     )
 
 
+class CategoryInfoRequest(BaseModel):
+    category_id: str = Field(
+        title="Category ID"
+    )
+
+
+class CategoryInfoResponse(BaseModel):
+    category_id: str = Field(
+        title="Category ID"
+    )
+
+    depth: int = Field(
+        title="Depth"
+    )
+
+    id: str = Field(
+        title="Reference concept ID"
+    )
+
+    name: str = Field(
+        title="Reference concept name"
+    )
+
+
 class CategoryParentResponse(BaseModel):
     parent: Union[str, None] = Field(
         title="Parent category"
+    )
+
+
+class CategoryChildrenRequest(BaseModel):
+    category_id: str = Field(
+        title="Category ID"
+    )
+
+    tgt_type: Literal['concept', 'category', 'cluster'] = Field(
+        title="Target type"
     )
 
 
