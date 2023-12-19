@@ -142,16 +142,18 @@ def get_concept_category_closest_task(self, concept_id, avg='linear', coeffs=(1,
             'category_id': closest[i],
             'score': scores[i],
             'rank': i + 1,
+            'clusters': None
         }
         if best_clusters is not None:
-            current_cat['clusters'] = [
-                {
-                    'cluster_id': best_clusters[i][0][j],
-                    'score': best_clusters[i][1][j],
-                    'rank': j + 1
-                }
-                for j in range(len(best_clusters[i][0]))
-            ]
+            if best_clusters[i] is not None:
+                current_cat['clusters'] = [
+                    {
+                        'cluster_id': best_clusters[i][0][j],
+                        'score': best_clusters[i][1][j],
+                        'rank': j + 1
+                    }
+                    for j in range(len(best_clusters[i][0]))
+                ]
         result_dict.append(current_cat)
     return {
         'scores': result_dict,

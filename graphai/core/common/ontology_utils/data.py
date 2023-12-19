@@ -139,7 +139,7 @@ def compute_average(score, n, avg):
         score = np.array(score).flatten()
         n = np.array(n).flatten()
         n[np.where(n == 0)[0]] = 1
-    if isinstance(n, spmatrix):
+    elif isinstance(n, spmatrix):
         score = np.array(score.todense()).flatten()
         n = np.array(n.todense()).flatten()
         n[np.where(n == 0)[0]] = 1
@@ -562,7 +562,7 @@ class OntologyData:
         score = (self.symmetric_concept_concept_matrix['matrix_concept_cluster_concepts']
                  [[concept_index], candidate_cluster_indices])
         denominator = (self.symmetric_concept_concept_matrix['cluster_concepts_lengths']
-                       [[concept_index], candidate_cluster_indices])
+                       [[0], candidate_cluster_indices])
         results = compute_average(score, denominator, avg)
         sorted_indices = np.argsort(results)[::-1]
         best_cluster_indices = sorted_indices[:top_n]
