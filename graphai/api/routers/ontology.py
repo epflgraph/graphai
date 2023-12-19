@@ -1,5 +1,6 @@
 from fastapi import APIRouter
 from celery import chain
+from typing import Union
 
 from graphai.api.schemas.ontology import (
     TreeResponse,
@@ -52,21 +53,21 @@ async def tree():
     return results
 
 
-@router.get('/tree/info/{category_id}', response_model=CategoryInfoResponse)
+@router.post('/tree/info', response_model=Union[CategoryInfoResponse, None])
 async def parent(data: CategoryInfoRequest):
     category_id = data.category_id
     results = get_category_info_task.s(category_id).apply_async(priority=6).get(timeout=10)
     return results
 
 
-@router.get('/tree/parent/{category_id}', response_model=CategoryParentResponse)
+@router.post('/tree/parent', response_model=CategoryParentResponse)
 async def parent(data: CategoryInfoRequest):
     category_id = data.category_id
     results = get_category_parent_task.s(category_id).apply_async(priority=6).get(timeout=10)
     return results
 
 
-@router.get('/tree/children/{category_id}', response_model=CategoryChildrenResponse)
+@router.post('/tree/children', response_model=CategoryChildrenResponse)
 async def children(data: CategoryChildrenRequest):
     category_id = data.category_id
     dest_type = data.tgt_type

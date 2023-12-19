@@ -16,7 +16,7 @@ def get_ontology_tree_task(self):
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 5},
              name='ontology_6.category_info', ignore_result=False, ontology_obj=ontology_data)
 def get_category_info_task(self, cat_id):
-    return {'category': self.ontology_obj.get_ontology_category_info(cat_id)}
+    return self.ontology_obj.get_ontology_category_info(cat_id)
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 5},

@@ -636,14 +636,14 @@ class OntologyData:
 
     def get_category_parent(self, child_id):
         self.load_data()
-        results = self.category_category.loc[self.category_category.from_id == child_id, ['to_id']].values.tolist()
+        results = self.category_category.loc[self.category_category.from_id == child_id, 'to_id'].values.tolist()
         if len(results) > 0:
             return results[0]
         return None
 
     def get_category_children(self, parent_id):
         self.load_data()
-        results = self.category_category.loc[self.category_category.to_id == parent_id, ['from_id']].values.tolist()
+        results = self.category_category.loc[self.category_category.to_id == parent_id, 'from_id'].values.tolist()
         if len(results) > 0:
             return results
         return None
