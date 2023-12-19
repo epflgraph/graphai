@@ -54,21 +54,21 @@ async def tree():
 
 
 @router.post('/tree/info', response_model=Union[CategoryInfoResponse, None])
-async def parent(data: CategoryInfoRequest):
+async def cat_info(data: CategoryInfoRequest):
     category_id = data.category_id
     results = get_category_info_task.s(category_id).apply_async(priority=6).get(timeout=10)
     return results
 
 
 @router.post('/tree/parent', response_model=CategoryParentResponse)
-async def parent(data: CategoryInfoRequest):
+async def cat_parent(data: CategoryInfoRequest):
     category_id = data.category_id
     results = get_category_parent_task.s(category_id).apply_async(priority=6).get(timeout=10)
     return results
 
 
 @router.post('/tree/children', response_model=CategoryChildrenResponse)
-async def children(data: CategoryChildrenRequest):
+async def cat_children(data: CategoryChildrenRequest):
     category_id = data.category_id
     dest_type = data.tgt_type
     if dest_type == 'category':
