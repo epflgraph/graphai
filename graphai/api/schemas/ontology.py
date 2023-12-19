@@ -247,7 +247,7 @@ class NearestCategoryElement(BaseModel):
         title="Rank"
     )
 
-    clusters: Optional[NearestClusterElement] = Field(
+    clusters: Optional[List[NearestClusterElement]] = Field(
         title="Clusters"
     )
 
