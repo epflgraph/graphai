@@ -146,6 +146,48 @@ class RecomputeClustersResponse(TaskStatusResponse):
     )
 
 
+class BreakUpClusterRequest(BaseModel):
+    cluster_id: str = Field(
+        title="Cluster ID",
+    )
+
+    n_clusters: Union[int, List[int]] = Field(
+        title="# of clusters",
+        description="Number of clusters to break the given cluster into. Can be one integer or a list of integers.",
+        default=2
+    )
+
+
+class BreakUpClustersClusterNumberResponse(BaseModel):
+    clusters: Union[Dict[int, List[OneConceptResponseElement]], None] = Field(
+        title="Cluster recomputation results",
+        description="A mapping of each cluster number to the list of the cluster's concepts (each of which "
+                    "is a dictionary with the 'name' and 'id' of the concept)."
+    )
+
+    n_clusters: int = Field(
+        title="Number of clusters",
+    )
+
+
+class BreakUpClustersTaskResponse(BaseModel):
+    results: Union[List[BreakUpClustersClusterNumberResponse], None] = Field(
+        title="Cluster break-up results",
+    )
+
+    successful: bool = Field(
+        title="Success flag",
+        description="Whether the computation was successful."
+    )
+
+
+class BreakUpClustersResponse(TaskStatusResponse):
+    task_result: Union[BreakUpClustersTaskResponse, None] = Field(
+        title="Cluster break-up response",
+        description="A dict of list of dicts containing the resulting broken-up clusters and a freshness flag."
+    )
+
+
 class GraphDistanceRequest(BaseModel):
     src: str = Field(
         title="Source node"
