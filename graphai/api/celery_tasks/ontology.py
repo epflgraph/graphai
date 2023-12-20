@@ -3,7 +3,7 @@ import numpy as np
 from graphai.api.common.ontology import ontology_data
 from graphai.core.common.ontology_utils.clustering import (
     compute_all_graphs_from_scratch, assign_to_categories_using_existing,
-    combine_and_embed_laplacian, cluster_and_reassign_outliers
+    combine_and_embed_laplacian, cluster_and_reassign_outliers, convert_cluster_labels_to_dict
 )
 
 
@@ -46,9 +46,9 @@ def get_category_clusters_task(self, parent_id):
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 5},
              name='ontology_6.recompute_clusters', ignore_result=False, ontology_data_obj=ontology_data)
 def recompute_clusters_task(self, n_clusters, min_n=None):
-    concept_concept = self.ontology_data_obj.get_concept_concept_graphscore()
-    concept_names = self.ontology_data_obj.get_ontology_concept_names()
-    category_concept = self.ontology_data_obj.get_category_concept()
+    concept_concept = self.ontology_data_obj.get_concept_concept_graphscore_table()
+    concept_names = self.ontology_data_obj.get_ontology_concept_names_table()
+    category_concept = self.ontology_data_obj.get_category_concept_table()
     try:
         graphs_dict, base_graph_dict, row_index_dicts, concept_index_to_name, concept_index_to_id = (
             compute_all_graphs_from_scratch(
@@ -57,12 +57,7 @@ def recompute_clusters_task(self, n_clusters, min_n=None):
         )
         _, embedding = combine_and_embed_laplacian(list(graphs_dict.values()))
         cluster_labels = cluster_and_reassign_outliers(embedding, n_clusters, min_n)
-        unique_cluster_labels = sorted(list(set(cluster_labels.tolist())))
-        result_dict = {
-            label: [{'name': concept_index_to_name[i], 'id': concept_index_to_id[i]}
-                    for i in np.where(cluster_labels == label)[0]]
-            for label in unique_cluster_labels
-        }
+        result_dict = convert_cluster_labels_to_dict(cluster_labels, concept_index_to_id, concept_index_to_name)
         category_assignments, impurity_count, impurity_proportion = \
             assign_to_categories_using_existing(cluster_labels, base_graph_dict['existing'],
                                                 row_index_dicts['existing'])
@@ -170,3 +165,32 @@ def get_concept_concept_closest_task(self, concept_id, top_n=1):
         'closest': closest,
         'scores': scores
     }
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 5},
+             name='ontology_6.break_up_cluster', ignore_result=False, ontology_data_obj=ontology_data)
+def break_up_cluster_task(self, cluster_id, n_clusters=2):
+    concepts_to_use = self.ontology_data_obj.get_cluster_concepts(cluster_id)
+    if len(concepts_to_use) == 0:
+        return {'results': None}
+    concept_concept = self.ontology_data_obj.get_concept_concept_graphscore_table(concepts_to_keep=concepts_to_use)
+    concept_names = self.ontology_data_obj.get_ontology_concept_names_table(concepts_to_keep=concepts_to_use)
+    try:
+        graphs_dict, base_graph_dict, row_index_dicts, concept_index_to_name, concept_index_to_id = (
+            compute_all_graphs_from_scratch(
+                {'graphscore': concept_concept},
+                concept_names)
+        )
+        _, embedding = combine_and_embed_laplacian(list(graphs_dict.values()),
+                                                   n_dims=min([1000, max([1, int(len(concepts_to_use)/2)])]))
+        if isinstance(n_clusters, int):
+            n_clusters = [n_clusters]
+        all_results = list()
+        for current_n_clusters in n_clusters:
+            cluster_labels = cluster_and_reassign_outliers(embedding, current_n_clusters, min_n=1)
+            result_dict = convert_cluster_labels_to_dict(cluster_labels, concept_index_to_id, concept_index_to_name)
+            all_results.append({'n_clusters': current_n_clusters, 'clusters': result_dict})
+    except Exception as e:
+        print(e)
+        all_results = None
+    return {'results': all_results}
