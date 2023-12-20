@@ -171,7 +171,8 @@ def get_concept_concept_closest_task(self, concept_id, top_n=1):
              name='ontology_6.break_up_cluster', ignore_result=False, ontology_data_obj=ontology_data)
 def break_up_cluster_task(self, cluster_id, n_clusters=2):
     concepts_to_use = self.ontology_data_obj.get_cluster_concepts(cluster_id)
-    if len(concepts_to_use) == 0:
+    n_total_concepts = len(concepts_to_use)
+    if n_total_concepts == 0:
         return {'results': None}
     concept_concept = self.ontology_data_obj.get_concept_concept_graphscore_table(concepts_to_keep=concepts_to_use)
     concept_names = self.ontology_data_obj.get_ontology_concept_names_table(concepts_to_keep=concepts_to_use)
@@ -182,14 +183,18 @@ def break_up_cluster_task(self, cluster_id, n_clusters=2):
                 concept_names)
         )
         _, embedding = combine_and_embed_laplacian(list(graphs_dict.values()),
-                                                   n_dims=min([1000, max([1, int(len(concepts_to_use)/2)])]))
+                                                   n_dims=min([1000, max([1, int(n_total_concepts/2)])]))
         if isinstance(n_clusters, int):
             n_clusters = [n_clusters]
         all_results = list()
         for current_n_clusters in n_clusters:
-            cluster_labels = cluster_and_reassign_outliers(embedding, current_n_clusters, min_n=1)
-            result_dict = convert_cluster_labels_to_dict(cluster_labels, concept_index_to_id, concept_index_to_name)
-            all_results.append({'n_clusters': current_n_clusters, 'clusters': result_dict})
+            if current_n_clusters <= n_total_concepts:
+                cluster_labels = cluster_and_reassign_outliers(embedding, current_n_clusters, min_n=1)
+                result_dict = convert_cluster_labels_to_dict(cluster_labels, concept_index_to_id,
+                                                             concept_index_to_name)
+                all_results.append({'n_clusters': current_n_clusters, 'clusters': result_dict})
+            else:
+                all_results.append({'n_clusters': current_n_clusters, 'clusters': None})
     except Exception as e:
         print(e)
         all_results = None
