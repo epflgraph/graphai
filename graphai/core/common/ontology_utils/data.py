@@ -607,9 +607,12 @@ class OntologyData:
             best_clusters = None
         return best_cats, best_scores, selected_d3_category, best_clusters
 
-    def get_ontology_concept_names(self):
+    def get_ontology_concept_names_table(self, concepts_to_keep=None):
         self.load_data()
-        return self.ontology_concept_names
+        results = self.ontology_concept_names
+        if concepts_to_keep is not None:
+            results = results.loc[results["id"].apply(lambda x: x in concepts_to_keep)]
+        return results
 
     def get_ontology_category_names(self):
         self.load_data()
@@ -626,9 +629,12 @@ class OntologyData:
         self.load_data()
         return self.non_ontology_concept_names
 
-    def get_concept_concept_graphscore(self):
+    def get_concept_concept_graphscore_table(self, concepts_to_keep=None):
         self.load_data()
-        return self.concept_concept_graphscore
+        results = self.concept_concept_graphscore
+        if concepts_to_keep is not None:
+            results = results.loc[results.to_id.apply(lambda x: x in concepts_to_keep)]
+        return results
 
     def get_category_to_category(self):
         self.load_data()
@@ -660,10 +666,16 @@ class OntologyData:
         self.load_data()
         return self.cluster_concept_dict.get(cluster_id, None)
 
-    def get_category_concept(self):
+    def get_category_concept_table(self, concepts_to_keep=None):
         self.load_data()
-        return self.category_concept
+        results = self.category_concept
+        if concepts_to_keep is not None:
+            results = results.loc[results.to_id.apply(lambda x: x in concepts_to_keep)]
+        return results
 
-    def get_category_anchor_pages(self):
+    def get_category_anchor_pages(self, category_id):
         self.load_data()
-        return self.category_anchors_dict
+        return self.category_anchors_dict.get(category_id, [])
+
+    def get_cluster_concepts(self, cluster_id):
+        return self.cluster_concept.get(cluster_id, [])
