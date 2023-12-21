@@ -1,7 +1,7 @@
 #!/bin/bash
 host="0.0.0.0"
 port=28800
-TIMEOUT=120
+TIMEOUT=180
 
 while getopts ":h:p:" opt; do
   case $opt in

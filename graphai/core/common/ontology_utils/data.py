@@ -139,7 +139,7 @@ def compute_average(score, n, avg):
         score = np.array(score).flatten()
         n = np.array(n).flatten()
         n[np.where(n == 0)[0]] = 1
-    if isinstance(n, spmatrix):
+    elif isinstance(n, spmatrix):
         score = np.array(score.todense()).flatten()
         n = np.array(n.todense()).flatten()
         n[np.where(n == 0)[0]] = 1
@@ -156,6 +156,9 @@ def compute_average(score, n, avg):
 
 def average_and_combine(s1, s2, l1, l2, avg, coeffs, skip_zeros=False):
     assert coeffs is None or (all([c >= 0 for c in coeffs]) and sum(coeffs) > 0)
+    if s2 is None or l2 is None:
+        s2 = 0
+        l2 = 0
     if coeffs is None:
         score = s1 + s2
         denominator = l1 + l2
@@ -178,14 +181,20 @@ class OntologyData:
         self.db_config = None
         self.ontology_concept_names = None
         self.ontology_categories = None
+        self.category_depth_dict = None
         self.non_ontology_concept_names = None
         self.concept_concept_graphscore = None
         self.ontology_and_anchor_concepts_id_to_index = None
         self.ontology_neighbor_concepts_id_to_index = None
         self.symmetric_concept_concept_matrix = dict()
         self.category_category = None
+        self.category_category_dict = None
         self.category_concept = None
+        self.category_cluster = None
+        self.cluster_concept = None
         self.category_concept_dict = None
+        self.category_cluster_dict = None
+        self.cluster_concept_dict = None
         self.category_anchors_dict = None
 
     def load_data(self):
@@ -201,8 +210,8 @@ class OntologyData:
             # Now loading category-category and category-concept tables
             self.load_category_category()
             self.load_category_concept()
-            # Now computing aggregated anchor concept lists for each category
-            self.compute_category_anchors()
+            # Now loading aggregated anchor concept lists for each category
+            self.load_anchor_page_dict()
             # Finally, we compute aggregated matrices that map each concept to each category
             self.compute_precalculated_similarity_matrices()
             self.loaded = True
@@ -219,10 +228,13 @@ class OntologyData:
         self.ontology_categories = db_results_to_pandas_df(db_manager.execute_query(
             "SELECT a.id AS category_id, a.depth AS depth, b.id AS concept_id, b.name AS concept_name "
             "FROM graph_ontology.Nodes_N_Category a JOIN graph_ontology.Nodes_N_Concept b "
-            "ON a.anchor_page_id=b.id "
+            "ON a.reference_page_id=b.id "
             "WHERE b.is_ontology_category=1;"),
             ['category_id', 'depth', 'id', 'name']
         )
+        cat_ids = self.ontology_categories.category_id.values.tolist()
+        depths = self.ontology_categories.depth.values.tolist()
+        self.category_depth_dict = {cat_ids[i]: depths[i] for i in range(len(cat_ids))}
 
     def load_non_ontology_concept_names(self):
         db_manager = DB(self.db_config)
@@ -244,21 +256,57 @@ class OntologyData:
             "SELECT from_id, to_id FROM graph_ontology.Edges_N_Category_N_Category_T_ChildToParent;"),
             ['from_id', 'to_id']
         )
+        category_category_agg = self.category_category.assign(
+            id=self.category_category.from_id.apply(lambda x: [x])
+        )[['to_id', 'id']].groupby('to_id').agg(sum).reset_index()
+        self.category_category_dict = get_col_to_col_dict(category_category_agg, 'to_id', 'id')
 
     def load_category_concept(self):
         db_manager = DB(self.db_config)
-        self.category_concept = db_results_to_pandas_df(db_manager.execute_query(
-            "SELECT from_id, to_id FROM graph_ontology.Edges_N_Category_N_Concept_T_ParentToChild"),
+        self.category_cluster = db_results_to_pandas_df(db_manager.execute_query(
+            "SELECT from_id, to_id FROM graph_ontology.Edges_N_Category_N_ConceptsCluster_T_ParentToChild"),
             ['from_id', 'to_id']
         )
+        self.cluster_concept = db_results_to_pandas_df(db_manager.execute_query(
+            "SELECT from_id, to_id FROM graph_ontology.Edges_N_ConceptsCluster_N_Concept_T_ParentToChild"),
+            ['from_id', 'to_id']
+        )
+        self.category_concept = (
+            pd.merge(self.category_cluster, self.cluster_concept,
+                     left_on='to_id', right_on='from_id',
+                     suffixes=('_cat', '_concept'))[['from_id_cat', 'to_id_concept']].
+            rename(columns={'from_id_cat': 'from_id', 'to_id_concept': 'to_id'})
+        )
+
         category_concept_agg = self.category_concept.assign(
             id=self.category_concept.to_id.apply(lambda x: [x])
         )[['from_id', 'id']].groupby('from_id').agg(sum).reset_index()
-        category_ids = category_concept_agg['from_id'].values.tolist()
-        concept_lists = category_concept_agg['id'].values.tolist()
-        self.category_concept_dict = {category_ids[i]: concept_lists[i] for i in range(len(category_ids))}
+        self.category_concept_dict = get_col_to_col_dict(category_concept_agg, 'from_id', 'id')
 
-    def compute_category_anchors(self):
+        cluster_concept_agg = self.cluster_concept.assign(
+            id=self.cluster_concept.to_id.apply(lambda x: [x])
+        )[['from_id', 'id']].groupby('from_id').agg(sum).reset_index()
+        self.cluster_concept_dict = get_col_to_col_dict(cluster_concept_agg, 'from_id', 'id')
+
+        category_cluster_agg = self.category_cluster.assign(
+            id=self.category_cluster.to_id.apply(lambda x: [x])
+        )[['from_id', 'id']].groupby('from_id').agg(sum).reset_index()
+        self.category_cluster_dict = get_col_to_col_dict(category_cluster_agg, 'from_id', 'id')
+
+    def load_anchor_page_dict(self):
+        db_manager = DB(self.db_config)
+        anchors = db_results_to_pandas_df(db_manager.execute_query(
+            "SELECT from_id, to_id FROM graph_ontology.Edges_N_Category_N_Concept_T_AnchorPage"
+        ), ['from_id', 'to_id'])
+        anchors['to_id'] = anchors['to_id'].apply(lambda x: [x])
+        anchors = anchors.groupby('from_id').agg(sum).reset_index()
+        category_ids = anchors.from_id.values.tolist()
+        anchor_lists = anchors.to_id.values.tolist()
+        depths_list = [self.category_depth_dict[x] for x in category_ids]
+        self.category_anchors_dict = {category_ids[i]: {'anchors': anchor_lists[i], 'depth': depths_list[i]}
+                                      for i in range(len(category_ids))}
+
+    def compute_category_anchors_using_references(self):
         assert self.category_category is not None and self.ontology_categories is not None
         print('computing category anchors')
         anchors = self.ontology_categories.loc[self.ontology_categories.depth == 5, ['category_id', 'depth', 'id']].\
@@ -289,8 +337,8 @@ class OntologyData:
         category_ids = anchors.category_id.values.tolist()
         anchor_lists = anchors.anchor_ids.values.tolist()
         depths_list = anchors.depth.values.tolist()
-        self.category_anchors_dict = {category_ids[i]: {'anchors': anchor_lists[i], 'depth': depths_list[i]}
-                                      for i in range(len(category_ids))}
+        return {category_ids[i]: {'anchors': anchor_lists[i], 'depth': depths_list[i]}
+                for i in range(len(category_ids))}
 
     def compute_symmetric_concept_concept_matrix(self):
         adj, row_dict, _ = (create_graph_from_df(
@@ -301,6 +349,7 @@ class OntologyData:
         self.symmetric_concept_concept_matrix['matrix'] = adj
 
     def compute_precalculated_similarity_matrices(self):
+        # First, computations for depth 4 categories
         depth4_categories_list = sorted([x for x in self.category_anchors_dict.keys()
                                          if self.category_anchors_dict[x]['depth'] == 4])
 
@@ -308,6 +357,7 @@ class OntologyData:
         self.symmetric_concept_concept_matrix['d4_cat_id_to_index'] = (
             invert_dict(self.symmetric_concept_concept_matrix['d4_cat_index_to_id']))
 
+        # Anchors
         self.symmetric_concept_concept_matrix['d4_cat_anchors'] = {
             x: [self.symmetric_concept_concept_matrix['concept_id_to_index'][y]
                 for y in self.category_anchors_dict[
@@ -322,6 +372,7 @@ class OntologyData:
             shape=(1, len(self.symmetric_concept_concept_matrix['d4_cat_anchors']))
         )
 
+        # Anchor-based matrices
         self.symmetric_concept_concept_matrix['matrix_concept_cat_anchors'] = vstack(
             [csr_matrix(self.symmetric_concept_concept_matrix['matrix'][
                         self.symmetric_concept_concept_matrix['d4_cat_anchors'][x], :].sum(axis=0)
@@ -335,6 +386,7 @@ class OntologyData:
              for x in range(len(depth4_categories_list))]
         )
 
+        # Concepts
         self.symmetric_concept_concept_matrix['d4_cat_concepts'] = {
             x: [self.symmetric_concept_concept_matrix['concept_id_to_index'][y]
                 for y in self.category_concept_dict.get(
@@ -349,6 +401,7 @@ class OntologyData:
             shape=(1, len(self.symmetric_concept_concept_matrix['d4_cat_concepts']))
         )
 
+        # Concept-based matrices
         self.symmetric_concept_concept_matrix['matrix_concept_cat_concepts'] = vstack(
             [csr_matrix(self.symmetric_concept_concept_matrix['matrix'][
                         self.symmetric_concept_concept_matrix['d4_cat_concepts'][x], :].sum(axis=0)
@@ -362,6 +415,66 @@ class OntologyData:
              for x in range(len(depth4_categories_list))]
         )
 
+        # A few computations for depth 3 categories
+        depth3_categories_list = sorted([x for x in self.category_anchors_dict.keys()
+                                         if self.category_anchors_dict[x]['depth'] == 3])
+        self.symmetric_concept_concept_matrix['d3_cat_index_to_id'] = dict(enumerate(depth3_categories_list))
+        self.symmetric_concept_concept_matrix['d3_cat_id_to_index'] = (
+            invert_dict(self.symmetric_concept_concept_matrix['d3_cat_index_to_id']))
+        self.symmetric_concept_concept_matrix['d3_to_d4'] = [
+            [self.symmetric_concept_concept_matrix['d4_cat_id_to_index'][y]
+             for y in self.category_category_dict[self.symmetric_concept_concept_matrix['d3_cat_index_to_id'][x]]]
+            for x in range(len(depth3_categories_list))
+        ]
+
+        # Now, computations for clusters
+        clusters_list = sorted(list(self.cluster_concept_dict.keys()))
+
+        self.symmetric_concept_concept_matrix['cluster_index_to_id'] = dict(enumerate(clusters_list))
+        self.symmetric_concept_concept_matrix['cluster_id_to_index'] = (
+            invert_dict(self.symmetric_concept_concept_matrix['cluster_index_to_id']))
+
+        # Concepts
+        self.symmetric_concept_concept_matrix['cluster_concepts'] = {
+            x: [self.symmetric_concept_concept_matrix['concept_id_to_index'][y]
+                for y in self.cluster_concept_dict.get(
+                    self.symmetric_concept_concept_matrix['cluster_index_to_id'][x], [])
+                if y in self.symmetric_concept_concept_matrix['concept_id_to_index']]
+            for x in range(len(clusters_list))
+        }
+        self.symmetric_concept_concept_matrix['cluster_concepts_lengths'] = csr_matrix(
+            ([len(v) for k, v in self.symmetric_concept_concept_matrix['cluster_concepts'].items()],
+             ([0] * len(self.symmetric_concept_concept_matrix['cluster_concepts']),
+              [k for k, v in self.symmetric_concept_concept_matrix['cluster_concepts'].items()])),
+            shape=(1, len(self.symmetric_concept_concept_matrix['cluster_concepts']))
+        )
+
+        # Concept-based matrices
+        self.symmetric_concept_concept_matrix['matrix_concept_cluster_concepts'] = vstack(
+            [csr_matrix(self.symmetric_concept_concept_matrix['matrix'][
+                        self.symmetric_concept_concept_matrix['cluster_concepts'][x], :].sum(axis=0)
+                        )
+             for x in range(len(clusters_list))]
+        ).transpose().tocsr()
+        self.symmetric_concept_concept_matrix['matrix_cluster_cluster_concepts'] = vstack(
+            [csr_matrix(self.symmetric_concept_concept_matrix['matrix_concept_cluster_concepts'][
+                        self.symmetric_concept_concept_matrix['cluster_concepts'][x], :].sum(axis=0)
+                        )
+             for x in range(len(clusters_list))]
+        )
+        self.symmetric_concept_concept_matrix['matrix_cluster_cat_concepts'] = vstack(
+            [csr_matrix(self.symmetric_concept_concept_matrix['matrix_concept_cat_concepts'][
+                        self.symmetric_concept_concept_matrix['cluster_concepts'][x], :].sum(axis=0)
+                        )
+             for x in range(len(depth4_categories_list))]
+        )
+        self.symmetric_concept_concept_matrix['matrix_cluster_cat_anchors'] = vstack(
+            [csr_matrix(self.symmetric_concept_concept_matrix['matrix_concept_cat_anchors'][
+                        self.symmetric_concept_concept_matrix['cluster_concepts'][x], :].sum(axis=0)
+                        )
+             for x in range(len(depth4_categories_list))]
+        )
+
     def get_concept_concept_similarity(self, concept_1_id, concept_2_id):
         concepts = self.symmetric_concept_concept_matrix['concept_id_to_index']
         if concept_1_id not in concepts or concept_2_id not in concepts:
@@ -369,6 +482,30 @@ class OntologyData:
         concept_1_index = concepts[concept_1_id]
         concept_2_index = concepts[concept_2_id]
         return self.symmetric_concept_concept_matrix['matrix'][concept_1_index, concept_2_index]
+
+    def get_concept_cluster_similarity(self, concept_id, cluster_id, avg='linear'):
+        concepts = self.symmetric_concept_concept_matrix['concept_id_to_index']
+        clusters = self.symmetric_concept_concept_matrix['cluster_id_to_index']
+        if concept_id not in concepts or cluster_id not in clusters:
+            return None
+        concept_index = concepts[concept_id]
+        cluster_index = clusters[cluster_id]
+        score = self.symmetric_concept_concept_matrix['matrix_concept_cluster_concepts'][concept_index, cluster_index]
+        denominator = self.symmetric_concept_concept_matrix['cluster_concepts_lengths'][0, cluster_index]
+        return compute_average(score, denominator, avg)
+
+    def get_cluster_cluster_similarity(self, cluster_1_id, cluster_2_id, avg='linear'):
+        clusters = self.symmetric_concept_concept_matrix['cluster_id_to_index']
+        if cluster_1_id not in clusters or cluster_2_id not in clusters:
+            return None
+        cluster_1_index = clusters[cluster_1_id]
+        cluster_2_index = clusters[cluster_2_id]
+        score = self.symmetric_concept_concept_matrix['matrix_cluster_cluster_concepts'][cluster_1_index, cluster_2_index]
+        denominator = (
+            self.symmetric_concept_concept_matrix['cluster_concepts_lengths'][0, cluster_1_index]
+            * self.symmetric_concept_concept_matrix['cluster_concepts_lengths'][0, cluster_2_index]
+        )
+        return compute_average(score, denominator, avg)
 
     def get_concept_category_similarity(self, concept_id, category_id, avg='linear', coeffs=(1, 1)):
         d4_cats = self.symmetric_concept_concept_matrix['d4_cat_id_to_index']
@@ -381,6 +518,25 @@ class OntologyData:
         s2 = self.symmetric_concept_concept_matrix['matrix_concept_cat_concepts'][concept_index, cat_index]
         l1 = self.symmetric_concept_concept_matrix['d4_cat_anchors_lengths'][0, cat_index]
         l2 = self.symmetric_concept_concept_matrix['d4_cat_concepts_lengths'][0, cat_index]
+        return average_and_combine(s1, s2, l1, l2, avg, coeffs)
+
+    def get_cluster_category_similarity(self, cluster_id, category_id, avg='linear', coeffs=(1, 1)):
+        clusters = self.symmetric_concept_concept_matrix['cluster_id_to_index']
+        d4_cats = self.symmetric_concept_concept_matrix['d4_cat_id_to_index']
+        if cluster_id not in clusters or category_id not in d4_cats:
+            return None
+        cluster_index = clusters[cluster_id]
+        category_index = d4_cats[category_id]
+        s1 = self.symmetric_concept_concept_matrix['matrix_cluster_cat_concepts'][cluster_index, category_index]
+        l1 = (
+            self.symmetric_concept_concept_matrix['cluster_concepts_lengths'][0, cluster_index]
+            * self.symmetric_concept_concept_matrix['d4_cat_concepts_lengths'][0, category_index]
+        )
+        s2 = self.symmetric_concept_concept_matrix['matrix_cluster_cat_anchors'][cluster_index, category_index]
+        l2 = (
+            self.symmetric_concept_concept_matrix['cluster_concepts_lengths'][0, cluster_index]
+            * self.symmetric_concept_concept_matrix['d4_cat_anchors_lengths'][0, category_index]
+        )
         return average_and_combine(s1, s2, l1, l2, avg, coeffs)
 
     def get_category_category_similarity(self, category_1_id, category_2_id, avg='linear', coeffs=(1, 1)):
@@ -420,7 +576,28 @@ class OntologyData:
             best_scores = [results[i] for i in best_concept_indices]
             return best_concepts, best_scores
 
-    def get_concept_closest_category(self, concept_id, avg='linear', coeffs=(1, 1), top_n=1):
+    def get_concept_closest_cluster_of_category(self, concept_id, category_id, avg='linear', top_n=3):
+        concepts = self.symmetric_concept_concept_matrix['concept_id_to_index']
+        if concept_id not in concepts or category_id not in self.category_cluster_dict:
+            return None
+        clusters = self.symmetric_concept_concept_matrix['cluster_id_to_index']
+        candidate_cluster_ids = self.category_cluster_dict[category_id]
+        concept_index = concepts[concept_id]
+        candidate_cluster_indices = [clusters[x] for x in candidate_cluster_ids]
+        score = (self.symmetric_concept_concept_matrix['matrix_concept_cluster_concepts']
+                 [[concept_index], candidate_cluster_indices])
+        denominator = (self.symmetric_concept_concept_matrix['cluster_concepts_lengths']
+                       [[0], candidate_cluster_indices])
+        results = compute_average(score, denominator, avg)
+        sorted_indices = np.argsort(results)[::-1]
+        best_cluster_indices = sorted_indices[:top_n]
+        best_clusters = [self.symmetric_concept_concept_matrix['cluster_index_to_id'][candidate_cluster_indices[i]]
+                         for i in best_cluster_indices]
+        best_scores = [results[i] for i in best_cluster_indices]
+        return best_clusters, best_scores
+
+    def get_concept_closest_category(self, concept_id, avg='linear', coeffs=(1, 1), top_n=1,
+                                     use_depth_3=False, return_clusters=False):
         d4_cat_indices = self.symmetric_concept_concept_matrix['d4_cat_index_to_id']
         concepts = self.symmetric_concept_concept_matrix['concept_id_to_index']
         if concept_id not in concepts:
@@ -431,42 +608,99 @@ class OntologyData:
         l1 = self.symmetric_concept_concept_matrix['d4_cat_anchors_lengths']
         l2 = self.symmetric_concept_concept_matrix['d4_cat_concepts_lengths']
         results = average_and_combine(s1, s2, l1, l2, avg, coeffs)
-        if top_n == 1:
-            best_cat_index = np.argmax(results)
-            best_cat = d4_cat_indices[best_cat_index]
-            best_score = results[best_cat_index]
-            return [best_cat], [best_score]
+        if use_depth_3:
+            results_d3 = np.array([sum(results[self.symmetric_concept_concept_matrix['d3_to_d4'][i]])
+                                   for i in range(len(self.symmetric_concept_concept_matrix['d3_to_d4']))])
+            results_d3 /= np.array([len(self.symmetric_concept_concept_matrix['d3_to_d4'][i])
+                                    for i in range(len(self.symmetric_concept_concept_matrix['d3_to_d4']))])
+            best_d3_index = np.argmax(results_d3)
+            selected_d3_category = self.symmetric_concept_concept_matrix['d3_cat_index_to_id'][best_d3_index]
+            result_indices = self.symmetric_concept_concept_matrix['d3_to_d4'][best_d3_index]
+            new_results = results.copy()
+            new_results[result_indices] += (np.max(new_results) - np.min(new_results)) + 0.1
         else:
-            sorted_indices = np.argsort(results)[::-1]
-            best_cat_indices = sorted_indices[:top_n]
-            best_cats = [d4_cat_indices[i] for i in best_cat_indices]
-            best_scores = [results[i] for i in best_cat_indices]
-            return best_cats, best_scores
+            new_results = results
+            selected_d3_category = None
+        sorted_indices = np.argsort(new_results)[::-1]
+        best_cat_indices = sorted_indices[:top_n]
+        best_cats = [d4_cat_indices[i] for i in best_cat_indices]
+        best_scores = [results[i] for i in best_cat_indices]
+        if return_clusters:
+            best_clusters = [self.get_concept_closest_cluster_of_category(concept_id, cat, avg, 5)
+                             for cat in best_cats]
+        else:
+            best_clusters = None
+        return best_cats, best_scores, selected_d3_category, best_clusters
 
-    def get_ontology_concept_names(self):
+    def get_ontology_concept_names_table(self, concepts_to_keep=None):
         self.load_data()
-        return self.ontology_concept_names
+        results = self.ontology_concept_names
+        if concepts_to_keep is not None:
+            results = results.loc[results["id"].apply(lambda x: x in concepts_to_keep)]
+        return results
 
     def get_ontology_category_names(self):
         self.load_data()
         return self.ontology_categories
 
+    def get_ontology_category_info(self, cat_id):
+        self.load_data()
+        results = self.ontology_categories.loc[self.ontology_categories.category_id == cat_id].to_dict(orient='records')
+        if len(results) > 0:
+            return results[0]
+        return None
+
     def get_non_ontology_concept_names(self):
         self.load_data()
         return self.non_ontology_concept_names
 
-    def get_concept_concept_graphscore(self):
+    def get_concept_concept_graphscore_table(self, concepts_to_keep=None):
         self.load_data()
-        return self.concept_concept_graphscore
+        results = self.concept_concept_graphscore
+        if concepts_to_keep is not None:
+            results = results.loc[results.to_id.apply(lambda x: x in concepts_to_keep)]
+        return results
 
     def get_category_to_category(self):
         self.load_data()
         return self.category_category
 
-    def get_category_concept(self):
+    def get_category_parent(self, child_id):
         self.load_data()
-        return self.category_concept
+        results = self.category_category.loc[self.category_category.from_id == child_id, 'to_id'].values.tolist()
+        if len(results) > 0:
+            return results[0]
+        return None
 
-    def get_category_anchor_pages(self):
+    def get_category_children(self, parent_id):
         self.load_data()
-        return self.category_anchors_dict
+        results = self.category_category.loc[self.category_category.to_id == parent_id, 'from_id'].values.tolist()
+        if len(results) > 0:
+            return results
+        return None
+
+    def get_category_cluster_list(self, cat_id):
+        self.load_data()
+        return self.category_cluster_dict.get(cat_id, None)
+
+    def get_category_concept_list(self, cat_id):
+        self.load_data()
+        return self.category_concept_dict.get(cat_id, None)
+
+    def get_cluster_concept_list(self, cluster_id):
+        self.load_data()
+        return self.cluster_concept_dict.get(cluster_id, None)
+
+    def get_category_concept_table(self, concepts_to_keep=None):
+        self.load_data()
+        results = self.category_concept
+        if concepts_to_keep is not None:
+            results = results.loc[results.to_id.apply(lambda x: x in concepts_to_keep)]
+        return results
+
+    def get_category_anchor_pages(self, category_id):
+        self.load_data()
+        return self.category_anchors_dict.get(category_id, [])
+
+    def get_cluster_concepts(self, cluster_id):
+        return self.cluster_concept_dict.get(cluster_id, [])

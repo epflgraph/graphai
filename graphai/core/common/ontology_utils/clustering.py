@@ -204,6 +204,9 @@ def perform_PCA(data, n_components, random_state=420, center_and_scale=True):
     if center_and_scale:
         data = data - np.mean(data, axis=0)
         data = data / np.std(data, axis=0)
+    max_n_components = min([data.shape[0], data.shape[1]])
+    if n_components > max_n_components:
+        n_components = max_n_components
     model = PCA(n_components=n_components, random_state=random_state, svd_solver='full')
     return model.fit_transform(data)
 
@@ -445,3 +448,13 @@ def assign_to_categories_using_existing(labels, category_concept, category_id_to
 
     impurity_proportion = impurity_count / len(labels)
     return cluster_category_map, impurity_count, impurity_proportion
+
+
+def convert_cluster_labels_to_dict(cluster_labels, concept_index_to_id, concept_index_to_name):
+    unique_cluster_labels = sorted(list(set(cluster_labels.tolist())))
+    result_dict = {
+        label: [{'name': concept_index_to_name[i], 'id': concept_index_to_id[i]}
+                for i in np.where(cluster_labels == label)[0]]
+        for label in unique_cluster_labels
+    }
+    return result_dict

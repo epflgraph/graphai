@@ -1,14 +1,24 @@
 from fastapi import APIRouter
 from celery import chain
+from typing import Union
 
 from graphai.api.schemas.ontology import (
     TreeResponse,
+    CategoryInfoRequest,
+    CategoryInfoResponse,
+    CategoryParentResponse,
+    CategoryChildrenRequest,
+    CategoryChildrenResponse,
     RecomputeClustersRequest,
     RecomputeClustersResponse,
     GraphDistanceRequest,
     GraphDistanceResponse,
-    GraphNearestNeighborRequest,
-    GraphNearestNeighborResponse
+    GraphNearestCategoryRequest,
+    GraphNearestCategoryResponse,
+    GraphNearestConceptRequest,
+    GraphNearestConceptResponse,
+    BreakUpClusterRequest,
+    BreakUpClustersResponse,
 )
 from graphai.api.schemas.common import TaskIDResponse
 
@@ -16,14 +26,21 @@ from graphai.api.common.log import log
 from graphai.api.celery_tasks.common import format_api_results
 from graphai.api.celery_tasks.ontology import (
     get_ontology_tree_task,
+    get_category_info_task,
     get_category_parent_task,
     get_category_children_task,
+    get_category_concepts_task,
+    get_category_clusters_task,
     recompute_clusters_task,
+    break_up_cluster_task,
     get_concept_category_similarity_task,
+    get_concept_cluster_similarity_task,
+    get_cluster_cluster_similarity_task,
     get_concept_category_closest_task,
     get_concept_concept_similarity_task,
     get_concept_concept_closest_task,
-    get_category_category_similarity_task
+    get_category_category_similarity_task,
+    get_cluster_category_similarity_task
 )
 from graphai.core.interfaces.celery_config import get_task_info
 
@@ -35,56 +52,39 @@ router = APIRouter(
 )
 
 
-def ontology_tree_response_handler(id_and_results):
-    full_results = get_task_info(id_and_results['id'], task_results=id_and_results['results'])
-    task_results = id_and_results['results']
-    if task_results is not None:
-        if 'child_to_parent' in task_results:
-            task_results = task_results['child_to_parent']
-        else:
-            task_results = None
-    return format_api_results(full_results['id'], full_results['name'], full_results['status'], task_results)
-
-
 @router.get('/tree', response_model=TreeResponse)
 async def tree():
     log('Returning the ontology tree')
-    task = (get_ontology_tree_task.s()).apply_async(priority=6)
-    task_id = task.id
-    try:
-        results = task.get(timeout=10)
-    except TimeoutError as e:
-        print(e)
-        results = None
-    id_and_results = {'id': task_id, 'results': results}
-    return ontology_tree_response_handler(id_and_results)
+    results = get_ontology_tree_task.s().apply_async(priority=6).get(timeout=10)
+    return results
 
 
-@router.get('/tree/parent/{category_id}', response_model=TreeResponse)
-async def parent(category_id):
-    log('Returning the parent of category %s' % category_id)
-    task = (get_category_parent_task.s(int(category_id))).apply_async(priority=6)
-    try:
-        results = task.get(timeout=10)
-    except TimeoutError as e:
-        print(e)
-        results = None
-    id_and_results = {'id': task.id, 'results': results}
-    return ontology_tree_response_handler(id_and_results)
+@router.post('/tree/info', response_model=Union[CategoryInfoResponse, None])
+async def cat_info(data: CategoryInfoRequest):
+    category_id = data.category_id
+    results = get_category_info_task.s(category_id).apply_async(priority=6).get(timeout=10)
+    return results
 
 
-@router.get('/tree/children/{category_id}', response_model=TreeResponse)
-async def children(category_id):
-    log('Returning the children of category %s' % category_id)
-    task = (get_category_children_task.s(int(category_id))).apply_async(priority=6)
-    task_id = task.id
-    try:
-        results = task.get(timeout=10)
-    except TimeoutError as e:
-        print(e)
-        results = None
-    id_and_results = {'id': task_id, 'results': results}
-    return ontology_tree_response_handler(id_and_results)
+@router.post('/tree/parent', response_model=CategoryParentResponse)
+async def cat_parent(data: CategoryInfoRequest):
+    category_id = data.category_id
+    results = get_category_parent_task.s(category_id).apply_async(priority=6).get(timeout=10)
+    return results
+
+
+@router.post('/tree/children', response_model=CategoryChildrenResponse)
+async def cat_children(data: CategoryChildrenRequest):
+    category_id = data.category_id
+    dest_type = data.tgt_type
+    if dest_type == 'category':
+        task = get_category_children_task.s(category_id)
+    elif dest_type == 'concept':
+        task = get_category_concepts_task.s(category_id)
+    else:
+        task = get_category_clusters_task.s(category_id)
+    results = task.apply_async(priority=6).get(timeout=10)
+    return results
 
 
 @router.post('/recompute_clusters', response_model=TaskIDResponse)
@@ -118,37 +118,77 @@ async def recompute_clusters_status(task_id):
 @router.post('/graph_distance', response_model=GraphDistanceResponse)
 async def compute_graph_distance(data: GraphDistanceRequest):
     src = data.src
-    dest = data.dest
+    tgt = data.tgt
     src_type = data.src_type
-    dest_type = data.dest_type
+    tgt_type = data.tgt_type
     avg = data.avg
     coeffs = data.coeffs
     assert coeffs is None or len(coeffs) == 2
-    if src_type == 'concept' and dest_type == 'category':
-        task = get_concept_category_similarity_task.s(src, dest, avg, coeffs)
-    elif src_type == 'category' and dest_type == 'concept':
-        task = get_concept_category_similarity_task.s(dest, src, avg, coeffs)
-    elif src_type == 'category' and dest_type == 'category':
-        task = get_category_category_similarity_task.s(src, dest, avg, coeffs)
+    if src_type == 'concept' and tgt_type == 'category':
+        task = get_concept_category_similarity_task.s(src, tgt, avg, coeffs)
+    elif src_type == 'category' and tgt_type == 'concept':
+        task = get_concept_category_similarity_task.s(tgt, src, avg, coeffs)
+    elif src_type == 'concept' and tgt_type == 'cluster':
+        task = get_concept_cluster_similarity_task.s(src, tgt, avg)
+    elif src_type == 'cluster' and tgt_type == 'concept':
+        task = get_concept_cluster_similarity_task.s(tgt, src, avg)
+    elif src_type == 'cluster' and tgt_type == 'cluster':
+        task = get_cluster_cluster_similarity_task.s(src, tgt, avg)
+    elif src_type == 'cluster' and tgt_type == 'category':
+        task = get_cluster_category_similarity_task.s(src, tgt, avg, coeffs)
+    elif src_type == 'category' and tgt_type == 'cluster':
+        task = get_cluster_category_similarity_task.s(tgt, src, avg, coeffs)
+    elif src_type == 'category' and tgt_type == 'category':
+        task = get_category_category_similarity_task.s(src, tgt, avg, coeffs)
     else:
-        task = get_concept_concept_similarity_task.s(src, dest)
+        task = get_concept_concept_similarity_task.s(src, tgt)
     res = task.apply_async(priority=6).get(timeout=30)
     return res
 
 
-@router.post('/graph_nearest_neighbor', response_model=GraphNearestNeighborResponse)
-async def compute_graph_nearest_neighbor(data: GraphNearestNeighborRequest):
+@router.post('/nearest_neighbor/category', response_model=GraphNearestCategoryResponse)
+async def compute_graph_nearest_category(data: GraphNearestCategoryRequest):
     src = data.src
-    src_type = data.src_type
-    dest_type = data.dest_type
     avg = data.avg
     coeffs = data.coeffs
     top_n = data.top_n
+    use_depth_3 = data.top_down_search
+    return_clusters = data.return_clusters
     assert coeffs is None or len(coeffs) == 2
-    assert src_type != 'category'
-    if src_type == 'concept' and dest_type == 'category':
-        task = get_concept_category_closest_task.s(src, avg, coeffs, top_n)
-    else:
-        task = get_concept_concept_closest_task.s(src, top_n)
+    task = get_concept_category_closest_task.s(src, avg, coeffs, top_n, use_depth_3, return_clusters)
     res = task.apply_async(priority=6).get(timeout=30)
     return res
+
+
+@router.post('/nearest_neighbor/concept', response_model=GraphNearestConceptResponse)
+async def compute_graph_nearest_concept(data: GraphNearestConceptRequest):
+    src = data.src
+    top_n = data.top_n
+    task = get_concept_concept_closest_task.s(src, top_n)
+    res = task.apply_async(priority=6).get(timeout=30)
+    return res
+
+
+@router.post('/break_up_cluster', response_model=TaskIDResponse)
+async def break_up_cluster(data: BreakUpClusterRequest):
+    cluster_id = data.cluster_id
+    n_clusters = data.n_clusters
+    task_list = [break_up_cluster_task.s(cluster_id, n_clusters)]
+    task = chain(task_list)
+    task = task.apply_async(priority=6)
+    return {'task_id': task.id}
+
+
+@router.get('/break_up_cluster/status/{task_id}', response_model=BreakUpClustersResponse)
+async def break_up_cluster_status(task_id):
+    full_results = get_task_info(task_id)
+    task_results = full_results['results']
+    if task_results is not None:
+        if 'results' in task_results:
+            task_results = {
+                'results': task_results['results'],
+                'successful': task_results['results'] is not None
+            }
+        else:
+            task_results = None
+    return format_api_results(full_results['id'], full_results['name'], full_results['status'], task_results)

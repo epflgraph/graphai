@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from typing import List, Union, Dict, Literal, Tuple
+from typing import List, Union, Dict, Literal, Tuple, Optional
 
 from graphai.api.schemas.common import TaskStatusResponse
 
@@ -9,20 +9,73 @@ class TreeResponseElem(BaseModel):
     Object representing the output of the /ontology/tree endpoint.
     """
 
-    ChildCategoryID: int = Field(
+    child_id: int = Field(
         ...,
         title="Child category ID",
         description="ID of the child category"
     )
 
-    ParentCategoryID: int = Field(
+    parent_id: int = Field(
         ...,
         title="Parent category ID",
         description="ID of the parent category"
     )
 
 
-class TreeResponse(TaskStatusResponse):
+class TreeResponse(BaseModel):
+    child_to_parent: Union[List[TreeResponseElem], None] = Field(
+        title="Ontology tree results",
+        description="Child-parent relationships in the ontology's predefined tree."
+    )
+
+
+class CategoryInfoRequest(BaseModel):
+    category_id: str = Field(
+        title="Category ID"
+    )
+
+
+class CategoryInfoResponse(BaseModel):
+    category_id: str = Field(
+        title="Category ID"
+    )
+
+    depth: int = Field(
+        title="Depth"
+    )
+
+    id: str = Field(
+        title="Reference concept ID"
+    )
+
+    name: str = Field(
+        title="Reference concept name"
+    )
+
+
+class CategoryParentResponse(BaseModel):
+    parent: Union[str, None] = Field(
+        title="Parent category"
+    )
+
+
+class CategoryChildrenRequest(BaseModel):
+    category_id: str = Field(
+        title="Category ID"
+    )
+
+    tgt_type: Literal['concept', 'category', 'cluster'] = Field(
+        title="Target type"
+    )
+
+
+class CategoryChildrenResponse(BaseModel):
+    children: Union[List[str], None] = Field(
+        title="Child categories"
+    )
+
+
+class TreeParentResponse(TaskStatusResponse):
     task_result: Union[List[TreeResponseElem], None] = Field(
         title="Ontology tree results",
         description="Child-parent relationships in the ontology's predefined tree as a list of dicts."
@@ -93,22 +146,64 @@ class RecomputeClustersResponse(TaskStatusResponse):
     )
 
 
+class BreakUpClusterRequest(BaseModel):
+    cluster_id: str = Field(
+        title="Cluster ID",
+    )
+
+    n_clusters: Union[int, List[int]] = Field(
+        title="# of clusters",
+        description="Number of clusters to break the given cluster into. Can be one integer or a list of integers.",
+        default=2
+    )
+
+
+class BreakUpClustersClusterNumberResponse(BaseModel):
+    clusters: Union[Dict[int, List[OneConceptResponseElement]], None] = Field(
+        title="Cluster recomputation results",
+        description="A mapping of each cluster number to the list of the cluster's concepts (each of which "
+                    "is a dictionary with the 'name' and 'id' of the concept)."
+    )
+
+    n_clusters: int = Field(
+        title="Number of clusters",
+    )
+
+
+class BreakUpClustersTaskResponse(BaseModel):
+    results: Union[List[BreakUpClustersClusterNumberResponse], None] = Field(
+        title="Cluster break-up results",
+    )
+
+    successful: bool = Field(
+        title="Success flag",
+        description="Whether the computation was successful."
+    )
+
+
+class BreakUpClustersResponse(TaskStatusResponse):
+    task_result: Union[BreakUpClustersTaskResponse, None] = Field(
+        title="Cluster break-up response",
+        description="A dict of list of dicts containing the resulting broken-up clusters and a freshness flag."
+    )
+
+
 class GraphDistanceRequest(BaseModel):
     src: str = Field(
         title="Source node"
     )
 
-    src_type: Literal['concept', 'category'] = Field(
+    src_type: Literal['concept', 'cluster', 'category'] = Field(
         title="Type of source node",
         default="concept"
     )
 
-    dest: str = Field(
-        title="Destination node"
+    tgt: str = Field(
+        title="Target node"
     )
 
-    dest_type: Literal['concept', 'category'] = Field(
-        title="Type of destination node",
+    tgt_type: Literal['concept', 'cluster', 'category'] = Field(
+        title="Type of target node",
         default="category"
     )
 
@@ -129,19 +224,9 @@ class GraphDistanceResponse(BaseModel):
     )
 
 
-class GraphNearestNeighborRequest(BaseModel):
+class GraphNearestCategoryRequest(BaseModel):
     src: str = Field(
-        title="Source node"
-    )
-
-    src_type: Literal['concept'] = Field(
-        title="Type of source node",
-        default="concept"
-    )
-
-    dest_type: Literal['concept', 'category'] = Field(
-        title="Type of destination node",
-        default="category"
+        title="Source concept"
     )
 
     avg: Literal['none', 'linear', 'log'] = Field(
@@ -151,6 +236,7 @@ class GraphNearestNeighborRequest(BaseModel):
 
     coeffs: Union[None, Tuple[float, float]] = Field(
         title="Coefficients",
+        description="The coefficients for the concepts and anchor pages of a category, respectively. ",
         default=(1.0, 1.0)
     )
 
@@ -159,8 +245,80 @@ class GraphNearestNeighborRequest(BaseModel):
         default=1
     )
 
+    top_down_search: bool = Field(
+        title="Top-down search",
+        description="Only valid for concept-category. "
+                    "Whether to directly search in depth-4 categories or to start the search higher, at depth 3. "
+                    "True by default, as this generally yield better results. Set to False in order to get "
+                    "a ranking based on raw similarity scores between the given concept and depth-4 categories.",
+        default=True
+    )
 
-class GraphNearestNeighborResponse(BaseModel):
+    return_clusters: bool = Field(
+        title="Return clusters",
+        description="If set, the results will include, for each of the most similar categories, "
+                    "the top 3 most similar clusters to the given concept.",
+        default=False
+    )
+
+
+class NearestClusterElement(BaseModel):
+    cluster_id: str = Field(
+        title="Cluster ID"
+    )
+
+    score: float = Field(
+        title="Score"
+    )
+
+    rank: int = Field(
+        title="Rank"
+    )
+
+
+class NearestCategoryElement(BaseModel):
+    category_id: str = Field(
+        title="Category ID"
+    )
+
+    score: float = Field(
+        title="Score"
+    )
+
+    rank: int = Field(
+        title="Rank"
+    )
+
+    clusters: Optional[List[NearestClusterElement]] = Field(
+        title="Clusters"
+    )
+
+
+class GraphNearestCategoryResponse(BaseModel):
+    scores: Union[None, List[NearestCategoryElement]] = Field(
+        title="Closest matches"
+    )
+
+    parent_category: Union[None, str] = Field(
+        title="Parent category",
+        description="If the `top_down_search` flag was set, this field will contain the id of the closest "
+                    "depth-3 category. In that case, the top few categories (as many as this depth-3 category "
+                    "has children) will be children of this category. If the flag is not set, this value is null."
+    )
+
+
+class GraphNearestConceptRequest(BaseModel):
+    src: str = Field(
+        title="Source concept"
+    )
+
+    top_n: int = Field(
+        title="Top n",
+        default=1
+    )
+
+
+class GraphNearestConceptResponse(BaseModel):
     closest: Union[None, List[str]] = Field(
         title="Closest matches"
     )
