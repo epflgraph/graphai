@@ -534,8 +534,8 @@ class OntologyData:
         )
         s2 = self.symmetric_concept_concept_matrix['matrix_cluster_cat_anchors'][cluster_index, category_index]
         l2 = (
-                self.symmetric_concept_concept_matrix['cluster_concepts_lengths'][0, cluster_index]
-                * self.symmetric_concept_concept_matrix['d4_cat_anchors_lengths'][0, category_index]
+            self.symmetric_concept_concept_matrix['cluster_concepts_lengths'][0, cluster_index]
+            * self.symmetric_concept_concept_matrix['d4_cat_anchors_lengths'][0, category_index]
         )
         return average_and_combine(s1, s2, l1, l2, avg, coeffs)
 

@@ -1,5 +1,4 @@
 from celery import shared_task
-import numpy as np
 from graphai.api.common.ontology import ontology_data
 from graphai.core.common.ontology_utils.clustering import (
     compute_all_graphs_from_scratch, assign_to_categories_using_existing,
@@ -193,7 +192,7 @@ def break_up_cluster_task(self, cluster_id, n_clusters=2):
                 concept_names)
         )
         _, embedding = combine_and_embed_laplacian(list(graphs_dict.values()),
-                                                   n_dims=min([1000, max([1, int(n_total_concepts/2)])]))
+                                                   n_dims=min([1000, max([1, int(n_total_concepts / 2)])]))
         if isinstance(n_clusters, int):
             n_clusters = [n_clusters]
         all_results = list()
