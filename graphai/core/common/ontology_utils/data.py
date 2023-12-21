@@ -703,4 +703,4 @@ class OntologyData:
         return self.category_anchors_dict.get(category_id, [])
 
     def get_cluster_concepts(self, cluster_id):
-        return self.cluster_concept.get(cluster_id, [])
+        return self.cluster_concept_dict.get(cluster_id, [])
