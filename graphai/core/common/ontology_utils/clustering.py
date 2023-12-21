@@ -204,6 +204,9 @@ def perform_PCA(data, n_components, random_state=420, center_and_scale=True):
     if center_and_scale:
         data = data - np.mean(data, axis=0)
         data = data / np.std(data, axis=0)
+    max_n_components = min([data.shape[0], data.shape[1]])
+    if n_components > max_n_components:
+        n_components = max_n_components
     model = PCA(n_components=n_components, random_state=random_state, svd_solver='full')
     return model.fit_transform(data)
 
