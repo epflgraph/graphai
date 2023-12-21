@@ -193,7 +193,7 @@ class GraphDistanceRequest(BaseModel):
         title="Source node"
     )
 
-    src_type: Literal['concept', 'category'] = Field(
+    src_type: Literal['concept', 'cluster', 'category'] = Field(
         title="Type of source node",
         default="concept"
     )
@@ -202,7 +202,7 @@ class GraphDistanceRequest(BaseModel):
         title="Target node"
     )
 
-    tgt_type: Literal['concept', 'category'] = Field(
+    tgt_type: Literal['concept', 'cluster', 'category'] = Field(
         title="Type of target node",
         default="category"
     )

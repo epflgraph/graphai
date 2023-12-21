@@ -102,6 +102,16 @@ def get_cluster_cluster_similarity_task(self, cluster_1_id, cluster_2_id, avg='l
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 5},
+             name='ontology_6.cluster_category_similarity_graph_task',
+             ignore_result=False, ontology_data_obj=ontology_data)
+def get_cluster_category_similarity_task(self, cluster_id, category_id, avg='linear', coeffs=(1, 1)):
+    sim = self.ontology_data_obj.get_cluster_category_similarity(cluster_id, category_id, avg, coeffs)
+    return {
+        'sim': sim
+    }
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 5},
              name='ontology_6.category_category_similarity_graph_task',
              ignore_result=False, ontology_data_obj=ontology_data)
 def get_category_category_similarity_task(self, category_1_id, category_2_id, avg='linear', coeffs=(1, 1)):

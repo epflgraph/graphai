@@ -34,10 +34,13 @@ from graphai.api.celery_tasks.ontology import (
     recompute_clusters_task,
     break_up_cluster_task,
     get_concept_category_similarity_task,
+    get_concept_cluster_similarity_task,
+    get_cluster_cluster_similarity_task,
     get_concept_category_closest_task,
     get_concept_concept_similarity_task,
     get_concept_concept_closest_task,
-    get_category_category_similarity_task
+    get_category_category_similarity_task,
+    get_cluster_category_similarity_task
 )
 from graphai.core.interfaces.celery_config import get_task_info
 
@@ -125,6 +128,16 @@ async def compute_graph_distance(data: GraphDistanceRequest):
         task = get_concept_category_similarity_task.s(src, tgt, avg, coeffs)
     elif src_type == 'category' and tgt_type == 'concept':
         task = get_concept_category_similarity_task.s(tgt, src, avg, coeffs)
+    elif src_type == 'concept' and tgt_type == 'cluster':
+        task = get_concept_cluster_similarity_task.s(src, tgt, avg)
+    elif src_type == 'cluster' and tgt_type == 'concept':
+        task = get_concept_cluster_similarity_task.s(tgt, src, avg)
+    elif src_type == 'cluster' and tgt_type == 'cluster':
+        task = get_cluster_cluster_similarity_task.s(src, tgt, avg)
+    elif src_type == 'cluster' and tgt_type == 'category':
+        task = get_cluster_category_similarity_task.s(src, tgt, avg, coeffs)
+    elif src_type == 'category' and tgt_type == 'cluster':
+        task = get_cluster_category_similarity_task.s(tgt, src, avg, coeffs)
     elif src_type == 'category' and tgt_type == 'category':
         task = get_category_category_similarity_task.s(src, tgt, avg, coeffs)
     else:
@@ -166,7 +179,7 @@ async def break_up_cluster(data: BreakUpClusterRequest):
     return {'task_id': task.id}
 
 
-@router.get('/break_up_cluster/status/{task_id}', response_model=RecomputeClustersResponse)
+@router.get('/break_up_cluster/status/{task_id}', response_model=BreakUpClustersResponse)
 async def break_up_cluster_status(task_id):
     full_results = get_task_info(task_id)
     task_results = full_results['results']
