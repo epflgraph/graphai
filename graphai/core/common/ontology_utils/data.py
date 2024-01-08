@@ -295,14 +295,40 @@ class OntologyData:
 
     def load_anchor_page_dict(self):
         db_manager = DB(self.db_config)
-        anchors = db_results_to_pandas_df(db_manager.execute_query(
+        base_anchors = db_results_to_pandas_df(db_manager.execute_query(
             "SELECT from_id, to_id FROM graph_ontology.Edges_N_Category_N_Concept_T_AnchorPage"
         ), ['from_id', 'to_id'])
-        anchors['to_id'] = anchors['to_id'].apply(lambda x: [x])
-        anchors = anchors.groupby('from_id').agg(sum).reset_index()
-        category_ids = anchors.from_id.values.tolist()
-        anchor_lists = anchors.to_id.values.tolist()
-        depths_list = [self.category_depth_dict[x] for x in category_ids]
+        base_anchors['to_id'] = base_anchors['to_id'].apply(lambda x: [x])
+        base_anchors = base_anchors.groupby('from_id').agg(sum).reset_index().rename(columns={
+            'from_id': 'category_id', 'to_id': 'anchor_ids'
+        })
+        base_anchors = pd.merge(base_anchors, self.ontology_categories,
+                                on='category_id')[['category_id', 'depth', 'anchor_ids']]
+        anchors = base_anchors.loc[base_anchors.depth == 4]
+        for depth in range(3, -1, -1):
+            current_cat_df = self.ontology_categories.loc[
+                self.ontology_categories.depth == depth, ['category_id', 'depth']
+            ]
+            current_relationships = pd.merge(current_cat_df, self.category_category, left_on='category_id',
+                                             right_on='to_id', how='left').drop(columns=['to_id'])
+            current_relationships = (pd.merge(current_relationships, anchors, left_on='from_id',
+                                     right_on='category_id', how='left', suffixes=('', '_tgt')).
+                                     drop(columns=['from_id']))
+            current_relationships['anchor_ids'] = current_relationships['anchor_ids'].apply(
+                lambda x: x if isinstance(x, list) else []
+            )
+            current_relationships = pd.concat(
+                [current_relationships, base_anchors.loc[base_anchors.depth == depth]], axis=0
+            )
+            all_new_anchors = (current_relationships[['category_id', 'anchor_ids']].
+                               groupby('category_id').agg(sum).reset_index())
+            all_new_anchors['depth'] = depth
+            anchors = pd.concat([anchors, all_new_anchors], axis=0)
+        anchors['anchor_ids'] = anchors['anchor_ids'].apply(lambda x: list(set(x)))
+
+        category_ids = anchors.category_id.values.tolist()
+        anchor_lists = anchors.anchor_ids.values.tolist()
+        depths_list = anchors.depth.values.tolist()
         self.category_anchors_dict = {category_ids[i]: {'anchors': anchor_lists[i], 'depth': depths_list[i]}
                                       for i in range(len(category_ids))}
 
