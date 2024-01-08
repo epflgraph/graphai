@@ -254,11 +254,11 @@ class GraphNearestCategoryRequest(BaseModel):
         default=True
     )
 
-    return_clusters: bool = Field(
+    return_clusters: Union[int, None] = Field(
         title="Return clusters",
-        description="If set, the results will include, for each of the most similar categories, "
-                    "the top 3 most similar clusters to the given concept.",
-        default=False
+        description="If not null, determines the k for which the top k closest clusters in "
+                    "each of the top n categories are returned. If null, clusters are not returned.",
+        default=3
     )
 
 

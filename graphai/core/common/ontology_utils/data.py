@@ -597,7 +597,7 @@ class OntologyData:
         return best_clusters, best_scores
 
     def get_concept_closest_category(self, concept_id, avg='linear', coeffs=(1, 1), top_n=1,
-                                     use_depth_3=False, return_clusters=False):
+                                     use_depth_3=False, return_clusters=None):
         d4_cat_indices = self.symmetric_concept_concept_matrix['d4_cat_index_to_id']
         concepts = self.symmetric_concept_concept_matrix['concept_id_to_index']
         if concept_id not in concepts:
@@ -625,8 +625,8 @@ class OntologyData:
         best_cat_indices = sorted_indices[:top_n]
         best_cats = [d4_cat_indices[i] for i in best_cat_indices]
         best_scores = [results[i] for i in best_cat_indices]
-        if return_clusters:
-            best_clusters = [self.get_concept_closest_cluster_of_category(concept_id, cat, avg, 5)
+        if return_clusters is not None:
+            best_clusters = [self.get_concept_closest_cluster_of_category(concept_id, cat, avg, top_n=return_clusters)
                              for cat in best_cats]
         else:
             best_clusters = None
