@@ -294,36 +294,53 @@ class OntologyData:
         self.category_cluster_dict = get_col_to_col_dict(category_cluster_agg, 'from_id', 'id')
 
     def load_anchor_page_dict(self):
+        """
+        Loads category to anchor page list dictionary using the direct category-anchor table and the
+        category child-parent relations table.
+        Returns:
+            None
+        """
         db_manager = DB(self.db_config)
+        # Load the direct anchor page table
         base_anchors = db_results_to_pandas_df(db_manager.execute_query(
             "SELECT from_id, to_id FROM graph_ontology.Edges_N_Category_N_Concept_T_AnchorPage"
         ), ['from_id', 'to_id'])
+        # Aggregate the direct anchors of each category into a list
         base_anchors['to_id'] = base_anchors['to_id'].apply(lambda x: [x])
         base_anchors = base_anchors.groupby('from_id').agg(sum).reset_index().rename(columns={
             'from_id': 'category_id', 'to_id': 'anchor_ids'
         })
+        # Add the depth of the category to the dataframe
         base_anchors = pd.merge(base_anchors, self.ontology_categories,
                                 on='category_id')[['category_id', 'depth', 'anchor_ids']]
+
+        # Start the process of aggregating with children, bottom-up
         anchors = base_anchors.loc[base_anchors.depth == 4]
         for depth in range(3, -1, -1):
+            # Get current categories
             current_cat_df = self.ontology_categories.loc[
                 self.ontology_categories.depth == depth, ['category_id', 'depth']
             ]
+            # Join each current category with its children in the anchors calculated so far
             current_relationships = pd.merge(current_cat_df, self.category_category, left_on='category_id',
                                              right_on='to_id', how='left').drop(columns=['to_id'])
             current_relationships = (pd.merge(current_relationships, anchors, left_on='from_id',
                                      right_on='category_id', how='left', suffixes=('', '_tgt')).
                                      drop(columns=['from_id']))
+            # If the left join has yielded null values, turn them into empty lists
             current_relationships['anchor_ids'] = current_relationships['anchor_ids'].apply(
                 lambda x: x if isinstance(x, list) else []
             )
+            # Include the direct anchors of the current categories
             current_relationships = pd.concat(
                 [current_relationships, base_anchors.loc[base_anchors.depth == depth]], axis=0
             )
+            # Aggregate everything
             all_new_anchors = (current_relationships[['category_id', 'anchor_ids']].
                                groupby('category_id').agg(sum).reset_index())
             all_new_anchors['depth'] = depth
             anchors = pd.concat([anchors, all_new_anchors], axis=0)
+        # Remove duplicates in each of the entries
         anchors['anchor_ids'] = anchors['anchor_ids'].apply(lambda x: list(set(x)))
 
         category_ids = anchors.category_id.values.tolist()
