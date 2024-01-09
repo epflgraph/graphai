@@ -196,7 +196,6 @@ class OntologyData:
         self.non_ontology_concept_names = None
         self.concept_concept_graphscore = None
         self.ontology_and_anchor_concepts_id_to_index = None
-        self.ontology_neighbor_concepts_id_to_index = None
         self.symmetric_concept_concept_matrix = dict()
         self.category_category = None
         self.category_category_dict = None

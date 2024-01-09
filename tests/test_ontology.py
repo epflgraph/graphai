@@ -1,7 +1,4 @@
-import json
-
 import pytest
-from unittest.mock import patch
 
 from graphai.api.celery_tasks.ontology import (
     get_concept_category_closest_task,
