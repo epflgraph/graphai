@@ -129,19 +129,24 @@ def convert_to_csr_matrix(g):
     return csr_matrix(g)
 
 
+def to_ndarray_and_flatten(a):
+    if isinstance(a, np.ndarray):
+        return np.array(a).flatten()
+    elif isinstance(a, spmatrix):
+        return np.array(a.todense()).flatten()
+    else:
+        return a
+
+
 def compute_average(score, n, avg):
     assert avg in ['linear', 'log', 'none']
 
     if avg == 'none':
         return score
 
+    score = to_ndarray_and_flatten(score)
+    n = to_ndarray_and_flatten(n)
     if isinstance(n, np.ndarray):
-        score = np.array(score).flatten()
-        n = np.array(n).flatten()
-        n[np.where(n == 0)[0]] = 1
-    elif isinstance(n, spmatrix):
-        score = np.array(score.todense()).flatten()
-        n = np.array(n.todense()).flatten()
         n[np.where(n == 0)[0]] = 1
     else:
         if n == 0:
@@ -154,7 +159,7 @@ def compute_average(score, n, avg):
     return score
 
 
-def average_and_combine(s1, s2, l1, l2, avg, coeffs, skip_zeros=False):
+def average_and_combine(s1, s2, l1, l2, avg, coeffs, skip_empty=False):
     assert coeffs is None or (all([c >= 0 for c in coeffs]) and sum(coeffs) > 0)
     if s2 is None or l2 is None:
         s2 = 0
@@ -164,14 +169,20 @@ def average_and_combine(s1, s2, l1, l2, avg, coeffs, skip_zeros=False):
         denominator = l1 + l2
         score = compute_average(score, denominator, avg)
     else:
-        if skip_zeros:
-            lengths = [l1, l2]
-            coeff_sum = sum([coeffs[i] for i in range(len(coeffs)) if lengths[i] > 0])
-            if coeff_sum == 0:
-                coeff_sum = 1
+        averages_1 = compute_average(s1, l1, avg)
+        averages_2 = compute_average(s2, l2, avg)
+        if skip_empty:
+            if isinstance(averages_1, np.ndarray):
+                all_lengths = [to_ndarray_and_flatten(l1), to_ndarray_and_flatten(l2)]
+                coeff_sum = [sum([coeffs[j] for j in range(2) if all_lengths[j][i] > 0])
+                             for i in range(averages_1.shape[0])]
+                coeff_sum = np.array([x if x > 0 else 1 for x in coeff_sum])
+            else:
+                all_lengths = [l1, l2]
+                coeff_sum = sum([coeffs[i] for i in range(2) if all_lengths[i] > 0])
         else:
             coeff_sum = sum(coeffs)
-        score = (coeffs[0] * compute_average(s1, l1, avg) + coeffs[1] * compute_average(s2, l2, avg)) / coeff_sum
+        score = (coeffs[0] * averages_1 + coeffs[1] * averages_2) / coeff_sum
     return score
 
 
@@ -553,7 +564,7 @@ class OntologyData:
         )
         return compute_average(score, denominator, avg)
 
-    def get_concept_category_similarity(self, concept_id, category_id, avg='linear', coeffs=(1, 1)):
+    def get_concept_category_similarity(self, concept_id, category_id, avg='linear', coeffs=(1, 4)):
         self.load_data()
         d4_cats = self.symmetric_concept_concept_matrix['d4_cat_id_to_index']
         concepts = self.symmetric_concept_concept_matrix['concept_id_to_index']
@@ -567,7 +578,7 @@ class OntologyData:
         l2 = self.symmetric_concept_concept_matrix['d4_cat_concepts_lengths'][0, cat_index]
         return average_and_combine(s1, s2, l1, l2, avg, coeffs)
 
-    def get_cluster_category_similarity(self, cluster_id, category_id, avg='linear', coeffs=(1, 1)):
+    def get_cluster_category_similarity(self, cluster_id, category_id, avg='linear', coeffs=(1, 4)):
         self.load_data()
         clusters = self.symmetric_concept_concept_matrix['cluster_id_to_index']
         d4_cats = self.symmetric_concept_concept_matrix['d4_cat_id_to_index']
@@ -587,7 +598,7 @@ class OntologyData:
         )
         return average_and_combine(s1, s2, l1, l2, avg, coeffs)
 
-    def get_category_category_similarity(self, category_1_id, category_2_id, avg='linear', coeffs=(1, 1)):
+    def get_category_category_similarity(self, category_1_id, category_2_id, avg='linear', coeffs=(1, 4)):
         self.load_data()
         d4_cats = self.symmetric_concept_concept_matrix['d4_cat_id_to_index']
         if category_1_id not in d4_cats or category_2_id not in d4_cats:
@@ -647,7 +658,7 @@ class OntologyData:
         best_scores = [results[i] for i in best_cluster_indices]
         return best_clusters, best_scores
 
-    def get_concept_closest_category(self, concept_id, avg='linear', coeffs=(1, 1), top_n=1,
+    def get_concept_closest_category(self, concept_id, avg='linear', coeffs=(1, 4), top_n=1,
                                      use_depth_3=False, return_clusters=None):
         self.load_data()
         d4_cat_indices = self.symmetric_concept_concept_matrix['d4_cat_index_to_id']
