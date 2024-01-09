@@ -519,6 +519,7 @@ class OntologyData:
         )
 
     def get_concept_concept_similarity(self, concept_1_id, concept_2_id):
+        self.load_data()
         concepts = self.symmetric_concept_concept_matrix['concept_id_to_index']
         if concept_1_id not in concepts or concept_2_id not in concepts:
             return None
@@ -527,6 +528,7 @@ class OntologyData:
         return self.symmetric_concept_concept_matrix['matrix'][concept_1_index, concept_2_index]
 
     def get_concept_cluster_similarity(self, concept_id, cluster_id, avg='linear'):
+        self.load_data()
         concepts = self.symmetric_concept_concept_matrix['concept_id_to_index']
         clusters = self.symmetric_concept_concept_matrix['cluster_id_to_index']
         if concept_id not in concepts or cluster_id not in clusters:
@@ -538,6 +540,7 @@ class OntologyData:
         return compute_average(score, denominator, avg)
 
     def get_cluster_cluster_similarity(self, cluster_1_id, cluster_2_id, avg='linear'):
+        self.load_data()
         clusters = self.symmetric_concept_concept_matrix['cluster_id_to_index']
         if cluster_1_id not in clusters or cluster_2_id not in clusters:
             return None
@@ -551,6 +554,7 @@ class OntologyData:
         return compute_average(score, denominator, avg)
 
     def get_concept_category_similarity(self, concept_id, category_id, avg='linear', coeffs=(1, 1)):
+        self.load_data()
         d4_cats = self.symmetric_concept_concept_matrix['d4_cat_id_to_index']
         concepts = self.symmetric_concept_concept_matrix['concept_id_to_index']
         if category_id not in d4_cats or concept_id not in concepts:
@@ -564,6 +568,7 @@ class OntologyData:
         return average_and_combine(s1, s2, l1, l2, avg, coeffs)
 
     def get_cluster_category_similarity(self, cluster_id, category_id, avg='linear', coeffs=(1, 1)):
+        self.load_data()
         clusters = self.symmetric_concept_concept_matrix['cluster_id_to_index']
         d4_cats = self.symmetric_concept_concept_matrix['d4_cat_id_to_index']
         if cluster_id not in clusters or category_id not in d4_cats:
@@ -583,6 +588,7 @@ class OntologyData:
         return average_and_combine(s1, s2, l1, l2, avg, coeffs)
 
     def get_category_category_similarity(self, category_1_id, category_2_id, avg='linear', coeffs=(1, 1)):
+        self.load_data()
         d4_cats = self.symmetric_concept_concept_matrix['d4_cat_id_to_index']
         if category_1_id not in d4_cats or category_2_id not in d4_cats:
             return None
@@ -601,6 +607,7 @@ class OntologyData:
         return average_and_combine(s1, s2, l1, l2, avg, coeffs)
 
     def get_concept_closest_concept(self, concept_id, top_n=1):
+        self.load_data()
         concepts = self.symmetric_concept_concept_matrix['concept_id_to_index']
         if concept_id not in concepts:
             return None, None
@@ -620,6 +627,7 @@ class OntologyData:
             return best_concepts, best_scores
 
     def get_concept_closest_cluster_of_category(self, concept_id, category_id, avg='linear', top_n=3):
+        self.load_data()
         concepts = self.symmetric_concept_concept_matrix['concept_id_to_index']
         if concept_id not in concepts or category_id not in self.category_cluster_dict:
             return None
@@ -641,6 +649,7 @@ class OntologyData:
 
     def get_concept_closest_category(self, concept_id, avg='linear', coeffs=(1, 1), top_n=1,
                                      use_depth_3=False, return_clusters=None):
+        self.load_data()
         d4_cat_indices = self.symmetric_concept_concept_matrix['d4_cat_index_to_id']
         concepts = self.symmetric_concept_concept_matrix['concept_id_to_index']
         if concept_id not in concepts:
@@ -746,4 +755,5 @@ class OntologyData:
         return self.category_anchors_dict.get(category_id, [])
 
     def get_cluster_concepts(self, cluster_id):
+        self.load_data()
         return self.cluster_concept_dict.get(cluster_id, [])
