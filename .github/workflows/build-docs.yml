@@ -7,7 +7,7 @@ on:
 
 jobs:
   build-docs:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
 
     steps:
       - name: Create docs source files with sphinx-apidoc
