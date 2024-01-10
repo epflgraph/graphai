@@ -129,19 +129,24 @@ def convert_to_csr_matrix(g):
     return csr_matrix(g)
 
 
+def to_ndarray_and_flatten(a):
+    if isinstance(a, np.ndarray):
+        return np.array(a).flatten()
+    elif isinstance(a, spmatrix):
+        return np.array(a.todense()).flatten()
+    else:
+        return a
+
+
 def compute_average(score, n, avg):
     assert avg in ['linear', 'log', 'none']
 
     if avg == 'none':
         return score
 
+    score = to_ndarray_and_flatten(score)
+    n = to_ndarray_and_flatten(n)
     if isinstance(n, np.ndarray):
-        score = np.array(score).flatten()
-        n = np.array(n).flatten()
-        n[np.where(n == 0)[0]] = 1
-    elif isinstance(n, spmatrix):
-        score = np.array(score.todense()).flatten()
-        n = np.array(n.todense()).flatten()
         n[np.where(n == 0)[0]] = 1
     else:
         if n == 0:
@@ -154,7 +159,7 @@ def compute_average(score, n, avg):
     return score
 
 
-def average_and_combine(s1, s2, l1, l2, avg, coeffs, skip_zeros=False):
+def average_and_combine(s1, s2, l1, l2, avg, coeffs, skip_empty=False):
     assert coeffs is None or (all([c >= 0 for c in coeffs]) and sum(coeffs) > 0)
     if s2 is None or l2 is None:
         s2 = 0
@@ -164,14 +169,20 @@ def average_and_combine(s1, s2, l1, l2, avg, coeffs, skip_zeros=False):
         denominator = l1 + l2
         score = compute_average(score, denominator, avg)
     else:
-        if skip_zeros:
-            lengths = [l1, l2]
-            coeff_sum = sum([coeffs[i] for i in range(len(coeffs)) if lengths[i] > 0])
-            if coeff_sum == 0:
-                coeff_sum = 1
+        averages_1 = compute_average(s1, l1, avg)
+        averages_2 = compute_average(s2, l2, avg)
+        if skip_empty:
+            if isinstance(averages_1, np.ndarray):
+                all_lengths = [to_ndarray_and_flatten(l1), to_ndarray_and_flatten(l2)]
+                coeff_sum = [sum([coeffs[j] for j in range(2) if all_lengths[j][i] > 0])
+                             for i in range(averages_1.shape[0])]
+                coeff_sum = np.array([x if x > 0 else 1 for x in coeff_sum])
+            else:
+                all_lengths = [l1, l2]
+                coeff_sum = sum([coeffs[i] for i in range(2) if all_lengths[i] > 0])
         else:
             coeff_sum = sum(coeffs)
-        score = (coeffs[0] * compute_average(s1, l1, avg) + coeffs[1] * compute_average(s2, l2, avg)) / coeff_sum
+        score = (coeffs[0] * averages_1 + coeffs[1] * averages_2) / coeff_sum
     return score
 
 
@@ -185,7 +196,6 @@ class OntologyData:
         self.non_ontology_concept_names = None
         self.concept_concept_graphscore = None
         self.ontology_and_anchor_concepts_id_to_index = None
-        self.ontology_neighbor_concepts_id_to_index = None
         self.symmetric_concept_concept_matrix = dict()
         self.category_category = None
         self.category_category_dict = None
@@ -271,6 +281,12 @@ class OntologyData:
             "SELECT from_id, to_id FROM graph_ontology.Edges_N_ConceptsCluster_N_Concept_T_ParentToChild"),
             ['from_id', 'to_id']
         )
+        # This line is to make sure we don't have any rogue concepts in the cluster-concept table.
+        # It is mainly used in the debug mode, where self.ontology_concept_names has some concepts artificially removed.
+        # It should have no effect when debug mode is off, as every concept that is added to the ontology by being
+        # inserted into the cluster-concept table should have its is_ontology_concept flag set in the concepts table.
+        self.cluster_concept = pd.merge(self.cluster_concept, self.ontology_concept_names,
+                                        left_on='to_id', right_on='id')[['from_id', 'to_id']]
         self.category_concept = (
             pd.merge(self.category_cluster, self.cluster_concept,
                      left_on='to_id', right_on='from_id',
@@ -294,15 +310,58 @@ class OntologyData:
         self.category_cluster_dict = get_col_to_col_dict(category_cluster_agg, 'from_id', 'id')
 
     def load_anchor_page_dict(self):
+        """
+        Loads category to anchor page list dictionary using the direct category-anchor table and the
+        category child-parent relations table.
+        Returns:
+            None
+        """
         db_manager = DB(self.db_config)
-        anchors = db_results_to_pandas_df(db_manager.execute_query(
+        # Load the direct anchor page table
+        base_anchors = db_results_to_pandas_df(db_manager.execute_query(
             "SELECT from_id, to_id FROM graph_ontology.Edges_N_Category_N_Concept_T_AnchorPage"
         ), ['from_id', 'to_id'])
-        anchors['to_id'] = anchors['to_id'].apply(lambda x: [x])
-        anchors = anchors.groupby('from_id').agg(sum).reset_index()
-        category_ids = anchors.from_id.values.tolist()
-        anchor_lists = anchors.to_id.values.tolist()
-        depths_list = [self.category_depth_dict[x] for x in category_ids]
+        # Aggregate the direct anchors of each category into a list
+        base_anchors['to_id'] = base_anchors['to_id'].apply(lambda x: [x])
+        base_anchors = base_anchors.groupby('from_id').agg(sum).reset_index().rename(columns={
+            'from_id': 'category_id', 'to_id': 'anchor_ids'
+        })
+        # Add the depth of the category to the dataframe
+        base_anchors = pd.merge(base_anchors, self.ontology_categories,
+                                on='category_id')[['category_id', 'depth', 'anchor_ids']]
+
+        # Start the process of aggregating with children, bottom-up
+        anchors = base_anchors.loc[base_anchors.depth == 4]
+        for depth in range(3, -1, -1):
+            # Get current categories
+            current_cat_df = self.ontology_categories.loc[
+                self.ontology_categories.depth == depth, ['category_id', 'depth']
+            ]
+            # Join each current category with its children in the anchors calculated so far
+            current_relationships = pd.merge(current_cat_df, self.category_category, left_on='category_id',
+                                             right_on='to_id', how='left').drop(columns=['to_id'])
+            current_relationships = (pd.merge(current_relationships, anchors, left_on='from_id',
+                                     right_on='category_id', how='left', suffixes=('', '_tgt')).
+                                     drop(columns=['from_id']))
+            # If the left join has yielded null values, turn them into empty lists
+            current_relationships['anchor_ids'] = current_relationships['anchor_ids'].apply(
+                lambda x: x if isinstance(x, list) else []
+            )
+            # Include the direct anchors of the current categories
+            current_relationships = pd.concat(
+                [current_relationships, base_anchors.loc[base_anchors.depth == depth]], axis=0
+            )
+            # Aggregate everything
+            all_new_anchors = (current_relationships[['category_id', 'anchor_ids']].
+                               groupby('category_id').agg(sum).reset_index())
+            all_new_anchors['depth'] = depth
+            anchors = pd.concat([anchors, all_new_anchors], axis=0)
+        # Remove duplicates in each of the entries
+        anchors['anchor_ids'] = anchors['anchor_ids'].apply(lambda x: list(set(x)))
+
+        category_ids = anchors.category_id.values.tolist()
+        anchor_lists = anchors.anchor_ids.values.tolist()
+        depths_list = anchors.depth.values.tolist()
         self.category_anchors_dict = {category_ids[i]: {'anchors': anchor_lists[i], 'depth': depths_list[i]}
                                       for i in range(len(category_ids))}
 
@@ -476,6 +535,7 @@ class OntologyData:
         )
 
     def get_concept_concept_similarity(self, concept_1_id, concept_2_id):
+        self.load_data()
         concepts = self.symmetric_concept_concept_matrix['concept_id_to_index']
         if concept_1_id not in concepts or concept_2_id not in concepts:
             return None
@@ -484,6 +544,7 @@ class OntologyData:
         return self.symmetric_concept_concept_matrix['matrix'][concept_1_index, concept_2_index]
 
     def get_concept_cluster_similarity(self, concept_id, cluster_id, avg='linear'):
+        self.load_data()
         concepts = self.symmetric_concept_concept_matrix['concept_id_to_index']
         clusters = self.symmetric_concept_concept_matrix['cluster_id_to_index']
         if concept_id not in concepts or cluster_id not in clusters:
@@ -495,6 +556,7 @@ class OntologyData:
         return compute_average(score, denominator, avg)
 
     def get_cluster_cluster_similarity(self, cluster_1_id, cluster_2_id, avg='linear'):
+        self.load_data()
         clusters = self.symmetric_concept_concept_matrix['cluster_id_to_index']
         if cluster_1_id not in clusters or cluster_2_id not in clusters:
             return None
@@ -507,7 +569,8 @@ class OntologyData:
         )
         return compute_average(score, denominator, avg)
 
-    def get_concept_category_similarity(self, concept_id, category_id, avg='linear', coeffs=(1, 1)):
+    def get_concept_category_similarity(self, concept_id, category_id, avg='linear', coeffs=(1, 4)):
+        self.load_data()
         d4_cats = self.symmetric_concept_concept_matrix['d4_cat_id_to_index']
         concepts = self.symmetric_concept_concept_matrix['concept_id_to_index']
         if category_id not in d4_cats or concept_id not in concepts:
@@ -520,7 +583,8 @@ class OntologyData:
         l2 = self.symmetric_concept_concept_matrix['d4_cat_concepts_lengths'][0, cat_index]
         return average_and_combine(s1, s2, l1, l2, avg, coeffs)
 
-    def get_cluster_category_similarity(self, cluster_id, category_id, avg='linear', coeffs=(1, 1)):
+    def get_cluster_category_similarity(self, cluster_id, category_id, avg='linear', coeffs=(1, 4)):
+        self.load_data()
         clusters = self.symmetric_concept_concept_matrix['cluster_id_to_index']
         d4_cats = self.symmetric_concept_concept_matrix['d4_cat_id_to_index']
         if cluster_id not in clusters or category_id not in d4_cats:
@@ -539,7 +603,8 @@ class OntologyData:
         )
         return average_and_combine(s1, s2, l1, l2, avg, coeffs)
 
-    def get_category_category_similarity(self, category_1_id, category_2_id, avg='linear', coeffs=(1, 1)):
+    def get_category_category_similarity(self, category_1_id, category_2_id, avg='linear', coeffs=(1, 4)):
+        self.load_data()
         d4_cats = self.symmetric_concept_concept_matrix['d4_cat_id_to_index']
         if category_1_id not in d4_cats or category_2_id not in d4_cats:
             return None
@@ -558,6 +623,7 @@ class OntologyData:
         return average_and_combine(s1, s2, l1, l2, avg, coeffs)
 
     def get_concept_closest_concept(self, concept_id, top_n=1):
+        self.load_data()
         concepts = self.symmetric_concept_concept_matrix['concept_id_to_index']
         if concept_id not in concepts:
             return None, None
@@ -577,6 +643,7 @@ class OntologyData:
             return best_concepts, best_scores
 
     def get_concept_closest_cluster_of_category(self, concept_id, category_id, avg='linear', top_n=3):
+        self.load_data()
         concepts = self.symmetric_concept_concept_matrix['concept_id_to_index']
         if concept_id not in concepts or category_id not in self.category_cluster_dict:
             return None
@@ -596,8 +663,9 @@ class OntologyData:
         best_scores = [results[i] for i in best_cluster_indices]
         return best_clusters, best_scores
 
-    def get_concept_closest_category(self, concept_id, avg='linear', coeffs=(1, 1), top_n=1,
-                                     use_depth_3=False, return_clusters=False):
+    def get_concept_closest_category(self, concept_id, avg='linear', coeffs=(1, 4), top_n=1,
+                                     use_depth_3=False, return_clusters=None):
+        self.load_data()
         d4_cat_indices = self.symmetric_concept_concept_matrix['d4_cat_index_to_id']
         concepts = self.symmetric_concept_concept_matrix['concept_id_to_index']
         if concept_id not in concepts:
@@ -625,8 +693,8 @@ class OntologyData:
         best_cat_indices = sorted_indices[:top_n]
         best_cats = [d4_cat_indices[i] for i in best_cat_indices]
         best_scores = [results[i] for i in best_cat_indices]
-        if return_clusters:
-            best_clusters = [self.get_concept_closest_cluster_of_category(concept_id, cat, avg, 5)
+        if return_clusters is not None:
+            best_clusters = [self.get_concept_closest_cluster_of_category(concept_id, cat, avg, top_n=return_clusters)
                              for cat in best_cats]
         else:
             best_clusters = None
@@ -703,4 +771,5 @@ class OntologyData:
         return self.category_anchors_dict.get(category_id, [])
 
     def get_cluster_concepts(self, cluster_id):
+        self.load_data()
         return self.cluster_concept_dict.get(cluster_id, [])

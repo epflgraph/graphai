@@ -11,6 +11,7 @@ from graphai.api.common.graph import graph
 from graphai.api.common.ontology import ontology
 
 from graphai.core.common.config import config
+from graphai.core.common.common_utils import strtobool
 
 from graphai.core.interfaces.wp import WP
 
@@ -480,11 +481,14 @@ def text_init_task(self):
     # This task initialises the text celery worker by loading into memory the graph and ontology tables
     print('Start text_init task')
 
-    print('Loading graph tables...')
-    self.graph.fetch_from_db()
+    if strtobool(config['preload']['text']):
+        print('Loading graph tables...')
+        self.graph.fetch_from_db()
 
-    print('Loading ontology tables...')
-    self.ontology.fetch_from_db()
+        print('Loading ontology tables...')
+        self.ontology.fetch_from_db()
+    else:
+        print('Skipping preloading for text endpoints.')
 
     print('Graph and ontology tables loaded')
     return True
