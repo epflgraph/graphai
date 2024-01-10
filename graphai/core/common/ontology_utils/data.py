@@ -281,6 +281,12 @@ class OntologyData:
             "SELECT from_id, to_id FROM graph_ontology.Edges_N_ConceptsCluster_N_Concept_T_ParentToChild"),
             ['from_id', 'to_id']
         )
+        # This line is to make sure we don't have any rogue concepts in the cluster-concept table.
+        # It is mainly used in the debug mode, where self.ontology_concept_names has some concepts artificially removed.
+        # It should have no effect when debug mode is off, as every concept that is added to the ontology by being
+        # inserted into the cluster-concept table should have its is_ontology_concept flag set in the concepts table.
+        self.cluster_concept = pd.merge(self.cluster_concept, self.ontology_concept_names,
+                                        left_on='to_id', right_on='id')[['from_id', 'to_id']]
         self.category_concept = (
             pd.merge(self.category_cluster, self.cluster_concept,
                      left_on='to_id', right_on='from_id',
