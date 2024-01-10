@@ -632,10 +632,14 @@ def video_init_task(self):
 
         print('Loading translation models...')
         self.translation_obj.load_models()
+    else:
+        print('Skipping preloading for video endpoints.')
 
     if strtobool(config['preload']['ontology']):
         print('Loading ontology data...')
         self.ontology_data_obj.load_data()
+    else:
+        print('Skipping preloading for ontology endpoints.')
 
     print('All video processing objects loaded')
     return True

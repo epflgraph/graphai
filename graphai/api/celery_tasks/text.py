@@ -487,6 +487,8 @@ def text_init_task(self):
 
         print('Loading ontology tables...')
         self.ontology.fetch_from_db()
+    else:
+        print('Skipping preloading for text endpoints.')
 
     print('Graph and ontology tables loaded')
     return True
