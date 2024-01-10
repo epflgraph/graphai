@@ -14,10 +14,11 @@ from graphai.core.common.video import retrieve_file_from_url, retrieve_file_from
     FRAME_FORMAT_PNG, TESSERACT_OCR_FORMAT
 from graphai.core.common.caching import AudioDBCachingManager, SlideDBCachingManager, \
     VideoDBCachingManager
-from graphai.core.common.common_utils import file_exists, get_current_datetime
+from graphai.core.common.common_utils import file_exists, get_current_datetime, strtobool
 from itertools import chain
 from graphai.api.celery_tasks.common import fingerprint_lookup_retrieve_from_db, \
     fingerprint_lookup_parallel, fingerprint_lookup_callback
+from graphai.core.common.config import config
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
@@ -622,17 +623,19 @@ def video_init_task(self):
     # This task initialises the video celery worker by loading into memory the transcription and NLP models
     print('Start video_init task')
 
-    print('Loading transcription model...')
-    self.transcription_obj.load_model_whisper()
+    if strtobool(config['preload']['video']):
+        print('Loading transcription model...')
+        self.transcription_obj.load_model_whisper()
 
-    print('Loading NLP models...')
-    self.nlp_obj.get_nlp_models()
+        print('Loading NLP models...')
+        self.nlp_obj.get_nlp_models()
 
-    print('Loading translation models...')
-    self.translation_obj.load_models()
+        print('Loading translation models...')
+        self.translation_obj.load_models()
 
-    print('Loading ontology data...')
-    self.ontology_data_obj.load_data()
+    if strtobool(config['preload']['ontology']):
+        print('Loading ontology data...')
+        self.ontology_data_obj.load_data()
 
     print('All video processing objects loaded')
     return True
