@@ -73,3 +73,9 @@ jobs:
           echo "[openai]" >> config.ini
           echo "api_key: ${{ secrets.openai_api_key }}" >> config.ini
           echo "" >> config.ini
+          
+          echo "[preload]" >> config.ini
+          echo "video: ${{ vars.preload_video }}" >> config.ini
+          echo "text: ${{ vars.preload_text }}" >> config.ini
+          echo "ontology: ${{ vars.preload_ontology }}" >> config.ini
+          echo "" >> config.ini
