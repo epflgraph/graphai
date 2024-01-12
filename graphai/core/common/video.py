@@ -585,8 +585,18 @@ def tesseract_ocr_or_get_cached(ocr_path, image_path, language):
         extracted_text = read_txt_gz_file(ocr_path)
     else:
         extracted_text = perform_tesseract_ocr(image_path, language)
-        if extracted_text is not None:
-            write_txt_gz_file(extracted_text, ocr_path)
+        if extracted_text is None:
+            extracted_text = ''
+        write_txt_gz_file(extracted_text, ocr_path)
+    return extracted_text
+
+
+def generate_img_and_ocr_paths_and_perform_tesseract_ocr(input_folder_with_path, k, language=None):
+    if language is None:
+        language = 'en'
+    image_path = os.path.join(input_folder_with_path, (FRAME_FORMAT_PNG) % (k))
+    ocr_path = os.path.join(input_folder_with_path, (TESSERACT_OCR_FORMAT) % (k))
+    extracted_text = tesseract_ocr_or_get_cached(ocr_path, image_path, language)
     return extracted_text
 
 
@@ -606,17 +616,9 @@ def frame_ocr_distance(input_folder_with_path, k1, k2, nlp_models, language=None
     if language is None:
         language = 'en'
 
-    # Generate frame file paths
-    image_1_path = os.path.join(input_folder_with_path, (FRAME_FORMAT_PNG) % (k1))
-    image_2_path = os.path.join(input_folder_with_path, (FRAME_FORMAT_PNG) % (k2))
-
-    # Generate OCR file paths
-    ocr_1_path = os.path.join(input_folder_with_path, (TESSERACT_OCR_FORMAT) % (k1))
-    ocr_2_path = os.path.join(input_folder_with_path, (TESSERACT_OCR_FORMAT) % (k2))
-
     # Cache the results since they will be used multiple times during slide detection
-    extracted_text1 = tesseract_ocr_or_get_cached(ocr_1_path, image_1_path, language)
-    extracted_text2 = tesseract_ocr_or_get_cached(ocr_2_path, image_2_path, language)
+    extracted_text1 = generate_img_and_ocr_paths_and_perform_tesseract_ocr(input_folder_with_path, k1, language)
+    extracted_text2 = generate_img_and_ocr_paths_and_perform_tesseract_ocr(input_folder_with_path, k2, language)
 
     # Calculate NLP objects
     nlp_1 = nlp_models[language](extracted_text1)
@@ -765,6 +767,8 @@ def compute_video_ocr_transitions(input_folder_with_path, frame_sample_indices, 
     """
     if len(frame_sample_indices) == 0:
         return list()
+    generate_img_and_ocr_paths_and_perform_tesseract_ocr(input_folder_with_path,
+                                                         frame_sample_indices[0], language)
     if keep_first:
         transition_list = [frame_sample_indices[0]]
     else:
