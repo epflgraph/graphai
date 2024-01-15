@@ -240,11 +240,13 @@ class OntologyData:
             ['id', 'name']
         )
         if self.test_mode:
-            all_ids = self.ontology_concept_names['id'].values.tolist()
-            self.test_ids = random.sample(all_ids, int(len(all_ids) * self.test_ratio))
-            self.ontology_concept_names = self.ontology_concept_names.loc[
-                self.ontology_concept_names['id'].apply(lambda x: x not in self.test_ids)
-            ]
+            test_n = int(self.ontology_concept_names.shape[0] * self.test_ratio)
+            if test_n > 0:
+                all_ids = self.ontology_concept_names['id'].values.tolist()
+                self.test_ids = random.sample(all_ids, test_n)
+                self.ontology_concept_names = self.ontology_concept_names.loc[
+                    self.ontology_concept_names['id'].apply(lambda x: x not in self.test_ids)
+                ]
 
 
     def load_ontology_categories(self):
@@ -303,7 +305,7 @@ class OntologyData:
             rename(columns={'from_id_cat': 'from_id', 'to_id_concept': 'to_id'})
         )
 
-        if self.test_mode:
+        if self.test_mode and self.test_ids is not None:
             # Saving the category-concept rows of the test set
             self.test_category_concept = self.category_concept.loc[
                 self.category_concept['to_id'].apply(lambda x: x in self.test_ids)
@@ -795,3 +797,7 @@ class OntologyData:
     def get_cluster_concepts(self, cluster_id):
         self.load_data()
         return self.cluster_concept_dict.get(cluster_id, [])
+
+    def get_test_category_concept(self):
+        self.load_data()
+        return self.test_category_concept
