@@ -7,7 +7,7 @@ import re
 import random
 import json
 import time
-from datetime import datetime
+from datetime import datetime, timedelta
 import gzip
 import wget
 import subprocess
@@ -132,6 +132,33 @@ def perform_probe(input_filename_with_path):
     return ffmpeg.probe(input_filename_with_path, cmd='ffprobe')
 
 
+def perform_slow_audio_probe(input_filename_with_path):
+    """
+        Performs a slower probe using ffmpeg by decoding the audio stream
+        Args:
+            input_filename_with_path: Input file path
+
+        Returns:
+            Probe results
+        """
+    if not file_exists(input_filename_with_path):
+        raise Exception(f'ffmpeg error: File {input_filename_with_path} does not exist')
+    results = ffmpeg.input(input_filename_with_path).audio.output('pipe:', format='null').run(capture_stderr=True)
+    all_matches = re.findall(r"time=\d{2}:\d{2}:\d{2}\.\d{2}", str(results[1]))
+    final_time_str = all_matches[-1][5:]
+    final_time_parsed = time.strptime(final_time_str, '%H:%M:%S.%f')
+    return {
+        'format': {
+            'duration': timedelta(
+                hours=final_time_parsed.tm_hour,
+                minutes=final_time_parsed.tm_min,
+                seconds=final_time_parsed.tm_sec
+            ).total_seconds()
+        }
+    }
+
+
+
 def generate_symbolic_token(origin, token):
     """
     Generates a new symbolic token based on the origin token and the token itself
@@ -194,6 +221,12 @@ def detect_audio_format_and_duration(input_filename_with_path, input_token):
     except Exception as e:
         print(e, file=sys.stderr)
         return None, None
+    if probe_results.get('format', None) is None or probe_results['format'].get('duration', None) is None:
+        try:
+            probe_results = perform_slow_audio_probe(input_filename_with_path)
+        except Exception as e:
+            print(e, file=sys.stderr)
+            return None, None
     output_suffix = '_audio.ogg'
     output_token = input_token + output_suffix
     return output_token, float(probe_results['format']['duration'])
