@@ -539,7 +539,7 @@ def generate_frame_sample_indices(input_folder_with_path, step=12):
     # Get number of frames
     n_frames = len(glob.glob(os.path.join(input_folder_with_path + '/*.png')))
     # Generate list of frame sample indices
-    frame_sample_indices = list(np.arange(1, n_frames - step + 1, step)) + [n_frames - 1]
+    frame_sample_indices = list(np.arange(1, n_frames - step + 1, step)) + [n_frames]
     # Return frame sample indices
     return frame_sample_indices
 
