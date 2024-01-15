@@ -158,7 +158,6 @@ def perform_slow_audio_probe(input_filename_with_path):
     }
 
 
-
 def generate_symbolic_token(origin, token):
     """
     Generates a new symbolic token based on the origin token and the token itself
