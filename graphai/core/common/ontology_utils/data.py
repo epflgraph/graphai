@@ -1,6 +1,7 @@
 import numpy as np
 from db_cache_manager.db import DB
 import pandas as pd
+import random
 from scipy.sparse import csr_array, csr_matrix, vstack, spmatrix
 
 from graphai.core.common.common_utils import invert_dict
@@ -187,7 +188,7 @@ def average_and_combine(s1, s2, l1, l2, avg, coeffs, skip_empty=False):
 
 
 class OntologyData:
-    def __init__(self):
+    def __init__(self, test_mode=False, **kwargs):
         self.loaded = False
         self.db_config = None
         self.ontology_concept_names = None
@@ -206,6 +207,12 @@ class OntologyData:
         self.category_cluster_dict = None
         self.cluster_concept_dict = None
         self.category_anchors_dict = None
+        # Parameters for test mode
+        self.test_mode = test_mode
+        self.random_state = kwargs.get('random_state', 0)
+        self.test_ratio = kwargs.get('test_ratio', 0.0)
+        self.test_ids = None
+        self.test_category_concept = None
 
     def load_data(self):
         if not self.loaded:
@@ -232,6 +239,13 @@ class OntologyData:
             "SELECT id, name FROM graph_ontology.Nodes_N_Concept WHERE is_ontology_concept=1"),
             ['id', 'name']
         )
+        if self.test_mode:
+            all_ids = self.ontology_concept_names['id'].values.tolist()
+            self.test_ids = random.sample(all_ids, int(len(all_ids) * self.test_ratio))
+            self.ontology_concept_names = self.ontology_concept_names.loc[
+                self.ontology_concept_names['id'].apply(lambda x: x not in self.test_ids)
+            ]
+
 
     def load_ontology_categories(self):
         db_manager = DB(self.db_config)
@@ -281,18 +295,26 @@ class OntologyData:
             "SELECT from_id, to_id FROM graph_ontology.Edges_N_ConceptsCluster_N_Concept_T_ParentToChild"),
             ['from_id', 'to_id']
         )
-        # This line is to make sure we don't have any rogue concepts in the cluster-concept table.
-        # It is mainly used in the debug mode, where self.ontology_concept_names has some concepts artificially removed.
-        # It should have no effect when debug mode is off, as every concept that is added to the ontology by being
-        # inserted into the cluster-concept table should have its is_ontology_concept flag set in the concepts table.
-        self.cluster_concept = pd.merge(self.cluster_concept, self.ontology_concept_names,
-                                        left_on='to_id', right_on='id')[['from_id', 'to_id']]
+
         self.category_concept = (
             pd.merge(self.category_cluster, self.cluster_concept,
                      left_on='to_id', right_on='from_id',
                      suffixes=('_cat', '_concept'))[['from_id_cat', 'to_id_concept']].
             rename(columns={'from_id_cat': 'from_id', 'to_id_concept': 'to_id'})
         )
+
+        if self.test_mode:
+            # Saving the category-concept rows of the test set
+            self.test_category_concept = self.category_concept.loc[
+                self.category_concept['to_id'].apply(lambda x: x in self.test_ids)
+            ]
+            # Removing the test set concepts from category-concept and cluster-concept tables
+            self.category_concept = self.category_concept.loc[
+                self.category_concept['to_id'].apply(lambda x: x not in self.test_ids)
+            ]
+            self.cluster_concept = self.cluster_concept.loc[
+                self.cluster_concept['to_id'].apply(lambda x: x not in self.test_ids)
+            ]
 
         category_concept_agg = self.category_concept.assign(
             id=self.category_concept.to_id.apply(lambda x: [x])
