@@ -697,7 +697,7 @@ class OntologyData:
         d4_cat_indices = self.symmetric_concept_concept_matrix['d4_cat_index_to_id']
         concepts = self.symmetric_concept_concept_matrix['concept_id_to_index']
         if concept_id not in concepts:
-            return None, None
+            return None, None, None, None
         concept_index = concepts[concept_id]
         s1 = self.symmetric_concept_concept_matrix['matrix_concept_cat_anchors'][[concept_index], :]
         s2 = self.symmetric_concept_concept_matrix['matrix_concept_cat_concepts'][[concept_index], :]
