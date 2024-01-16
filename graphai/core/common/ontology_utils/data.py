@@ -213,6 +213,7 @@ class OntologyData:
         self.test_ratio = kwargs.get('test_ratio', 0.0)
         self.test_ids = None
         self.test_category_concept = None
+        self.test_cluster_concept = None
 
     def load_data(self):
         if not self.loaded:
@@ -309,6 +310,9 @@ class OntologyData:
             # Saving the category-concept rows of the test set
             self.test_category_concept = self.category_concept.loc[
                 self.category_concept['to_id'].apply(lambda x: x in self.test_ids)
+            ]
+            self.test_cluster_concept = self.cluster_concept.loc[
+                self.cluster_concept['to_id'].apply(lambda x: x in self.test_ids)
             ]
             # Removing the test set concepts from category-concept and cluster-concept tables
             self.category_concept = self.category_concept.loc[
@@ -801,3 +805,7 @@ class OntologyData:
     def get_test_category_concept(self):
         self.load_data()
         return self.test_category_concept
+
+    def get_test_cluster_concept(self):
+        self.load_data()
+        return self.test_cluster_concept
