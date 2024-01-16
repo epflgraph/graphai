@@ -244,6 +244,7 @@ class OntologyData:
             test_n = int(self.ontology_concept_names.shape[0] * self.test_ratio)
             if test_n > 0:
                 all_ids = self.ontology_concept_names['id'].values.tolist()
+                random.seed(self.random_state)
                 self.test_ids = random.sample(all_ids, test_n)
                 self.ontology_concept_names = self.ontology_concept_names.loc[
                     self.ontology_concept_names['id'].apply(lambda x: x not in self.test_ids)
