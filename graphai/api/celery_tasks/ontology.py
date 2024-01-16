@@ -133,7 +133,7 @@ def get_concept_concept_similarity_task(self, concept_1_id, concept_2_id):
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 5},
              name='ontology_6.concept_closest_category_graph_task',
              ignore_result=False, ontology_data_obj=ontology_data)
-def get_concept_category_closest_task(self, concept_id, avg='linear', coeffs=(1, 4), top_n=1,
+def get_concept_category_closest_task(self, concept_id, avg='log', coeffs=(1, 10), top_n=1,
                                       use_depth_3=False, return_clusters=None):
     closest, scores, d3_cat, best_clusters = (
         self.ontology_data_obj.get_concept_closest_category(concept_id, avg, coeffs, top_n,

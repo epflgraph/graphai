@@ -691,7 +691,7 @@ class OntologyData:
         best_scores = [results[i] for i in best_cluster_indices]
         return best_clusters, best_scores
 
-    def get_concept_closest_category(self, concept_id, avg='linear', coeffs=(1, 4), top_n=1,
+    def get_concept_closest_category(self, concept_id, avg='log', coeffs=(1, 10), top_n=1,
                                      use_depth_3=False, return_clusters=None):
         self.load_data()
         d4_cat_indices = self.symmetric_concept_concept_matrix['d4_cat_index_to_id']

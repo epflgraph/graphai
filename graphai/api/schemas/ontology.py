@@ -231,13 +231,13 @@ class GraphNearestCategoryRequest(BaseModel):
 
     avg: Literal['none', 'linear', 'log'] = Field(
         title="Averaging",
-        default="linear"
+        default="log"
     )
 
     coeffs: Union[None, Tuple[float, float]] = Field(
         title="Coefficients",
-        description="The coefficients for the concepts and anchor pages of a category, respectively. ",
-        default=(1.0, 1.0)
+        description="The coefficients for the anchor pages and concepts of a category, respectively. ",
+        default=(1.0, 10.0)
     )
 
     top_n: int = Field(
@@ -251,7 +251,7 @@ class GraphNearestCategoryRequest(BaseModel):
                     "Whether to directly search in depth-4 categories or to start the search higher, at depth 3. "
                     "True by default, as this generally yield better results. Set to False in order to get "
                     "a ranking based on raw similarity scores between the given concept and depth-4 categories.",
-        default=True
+        default=False
     )
 
     return_clusters: Union[int, None] = Field(
