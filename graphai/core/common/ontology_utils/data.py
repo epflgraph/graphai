@@ -212,6 +212,7 @@ class OntologyData:
         self.random_state = kwargs.get('random_state', 0)
         self.test_ratio = kwargs.get('test_ratio', 0.0)
         self.test_ids = None
+        self.test_concept_names = None
         self.test_category_concept = None
         self.test_cluster_concept = None
 
@@ -246,10 +247,12 @@ class OntologyData:
                 all_ids = self.ontology_concept_names['id'].values.tolist()
                 random.seed(self.random_state)
                 self.test_ids = random.sample(all_ids, test_n)
+                self.test_concept_names = self.ontology_concept_names.loc[
+                    self.ontology_concept_names['id'].apply(lambda x: x in self.test_ids)
+                ]
                 self.ontology_concept_names = self.ontology_concept_names.loc[
                     self.ontology_concept_names['id'].apply(lambda x: x not in self.test_ids)
                 ]
-
 
     def load_ontology_categories(self):
         db_manager = DB(self.db_config)
@@ -802,6 +805,10 @@ class OntologyData:
     def get_cluster_concepts(self, cluster_id):
         self.load_data()
         return self.cluster_concept_dict.get(cluster_id, [])
+
+    def get_test_concept_names(self):
+        self.load_data()
+        return self.test_concept_names
 
     def get_test_category_concept(self):
         self.load_data()
