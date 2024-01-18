@@ -709,18 +709,9 @@ class OntologyData:
         l2 = self.symmetric_concept_concept_matrix['d4_cat_concepts_lengths']
         results = average_and_combine(s1, s2, l1, l2, avg, coeffs)
         if use_depth_3:
-            results_d3 = np.array([sum(results[self.symmetric_concept_concept_matrix['d3_to_d4'][i]])
-                                   for i in range(len(self.symmetric_concept_concept_matrix['d3_to_d4']))])
-            results_d3 /= np.array([len(self.symmetric_concept_concept_matrix['d3_to_d4'][i])
-                                    for i in range(len(self.symmetric_concept_concept_matrix['d3_to_d4']))])
-            best_d3_index = np.argmax(results_d3)
-            selected_d3_category = self.symmetric_concept_concept_matrix['d3_cat_index_to_id'][best_d3_index]
-            result_indices = self.symmetric_concept_concept_matrix['d3_to_d4'][best_d3_index]
-            new_results = results.copy()
-            new_results[result_indices] += (np.max(new_results) - np.min(new_results)) + 0.1
+            new_results, selected_d3_category = self.go_through_depth_3(results)
         else:
-            new_results = results
-            selected_d3_category = None
+            new_results, selected_d3_category = results, None
         sorted_indices = np.argsort(new_results)[::-1]
         best_cat_indices = sorted_indices[:top_n]
         best_cats = [d4_cat_indices[i] for i in best_cat_indices]
@@ -731,6 +722,43 @@ class OntologyData:
         else:
             best_clusters = None
         return best_cats, best_scores, selected_d3_category, best_clusters
+
+    def go_through_depth_3(self, results):
+        results_d3 = np.array([sum(results[self.symmetric_concept_concept_matrix['d3_to_d4'][i]])
+                               for i in range(len(self.symmetric_concept_concept_matrix['d3_to_d4']))])
+        results_d3 /= np.array([len(self.symmetric_concept_concept_matrix['d3_to_d4'][i])
+                                for i in range(len(self.symmetric_concept_concept_matrix['d3_to_d4']))])
+        best_d3_index = np.argmax(results_d3)
+        selected_d3_category = self.symmetric_concept_concept_matrix['d3_cat_index_to_id'][best_d3_index]
+        result_indices = self.symmetric_concept_concept_matrix['d3_to_d4'][best_d3_index]
+        new_results = results.copy()
+        new_results[result_indices] += (np.max(new_results) - np.min(new_results)) + 0.1
+        return new_results, selected_d3_category
+
+    def get_cluster_closest_category(self, cluster_id, avg='log', coeffs=(1, 10), top_n=1,
+                                     use_depth_3=False):
+        self.load_data()
+        d4_cat_indices = self.symmetric_concept_concept_matrix['d4_cat_index_to_id']
+        clusters = self.symmetric_concept_concept_matrix['cluster_id_to_index']
+        if cluster_id not in clusters:
+            return None, None, None
+        cluster_index = clusters[cluster_id]
+        s1 = self.symmetric_concept_concept_matrix['matrix_cluster_cat_anchors'][[cluster_index], :]
+        s2 = self.symmetric_concept_concept_matrix['matrix_cluster_cat_concepts'][[cluster_index], :]
+        l1 = (self.symmetric_concept_concept_matrix['cluster_concepts_lengths'][0, cluster_index]
+              * self.symmetric_concept_concept_matrix['d4_cat_anchors_lengths'])
+        l2 = (self.symmetric_concept_concept_matrix['cluster_concepts_lengths'][0, cluster_index]
+              * self.symmetric_concept_concept_matrix['d4_cat_concepts_lengths'])
+        results = average_and_combine(s1, s2, l1, l2, avg, coeffs)
+        if use_depth_3:
+            new_results, selected_d3_category = self.go_through_depth_3(results)
+        else:
+            new_results, selected_d3_category = results, None
+        sorted_indices = np.argsort(new_results)[::-1]
+        best_cat_indices = sorted_indices[:top_n]
+        best_cats = [d4_cat_indices[i] for i in best_cat_indices]
+        best_scores = [results[i] for i in best_cat_indices]
+        return best_cats, best_scores, selected_d3_category
 
     def get_ontology_concept_names_table(self, concepts_to_keep=None):
         self.load_data()
