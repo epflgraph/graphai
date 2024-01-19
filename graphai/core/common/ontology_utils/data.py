@@ -675,6 +675,18 @@ class OntologyData:
             return best_concepts, best_scores
 
     def get_concept_closest_cluster_of_category(self, concept_id, category_id, avg='linear', top_n=3):
+        """
+        For a given concept and category, finds the top clusters under that category in terms of
+        similarity to the concept.
+        Args:
+            concept_id: Concept ID
+            category_id: Category ID
+            avg: Averaging method
+            top_n: Number of top clusters to return
+
+        Returns:
+            Top clusters and their similarity scores with the concept
+        """
         self.load_data()
         concepts = self.symmetric_concept_concept_matrix['concept_id_to_index']
         if concept_id not in concepts or category_id not in self.category_cluster_dict:
@@ -696,6 +708,14 @@ class OntologyData:
         return best_clusters, best_scores
 
     def _go_through_depth_3(self, results):
+        """
+        Internal method, computes the closest depth-4 categories by going through depth-3 categories
+        Args:
+            results: Similarity score of the entity with each depth 4 category
+
+        Returns:
+            Modified depth-4 scores based on the best depth-3 category, plus the depth-3 category itself
+        """
         results_d3 = np.array([sum(results[self.symmetric_concept_concept_matrix['d3_to_d4'][i]])
                                for i in range(len(self.symmetric_concept_concept_matrix['d3_to_d4']))])
         results_d3 /= np.array([len(self.symmetric_concept_concept_matrix['d3_to_d4'][i])
@@ -708,6 +728,23 @@ class OntologyData:
         return new_results, selected_d3_category
 
     def _compute_closest_category_result(self, s1, s2, l1, l2, avg, coeffs, use_depth_3, top_n, d4_cat_indices):
+        """
+        Internal method. Computes the closest category to an entity based on its anchor and concept score lists,
+        as well as other parameters.
+        Args:
+            s1: Score list for anchors
+            s2: Score list for concepts
+            l1: Length list for anchors
+            l2: Length list for concepts
+            avg: Averaging method
+            coeffs: Tuple of coefficients for the weighted average of anchor and concept scores, respectively
+            use_depth_3: Whether to go through depth-3 categories or look at depth-4 directly
+            top_n: Number of categories to return
+            d4_cat_indices: Index dictionary for depth-4 categories
+
+        Returns:
+            Best categories, their scores, and the parent depth-3 category if use_depth_3==True
+        """
         results = average_and_combine(s1, s2, l1, l2, avg, coeffs)
         if use_depth_3:
             new_results, selected_d3_category = self._go_through_depth_3(results)
