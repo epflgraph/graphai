@@ -22,6 +22,7 @@ from graphai.core.common.gpt_message_presets import (
 )
 
 TRANSLATION_LIST_SEPARATOR = ' [{[!!SEP!!]}] '
+HUGGINGFACE_MAX_TOKENS = 512
 CHATGPT_COSTS_PER_1K = {
     'gpt-3.5-turbo-1106': {
         'prompt_tokens': 0.001,
@@ -635,6 +636,8 @@ class TranslationModels:
         try:
             print(self.device)
             input_ids = tokenizer.encode(sentence, return_tensors="pt")
+            if input_ids.shape[1] > HUGGINGFACE_MAX_TOKENS:
+                return None
             input_ids = input_ids.to(self.device)
             outputs = model.generate(input_ids, max_length=512)
             decoded = tokenizer.decode(outputs[0], skip_special_tokens=True)
