@@ -140,7 +140,12 @@ def get_concept_category_closest_task(self, concept_id, avg='log', coeffs=(1, 10
                                                             use_depth_3=use_depth_3,
                                                             return_clusters=return_clusters)
     )
-    result_dict = list()
+    if closest is None:
+        return {
+            'scores': None,
+            'parent_category': None
+        }
+    result_list = list()
     for i in range(len(closest)):
         current_cat = {
             'category_id': closest[i],
@@ -158,9 +163,37 @@ def get_concept_category_closest_task(self, concept_id, avg='log', coeffs=(1, 10
                     }
                     for j in range(len(best_clusters[i][0]))
                 ]
-        result_dict.append(current_cat)
+        result_list.append(current_cat)
     return {
-        'scores': result_dict,
+        'scores': result_list,
+        'parent_category': d3_cat,
+    }
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 5},
+             name='ontology_6.cluster_closest_category_graph_task',
+             ignore_result=False, ontology_data_obj=ontology_data)
+def get_cluster_category_closest_task(self, cluster_id, avg='log', coeffs=(1, 10), top_n=1,
+                                      use_depth_3=False):
+    closest, scores, d3_cat = (
+        self.ontology_data_obj.get_cluster_closest_category(cluster_id, avg, coeffs, top_n,
+                                                            use_depth_3=use_depth_3)
+    )
+    if closest is None:
+        return {
+            'scores': None,
+            'parent_category': None
+        }
+    result_list = [
+        {
+            'category_id': closest[i],
+            'score': scores[i],
+            'rank': i + 1,
+        }
+        for i in range(len(closest))
+    ]
+    return {
+        'scores': result_list,
         'parent_category': d3_cat,
     }
 
