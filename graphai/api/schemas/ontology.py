@@ -170,21 +170,9 @@ class BreakUpClustersClusterNumberResponse(BaseModel):
     )
 
 
-class BreakUpClustersTaskResponse(BaseModel):
+class BreakUpClustersResponse(BaseModel):
     results: Union[List[BreakUpClustersClusterNumberResponse], None] = Field(
         title="Cluster break-up results",
-    )
-
-    successful: bool = Field(
-        title="Success flag",
-        description="Whether the computation was successful."
-    )
-
-
-class BreakUpClustersResponse(TaskStatusResponse):
-    task_result: Union[BreakUpClustersTaskResponse, None] = Field(
-        title="Cluster break-up response",
-        description="A dict of list of dicts containing the resulting broken-up clusters and a freshness flag."
     )
 
 

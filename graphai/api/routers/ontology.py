@@ -169,26 +169,11 @@ async def compute_graph_nearest_concept(data: GraphNearestConceptRequest):
     return res
 
 
-@router.post('/break_up_cluster', response_model=TaskIDResponse)
+@router.post('/break_up_cluster', response_model=BreakUpClustersResponse)
 async def break_up_cluster(data: BreakUpClusterRequest):
     cluster_id = data.cluster_id
     n_clusters = data.n_clusters
     task_list = [break_up_cluster_task.s(cluster_id, n_clusters)]
     task = chain(task_list)
-    task = task.apply_async(priority=6)
-    return {'task_id': task.id}
-
-
-@router.get('/break_up_cluster/status/{task_id}', response_model=BreakUpClustersResponse)
-async def break_up_cluster_status(task_id):
-    full_results = get_task_info(task_id)
-    task_results = full_results['results']
-    if task_results is not None:
-        if 'results' in task_results:
-            task_results = {
-                'results': task_results['results'],
-                'successful': task_results['results'] is not None
-            }
-        else:
-            task_results = None
-    return format_api_results(full_results['id'], full_results['name'], full_results['status'], task_results)
+    res = task.apply_async(priority=6).get(timeout=30)
+    return res
