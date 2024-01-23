@@ -879,7 +879,7 @@ class OntologyData:
         """
         Finds the closest category to a given cluster
         Args:
-            cluster_id: Concept ID
+            cluster_id: Cluster ID
             avg: Averaging method. Options are ('linear', 'log', and 'none')
             coeffs: Coefficients for averaging of the scores anchors and concepts
             top_n: Number of top categories to return
@@ -899,6 +899,37 @@ class OntologyData:
         l1 = (self.symmetric_concept_concept_matrix['cluster_concepts_lengths'][0, cluster_index]
               * self.symmetric_concept_concept_matrix['d4_cat_anchors_lengths'])
         l2 = (self.symmetric_concept_concept_matrix['cluster_concepts_lengths'][0, cluster_index]
+              * self.symmetric_concept_concept_matrix['d4_cat_concepts_lengths'])
+        best_cats, best_scores, selected_d3_category = self._compute_closest_category_result(
+            s1, s2, l1, l2, avg, coeffs, use_depth_3, top_n, d4_cat_indices
+        )
+        return best_cats, best_scores, selected_d3_category
+
+    def get_category_closest_category(self, category_id, avg='log', coeffs=(1, 10), top_n=1,
+                                      use_depth_3=False):
+        """
+        Finds the closest category to a given category. As with the category-category similarity method, the similarity
+        is composed of between-anchor and between-concept similarity, and there is no anchor-concept crossover.
+        Args:
+            category_id: Category ID
+            avg: Averaging method. Options are ('linear', 'log', and 'none')
+            coeffs: Coefficients for averaging of the scores anchors and concepts
+            top_n: Number of top categories to return
+            use_depth_3: Whether to go through depth-3 or directly use depth-4
+
+        Returns:
+            Top categories, their scores, and parent depth-3 category if use_depth_3==True.
+        """
+        self.load_data()
+        d4_cat_indices = self.symmetric_concept_concept_matrix['d4_cat_index_to_id']
+        if category_id not in d4_cat_indices:
+            return None, None, None
+        category_index = d4_cat_indices[category_id]
+        s1 = self.symmetric_concept_concept_matrix['matrix_cat_cat_anchors'][[category_index], :]
+        s2 = self.symmetric_concept_concept_matrix['matrix_cat_cat_concepts'][[category_index], :]
+        l1 = (self.symmetric_concept_concept_matrix['d4_cat_anchors_lengths'][0, category_index]
+              * self.symmetric_concept_concept_matrix['d4_cat_anchors_lengths'])
+        l2 = (self.symmetric_concept_concept_matrix['d4_cat_concepts_lengths'][0, category_index]
               * self.symmetric_concept_concept_matrix['d4_cat_concepts_lengths'])
         best_cats, best_scores, selected_d3_category = self._compute_closest_category_result(
             s1, s2, l1, l2, avg, coeffs, use_depth_3, top_n, d4_cat_indices
