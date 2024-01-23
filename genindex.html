@@ -178,8 +178,6 @@
 </li>
       <li><a href="graphai.api.routers.ontology.html#graphai.api.routers.ontology.break_up_cluster">break_up_cluster() (in module graphai.api.routers.ontology)</a>
 </li>
-      <li><a href="graphai.api.routers.ontology.html#graphai.api.routers.ontology.break_up_cluster_status">break_up_cluster_status() (in module graphai.api.routers.ontology)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="graphai.api.schemas.ontology.html#graphai.api.schemas.ontology.BreakUpClusterRequest">BreakUpClusterRequest (class in graphai.api.schemas.ontology)</a>
@@ -187,8 +185,6 @@
       <li><a href="graphai.api.schemas.ontology.html#graphai.api.schemas.ontology.BreakUpClustersClusterNumberResponse">BreakUpClustersClusterNumberResponse (class in graphai.api.schemas.ontology)</a>
 </li>
       <li><a href="graphai.api.schemas.ontology.html#graphai.api.schemas.ontology.BreakUpClustersResponse">BreakUpClustersResponse (class in graphai.api.schemas.ontology)</a>
-</li>
-      <li><a href="graphai.api.schemas.ontology.html#graphai.api.schemas.ontology.BreakUpClustersTaskResponse">BreakUpClustersTaskResponse (class in graphai.api.schemas.ontology)</a>
 </li>
       <li><a href="graphai.pipelines.investment.parameters.html#graphai.pipelines.investment.parameters.build_prefix">build_prefix() (in module graphai.pipelines.investment.parameters)</a>
 </li>
@@ -308,14 +304,14 @@
       </ul></li>
       <li><a href="graphai.core.common.ontology_utils.clustering.html#graphai.core.common.ontology_utils.clustering.cluster_using_embedding">cluster_using_embedding() (in module graphai.core.common.ontology_utils.clustering)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="graphai.api.schemas.ontology.html#graphai.api.schemas.ontology.BreakUpClustersClusterNumberResponse.clusters">clusters (graphai.api.schemas.ontology.BreakUpClustersClusterNumberResponse attribute)</a>
 
       <ul>
-        <li><a href="graphai.api.schemas.ontology.html#graphai.api.schemas.ontology.NearestCategoryElement.clusters">(graphai.api.schemas.ontology.NearestCategoryElement attribute)</a>
+        <li><a href="graphai.api.schemas.ontology.html#graphai.api.schemas.ontology.NearestCategoryElementWithClusters.clusters">(graphai.api.schemas.ontology.NearestCategoryElementWithClusters attribute)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="graphai.core.utils.text.io.html#graphai.core.utils.text.io.Colors.codes">codes (graphai.core.utils.text.io.Colors attribute)</a>
 </li>
       <li><a href="graphai.api.schemas.ontology.html#graphai.api.schemas.ontology.GraphDistanceRequest.coeffs">coeffs (graphai.api.schemas.ontology.GraphDistanceRequest attribute)</a>
@@ -360,9 +356,11 @@
 </li>
       <li><a href="graphai.pipelines.investment.compute_fundraisers_units.html#graphai.pipelines.investment.compute_fundraisers_units.compute_fundraisers_units">compute_fundraisers_units() (in module graphai.pipelines.investment.compute_fundraisers_units)</a>
 </li>
-      <li><a href="graphai.api.routers.ontology.html#graphai.api.routers.ontology.compute_graph_distance">compute_graph_distance() (in module graphai.api.routers.ontology)</a>
+      <li><a href="graphai.api.routers.ontology.html#graphai.api.routers.ontology.compute_graph_cluster_nearest_category">compute_graph_cluster_nearest_category() (in module graphai.api.routers.ontology)</a>
 </li>
-      <li><a href="graphai.api.routers.ontology.html#graphai.api.routers.ontology.compute_graph_nearest_category">compute_graph_nearest_category() (in module graphai.api.routers.ontology)</a>
+      <li><a href="graphai.api.routers.ontology.html#graphai.api.routers.ontology.compute_graph_concept_nearest_category">compute_graph_concept_nearest_category() (in module graphai.api.routers.ontology)</a>
+</li>
+      <li><a href="graphai.api.routers.ontology.html#graphai.api.routers.ontology.compute_graph_distance">compute_graph_distance() (in module graphai.api.routers.ontology)</a>
 </li>
       <li><a href="graphai.api.routers.ontology.html#graphai.api.routers.ontology.compute_graph_nearest_concept">compute_graph_nearest_concept() (in module graphai.api.routers.ontology)</a>
 </li>
@@ -760,6 +758,8 @@
 </li>
       <li><a href="graphai.core.common.ontology_utils.data.html#graphai.core.common.ontology_utils.data.OntologyData.get_cluster_category_similarity">get_cluster_category_similarity() (graphai.core.common.ontology_utils.data.OntologyData method)</a>
 </li>
+      <li><a href="graphai.core.common.ontology_utils.data.html#graphai.core.common.ontology_utils.data.OntologyData.get_cluster_closest_category">get_cluster_closest_category() (graphai.core.common.ontology_utils.data.OntologyData method)</a>
+</li>
       <li><a href="graphai.core.common.ontology_utils.data.html#graphai.core.common.ontology_utils.data.OntologyData.get_cluster_cluster_similarity">get_cluster_cluster_similarity() (graphai.core.common.ontology_utils.data.OntologyData method)</a>
 </li>
       <li><a href="graphai.core.common.ontology_utils.data.html#graphai.core.common.ontology_utils.data.OntologyData.get_cluster_concept_list">get_cluster_concept_list() (graphai.core.common.ontology_utils.data.OntologyData method)</a>
@@ -847,6 +847,12 @@
       <li><a href="graphai.core.common.scraping.html#graphai.core.common.scraping.get_sublinks">get_sublinks() (in module graphai.core.common.scraping)</a>
 </li>
       <li><a href="graphai.core.interfaces.celery_config.html#graphai.core.interfaces.celery_config.get_task_info">get_task_info() (in module graphai.core.interfaces.celery_config)</a>
+</li>
+      <li><a href="graphai.core.common.ontology_utils.data.html#graphai.core.common.ontology_utils.data.OntologyData.get_test_category_concept">get_test_category_concept() (graphai.core.common.ontology_utils.data.OntologyData method)</a>
+</li>
+      <li><a href="graphai.core.common.ontology_utils.data.html#graphai.core.common.ontology_utils.data.OntologyData.get_test_cluster_concept">get_test_cluster_concept() (graphai.core.common.ontology_utils.data.OntologyData method)</a>
+</li>
+      <li><a href="graphai.core.common.ontology_utils.data.html#graphai.core.common.ontology_utils.data.OntologyData.get_test_concept_names">get_test_concept_names() (graphai.core.common.ontology_utils.data.OntologyData method)</a>
 </li>
       <li><a href="graphai.core.common.caching.html#graphai.core.common.caching.VideoConfig.get_transcript_dir">get_transcript_dir() (graphai.core.common.caching.VideoConfig method)</a>
 </li>
@@ -1503,13 +1509,19 @@
         <li><a href="graphai.pipelines.visualisation.html#module-graphai.pipelines.visualisation">module</a>
 </li>
       </ul></li>
+      <li><a href="graphai.api.schemas.ontology.html#graphai.api.schemas.ontology.GraphClusterNearestCategoryRequest">GraphClusterNearestCategoryRequest (class in graphai.api.schemas.ontology)</a>
+</li>
+      <li><a href="graphai.api.schemas.ontology.html#graphai.api.schemas.ontology.GraphClusterNearestCategoryResponse">GraphClusterNearestCategoryResponse (class in graphai.api.schemas.ontology)</a>
+</li>
+      <li><a href="graphai.api.schemas.ontology.html#graphai.api.schemas.ontology.GraphConceptNearestCategoryRequest">GraphConceptNearestCategoryRequest (class in graphai.api.schemas.ontology)</a>
+</li>
+      <li><a href="graphai.api.schemas.ontology.html#graphai.api.schemas.ontology.GraphConceptNearestCategoryResponse">GraphConceptNearestCategoryResponse (class in graphai.api.schemas.ontology)</a>
+</li>
       <li><a href="graphai.api.schemas.ontology.html#graphai.api.schemas.ontology.GraphDistanceRequest">GraphDistanceRequest (class in graphai.api.schemas.ontology)</a>
 </li>
       <li><a href="graphai.api.schemas.ontology.html#graphai.api.schemas.ontology.GraphDistanceResponse">GraphDistanceResponse (class in graphai.api.schemas.ontology)</a>
 </li>
       <li><a href="graphai.api.schemas.ontology.html#graphai.api.schemas.ontology.GraphNearestCategoryRequest">GraphNearestCategoryRequest (class in graphai.api.schemas.ontology)</a>
-</li>
-      <li><a href="graphai.api.schemas.ontology.html#graphai.api.schemas.ontology.GraphNearestCategoryResponse">GraphNearestCategoryResponse (class in graphai.api.schemas.ontology)</a>
 </li>
       <li><a href="graphai.api.schemas.ontology.html#graphai.api.schemas.ontology.GraphNearestConceptRequest">GraphNearestConceptRequest (class in graphai.api.schemas.ontology)</a>
 </li>
@@ -1946,12 +1958,14 @@
       </ul></li>
       <li><a href="graphai.api.schemas.ontology.html#graphai.api.schemas.ontology.NearestCategoryElement">NearestCategoryElement (class in graphai.api.schemas.ontology)</a>
 </li>
-      <li><a href="graphai.api.schemas.ontology.html#graphai.api.schemas.ontology.NearestClusterElement">NearestClusterElement (class in graphai.api.schemas.ontology)</a>
+      <li><a href="graphai.api.schemas.ontology.html#graphai.api.schemas.ontology.NearestCategoryElementWithClusters">NearestCategoryElementWithClusters (class in graphai.api.schemas.ontology)</a>
 </li>
-      <li><a href="graphai.core.common.json_repair.string_utils.html#graphai.core.common.json_repair.string_utils.next_non_white_space_character">next_non_white_space_character() (in module graphai.core.common.json_repair.string_utils)</a>
+      <li><a href="graphai.api.schemas.ontology.html#graphai.api.schemas.ontology.NearestClusterElement">NearestClusterElement (class in graphai.api.schemas.ontology)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="graphai.core.common.json_repair.string_utils.html#graphai.core.common.json_repair.string_utils.next_non_white_space_character">next_non_white_space_character() (in module graphai.core.common.json_repair.string_utils)</a>
+</li>
       <li><a href="graphai.core.common.video.html#graphai.core.common.video.NLPModels">NLPModels (class in graphai.core.common.video)</a>
 </li>
       <li><a href="graphai.pipelines.investment.concept_configuration.html#graphai.pipelines.investment.concept_configuration.norm">norm() (in module graphai.pipelines.investment.concept_configuration)</a>
@@ -2004,8 +2018,12 @@
 </li>
       <li><a href="graphai.api.schemas.ontology.html#graphai.api.schemas.ontology.CategoryParentResponse.parent">parent (graphai.api.schemas.ontology.CategoryParentResponse attribute)</a>
 </li>
-      <li><a href="graphai.api.schemas.ontology.html#graphai.api.schemas.ontology.GraphNearestCategoryResponse.parent_category">parent_category (graphai.api.schemas.ontology.GraphNearestCategoryResponse attribute)</a>
+      <li><a href="graphai.api.schemas.ontology.html#graphai.api.schemas.ontology.GraphClusterNearestCategoryResponse.parent_category">parent_category (graphai.api.schemas.ontology.GraphClusterNearestCategoryResponse attribute)</a>
+
+      <ul>
+        <li><a href="graphai.api.schemas.ontology.html#graphai.api.schemas.ontology.GraphConceptNearestCategoryResponse.parent_category">(graphai.api.schemas.ontology.GraphConceptNearestCategoryResponse attribute)</a>
 </li>
+      </ul></li>
       <li><a href="graphai.api.schemas.ontology.html#graphai.api.schemas.ontology.TreeResponseElem.parent_id">parent_id (graphai.api.schemas.ontology.TreeResponseElem attribute)</a>
 </li>
       <li><a href="graphai.core.common.common_utils.html#graphai.core.common.common_utils.parse_mysql_datetime">parse_mysql_datetime() (in module graphai.core.common.common_utils)</a>
@@ -2024,10 +2042,10 @@
 </li>
       <li><a href="graphai.core.common.video.html#graphai.core.common.video.GoogleOCRModel.perform_ocr">perform_ocr() (graphai.core.common.video.GoogleOCRModel method)</a>
 </li>
-      <li><a href="graphai.core.common.ontology_utils.clustering.html#graphai.core.common.ontology_utils.clustering.perform_PCA">perform_PCA() (in module graphai.core.common.ontology_utils.clustering)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="graphai.core.common.ontology_utils.clustering.html#graphai.core.common.ontology_utils.clustering.perform_PCA">perform_PCA() (in module graphai.core.common.ontology_utils.clustering)</a>
+</li>
       <li><a href="graphai.core.common.video.html#graphai.core.common.video.perform_probe">perform_probe() (in module graphai.core.common.video)</a>
 </li>
       <li><a href="graphai.core.common.video.html#graphai.core.common.video.perform_slow_audio_probe">perform_slow_audio_probe() (in module graphai.core.common.video)</a>
@@ -2166,7 +2184,7 @@
       </ul></li>
       <li><a href="graphai.api.schemas.completion.html#graphai.api.schemas.completion.CompletionTaskResponseBase.result_type">result_type (graphai.api.schemas.completion.CompletionTaskResponseBase attribute)</a>
 </li>
-      <li><a href="graphai.api.schemas.ontology.html#graphai.api.schemas.ontology.BreakUpClustersTaskResponse.results">results (graphai.api.schemas.ontology.BreakUpClustersTaskResponse attribute)</a>
+      <li><a href="graphai.api.schemas.ontology.html#graphai.api.schemas.ontology.BreakUpClustersResponse.results">results (graphai.api.schemas.ontology.BreakUpClustersResponse attribute)</a>
 
       <ul>
         <li><a href="graphai.api.schemas.ontology.html#graphai.api.schemas.ontology.RecomputeClustersTaskResponse.results">(graphai.api.schemas.ontology.RecomputeClustersTaskResponse attribute)</a>
@@ -2190,7 +2208,7 @@
 </li>
       <li><a href="graphai.core.common.ontology_utils.data.html#graphai.core.common.ontology_utils.data.return_chosen_indices">return_chosen_indices() (in module graphai.core.common.ontology_utils.data)</a>
 </li>
-      <li><a href="graphai.api.schemas.ontology.html#graphai.api.schemas.ontology.GraphNearestCategoryRequest.return_clusters">return_clusters (graphai.api.schemas.ontology.GraphNearestCategoryRequest attribute)</a>
+      <li><a href="graphai.api.schemas.ontology.html#graphai.api.schemas.ontology.GraphConceptNearestCategoryRequest.return_clusters">return_clusters (graphai.api.schemas.ontology.GraphConceptNearestCategoryRequest attribute)</a>
 </li>
       <li><a href="graphai.core.interfaces.celery_config.html#graphai.core.interfaces.celery_config.route_task">route_task() (in module graphai.core.interfaces.celery_config)</a>
 </li>
@@ -2210,9 +2228,11 @@
         <li><a href="graphai.api.schemas.ontology.html#graphai.api.schemas.ontology.NearestClusterElement.score">(graphai.api.schemas.ontology.NearestClusterElement attribute)</a>
 </li>
       </ul></li>
-      <li><a href="graphai.api.schemas.ontology.html#graphai.api.schemas.ontology.GraphNearestCategoryResponse.scores">scores (graphai.api.schemas.ontology.GraphNearestCategoryResponse attribute)</a>
+      <li><a href="graphai.api.schemas.ontology.html#graphai.api.schemas.ontology.GraphClusterNearestCategoryResponse.scores">scores (graphai.api.schemas.ontology.GraphClusterNearestCategoryResponse attribute)</a>
 
       <ul>
+        <li><a href="graphai.api.schemas.ontology.html#graphai.api.schemas.ontology.GraphConceptNearestCategoryResponse.scores">(graphai.api.schemas.ontology.GraphConceptNearestCategoryResponse attribute)</a>
+</li>
         <li><a href="graphai.api.schemas.ontology.html#graphai.api.schemas.ontology.GraphNearestConceptResponse.scores">(graphai.api.schemas.ontology.GraphNearestConceptResponse attribute)</a>
 </li>
       </ul></li>
@@ -2264,10 +2284,12 @@
       </ul></li>
       <li><a href="graphai.core.common.ontology_utils.clustering.html#graphai.core.common.ontology_utils.clustering.spec_embed_on_laplacian">spec_embed_on_laplacian() (in module graphai.core.common.ontology_utils.clustering)</a>
 </li>
-      <li><a href="graphai.api.schemas.ontology.html#graphai.api.schemas.ontology.GraphDistanceRequest.src">src (graphai.api.schemas.ontology.GraphDistanceRequest attribute)</a>
+      <li><a href="graphai.api.schemas.ontology.html#graphai.api.schemas.ontology.GraphClusterNearestCategoryRequest.src">src (graphai.api.schemas.ontology.GraphClusterNearestCategoryRequest attribute)</a>
 
       <ul>
-        <li><a href="graphai.api.schemas.ontology.html#graphai.api.schemas.ontology.GraphNearestCategoryRequest.src">(graphai.api.schemas.ontology.GraphNearestCategoryRequest attribute)</a>
+        <li><a href="graphai.api.schemas.ontology.html#graphai.api.schemas.ontology.GraphConceptNearestCategoryRequest.src">(graphai.api.schemas.ontology.GraphConceptNearestCategoryRequest attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.ontology.html#graphai.api.schemas.ontology.GraphDistanceRequest.src">(graphai.api.schemas.ontology.GraphDistanceRequest attribute)</a>
 </li>
         <li><a href="graphai.api.schemas.ontology.html#graphai.api.schemas.ontology.GraphNearestConceptRequest.src">(graphai.api.schemas.ontology.GraphNearestConceptRequest attribute)</a>
 </li>
@@ -2282,12 +2304,12 @@
 </li>
       <li><a href="graphai.core.common.scraping.html#graphai.core.common.scraping.string_circular_shift">string_circular_shift() (in module graphai.core.common.scraping)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="graphai.core.common.json_repair.string_utils.html#graphai.core.common.json_repair.string_utils.strip_last_occurrence">strip_last_occurrence() (in module graphai.core.common.json_repair.string_utils)</a>
 </li>
       <li><a href="graphai.core.common.common_utils.html#graphai.core.common.common_utils.strtobool">strtobool() (in module graphai.core.common.common_utils)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="graphai.api.schemas.completion.html#graphai.api.schemas.completion.CleanupResponseDict.subject">subject (graphai.api.schemas.completion.CleanupResponseDict attribute)</a>
 </li>
       <li><a href="graphai.api.schemas.scraping.html#graphai.api.schemas.scraping.GetSublinksTaskResponse.sublinks">sublinks (graphai.api.schemas.scraping.GetSublinksTaskResponse attribute)</a>
@@ -2308,8 +2330,6 @@
         <li><a href="graphai.api.schemas.image.html#graphai.api.schemas.image.ExtractTextTaskResponse.successful">(graphai.api.schemas.image.ExtractTextTaskResponse attribute)</a>
 </li>
         <li><a href="graphai.api.schemas.image.html#graphai.api.schemas.image.ImageFingerprintTaskResponse.successful">(graphai.api.schemas.image.ImageFingerprintTaskResponse attribute)</a>
-</li>
-        <li><a href="graphai.api.schemas.ontology.html#graphai.api.schemas.ontology.BreakUpClustersTaskResponse.successful">(graphai.api.schemas.ontology.BreakUpClustersTaskResponse attribute)</a>
 </li>
         <li><a href="graphai.api.schemas.ontology.html#graphai.api.schemas.ontology.RecomputeClustersTaskResponse.successful">(graphai.api.schemas.ontology.RecomputeClustersTaskResponse attribute)</a>
 </li>
@@ -2404,8 +2424,6 @@
         <li><a href="graphai.api.schemas.image.html#graphai.api.schemas.image.ExtractTextResponse.task_result">(graphai.api.schemas.image.ExtractTextResponse attribute)</a>
 </li>
         <li><a href="graphai.api.schemas.image.html#graphai.api.schemas.image.ImageFingerprintResponse.task_result">(graphai.api.schemas.image.ImageFingerprintResponse attribute)</a>
-</li>
-        <li><a href="graphai.api.schemas.ontology.html#graphai.api.schemas.ontology.BreakUpClustersResponse.task_result">(graphai.api.schemas.ontology.BreakUpClustersResponse attribute)</a>
 </li>
         <li><a href="graphai.api.schemas.ontology.html#graphai.api.schemas.ontology.RecomputeClustersResponse.task_result">(graphai.api.schemas.ontology.RecomputeClustersResponse attribute)</a>
 </li>
