@@ -170,21 +170,9 @@ class BreakUpClustersClusterNumberResponse(BaseModel):
     )
 
 
-class BreakUpClustersTaskResponse(BaseModel):
+class BreakUpClustersResponse(BaseModel):
     results: Union[List[BreakUpClustersClusterNumberResponse], None] = Field(
         title="Cluster break-up results",
-    )
-
-    successful: bool = Field(
-        title="Success flag",
-        description="Whether the computation was successful."
-    )
-
-
-class BreakUpClustersResponse(TaskStatusResponse):
-    task_result: Union[BreakUpClustersTaskResponse, None] = Field(
-        title="Cluster break-up response",
-        description="A dict of list of dicts containing the resulting broken-up clusters and a freshness flag."
     )
 
 
@@ -225,19 +213,15 @@ class GraphDistanceResponse(BaseModel):
 
 
 class GraphNearestCategoryRequest(BaseModel):
-    src: str = Field(
-        title="Source concept"
-    )
-
     avg: Literal['none', 'linear', 'log'] = Field(
         title="Averaging",
-        default="linear"
+        default="log"
     )
 
     coeffs: Union[None, Tuple[float, float]] = Field(
         title="Coefficients",
-        description="The coefficients for the concepts and anchor pages of a category, respectively. ",
-        default=(1.0, 1.0)
+        description="The coefficients for the anchor pages and concepts of a category, respectively. ",
+        default=(1.0, 10.0)
     )
 
     top_n: int = Field(
@@ -247,11 +231,16 @@ class GraphNearestCategoryRequest(BaseModel):
 
     top_down_search: bool = Field(
         title="Top-down search",
-        description="Only valid for concept-category. "
-                    "Whether to directly search in depth-4 categories or to start the search higher, at depth 3. "
+        description="Whether to directly search in depth-4 categories or to start the search higher, at depth 3. "
                     "True by default, as this generally yield better results. Set to False in order to get "
-                    "a ranking based on raw similarity scores between the given concept and depth-4 categories.",
-        default=True
+                    "a ranking based on raw similarity scores between the given entity and depth-4 categories.",
+        default=False
+    )
+
+
+class GraphConceptNearestCategoryRequest(GraphNearestCategoryRequest):
+    src: str = Field(
+        title="Source concept"
     )
 
     return_clusters: Union[int, None] = Field(
@@ -259,6 +248,12 @@ class GraphNearestCategoryRequest(BaseModel):
         description="If not null, determines the k for which the top k closest clusters in "
                     "each of the top n categories are returned. If null, clusters are not returned.",
         default=3
+    )
+
+
+class GraphClusterNearestCategoryRequest(GraphNearestCategoryRequest):
+    src: str = Field(
+        title="Source cluster"
     )
 
 
@@ -289,12 +284,27 @@ class NearestCategoryElement(BaseModel):
         title="Rank"
     )
 
+
+class NearestCategoryElementWithClusters(NearestCategoryElement):
     clusters: Optional[List[NearestClusterElement]] = Field(
         title="Clusters"
     )
 
 
-class GraphNearestCategoryResponse(BaseModel):
+class GraphConceptNearestCategoryResponse(BaseModel):
+    scores: Union[None, List[NearestCategoryElementWithClusters]] = Field(
+        title="Closest matches"
+    )
+
+    parent_category: Union[None, str] = Field(
+        title="Parent category",
+        description="If the `top_down_search` flag was set, this field will contain the id of the closest "
+                    "depth-3 category. In that case, the top few categories (as many as this depth-3 category "
+                    "has children) will be children of this category. If the flag is not set, this value is null."
+    )
+
+
+class GraphClusterNearestCategoryResponse(BaseModel):
     scores: Union[None, List[NearestCategoryElement]] = Field(
         title="Closest matches"
     )
