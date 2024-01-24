@@ -68,7 +68,7 @@ def find_problem_areas_using_error_ratio(results, test_category_concept, train_c
     return problem_areas, errors_at_k, errors_at_k_categories
 
 
-def find_all_problem_areas(n_rounds=5, avg='log', coeffs=(1, 10), top_down=False, cutoff=0.5):
+def find_all_problem_areas(n_rounds=20, avg='log', coeffs=(1, 10), top_down=False, cutoff=0.5):
     all_problem_areas = list()
     accuracy_at_1_values = list()
     accuracy_at_5_values = list()
@@ -108,7 +108,6 @@ def main():
     print(f'{np.mean(accuracy_at_1_values)} ± {np.std(accuracy_at_1_values)}')
     print('Accuracy @ 5:')
     print(f'{np.mean(accuracy_at_5_values)} ± {np.std(accuracy_at_5_values)}')
-
 
 
 if __name__ == '__main__':
