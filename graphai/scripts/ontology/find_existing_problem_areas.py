@@ -64,13 +64,14 @@ def find_problem_areas_using_error_ratio(results, test_category_concept, train_c
             errors_at_k_categories['count_errors'] / errors_at_k_categories['count_test']
     )
     errors_at_k_categories = errors_at_k_categories.rename(columns={'from_id': 'category_id'})
-    problem_areas = errors_at_k_categories.loc[errors_at_k_categories.error_ratio >= ratio].from_id.values.tolist()
+    problem_areas = errors_at_k_categories.loc[errors_at_k_categories.error_ratio >= ratio].category_id.values.tolist()
     return problem_areas, errors_at_k, errors_at_k_categories
 
 
-def find_all_problem_areas(n_rounds=20, avg='log', coeffs=(1, 10), top_down=False, cutoff=0.5):
+def find_all_problem_areas(n_rounds=5, avg='log', coeffs=(1, 10), top_down=False, cutoff=0.5):
     all_problem_areas = list()
     for i in range(n_rounds):
+        print(f'Starting round {i + 1} out of {n_rounds}')
         ontology_data = OntologyData(test_mode=True, test_ratio=0.3, random_state=i)
         ontology_data.load_data()
         test_category_concept = ontology_data.get_test_category_concept()
@@ -85,10 +86,16 @@ def find_all_problem_areas(n_rounds=20, avg='log', coeffs=(1, 10), top_down=Fals
                                      errors_at_k_categories.category_id.apply(lambda x: x in problem_areas)
                                  ])
     all_problem_areas = pd.concat(all_problem_areas, axis=0)
-    all_problem_areas_count = all_problem_areas[['category_id', 'error_rate']].copy()
+    all_problem_areas_count = all_problem_areas[['category_id', 'error_ratio']].copy()
     all_problem_areas_count = pd.merge(
-        all_problem_areas_count.groupby('category_id').count().reset_index().rename(columns={'error_rate': 'count'}),
-        all_problem_areas_count.groupby('category_id').mean().reset_index().rename(columns={'error_rate': 'mean_rate'}),
+        all_problem_areas_count.groupby('category_id').count().reset_index().rename(columns={'error_ratio': 'count'}),
+        all_problem_areas_count.groupby('category_id').mean().reset_index().rename(columns={'error_ratio': 'mean_rate'}),
         on='category_id'
     )
     return all_problem_areas, all_problem_areas_count
+
+
+if __name__ == '__main__':
+    all_problem_areas, all_problem_areas_count = find_all_problem_areas()
+    all_problem_areas.to_csv('all.csv')
+    all_problem_areas_count.to_csv('all_counts.csv')
