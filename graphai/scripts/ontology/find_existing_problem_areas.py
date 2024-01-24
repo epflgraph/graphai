@@ -70,13 +70,18 @@ def find_problem_areas_using_error_ratio(results, test_category_concept, train_c
 
 def find_all_problem_areas(n_rounds=5, avg='log', coeffs=(1, 10), top_down=False, cutoff=0.5):
     all_problem_areas = list()
+    accuracy_at_1_values = list()
+    accuracy_at_5_values = list()
     for i in range(n_rounds):
         print(f'Starting round {i + 1} out of {n_rounds}')
         ontology_data = OntologyData(test_mode=True, test_ratio=0.3, random_state=i)
         ontology_data.load_data()
         test_category_concept = ontology_data.get_test_category_concept()
         test_concepts = test_category_concept['to_id'].values.tolist()
+        test_labels = test_category_concept['from_id'].values.tolist()
         results = predict_all(ontology_data, test_concepts, avg=avg, coeffs=coeffs, top_down=top_down, n=5)
+        accuracy_at_1_values.append(eval_at_k(results, test_labels, 1))
+        accuracy_at_5_values.append(eval_at_k(results, test_labels, 5))
         problem_areas, errors_at_k, errors_at_k_categories = (
             find_problem_areas_using_error_ratio(results, test_category_concept,
                                                  ontology_data.get_category_concept_table(), k=5, ratio=cutoff)
@@ -92,10 +97,19 @@ def find_all_problem_areas(n_rounds=5, avg='log', coeffs=(1, 10), top_down=False
         all_problem_areas_count.groupby('category_id').mean().reset_index().rename(columns={'error_ratio': 'mean_rate'}),
         on='category_id'
     )
-    return all_problem_areas, all_problem_areas_count
+    return all_problem_areas, all_problem_areas_count, accuracy_at_1_values, accuracy_at_5_values
+
+
+def main():
+    all_problem_areas, all_problem_areas_count, accuracy_at_1_values, accuracy_at_5_values = find_all_problem_areas()
+    all_problem_areas.to_csv('all.csv', index=False)
+    all_problem_areas_count.to_csv('all_counts.csv', index=False)
+    print('Accuracy @ 1:')
+    print(f'{np.mean(accuracy_at_1_values)} ± {np.std(accuracy_at_1_values)}')
+    print('Accuracy @ 5:')
+    print(f'{np.mean(accuracy_at_5_values)} ± {np.std(accuracy_at_5_values)}')
+
 
 
 if __name__ == '__main__':
-    all_problem_areas, all_problem_areas_count = find_all_problem_areas()
-    all_problem_areas.to_csv('all.csv')
-    all_problem_areas_count.to_csv('all_counts.csv')
+    main()
