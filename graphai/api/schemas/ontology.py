@@ -307,6 +307,13 @@ class GraphConceptNearestCategoryResponse(BaseModel):
                     "has children) will be children of this category. If the flag is not set, this value is null."
     )
 
+    valid: bool = Field(
+        title="Valid results",
+        description="If this flag is unset while the results are not null, "
+                    "it means that the top result has a score of 0, "
+                    "meaning that effectively, all the results returned are random."
+    )
+
 
 class GraphClusterNearestCategoryResponse(BaseModel):
     scores: Union[None, List[NearestCategoryElement]] = Field(

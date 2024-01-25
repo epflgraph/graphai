@@ -143,7 +143,8 @@ def get_concept_category_closest_task(self, concept_id, avg='log', coeffs=(1, 10
     if closest is None:
         return {
             'scores': None,
-            'parent_category': None
+            'parent_category': None,
+            'valid': False
         }
     result_list = list()
     for i in range(len(closest)):
@@ -167,6 +168,7 @@ def get_concept_category_closest_task(self, concept_id, avg='log', coeffs=(1, 10
     return {
         'scores': result_list,
         'parent_category': d3_cat,
+        'valid': scores[0] > 0
     }
 
 
