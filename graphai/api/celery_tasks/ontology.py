@@ -175,10 +175,18 @@ def get_concept_category_closest_task(self, concept_id, avg='log', coeffs=(1, 10
              ignore_result=False, ontology_data_obj=ontology_data)
 def get_cluster_category_closest_task(self, cluster_id, avg='log', coeffs=(1, 10), top_n=1,
                                       use_depth_3=False):
-    closest, scores, d3_cat = (
-        self.ontology_data_obj.get_cluster_closest_category(cluster_id, avg, coeffs, top_n,
-                                                            use_depth_3=use_depth_3)
-    )
+    if isinstance(cluster_id, list):
+        # If it's a list, it's assumed to be a list of concepts (i.e. a "custom" cluster)
+        closest, scores, d3_cat = (
+            self.ontology_data_obj.get_custom_cluster_closest_category(cluster_id, avg, coeffs, top_n,
+                                                                use_depth_3=use_depth_3)
+        )
+    else:
+        # Otherwise, it's a single string, and represents an existing cluster
+        closest, scores, d3_cat = (
+            self.ontology_data_obj.get_cluster_closest_category(cluster_id, avg, coeffs, top_n,
+                                                                use_depth_3=use_depth_3)
+        )
     if closest is None:
         return {
             'scores': None,

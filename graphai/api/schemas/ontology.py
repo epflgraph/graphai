@@ -252,8 +252,12 @@ class GraphConceptNearestCategoryRequest(GraphNearestCategoryRequest):
 
 
 class GraphClusterNearestCategoryRequest(GraphNearestCategoryRequest):
-    src: str = Field(
-        title="Source cluster"
+    src: Union[List[str], str] = Field(
+        title="Source cluster",
+        description="The cluster to find the closest category for. The cluster can be an existing or a 'custom' one. "
+                    "If this parameter is a single string, the string represents the ID of an existing cluster. "
+                    "On the other hand, if a list of strings is provided, each element of the list is "
+                    "considered to be the ID of a concept, and the cluster is a 'custom' cluster."
     )
 
 
