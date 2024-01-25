@@ -925,8 +925,8 @@ class OntologyData:
         if any(concept_id not in concepts for concept_id in concept_ids):
             return None, None, None
         concept_indices = [concepts[concept_id] for concept_id in concept_ids]
-        s1 = self.symmetric_concept_concept_matrix['matrix_concept_cat_anchors'][concept_indices, :]
-        s2 = self.symmetric_concept_concept_matrix['matrix_concept_cat_concepts'][concept_indices, :]
+        s1 = self.symmetric_concept_concept_matrix['matrix_concept_cat_anchors'][concept_indices, :].sum(axis=0)
+        s2 = self.symmetric_concept_concept_matrix['matrix_concept_cat_concepts'][concept_indices, :].sum(axis=0)
         l1 = (len(concept_indices)
               * self.symmetric_concept_concept_matrix['d4_cat_anchors_lengths'])
         l2 = (len(concept_indices)
