@@ -905,6 +905,37 @@ class OntologyData:
         )
         return best_cats, best_scores, selected_d3_category
 
+    def get_custom_cluster_closest_category(self, concept_ids, avg='log', coeffs=(1, 10), top_n=1,
+                                            use_depth_3=False):
+        """
+        Finds the closest category to a custom cluster, provided as a list of concepts
+        Args:
+            concept_ids: List of concept IDs
+            avg: Averaging method. Options are ('linear', 'log', and 'none')
+            coeffs: Coefficients for averaging of the scores anchors and concepts
+            top_n: Number of top categories to return
+            use_depth_3: Whether to go through depth-3 or directly use depth-4
+
+        Returns:
+            Top categories, their scores, and parent depth-3 category if use_depth_3==True.
+        """
+        self.load_data()
+        d4_cat_indices = self.symmetric_concept_concept_matrix['d4_cat_index_to_id']
+        concepts = self.symmetric_concept_concept_matrix['concept_id_to_index']
+        if any(concept_id not in concepts for concept_id in concept_ids):
+            return None, None, None
+        concept_indices = [concepts[concept_id] for concept_id in concept_ids]
+        s1 = self.symmetric_concept_concept_matrix['matrix_concept_cat_anchors'][concept_indices, :]
+        s2 = self.symmetric_concept_concept_matrix['matrix_concept_cat_concepts'][concept_indices, :]
+        l1 = (len(concept_indices)
+              * self.symmetric_concept_concept_matrix['d4_cat_anchors_lengths'])
+        l2 = (len(concept_indices)
+              * self.symmetric_concept_concept_matrix['d4_cat_concepts_lengths'])
+        best_cats, best_scores, selected_d3_category = self._compute_closest_category_result(
+            s1, s2, l1, l2, avg, coeffs, use_depth_3, top_n, d4_cat_indices
+        )
+        return best_cats, best_scores, selected_d3_category
+
     def get_category_closest_category(self, category_id, avg='log', coeffs=(1, 10), top_n=1,
                                       use_depth_3=False):
         """
