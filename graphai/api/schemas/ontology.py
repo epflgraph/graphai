@@ -324,6 +324,12 @@ class GraphConceptNearestCategoryResponse(BaseModel):
                     "meaning that effectively, all the results returned are random."
     )
 
+    existing_label: Union[str, None] = Field(
+        title="Existing category",
+        description="If the requested concept already exists as part of the ontology, this value will reflect "
+                    "its existing parent category."
+    )
+
 
 class GraphClusterNearestCategoryResponse(BaseModel):
     scores: Union[None, List[NearestCategoryElement]] = Field(
@@ -335,6 +341,12 @@ class GraphClusterNearestCategoryResponse(BaseModel):
         description="If the `top_down_search` flag was set, this field will contain the id of the closest "
                     "depth-3 category. In that case, the top few categories (as many as this depth-3 category "
                     "has children) will be children of this category. If the flag is not set, this value is null."
+    )
+
+    existing_label: Union[str, None] = Field(
+        title="Existing category",
+        description="If the requested cluster already exists as part of the ontology, this value will reflect "
+                    "its existing parent category."
     )
 
 

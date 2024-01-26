@@ -1014,18 +1014,32 @@ class OntologyData:
             return results
         return None
 
-    def get_cluster_parent(self, child_id):
+    def get_cluster_parent(self, cluster_id):
         self.load_data()
-        results = self.category_cluster.loc[self.category_cluster.to_id == child_id, 'from_id'].values.tolist()
+        results = self.category_cluster.loc[self.category_cluster.to_id == cluster_id, 'from_id'].values.tolist()
         if len(results) > 0:
             return results[0]
         return None
 
-    def get_cluster_children(self, parent_id):
+    def get_cluster_children(self, cluster_id):
         self.load_data()
-        results = self.cluster_concept.loc[self.cluster_concept.from_id == parent_id, 'to_id'].values.tolist()
+        results = self.cluster_concept.loc[self.cluster_concept.from_id == cluster_id, 'to_id'].values.tolist()
         if len(results) > 0:
             return results
+        return None
+
+    def get_concept_parent_category(self, concept_id):
+        self.load_data()
+        results = self.category_concept.loc[self.category_concept.to_id == concept_id, 'from_id'].values.tolist()
+        if len(results) > 0:
+            return results[0]
+        return None
+
+    def get_concept_parent_cluster(self, concept_id):
+        self.load_data()
+        results = self.cluster_concept.loc[self.cluster_concept.to_id == concept_id, 'from_id'].values.tolist()
+        if len(results) > 0:
+            return results[0]
         return None
 
     def get_category_cluster_list(self, cat_id):
