@@ -1014,6 +1014,20 @@ class OntologyData:
             return results
         return None
 
+    def get_cluster_parent(self, child_id):
+        self.load_data()
+        results = self.category_cluster.loc[self.category_cluster.to_id == child_id, 'from_id'].values.tolist()
+        if len(results) > 0:
+            return results[0]
+        return None
+
+    def get_cluster_children(self, parent_id):
+        self.load_data()
+        results = self.cluster_concept.loc[self.cluster_concept.from_id == parent_id, 'to_id'].values.tolist()
+        if len(results) > 0:
+            return results
+        return None
+
     def get_category_cluster_list(self, cat_id):
         self.load_data()
         return self.category_cluster_dict.get(cat_id, None)

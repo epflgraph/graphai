@@ -35,6 +35,12 @@ class CategoryInfoRequest(BaseModel):
     )
 
 
+class ClusterInfoRequest(BaseModel):
+    cluster_id: str = Field(
+        title="Cluster ID"
+    )
+
+
 class CategoryInfoResponse(BaseModel):
     category_id: str = Field(
         title="Category ID"
@@ -69,9 +75,13 @@ class CategoryChildrenRequest(BaseModel):
     )
 
 
-class CategoryChildrenResponse(BaseModel):
+class TreeChildrenResponse(BaseModel):
     children: Union[List[str], None] = Field(
-        title="Child categories"
+        title="Children"
+    )
+
+    child_type: Union[Literal['category', 'cluster', 'concept'], None] = Field(
+        title="Type of children"
     )
 
 

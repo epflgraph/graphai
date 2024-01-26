@@ -43,6 +43,18 @@ def get_category_clusters_task(self, parent_id):
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 5},
+             name='ontology_6.cluster_parent', ignore_result=False, ontology_obj=ontology_data)
+def get_cluster_parent_task(self, child_id):
+    return {'parent': self.ontology_obj.get_cluster_parent(child_id)}
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 5},
+             name='ontology_6.cluster_children', ignore_result=False, ontology_obj=ontology_data)
+def get_cluster_children_task(self, parent_id):
+    return {'children': self.ontology_obj.get_cluster_children(parent_id)}
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 5},
              name='ontology_6.recompute_clusters', ignore_result=False, ontology_data_obj=ontology_data)
 def recompute_clusters_task(self, n_clusters, min_n=None):
     concept_concept = self.ontology_data_obj.get_concept_concept_graphscore_table()
