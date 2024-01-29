@@ -212,6 +212,7 @@ class OntologyData:
         self.random_state = kwargs.get('random_state', 0)
         self.test_ratio = kwargs.get('test_ratio', 0.0)
         self.sampling_method = kwargs.get('sampling_method', 'weighted')
+        self.weighted_min_n = kwargs.get('min_n', 0)
         assert not self.test_mode or self.sampling_method in ['simple', 'weighted']
         self.test_ids = None
         self.test_concept_names = None
@@ -311,9 +312,13 @@ class OntologyData:
                     weights = (self.category_concept.groupby('from_id').
                                count().reset_index().rename(columns={'to_id': 'count'}))
                     weights = pd.merge(self.category_concept, weights, on='from_id')
-                    weights['count'] = weights['count'].apply(lambda x: 1.0 / x)
                     weight_dict = get_col_to_col_dict(weights, 'to_id', 'count')
                     weight_list = [weight_dict[i] for i in all_ids]
+                    if self.weighted_min_n > 0:
+                        indices_to_keep = np.argwhere(np.array(weight_list) > self.weighted_min_n).flatten().tolist()
+                        all_ids = [all_ids[i] for i in indices_to_keep]
+                        weight_list = [weight_list[i] for i in indices_to_keep]
+                    weight_list = [1.0 / x for x in weight_list]
                     probabilities = np.array(weight_list) / sum(weight_list)
                     self.test_ids = np.random.choice(all_ids, test_n, replace=False, p=probabilities)
                 self.test_concept_names = self.ontology_concept_names.loc[
