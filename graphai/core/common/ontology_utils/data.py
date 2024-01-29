@@ -213,7 +213,7 @@ class OntologyData:
         self.test_ratio = kwargs.get('test_ratio', 0.0)
         self.sampling_method = kwargs.get('sampling_method', 'weighted')
         self.weighted_min_n = kwargs.get('min_n', 0)
-        assert not self.test_mode or self.sampling_method in ['simple', 'weighted']
+        assert not self.test_mode or self.sampling_method in ['simple', 'weighted', 'weighted_log']
         self.test_ids = None
         self.test_concept_names = None
         self.test_category_concept = None
@@ -318,7 +318,10 @@ class OntologyData:
                         indices_to_keep = np.argwhere(np.array(weight_list) > self.weighted_min_n).flatten().tolist()
                         all_ids = [all_ids[i] for i in indices_to_keep]
                         weight_list = [weight_list[i] for i in indices_to_keep]
-                    weight_list = [1.0 / x for x in weight_list]
+                    if self.sampling_method == 'weighted':
+                        weight_list = [1.0 / x for x in weight_list]
+                    else:
+                        weight_list = [1.0 / np.log(1 + x) for x in weight_list]
                     probabilities = np.array(weight_list) / sum(weight_list)
                     self.test_ids = np.random.choice(all_ids, test_n, replace=False, p=probabilities)
                 self.test_concept_names = self.ontology_concept_names.loc[
