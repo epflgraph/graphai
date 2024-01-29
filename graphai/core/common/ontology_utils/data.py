@@ -1061,6 +1061,9 @@ class OntologyData:
             results = results.loc[results.to_id.apply(lambda x: x in concepts_to_keep)]
         return results
 
+    def get_category_cluster_table(self):
+        return self.category_cluster
+
     def get_category_anchor_pages(self, category_id):
         self.load_data()
         return self.category_anchors_dict.get(category_id, [])

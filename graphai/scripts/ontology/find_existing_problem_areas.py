@@ -41,13 +41,21 @@ def get_max_accuracy(res):
     return len([x for x in res if len(x) > 0]) / len(res)
 
 
-def find_problem_areas_using_error_ratio(results, test_category_concept, train_category_concept, k=5, ratio=1.0):
+def find_problem_areas_using_error_ratio(results, test_category_concept, train_category_concept,
+                                         category_cluster, test_cluster_concept, k=5, ratio=1.0):
     concepts = test_category_concept.to_id.values.tolist()
     labels = test_category_concept.from_id.values.tolist()
     errors_at_k = get_errors_at_k(results, concepts, labels, k)
     errors_at_k_categories = test_category_concept.loc[
         test_category_concept.to_id.apply(lambda x: x in errors_at_k)
     ].copy()
+    errors_at_k_cat_cluster_concept = (
+        pd.merge(
+            category_cluster, test_cluster_concept.loc[test_cluster_concept.to_id.apply(lambda x: x in errors_at_k)],
+            left_on='to_id', right_on='from_id', suffixes=('_x', '_y'), how='inner'
+        )[['from_id_x', 'to_id_x', 'to_id_y']].
+        rename(columns={'from_id_x': 'category_id', 'to_id_x': 'cluster_id', 'to_id_y': 'concept_id'})
+    )
     errors_at_k_categories = errors_at_k_categories.assign(count=1)[['from_id', 'count']].groupby(
         'from_id').sum().reset_index()
     category_full_sizes = (
@@ -65,7 +73,13 @@ def find_problem_areas_using_error_ratio(results, test_category_concept, train_c
     )
     errors_at_k_categories = errors_at_k_categories.rename(columns={'from_id': 'category_id'})
     problem_areas = errors_at_k_categories.loc[errors_at_k_categories.error_ratio >= ratio].category_id.values.tolist()
-    return problem_areas, errors_at_k, errors_at_k_categories
+    errors_at_k_cat_cluster_concept = errors_at_k_cat_cluster_concept.loc[
+        errors_at_k_cat_cluster_concept.category_id.apply(lambda x: x in problem_areas)
+    ]
+    errors_at_k_cat_cluster_concept = errors_at_k_cat_cluster_concept.groupby(
+        ['category_id', 'cluster_id']
+    ).count().reset_index()
+    return problem_areas, errors_at_k, errors_at_k_categories, errors_at_k_cat_cluster_concept
 
 
 def find_all_problem_areas(n_rounds=20, avg='log', coeffs=(1, 10), top_down=False, cutoff=0.5):
@@ -82,9 +96,12 @@ def find_all_problem_areas(n_rounds=20, avg='log', coeffs=(1, 10), top_down=Fals
         results = predict_all(ontology_data, test_concepts, avg=avg, coeffs=coeffs, top_down=top_down, n=5)
         accuracy_at_1_values.append(eval_at_k(results, test_labels, 1))
         accuracy_at_5_values.append(eval_at_k(results, test_labels, 5))
-        problem_areas, errors_at_k, errors_at_k_categories = (
+        problem_areas, errors_at_k, errors_at_k_categories, errors_at_k_cat_cluster_concept = (
             find_problem_areas_using_error_ratio(results, test_category_concept,
-                                                 ontology_data.get_category_concept_table(), k=5, ratio=cutoff)
+                                                 ontology_data.get_category_concept_table(),
+                                                 ontology_data.get_category_cluster_table(),
+                                                 ontology_data.get_test_cluster_concept(),
+                                                 k=5, ratio=cutoff)
         )
         errors_at_k_categories = errors_at_k_categories.assign(random_state=i)
         all_problem_areas.append(errors_at_k_categories.loc[
