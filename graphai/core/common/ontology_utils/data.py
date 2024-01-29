@@ -211,6 +211,8 @@ class OntologyData:
         self.test_mode = test_mode
         self.random_state = kwargs.get('random_state', 0)
         self.test_ratio = kwargs.get('test_ratio', 0.0)
+        self.sampling_method = kwargs.get('sampling_method', 'weighted')
+        assert not self.test_mode or self.sampling_method in ['simple', 'weighted']
         self.test_ids = None
         self.test_concept_names = None
         self.test_category_concept = None
@@ -223,12 +225,12 @@ class OntologyData:
             self.load_ontology_concept_names()
             self.load_ontology_categories()
             self.load_non_ontology_concept_names()
-            # Now loading the concept-concept table and the matrix from neighborhood to ontology/anchors
-            self.load_concept_concept_graphscore()
-            self.compute_symmetric_concept_concept_matrix()
             # Now loading category-category and category-concept tables
             self.load_category_category()
             self.load_category_concept()
+            # Now loading the concept-concept table and the matrix from neighborhood to ontology/anchors
+            self.load_concept_concept_graphscore()
+            self.compute_symmetric_concept_concept_matrix()
             # Now loading aggregated anchor concept lists for each category
             self.load_anchor_page_dict()
             # Finally, we compute aggregated matrices that map each concept to each category
@@ -241,18 +243,6 @@ class OntologyData:
             "SELECT id, name FROM graph_ontology.Nodes_N_Concept WHERE is_ontology_concept=1"),
             ['id', 'name']
         )
-        if self.test_mode:
-            test_n = int(self.ontology_concept_names.shape[0] * self.test_ratio)
-            if test_n > 0:
-                all_ids = self.ontology_concept_names['id'].values.tolist()
-                random.seed(self.random_state)
-                self.test_ids = random.sample(all_ids, test_n)
-                self.test_concept_names = self.ontology_concept_names.loc[
-                    self.ontology_concept_names['id'].apply(lambda x: x in self.test_ids)
-                ]
-                self.ontology_concept_names = self.ontology_concept_names.loc[
-                    self.ontology_concept_names['id'].apply(lambda x: x not in self.test_ids)
-                ]
 
     def load_ontology_categories(self):
         db_manager = DB(self.db_config)
@@ -310,21 +300,42 @@ class OntologyData:
             rename(columns={'from_id_cat': 'from_id', 'to_id_concept': 'to_id'})
         )
 
-        if self.test_mode and self.test_ids is not None:
-            # Saving the category-concept rows of the test set
-            self.test_category_concept = self.category_concept.loc[
-                self.category_concept['to_id'].apply(lambda x: x in self.test_ids)
-            ]
-            self.test_cluster_concept = self.cluster_concept.loc[
-                self.cluster_concept['to_id'].apply(lambda x: x in self.test_ids)
-            ]
-            # Removing the test set concepts from category-concept and cluster-concept tables
-            self.category_concept = self.category_concept.loc[
-                self.category_concept['to_id'].apply(lambda x: x not in self.test_ids)
-            ]
-            self.cluster_concept = self.cluster_concept.loc[
-                self.cluster_concept['to_id'].apply(lambda x: x not in self.test_ids)
-            ]
+        if self.test_mode:
+            test_n = int(self.ontology_concept_names.shape[0] * self.test_ratio)
+            if test_n > 0:
+                all_ids = self.ontology_concept_names['id'].values.tolist()
+                random.seed(self.random_state)
+                if self.sampling_method == 'simple':
+                    self.test_ids = random.sample(all_ids, test_n)
+                else:
+                    weights = (self.category_concept.groupby('from_id').
+                               count().reset_index().rename(columns={'to_id': 'count'}))
+                    weights = pd.merge(self.category_concept, weights, on='from_id')
+                    weights['count'] = weights['count'].apply(lambda x: 1.0 / x)
+                    weight_dict = get_col_to_col_dict(weights, 'to_id', 'count')
+                    weight_list = [weight_dict[i] for i in all_ids]
+                    probabilities = np.array(weight_list) / sum(weight_list)
+                    self.test_ids = np.random.choice(all_ids, test_n, replace=False, p=probabilities)
+                self.test_concept_names = self.ontology_concept_names.loc[
+                    self.ontology_concept_names['id'].apply(lambda x: x in self.test_ids)
+                ]
+                self.ontology_concept_names = self.ontology_concept_names.loc[
+                    self.ontology_concept_names['id'].apply(lambda x: x not in self.test_ids)
+                ]
+                # Saving the category-concept rows of the test set
+                self.test_category_concept = self.category_concept.loc[
+                    self.category_concept['to_id'].apply(lambda x: x in self.test_ids)
+                ]
+                self.test_cluster_concept = self.cluster_concept.loc[
+                    self.cluster_concept['to_id'].apply(lambda x: x in self.test_ids)
+                ]
+                # Removing the test set concepts from category-concept and cluster-concept tables
+                self.category_concept = self.category_concept.loc[
+                    self.category_concept['to_id'].apply(lambda x: x not in self.test_ids)
+                ]
+                self.cluster_concept = self.cluster_concept.loc[
+                    self.cluster_concept['to_id'].apply(lambda x: x not in self.test_ids)
+                ]
 
         category_concept_agg = self.category_concept.assign(
             id=self.category_concept.to_id.apply(lambda x: [x])
