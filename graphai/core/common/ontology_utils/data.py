@@ -1036,7 +1036,8 @@ class OntologyData:
 
     def get_category_to_category(self):
         self.load_data()
-        return self.category_category.rename(column={'from_id': 'child_id', 'to_id': 'parent_id'})
+        return (self.category_category.
+                rename(column={'from_id': 'child_id', 'to_id': 'parent_id'}).to_dict(orient='records'))
 
     def get_category_parent(self, child_id):
         self.load_data()
