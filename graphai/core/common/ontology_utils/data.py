@@ -196,6 +196,7 @@ class OntologyData:
         self.category_depth_dict = None
         self.non_ontology_concept_names = None
         self.concept_concept_graphscore = None
+        self.concept_edge_counts = None
         self.ontology_and_anchor_concepts_id_to_index = None
         self.symmetric_concept_concept_matrix = dict()
         self.category_category = None
@@ -207,6 +208,7 @@ class OntologyData:
         self.category_cluster_dict = None
         self.cluster_concept_dict = None
         self.category_anchors_dict = None
+        self.edge_count_threshold = kwargs.get('adaptive_threshold', 20)
         # Parameters for test mode
         self.test_mode = test_mode
         self.random_state = kwargs.get('random_state', 0)
@@ -271,6 +273,13 @@ class OntologyData:
             "SELECT from_id, to_id, score FROM graph_ontology.Edges_N_Concept_N_Concept_T_Undirected"),
             ['from_id', 'to_id', 'score']
         )
+        self.concept_edge_counts = get_col_to_col_dict(
+            pd.concat([
+                self.concept_concept_graphscore,
+                self.concept_concept_graphscore.rename(columns={'from_id': 'to_id', 'to_id': 'from_id'})
+            ], axis=0).groupby('from_id').count().reset_index(), 'from_id', 'to_id'
+        )
+        print('Edge counts computed')
 
     def load_category_category(self):
         db_manager = DB(self.db_config)
@@ -827,7 +836,8 @@ class OntologyData:
         new_results[result_indices] += (np.max(new_results) - np.min(new_results)) + 0.1
         return new_results, selected_d3_category
 
-    def _compute_closest_category_result(self, s1, s2, l1, l2, avg, coeffs, use_depth_3, top_n, d4_cat_indices):
+    def _compute_closest_category_result(self, s1, s2, l1, l2, avg, coeffs, use_depth_3, top_n, d4_cat_indices,
+                                         entity_edge_count=None):
         """
         Internal method. Computes the closest category to an entity based on its anchor and concept score lists,
         as well as other parameters.
@@ -845,6 +855,14 @@ class OntologyData:
         Returns:
             Best categories, their scores, and the parent depth-3 category if use_depth_3==True
         """
+        if avg == 'adaptive':
+            if entity_edge_count is not None:
+                if entity_edge_count > self.edge_count_threshold:
+                    avg = 'linear'
+                else:
+                    avg = 'log'
+            else:
+                avg = 'log'
         results = average_and_combine(s1, s2, l1, l2, avg, coeffs)
         if use_depth_3:
             new_results, selected_d3_category = self._go_through_depth_3(results)
@@ -854,7 +872,7 @@ class OntologyData:
         best_cat_indices = sorted_indices[:top_n]
         best_cats = [d4_cat_indices[i] for i in best_cat_indices]
         best_scores = [results[i] for i in best_cat_indices]
-        return best_cats, best_scores, selected_d3_category
+        return best_cats, best_scores, selected_d3_category, avg
 
     def get_concept_closest_category(self, concept_id, avg='log', coeffs=(1, 10), top_n=1,
                                      use_depth_3=False, return_clusters=None):
@@ -883,8 +901,9 @@ class OntologyData:
         s2 = self.symmetric_concept_concept_matrix['matrix_concept_cat_concepts'][[concept_index], :]
         l1 = self.symmetric_concept_concept_matrix['d4_cat_anchors_lengths']
         l2 = self.symmetric_concept_concept_matrix['d4_cat_concepts_lengths']
-        best_cats, best_scores, selected_d3_category = self._compute_closest_category_result(
-            s1, s2, l1, l2, avg, coeffs, use_depth_3, top_n, d4_cat_indices
+        edge_count = self.concept_edge_counts[concept_id]
+        best_cats, best_scores, selected_d3_category, avg = self._compute_closest_category_result(
+            s1, s2, l1, l2, avg, coeffs, use_depth_3, top_n, d4_cat_indices, edge_count
         )
         if return_clusters is not None:
             best_clusters = [self.get_concept_closest_cluster_of_category(concept_id, cat, avg, top_n=return_clusters)
@@ -919,7 +938,7 @@ class OntologyData:
               * self.symmetric_concept_concept_matrix['d4_cat_anchors_lengths'])
         l2 = (self.symmetric_concept_concept_matrix['cluster_concepts_lengths'][0, cluster_index]
               * self.symmetric_concept_concept_matrix['d4_cat_concepts_lengths'])
-        best_cats, best_scores, selected_d3_category = self._compute_closest_category_result(
+        best_cats, best_scores, selected_d3_category, avg = self._compute_closest_category_result(
             s1, s2, l1, l2, avg, coeffs, use_depth_3, top_n, d4_cat_indices
         )
         return best_cats, best_scores, selected_d3_category
@@ -950,7 +969,7 @@ class OntologyData:
               * self.symmetric_concept_concept_matrix['d4_cat_anchors_lengths'])
         l2 = (len(concept_indices)
               * self.symmetric_concept_concept_matrix['d4_cat_concepts_lengths'])
-        best_cats, best_scores, selected_d3_category = self._compute_closest_category_result(
+        best_cats, best_scores, selected_d3_category, avg = self._compute_closest_category_result(
             s1, s2, l1, l2, avg, coeffs, use_depth_3, top_n, d4_cat_indices
         )
         return best_cats, best_scores, selected_d3_category
@@ -981,7 +1000,7 @@ class OntologyData:
               * self.symmetric_concept_concept_matrix['d4_cat_anchors_lengths'])
         l2 = (self.symmetric_concept_concept_matrix['d4_cat_concepts_lengths'][0, category_index]
               * self.symmetric_concept_concept_matrix['d4_cat_concepts_lengths'])
-        best_cats, best_scores, selected_d3_category = self._compute_closest_category_result(
+        best_cats, best_scores, selected_d3_category, avg = self._compute_closest_category_result(
             s1, s2, l1, l2, avg, coeffs, use_depth_3, top_n, d4_cat_indices
         )
         return best_cats, best_scores, selected_d3_category
@@ -1017,7 +1036,7 @@ class OntologyData:
 
     def get_category_to_category(self):
         self.load_data()
-        return self.category_category
+        return self.category_category.rename(column={'from_id': 'child_id', 'to_id': 'parent_id'})
 
     def get_category_parent(self, child_id):
         self.load_data()
