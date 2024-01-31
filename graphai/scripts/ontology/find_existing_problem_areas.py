@@ -83,13 +83,14 @@ def find_problem_areas_using_error_ratio(results, test_category_concept, train_c
     return problem_areas, errors_at_k, errors_at_k_categories, errors_at_k_cat_cluster_concept
 
 
-def find_all_problem_areas(n_rounds=20, avg='log', coeffs=(1, 10), top_down=False, cutoff=0.5):
+def find_all_problem_areas(n_rounds=20, sampling_method='weighted',
+                           avg='log', coeffs=(1, 10), top_down=False, cutoff=0.5):
     all_problem_areas = list()
     accuracy_at_1_values = list()
     accuracy_at_5_values = list()
     for i in range(n_rounds):
         print(f'Starting round {i + 1} out of {n_rounds}')
-        ontology_data = OntologyData(test_mode=True, test_ratio=0.3, random_state=i)
+        ontology_data = OntologyData(test_mode=True, test_ratio=0.3, random_state=i, sampling_method=sampling_method)
         ontology_data.load_data()
         test_category_concept = ontology_data.get_test_category_concept()
         test_concepts = test_category_concept['to_id'].values.tolist()
@@ -120,17 +121,19 @@ def find_all_problem_areas(n_rounds=20, avg='log', coeffs=(1, 10), top_down=Fals
 
 def main():
     for avg in ['linear', 'log', 'adaptive']:
-        all_problem_areas, all_problem_areas_count, accuracy_at_1_values, accuracy_at_5_values = (
-            find_all_problem_areas(avg=avg)
-        )
-        all_problem_areas.to_csv(f'all_{avg}.csv', index=False)
-        all_problem_areas_count.to_csv(f'all_counts_{avg}.csv', index=False)
+        for sampling_method in ['simple', 'weighted']:
+            all_problem_areas, all_problem_areas_count, accuracy_at_1_values, accuracy_at_5_values = (
+                find_all_problem_areas(avg=avg)
+            )
+            all_problem_areas.to_csv(f'all_{avg}_{sampling_method}.csv', index=False)
+            all_problem_areas_count.to_csv(f'all_counts_{avg}_{sampling_method}.csv', index=False)
 
-        print(f'{avg}:')
-        print('Accuracy @ 1:')
-        print(f'{np.mean(accuracy_at_1_values)} ± {np.std(accuracy_at_1_values)}')
-        print('Accuracy @ 5:')
-        print(f'{np.mean(accuracy_at_5_values)} ± {np.std(accuracy_at_5_values)}')
+            print(f'{avg}:')
+            print(f'{sampling_method}:')
+            print('Accuracy @ 1:')
+            print(f'{np.mean(accuracy_at_1_values)} ± {np.std(accuracy_at_1_values)}')
+            print('Accuracy @ 5:')
+            print(f'{np.mean(accuracy_at_5_values)} ± {np.std(accuracy_at_5_values)}')
 
 
 if __name__ == '__main__':
