@@ -3,6 +3,7 @@ from db_cache_manager.db import DB
 import pandas as pd
 import random
 from scipy.sparse import csr_array, csr_matrix, vstack, spmatrix
+from scipy.stats import zscore
 
 from graphai.core.common.common_utils import invert_dict
 from graphai.core.common.config import config
@@ -147,8 +148,9 @@ def adjusted_exp(x, overlap=5.0):
 def adjusted_exp_slope_1_point(overlap=5.0):
     return (1 + overlap) * np.log(1 + overlap) * (np.log(1 + overlap) + overlap / ((1 + overlap) * np.log(1 + overlap)))
 
+
 def compute_average(score, n, avg):
-    assert avg in ['linear', 'log', 'none', 'pwl']
+    assert avg in ['linear', 'log', 'none']
 
     if avg == 'none':
         return score
@@ -165,16 +167,6 @@ def compute_average(score, n, avg):
         score /= n
     elif avg == 'log':
         score /= np.log(1 + n)
-    elif avg == 'pwl':
-        pwl = np.zeros(np.shape(n))
-        pre_overlap = np.where(n <= 5)
-        post_first_overlap = np.where((n > 5) & (n <= adjusted_exp_slope_1_point(5)))
-        post_second_overlap = np.where(n > adjusted_exp_slope_1_point(5))
-        pwl[pre_overlap] = np.log(1.0 + n[pre_overlap])
-        pwl[post_first_overlap] = adjusted_exp(n[post_first_overlap])
-        pwl[post_second_overlap] = n[post_second_overlap] - (adjusted_exp_slope_1_point(5) -
-                                                             adjusted_exp(adjusted_exp_slope_1_point(5)))
-        score /= pwl
     return score
 
 
@@ -226,7 +218,7 @@ class OntologyData:
         self.category_cluster_dict = None
         self.cluster_concept_dict = None
         self.category_anchors_dict = None
-        self.edge_count_threshold = kwargs.get('adaptive_threshold', 30)
+        self.edge_count_threshold = kwargs.get('adaptive_threshold', 20)
         # Parameters for test mode
         self.test_mode = test_mode
         self.random_state = kwargs.get('random_state', 0)
@@ -855,7 +847,7 @@ class OntologyData:
         return new_results, selected_d3_category
 
     def _compute_closest_category_result(self, s1, s2, l1, l2, avg, coeffs, use_depth_3, top_n, d4_cat_indices,
-                                         entity_edge_count=None):
+                                         entity_edge_count=None, edge_count_threshold=None):
         """
         Internal method. Computes the closest category to an entity based on its anchor and concept score lists,
         as well as other parameters.
@@ -875,7 +867,9 @@ class OntologyData:
         """
         if avg == 'adaptive':
             if entity_edge_count is not None:
-                if entity_edge_count > self.edge_count_threshold:
+                if edge_count_threshold is None:
+                    edge_count_threshold = self.edge_count_threshold
+                if entity_edge_count > edge_count_threshold:
                     avg = 'linear'
                 else:
                     avg = 'log'
@@ -893,7 +887,7 @@ class OntologyData:
         return best_cats, best_scores, selected_d3_category, avg
 
     def get_concept_closest_category(self, concept_id, avg='log', coeffs=(1, 10), top_n=1,
-                                     use_depth_3=False, return_clusters=None):
+                                     use_depth_3=False, return_clusters=None, adaptive_threshold=None):
         """
         Finds the closest category to a given concept
         Args:
@@ -921,7 +915,8 @@ class OntologyData:
         l2 = self.symmetric_concept_concept_matrix['d4_cat_concepts_lengths']
         edge_count = self.concept_edge_counts[concept_id]
         best_cats, best_scores, selected_d3_category, avg = self._compute_closest_category_result(
-            s1, s2, l1, l2, avg, coeffs, use_depth_3, top_n, d4_cat_indices, edge_count
+            s1, s2, l1, l2, avg, coeffs, use_depth_3, top_n, d4_cat_indices, edge_count,
+            edge_count_threshold=adaptive_threshold
         )
         if return_clusters is not None:
             best_clusters = [self.get_concept_closest_cluster_of_category(concept_id, cat, avg, top_n=return_clusters)

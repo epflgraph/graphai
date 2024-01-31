@@ -3,12 +3,13 @@ import pandas as pd
 import numpy as np
 
 
-def predict_all(model: OntologyData, x: list, avg='linear', coeffs=(1, 4), top_down=True, n=5):
+def predict_all(model: OntologyData, x: list, avg='linear', coeffs=(1, 4), top_down=True, n=5, **kwargs):
     y = list()
     for p in x:
         best_cats, best_scores, selected_d3_category, best_clusters = \
             model.get_concept_closest_category(p, avg=avg, coeffs=coeffs, top_n=n, use_depth_3=top_down,
-                                               return_clusters=None)
+                                               return_clusters=None,
+                                               adaptive_threshold=kwargs.get('adaptive_threshold', None))
         if best_cats is None:
             best_cats = list()
         y.append(best_cats)
