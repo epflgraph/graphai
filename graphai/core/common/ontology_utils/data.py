@@ -139,8 +139,16 @@ def to_ndarray_and_flatten(a):
         return a
 
 
+def adjusted_exp(x, overlap=5.0):
+    return (np.log(1.0 + overlap) / (np.exp(overlap / ((1 + overlap) * np.log(1 + overlap))))
+            * np.exp(x / ((1 + overlap) * np.log(1 + overlap))))
+
+
+def adjusted_exp_slope_1_point(overlap=5.0):
+    return (1 + overlap) * np.log(1 + overlap) * (np.log(1 + overlap) + overlap / ((1 + overlap) * np.log(1 + overlap)))
+
 def compute_average(score, n, avg):
-    assert avg in ['linear', 'log', 'none']
+    assert avg in ['linear', 'log', 'none', 'pwl']
 
     if avg == 'none':
         return score
@@ -157,6 +165,16 @@ def compute_average(score, n, avg):
         score /= n
     elif avg == 'log':
         score /= np.log(1 + n)
+    elif avg == 'pwl':
+        pwl = np.zeros(np.shape(n))
+        pre_overlap = np.where(n <= 5)
+        post_first_overlap = np.where((n > 5) & (n <= adjusted_exp_slope_1_point(5)))
+        post_second_overlap = np.where(n > adjusted_exp_slope_1_point(5))
+        pwl[pre_overlap] = np.log(1.0 + n[pre_overlap])
+        pwl[post_first_overlap] = adjusted_exp(n[post_first_overlap])
+        pwl[post_second_overlap] = n[post_second_overlap] - (adjusted_exp_slope_1_point(5) -
+                                                             adjusted_exp(adjusted_exp_slope_1_point(5)))
+        score /= pwl
     return score
 
 
@@ -208,7 +226,7 @@ class OntologyData:
         self.category_cluster_dict = None
         self.cluster_concept_dict = None
         self.category_anchors_dict = None
-        self.edge_count_threshold = kwargs.get('adaptive_threshold', 20)
+        self.edge_count_threshold = kwargs.get('adaptive_threshold', 30)
         # Parameters for test mode
         self.test_mode = test_mode
         self.random_state = kwargs.get('random_state', 0)

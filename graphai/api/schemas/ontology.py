@@ -223,7 +223,7 @@ class GraphDistanceResponse(BaseModel):
 
 
 class GraphNearestCategoryRequest(BaseModel):
-    avg: Literal['none', 'linear', 'log'] = Field(
+    avg: Literal['none', 'linear', 'log', 'adaptive'] = Field(
         title="Averaging",
         default="log"
     )

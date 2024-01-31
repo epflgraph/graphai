@@ -118,28 +118,18 @@ def find_all_problem_areas(n_rounds=20, avg='log', coeffs=(1, 10), top_down=Fals
 
 
 def main():
-    all_problem_areas_lin, all_problem_areas_count_lin, accuracy_at_1_values_lin, accuracy_at_5_values_lin = (
-        find_all_problem_areas(avg='linear')
-    )
-    all_problem_areas_log, all_problem_areas_count_log, accuracy_at_1_values_log, accuracy_at_5_values_log = (
-        find_all_problem_areas(avg='log')
-    )
-    all_problem_areas_lin.to_csv('all_lin.csv', index=False)
-    all_problem_areas_count_lin.to_csv('all_counts_lin.csv', index=False)
-    all_problem_areas_log.to_csv('all_log.csv', index=False)
-    all_problem_areas_count_log.to_csv('all_counts_log.csv', index=False)
+    for avg in ['linear', 'log', 'adaptive']:
+        all_problem_areas, all_problem_areas_count, accuracy_at_1_values, accuracy_at_5_values = (
+            find_all_problem_areas(avg=avg)
+        )
+        all_problem_areas.to_csv(f'all_{avg}.csv', index=False)
+        all_problem_areas_count.to_csv(f'all_counts_{avg}.csv', index=False)
 
-    print('Linear:')
-    print('Accuracy @ 1:')
-    print(f'{np.mean(accuracy_at_1_values_lin)} ± {np.std(accuracy_at_1_values_lin)}')
-    print('Accuracy @ 5:')
-    print(f'{np.mean(accuracy_at_5_values_lin)} ± {np.std(accuracy_at_5_values_lin)}')
-
-    print('Log:')
-    print('Accuracy @ 1:')
-    print(f'{np.mean(accuracy_at_1_values_log)} ± {np.std(accuracy_at_1_values_log)}')
-    print('Accuracy @ 5:')
-    print(f'{np.mean(accuracy_at_5_values_log)} ± {np.std(accuracy_at_5_values_log)}')
+        print(f'{avg}:')
+        print('Accuracy @ 1:')
+        print(f'{np.mean(accuracy_at_1_values)} ± {np.std(accuracy_at_1_values)}')
+        print('Accuracy @ 5:')
+        print(f'{np.mean(accuracy_at_5_values)} ± {np.std(accuracy_at_5_values)}')
 
 
 if __name__ == '__main__':
