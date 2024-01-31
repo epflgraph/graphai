@@ -240,3 +240,12 @@ def extract_scraping_content_callback_task(self, results, headers, long_patterns
                 'date_added': current_datetime
             })
     return results
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
+             name='scraping_6.scraping_dummy_task', ignore_result=False)
+def scraping_dummy_task(self, results):
+    # This task is required for chaining groups due to the peculiarities of celery
+    # Whenever there are two groups in one chain of tasks, there need to be at least
+    # TWO tasks between them, and this dummy task is simply an f(x)=x function.
+    return results
