@@ -123,7 +123,7 @@ def main():
     for avg in ['linear', 'log', 'adaptive']:
         for sampling_method in ['simple', 'weighted']:
             all_problem_areas, all_problem_areas_count, accuracy_at_1_values, accuracy_at_5_values = (
-                find_all_problem_areas(avg=avg)
+                find_all_problem_areas(avg=avg, sampling_method=sampling_method)
             )
             all_problem_areas.to_csv(f'all_{avg}_{sampling_method}.csv', index=False)
             all_problem_areas_count.to_csv(f'all_counts_{avg}_{sampling_method}.csv', index=False)
