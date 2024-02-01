@@ -605,13 +605,13 @@ class OntologyData:
             [csr_matrix(self.symmetric_concept_concept_matrix['matrix_concept_cat_concepts'][
                         self.symmetric_concept_concept_matrix['cluster_concepts'].get(x, []), :].sum(axis=0)
                         )
-             for x in range(len(depth4_categories_list))]
+             for x in range(len(clusters_list))]
         )
         self.symmetric_concept_concept_matrix['matrix_cluster_cat_anchors'] = vstack(
             [csr_matrix(self.symmetric_concept_concept_matrix['matrix_concept_cat_anchors'][
                         self.symmetric_concept_concept_matrix['cluster_concepts'].get(x, []), :].sum(axis=0)
                         )
-             for x in range(len(depth4_categories_list))]
+             for x in range(len(clusters_list))]
         )
 
     def get_concept_concept_similarity(self, concept_1_id, concept_2_id):
