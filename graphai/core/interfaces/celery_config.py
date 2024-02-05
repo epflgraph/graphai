@@ -74,6 +74,10 @@ def create_celery():
     Returns:
         Celery app object
     """
+    os.environ["FORKED_BY_MULTIPROCESSING"] = "1"
+    if os.name != "nt":
+        from billiard import context
+        context._force_start_method("spawn")
     celery_app = current_celery_app
     settings = get_settings()
     celery_app.config_from_object(settings, namespace='CELERY')
