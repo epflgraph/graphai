@@ -6,7 +6,7 @@ from graphai.core.common.caching import ScrapingDBCachingManager
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='text_6.initialize_scraping_url', ignore_result=False)
+             name='scraping_6.initialize_scraping_url', ignore_result=False)
 def initialize_url_and_get_sublinks_task(self, token, url, force=False):
     if token is None or url is None:
         return {
@@ -56,7 +56,7 @@ def initialize_url_and_get_sublinks_task(self, token, url, force=False):
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='text_6.scraping_sublinks_callback', ignore_result=False)
+             name='scraping_6.scraping_sublinks_callback', ignore_result=False)
 def scraping_sublinks_callback_task(self, results):
     if results['data'] is not None and results['fresh']:
         current_datetime = get_current_datetime()
@@ -72,7 +72,7 @@ def scraping_sublinks_callback_task(self, results):
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='text_6.process_all_scraping_sublinks_preprocess', ignore_result=False)
+             name='scraping_6.process_all_scraping_sublinks_preprocess', ignore_result=False)
 def process_all_scraping_sublinks_preprocess_task(self, results, headers, long_patterns, force=False):
     results['cached_results'] = None
     # If there are no results to begin with, we pass them on as-is
@@ -105,7 +105,7 @@ def process_all_scraping_sublinks_preprocess_task(self, results, headers, long_p
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='text_6.process_all_scraping_sublinks_parallel', ignore_result=False)
+             name='scraping_6.process_all_scraping_sublinks_parallel', ignore_result=False)
 def process_all_scraping_sublinks_parallel_task(self, results, i, n_total):
     if results['data'] is None or results.get('cached_results', None) is not None:
         return results
@@ -129,7 +129,7 @@ def process_all_scraping_sublinks_parallel_task(self, results, i, n_total):
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='text_6.process_all_scraping_sublinks_callback', ignore_result=False)
+             name='scraping_6.process_all_scraping_sublinks_callback', ignore_result=False)
 def process_all_scraping_sublinks_callback_task(self, results):
     # If the results are null (e.g. unreachable url)
     if results[0]['data'] is None:
@@ -169,7 +169,7 @@ def process_all_scraping_sublinks_callback_task(self, results):
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='text_6.remove_junk_scraping_parallel', ignore_result=False)
+             name='scraping_6.remove_junk_scraping_parallel', ignore_result=False)
 def remove_junk_scraping_parallel_task(self, results, i, n_total, headers, long_patterns):
     # If there is no junk removal, there's nothing to merge in the callback and nothing to do here
     if not headers and not long_patterns:
@@ -202,7 +202,7 @@ def remove_junk_scraping_parallel_task(self, results, i, n_total, headers, long_
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='text_6.remove_junk_scraping_callback', ignore_result=False)
+             name='scraping_6.remove_junk_scraping_callback', ignore_result=False)
 def remove_junk_scraping_callback_task(self, results):
     # If the results aren't fresh (whether cache hit or unsuccessful), there is nothing to merge and nothing to
     # insert into the database
@@ -224,7 +224,7 @@ def remove_junk_scraping_callback_task(self, results):
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='text_6.extract_scraping_content_callback', ignore_result=False)
+             name='scraping_6.extract_scraping_content_callback', ignore_result=False)
 def extract_scraping_content_callback_task(self, results, headers, long_patterns):
     if results['fresh']:
         current_datetime = get_current_datetime()
@@ -239,4 +239,13 @@ def extract_scraping_content_callback_task(self, results, headers, long_patterns
                 'long_patterns_removed': 1 if long_patterns else 0,
                 'date_added': current_datetime
             })
+    return results
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
+             name='scraping_6.scraping_dummy_task', ignore_result=False)
+def scraping_dummy_task(self, results):
+    # This task is required for chaining groups due to the peculiarities of celery
+    # Whenever there are two groups in one chain of tasks, there need to be at least
+    # TWO tasks between them, and this dummy task is simply an f(x)=x function.
     return results

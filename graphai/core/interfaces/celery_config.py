@@ -46,7 +46,9 @@ class BaseConfig:
             # Video, voice, image
             Queue("video_2", max_priority=2),
             # Ontology
-            Queue("ontology_6", max_priority=6)
+            Queue("ontology_6", max_priority=6),
+            # Scraping
+            Queue("scraping_6", max_priority=6)
         ]
 
         self.CELERY_TASK_ROUTES = (route_task,)
