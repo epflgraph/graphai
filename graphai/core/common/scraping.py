@@ -338,7 +338,12 @@ def extract_text_from_url(url, request_headers=None, max_length=None, tag_search
         tag_search_sequence = ['main', 'body', 'html']
 
     # Fetch webpage from URL
-    response = requests.get(url, allow_redirects=True, headers=request_headers)
+    try:
+        response = requests.get(url, allow_redirects=True, headers=request_headers)
+    except (requests.ConnectionError, requests.HTTPError, requests.Timeout) as e:
+        print('Warning: could not reach destination, full stack trace follows:')
+        print(e)
+        return ''
 
     # Return if there's no response
     if response.text is None:
