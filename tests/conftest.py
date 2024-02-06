@@ -10,4 +10,4 @@ from fixtures.completion import *
 
 from fixtures.scraping import *
 
-from fixtures.ontology import *
+# from fixtures.ontology import *
