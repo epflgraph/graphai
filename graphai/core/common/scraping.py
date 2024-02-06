@@ -340,7 +340,7 @@ def extract_text_from_url(url, request_headers=None, max_length=None, tag_search
     # Fetch webpage from URL
     try:
         response = requests.get(url, allow_redirects=True, headers=request_headers)
-    except (requests.ConnectionError, requests.HTTPError, requests.Timeout) as e:
+    except requests.exceptions.RequestException as e:
         print('Warning: could not reach destination, full stack trace follows:')
         print(e)
         return ''
@@ -596,7 +596,12 @@ def get_sublinks(base_url, validated_url, request_headers=None):
         validated_url = validated_url[:-1]
 
     # Fetch webpage from URL
-    response = requests.get(validated_url, allow_redirects=True, headers=request_headers)
+    try:
+        response = requests.get(validated_url, allow_redirects=True, headers=request_headers)
+    except requests.exceptions.RequestException as e:
+        print('Warning: could not reach destination, full stack trace follows:')
+        print(e)
+        return None, None, None
 
     # Parse and extract links
     soup = BeautifulSoup(response.text, 'lxml')
