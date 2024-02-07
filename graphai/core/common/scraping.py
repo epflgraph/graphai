@@ -111,6 +111,12 @@ def find_edge_patterns(content_stack, flip_strings=False):
     Returns:
         List of patterns
     """
+    # Remove null values
+    content_stack = [x for x in content_stack if x is not None]
+
+    if len(content_stack) == 0:
+        return list()
+
     # Remove duplicates and sort content stack in alphabetic order
     # so that content[k] and content[k+1] are as similar as possible
     content_stack = sorted(list(set(content_stack)), reverse=True)
