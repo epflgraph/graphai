@@ -196,7 +196,7 @@ def get_cluster_category_closest_task(self, cluster_id, avg='log', coeffs=(1, 10
         # If it's a list, it's assumed to be a list of concepts (i.e. a "custom" cluster)
         closest, scores, d3_cat = (
             self.ontology_data_obj.get_custom_cluster_closest_category(cluster_id, avg, coeffs, top_n,
-                                                                use_depth_3=use_depth_3)
+                                                                       use_depth_3=use_depth_3)
         )
     else:
         # Otherwise, it's a single string, and represents an existing cluster

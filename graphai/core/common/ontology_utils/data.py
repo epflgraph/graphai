@@ -3,7 +3,6 @@ from db_cache_manager.db import DB
 import pandas as pd
 import random
 from scipy.sparse import csr_array, csr_matrix, vstack, spmatrix
-from scipy.stats import zscore
 
 from graphai.core.common.common_utils import invert_dict
 from graphai.core.common.config import config

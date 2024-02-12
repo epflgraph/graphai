@@ -102,7 +102,7 @@ async def cluster_parent(data: ClusterInfoRequest):
 
 
 @router.post('/tree/cluster/children', response_model=TreeChildrenResponse)
-async def cluster_parent(data: ClusterInfoRequest):
+async def cluster_children(data: ClusterInfoRequest):
     cluster_id = data.cluster_id
     results = get_cluster_children_task.s(cluster_id).apply_async(priority=6).get(timeout=10)
     results['child_type'] = 'concept'

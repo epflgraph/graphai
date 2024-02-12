@@ -70,7 +70,7 @@ def find_problem_areas_using_error_ratio(results, test_category_concept, train_c
     errors_at_k_categories = pd.merge(errors_at_k_categories, category_test_sizes, how='inner',
                                       on='from_id').rename(columns={'count': 'count_test'})
     errors_at_k_categories['error_ratio'] = (
-            errors_at_k_categories['count_errors'] / errors_at_k_categories['count_test']
+        errors_at_k_categories['count_errors'] / errors_at_k_categories['count_test']
     )
     errors_at_k_categories = errors_at_k_categories.rename(columns={'from_id': 'category_id'})
     problem_areas = errors_at_k_categories.loc[errors_at_k_categories.error_ratio >= ratio].category_id.values.tolist()
@@ -106,9 +106,11 @@ def find_all_problem_areas(n_rounds=20, sampling_method='weighted',
                                                  k=5, ratio=cutoff)
         )
         errors_at_k_categories = errors_at_k_categories.assign(random_state=i)
-        all_problem_areas.append(errors_at_k_categories.loc[
-                                     errors_at_k_categories.category_id.apply(lambda x: x in problem_areas)
-                                 ])
+        all_problem_areas.append(
+            errors_at_k_categories.loc[
+                errors_at_k_categories.category_id.apply(lambda x: x in problem_areas)
+            ]
+        )
     all_problem_areas = pd.concat(all_problem_areas, axis=0)
     all_problem_areas_count = all_problem_areas[['category_id', 'error_ratio']].copy()
     all_problem_areas_count = pd.merge(
