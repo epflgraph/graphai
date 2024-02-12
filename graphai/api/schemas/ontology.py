@@ -35,6 +35,12 @@ class CategoryInfoRequest(BaseModel):
     )
 
 
+class ClusterInfoRequest(BaseModel):
+    cluster_id: str = Field(
+        title="Cluster ID"
+    )
+
+
 class CategoryInfoResponse(BaseModel):
     category_id: str = Field(
         title="Category ID"
@@ -69,9 +75,13 @@ class CategoryChildrenRequest(BaseModel):
     )
 
 
-class CategoryChildrenResponse(BaseModel):
+class TreeChildrenResponse(BaseModel):
     children: Union[List[str], None] = Field(
-        title="Child categories"
+        title="Children"
+    )
+
+    child_type: Union[Literal['category', 'cluster', 'concept'], None] = Field(
+        title="Type of children"
     )
 
 
@@ -213,7 +223,7 @@ class GraphDistanceResponse(BaseModel):
 
 
 class GraphNearestCategoryRequest(BaseModel):
-    avg: Literal['none', 'linear', 'log'] = Field(
+    avg: Literal['none', 'linear', 'log', 'adaptive'] = Field(
         title="Averaging",
         default="log"
     )
@@ -252,8 +262,12 @@ class GraphConceptNearestCategoryRequest(GraphNearestCategoryRequest):
 
 
 class GraphClusterNearestCategoryRequest(GraphNearestCategoryRequest):
-    src: str = Field(
-        title="Source cluster"
+    src: Union[List[str], str] = Field(
+        title="Source cluster",
+        description="The cluster to find the closest category for. The cluster can be an existing or a 'custom' one. "
+                    "If this parameter is a single string, the string represents the ID of an existing cluster. "
+                    "On the other hand, if a list of strings is provided, each element of the list is "
+                    "considered to be the ID of a concept, and the cluster is a 'custom' cluster."
     )
 
 
@@ -303,6 +317,19 @@ class GraphConceptNearestCategoryResponse(BaseModel):
                     "has children) will be children of this category. If the flag is not set, this value is null."
     )
 
+    valid: bool = Field(
+        title="Valid results",
+        description="If this flag is unset while the results are not null, "
+                    "it means that the top result has a score of 0, "
+                    "meaning that effectively, all the results returned are random."
+    )
+
+    existing_label: Union[str, None] = Field(
+        title="Existing category",
+        description="If the requested concept already exists as part of the ontology, this value will reflect "
+                    "its existing parent category."
+    )
+
 
 class GraphClusterNearestCategoryResponse(BaseModel):
     scores: Union[None, List[NearestCategoryElement]] = Field(
@@ -314,6 +341,12 @@ class GraphClusterNearestCategoryResponse(BaseModel):
         description="If the `top_down_search` flag was set, this field will contain the id of the closest "
                     "depth-3 category. In that case, the top few categories (as many as this depth-3 category "
                     "has children) will be children of this category. If the flag is not set, this value is null."
+    )
+
+    existing_label: Union[str, None] = Field(
+        title="Existing category",
+        description="If the requested cluster already exists as part of the ontology, this value will reflect "
+                    "its existing parent category."
     )
 
 

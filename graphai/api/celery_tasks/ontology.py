@@ -43,6 +43,18 @@ def get_category_clusters_task(self, parent_id):
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 5},
+             name='ontology_6.cluster_parent', ignore_result=False, ontology_obj=ontology_data)
+def get_cluster_parent_task(self, child_id):
+    return {'parent': self.ontology_obj.get_cluster_parent(child_id)}
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 5},
+             name='ontology_6.cluster_children', ignore_result=False, ontology_obj=ontology_data)
+def get_cluster_children_task(self, parent_id):
+    return {'children': self.ontology_obj.get_cluster_children(parent_id)}
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 5},
              name='ontology_6.recompute_clusters', ignore_result=False, ontology_data_obj=ontology_data)
 def recompute_clusters_task(self, n_clusters, min_n=None):
     concept_concept = self.ontology_data_obj.get_concept_concept_graphscore_table()
@@ -143,7 +155,9 @@ def get_concept_category_closest_task(self, concept_id, avg='log', coeffs=(1, 10
     if closest is None:
         return {
             'scores': None,
-            'parent_category': None
+            'parent_category': None,
+            'valid': False,
+            'existing_label': None
         }
     result_list = list()
     for i in range(len(closest)):
@@ -164,9 +178,12 @@ def get_concept_category_closest_task(self, concept_id, avg='log', coeffs=(1, 10
                     for j in range(len(best_clusters[i][0]))
                 ]
         result_list.append(current_cat)
+    existing_label = self.ontology_data_obj.get_concept_parent_category(concept_id)
     return {
         'scores': result_list,
         'parent_category': d3_cat,
+        'valid': scores[0] > 0,
+        'existing_label': existing_label
     }
 
 
@@ -175,14 +192,23 @@ def get_concept_category_closest_task(self, concept_id, avg='log', coeffs=(1, 10
              ignore_result=False, ontology_data_obj=ontology_data)
 def get_cluster_category_closest_task(self, cluster_id, avg='log', coeffs=(1, 10), top_n=1,
                                       use_depth_3=False):
-    closest, scores, d3_cat = (
-        self.ontology_data_obj.get_cluster_closest_category(cluster_id, avg, coeffs, top_n,
-                                                            use_depth_3=use_depth_3)
-    )
+    if isinstance(cluster_id, list):
+        # If it's a list, it's assumed to be a list of concepts (i.e. a "custom" cluster)
+        closest, scores, d3_cat = (
+            self.ontology_data_obj.get_custom_cluster_closest_category(cluster_id, avg, coeffs, top_n,
+                                                                       use_depth_3=use_depth_3)
+        )
+    else:
+        # Otherwise, it's a single string, and represents an existing cluster
+        closest, scores, d3_cat = (
+            self.ontology_data_obj.get_cluster_closest_category(cluster_id, avg, coeffs, top_n,
+                                                                use_depth_3=use_depth_3)
+        )
     if closest is None:
         return {
             'scores': None,
-            'parent_category': None
+            'parent_category': None,
+            'existing_label': None
         }
     result_list = [
         {
@@ -192,9 +218,14 @@ def get_cluster_category_closest_task(self, cluster_id, avg='log', coeffs=(1, 10
         }
         for i in range(len(closest))
     ]
+    if isinstance(cluster_id, str):
+        existing_label = self.ontology_data_obj.get_cluster_parent(cluster_id)
+    else:
+        existing_label = None
     return {
         'scores': result_list,
         'parent_category': d3_cat,
+        'existing_label': existing_label
     }
 
 

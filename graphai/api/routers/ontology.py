@@ -8,7 +8,8 @@ from graphai.api.schemas.ontology import (
     CategoryInfoResponse,
     CategoryParentResponse,
     CategoryChildrenRequest,
-    CategoryChildrenResponse,
+    TreeChildrenResponse,
+    ClusterInfoRequest,
     RecomputeClustersRequest,
     RecomputeClustersResponse,
     GraphDistanceRequest,
@@ -33,6 +34,8 @@ from graphai.api.celery_tasks.ontology import (
     get_category_children_task,
     get_category_concepts_task,
     get_category_clusters_task,
+    get_cluster_parent_task,
+    get_cluster_children_task,
     recompute_clusters_task,
     break_up_cluster_task,
     get_concept_category_similarity_task,
@@ -62,21 +65,21 @@ async def tree():
     return results
 
 
-@router.post('/tree/info', response_model=Union[CategoryInfoResponse, None])
+@router.post('/tree/category/info', response_model=Union[CategoryInfoResponse, None])
 async def cat_info(data: CategoryInfoRequest):
     category_id = data.category_id
     results = get_category_info_task.s(category_id).apply_async(priority=6).get(timeout=10)
     return results
 
 
-@router.post('/tree/parent', response_model=CategoryParentResponse)
+@router.post('/tree/category/parent', response_model=CategoryParentResponse)
 async def cat_parent(data: CategoryInfoRequest):
     category_id = data.category_id
     results = get_category_parent_task.s(category_id).apply_async(priority=6).get(timeout=10)
     return results
 
 
-@router.post('/tree/children', response_model=CategoryChildrenResponse)
+@router.post('/tree/category/children', response_model=TreeChildrenResponse)
 async def cat_children(data: CategoryChildrenRequest):
     category_id = data.category_id
     dest_type = data.tgt_type
@@ -87,6 +90,22 @@ async def cat_children(data: CategoryChildrenRequest):
     else:
         task = get_category_clusters_task.s(category_id)
     results = task.apply_async(priority=6).get(timeout=10)
+    results['child_type'] = dest_type
+    return results
+
+
+@router.post('/tree/cluster/parent', response_model=CategoryParentResponse)
+async def cluster_parent(data: ClusterInfoRequest):
+    cluster_id = data.cluster_id
+    results = get_cluster_parent_task.s(cluster_id).apply_async(priority=6).get(timeout=10)
+    return results
+
+
+@router.post('/tree/cluster/children', response_model=TreeChildrenResponse)
+async def cluster_children(data: ClusterInfoRequest):
+    cluster_id = data.cluster_id
+    results = get_cluster_children_task.s(cluster_id).apply_async(priority=6).get(timeout=10)
+    results['child_type'] = 'concept'
     return results
 
 
