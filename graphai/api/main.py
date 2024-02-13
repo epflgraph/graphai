@@ -1,4 +1,5 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends, APIRouter
+from fastapi.security import OAuth2PasswordRequestForm
 from fastapi.responses import RedirectResponse
 
 from graphai.api.common.celery_tools import celery_instance
@@ -13,10 +14,13 @@ import graphai.api.routers.voice as voice_router
 import graphai.api.routers.translation as translation_router
 import graphai.api.routers.completion as summarization_router
 import graphai.api.routers.scraping as scraping_router
+from graphai.api.routers.auth import *
 
 from graphai.api.celery_tasks.text import text_init_task
 from graphai.api.celery_tasks.video import video_init_task
 
+
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 # Initialise FastAPI
 app = FastAPI(
@@ -26,15 +30,48 @@ app = FastAPI(
     version="0.2.1"
 )
 
+
+unauthenticated_router = APIRouter()
+authenticated_router = APIRouter(dependencies=[Depends(oauth2_scheme)])
+
+
+# Root endpoint redirects to docs
+@unauthenticated_router.get("/")
+async def redirect_docs():
+    return RedirectResponse(url='/docs')
+
+
+@unauthenticated_router.post("/token")
+async def login(form_data: OAuth2PasswordRequestForm = Depends()):
+    user_dict = fake_users_db.get(form_data.username)
+    if not user_dict:
+        raise HTTPException(status_code=400, detail="Incorrect username or password")
+    user = UserInDB(**user_dict)
+    hashed_password = fake_hash_password(form_data.password)
+    if not hashed_password == user.hashed_password:
+        raise HTTPException(status_code=400, detail="Incorrect username or password")
+
+    return {"access_token": user.username, "token_type": "bearer"}
+
+
+@authenticated_router.get("/users/me")
+async def read_users_me(current_user: User = Depends(get_current_active_user)):
+    return current_user
+
+
 # Include all routers in the app
-app.include_router(image_router.router)
-app.include_router(ontology_router.router)
-app.include_router(text_router.router)
-app.include_router(video_router.router)
-app.include_router(voice_router.router)
-app.include_router(translation_router.router)
-app.include_router(summarization_router.router)
-app.include_router(scraping_router.router)
+authenticated_router.include_router(image_router.router)
+authenticated_router.include_router(ontology_router.router)
+authenticated_router.include_router(text_router.router)
+authenticated_router.include_router(video_router.router)
+authenticated_router.include_router(voice_router.router)
+authenticated_router.include_router(translation_router.router)
+authenticated_router.include_router(summarization_router.router)
+authenticated_router.include_router(scraping_router.router)
+
+
+app.include_router(unauthenticated_router)
+app.include_router(authenticated_router)
 app.celery_app = celery_instance
 
 
@@ -63,9 +100,3 @@ async def init():
         log('Loaded')
     else:
         log('ERROR: Loading unsuccessful, check celery logs')
-
-
-# Root endpoint redirects to docs
-@app.get("/")
-async def redirect_docs():
-    return RedirectResponse(url='/docs')
