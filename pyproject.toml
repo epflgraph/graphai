@@ -24,7 +24,7 @@ dependencies = [
     "fastapi>=0.95.0",
     "gunicorn",
     "uvicorn",
-    "pydantic",
+    "pydantic>=1.7.4,<1.11.0",
     "requests",
     "httpx",
     "wget",
