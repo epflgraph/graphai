@@ -21,7 +21,7 @@ dependencies = [
     "scipy",
     "pandas",
     "matplotlib",
-    "fastapi",
+    "fastapi>=0.95.0",
     "gunicorn",
     "uvicorn",
     "pydantic",
@@ -69,7 +69,10 @@ dependencies = [
     "opentelemetry-exporter-otlp==1.19.0",
     "opentelemetry-instrumentation-fastapi==0.40b0",
     "pyamg",
-    "yt-dlp"
+    "yt-dlp",
+    "python-multipart",
+    "python-jose[cryptography]",
+    "passlib[bcrypt]"
 ]
 
 [tool.setuptools]
