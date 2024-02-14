@@ -48,6 +48,11 @@ jobs:
           echo "user: ${{ vars.db_user }}" >> config.ini
           echo "password: ${{ secrets.db_password }}" >> config.ini
           echo "" >> config.ini
+          
+          echo "[auth]" >> config.ini
+          echo "schema: ${{ vars.auth_schema }}" >> config.ini
+          echo "secret_key: ${{ secrets.auth_key }}" >> config.ini
+          echo "" >> config.ini
 
           echo "[elasticsearch]" >> config.ini
           echo "host: ${{ vars.es_host }}" >> config.ini
