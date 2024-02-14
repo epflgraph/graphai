@@ -11,7 +11,7 @@ from pydantic import BaseModel
 # openssl rand -hex 32
 SECRET_KEY = "4ce244e14c5bc5b8a9de36e37a938615ba7faa71f306276099ac62a93a3b4086"
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 1800
+ACCESS_TOKEN_EXPIRE_MINUTES = 720
 
 
 fake_users_db = {
