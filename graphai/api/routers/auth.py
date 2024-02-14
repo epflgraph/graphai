@@ -1,5 +1,7 @@
 from datetime import datetime, timedelta, timezone
 from typing import Annotated, Union
+from graphai.core.common.config import config
+from db_cache_manager.db import DB
 
 from fastapi import Depends, HTTPException, status, APIRouter
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
@@ -7,22 +9,13 @@ from jose import ExpiredSignatureError, JWTError, jwt
 from passlib.context import CryptContext
 from pydantic import BaseModel
 
-# to get a string like this run:
+# to get a secret key run:
 # openssl rand -hex 32
-SECRET_KEY = "4ce244e14c5bc5b8a9de36e37a938615ba7faa71f306276099ac62a93a3b4086"
+# and then put it in the config file
+SECRET_KEY = config['auth']['secret_key']
+AUTH_SCHEMA = config['auth']['schema']
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 720
-
-
-fake_users_db = {
-    "johndoe": {
-        "username": "johndoe",
-        "full_name": "John Doe",
-        "email": "johndoe@example.com",
-        "hashed_password": "$2b$12$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW",
-        "disabled": False,
-    }
-}
 
 
 class Token(BaseModel):
@@ -58,14 +51,19 @@ def get_password_hash(password):
     return pwd_context.hash(password)
 
 
-def get_user(db, username: str):
-    if username in db:
-        user_dict = db[username]
+def get_user(username: str):
+    db_manager = DB(config['database'])
+    columns = ['username', 'full_name', 'email', 'hashed_password', 'disabled']
+    query = f"SELECT {', '.join(columns)} FROM {AUTH_SCHEMA}.Users WHERE username=%s"
+    results = db_manager.execute_query(query, (username, ))
+    if len(results) > 0:
+        user_list = results[0]
+        user_dict = {columns[i]: user_list[i] for i in range(len(columns))}
         return UserInDB(**user_dict)
 
 
-def authenticate_user(fake_db, username: str, password: str):
-    user = get_user(fake_db, username)
+def authenticate_user(username: str, password: str):
+    user = get_user(username)
     if not user:
         return False
     if not verify_password(password, user.hashed_password):
@@ -105,7 +103,7 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
         raise expired_exception
     except JWTError:
         raise credentials_exception
-    user = get_user(fake_users_db, username=token_data.username)
+    user = get_user(username=token_data.username)
     if user is None:
         raise credentials_exception
     return user
@@ -129,7 +127,7 @@ authenticated_router = APIRouter(dependencies=[Depends(get_current_active_user)]
 async def login_for_access_token(
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()]
 ) -> Token:
-    user = authenticate_user(fake_users_db, form_data.username, form_data.password)
+    user = authenticate_user(form_data.username, form_data.password)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
