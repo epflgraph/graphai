@@ -68,6 +68,18 @@ async def get_current_active_user(
     return current_user
 
 
+async def get_active_user_dummy():
+    # This function is used to override get_current_active_user when running tests
+    dummy_user = {
+        'username': 'test',
+        'full_name': 'Test McTesterson',
+        'email': 'test@test.com',
+        'hashed_password': 'testhash',
+        'disabled': False
+    }
+    return User(**dummy_user)
+
+
 # Now adding one unauthenticated and one authenticated router
 # Every single endpoint aside from / and /token are in the authenticated router, behind a login
 unauthenticated_router = APIRouter()
