@@ -11,6 +11,8 @@ CREATE TABLE IF NOT EXISTS `auth_graphai`.`Users` (
   KEY `email` (`email`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
+-- You can hash your chosen password using graphai.core.common.auth_utils.get_password_hash
+
 INSERT INTO `auth_graphai`.`Users`
 (`username`,
 `full_name`,
