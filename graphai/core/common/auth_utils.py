@@ -6,14 +6,7 @@ from pydantic import BaseModel
 
 from graphai.core.common.config import config
 
-# to get a secret key run:
-# openssl rand -hex 32
-# and then put it in the config file
-
-SECRET_KEY = config['auth']['secret_key']
 AUTH_SCHEMA = config['auth']['schema']
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 720
 
 
 class Token(BaseModel):

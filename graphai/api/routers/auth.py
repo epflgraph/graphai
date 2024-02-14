@@ -1,10 +1,8 @@
 from datetime import timedelta, datetime, timezone
 from typing import Annotated, Union
+from graphai.core.common.config import config
 
 from graphai.core.common.auth_utils import (
-    SECRET_KEY,
-    ALGORITHM,
-    ACCESS_TOKEN_EXPIRE_MINUTES,
     Token,
     TokenData,
     User,
@@ -15,7 +13,12 @@ from fastapi import Depends, HTTPException, status, APIRouter
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jose import ExpiredSignatureError, JWTError, jwt
 
-
+# to get a secret key run:
+# openssl rand -hex 32
+# and then put it in the config file
+SECRET_KEY = config['auth']['secret_key']
+ALGORITHM = "HS256"
+ACCESS_TOKEN_EXPIRE_MINUTES = 720
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 
