@@ -3,7 +3,7 @@ from typing import Annotated, Union
 
 from fastapi import Depends, HTTPException, status, APIRouter
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
-from jose import JWTError, jwt
+from jose import ExpiredSignatureError, JWTError, jwt
 from passlib.context import CryptContext
 from pydantic import BaseModel
 
@@ -98,12 +98,11 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         username: str = payload.get("sub")
-        expiration_time: datetime = payload.get("exp")
         if username is None:
             raise credentials_exception
-        if expiration_time is None or datetime.now(timezone.utc) > expiration_time:
-            raise expired_exception
         token_data = TokenData(username=username)
+    except ExpiredSignatureError:
+        raise expired_exception
     except JWTError:
         raise credentials_exception
     user = get_user(fake_users_db, username=token_data.username)
