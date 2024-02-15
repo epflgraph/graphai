@@ -10,8 +10,9 @@ def main():
         success = False
     if success:
         print('Successful, now moving date_added to date_modified')
-        db_manager.db.execute_query(f"UPDATE `{db_manager.schema}`.`{db_manager.cache_table}` "
-                                    f"SET date_modified = date_added")
+        db_manager.db.execute_query("UPDATE `%s`.`%s` "
+                                    "SET date_modified = date_added",
+                                    values=(db_manager.schema, db_manager.cache_table))
 
 
 if __name__ == '__main__':
