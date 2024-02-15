@@ -67,17 +67,17 @@ class VideoDBCachingManager(DBCachingManagerBase):
     def init_db(self):
         # Ensuring the schema's existence
         self.db.execute_query(
-            f"""
-            CREATE DATABASE IF NOT EXISTS `{self.schema}`
+            """
+            CREATE DATABASE IF NOT EXISTS `%s`
             DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci
             DEFAULT ENCRYPTION='N';
-            """
+            """, values=(self.schema, )
         )
 
         # Creating the cache table if it does not exist
         self.db.execute_query(
-            f"""
-            CREATE TABLE IF NOT EXISTS `{self.schema}`.`{self.cache_table}` (
+            """
+            CREATE TABLE IF NOT EXISTS `%s`.`%s` (
               `id_token` VARCHAR(255),
               `origin_token` LONGTEXT,
               `fingerprint` VARCHAR(255) DEFAULT NULL,
@@ -85,29 +85,29 @@ class VideoDBCachingManager(DBCachingManagerBase):
               `date_modified` DATETIME DEFAULT NULL,
               PRIMARY KEY id_token (id_token)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-            """
+            """, values=(self.schema, self.cache_table)
         )
 
         # Creating an origin_token index (since it's LONGTEXT, we need to specify index length)
         try:
             self.db.execute_query(
-                f"""
-                CREATE INDEX `video_main_origin_token_index` ON `{self.schema}`.`{self.cache_table}` (`origin_token`(512));
                 """
+                CREATE INDEX `video_main_origin_token_index` ON `%s`.`%s` (`origin_token`(512));
+                """, values=(self.schema, self.cache_table)
             )
         except Exception:
             pass
 
         # Creating the closest match table
         self.db.execute_query(
-            f"""
-            CREATE TABLE IF NOT EXISTS `{self.schema}`.`{self.most_similar_table}` (
+            """
+            CREATE TABLE IF NOT EXISTS `%s`.`%s` (
               `id_token` VARCHAR(255),
               `most_similar_token` VARCHAR(255) DEFAULT NULL,
               PRIMARY KEY id_token (id_token),
               KEY most_similar_token (most_similar_token)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-            """
+            """, values=(self.schema, self.most_similar_table)
         )
 
 
@@ -123,17 +123,17 @@ class AudioDBCachingManager(DBCachingManagerBase):
     def init_db(self):
         # Ensuring the schema's existence
         self.db.execute_query(
-            f"""
-            CREATE DATABASE IF NOT EXISTS `{self.schema}`
+            """
+            CREATE DATABASE IF NOT EXISTS `%s`
             DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci
             DEFAULT ENCRYPTION='N';
-            """
+            """, values=(self.schema, )
         )
 
         # Creating the cache table if it does not exist
         self.db.execute_query(
-            f"""
-            CREATE TABLE IF NOT EXISTS `{self.schema}`.`{self.cache_table}` (
+            """
+            CREATE TABLE IF NOT EXISTS `%s`.`%s` (
               `id_token` VARCHAR(255),
               `origin_token` VARCHAR(255),
               `fingerprint` LONGTEXT DEFAULT NULL,
@@ -149,15 +149,15 @@ class AudioDBCachingManager(DBCachingManagerBase):
               `date_added` DATETIME DEFAULT NULL,
               PRIMARY KEY id_token (id_token)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-            """
+            """, values=(self.schema, self.cache_table)
         )
 
         # Creating an origin_token index
         try:
             self.db.execute_query(
-                f"""
-                CREATE INDEX `audio_main_origin_token_index` ON `{self.schema}`.`{self.cache_table}` (`origin_token`);
                 """
+                CREATE INDEX `audio_main_origin_token_index` ON `%s`.`%s` (`origin_token`);
+                """, values=(self.schema, self.cache_table)
             )
         except Exception:
             pass
@@ -165,13 +165,13 @@ class AudioDBCachingManager(DBCachingManagerBase):
         # Creating the closest match table
         self.db.execute_query(
             f"""
-            CREATE TABLE IF NOT EXISTS `{self.schema}`.`{self.most_similar_table}` (
+            CREATE TABLE IF NOT EXISTS `%s`.`%s` (
               `id_token` VARCHAR(255),
               `most_similar_token` VARCHAR(255) DEFAULT NULL,
               PRIMARY KEY id_token (id_token),
               KEY most_similar_token (most_similar_token)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-            """
+            """, values=(self.schema, self.most_similar_table)
         )
 
 
@@ -187,17 +187,17 @@ class SlideDBCachingManager(DBCachingManagerBase):
     def init_db(self):
         # Ensuring the schema's existence
         self.db.execute_query(
-            f"""
-            CREATE DATABASE IF NOT EXISTS `{self.schema}`
+            """
+            CREATE DATABASE IF NOT EXISTS `%s`
             DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci
             DEFAULT ENCRYPTION='N';
-            """
+            """, values=(self.schema, )
         )
 
         # Creating the cache table if it does not exist
         self.db.execute_query(
-            f"""
-            CREATE TABLE IF NOT EXISTS `{self.schema}`.`{self.cache_table}` (
+            """
+            CREATE TABLE IF NOT EXISTS `%s`.`%s` (
               `id_token` VARCHAR(255),
               `origin_token` VARCHAR(255),
               `fingerprint` LONGTEXT DEFAULT NULL,
@@ -213,15 +213,15 @@ class SlideDBCachingManager(DBCachingManagerBase):
               `date_added` DATETIME DEFAULT NULL,
               PRIMARY KEY id_token (id_token)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-            """
+            """, values=(self.schema, self.cache_table)
         )
 
         # Creating the fingerprint index if it doesn't exist
         try:
             self.db.execute_query(
-                f"""
-                CREATE INDEX `slide_main_fp_index` ON `{self.schema}`.`{self.cache_table}` (`fingerprint`(64));
                 """
+                CREATE INDEX `slide_main_fp_index` ON `%s`.`%s` (`fingerprint`(64));
+                """, values=(self.schema, self.cache_table)
             )
         except Exception:
             pass
@@ -229,23 +229,23 @@ class SlideDBCachingManager(DBCachingManagerBase):
         # Creating an origin_token index
         try:
             self.db.execute_query(
-                f"""
-                CREATE INDEX `slide_main_origin_token_index` ON `{self.schema}`.`{self.cache_table}` (`origin_token`);
                 """
+                CREATE INDEX `slide_main_origin_token_index` ON `%s`.`%s` (`origin_token`);
+                """, values=(self.schema, self.cache_table)
             )
         except Exception:
             pass
 
         # Creating the closest match table
         self.db.execute_query(
-            f"""
-            CREATE TABLE IF NOT EXISTS `{self.schema}`.`{self.most_similar_table}` (
+            """
+            CREATE TABLE IF NOT EXISTS `%s`.`%s` (
               `id_token` VARCHAR(255),
               `most_similar_token` VARCHAR(255) DEFAULT NULL,
               PRIMARY KEY id_token (id_token),
               KEY most_similar_token (most_similar_token)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-            """
+            """, values=(self.schema, self.most_similar_table)
         )
 
 
@@ -261,17 +261,17 @@ class TextDBCachingManager(DBCachingManagerBase):
     def init_db(self):
         # Making sure the schema exists
         self.db.execute_query(
-            f"""
-            CREATE DATABASE IF NOT EXISTS `{self.schema}`
+            """
+            CREATE DATABASE IF NOT EXISTS `%s`
             DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci
             DEFAULT ENCRYPTION='N';
-            """
+            """, values=(self.schema, )
         )
 
         # Creating the cache table if it does not exist
         self.db.execute_query(
-            f"""
-            CREATE TABLE IF NOT EXISTS `{self.schema}`.`{self.cache_table}` (
+            """
+            CREATE TABLE IF NOT EXISTS `%s`.`%s` (
               `id_token` VARCHAR(255),
               `fingerprint` VARCHAR(255) DEFAULT NULL,
               `source` LONGTEXT DEFAULT NULL,
@@ -281,29 +281,29 @@ class TextDBCachingManager(DBCachingManagerBase):
               `date_added` DATETIME DEFAULT NULL,
               PRIMARY KEY id_token (id_token)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-            """
+            """, values=(self.schema, self.cache_table)
         )
 
         # Creating the fingerprint index if it doesn't exist
         try:
             self.db.execute_query(
-                f"""
-                CREATE INDEX `text_main_fp_index` ON `{self.schema}`.`{self.cache_table}` (`fingerprint`(64));
                 """
+                CREATE INDEX `text_main_fp_index` ON `%s`.`%s` (`fingerprint`(64));
+                """, values=(self.schema, self.cache_table)
             )
         except Exception:
             pass
 
         # Creating the closest match table
         self.db.execute_query(
-            f"""
-            CREATE TABLE IF NOT EXISTS `{self.schema}`.`{self.most_similar_table}` (
+            """
+            CREATE TABLE IF NOT EXISTS `%s`.`%s` (
               `id_token` VARCHAR(255),
               `most_similar_token` VARCHAR(255) DEFAULT NULL,
               PRIMARY KEY id_token (id_token),
               KEY most_similar_token (most_similar_token)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-            """
+            """, values=(self.schema, self.most_similar_table)
         )
 
 
@@ -319,17 +319,17 @@ class CompletionDBCachingManager(DBCachingManagerBase):
     def init_db(self):
         # Making sure the schema exists
         self.db.execute_query(
-            f"""
-            CREATE DATABASE IF NOT EXISTS `{self.schema}`
+            """
+            CREATE DATABASE IF NOT EXISTS `%s`
             DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci
             DEFAULT ENCRYPTION='N';
-            """
+            """, values=(self.schema, )
         )
 
         # Creating the cache table if it does not exist
         self.db.execute_query(
-            f"""
-            CREATE TABLE IF NOT EXISTS `{self.schema}`.`{self.cache_table}` (
+            """
+            CREATE TABLE IF NOT EXISTS `%s`.`%s` (
               `id_token` VARCHAR(255),
               `fingerprint` VARCHAR(255) DEFAULT NULL,
               `input_text` LONGTEXT DEFAULT NULL,
@@ -343,29 +343,29 @@ class CompletionDBCachingManager(DBCachingManagerBase):
               `date_added` DATETIME DEFAULT NULL,
               PRIMARY KEY id_token (id_token)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-            """
+            """, values=(self.schema, self.cache_table)
         )
 
         # Creating the fingerprint index if it doesn't exist
         try:
             self.db.execute_query(
-                f"""
-                CREATE INDEX `summary_main_fp_index` ON `{self.schema}`.`{self.cache_table}` (`fingerprint`(64));
                 """
+                CREATE INDEX `summary_main_fp_index` ON `%s`.`%s` (`fingerprint`(64));
+                """, values=(self.schema, self.cache_table)
             )
         except Exception:
             pass
 
         # Creating the closest match table
         self.db.execute_query(
-            f"""
-            CREATE TABLE IF NOT EXISTS `{self.schema}`.`{self.most_similar_table}` (
+            """
+            CREATE TABLE IF NOT EXISTS `%s`.`%s` (
               `id_token` VARCHAR(255),
               `most_similar_token` VARCHAR(255) DEFAULT NULL,
               PRIMARY KEY id_token (id_token),
               KEY most_similar_token (most_similar_token)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-            """
+            """, values=(self.schema, self.most_similar_table)
         )
 
 
@@ -383,17 +383,17 @@ class ScrapingDBCachingManager(DBCachingManagerBase):
     def init_db(self):
         # Making sure the schema exists
         self.db.execute_query(
-            f"""
-            CREATE DATABASE IF NOT EXISTS `{self.schema}`
+            """
+            CREATE DATABASE IF NOT EXISTS `%s`
             DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci
             DEFAULT ENCRYPTION='N';
-            """
+            """, values=(self.schema, )
         )
 
         # Creating the cache table if it does not exist
         self.db.execute_query(
-            f"""
-            CREATE TABLE IF NOT EXISTS `{self.schema}`.`{self.cache_table}` (
+            """
+            CREATE TABLE IF NOT EXISTS `%s`.`%s` (
               `id_token` VARCHAR(255),
               `origin_token` VARCHAR(255),
               `fingerprint` VARCHAR(255) DEFAULT NULL,
@@ -405,15 +405,15 @@ class ScrapingDBCachingManager(DBCachingManagerBase):
               `date_added` DATETIME,
               PRIMARY KEY id_token (id_token)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-            """
+            """, values=(self.schema, self.cache_table)
         )
 
         # Creating the fingerprint index if it doesn't exist
         try:
             self.db.execute_query(
-                f"""
-                CREATE INDEX `scraping_main_fp_index` ON `{self.schema}`.`{self.cache_table}` (`fingerprint`);
                 """
+                CREATE INDEX `scraping_main_fp_index` ON `%s`.`%s` (`fingerprint`);
+                """, values=(self.schema, self.cache_table)
             )
         except Exception:
             pass
@@ -421,23 +421,23 @@ class ScrapingDBCachingManager(DBCachingManagerBase):
         # Creating the parent_token index if it doesn't exist
         try:
             self.db.execute_query(
-                f"""
-                CREATE INDEX `scraping_main_origin_index` ON `{self.schema}`.`{self.cache_table}` (`origin_token`);
                 """
+                CREATE INDEX `scraping_main_origin_index` ON `%s`.`%s` (`origin_token`);
+                """, values=(self.schema, self.cache_table)
             )
         except Exception:
             pass
 
         # Creating the closest match table
         self.db.execute_query(
-            f"""
-            CREATE TABLE IF NOT EXISTS `{self.schema}`.`{self.most_similar_table}` (
+            """
+            CREATE TABLE IF NOT EXISTS `%s`.`%s` (
               `id_token` VARCHAR(255),
               `most_similar_token` VARCHAR(255) DEFAULT NULL,
               PRIMARY KEY id_token (id_token),
               KEY most_similar_token (most_similar_token)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-            """
+            """, values=(self.schema, self.most_similar_table)
         )
 
     def get_details_using_origin(self, origin_token, cols):
