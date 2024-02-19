@@ -69,8 +69,15 @@ order to create your users table and add the first user.
    two are set to `auth_graphai` by default.
 3. Create further users using the same SQL file, if desired.
 
-Now, your users will be able to log in and obtain bearer tokens through the `/token` endpoint, which will grant them 
-access to virtually every other endpoint.
+Now, your users will be able to log in and obtain bearer tokens through the `/token` endpoint as follows:
+```
+curl -X 'POST' 'http://host:28800/token' -H 'accept: application/json' -H 'Content-Type: application/x-www-form-urlencoded' -d 'grant_type=&username=YOURUSERNAME&password=YOURPASSWORD&scope=&client_id=&client_secret='
+```
+
+The access token received from this endpoint can then be used as part of the header for requests to other endpoints:
+```
+-H 'Authorization: Bearer ACCESS_TOKEN_GOES_HERE'
+```
 
 ## Deployment
 To deploy the API, make sure the RabbitMQ and Redis services are running and accessible at the urls provided in the corresponding config file.
