@@ -58,7 +58,7 @@ then edit it with your credentials and preferences.
 From version 0.3.0 onwards, the API uses bearer tokens for authentication. In order for this authentication to work, 
 follow these steps:
 
-1. Add the `[auth]` section to the `config.ini` file. The secret key can be generated using `openssl rand -hex 32`. 
+1. Add an `[auth]` section to the `config.ini` file, as shown in the example config file. The secret key can be generated using `openssl rand -hex 32`. 
 Generate your own and do NOT use the secret key included in the example config file!
 2. Modify and run the SQL file `init_auth_db.sql`, found in the `queries` folder in the root directory of the repo in 
 order to create your users table and add the first user.
