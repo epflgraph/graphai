@@ -14,6 +14,11 @@ import graphai.api.routers.translation as translation_router
 import graphai.api.routers.completion as summarization_router
 import graphai.api.routers.scraping as scraping_router
 
+from graphai.api.routers.auth import (
+    unauthenticated_router,
+    authenticated_router
+)
+
 from graphai.api.celery_tasks.text import text_init_task
 from graphai.api.celery_tasks.video import video_init_task
 
@@ -26,15 +31,20 @@ app = FastAPI(
     version="0.2.1"
 )
 
+
 # Include all routers in the app
-app.include_router(image_router.router)
-app.include_router(ontology_router.router)
-app.include_router(text_router.router)
-app.include_router(video_router.router)
-app.include_router(voice_router.router)
-app.include_router(translation_router.router)
-app.include_router(summarization_router.router)
-app.include_router(scraping_router.router)
+authenticated_router.include_router(image_router.router)
+authenticated_router.include_router(ontology_router.router)
+authenticated_router.include_router(text_router.router)
+authenticated_router.include_router(video_router.router)
+authenticated_router.include_router(voice_router.router)
+authenticated_router.include_router(translation_router.router)
+authenticated_router.include_router(summarization_router.router)
+authenticated_router.include_router(scraping_router.router)
+
+
+app.include_router(unauthenticated_router)
+app.include_router(authenticated_router)
 app.celery_app = celery_instance
 
 

@@ -4,14 +4,14 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "graphai"
-version = "0.2.1"
+version = "0.3.0"
 authors = [
   { name="Aitor Pérez", email="aitor.perez@epfl.ch" },
   { name="Ramtin Yazdanian", email="ramtin.yazdanian@epfl.ch" }
 ]
 description = "The graphai package contains tools and services enhancing the EPFL Graph project with AI-based utilities."
 readme = "README.md"
-requires-python = ">=3.7"
+requires-python = ">=3.9"
 classifiers = [
     "Programming Language :: Python :: 3",
     "Operating System :: OS Independent"
@@ -21,10 +21,10 @@ dependencies = [
     "scipy",
     "pandas",
     "matplotlib",
-    "fastapi",
+    "fastapi>=0.95.0",
     "gunicorn",
     "uvicorn",
-    "pydantic",
+    "pydantic>=1.7.4,<1.11.0",
     "requests",
     "httpx",
     "wget",
@@ -62,14 +62,17 @@ dependencies = [
     "sphinx-material",
     "sphinx-rtd-theme",
     "pytest-celery",
-    "db-cache-manager>=0.0.3.1",
+    "db-cache-manager>=0.1.0",
     "elasticsearch-interface",
     "scikit-learn",
     "opentelemetry-distro==0.40b0",
     "opentelemetry-exporter-otlp==1.19.0",
     "opentelemetry-instrumentation-fastapi==0.40b0",
     "pyamg",
-    "yt-dlp"
+    "yt-dlp",
+    "python-multipart",
+    "python-jose[cryptography]",
+    "passlib[bcrypt]"
 ]
 
 [tool.setuptools]

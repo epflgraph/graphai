@@ -54,6 +54,24 @@ then edit it with your credentials and preferences.
 
 > ℹ️ The caching additionally requires either the existence of the schema whose name is specified in the file (`cache_graphai` by default) in your database or otherwise the permission to create a new schema.
 
+### Authentication
+From version 0.3.0 onwards, the API uses bearer tokens for authentication. In order for this authentication to work, 
+follow these steps:
+
+1. Add an `[auth]` section to the `config.ini` file, as shown in the example config file. The secret key can be generated using `openssl rand -hex 32`. 
+Generate your own and do NOT use the secret key included in the example config file!
+2. Modify and run the SQL file `init_auth_db.sql`, found in the `queries` folder in the root directory of the repo in 
+order to create your users table and add the first user.
+   1. Be sure to fill in the details of the user. Using your desired password, you can generate the value for
+   `hashed_password` using the function `graphai.core.common.auth_utils.get_password_hash`, which uses 
+   bcrypt encryption and is used by the API itself.
+   2. Make sure that the name of the schema matches the one indicated in the `[auth]` section of `config.ini`. These 
+   two are set to `auth_graphai` by default.
+3. Create further users using the same SQL file, if desired.
+
+Now, your users will be able to log in and obtain bearer tokens through the `/token` endpoint, which will grant them 
+access to virtually every other endpoint.
+
 ## Deployment
 To deploy the API, make sure the RabbitMQ and Redis services are running and accessible at the urls provided in the corresponding config file.
 
@@ -64,13 +82,14 @@ cd /path/to/project/graphai/api
 ./deploy_celery.sh
 ```
  
-> ℹ️ Celery can run jobs using **threads** or **processes**. Because of the [Global Interpreter Lock (GIL)](https://docs.celeryq.dev/projects/celery-enhancement-proposals/en/latest/glossary.html#term-GIL) in Python, running using threads will mostly reduce your tasks from true parallelism to concurrency (although this is only true when running Python bytecode, as opposed to e.g. C libraries underneath, which *are* truly run in parallel). However, using processes means that you will have one copy of your read-only (potentially large) objects *per process*.
+> ℹ️ Celery can run jobs using **threads** or **processes**. Because of the [Global Interpreter Lock (GIL)](https://docs.celeryq.dev/projects/celery-enhancement-proposals/en/latest/glossary.html#term-GIL) in Python, running using threads will mostly reduce your tasks from true parallelism to concurrency (although this is only true when running Python bytecode, as opposed to e.g. C libraries underneath or I/O calls, which *are* truly run in parallel). However, using processes means that you will have one copy of your read-only (potentially large) objects *per process*.
 > 
-> The `deploy_celery.sh` script launches two workers, both of which use threads, one designed to handle time-critical tasks, and another designed to handle long-running tasks. When writing tasks and jobs, be mindful of their overall priority and assign them to the appropriate worker (either using the existing queues or by adding a new queue to `core/interfaces/celery_config.py` and `deploy_celery.sh`).
+> The `deploy_celery.sh` script launches three workers, two of which use threads. Out of those two, one is designed to handle time-critical tasks, and another is designed to handle long-running tasks. When writing new tasks and jobs, be mindful of their overall priority and assign them to the appropriate worker (either using the existing queues or by adding a new queue to `core/interfaces/celery_config.py` and `deploy_celery.sh`).
+> If your tasks do not use any large objects but need to run fast, you can use the `prefork` pool in order to use true parallelism.
 > * Launching multiple workers also allows you to set the niceness value of each worker process, thus giving you more control over priorities.
 > * For more optimization tips, particularly regarding the `--prefetch-multiplier` flag, see [here](https://docs.celeryq.dev/en/stable/userguide/optimizing.html#optimizing-prefetch-limit).
 
-> ℹ️ The `deploy_celery.sh` script launches workers in detached mode. In order to monitor the status of **all** workers, use the `monitor_celery.sh` script. In order to terminate them all, use the `cleanup_celery_workers.sh` script. See more [here](https://docs.celeryq.dev/en/stable/userguide/workers.html#stopping-the-worker).
+> ℹ️ The `deploy_celery.sh` script launches workers in detached mode. You can monitor them using the Flower API, which resides at `localhost:5555` by default. In order to terminate them all, use the `cleanup_celery_workers.sh` script. See more [here](https://docs.celeryq.dev/en/stable/userguide/workers.html#stopping-the-worker).
 
 ### Deploy the API
 Once the Celery workers are running, to deploy the API, run the [deploy.sh](graphai/api/deploy.sh) script from the [graphai/api](graphai/api) folder:
