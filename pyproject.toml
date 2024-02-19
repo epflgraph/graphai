@@ -62,7 +62,7 @@ dependencies = [
     "sphinx-material",
     "sphinx-rtd-theme",
     "pytest-celery",
-    "db-cache-manager>=0.0.3.1",
+    "db-cache-manager>=0.1.0",
     "elasticsearch-interface",
     "scikit-learn",
     "opentelemetry-distro==0.40b0",
