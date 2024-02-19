@@ -54,6 +54,24 @@ then edit it with your credentials and preferences.
 
 > ℹ️ The caching additionally requires either the existence of the schema whose name is specified in the file (`cache_graphai` by default) in your database or otherwise the permission to create a new schema.
 
+### Authentication
+From version 0.3.0 onwards, the API uses bearer tokens for authentication. In order for this authentication to work, 
+follow these steps:
+
+1. Add the `[auth]` section to the `config.ini` file. The secret key can be generated using `openssl rand -hex 32`. 
+Generate your own and do NOT use the secret key included in the example config file!
+2. Modify and run the SQL file `init_auth_db.sql`, found in the `queries` folder in the root directory of the repo in 
+order to create your users table and add the first user.
+   1. Be sure to fill in the details of the user. Using your desired password, you can generate the value for
+   `hashed_password` using the function `graphai.core.common.auth_utils.get_password_hash`, which uses 
+   bcrypt encryption and is used by the API itself.
+   2. Make sure that the name of the schema matches the one indicated in the `[auth]` section of `config.ini`. These 
+   two are set to `auth_graphai` by default.
+3. Create further users using the same SQL file, if desired.
+
+Now, your users will be able to log in and obtain bearer tokens through the `/token` endpoint, which will grant them 
+access to virtually every other endpoint.
+
 ## Deployment
 To deploy the API, make sure the RabbitMQ and Redis services are running and accessible at the urls provided in the corresponding config file.
 
