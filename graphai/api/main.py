@@ -1,5 +1,4 @@
-from fastapi import FastAPI, Depends, APIRouter
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from fastapi import FastAPI
 from fastapi.responses import RedirectResponse
 
 from graphai.api.common.celery_tools import celery_instance
