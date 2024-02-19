@@ -1,19 +1,23 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="./">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>graphai.core.text.keywords module &mdash; EPFL Graph AI</title>
-      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+
+  
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-        <script src="_static/doctools.js"></script>
-        <script src="_static/sphinx_highlight.js"></script>
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -88,10 +92,10 @@
            <div itemprop="articleBody">
              
   <section id="module-graphai.core.text.keywords">
-<span id="graphai-core-text-keywords-module"></span><h1>graphai.core.text.keywords module<a class="headerlink" href="#module-graphai.core.text.keywords" title="Permalink to this heading"></a></h1>
+<span id="graphai-core-text-keywords-module"></span><h1>graphai.core.text.keywords module<a class="headerlink" href="#module-graphai.core.text.keywords" title="Link to this heading"></a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="graphai.core.text.keywords.word_tokens">
-<span class="sig-prename descclassname"><span class="pre">graphai.core.text.keywords.</span></span><span class="sig-name descname"><span class="pre">word_tokens</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.text.keywords.word_tokens" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">graphai.core.text.keywords.</span></span><span class="sig-name descname"><span class="pre">word_tokens</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.text.keywords.word_tokens" title="Link to this definition"></a></dt>
 <dd><p>Generates all possible word tokens from a sentence.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -113,7 +117,7 @@
 
 <dl class="py function">
 <dt class="sig sig-object py" id="graphai.core.text.keywords.rake_extract">
-<span class="sig-prename descclassname"><span class="pre">graphai.core.text.keywords.</span></span><span class="sig-name descname"><span class="pre">rake_extract</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_nltk</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">split_words</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_scores</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filter_past_tenses_and_adverbs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.text.keywords.rake_extract" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">graphai.core.text.keywords.</span></span><span class="sig-name descname"><span class="pre">rake_extract</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_nltk</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">split_words</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_scores</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filter_past_tenses_and_adverbs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.text.keywords.rake_extract" title="Link to this definition"></a></dt>
 <dd><p>Extracts keywords from unconstrained text using python-rake or nltk-rake.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -157,7 +161,7 @@ participles or adverbs. Default: False.</p></li>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="graphai.core.text.keywords.get_keywords">
-<span class="sig-prename descclassname"><span class="pre">graphai.core.text.keywords.</span></span><span class="sig-name descname"><span class="pre">get_keywords</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_nltk</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.text.keywords.get_keywords" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">graphai.core.text.keywords.</span></span><span class="sig-name descname"><span class="pre">get_keywords</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_nltk</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.text.keywords.get_keywords" title="Link to this definition"></a></dt>
 <dd><p>Normalize raw text and extract keywords.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>

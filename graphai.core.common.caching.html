@@ -1,24 +1,28 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="./">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>graphai.core.common.caching module &mdash; EPFL Graph AI</title>
-      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+
+  
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-        <script src="_static/doctools.js"></script>
-        <script src="_static/sphinx_highlight.js"></script>
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="graphai.core.common.common_utils module" href="graphai.core.common.common_utils.html" />
-    <link rel="prev" title="graphai.core.common.ontology_utils.data module" href="graphai.core.common.ontology_utils.data.html" /> 
+    <link rel="prev" title="graphai.core.common.auth_utils module" href="graphai.core.common.auth_utils.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -89,10 +93,10 @@
            <div itemprop="articleBody">
              
   <section id="module-graphai.core.common.caching">
-<span id="graphai-core-common-caching-module"></span><h1>graphai.core.common.caching module<a class="headerlink" href="#module-graphai.core.common.caching" title="Permalink to this heading"></a></h1>
+<span id="graphai-core-common-caching-module"></span><h1>graphai.core.common.caching module<a class="headerlink" href="#module-graphai.core.common.caching" title="Link to this heading"></a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="graphai.core.common.caching.delete_file">
-<span class="sig-prename descclassname"><span class="pre">graphai.core.common.caching.</span></span><span class="sig-name descname"><span class="pre">delete_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.caching.delete_file" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">graphai.core.common.caching.</span></span><span class="sig-name descname"><span class="pre">delete_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.caching.delete_file" title="Link to this definition"></a></dt>
 <dd><p>Deletes a file
 :param file_path: Full path of the file</p>
 <dl class="field-list simple">
@@ -104,7 +108,7 @@
 
 <dl class="py function">
 <dt class="sig sig-object py" id="graphai.core.common.caching.create_symlink_between_paths">
-<span class="sig-prename descclassname"><span class="pre">graphai.core.common.caching.</span></span><span class="sig-name descname"><span class="pre">create_symlink_between_paths</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">old_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new_path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.caching.create_symlink_between_paths" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">graphai.core.common.caching.</span></span><span class="sig-name descname"><span class="pre">create_symlink_between_paths</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">old_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new_path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.caching.create_symlink_between_paths" title="Link to this definition"></a></dt>
 <dd><p>Creates a symlink from new_path to old_path
 :param old_path: Path to the old (real) file
 :param new_path: Path to the new (symlink) file</p>
@@ -117,71 +121,71 @@
 
 <dl class="py class">
 <dt class="sig sig-object py" id="graphai.core.common.caching.VideoDBCachingManager">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">graphai.core.common.caching.</span></span><span class="sig-name descname"><span class="pre">VideoDBCachingManager</span></span><a class="headerlink" href="#graphai.core.common.caching.VideoDBCachingManager" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">graphai.core.common.caching.</span></span><span class="sig-name descname"><span class="pre">VideoDBCachingManager</span></span><a class="headerlink" href="#graphai.core.common.caching.VideoDBCachingManager" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">DBCachingManagerBase</span></code></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="graphai.core.common.caching.VideoDBCachingManager.init_db">
-<span class="sig-name descname"><span class="pre">init_db</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.caching.VideoDBCachingManager.init_db" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">init_db</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.caching.VideoDBCachingManager.init_db" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="graphai.core.common.caching.AudioDBCachingManager">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">graphai.core.common.caching.</span></span><span class="sig-name descname"><span class="pre">AudioDBCachingManager</span></span><a class="headerlink" href="#graphai.core.common.caching.AudioDBCachingManager" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">graphai.core.common.caching.</span></span><span class="sig-name descname"><span class="pre">AudioDBCachingManager</span></span><a class="headerlink" href="#graphai.core.common.caching.AudioDBCachingManager" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">DBCachingManagerBase</span></code></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="graphai.core.common.caching.AudioDBCachingManager.init_db">
-<span class="sig-name descname"><span class="pre">init_db</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.caching.AudioDBCachingManager.init_db" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">init_db</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.caching.AudioDBCachingManager.init_db" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="graphai.core.common.caching.SlideDBCachingManager">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">graphai.core.common.caching.</span></span><span class="sig-name descname"><span class="pre">SlideDBCachingManager</span></span><a class="headerlink" href="#graphai.core.common.caching.SlideDBCachingManager" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">graphai.core.common.caching.</span></span><span class="sig-name descname"><span class="pre">SlideDBCachingManager</span></span><a class="headerlink" href="#graphai.core.common.caching.SlideDBCachingManager" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">DBCachingManagerBase</span></code></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="graphai.core.common.caching.SlideDBCachingManager.init_db">
-<span class="sig-name descname"><span class="pre">init_db</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.caching.SlideDBCachingManager.init_db" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">init_db</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.caching.SlideDBCachingManager.init_db" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="graphai.core.common.caching.TextDBCachingManager">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">graphai.core.common.caching.</span></span><span class="sig-name descname"><span class="pre">TextDBCachingManager</span></span><a class="headerlink" href="#graphai.core.common.caching.TextDBCachingManager" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">graphai.core.common.caching.</span></span><span class="sig-name descname"><span class="pre">TextDBCachingManager</span></span><a class="headerlink" href="#graphai.core.common.caching.TextDBCachingManager" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">DBCachingManagerBase</span></code></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="graphai.core.common.caching.TextDBCachingManager.init_db">
-<span class="sig-name descname"><span class="pre">init_db</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.caching.TextDBCachingManager.init_db" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">init_db</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.caching.TextDBCachingManager.init_db" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="graphai.core.common.caching.CompletionDBCachingManager">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">graphai.core.common.caching.</span></span><span class="sig-name descname"><span class="pre">CompletionDBCachingManager</span></span><a class="headerlink" href="#graphai.core.common.caching.CompletionDBCachingManager" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">graphai.core.common.caching.</span></span><span class="sig-name descname"><span class="pre">CompletionDBCachingManager</span></span><a class="headerlink" href="#graphai.core.common.caching.CompletionDBCachingManager" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">DBCachingManagerBase</span></code></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="graphai.core.common.caching.CompletionDBCachingManager.init_db">
-<span class="sig-name descname"><span class="pre">init_db</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.caching.CompletionDBCachingManager.init_db" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">init_db</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.caching.CompletionDBCachingManager.init_db" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="graphai.core.common.caching.ScrapingDBCachingManager">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">graphai.core.common.caching.</span></span><span class="sig-name descname"><span class="pre">ScrapingDBCachingManager</span></span><a class="headerlink" href="#graphai.core.common.caching.ScrapingDBCachingManager" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">graphai.core.common.caching.</span></span><span class="sig-name descname"><span class="pre">ScrapingDBCachingManager</span></span><a class="headerlink" href="#graphai.core.common.caching.ScrapingDBCachingManager" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">DBCachingManagerBase</span></code></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="graphai.core.common.caching.ScrapingDBCachingManager.init_db">
-<span class="sig-name descname"><span class="pre">init_db</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.caching.ScrapingDBCachingManager.init_db" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">init_db</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.caching.ScrapingDBCachingManager.init_db" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="graphai.core.common.caching.ScrapingDBCachingManager.get_details_using_origin">
-<span class="sig-name descname"><span class="pre">get_details_using_origin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">origin_token</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cols</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.caching.ScrapingDBCachingManager.get_details_using_origin" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_details_using_origin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">origin_token</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cols</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.caching.ScrapingDBCachingManager.get_details_using_origin" title="Link to this definition"></a></dt>
 <dd><p>Gets details of cache row(s) using origin token instead of id token
 :param origin_token: Origin token
 :param cols: List of columns to retrieve</p>
@@ -196,36 +200,36 @@
 
 <dl class="py class">
 <dt class="sig sig-object py" id="graphai.core.common.caching.VideoConfig">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">graphai.core.common.caching.</span></span><span class="sig-name descname"><span class="pre">VideoConfig</span></span><a class="headerlink" href="#graphai.core.common.caching.VideoConfig" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">graphai.core.common.caching.</span></span><span class="sig-name descname"><span class="pre">VideoConfig</span></span><a class="headerlink" href="#graphai.core.common.caching.VideoConfig" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="graphai.core.common.caching.VideoConfig.get_root_dir">
-<span class="sig-name descname"><span class="pre">get_root_dir</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.caching.VideoConfig.get_root_dir" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_root_dir</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.caching.VideoConfig.get_root_dir" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="graphai.core.common.caching.VideoConfig.get_image_dir">
-<span class="sig-name descname"><span class="pre">get_image_dir</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.caching.VideoConfig.get_image_dir" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_image_dir</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.caching.VideoConfig.get_image_dir" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="graphai.core.common.caching.VideoConfig.get_audio_dir">
-<span class="sig-name descname"><span class="pre">get_audio_dir</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.caching.VideoConfig.get_audio_dir" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_audio_dir</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.caching.VideoConfig.get_audio_dir" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="graphai.core.common.caching.VideoConfig.get_video_dir">
-<span class="sig-name descname"><span class="pre">get_video_dir</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.caching.VideoConfig.get_video_dir" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_video_dir</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.caching.VideoConfig.get_video_dir" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="graphai.core.common.caching.VideoConfig.get_transcript_dir">
-<span class="sig-name descname"><span class="pre">get_transcript_dir</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.caching.VideoConfig.get_transcript_dir" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_transcript_dir</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.caching.VideoConfig.get_transcript_dir" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="graphai.core.common.caching.VideoConfig.concat_file_path">
-<span class="sig-name descname"><span class="pre">concat_file_path</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">subfolder</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.caching.VideoConfig.concat_file_path" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">concat_file_path</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">subfolder</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.caching.VideoConfig.concat_file_path" title="Link to this definition"></a></dt>
 <dd><p>Concatenates the root dir with the given subfolder and file name.
 :param filename: Name of the file
 :param subfolder: Subfolder it is/should be in</p>
@@ -238,7 +242,7 @@
 
 <dl class="py method">
 <dt class="sig sig-object py" id="graphai.core.common.caching.VideoConfig.generate_filepath">
-<span class="sig-name descname"><span class="pre">generate_filepath</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">force_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.caching.VideoConfig.generate_filepath" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">generate_filepath</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">force_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.caching.VideoConfig.generate_filepath" title="Link to this definition"></a></dt>
 <dd><p>Generates the full path of a given file based on its name
 :param filename: Name of the file
 :param force_dir: Whether to force a particular subfolder</p>
@@ -251,7 +255,7 @@
 
 <dl class="py method">
 <dt class="sig sig-object py" id="graphai.core.common.caching.VideoConfig.create_symlink">
-<span class="sig-name descname"><span class="pre">create_symlink</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">old_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new_filename</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.caching.VideoConfig.create_symlink" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">create_symlink</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">old_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new_filename</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.caching.VideoConfig.create_symlink" title="Link to this definition"></a></dt>
 <dd><p>Creates a symlink between a new filename (for which the path is generated automatically) and an old full path
 :param old_path: Old full path
 :param new_filename: New filename</p>
@@ -266,33 +270,33 @@
 
 <dl class="py class">
 <dt class="sig sig-object py" id="graphai.core.common.caching.FingerprintParameters">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">graphai.core.common.caching.</span></span><span class="sig-name descname"><span class="pre">FingerprintParameters</span></span><a class="headerlink" href="#graphai.core.common.caching.FingerprintParameters" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">graphai.core.common.caching.</span></span><span class="sig-name descname"><span class="pre">FingerprintParameters</span></span><a class="headerlink" href="#graphai.core.common.caching.FingerprintParameters" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="graphai.core.common.caching.FingerprintParameters.load_values">
-<span class="sig-name descname"><span class="pre">load_values</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.caching.FingerprintParameters.load_values" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">load_values</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.caching.FingerprintParameters.load_values" title="Link to this definition"></a></dt>
 <dd><p>Loads the values of fingerprinting similarity thresholds from file, or failing that, sets them to defaults
 :returns: None</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="graphai.core.common.caching.FingerprintParameters.get_min_sim_text">
-<span class="sig-name descname"><span class="pre">get_min_sim_text</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.caching.FingerprintParameters.get_min_sim_text" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_min_sim_text</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.caching.FingerprintParameters.get_min_sim_text" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="graphai.core.common.caching.FingerprintParameters.get_min_sim_image">
-<span class="sig-name descname"><span class="pre">get_min_sim_image</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.caching.FingerprintParameters.get_min_sim_image" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_min_sim_image</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.caching.FingerprintParameters.get_min_sim_image" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="graphai.core.common.caching.FingerprintParameters.get_min_sim_audio">
-<span class="sig-name descname"><span class="pre">get_min_sim_audio</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.caching.FingerprintParameters.get_min_sim_audio" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_min_sim_audio</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.caching.FingerprintParameters.get_min_sim_audio" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="graphai.core.common.caching.FingerprintParameters.get_min_sim_video">
-<span class="sig-name descname"><span class="pre">get_min_sim_video</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.caching.FingerprintParameters.get_min_sim_video" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_min_sim_video</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.caching.FingerprintParameters.get_min_sim_video" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -303,7 +307,7 @@
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="graphai.core.common.ontology_utils.data.html" class="btn btn-neutral float-left" title="graphai.core.common.ontology_utils.data module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="graphai.core.common.auth_utils.html" class="btn btn-neutral float-left" title="graphai.core.common.auth_utils module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="graphai.core.common.common_utils.html" class="btn btn-neutral float-right" title="graphai.core.common.common_utils module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 

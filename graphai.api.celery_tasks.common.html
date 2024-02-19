@@ -1,19 +1,23 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="./">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>graphai.api.celery_tasks.common module &mdash; EPFL Graph AI</title>
-      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+
+  
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-        <script src="_static/doctools.js"></script>
-        <script src="_static/sphinx_highlight.js"></script>
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -89,10 +93,10 @@
            <div itemprop="articleBody">
              
   <section id="module-graphai.api.celery_tasks.common">
-<span id="graphai-api-celery-tasks-common-module"></span><h1>graphai.api.celery_tasks.common module<a class="headerlink" href="#module-graphai.api.celery_tasks.common" title="Permalink to this heading"></a></h1>
+<span id="graphai-api-celery-tasks-common-module"></span><h1>graphai.api.celery_tasks.common module<a class="headerlink" href="#module-graphai.api.celery_tasks.common" title="Link to this heading"></a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="graphai.api.celery_tasks.common.format_api_results">
-<span class="sig-prename descclassname"><span class="pre">graphai.api.celery_tasks.common.</span></span><span class="sig-name descname"><span class="pre">format_api_results</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">status</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">result</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.api.celery_tasks.common.format_api_results" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">graphai.api.celery_tasks.common.</span></span><span class="sig-name descname"><span class="pre">format_api_results</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">status</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">result</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.api.celery_tasks.common.format_api_results" title="Link to this definition"></a></dt>
 <dd><p>Formats results coming from celery into the common output format of the API
 :param id: Id of the task
 :param name: Name of the task
@@ -107,12 +111,12 @@
 
 <dl class="py function">
 <dt class="sig sig-object py" id="graphai.api.celery_tasks.common.compute_text_fingerprint_common">
-<span class="sig-prename descclassname"><span class="pre">graphai.api.celery_tasks.common.</span></span><span class="sig-name descname"><span class="pre">compute_text_fingerprint_common</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">db_manager</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">token</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">text</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">force</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.api.celery_tasks.common.compute_text_fingerprint_common" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">graphai.api.celery_tasks.common.</span></span><span class="sig-name descname"><span class="pre">compute_text_fingerprint_common</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">db_manager</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">token</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">text</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">force</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.api.celery_tasks.common.compute_text_fingerprint_common" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="graphai.api.celery_tasks.common.fingerprint_lookup_retrieve_from_db">
-<span class="sig-prename descclassname"><span class="pre">graphai.api.celery_tasks.common.</span></span><span class="sig-name descname"><span class="pre">fingerprint_lookup_retrieve_from_db</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">results</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db_manager</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">equality_conditions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.api.celery_tasks.common.fingerprint_lookup_retrieve_from_db" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">graphai.api.celery_tasks.common.</span></span><span class="sig-name descname"><span class="pre">fingerprint_lookup_retrieve_from_db</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">results</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db_manager</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">equality_conditions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.api.celery_tasks.common.fingerprint_lookup_retrieve_from_db" title="Link to this definition"></a></dt>
 <dd><p>Retrieves the number of cache rows relevant to fingerprint lookup
 :param results: Dict containing results of fingerprint computation
 :param db_manager: DBCachingManagerBase object
@@ -133,7 +137,7 @@
 
 <dl class="py function">
 <dt class="sig sig-object py" id="graphai.api.celery_tasks.common.fingerprint_lookup_parallel">
-<span class="sig-prename descclassname"><span class="pre">graphai.api.celery_tasks.common.</span></span><span class="sig-name descname"><span class="pre">fingerprint_lookup_parallel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">i</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_total</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_similarity</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db_manager</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'audio'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">equality_conditions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.api.celery_tasks.common.fingerprint_lookup_parallel" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">graphai.api.celery_tasks.common.</span></span><span class="sig-name descname"><span class="pre">fingerprint_lookup_parallel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">i</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_total</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_similarity</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db_manager</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'audio'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">equality_conditions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.api.celery_tasks.common.fingerprint_lookup_parallel" title="Link to this definition"></a></dt>
 <dd><p>Performs parallel lookup of fingerprints
 :param input_dict: Dict of results from previous step
 :param i: The index of this parallel task
@@ -151,12 +155,12 @@
 
 <dl class="py function">
 <dt class="sig sig-object py" id="graphai.api.celery_tasks.common.fingerprint_lookup_direct">
-<span class="sig-prename descclassname"><span class="pre">graphai.api.celery_tasks.common.</span></span><span class="sig-name descname"><span class="pre">fingerprint_lookup_direct</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fp_results</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db_manager</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">equality_conditions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.api.celery_tasks.common.fingerprint_lookup_direct" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">graphai.api.celery_tasks.common.</span></span><span class="sig-name descname"><span class="pre">fingerprint_lookup_direct</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fp_results</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db_manager</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">equality_conditions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.api.celery_tasks.common.fingerprint_lookup_direct" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="graphai.api.celery_tasks.common.fingerprint_lookup_callback">
-<span class="sig-prename descclassname"><span class="pre">graphai.api.celery_tasks.common.</span></span><span class="sig-name descname"><span class="pre">fingerprint_lookup_callback</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">results_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db_manager</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.api.celery_tasks.common.fingerprint_lookup_callback" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">graphai.api.celery_tasks.common.</span></span><span class="sig-name descname"><span class="pre">fingerprint_lookup_callback</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">results_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db_manager</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.api.celery_tasks.common.fingerprint_lookup_callback" title="Link to this definition"></a></dt>
 <dd><p>Handles the collection and aggregation of parallel fingerprint lookup results, plus database insertion.
 :param results_list: List of parallel fingerprint lookup results
 :param db_manager: DBCachingManagerBase object</p>

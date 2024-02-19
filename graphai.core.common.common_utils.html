@@ -1,19 +1,23 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="./">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>graphai.core.common.common_utils module &mdash; EPFL Graph AI</title>
-      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+
+  
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-        <script src="_static/doctools.js"></script>
-        <script src="_static/sphinx_highlight.js"></script>
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -89,10 +93,10 @@
            <div itemprop="articleBody">
              
   <section id="module-graphai.core.common.common_utils">
-<span id="graphai-core-common-common-utils-module"></span><h1>graphai.core.common.common_utils module<a class="headerlink" href="#module-graphai.core.common.common_utils" title="Permalink to this heading"></a></h1>
+<span id="graphai-core-common-common-utils-module"></span><h1>graphai.core.common.common_utils module<a class="headerlink" href="#module-graphai.core.common.common_utils" title="Link to this heading"></a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="graphai.core.common.common_utils.make_sure_path_exists">
-<span class="sig-prename descclassname"><span class="pre">graphai.core.common.common_utils.</span></span><span class="sig-name descname"><span class="pre">make_sure_path_exists</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_at_the_end</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">full_perm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.common_utils.make_sure_path_exists" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">graphai.core.common.common_utils.</span></span><span class="sig-name descname"><span class="pre">make_sure_path_exists</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_at_the_end</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">full_perm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.common_utils.make_sure_path_exists" title="Link to this definition"></a></dt>
 <dd><p>Recursively creates the folders in a path.
 :param path: The path that needs to exist (and will thus be created if it doesn’t)
 :param file_at_the_end: Whether there is a filename at the end of the path</p>
@@ -105,7 +109,7 @@
 
 <dl class="py function">
 <dt class="sig sig-object py" id="graphai.core.common.common_utils.file_exists">
-<span class="sig-prename descclassname"><span class="pre">graphai.core.common.common_utils.</span></span><span class="sig-name descname"><span class="pre">file_exists</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.common_utils.file_exists" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">graphai.core.common.common_utils.</span></span><span class="sig-name descname"><span class="pre">file_exists</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.common_utils.file_exists" title="Link to this definition"></a></dt>
 <dd><p>Checks whether a given file exists
 :param file_path: Path of the file</p>
 <dl class="field-list simple">
@@ -117,7 +121,7 @@
 
 <dl class="py function">
 <dt class="sig sig-object py" id="graphai.core.common.common_utils.write_text_file">
-<span class="sig-prename descclassname"><span class="pre">graphai.core.common.common_utils.</span></span><span class="sig-name descname"><span class="pre">write_text_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename_with_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">contents</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.common_utils.write_text_file" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">graphai.core.common.common_utils.</span></span><span class="sig-name descname"><span class="pre">write_text_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename_with_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">contents</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.common_utils.write_text_file" title="Link to this definition"></a></dt>
 <dd><p>Writes contents to text file
 :param filename_with_path: Full path of the file
 :param contents: Textual contents</p>
@@ -130,7 +134,7 @@
 
 <dl class="py function">
 <dt class="sig sig-object py" id="graphai.core.common.common_utils.write_json_file">
-<span class="sig-prename descclassname"><span class="pre">graphai.core.common.common_utils.</span></span><span class="sig-name descname"><span class="pre">write_json_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename_with_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.common_utils.write_json_file" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">graphai.core.common.common_utils.</span></span><span class="sig-name descname"><span class="pre">write_json_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename_with_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.common_utils.write_json_file" title="Link to this definition"></a></dt>
 <dd><p>Writes dictionary to JSON file
 :param filename_with_path: Full path of the file
 :param d: Dictionary to write</p>
@@ -143,7 +147,7 @@
 
 <dl class="py function">
 <dt class="sig sig-object py" id="graphai.core.common.common_utils.read_text_file">
-<span class="sig-prename descclassname"><span class="pre">graphai.core.common.common_utils.</span></span><span class="sig-name descname"><span class="pre">read_text_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename_with_path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.common_utils.read_text_file" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">graphai.core.common.common_utils.</span></span><span class="sig-name descname"><span class="pre">read_text_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename_with_path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.common_utils.read_text_file" title="Link to this definition"></a></dt>
 <dd><p>Opens and reads the contents of a text file
 :param filename_with_path: Full path of the file</p>
 <dl class="field-list simple">
@@ -155,7 +159,7 @@
 
 <dl class="py function">
 <dt class="sig sig-object py" id="graphai.core.common.common_utils.read_json_file">
-<span class="sig-prename descclassname"><span class="pre">graphai.core.common.common_utils.</span></span><span class="sig-name descname"><span class="pre">read_json_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename_with_path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.common_utils.read_json_file" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">graphai.core.common.common_utils.</span></span><span class="sig-name descname"><span class="pre">read_json_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename_with_path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.common_utils.read_json_file" title="Link to this definition"></a></dt>
 <dd><p>Reads the contents of a JSON file
 :param filename_with_path: Full path of the file</p>
 <dl class="field-list simple">
@@ -167,29 +171,29 @@
 
 <dl class="py function">
 <dt class="sig sig-object py" id="graphai.core.common.common_utils.format_datetime_for_mysql">
-<span class="sig-prename descclassname"><span class="pre">graphai.core.common.common_utils.</span></span><span class="sig-name descname"><span class="pre">format_datetime_for_mysql</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dt</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.common_utils.format_datetime_for_mysql" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">graphai.core.common.common_utils.</span></span><span class="sig-name descname"><span class="pre">format_datetime_for_mysql</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dt</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.common_utils.format_datetime_for_mysql" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="graphai.core.common.common_utils.parse_mysql_datetime">
-<span class="sig-prename descclassname"><span class="pre">graphai.core.common.common_utils.</span></span><span class="sig-name descname"><span class="pre">parse_mysql_datetime</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dt</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.common_utils.parse_mysql_datetime" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">graphai.core.common.common_utils.</span></span><span class="sig-name descname"><span class="pre">parse_mysql_datetime</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dt</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.common_utils.parse_mysql_datetime" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="graphai.core.common.common_utils.get_current_datetime">
-<span class="sig-prename descclassname"><span class="pre">graphai.core.common.common_utils.</span></span><span class="sig-name descname"><span class="pre">get_current_datetime</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.common_utils.get_current_datetime" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">graphai.core.common.common_utils.</span></span><span class="sig-name descname"><span class="pre">get_current_datetime</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.common_utils.get_current_datetime" title="Link to this definition"></a></dt>
 <dd><p>Returns current datetime formatted for MySQL
 :returns: Datetime string</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="graphai.core.common.common_utils.invert_dict">
-<span class="sig-prename descclassname"><span class="pre">graphai.core.common.common_utils.</span></span><span class="sig-name descname"><span class="pre">invert_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">d</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.common_utils.invert_dict" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">graphai.core.common.common_utils.</span></span><span class="sig-name descname"><span class="pre">invert_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">d</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.common_utils.invert_dict" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="graphai.core.common.common_utils.strtobool">
-<span class="sig-prename descclassname"><span class="pre">graphai.core.common.common_utils.</span></span><span class="sig-name descname"><span class="pre">strtobool</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">val</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.common_utils.strtobool" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">graphai.core.common.common_utils.</span></span><span class="sig-name descname"><span class="pre">strtobool</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">val</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.common_utils.strtobool" title="Link to this definition"></a></dt>
 <dd><p>Convert a string representation of truth to True or False.
 True values are ‘y’, ‘yes’, ‘t’, ‘true’, ‘on’, and ‘1’; False values
 are ‘n’, ‘no’, ‘f’, ‘false’, ‘off’, and ‘0’. Raises ValueError if

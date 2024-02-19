@@ -1,19 +1,23 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="./">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>graphai.core.common.graph module &mdash; EPFL Graph AI</title>
-      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+
+  
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-        <script src="_static/doctools.js"></script>
-        <script src="_static/sphinx_highlight.js"></script>
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
         <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
@@ -90,19 +94,19 @@
            <div itemprop="articleBody">
              
   <section id="module-graphai.core.common.graph">
-<span id="graphai-core-common-graph-module"></span><h1>graphai.core.common.graph module<a class="headerlink" href="#module-graphai.core.common.graph" title="Permalink to this heading"></a></h1>
+<span id="graphai-core-common-graph-module"></span><h1>graphai.core.common.graph module<a class="headerlink" href="#module-graphai.core.common.graph" title="Link to this heading"></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="graphai.core.common.graph.ConceptsGraph">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">graphai.core.common.graph.</span></span><span class="sig-name descname"><span class="pre">ConceptsGraph</span></span><a class="headerlink" href="#graphai.core.common.graph.ConceptsGraph" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">graphai.core.common.graph.</span></span><span class="sig-name descname"><span class="pre">ConceptsGraph</span></span><a class="headerlink" href="#graphai.core.common.graph.ConceptsGraph" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="graphai.core.common.graph.ConceptsGraph.fetch_from_db">
-<span class="sig-name descname"><span class="pre">fetch_from_db</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.graph.ConceptsGraph.fetch_from_db" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">fetch_from_db</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.graph.ConceptsGraph.fetch_from_db" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="graphai.core.common.graph.ConceptsGraph.old_compute_scores">
-<span class="sig-name descname"><span class="pre">old_compute_scores</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source_page_ids</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_page_ids</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.graph.ConceptsGraph.old_compute_scores" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">old_compute_scores</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source_page_ids</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_page_ids</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.graph.ConceptsGraph.old_compute_scores" title="Link to this definition"></a></dt>
 <dd><p>Computes the graph scores for all possible source-target pairs from two lists of page ids.
 The graph score of a pair (s, t) is computed as:</p>
 <p><span class="math notranslate nohighlight">\(\displaystyle score(s, t) = 1 - \frac{1}{1 + \ln(1 + rebound(s, t) * \ln(out(s, t)))}\)</span>, with</p>
@@ -134,7 +138,7 @@ has keys ‘source_page_id’ (int), ‘target_page_id’ (int) and ‘score’ 
 
 <dl class="py method">
 <dt class="sig sig-object py" id="graphai.core.common.graph.ConceptsGraph.add_graph_score">
-<span class="sig-name descname"><span class="pre">add_graph_score</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">results</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">smoothing</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.graph.ConceptsGraph.add_graph_score" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">add_graph_score</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">results</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">smoothing</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.graph.ConceptsGraph.add_graph_score" title="Link to this definition"></a></dt>
 <dd><p>Computes GraphScore for the provided intermediate wikify results.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>

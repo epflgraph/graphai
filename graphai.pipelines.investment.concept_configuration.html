@@ -1,19 +1,23 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="./">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>graphai.pipelines.investment.concept_configuration module &mdash; EPFL Graph AI</title>
-      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+
+  
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-        <script src="_static/doctools.js"></script>
-        <script src="_static/sphinx_highlight.js"></script>
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -88,10 +92,10 @@
            <div itemprop="articleBody">
              
   <section id="module-graphai.pipelines.investment.concept_configuration">
-<span id="graphai-pipelines-investment-concept-configuration-module"></span><h1>graphai.pipelines.investment.concept_configuration module<a class="headerlink" href="#module-graphai.pipelines.investment.concept_configuration" title="Permalink to this heading"></a></h1>
+<span id="graphai-pipelines-investment-concept-configuration-module"></span><h1>graphai.pipelines.investment.concept_configuration module<a class="headerlink" href="#module-graphai.pipelines.investment.concept_configuration" title="Link to this heading"></a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="graphai.pipelines.investment.concept_configuration.norm">
-<span class="sig-prename descclassname"><span class="pre">graphai.pipelines.investment.concept_configuration.</span></span><span class="sig-name descname"><span class="pre">norm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.pipelines.investment.concept_configuration.norm" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">graphai.pipelines.investment.concept_configuration.</span></span><span class="sig-name descname"><span class="pre">norm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.pipelines.investment.concept_configuration.norm" title="Link to this definition"></a></dt>
 <dd><p>Computes the norm of the different configurations in x.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -109,7 +113,7 @@ given by the columns [‘PageID’, ‘Score’].</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="graphai.pipelines.investment.concept_configuration.normalise">
-<span class="sig-prename descclassname"><span class="pre">graphai.pipelines.investment.concept_configuration.</span></span><span class="sig-name descname"><span class="pre">normalise</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.pipelines.investment.concept_configuration.normalise" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">graphai.pipelines.investment.concept_configuration.</span></span><span class="sig-name descname"><span class="pre">normalise</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.pipelines.investment.concept_configuration.normalise" title="Link to this definition"></a></dt>
 <dd><p>Returns the same set of configurations as in x, with their scores divided by each norm. Hence, all configurations
 in x have norm 1.</p>
 <dl class="field-list simple">
@@ -127,7 +131,7 @@ configuration.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="graphai.pipelines.investment.concept_configuration.mix">
-<span class="sig-prename descclassname"><span class="pre">graphai.pipelines.investment.concept_configuration.</span></span><span class="sig-name descname"><span class="pre">mix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">edges</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_ratio</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.05</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.pipelines.investment.concept_configuration.mix" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">graphai.pipelines.investment.concept_configuration.</span></span><span class="sig-name descname"><span class="pre">mix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">edges</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_ratio</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.05</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.pipelines.investment.concept_configuration.mix" title="Link to this definition"></a></dt>
 <dd><p>Mixes the configurations in x according to the edges in edges.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -153,7 +157,7 @@ with score 1.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="graphai.pipelines.investment.concept_configuration.normalise_graph">
-<span class="sig-prename descclassname"><span class="pre">graphai.pipelines.investment.concept_configuration.</span></span><span class="sig-name descname"><span class="pre">normalise_graph</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">edges</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.pipelines.investment.concept_configuration.normalise_graph" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">graphai.pipelines.investment.concept_configuration.</span></span><span class="sig-name descname"><span class="pre">normalise_graph</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">edges</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.pipelines.investment.concept_configuration.normalise_graph" title="Link to this definition"></a></dt>
 <dd><p>Adds missing reverse edges and averages scores. Adds loops on each vertex with a score of one.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -169,7 +173,7 @@ weighted edges of the concepts graph.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="graphai.pipelines.investment.concept_configuration.combine">
-<span class="sig-prename descclassname"><span class="pre">graphai.pipelines.investment.concept_configuration.</span></span><span class="sig-name descname"><span class="pre">combine</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pairs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.pipelines.investment.concept_configuration.combine" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">graphai.pipelines.investment.concept_configuration.</span></span><span class="sig-name descname"><span class="pre">combine</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pairs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.pipelines.investment.concept_configuration.combine" title="Link to this definition"></a></dt>
 <dd><p>Combines the configurations in x and y based on the associations in pairs.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -196,7 +200,7 @@ scores in x and y.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="graphai.pipelines.investment.concept_configuration.compute_affinities">
-<span class="sig-prename descclassname"><span class="pre">graphai.pipelines.investment.concept_configuration.</span></span><span class="sig-name descname"><span class="pre">compute_affinities</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pairs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">edges</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mix_x</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mix_y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normalise_before</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'cosine'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.pipelines.investment.concept_configuration.compute_affinities" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">graphai.pipelines.investment.concept_configuration.</span></span><span class="sig-name descname"><span class="pre">compute_affinities</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pairs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">edges</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mix_x</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mix_y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normalise_before</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'cosine'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.pipelines.investment.concept_configuration.compute_affinities" title="Link to this definition"></a></dt>
 <dd><p>Computes affinity scores between the pairs configurations in x and y indexed in pairs, according to the concepts
 (edge-weighted) graph specified in edges.</p>
 <dl class="field-list simple">

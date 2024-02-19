@@ -1,19 +1,23 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="./">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>graphai.core.utils.time.stopwatch module &mdash; EPFL Graph AI</title>
-      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+
+  
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-        <script src="_static/doctools.js"></script>
-        <script src="_static/sphinx_highlight.js"></script>
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -90,10 +94,10 @@
            <div itemprop="articleBody">
              
   <section id="module-graphai.core.utils.time.stopwatch">
-<span id="graphai-core-utils-time-stopwatch-module"></span><h1>graphai.core.utils.time.stopwatch module<a class="headerlink" href="#module-graphai.core.utils.time.stopwatch" title="Permalink to this heading"></a></h1>
+<span id="graphai-core-utils-time-stopwatch-module"></span><h1>graphai.core.utils.time.stopwatch module<a class="headerlink" href="#module-graphai.core.utils.time.stopwatch" title="Link to this heading"></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="graphai.core.utils.time.stopwatch.Stopwatch">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">graphai.core.utils.time.stopwatch.</span></span><span class="sig-name descname"><span class="pre">Stopwatch</span></span><a class="headerlink" href="#graphai.core.utils.time.stopwatch.Stopwatch" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">graphai.core.utils.time.stopwatch.</span></span><span class="sig-name descname"><span class="pre">Stopwatch</span></span><a class="headerlink" href="#graphai.core.utils.time.stopwatch.Stopwatch" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Class representing a stopwatch to track execution times. Usage is as follows:</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">sw</span> <span class="o">=</span> <span class="n">Stopwatch</span><span class="p">()</span>
@@ -163,31 +167,31 @@ if the partial time is not needed.</p>
 </div>
 <dl class="py method">
 <dt class="sig sig-object py" id="graphai.core.utils.time.stopwatch.Stopwatch.reset">
-<span class="sig-name descname"><span class="pre">reset</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.utils.time.stopwatch.Stopwatch.reset" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">reset</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.utils.time.stopwatch.Stopwatch.reset" title="Link to this definition"></a></dt>
 <dd><p>Resets all time checkpoints.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="graphai.core.utils.time.stopwatch.Stopwatch.tick">
-<span class="sig-name descname"><span class="pre">tick</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.utils.time.stopwatch.Stopwatch.tick" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">tick</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.utils.time.stopwatch.Stopwatch.tick" title="Link to this definition"></a></dt>
 <dd><p>Creates a new time checkpoint.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="graphai.core.utils.time.stopwatch.Stopwatch.delta">
-<span class="sig-name descname"><span class="pre">delta</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.utils.time.stopwatch.Stopwatch.delta" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">delta</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.utils.time.stopwatch.Stopwatch.delta" title="Link to this definition"></a></dt>
 <dd><p>Creates a new time checkpoint and returns the difference with the previous one.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="graphai.core.utils.time.stopwatch.Stopwatch.total">
-<span class="sig-name descname"><span class="pre">total</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.utils.time.stopwatch.Stopwatch.total" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">total</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.utils.time.stopwatch.Stopwatch.total" title="Link to this definition"></a></dt>
 <dd><p>Creates a new time checkpoint and returns the difference with the first one.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="graphai.core.utils.time.stopwatch.Stopwatch.report">
-<span class="sig-name descname"><span class="pre">report</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tick</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">laps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Finished'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.utils.time.stopwatch.Stopwatch.report" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">report</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tick</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">laps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Finished'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.utils.time.stopwatch.Stopwatch.report" title="Link to this definition"></a></dt>
 <dd><p>Prints a summary of all time checkpoints, including the differences between each pair
 of consecutive checkpoints and the difference between the last and the first.</p>
 <dl class="field-list simple">
