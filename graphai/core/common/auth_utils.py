@@ -24,7 +24,7 @@ class User(BaseModel):
     username: str
     email: Union[str, None] = None
     full_name: Union[str, None] = None
-    scopes: Union[List[str], None] = None
+    scopes: Union[List[str]] = []
     disabled: Union[bool, None] = None
 
 
@@ -53,6 +53,8 @@ def get_user(username: str):
         user_dict = {columns[i]: user_list[i] for i in range(len(columns))}
         if user_dict['scopes'] is not None:
             user_dict['scopes'] = user_dict['scopes'].strip().split(',')
+        else:
+            user_dict['scopes'] = list()
         return UserInDB(**user_dict)
 
 
