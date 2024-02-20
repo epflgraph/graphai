@@ -1,4 +1,4 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Security
 from celery import group, chain
 
 from graphai.api.schemas.common import TaskIDResponse
@@ -25,6 +25,7 @@ from graphai.api.celery_tasks.scraping import (
     extract_scraping_content_callback_task,
     scraping_dummy_task
 )
+from graphai.api.routers.auth import get_current_active_user
 
 from graphai.core.common.scraping import create_base_url_token
 
@@ -33,7 +34,8 @@ from graphai.core.interfaces.celery_config import get_task_info
 router = APIRouter(
     prefix='/scraping',
     tags=['scraping'],
-    responses={404: {'description': 'Not found'}}
+    responses={404: {'description': 'Not found'}},
+    dependencies=[Security(get_current_active_user, scopes=['scraping'])]
 )
 
 

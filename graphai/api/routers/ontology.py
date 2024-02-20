@@ -1,4 +1,4 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Security
 from celery import chain
 from typing import Union
 
@@ -48,13 +48,16 @@ from graphai.api.celery_tasks.ontology import (
     get_category_category_similarity_task,
     get_cluster_category_similarity_task
 )
+from graphai.api.routers.auth import get_current_active_user
+
 from graphai.core.interfaces.celery_config import get_task_info
 
 # Initialise ontology router
 router = APIRouter(
     prefix='/ontology',
     tags=['ontology'],
-    responses={404: {'description': 'Not found'}}
+    responses={404: {'description': 'Not found'}},
+    dependencies=[Security(get_current_active_user, scopes=['ontology'])]
 )
 
 

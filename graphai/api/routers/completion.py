@@ -1,4 +1,4 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Security
 from celery import group, chain
 
 from graphai.api.schemas.common import TaskIDResponse
@@ -38,6 +38,7 @@ from graphai.api.celery_tasks.completion import (
     simulate_completion_task,
     choose_best_subset_task
 )
+from graphai.api.routers.auth import get_current_active_user
 
 from graphai.core.common.text_utils import generate_summary_text_token, generate_completion_type_dict
 from graphai.core.common.caching import FingerprintParameters
@@ -47,7 +48,8 @@ from graphai.core.interfaces.celery_config import get_task_info
 router = APIRouter(
     prefix='/completion',
     tags=['completion'],
-    responses={404: {'description': 'Not found'}}
+    responses={404: {'description': 'Not found'}},
+    dependencies=[Security(get_current_active_user, scopes=['completion'])]
 )
 
 

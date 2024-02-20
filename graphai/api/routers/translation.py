@@ -1,4 +1,4 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Security
 from celery import group, chain
 
 from graphai.api.schemas.common import TaskIDResponse
@@ -27,6 +27,8 @@ from graphai.api.celery_tasks.common import (
     format_api_results,
     ignore_fingerprint_results_callback_task,
 )
+from graphai.api.routers.auth import get_current_active_user
+
 from graphai.core.common.text_utils import generate_src_tgt_dict, generate_translation_text_token, \
     translation_list_to_text, translation_text_back_to_list
 from graphai.core.common.caching import FingerprintParameters
@@ -36,7 +38,8 @@ from graphai.core.interfaces.celery_config import get_task_info
 router = APIRouter(
     prefix='/translation',
     tags=['translation'],
-    responses={404: {'description': 'Not found'}}
+    responses={404: {'description': 'Not found'}},
+    dependencies=[Security(get_current_active_user, scopes=['translation'])]
 )
 
 
