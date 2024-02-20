@@ -1,4 +1,4 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Security
 from fastapi.responses import FileResponse
 
 from celery import chain, group
@@ -24,6 +24,7 @@ from graphai.api.celery_tasks.text import (
     draw_graph_task,
     text_test_task,
 )
+from graphai.api.routers.auth import get_current_active_user
 
 pd.set_option('display.max_rows', 400)
 pd.set_option('display.max_columns', 500)
@@ -33,7 +34,8 @@ pd.set_option('display.width', 1000)
 router = APIRouter(
     prefix='/text',
     tags=['text'],
-    responses={404: {'description': 'Not found'}}
+    responses={404: {'description': 'Not found'}},
+    dependencies=[Security(get_current_active_user, scopes=['text'])]
 )
 
 

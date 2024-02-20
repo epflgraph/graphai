@@ -1,4 +1,4 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Security
 
 from celery import group, chain
 
@@ -25,6 +25,8 @@ from graphai.api.celery_tasks.image import (
     extract_slide_text_task,
     extract_slide_text_callback_task,
 )
+from graphai.api.routers.auth import get_current_active_user
+
 from graphai.core.interfaces.celery_config import get_task_info
 from graphai.core.common.caching import FingerprintParameters
 
@@ -32,7 +34,8 @@ from graphai.core.common.caching import FingerprintParameters
 router = APIRouter(
     prefix='/image',
     tags=['image'],
-    responses={404: {'description': 'Not found'}}
+    responses={404: {'description': 'Not found'}},
+    dependencies=[Security(get_current_active_user, scopes=['image'])]
 )
 
 

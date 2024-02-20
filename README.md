@@ -67,7 +67,8 @@ order to create your users table and add the first user.
    bcrypt encryption and is used by the API itself.
    2. Make sure that the name of the schema matches the one indicated in the `[auth]` section of `config.ini`. These 
    two are set to `auth_graphai` by default.
-3. Create further users using the same SQL file, if desired.
+3. Create further users using the same SQL file, if desired. You can restrict a user's access to certain endpoint groups 
+by removing the corresponding scopes from the `scopes` column for that user.
 
 Now, your users will be able to log in and obtain bearer tokens through the `/token` endpoint as follows:
 ```

@@ -1,4 +1,4 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Security
 from fastapi.responses import FileResponse
 from celery import group, chain
 
@@ -35,6 +35,8 @@ from graphai.api.celery_tasks.video import (
     video_fingerprint_find_closest_callback_task,
     retrieve_video_fingerprint_callback_task
 )
+from graphai.api.routers.auth import get_current_active_user
+
 from graphai.core.interfaces.celery_config import get_task_info
 from graphai.core.common.caching import FingerprintParameters
 
@@ -42,7 +44,8 @@ from graphai.core.common.caching import FingerprintParameters
 router = APIRouter(
     prefix='/video',
     tags=['video'],
-    responses={404: {'description': 'Not found'}}
+    responses={404: {'description': 'Not found'}},
+    dependencies=[Security(get_current_active_user, scopes=['video'])]
 )
 
 

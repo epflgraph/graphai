@@ -1,4 +1,4 @@
-from typing import Union
+from typing import Union, List
 
 from db_cache_manager.db import DB
 from passlib.context import CryptContext
@@ -7,6 +7,7 @@ from pydantic import BaseModel
 from graphai.core.common.config import config
 
 AUTH_SCHEMA = config['auth']['schema']
+ALL_SCOPES = ['user', 'voice', 'video', 'translation', 'text', 'scraping', 'ontology', 'image', 'completion']
 
 
 class Token(BaseModel):
@@ -16,12 +17,14 @@ class Token(BaseModel):
 
 class TokenData(BaseModel):
     username: Union[str, None] = None
+    scopes: List[str] = []
 
 
 class User(BaseModel):
     username: str
     email: Union[str, None] = None
     full_name: Union[str, None] = None
+    scopes: Union[List[str]] = []
     disabled: Union[bool, None] = None
 
 
@@ -42,12 +45,16 @@ def get_password_hash(password):
 
 def get_user(username: str):
     db_manager = DB(config['database'])
-    columns = ['username', 'full_name', 'email', 'hashed_password', 'disabled']
+    columns = ['username', 'full_name', 'email', 'hashed_password', 'disabled', 'scopes']
     query = f"SELECT {', '.join(columns)} FROM {AUTH_SCHEMA}.Users WHERE username=%s"
     results = db_manager.execute_query(query, (username, ))
     if len(results) > 0:
         user_list = results[0]
         user_dict = {columns[i]: user_list[i] for i in range(len(columns))}
+        if user_dict['scopes'] is not None:
+            user_dict['scopes'] = user_dict['scopes'].strip().split(',')
+        else:
+            user_dict['scopes'] = list()
         return UserInDB(**user_dict)
 
 

@@ -1,4 +1,4 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Security
 
 from celery import group, chain
 
@@ -11,6 +11,7 @@ from graphai.api.schemas.voice import (
     AudioDetectLanguageRequest,
     AudioDetectLanguageResponse,
 )
+from graphai.api.routers.auth import get_current_active_user
 
 from graphai.api.celery_tasks.common import format_api_results, ignore_fingerprint_results_callback_task
 from graphai.api.celery_tasks.voice import (
@@ -36,7 +37,8 @@ from graphai.core.common.caching import FingerprintParameters
 router = APIRouter(
     prefix='/voice',
     tags=['voice'],
-    responses={404: {'description': 'Not found'}}
+    responses={404: {'description': 'Not found'}},
+    dependencies=[Security(get_current_active_user, scopes=['voice'])]
 )
 
 
