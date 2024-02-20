@@ -280,7 +280,7 @@ def test__text_keywords__aggregate__run_task(wave_fields_scores_df):
 
 @pytest.mark.celery(accept_content=['pickle', 'json'], result_serializer='pickle', task_serializer='pickle')
 @pytest.mark.usefixtures('wave_fields', 'schreier')
-def test__text_wikify__integration(fixture_app, celery_worker, wave_fields, schreier, timeout=60):
+def test__text_wikify__integration(fixture_app, celery_worker, euclid, wave_fields, schreier, timeout=60):
     # Make POST request to fixture fastapi app
     response = fixture_app.post('/text/wikify', data=json.dumps({'raw_text': ''}), timeout=timeout)
 
@@ -293,6 +293,24 @@ def test__text_wikify__integration(fixture_app, celery_worker, wave_fields, schr
     # Check returned value
     assert isinstance(results, pd.DataFrame)
     assert len(results) == 0
+
+    ################
+
+    # Make POST request to fixture fastapi app
+    response = fixture_app.post('/text/wikify', data=json.dumps({'keywords': euclid}), timeout=timeout)
+
+    # Check status code is successful
+    assert response.status_code == 200
+
+    # Parse result
+    results = pd.DataFrame(response.json())
+
+    # Check returned value
+    assert isinstance(results, pd.DataFrame)
+    assert len(results) > 0
+    assert 1196 in results['PageID'].values        # Angle wikipage
+    for column in ['PageID', 'PageTitle', 'SearchScore', 'LevenshteinScore', 'GraphScore', 'OntologyLocalScore', 'OntologyGlobalScore', 'KeywordsScore', 'MixedScore']:
+        assert column in results.columns
 
     ################
 
