@@ -121,10 +121,25 @@ async def get_active_user_dummy():
     return User(**dummy_user)
 
 
-# Now adding one unauthenticated and one authenticated router
-# Every single endpoint aside from / and /token are in the authenticated router, behind a login
+# Now adding one unauthenticated and one authenticated router.
+# Every single endpoint aside from / and /token is in the authenticated router, behind a login.
+# These two mainly serve to organize routers and make it easier to read and expand the code.
+
+# Because of the scopes, the auth *dependency* (which includes the scope) is not defined here in the authenticated
+# router, but in each of the child routers (for when the entire router is under the same scope) that are later added to
+# the authenticated router in the main.py file, or directly in individual endpoints (which can be added to a child
+# router or directly to the authenticated router).
+
+# For a router, the security dependency is defined by including
+# Security(get_current_active_user, scopes=['SCOPE'])
+# in its list of dependencies.
+
+# For an individual endpoint, the security dependency is defined by including
+# current_user: Annotated[User, Security(get_current_active_user, scopes=['SCOPE'])]
+# in the handler's signature as one of the arguments.
+
 unauthenticated_router = APIRouter()
-authenticated_router = APIRouter(dependencies=[Depends(get_current_active_user)])
+authenticated_router = APIRouter()
 
 
 @unauthenticated_router.post("/token")
