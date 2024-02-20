@@ -25,6 +25,11 @@ def schreier():
 
 
 @pytest.fixture
+def euclid():
+    return ["straight line", "point to point", "describe a circle", "all right angles equal", "two straight lines", "interior angles", "less than two right angles"]
+
+
+@pytest.fixture
 def wave_fields_wikisearch_df():
     return pd.DataFrame([
         ['acoustic wave fields', 1901541, """Ion_acoustic_wave""", 1, 1, 0.848181],

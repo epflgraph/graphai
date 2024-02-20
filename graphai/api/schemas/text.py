@@ -2,15 +2,27 @@ from pydantic import BaseModel, Field
 from typing import List
 
 
-class WikifyRequest(BaseModel):
+class WikifyFromRawTextRequest(BaseModel):
     """
-    Object containing the information to be wikified and the list of anchor page ids to define the search space in the graph.
+    Object containing the raw text to be wikified.
     """
     raw_text: str = Field(
         ...,
         title="Raw Text",
         description="Raw text to be wikified",
         example="To draw a straight line from any point to any point.\nTo produce a finite straight line continuously in a straight line.\nTo describe a circle with any center and radius.\nThat all right angles equal one another.\nThat, if a straight line falling on two straight lines makes the interior angles on the same side less than two right angles, the two straight lines, if produced indefinitely, meet on that side on which are the angles less than the two right angles."
+    )
+
+
+class WikifyFromKeywordsRequest(BaseModel):
+    """
+    Object containing the keywords to be wikified.
+    """
+    keywords: list[str] = Field(
+        ...,
+        title="Keywords",
+        description="List of keywords to be wikified",
+        example=["straight line", "point to point", "describe a circle", "all right angles equal", "two straight lines", "interior angles", "less than two right angles"],
     )
 
 

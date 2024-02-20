@@ -26,12 +26,15 @@ def extract_keywords_task(self, raw_text, use_nltk=False):
     Celery task that extracts keywords from a given text.
 
     Args:
-        raw_text (str): Text to extract keywords from.
+        raw_text (str|list): Text to extract keywords from. If a list is passed, it is assumed that they are the keywords and the same list is returned.
         use_nltk (bool): Whether to use nltk-rake for keyword extraction, otherwise python-rake is used. Default: False.
 
     Returns:
         list[str]: A list containing the keywords extracted from the text.
     """
+
+    if isinstance(raw_text, list):
+        return raw_text
 
     keywords_list = get_keywords(raw_text, use_nltk)
 

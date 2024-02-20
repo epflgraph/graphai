@@ -2,14 +2,15 @@ from fastapi import APIRouter
 from fastapi.responses import FileResponse
 
 from celery import chain, group
-from typing import Optional
+from typing import Optional, Union
 
 import pandas as pd
 
 from graphai.api.schemas.text import (
     KeywordsRequest,
     KeywordsResponse,
-    WikifyRequest,
+    WikifyFromRawTextRequest,
+    WikifyFromKeywordsRequest,
     WikifyResponse,
 )
 from graphai.api.celery_tasks.text import (
@@ -64,7 +65,7 @@ async def keywords(data: KeywordsRequest, use_nltk: Optional[bool] = False):
 
 @router.post('/wikify', response_model=WikifyResponse)
 async def wikify(
-    data: WikifyRequest,
+    data: Union[WikifyFromRawTextRequest, WikifyFromKeywordsRequest],
     method: Optional[str] = 'es-base',
     restrict_to_ontology: Optional[bool] = False,
     graph_score_smoothing: Optional[bool] = True,
@@ -91,7 +92,12 @@ async def wikify(
     """
 
     # Get input parameters
-    raw_text = data.raw_text
+    if isinstance(data, WikifyFromRawTextRequest):
+        raw_text = data.raw_text
+    elif isinstance(data, WikifyFromKeywordsRequest):
+        raw_text = data.keywords
+    else:
+        return []
 
     # Return if no input
     if not raw_text:
