@@ -1,7 +1,11 @@
+-- If a group of concepts are to be split from their existing cluster and associated with a new category,
+-- we need to calculate the next cluster id, change the cluster of those concepts to the new value,
+-- and associate the new cluster with the target category.
+
 -- Setting the name of the new category
 
 SET @new_category_id := '<CATEGORY ID>';
-SET @concepts_to_split := '<CONCEPT ID 1>,<CONCEPT ID 2>,...'
+SET @concepts_to_split := '<CONCEPT ID 1>,<CONCEPT ID 2>,...';
 
 -- Computing the id of the new cluster
 
