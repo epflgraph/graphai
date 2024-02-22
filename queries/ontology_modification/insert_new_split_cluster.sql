@@ -1,0 +1,26 @@
+-- Setting the name of the new category
+
+SET @new_category_id := '<CATEGORY ID>';
+
+-- Computing the id of the new cluster
+
+SET @next_cluster_number := (SELECT CAST(MAX(CAST(from_id AS UNSIGNED)) + 1 AS CHAR(255))
+FROM graph_ontology.Edges_N_ConceptsCluster_N_Concept_T_ParentToChild
+);
+
+-- Updating the cluster value of the concepts and setting it to the new value
+
+UPDATE `graph_ontology`.`Edges_N_ConceptsCluster_N_Concept_T_ParentToChild`
+SET
+`from_id` = @next_cluster_number
+WHERE to_id IN ('<CONCEPT ID 1>', '<CONCEPT ID 2>', ...);
+
+-- Inserting the new cluster into the category-cluster table
+
+INSERT INTO `graph_ontology`.`Edges_N_Category_N_ConceptsCluster_T_ParentToChild`
+(`from_id`,
+`to_id`)
+VALUES
+(@new_category_id,
+@next_cluster_number);
+
