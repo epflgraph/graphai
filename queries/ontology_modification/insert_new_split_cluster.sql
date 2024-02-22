@@ -1,6 +1,7 @@
 -- Setting the name of the new category
 
 SET @new_category_id := '<CATEGORY ID>';
+SET @concepts_to_split := '<CONCEPT ID 1>,<CONCEPT ID 2>,...'
 
 -- Computing the id of the new cluster
 
@@ -13,7 +14,7 @@ FROM graph_ontology.Edges_N_ConceptsCluster_N_Concept_T_ParentToChild
 UPDATE `graph_ontology`.`Edges_N_ConceptsCluster_N_Concept_T_ParentToChild`
 SET
 `from_id` = @next_cluster_number
-WHERE to_id IN ('<CONCEPT ID 1>', '<CONCEPT ID 2>', ...);
+WHERE FIND_IN_SET(to_id, @concepts_to_split) > 0;
 
 -- Inserting the new cluster into the category-cluster table
 
