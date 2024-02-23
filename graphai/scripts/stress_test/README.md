@@ -15,5 +15,7 @@ To run the script, follow these steps:
 }
 `
 3. Run the script with `python stress_test.py --config CONFIG_FILE_PATH --requests N_REQUESTS`. If you don't provide the 
-`--requests` argument, its default value will be 10, meaning 10 requests will spawn randomly.
+`--requests` argument, its default value will be 10, meaning 10 requests will spawn randomly (4 translation to 1 slides).
 
+Each task type has its own predefined timeout. The defaults are 20 seconds for translation and 600 seconds for 
+slide extraction. They can be overriden with the `--timeout_translate` and `--timeout_slides` arguments, respectively.

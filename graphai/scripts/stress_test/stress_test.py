@@ -58,17 +58,17 @@ def main():
     parser = ArgumentParser()
     parser.add_argument('--config', type=str, required=True)
     parser.add_argument('--requests', type=int, default=10)
-    parser.add_argument('--translate_timeout', type=int, default=None)
-    parser.add_argument('--slides_timeout', type=int, default=None)
+    parser.add_argument('--timeout_translate', type=int, default=None)
+    parser.add_argument('--timeout_slides', type=int, default=None)
     args = parser.parse_args()
 
     config_file = args.config
     n_requests = args.requests
     timeout_values = TIMEOUTS.copy()
-    if args.translate_timeout and args.translate_timeout > 0:
-        timeout_values['translate'] = args.translate_timeout
-    if args.slides_timeout and args.slides_timeout > 0:
-        timeout_values['slides'] = args.slides_timeout
+    if args.timeout_translate and args.timeout_translate > 0:
+        timeout_values['translate'] = args.timeout_translate
+    if args.timeout_slides and args.timeout_slides > 0:
+        timeout_values['slides'] = args.timeout_slides
 
     login_config = login(config_file)
 
