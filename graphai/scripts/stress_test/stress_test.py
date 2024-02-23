@@ -6,18 +6,18 @@ import multiprocessing
 import random
 
 
-text_list = """This session will be all about an extended example program dealing with discrete event simulation of 
-digital circuits. This example will show interesting ways how one can combine assignments and higher order 
-functions. Our task will be to construct a digital circuit simulator. There are a number of things that we need 
-to do. We need to define a way to specify a digital circuit. We need to define a way to how to run simulations 
-and then we have to put everything together so that the circuits can actually drive the simulator. This is also a 
-great example that shows how to build programs that do discrete event simulation. So we start with a small 
-description language for digital circuits. A digital circuit is composed of wires and the functional components. 
-Wires transport signals and components transform signals. We represent signals using Booleans True and False. So 
-it's a digital circuit simulator and analog one. A signal is either true or false and not but not something in 
-between. Their base components are also called gates. They are the inverter whose output is the inverse of its 
-input. The AND gate whose output is the conjunction, logical AND of its inputs and the OR gate whose output is 
-the disjunction, logical OR of its inputs. Once we have these three, we can construct the other components by 
+text_list = """This session will be all about an extended example program dealing with discrete event simulation of
+digital circuits. This example will show interesting ways how one can combine assignments and higher order
+functions. Our task will be to construct a digital circuit simulator. There are a number of things that we need
+to do. We need to define a way to specify a digital circuit. We need to define a way to how to run simulations
+and then we have to put everything together so that the circuits can actually drive the simulator. This is also a
+great example that shows how to build programs that do discrete event simulation. So we start with a small
+description language for digital circuits. A digital circuit is composed of wires and the functional components.
+Wires transport signals and components transform signals. We represent signals using Booleans True and False. So
+it's a digital circuit simulator and analog one. A signal is either true or false and not but not something in
+between. Their base components are also called gates. They are the inverter whose output is the inverse of its
+input. The AND gate whose output is the conjunction, logical AND of its inputs and the OR gate whose output is
+the disjunction, logical OR of its inputs. Once we have these three, we can construct the other components by
 combining the base components.""".split('. ')
 
 
