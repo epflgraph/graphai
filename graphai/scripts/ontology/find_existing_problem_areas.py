@@ -32,6 +32,16 @@ def eval_at_k(res, labels, k):
     return acc
 
 
+def get_direct_child_to_parent_dict(model: OntologyData):
+    child_to_parent = model.get_category_to_category()
+    child_to_parent = {d['child_id']: d['parent_id'] for d in child_to_parent}
+    return child_to_parent
+
+
+def convert_to_level_3(child_to_parent, labels):
+    return [child_to_parent[label] for label in labels]
+
+
 def get_errors_at_k(res, concepts, labels, k):
     results_to_evaluate = get_top_k_list_of_lists(res, k)
     error_indices = [i for i in range(len(results_to_evaluate)) if labels[i] not in results_to_evaluate[i]]

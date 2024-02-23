@@ -60,7 +60,7 @@ follow these steps:
 
 1. Add an `[auth]` section to the `config.ini` file, as shown in the example config file. The secret key can be generated using `openssl rand -hex 32`. 
 Generate your own and do NOT use the secret key included in the example config file!
-2. Modify and run the SQL file `init_auth_db.sql`, found in the `queries` folder in the root directory of the repo in 
+2. Modify and run the SQL file `init_auth_db.sql`, found in the `queries/auth` folder in the root directory of the repo in 
 order to create your users table and add the first user.
    1. Be sure to fill in the details of the user. Using your desired password, you can generate the value for
    `hashed_password` using the function `graphai.core.common.auth_utils.get_password_hash`, which uses 
