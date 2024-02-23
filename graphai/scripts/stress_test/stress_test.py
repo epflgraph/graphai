@@ -75,7 +75,7 @@ def main():
     print('STARTING TASKS...')
     start_time = time.time()
     with multiprocessing.Pool(processes=min([n_requests, 10])) as pool:
-        what = ['slides' if i % 5 == 0 else 'translate' for i in range(n_requests)]
+        what = ['slides' if i % 5 == 4 else 'translate' for i in range(n_requests)]
         tasks = {
             i: {
                 'task': pool.apply_async(stress_test_worker, (login_config, what[i])),
