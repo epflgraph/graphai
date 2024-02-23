@@ -32,6 +32,11 @@ video_url_list = [
     "download/protocol/https/flavorParamIds/0"
 ]
 
+TIMEOUTS = {
+    'translate': 20,
+    'slides': 600
+}
+
 
 def stress_test_worker(login_config, what='translate'):
     assert what in ['translate', 'slides']
@@ -52,20 +57,36 @@ def stress_test_worker(login_config, what='translate'):
 def main():
     parser = ArgumentParser()
     parser.add_argument('--config', type=str, required=True)
-    parser.add_argument('--requests', type=int, default=3)
+    parser.add_argument('--requests', type=int, default=10)
+    parser.add_argument('--translate_timeout', type=int, default=None)
+    parser.add_argument('--slides_timeout', type=int, default=None)
     args = parser.parse_args()
 
     config_file = args.config
     n_requests = args.requests
+    timeout_values = TIMEOUTS.copy()
+    if args.translate_timeout and args.translate_timeout > 0:
+        timeout_values['translate'] = args.translate_timeout
+    if args.slides_timeout and args.slides_timeout > 0:
+        timeout_values['slides'] = args.slides_timeout
 
     login_config = login(config_file)
 
     print('STARTING TASKS...')
     start_time = time.time()
     with multiprocessing.Pool(processes=min([n_requests, 10])) as pool:
-        what = ['slides' if i % 3 == 0 else 'translate' for i in range(n_requests)]
-        tasks = [pool.apply_async(stress_test_worker, (login_config, what[i])) for i in range(n_requests)]
-        print(all([res.get(timeout=300) for res in tasks]))
+        what = ['slides' if i % 5 == 0 else 'translate' for i in range(n_requests)]
+        tasks = {
+            i: {
+                'task': pool.apply_async(stress_test_worker, (login_config, what[i])),
+                'timeout': timeout_values[what[i]]
+            } for i in range(n_requests)
+        }
+        result = all([tasks[i]['task'].get(timeout=tasks[i]['timeout']) for i in tasks])
+        if result:
+            print('All tasks succeeded')
+        else:
+            print('Some tasks failed')
 
     finish_time = time.time()
     print(f'TIME ELAPSED: {finish_time - start_time}')
