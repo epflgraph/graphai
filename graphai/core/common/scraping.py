@@ -5,6 +5,7 @@ import re
 from bs4 import BeautifulSoup
 from unidecode import unidecode
 import hashlib
+from urllib.parse import urljoin
 
 
 REQ_HEADERS = {
@@ -616,10 +617,7 @@ def get_sublinks(base_url, validated_url, request_headers=None):
         link_url = link.get('href')
         if link_url is not None and (link_url.startswith('http') or link_url.startswith('/')):
             if link_url.startswith('/'):
-                if validated_url.endswith('/'):
-                    link_url = validated_url[:-1] + link_url
-                else:
-                    link_url = validated_url + link_url
+                link_url = urljoin(validated_url, link_url)
             if validated_url in link_url:
                 if link_url.endswith('/'):
                     link_url = link_url[:-1]
