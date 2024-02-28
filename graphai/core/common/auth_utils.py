@@ -6,6 +6,9 @@ from pydantic import BaseModel
 
 from graphai.core.common.config import config
 
+import string
+import random
+
 AUTH_SCHEMA = config['auth']['schema']
 ALL_SCOPES = ['user', 'voice', 'video', 'translation', 'text', 'scraping', 'ontology', 'image', 'completion']
 
@@ -33,6 +36,11 @@ class UserInDB(User):
 
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+
+def generate_random_password_string(length=32):
+    return ''.join(random.SystemRandom().choice(string.ascii_uppercase + string.ascii_lowercase + string.digits)
+                   for _ in range(length))
 
 
 def verify_password(plain_password, hashed_password):
