@@ -4,8 +4,8 @@
 
 -- Setting the list of concepts and the id of the destination cluster
 
-SET @concepts_to_add := '<CONCEPT ID 1>,<CONCEPT ID 2>,...';
 SET @cluster_id := '<CLUSTER ID>';
+SET @concepts_to_add := '<CONCEPT ID 1>,<CONCEPT ID 2>,...';
 
 -- Adding the concepts to the cluster-concept table
 
