@@ -4,6 +4,18 @@ from argparse import ArgumentParser
 import pandas as pd
 
 
+def check_if_concept_has_been_added(db_manager, concept_id):
+    query = ("SELECT COUNT(*) FROM graph_ontology.Edges_N_ConceptsCluster_N_Concept_T_ParentToChild "
+             "WHERE to_id=%s")
+    result = db_manager.execute_query(query, values=(concept_id, ))[0][0]
+    if result == 0:
+        print(f'Concept {concept_id} not in cluster edge table!')
+    elif result > 1:
+        print(f'Concept {concept_id} duplicated!')
+    else:
+        return
+
+
 def get_number_of_ontology_concepts(db_manager):
     query = "SELECT COUNT(*) FROM graph_ontology.Nodes_N_Concept WHERE is_ontology_concept=1;"
     result = db_manager.execute_query(query)[0][0]
@@ -61,57 +73,68 @@ def add_concept_to_new_cluster(db_manager, concept_id, category_id):
 def main():
     parser = ArgumentParser()
     parser.add_argument('--input_file', type=str)
+    parser.add_argument('--check_mode', action='store_true')
     args = parser.parse_args()
     input_csv = args.input_file
+    check_mode = args.check_mode
 
     db_manager = DB(config['database'])
     input_df = pd.read_csv(input_csv, index_col='id')
-    df_to_process = input_df.copy()
-    df_to_process = df_to_process.loc[
-        (~pd.isna(df_to_process['chosen_category']))
-        | (~pd.isna(df_to_process['candidate_categories']))
-    ]
 
-    df_to_process = df_to_process.loc[
-        df_to_process['processed'] != 1
-    ]
-    for col in df_to_process.columns:
-        if col == 'processed':
-            continue
-        df_to_process[col] = df_to_process[col].astype(str)
+    if check_mode:
+        processed_concepts = input_df.loc[
+            input_df['processed'] == 1, 'concept_id'
+        ].values.tolist()
+        processed_concepts = [str(x) for x in processed_concepts]
+        for concept_id in processed_concepts:
+            check_if_concept_has_been_added(db_manager, concept_id)
+    else:
+        df_to_process = input_df.copy()
+        df_to_process = df_to_process.loc[
+            (~pd.isna(df_to_process['chosen_category']))
+            | (~pd.isna(df_to_process['candidate_categories']))
+        ]
 
-    concepts_dict = df_to_process[['concept_id', 'chosen_category', 'chosen_cluster']].to_dict(orient='records')
-    print(df_to_process.shape)
-    if df_to_process.shape[0] == 0:
-        return
-    starting_concept_count = get_number_of_ontology_concepts(db_manager)
-    print('STARTING...')
-    for concept_element in concepts_dict:
-        is_cluster_valid = verify_category_cluster_relationship(db_manager,
-                                                                concept_element['chosen_cluster'],
-                                                                concept_element['chosen_category'])
-        if not is_cluster_valid:
-            print(f'INVALID CLUSTER-CATEGORY relationship for {concept_element}')
-            concept_element['chosen_cluster'] = '-'
+        df_to_process = df_to_process.loc[
+            df_to_process['processed'] != 1
+        ]
+        for col in df_to_process.columns:
+            if col == 'processed':
+                continue
+            df_to_process[col] = df_to_process[col].astype(str)
 
-        if concept_element['chosen_cluster'] == '-':
-            add_concept_to_new_cluster(db_manager,
-                                       concept_element['concept_id'],
-                                       concept_element['chosen_category'])
-        else:
-            add_concept_to_existing_cluster(db_manager,
-                                            concept_element['concept_id'],
-                                            concept_element['chosen_cluster'])
-    processed_concept_id_set = {x['concept_id'] for x in concepts_dict}
-    final_concept_count = get_number_of_ontology_concepts(db_manager)
-    print(f'EXPECTED TOTAL # OF CONCEPTS PROCESSED: {len(concepts_dict)}')
-    print(f'TOTAL # OF CONCEPTS PROCESSED: {final_concept_count - starting_concept_count}')
-    print('Writing modified dataframe to disk...')
-    input_df['processed'] = input_df.apply(
-        lambda x: 1 if str(x['concept_id']) in processed_concept_id_set else x['processed'],
-        axis=1
-    )
-    input_df.to_csv(input_csv)
+        concepts_dict = df_to_process[['concept_id', 'chosen_category', 'chosen_cluster']].to_dict(orient='records')
+        print(df_to_process.shape)
+        if df_to_process.shape[0] == 0:
+            return
+        starting_concept_count = get_number_of_ontology_concepts(db_manager)
+        print('STARTING...')
+        for concept_element in concepts_dict:
+            is_cluster_valid = verify_category_cluster_relationship(db_manager,
+                                                                    concept_element['chosen_cluster'],
+                                                                    concept_element['chosen_category'])
+            if not is_cluster_valid:
+                print(f'INVALID CLUSTER-CATEGORY relationship for {concept_element}')
+                concept_element['chosen_cluster'] = '-'
+
+            if concept_element['chosen_cluster'] == '-':
+                add_concept_to_new_cluster(db_manager,
+                                           concept_element['concept_id'],
+                                           concept_element['chosen_category'])
+            else:
+                add_concept_to_existing_cluster(db_manager,
+                                                concept_element['concept_id'],
+                                                concept_element['chosen_cluster'])
+        processed_concept_id_set = {x['concept_id'] for x in concepts_dict}
+        final_concept_count = get_number_of_ontology_concepts(db_manager)
+        print(f'EXPECTED TOTAL # OF CONCEPTS PROCESSED: {len(concepts_dict)}')
+        print(f'TOTAL # OF CONCEPTS PROCESSED: {final_concept_count - starting_concept_count}')
+        print('Writing modified dataframe to disk...')
+        input_df['processed'] = input_df.apply(
+            lambda x: 1 if str(x['concept_id']) in processed_concept_id_set else x['processed'],
+            axis=1
+        )
+        input_df.to_csv(input_csv)
 
 
 if __name__ == '__main__':
