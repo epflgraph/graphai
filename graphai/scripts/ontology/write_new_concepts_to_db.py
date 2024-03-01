@@ -109,7 +109,10 @@ def main():
             return
         starting_concept_count = get_number_of_ontology_concepts(db_manager)
         print('STARTING...')
+        processed_concept_id_set = set()
         for concept_element in concepts_dict:
+            if concept_element['chosen_category'] == '-':
+                continue
             is_cluster_valid = verify_category_cluster_relationship(db_manager,
                                                                     concept_element['chosen_cluster'],
                                                                     concept_element['chosen_category'])
@@ -125,7 +128,7 @@ def main():
                 add_concept_to_existing_cluster(db_manager,
                                                 concept_element['concept_id'],
                                                 concept_element['chosen_cluster'])
-        processed_concept_id_set = {x['concept_id'] for x in concepts_dict}
+            processed_concept_id_set.add(concept_element['concept_id'])
         final_concept_count = get_number_of_ontology_concepts(db_manager)
         print(f'EXPECTED TOTAL # OF CONCEPTS PROCESSED: {len(concepts_dict)}')
         print(f'TOTAL # OF CONCEPTS PROCESSED: {final_concept_count - starting_concept_count}')
