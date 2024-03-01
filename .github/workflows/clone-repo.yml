@@ -11,8 +11,9 @@ jobs:
 
     steps:
       - name: Debug
-        run: |
-          echo ${{ github }}
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+        run: echo "$GITHUB_CONTEXT"
 
       - name: Checkout repository code
         uses: actions/checkout@v4
