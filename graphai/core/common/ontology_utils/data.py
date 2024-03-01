@@ -812,7 +812,10 @@ class OntologyData:
         clusters = self.symmetric_concept_concept_matrix['cluster_id_to_index']
         candidate_cluster_ids = self.category_cluster_dict[category_id]
         concept_index = concepts[concept_id]
-        candidate_cluster_indices = [clusters[x] for x in candidate_cluster_ids]
+        # We do .get() because it is possible that there are some empty clusters, i.e. without a row in cluster-concept,
+        # but with a row in category-cluster.
+        candidate_cluster_indices = [clusters.get(x, None) for x in candidate_cluster_ids]
+        candidate_cluster_indices = [x for x in candidate_cluster_indices if x is not None]
         score = (self.symmetric_concept_concept_matrix['matrix_concept_cluster_concepts']
                  [[concept_index], candidate_cluster_indices])
         denominator = (self.symmetric_concept_concept_matrix['cluster_concepts_lengths']
