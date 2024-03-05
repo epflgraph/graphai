@@ -90,10 +90,15 @@ def main():
             check_if_concept_has_been_added(db_manager, concept_id)
     else:
         df_to_process = input_df.copy()
-        df_to_process = df_to_process.loc[
-            (~pd.isna(df_to_process['chosen_category']))
-            | (~pd.isna(df_to_process['candidate_categories']))
-        ]
+        if 'chosen_category' in df_to_process.columns and 'candidate_categories' in df_to_process.columns:
+            df_to_process = df_to_process.loc[
+                (~pd.isna(df_to_process['chosen_category']))
+                | (~pd.isna(df_to_process['candidate_categories']))
+            ]
+        elif 'chosen_category' in df_to_process.columns:
+            df_to_process = df_to_process.loc[
+                (~pd.isna(df_to_process['chosen_category']))
+            ]
 
         df_to_process = df_to_process.loc[
             df_to_process['processed'] != 1
