@@ -20,40 +20,22 @@ jobs:
         with:
           path: main
 
-      - name: Run linter
-        run: |
-          cd main
-          source /data/venvs/test_venv/bin/activate
-          flake8 --ignore=E501,W503 graphai
-
-      - name: Install python package in editable mode along with dependencies from the correct virtual environment
-        run: |
-          cd main
-          source /data/venvs/test_venv/bin/activate
-          pip install -e .
-          python -c "import spacy; spacy.cli.download('en_core_web_lg') if 'en_core_web_lg' not in spacy.util.get_installed_models() else None"
-          python -c "import spacy; spacy.cli.download('fr_core_news_md') if 'fr_core_news_md' not in spacy.util.get_installed_models() else None"
-          python -c "import whisper; whisper.load_model('${{ vars.whisper_model_type }}');"
-          python -c "from transformers import AutoModelForSeq2SeqLM; AutoModelForSeq2SeqLM.from_pretrained('Helsinki-NLP/opus-mt-en-fr')"
-          python -c "from transformers import AutoModelForSeq2SeqLM; AutoModelForSeq2SeqLM.from_pretrained('Helsinki-NLP/opus-mt-fr-en')"
-          opentelemetry-bootstrap --action=install
-
       - name: Create config file
         run: |
           cd main
-          
+
           echo "[celery]" >> config.ini
           echo "broker_url: ${{ vars.celery_broker_url }}" >> config.ini
           echo "result_backend: ${{ vars.celery_result_backend }}" >> config.ini
           echo "" >> config.ini
-          
+
           echo "[database]" >> config.ini
           echo "host: ${{ vars.db_host }}" >> config.ini
           echo "port: ${{ vars.db_port }}" >> config.ini
           echo "user: ${{ vars.db_user }}" >> config.ini
           echo "password: ${{ secrets.db_password }}" >> config.ini
           echo "" >> config.ini
-          
+
           echo "[auth]" >> config.ini
           echo "schema: ${{ vars.auth_schema }}" >> config.ini
           echo "secret_key: ${{ secrets.auth_key }}" >> config.ini
@@ -75,17 +57,35 @@ jobs:
           echo "[whisper]" >> config.ini
           echo "model_type: ${{ vars.whisper_model_type }}" >> config.ini
           echo "" >> config.ini
-          
+
           echo "[google]" >> config.ini
           echo "api_key: ${{ secrets.google_api_key }}" >> config.ini
           echo "" >> config.ini
-          
+
           echo "[openai]" >> config.ini
           echo "api_key: ${{ secrets.openai_api_key }}" >> config.ini
           echo "" >> config.ini
-          
+
           echo "[preload]" >> config.ini
           echo "video: ${{ vars.preload_video }}" >> config.ini
           echo "text: ${{ vars.preload_text }}" >> config.ini
           echo "ontology: ${{ vars.preload_ontology }}" >> config.ini
           echo "" >> config.ini
+
+      - name: Install python package in editable mode
+        run: |
+          cd main
+          source /data/venvs/test_venv/bin/activate
+          pip install -e .
+
+      - name: Install dependencies
+        run: |
+          cd main
+          source /data/venvs/test_venv/bin/activate
+          python -c "import spacy; spacy.cli.download('en_core_web_lg') if 'en_core_web_lg' not in spacy.util.get_installed_models() else None"
+          python -c "import spacy; spacy.cli.download('fr_core_news_md') if 'fr_core_news_md' not in spacy.util.get_installed_models() else None"
+          python -c "import whisper; whisper.load_model('${{ vars.whisper_model_type }}');"
+          python -c "from transformers import AutoModelForSeq2SeqLM; AutoModelForSeq2SeqLM.from_pretrained('Helsinki-NLP/opus-mt-en-fr')"
+          python -c "from transformers import AutoModelForSeq2SeqLM; AutoModelForSeq2SeqLM.from_pretrained('Helsinki-NLP/opus-mt-fr-en')"
+          opentelemetry-bootstrap --action=install
+

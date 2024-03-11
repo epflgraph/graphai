@@ -13,7 +13,6 @@ on:
 
 jobs:
   clone-repo:
-    if: github.event_name == 'pull_request'
     uses: ./.github/workflows/clone-repo.yml
     secrets: inherit
 
@@ -24,6 +23,7 @@ jobs:
 
   deploy-api:
     if: github.event_name == 'push'
+    needs: [clone-repo]
     uses: ./.github/workflows/deploy-api.yml
 
   build-docs:

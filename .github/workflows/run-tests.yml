@@ -10,6 +10,12 @@ jobs:
     runs-on: self-hosted
 
     steps:
+      - name: Run linter
+        run: |
+          cd main
+          source /data/venvs/test_venv/bin/activate
+          flake8 --ignore=E501,W503 graphai
+
       - name: Run tests
         run: |
           cd main/tests
