@@ -4,8 +4,8 @@
 
 -- Setting the list of concepts and the id of the destination cluster
 
-SET @concepts_to_add := '<CONCEPT ID 1>,<CONCEPT ID 2>,...';
 SET @cluster_id := '<CLUSTER ID>';
+SET @concepts_to_add := '<CONCEPT ID 1>,<CONCEPT ID 2>,...';
 
 -- Adding the concepts to the cluster-concept table
 
@@ -24,6 +24,6 @@ DEALLOCATE PREPARE stmt;
 UPDATE `graph_ontology`.`Nodes_N_Concept`
 SET
 `is_ontology_concept` = 1,
-`is_ontology_neighbor` = 0,
+`is_ontology_neighbour` = 0,
 `is_unused` = 0
 WHERE FIND_IN_SET(id, @concepts_to_add) > 0;
