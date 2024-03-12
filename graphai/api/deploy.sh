@@ -22,4 +22,4 @@ while getopts ":h:p:" opt; do
 done
 
 # uvicorn main:app --host $host --port $port
-OTEL_RESOURCE_ATTRIBUTES=service.name=graphAIApp OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4317 OTEL_EXPORTER_OTLP_PROTOCOL=grpc opentelemetry-instrument gunicorn main:app -b $host:$port -w 1 -k uvicorn.workers.UvicornWorker --timeout $TIMEOUT
+gunicorn main:app -b $host:$port -w 1 -k uvicorn.workers.UvicornWorker --timeout $TIMEOUT
