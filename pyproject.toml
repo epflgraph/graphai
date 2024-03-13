@@ -72,7 +72,9 @@ dependencies = [
     "yt-dlp",
     "python-multipart",
     "python-jose[cryptography]",
-    "passlib[bcrypt]"
+    "passlib[bcrypt]",
+    "fasttext",
+    "fasttext-reducer"
 ]
 
 [tool.setuptools]
