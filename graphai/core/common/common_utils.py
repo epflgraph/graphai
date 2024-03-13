@@ -18,6 +18,8 @@ def make_sure_path_exists(path, file_at_the_end=False, full_perm=True):
         return
     if file_at_the_end:
         path = '/'.join(path.split('/')[:-1])
+    if os.path.isdir(path):
+        return
     try:
         parent_path = '/'.join(path.split('/')[:-1])
         make_sure_path_exists(parent_path)
