@@ -52,7 +52,7 @@ def reduce_and_save(source_filename, full_target_path, target_dim=30):
     model.save_model(full_target_path)
 
 
-def init_fasttext_models(root_dir, lang, target_dim):
+def reduce_fasttext_models(root_dir, lang, target_dim):
     make_sure_path_exists(root_dir)
     final_file_name = generate_model_filename(lang, target_dim)
     original_file_name = generate_model_filename(lang, 300)
@@ -70,14 +70,14 @@ def init_fasttext_models(root_dir, lang, target_dim):
     print(f'ft_{lang}={target_filename}')
 
 
-def init_fasttext_models_main():
+def reduce_fasttext_models_main():
     parser = ArgumentParser()
     parser.add_argument('--root_dir', type=str, required=True)
-    parser.add_argument('--lang', type=str, choices=['en', 'fr'], required=True)
+    parser.add_argument('--lang', type=str, required=True)
     parser.add_argument('--dim', type=int, default=30)
     args = parser.parse_args()
-    init_fasttext_models(args.root_dir, args.lang, args.dim)
+    reduce_fasttext_models(args.root_dir, args.lang, args.dim)
 
 
 if __name__ == '__main__':
-    init_fasttext_models_main()
+    reduce_fasttext_models_main()
