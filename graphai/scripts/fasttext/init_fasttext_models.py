@@ -1,10 +1,34 @@
 import os
+import errno
 
 import fasttext
 from fasttext.util import download_model, reduce_model
 from argparse import ArgumentParser
 from contextlib import chdir
-from graphai.core.common.common_utils import make_sure_path_exists
+
+
+def make_sure_path_exists(path, full_perm=True):
+    """
+    Recursively creates the folders in a path.
+    Args:
+        path: The path that needs to exist (and will thus be created if it doesn't)
+        full_perm: If set, the function will assign full permission (chmod 777) to each newly created folder
+    Returns:
+        None
+    """
+    if path == '/' or path == '':
+        return
+    if os.path.isdir(path):
+        return
+    try:
+        parent_path = '/'.join(path.split('/')[:-1])
+        make_sure_path_exists(parent_path)
+        os.mkdir(path)
+        if full_perm:
+            os.chmod(path, 0o777)
+    except OSError as exception:
+        if exception.errno != errno.EEXIST and exception.errno != errno.EPERM:
+            raise
 
 
 def generate_model_filename(lang='en', target_dim=30):
@@ -28,16 +52,7 @@ def reduce_and_save(source_filename, full_target_path, target_dim=30):
     model.save_model(full_target_path)
 
 
-def main():
-    parser = ArgumentParser()
-    parser.add_argument('--root_dir', type=str, required=True)
-    parser.add_argument('--lang', type=str, choices=['en', 'fr'], required=True)
-    parser.add_argument('--dim', type=int, default=30)
-    args = parser.parse_args()
-    root_dir = args.root_dir
-    lang = args.lang
-    target_dim = args.dim
-
+def init_fasttext_models(root_dir, lang, target_dim):
     make_sure_path_exists(root_dir)
     final_file_name = generate_model_filename(lang, target_dim)
     original_file_name = generate_model_filename(lang, 300)
@@ -55,5 +70,14 @@ def main():
     print(f'ft_{lang}={target_filename}')
 
 
+def init_fasttext_models_main():
+    parser = ArgumentParser()
+    parser.add_argument('--root_dir', type=str, required=True)
+    parser.add_argument('--lang', type=str, choices=['en', 'fr'], required=True)
+    parser.add_argument('--dim', type=int, default=30)
+    args = parser.parse_args()
+    init_fasttext_models(args.root_dir, args.lang, args.dim)
+
+
 if __name__ == '__main__':
-    main()
+    init_fasttext_models_main()
