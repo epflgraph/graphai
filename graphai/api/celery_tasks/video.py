@@ -401,7 +401,7 @@ def compute_noise_level_parallel_task(self, results, i, n, language=None):
     noise_level_list = compute_ocr_noise_level(
         self.file_manager.generate_filepath(results['result']),
         current_sample_indices,
-        self.nlp_model.get_nlp_models(),
+        self.nlp_model,
         language=language
     )
 
@@ -463,7 +463,7 @@ def compute_slide_transitions_parallel_task(self, results, i, n, language=None):
         current_sample_indices,
         results['threshold'],
         results['hash_threshold'],
-        self.nlp_model.get_nlp_models(),
+        self.nlp_model,
         language=language,
         keep_first=True
     )
@@ -501,7 +501,7 @@ def compute_slide_transitions_callback_task(self, results, language=None):
                                                            l1[-1], l2[0],
                                                            results[0]['threshold'],
                                                            results[0]['hash_threshold'],
-                                                           self.nlp_model.get_nlp_models(),
+                                                           self.nlp_model,
                                                            language)
         if not t_check:
             l1 = l1[:-1]
@@ -628,7 +628,7 @@ def video_init_task(self):
         self.transcription_obj.load_model_whisper()
 
         print('Loading NLP models...')
-        self.nlp_obj.get_nlp_models()
+        self.nlp_obj.load_nlp_models()
 
         print('Loading translation models...')
         self.translation_obj.load_models()
