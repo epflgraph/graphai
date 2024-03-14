@@ -9,6 +9,8 @@ import json
 import time
 from datetime import datetime, timedelta
 import gzip
+
+from sacremoses.tokenize import MosesTokenizer
 import wget
 import subprocess
 
@@ -23,8 +25,13 @@ from fuzzywuzzy import fuzz
 
 import pytesseract
 from google.cloud import vision
-import spacy
 import whisper
+
+import fasttext
+from fasttext_reducer.reduce_fasttext_models import generate_target_path
+import nltk.data
+from nltk.corpus import stopwords
+import string
 
 from graphai.core.common.config import config
 from graphai.core.common.common_utils import make_sure_path_exists, file_exists
@@ -632,6 +639,10 @@ def generate_img_and_ocr_paths_and_perform_tesseract_ocr(input_folder_with_path,
     return extracted_text
 
 
+def get_cosine_sim(v1, v2):
+    return np.dot(v1, v2) / (np.linalg.norm(v1) * np.linalg.norm(v2))
+
+
 def frame_ocr_distance(input_folder_with_path, k1, k2, nlp_models, language=None):
     """
     Computes OCR distance between two frames
@@ -918,10 +929,17 @@ class WhisperTranscriptionModel:
 
 class NLPModels:
     def __init__(self):
-        spacy.prefer_gpu()
+        n_dims = config['fasttext']['dim']
+        base_dir = config['fasttext']['path']
+        self.model_paths = {
+            lang: generate_target_path(base_dir, lang, n_dims)
+            for lang in ['en', 'fr']
+        }
         self.nlp_models = None
+        self.tokenizers = None
+        self.stopwords = None
 
-    def get_nlp_models(self):
+    def load_nlp_models(self):
         """
         Lazy-loads and returns the NLP models used for local OCR in slide detection
         Returns:
@@ -929,10 +947,47 @@ class NLPModels:
         """
         if self.nlp_models is None:
             self.nlp_models = {
-                'en': spacy.load('en_core_web_lg'),
-                'fr': spacy.load('fr_core_news_md')
+                lang: fasttext.load_model(self.model_paths[lang])
+                for lang in self.model_paths
             }
-        return self.nlp_models
+            langcode_to_full_name = {
+                'en': 'english',
+                'fr': 'french'
+            }
+            self.tokenizers = {
+                lang: MosesTokenizer(lang)
+                for lang in self.nlp_models
+            }
+            self.stopwords = {
+                lang: stopwords.words(langcode_to_full_name[lang])
+                for lang in self.nlp_models
+            }
+
+    def get_words(self, text, lang='en'):
+        self.load_nlp_models()
+        current_tokenizer = self.tokenizers[lang]
+        current_stopwords = self.stopwords[lang]
+
+        all_valid_words = [w for w in current_tokenizer.tokenize(text, return_str=False, escape=False)
+                           if str(w.lower()) not in current_stopwords and str(w) not in nltk.punkt.string.punctuation]
+        if lang == 'fr':
+            all_valid_words = [w.strip("'") for w in all_valid_words]
+        return all_valid_words
+
+    def get_word_vector(self, text, lang='en'):
+        self.load_nlp_models()
+        current_model = self.nlp_models[lang]
+        all_valid_words = self.get_words(text, lang)
+
+        result_vector = sum(current_model.get_word_vector(w) for w in all_valid_words)
+        return result_vector
+
+    def get_word_vector_using_words(self, words, lang='en'):
+        self.load_nlp_models()
+        current_model = self.nlp_models[lang]
+
+        result_vector = sum(current_model.get_word_vector(w) for w in words)
+        return result_vector
 
 
 class GoogleOCRModel:
