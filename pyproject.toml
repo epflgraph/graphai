@@ -34,7 +34,6 @@ dependencies = [
     "openai>=1.0.0",
     "tiktoken",
     "pytesseract",
-    "spacy",
     "langdetect",
     "google-cloud-vision",
     "google-cloud-storage",
