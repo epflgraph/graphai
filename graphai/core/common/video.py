@@ -798,7 +798,7 @@ def compute_ocr_threshold(distance_list, default_threshold=0.1):
     Returns:
         The noise threshold
     """
-    threshold = float(5 * np.median(distance_list))
+    threshold = float(4 * np.median(distance_list))
     if math.isnan(threshold):
         return default_threshold
     return threshold
