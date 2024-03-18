@@ -129,47 +129,6 @@ class Ontology:
         print('Setting ontology as loaded...')
         self.loaded = True
 
-    def get_concept_category(self, page_id):
-        self.fetch_from_db()
-        if page_id not in self.concept_ids:
-            return None
-        return self.concept_categories.at[page_id]
-
-    def get_predefined_tree(self):
-        self.fetch_from_db()
-        return self.categories_categories.to_dict(orient='records')
-
-    def get_category_parent(self, category_id):
-        self.fetch_from_db()
-        if category_id not in self.category_parents.index:
-            return None
-        else:
-            return [{
-                'ParentCategoryID': self.category_parents[category_id],
-                'ChildCategoryID': category_id
-            }]
-
-    def get_category_children(self, category_id):
-        self.fetch_from_db()
-        if category_id not in self.category_ids:
-            return None
-        else:
-            cat_to_cat = self.categories_categories
-            return cat_to_cat.loc[cat_to_cat['ParentCategoryID'] == category_id].to_dict(orient='records')
-
-    def add_concepts_category(self, results):
-        self.fetch_from_db()
-        return pd.merge(results, self.concept_categories, how='inner', on='PageID')
-
-    def add_categories_category(self, results):
-        self.fetch_from_db()
-        return pd.merge(
-            results,
-            self.categories_categories.rename(columns={'ChildCategoryID': 'CategoryID', 'ParentCategoryID': 'Category2ID'}),
-            how='inner',
-            on='CategoryID'
-        )
-
     def filter_concepts(self, results):
         self.fetch_from_db()
         return results[results['PageID'].isin(self.concept_ids)]
