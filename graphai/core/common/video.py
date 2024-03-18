@@ -732,15 +732,15 @@ def frame_ocr_distance(input_folder_with_path, k1, k2, nlp_models: NLPModels, la
     nlp_2 = nlp_models.get_words(extracted_text2, language)
 
     # Calculate distance score
-    if np.max([len(nlp_1), len(nlp_2)]) < 32:
+    if np.max([len(nlp_1), len(nlp_2)]) < 16:
         text_dif = 0
-    elif np.min([len(nlp_1), len(nlp_2)]) < 4 and np.max([len(nlp_1), len(nlp_2)]) >= 32:
+    elif np.min([len(nlp_1), len(nlp_2)]) < 4 and np.max([len(nlp_1), len(nlp_2)]) >= 16:
         text_dif = 1
     else:
         text_sim = get_cosine_sim(nlp_models.get_text_word_vector(extracted_text1, language),
                                   nlp_models.get_text_word_vector(extracted_text2, language))
         text_dif = 1 - text_sim
-        text_dif = text_dif * (1 - np.exp(-np.mean([len(nlp_1), len(nlp_2)]) / 32))
+        text_dif = text_dif * (1 - np.exp(-np.mean([len(nlp_1), len(nlp_2)]) / 16))
 
     # Return distance score
     return text_dif
@@ -798,7 +798,7 @@ def compute_ocr_threshold(distance_list, default_threshold=0.1):
     Returns:
         The noise threshold
     """
-    threshold = float(4 * np.median(distance_list))
+    threshold = float(5 * np.median(distance_list))
     if math.isnan(threshold):
         return default_threshold
     return threshold
