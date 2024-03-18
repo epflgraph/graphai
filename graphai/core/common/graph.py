@@ -17,24 +17,6 @@ class ConceptsGraph:
         # holding the scored, undirected concept-concept edges
         self.concepts_concepts = None
 
-        ################################################
-
-        # Object of type pd.DataFrame with columns ['SourcePageID', 'TargetPageID'] holding, for each SourcePageID,
-        # a set of all its successors (TargetPageIDs).
-        self.successors = None
-
-        # Object of type pd.DataFrame with columns ['SourcePageID', 'TargetPageID'] holding, for each TargetPageID,
-        # a set of all its predecessors (SourcePageID).
-        self.predecessors = None
-
-        ################################################
-
-        # Set containing the PageIDs of all concepts having an outgoing edge
-        self.sources = None
-
-        # Set containing the PageIDs of all concepts having an ingoing edge
-        self.targets = None
-
     def fetch_from_db(self):
         if self.loaded:
             print('Graph already loaded')
@@ -50,7 +32,6 @@ class ConceptsGraph:
         table_name = 'graph.Nodes_N_Concept'
         fields = ['PageID', 'PageTitle']
         self.concepts = pd.DataFrame(db.find(table_name, fields=fields), columns=fields)
-        # concept_ids = list(self.concepts['PageID'])
 
         print('Done')
 
@@ -58,9 +39,7 @@ class ConceptsGraph:
 
         table_name = 'graph.Edges_N_Concept_N_Concept_T_GraphScore'
         fields = ['SourcePageID', 'TargetPageID', 'NormalisedScore']
-        # conditions = {'SourcePageID': concept_ids, 'TargetPageID': concept_ids}
-        conditions = {}
-        self.concepts_concepts = pd.DataFrame(db.find(table_name, fields=fields, conditions=conditions), columns=fields)
+        self.concepts_concepts = pd.DataFrame(db.find(table_name, fields=fields), columns=fields)
 
         print('Done')
 
@@ -73,14 +52,6 @@ class ConceptsGraph:
             self.concepts_concepts,
             self.concepts_concepts.rename(columns={'SourcePageID': 'TargetPageID', 'TargetPageID': 'SourcePageID'})
         ]).reset_index(drop=True)
-
-        # print('Storing derived successors, predecessors, sources and targets...')
-        #
-        # # Store successor and predecessor sets as attributes
-        # self.successors = self.concepts_concepts.groupby(by='SourcePageID').aggregate({'TargetPageID': set})
-        # self.predecessors = self.concepts_concepts.groupby(by='TargetPageID').aggregate({'SourcePageID': set})
-        # self.sources = set(self.successors.index)
-        # self.targets = set(self.predecessors.index)
 
         # Set the flag to avoid future reloads
         print('Setting graph as loaded...')

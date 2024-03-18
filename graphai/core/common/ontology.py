@@ -13,34 +13,16 @@ class Ontology:
         # Object of type pd.DataFrame with columns ['CategoryID', 'CategoryName'] holding the categories
         self.categories = None
 
-        # Set containing the CategoryID of all categories
-        self.category_ids = None
-
-        # Object of type pd.Series containing 'CategoryName' indexed by 'CategoryID'
-        self.category_names = None
-
         ################################################
 
         # Object of type pd.DataFrame with columns ['ChildCategoryID', 'ParentCategoryID'] holding the
         # category-category (parent-child) edges
         self.categories_categories = None
 
-        # Set containing the CategoryID of all children categories
-        self.category_child_ids = None
-
-        # Object of type pd.Series containing 'ParentCategoryID' indexed by 'ChildCategoryID'
-        self.category_parents = None
-
         ################################################
 
         # Object of type pd.DataFrame with columns ['PageID', 'CategoryID'] holding the concept-category edges
         self.concepts_categories = None
-
-        # Set containing the PageID of all concepts that have a category
-        self.concept_ids = None
-
-        # Object of type pd.Series containing 'CategoryID' indexed by 'PageID'
-        self.concept_categories = None
 
         ################################################
 
@@ -77,12 +59,6 @@ class Ontology:
         fields = ['CategoryID', 'CategoryName']
         self.categories = pd.DataFrame(db.find(table_name, fields=fields), columns=fields)
 
-        # Extract category ids for faster access
-        self.category_ids = set(self.categories['CategoryID'])
-
-        # Store category names indexing by CategoryID for faster access
-        self.category_names = self.categories.set_index('CategoryID')['CategoryName']
-
         print('Done')
 
         ################################################
@@ -96,12 +72,6 @@ class Ontology:
             table_name = 'graphontology.Predefined_Knowledge_Tree_Hierarchy'
         fields = ['ChildCategoryID', 'ParentCategoryID']
         self.categories_categories = pd.DataFrame(db.find(table_name, fields=fields), columns=fields)
-
-        # Extract child category ids for faster access
-        self.category_child_ids = set(self.categories_categories['ChildCategoryID'])
-
-        # Store category parents indexing by ChildCategoryID for faster access
-        self.category_parents = self.categories_categories.set_index('ChildCategoryID')['ParentCategoryID']
 
         print('Done')
 
@@ -117,12 +87,6 @@ class Ontology:
         fields = ['PageID', 'CategoryID']
         self.concepts_categories = pd.DataFrame(db.find(table_name, fields=fields), columns=['PageID', 'CategoryID'])
 
-        # Extract concept and category ids for faster access
-        self.concept_ids = set(self.concepts_categories['PageID'])
-
-        # Store category ids indexing by PageID for faster access
-        self.concept_categories = self.concepts_categories.set_index('PageID')['CategoryID']
-
         print('Done')
 
         # Set the flag to avoid future reloads
@@ -131,7 +95,7 @@ class Ontology:
 
     def filter_concepts(self, results):
         self.fetch_from_db()
-        return results[results['PageID'].isin(self.concept_ids)]
+        return results[results['PageID'].isin(self.concepts_categories['PageID'])]
 
     def add_ontology_scores(self, results, smoothing=True):
         """
