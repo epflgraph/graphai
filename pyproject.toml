@@ -72,6 +72,7 @@ dependencies = [
     "python-multipart",
     "python-jose[cryptography]",
     "passlib[bcrypt]",
+    "pybind11",
     "fasttext",
     "fasttext-reducer"
 ]
