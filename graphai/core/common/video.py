@@ -29,8 +29,6 @@ import whisper
 
 import fasttext
 from fasttext_reducer.reduce_fasttext_models import generate_target_path
-import nltk.data
-from nltk.corpus import stopwords
 
 from graphai.core.common.config import config
 from graphai.core.common.common_utils import make_sure_path_exists, file_exists
@@ -38,6 +36,37 @@ from graphai.core.common.common_utils import make_sure_path_exists, file_exists
 FRAME_FORMAT_PNG = 'frame-%06d.png'
 FRAME_FORMAT_JPG = 'frame-%06d.jpg'
 TESSERACT_OCR_FORMAT = 'ocr-%06d.txt.gz'
+
+PUNKT = r"""!"#$%&'()*+,-./:;<=>?@[\]^_`{|}~"""
+STOPWORDS = {
+    'fr': ['au', 'aux', 'avec', 'ce', 'ces', 'dans', 'de', 'des', 'du', 'elle', 'en', 'et', 'eux', 'il', 'ils', 'je',
+           'la', 'le', 'les', 'leur', 'lui', 'ma', 'mais', 'me', 'même', 'mes', 'moi', 'mon', 'ne', 'nos', 'notre',
+           'nous', 'on', 'ou', 'par', 'pas', 'pour', 'qu', 'que', 'qui', 'sa', 'se', 'ses', 'son', 'sur', 'ta', 'te',
+           'tes', 'toi', 'ton', 'tu', 'un', 'une', 'vos', 'votre', 'vous', 'c', 'd', 'j', 'l', 'à', 'm', 'n', 's', 't',
+           'y', 'été', 'étée', 'étées', 'étés', 'étant', 'étante', 'étants', 'étantes', 'suis', 'es', 'est', 'sommes',
+           'êtes', 'sont', 'serai', 'seras', 'sera', 'serons', 'serez', 'seront', 'serais', 'serait', 'serions',
+           'seriez', 'seraient', 'étais', 'était', 'étions', 'étiez', 'étaient', 'fus', 'fut', 'fûmes', 'fûtes',
+           'furent', 'sois', 'soit', 'soyons', 'soyez', 'soient', 'fusse', 'fusses', 'fût', 'fussions', 'fussiez',
+           'fussent', 'ayant', 'ayante', 'ayantes', 'ayants', 'eu', 'eue', 'eues', 'eus', 'ai', 'as', 'avons', 'avez',
+           'ont', 'aurai', 'auras', 'aura', 'aurons', 'aurez', 'auront', 'aurais', 'aurait', 'aurions', 'auriez',
+           'auraient', 'avais', 'avait', 'avions', 'aviez', 'avaient', 'eut', 'eûmes', 'eûtes', 'eurent', 'aie',
+           'aies', 'ait', 'ayons', 'ayez', 'aient', 'eusse', 'eusses', 'eût', 'eussions', 'eussiez', 'eussent'],
+    'en': ['i', 'me', 'my', 'myself', 'we', 'our', 'ours', 'ourselves', 'you', "you're", "you've", "you'll", "you'd",
+           'your', 'yours', 'yourself', 'yourselves', 'he', 'him', 'his', 'himself', 'she', "she's", 'her', 'hers',
+           'herself', 'it', "it's", 'its', 'itself', 'they', 'them', 'their', 'theirs', 'themselves', 'what', 'which',
+           'who', 'whom', 'this', 'that', "that'll", 'these', 'those', 'am', 'is', 'are', 'was', 'were', 'be', 'been',
+           'being', 'have', 'has', 'had', 'having', 'do', 'does', 'did', 'doing', 'a', 'an', 'the', 'and', 'but',
+           'if', 'or', 'because', 'as', 'until', 'while', 'of', 'at', 'by', 'for', 'with', 'about', 'against',
+           'between', 'into', 'through', 'during', 'before', 'after', 'above', 'below', 'to', 'from', 'up', 'down',
+           'in', 'out', 'on', 'off', 'over', 'under', 'again', 'further', 'then', 'once', 'here', 'there', 'when',
+           'where', 'why', 'how', 'all', 'any', 'both', 'each', 'few', 'more', 'most', 'other', 'some', 'such', 'no',
+           'nor', 'not', 'only', 'own', 'same', 'so', 'than', 'too', 'very', 's', 't', 'can', 'will', 'just', 'don',
+           "don't", 'should', "should've", 'now', 'd', 'll', 'm', 'o', 're', 've', 'y', 'ain', 'aren', "aren't",
+           'couldn', "couldn't", 'didn', "didn't", 'doesn', "doesn't", 'hadn', "hadn't", 'hasn', "hasn't", 'haven',
+           "haven't", 'isn', "isn't", 'ma', 'mightn', "mightn't", 'mustn', "mustn't", 'needn', "needn't", 'shan',
+           "shan't", 'shouldn', "shouldn't", 'wasn', "wasn't", 'weren', "weren't", 'won', "won't", 'wouldn',
+           "wouldn't"]
+}
 
 
 def generate_random_token():
@@ -661,18 +690,11 @@ class NLPModels:
                 lang: fasttext.load_model(self.model_paths[lang])
                 for lang in self.model_paths
             }
-            langcode_to_full_name = {
-                'en': 'english',
-                'fr': 'french'
-            }
             self.tokenizers = {
                 lang: MosesTokenizer(lang)
                 for lang in self.nlp_models
             }
-            self.stopwords = {
-                lang: stopwords.words(langcode_to_full_name[lang])
-                for lang in self.nlp_models
-            }
+            self.stopwords = STOPWORDS
 
     def get_words(self, text, lang='en', valid_only=False):
         self.load_nlp_models()
@@ -682,7 +704,7 @@ class NLPModels:
         if valid_only:
             all_words = [w for w in all_words
                          if str(w.lower()) not in current_stopwords
-                         and str(w) not in nltk.punkt.string.punctuation]
+                         and str(w) not in PUNKT]
             if lang == 'fr':
                 all_words = [w.strip("'") for w in all_words]
         return all_words
