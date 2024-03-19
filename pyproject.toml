@@ -73,7 +73,7 @@ dependencies = [
     "python-jose[cryptography]",
     "passlib[bcrypt]",
     "pybind11",
-    "fasttext",
+    "fasttext-wheel",
     "fasttext-reducer"
 ]
 
