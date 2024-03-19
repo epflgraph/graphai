@@ -9,6 +9,8 @@ import json
 import time
 from datetime import datetime, timedelta
 import gzip
+
+from sacremoses.tokenize import MosesTokenizer
 import wget
 import subprocess
 
@@ -23,8 +25,12 @@ from fuzzywuzzy import fuzz
 
 import pytesseract
 from google.cloud import vision
-import spacy
 import whisper
+
+import fasttext
+from fasttext_reducer.reduce_fasttext_models import generate_target_path
+import nltk.data
+from nltk.corpus import stopwords
 
 from graphai.core.common.config import config
 from graphai.core.common.common_utils import make_sure_path_exists, file_exists
@@ -632,7 +638,76 @@ def generate_img_and_ocr_paths_and_perform_tesseract_ocr(input_folder_with_path,
     return extracted_text
 
 
-def frame_ocr_distance(input_folder_with_path, k1, k2, nlp_models, language=None):
+class NLPModels:
+    def __init__(self):
+        n_dims = config['fasttext']['dim']
+        base_dir = config['fasttext']['path']
+        self.model_paths = {
+            lang: generate_target_path(base_dir, lang, n_dims)
+            for lang in ['en', 'fr']
+        }
+        self.nlp_models = None
+        self.tokenizers = None
+        self.stopwords = None
+
+    def load_nlp_models(self):
+        """
+        Lazy-loads and returns the NLP models used for local OCR in slide detection
+        Returns:
+            The NLP model dict
+        """
+        if self.nlp_models is None:
+            self.nlp_models = {
+                lang: fasttext.load_model(self.model_paths[lang])
+                for lang in self.model_paths
+            }
+            langcode_to_full_name = {
+                'en': 'english',
+                'fr': 'french'
+            }
+            self.tokenizers = {
+                lang: MosesTokenizer(lang)
+                for lang in self.nlp_models
+            }
+            self.stopwords = {
+                lang: stopwords.words(langcode_to_full_name[lang])
+                for lang in self.nlp_models
+            }
+
+    def get_words(self, text, lang='en', valid_only=False):
+        self.load_nlp_models()
+        current_tokenizer = self.tokenizers[lang]
+        current_stopwords = self.stopwords[lang]
+        all_words = current_tokenizer.tokenize(text, return_str=False, escape=False)
+        if valid_only:
+            all_words = [w for w in all_words
+                         if str(w.lower()) not in current_stopwords
+                         and str(w) not in nltk.punkt.string.punctuation]
+            if lang == 'fr':
+                all_words = [w.strip("'") for w in all_words]
+        return all_words
+
+    def get_text_word_vector(self, text, lang='en', valid_only=True):
+        self.load_nlp_models()
+        current_model = self.nlp_models[lang]
+        all_valid_words = self.get_words(text, lang, valid_only=valid_only)
+
+        result_vector = sum(current_model.get_word_vector(w) for w in all_valid_words)
+        return result_vector
+
+    def get_text_word_vector_using_words(self, words, lang='en'):
+        self.load_nlp_models()
+        current_model = self.nlp_models[lang]
+
+        result_vector = sum(current_model.get_word_vector(w) for w in words)
+        return result_vector
+
+
+def get_cosine_sim(v1, v2):
+    return np.dot(v1, v2) / (np.linalg.norm(v1) * np.linalg.norm(v2))
+
+
+def frame_ocr_distance(input_folder_with_path, k1, k2, nlp_models: NLPModels, language=None):
     """
     Computes OCR distance between two frames
     Args:
@@ -653,18 +728,19 @@ def frame_ocr_distance(input_folder_with_path, k1, k2, nlp_models, language=None
     extracted_text2 = generate_img_and_ocr_paths_and_perform_tesseract_ocr(input_folder_with_path, k2, language)
 
     # Calculate NLP objects
-    nlp_1 = nlp_models[language](extracted_text1)
-    nlp_2 = nlp_models[language](extracted_text2)
+    nlp_1 = nlp_models.get_words(extracted_text1, language)
+    nlp_2 = nlp_models.get_words(extracted_text2, language)
 
     # Calculate distance score
-    if np.max([len(nlp_1), len(nlp_2)]) < 32:
+    if np.max([len(nlp_1), len(nlp_2)]) < 16:
         text_dif = 0
-    elif np.min([len(nlp_1), len(nlp_2)]) < 4 and np.max([len(nlp_1), len(nlp_2)]) >= 32:
+    elif np.min([len(nlp_1), len(nlp_2)]) < 4 and np.max([len(nlp_1), len(nlp_2)]) >= 16:
         text_dif = 1
     else:
-        text_sim = nlp_1.similarity(nlp_2)
+        text_sim = get_cosine_sim(nlp_models.get_text_word_vector(extracted_text1, language),
+                                  nlp_models.get_text_word_vector(extracted_text2, language))
         text_dif = 1 - text_sim
-        text_dif = text_dif * (1 - np.exp(-np.mean([len(nlp_1), len(nlp_2)]) / 32))
+        text_dif = text_dif * (1 - np.exp(-np.mean([len(nlp_1), len(nlp_2)]) / 16))
 
     # Return distance score
     return text_dif
@@ -914,25 +990,6 @@ class WhisperTranscriptionModel:
             print(e, file=sys.stderr)
             return None
         return result
-
-
-class NLPModels:
-    def __init__(self):
-        spacy.prefer_gpu()
-        self.nlp_models = None
-
-    def get_nlp_models(self):
-        """
-        Lazy-loads and returns the NLP models used for local OCR in slide detection
-        Returns:
-            The NLP model dict
-        """
-        if self.nlp_models is None:
-            self.nlp_models = {
-                'en': spacy.load('en_core_web_lg'),
-                'fr': spacy.load('fr_core_news_md')
-            }
-        return self.nlp_models
 
 
 class GoogleOCRModel:

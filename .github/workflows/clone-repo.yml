@@ -57,6 +57,11 @@ jobs:
           echo "[whisper]" >> config.ini
           echo "model_type: ${{ vars.whisper_model_type }}" >> config.ini
           echo "" >> config.ini
+          
+          echo "[fasttext]" >> config.ini
+          echo "path: ${{ vars.fasttext_path }}" >> config.ini
+          echo "dim: ${{ vars.fasttext_dim }}" >> config.ini
+          echo "" >> config.ini
 
           echo "[google]" >> config.ini
           echo "api_key: ${{ secrets.google_api_key }}" >> config.ini
@@ -82,8 +87,8 @@ jobs:
         run: |
           cd main
           source /data/venvs/test_venv/bin/activate
-          python -c "import spacy; spacy.cli.download('en_core_web_lg') if 'en_core_web_lg' not in spacy.util.get_installed_models() else None"
-          python -c "import spacy; spacy.cli.download('fr_core_news_md') if 'fr_core_news_md' not in spacy.util.get_installed_models() else None"
+          fasttext-reduce --root_dir ${{ vars.fasttext_path }} --lang en --dim ${{ vars.fasttext_dim }}
+          fasttext-reduce --root_dir ${{ vars.fasttext_path }} --lang fr --dim ${{ vars.fasttext_dim }}
           python -c "import whisper; whisper.load_model('${{ vars.whisper_model_type }}');"
           python -c "from transformers import AutoModelForSeq2SeqLM; AutoModelForSeq2SeqLM.from_pretrained('Helsinki-NLP/opus-mt-en-fr')"
           python -c "from transformers import AutoModelForSeq2SeqLM; AutoModelForSeq2SeqLM.from_pretrained('Helsinki-NLP/opus-mt-fr-en')"

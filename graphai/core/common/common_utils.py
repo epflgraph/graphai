@@ -10,7 +10,7 @@ def make_sure_path_exists(path, file_at_the_end=False, full_perm=True):
     Args:
         path: The path that needs to exist (and will thus be created if it doesn't)
         file_at_the_end: Whether there is a filename at the end of the path
-
+        full_perm: If set, the function will assign full permission (chmod 777) to each newly created folder
     Returns:
         None
     """
@@ -18,6 +18,8 @@ def make_sure_path_exists(path, file_at_the_end=False, full_perm=True):
         return
     if file_at_the_end:
         path = '/'.join(path.split('/')[:-1])
+    if os.path.isdir(path):
+        return
     try:
         parent_path = '/'.join(path.split('/')[:-1])
         make_sure_path_exists(parent_path)

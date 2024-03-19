@@ -34,7 +34,6 @@ dependencies = [
     "openai>=1.0.0",
     "tiktoken",
     "pytesseract",
-    "spacy",
     "langdetect",
     "google-cloud-vision",
     "google-cloud-storage",
@@ -72,7 +71,10 @@ dependencies = [
     "yt-dlp",
     "python-multipart",
     "python-jose[cryptography]",
-    "passlib[bcrypt]"
+    "passlib[bcrypt]",
+    "pybind11",
+    "fasttext-wheel",
+    "fasttext-reducer>=0.1.1"
 ]
 
 [tool.setuptools]

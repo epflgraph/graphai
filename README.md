@@ -54,6 +54,15 @@ then edit it with your credentials and preferences.
 
 > ℹ️ The caching additionally requires either the existence of the schema whose name is specified in the file (`cache_graphai` by default) in your database or otherwise the permission to create a new schema.
 
+#### Fasttext initialization
+The slide detection pipeline requires English and French-language fasttext models in order to work. 
+To initialize these two, run the following two lines, replacing `<PATH>` and `<DIM>` with the `path` and `dim` 
+values from the `[fasttext]` section of your `config.ini` file:
+```
+fasttext-reduce --root_dir <PATH> --lang en --dim <DIM>
+fasttext-reduce --root_dir <PATH> --lang fr --dim <DIM>
+```
+
 ### Authentication
 From version 0.3.0 onwards, the API uses bearer tokens for authentication. In order for this authentication to work, 
 follow these steps:
