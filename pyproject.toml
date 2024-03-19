@@ -74,7 +74,7 @@ dependencies = [
     "passlib[bcrypt]",
     "pybind11",
     "fasttext-wheel",
-    "fasttext-reducer"
+    "fasttext-reducer>=0.1.1"
 ]
 
 [tool.setuptools]
