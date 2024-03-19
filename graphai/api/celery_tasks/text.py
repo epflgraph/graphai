@@ -7,8 +7,7 @@ import Levenshtein
 
 from elasticsearch_interface.es import ES
 
-from graphai.api.common.graph import graph, new_graph
-from graphai.api.common.ontology import ontology
+from graphai.api.common.graph import graph
 
 from graphai.core.common.config import config
 from graphai.core.common.common_utils import strtobool
@@ -19,7 +18,7 @@ from graphai.core.text.keywords import get_keywords
 from graphai.core.text.draw import draw_ontology, draw_graph
 
 
-@shared_task(bind=True, name='text_10.init', graph=new_graph)
+@shared_task(bind=True, name='text_10.init', graph=graph)
 def text_init_task(self):
     """
     Celery task that spawns and populates graph and ontology objects so that they are held in memory ready for requests to arrive.
@@ -45,19 +44,14 @@ def extract_keywords_task(self, raw_text, use_nltk=False):
     Celery task that extracts keywords from a given text.
 
     Args:
-        raw_text (str|list): Text to extract keywords from. If a list is passed, it is assumed that they are the keywords and the same list is returned.
+        raw_text (str): Text to extract keywords from.
         use_nltk (bool): Whether to use nltk-rake for keyword extraction, otherwise python-rake is used. Default: False.
 
     Returns:
         list[str]: A list containing the keywords extracted from the text.
     """
 
-    if isinstance(raw_text, list):
-        return raw_text
-
-    keywords_list = get_keywords(raw_text, use_nltk)
-
-    return keywords_list
+    return get_keywords(raw_text, use_nltk)
 
 
 @shared_task(bind=True, name='text_10.wikisearch', wp=WP(), es=ES(config['elasticsearch'], 'aitor_concepts'))
@@ -163,7 +157,7 @@ def wikisearch_callback_task(self, results):
     return results
 
 
-@shared_task(bind=True, name='text_10.compute_scores', graph=new_graph)
+@shared_task(bind=True, name='text_10.compute_scores', graph=graph)
 def compute_scores_task(self, results, restrict_to_ontology=False, graph_score_smoothing=True, ontology_score_smoothing=True, keywords_score_smoothing=True):
     """
     Celery task that computes the GraphScore, OntologyLocalScore, OntologyGlobalScore and KeywordsScore to a DataFrame of wikisearch results.
@@ -461,7 +455,7 @@ def aggregate_task(self, results, coef=0.5, filter=False, epsilon=0.1, min_votes
     return results
 
 
-@shared_task(bind=True, name='text_10.draw_ontology', ontology=ontology)
+@shared_task(bind=True, name='text_10.draw_ontology', graph=graph)
 def draw_ontology_task(self, results, level=2):
     """
     Celery task that draws the ontology neighbourhood induced by the given set of wikify results.
@@ -475,10 +469,10 @@ def draw_ontology_task(self, results, level=2):
         bool: Whether the drawing succeeded.
     """
 
-    return draw_ontology(results, self.ontology, level)
+    return draw_ontology(results, self.graph, level)
 
 
-@shared_task(bind=True, name='text_10.draw_graph', graph=new_graph)
+@shared_task(bind=True, name='text_10.draw_graph', graph=graph)
 def draw_graph_task(self, results, concept_score_threshold=0.3, edge_threshold=0.3, min_component_size=3):
     """
     Celery task that draws the concepts graph neighbourhood induced by the given set of wikify results.
