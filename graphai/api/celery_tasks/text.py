@@ -7,7 +7,7 @@ import Levenshtein
 
 from elasticsearch_interface.es import ES
 
-from graphai.api.common.graph import graph
+from graphai.api.common.graph import graph, new_graph
 from graphai.api.common.ontology import ontology
 
 from graphai.core.common.config import config
@@ -19,8 +19,27 @@ from graphai.core.text.keywords import get_keywords
 from graphai.core.text.draw import draw_ontology, draw_graph
 
 
-@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={'max_retries': 2},
-             name='text_10.extract_keywords', ignore_result=False)
+@shared_task(bind=True, name='text_10.init', ignore_result=False, graph=new_graph)
+def text_init_task(self):
+    """
+    Celery task that spawns and populates graph and ontology objects so that they are held in memory ready for requests to arrive.
+    """
+
+    # This task initialises the text celery worker by loading into memory the graph and ontology tables
+    print('Start text_init task')
+
+    if strtobool(config['preload']['text']):
+        print('Loading concepts graph and ontology tables...')
+        self.graph.load_from_db()
+    else:
+        print('Skipping preloading for text endpoints')
+
+    print('Concepts graph and ontology tables loaded')
+
+    return True
+
+
+@shared_task(bind=True, name='text_10.extract_keywords', ignore_result=False)
 def extract_keywords_task(self, raw_text, use_nltk=False):
     """
     Celery task that extracts keywords from a given text.
@@ -41,8 +60,7 @@ def extract_keywords_task(self, raw_text, use_nltk=False):
     return keywords_list
 
 
-@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={'max_retries': 2},
-             name='text_10.wikisearch', ignore_result=False, wp=WP(), es=ES(config['elasticsearch'], 'aitor_concepts'))
+@shared_task(bind=True, name='text_10.wikisearch', ignore_result=False, wp=WP(), es=ES(config['elasticsearch'], 'aitor_concepts'))
 def wikisearch_task(self, keywords_list, fraction=(0, 1), method='es-base'):
     """
     Celery task that finds 10 relevant Wikipedia pages for each set of keywords in a list.
@@ -126,8 +144,7 @@ def wikisearch_task(self, keywords_list, fraction=(0, 1), method='es-base'):
     return all_results
 
 
-@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={'max_retries': 2},
-             name='text_10.wikisearch_callback', ignore_result=False)
+@shared_task(bind=True, name='text_10.wikisearch_callback', ignore_result=False)
 def wikisearch_callback_task(self, results):
     """
     Celery task that aggregates the results from the wikisearch task. It combines all parallel results into one single DataFrame.
@@ -146,8 +163,7 @@ def wikisearch_callback_task(self, results):
     return results
 
 
-@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={'max_retries': 2},
-             name='text_10.compute_scores', ignore_result=False, graph=graph, ontology=ontology)
+@shared_task(bind=True, name='text_10.compute_scores', ignore_result=False, graph=new_graph)
 def compute_scores_task(self, results, restrict_to_ontology=False, graph_score_smoothing=True, ontology_score_smoothing=True, keywords_score_smoothing=True):
     """
     Celery task that computes the GraphScore, OntologyLocalScore, OntologyGlobalScore and KeywordsScore to a DataFrame of wikisearch results.
@@ -170,16 +186,35 @@ def compute_scores_task(self, results, restrict_to_ontology=False, graph_score_s
     if len(results) == 0:
         return results
 
+    # Parse concept id type from int to string
+    results['PageID'] = results['PageID'].astype(str)
+
+    # Restrict to ontology if needed
     if restrict_to_ontology:
-        results = self.ontology.filter_concepts(results)
+        results = results[results['concept_id'].isin(self.graph.get_ontology_concepts())]
+
+    columns_map = {
+        'Keywords': 'keywords',
+        'PageID': 'concept_id',
+        'PageTitle': 'concept_name',
+        'Searchrank': 'searchrank',
+        'SearchScore': 'search_score',
+        'LevenshteinScore': 'levenshtein_score',
+        'GraphScore': 'graph_score',
+        'OntologyLocalScore': 'ontology_local_score',
+        'OntologyGlobalScore': 'ontology_global_score',
+        'KeywordsScore': 'keywords_score',
+        'MixedScore': 'mixed_score',
+    }
+    columns_inverse_map = {v: k for k, v in columns_map.items()}
 
     # Compute GraphScore
+    results = results.rename(columns=columns_map)
     results = self.graph.add_graph_score(results, smoothing=graph_score_smoothing)
 
     # Compute OntologyLocalScore and OntologyGlobalScore
-    self.ontology.graph = self.graph
-    results = self.ontology.add_ontology_scores(results, smoothing=ontology_score_smoothing)
-    self.ontology.graph = None
+    results = self.graph.add_ontology_scores(results, smoothing=ontology_score_smoothing)
+    results = results.rename(columns=columns_inverse_map)
 
     # Compute KeywordsScore aggregating OntologyGlobalScore over Keywords as an indicator for low-quality keywords
     results = pd.merge(
@@ -358,8 +393,7 @@ def filter_results(results, epsilon=0.1, min_votes=5):
     return results
 
 
-@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={'max_retries': 2},
-             name='text_10.purge_irrelevant', ignore_result=False)
+@shared_task(bind=True, name='text_10.purge_irrelevant', ignore_result=False)
 def purge_irrelevant_task(self, results, coef=0.5, epsilon=0.1, min_votes=5):
     """
     Celery task that aggregates intermediate wikify results and filters irrelevant pages,
@@ -395,8 +429,7 @@ def purge_irrelevant_task(self, results, coef=0.5, epsilon=0.1, min_votes=5):
     return results
 
 
-@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={'max_retries': 2},
-             name='text_10.aggregate', ignore_result=False)
+@shared_task(bind=True, name='text_10.aggregate', ignore_result=False)
 def aggregate_task(self, results, coef=0.5, filter=False, epsilon=0.1, min_votes=5):
     """
     Celery task that aggregates a pandas DataFrame of intermediate wikify results, unique by (Keywords, PageID), into a pandas DataFrame
@@ -428,8 +461,7 @@ def aggregate_task(self, results, coef=0.5, filter=False, epsilon=0.1, min_votes
     return results
 
 
-@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={'max_retries': 2},
-             name='text_10.draw_ontology', ignore_result=False, ontology=ontology)
+@shared_task(bind=True, name='text_10.draw_ontology', ignore_result=False, ontology=ontology)
 def draw_ontology_task(self, results, level=2):
     """
     Celery task that draws the ontology neighbourhood induced by the given set of wikify results.
@@ -446,8 +478,7 @@ def draw_ontology_task(self, results, level=2):
     return draw_ontology(results, self.ontology, level)
 
 
-@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={'max_retries': 2},
-             name='text_10.draw_graph', ignore_result=False, graph=graph)
+@shared_task(bind=True, name='text_10.draw_graph', ignore_result=False, graph=graph)
 def draw_graph_task(self, results, concept_score_threshold=0.3, edge_threshold=0.3, min_component_size=3):
     """
     Celery task that draws the concepts graph neighbourhood induced by the given set of wikify results.
@@ -466,32 +497,8 @@ def draw_graph_task(self, results, concept_score_threshold=0.3, edge_threshold=0
     return draw_graph(results, self.graph, concept_score_threshold, edge_threshold, min_component_size)
 
 
-@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={'max_retries': 2},
-             name='text_10.sleeper', ignore_result=False)
+@shared_task(bind=True, name='text_10.sleeper', ignore_result=False)
 def text_test_task(self):
     sleep(15)
-    print('it worked')
+    print('It worked')
     return 0
-
-
-@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={'max_retries': 2},
-             name='text_10.init', ignore_result=False, graph=graph, ontology=ontology)
-def text_init_task(self):
-    """
-    Celery task that spawns and populates graph and ontology objects so that they are held in memory ready for requests to arrive.
-    """
-
-    # This task initialises the text celery worker by loading into memory the graph and ontology tables
-    print('Start text_init task')
-
-    if strtobool(config['preload']['text']):
-        print('Loading graph tables...')
-        self.graph.fetch_from_db()
-
-        print('Loading ontology tables...')
-        self.ontology.fetch_from_db()
-    else:
-        print('Skipping preloading for text endpoints.')
-
-    print('Graph and ontology tables loaded')
-    return True
