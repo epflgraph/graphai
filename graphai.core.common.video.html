@@ -464,9 +464,42 @@ satisfy the minimum similarity criterion.</p>
 <span class="sig-prename descclassname"><span class="pre">graphai.core.common.video.</span></span><span class="sig-name descname"><span class="pre">generate_img_and_ocr_paths_and_perform_tesseract_ocr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_folder_with_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">language</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.video.generate_img_and_ocr_paths_and_perform_tesseract_ocr" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
+<dl class="py class">
+<dt class="sig sig-object py" id="graphai.core.common.video.NLPModels">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">graphai.core.common.video.</span></span><span class="sig-name descname"><span class="pre">NLPModels</span></span><a class="headerlink" href="#graphai.core.common.video.NLPModels" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="graphai.core.common.video.NLPModels.load_nlp_models">
+<span class="sig-name descname"><span class="pre">load_nlp_models</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.video.NLPModels.load_nlp_models" title="Link to this definition"></a></dt>
+<dd><p>Lazy-loads and returns the NLP models used for local OCR in slide detection
+:returns: The NLP model dict</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="graphai.core.common.video.NLPModels.get_words">
+<span class="sig-name descname"><span class="pre">get_words</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lang</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'en'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">valid_only</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.video.NLPModels.get_words" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="graphai.core.common.video.NLPModels.get_text_word_vector">
+<span class="sig-name descname"><span class="pre">get_text_word_vector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lang</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'en'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">valid_only</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.video.NLPModels.get_text_word_vector" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="graphai.core.common.video.NLPModels.get_text_word_vector_using_words">
+<span class="sig-name descname"><span class="pre">get_text_word_vector_using_words</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">words</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lang</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'en'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.video.NLPModels.get_text_word_vector_using_words" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.core.common.video.get_cosine_sim">
+<span class="sig-prename descclassname"><span class="pre">graphai.core.common.video.</span></span><span class="sig-name descname"><span class="pre">get_cosine_sim</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">v1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v2</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.video.get_cosine_sim" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 <dl class="py function">
 <dt class="sig sig-object py" id="graphai.core.common.video.frame_ocr_distance">
-<span class="sig-prename descclassname"><span class="pre">graphai.core.common.video.</span></span><span class="sig-name descname"><span class="pre">frame_ocr_distance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_folder_with_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nlp_models</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">language</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.video.frame_ocr_distance" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">graphai.core.common.video.</span></span><span class="sig-name descname"><span class="pre">frame_ocr_distance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_folder_with_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nlp_models</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#graphai.core.common.video.NLPModels" title="graphai.core.common.video.NLPModels"><span class="pre">NLPModels</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">language</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.video.frame_ocr_distance" title="Link to this definition"></a></dt>
 <dd><p>Computes OCR distance between two frames
 :param input_folder_with_path: Full path of input image folder
 :param k1: Index of frame 1
@@ -626,19 +659,6 @@ translated segments which can be used as subtitles, and ‘language’ which con
 <dd class="field-odd"><p>A dictionary with three keys</p>
 </dd>
 </dl>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="graphai.core.common.video.NLPModels">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">graphai.core.common.video.</span></span><span class="sig-name descname"><span class="pre">NLPModels</span></span><a class="headerlink" href="#graphai.core.common.video.NLPModels" title="Link to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<dl class="py method">
-<dt class="sig sig-object py" id="graphai.core.common.video.NLPModels.get_nlp_models">
-<span class="sig-name descname"><span class="pre">get_nlp_models</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.video.NLPModels.get_nlp_models" title="Link to this definition"></a></dt>
-<dd><p>Lazy-loads and returns the NLP models used for local OCR in slide detection
-:returns: The NLP model dict</p>
 </dd></dl>
 
 </dd></dl>

@@ -99,7 +99,8 @@
 <span class="sig-prename descclassname"><span class="pre">graphai.core.common.common_utils.</span></span><span class="sig-name descname"><span class="pre">make_sure_path_exists</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_at_the_end</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">full_perm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.common_utils.make_sure_path_exists" title="Link to this definition"></a></dt>
 <dd><p>Recursively creates the folders in a path.
 :param path: The path that needs to exist (and will thus be created if it doesn’t)
-:param file_at_the_end: Whether there is a filename at the end of the path</p>
+:param file_at_the_end: Whether there is a filename at the end of the path
+:param full_perm: If set, the function will assign full permission (chmod 777) to each newly created folder</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>None</p>

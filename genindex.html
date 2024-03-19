@@ -832,6 +832,8 @@
 </li>
       <li><a href="graphai.core.common.ontology_utils.data.html#graphai.core.common.ontology_utils.data.OntologyData.get_concept_parent_cluster">get_concept_parent_cluster() (graphai.core.common.ontology_utils.data.OntologyData method)</a>
 </li>
+      <li><a href="graphai.core.common.video.html#graphai.core.common.video.get_cosine_sim">get_cosine_sim() (in module graphai.core.common.video)</a>
+</li>
       <li><a href="graphai.api.routers.auth.html#graphai.api.routers.auth.get_current_active_user">get_current_active_user() (in module graphai.api.routers.auth)</a>
 </li>
       <li><a href="graphai.core.common.common_utils.html#graphai.core.common.common_utils.get_current_datetime">get_current_datetime() (in module graphai.core.common.common_utils)</a>
@@ -874,8 +876,6 @@
 </li>
       <li><a href="graphai.api.common.celery_tools.html#graphai.api.common.celery_tools.get_n_celery_workers">get_n_celery_workers() (in module graphai.api.common.celery_tools)</a>
 </li>
-      <li><a href="graphai.core.common.video.html#graphai.core.common.video.NLPModels.get_nlp_models">get_nlp_models() (graphai.core.common.video.NLPModels method)</a>
-</li>
       <li><a href="graphai.core.common.ontology_utils.data.html#graphai.core.common.ontology_utils.data.OntologyData.get_non_ontology_concept_names">get_non_ontology_concept_names() (graphai.core.common.ontology_utils.data.OntologyData method)</a>
 </li>
       <li><a href="graphai.core.common.ontology_utils.data.html#graphai.core.common.ontology_utils.data.OntologyData.get_ontology_category_info">get_ontology_category_info() (graphai.core.common.ontology_utils.data.OntologyData method)</a>
@@ -906,6 +906,10 @@
 </li>
       <li><a href="graphai.core.common.ontology_utils.data.html#graphai.core.common.ontology_utils.data.OntologyData.get_test_concept_names">get_test_concept_names() (graphai.core.common.ontology_utils.data.OntologyData method)</a>
 </li>
+      <li><a href="graphai.core.common.video.html#graphai.core.common.video.NLPModels.get_text_word_vector">get_text_word_vector() (graphai.core.common.video.NLPModels method)</a>
+</li>
+      <li><a href="graphai.core.common.video.html#graphai.core.common.video.NLPModels.get_text_word_vector_using_words">get_text_word_vector_using_words() (graphai.core.common.video.NLPModels method)</a>
+</li>
       <li><a href="graphai.core.common.caching.html#graphai.core.common.caching.VideoConfig.get_transcript_dir">get_transcript_dir() (graphai.core.common.caching.VideoConfig method)</a>
 </li>
       <li><a href="graphai.api.routers.translation.html#graphai.api.routers.translation.get_translation_text_fingerprint_chain_list">get_translation_text_fingerprint_chain_list() (in module graphai.api.routers.translation)</a>
@@ -915,6 +919,8 @@
       <li><a href="graphai.core.common.caching.html#graphai.core.common.caching.VideoConfig.get_video_dir">get_video_dir() (graphai.core.common.caching.VideoConfig method)</a>
 </li>
       <li><a href="graphai.api.routers.video.html#graphai.api.routers.video.get_video_fingerprint_chain_list">get_video_fingerprint_chain_list() (in module graphai.api.routers.video)</a>
+</li>
+      <li><a href="graphai.core.common.video.html#graphai.core.common.video.NLPModels.get_words">get_words() (graphai.core.common.video.NLPModels method)</a>
 </li>
       <li><a href="graphai.api.schemas.scraping.html#graphai.api.schemas.scraping.GetSublinksRequest">GetSublinksRequest (class in graphai.api.schemas.scraping)</a>
 </li>
@@ -1092,6 +1098,8 @@
         <li><a href="graphai.api.routers.image.html#module-graphai.api.routers.image">module</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     graphai.api.routers.ontology
 
@@ -1099,8 +1107,6 @@
         <li><a href="graphai.api.routers.ontology.html#module-graphai.api.routers.ontology">module</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     graphai.api.routers.scraping
 
@@ -1757,15 +1763,17 @@
 </li>
       <li><a href="graphai.core.common.ontology_utils.data.html#graphai.core.common.ontology_utils.data.OntologyData.load_category_concept">load_category_concept() (graphai.core.common.ontology_utils.data.OntologyData method)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="graphai.core.common.ontology_utils.data.html#graphai.core.common.ontology_utils.data.OntologyData.load_concept_concept_graphscore">load_concept_concept_graphscore() (graphai.core.common.ontology_utils.data.OntologyData method)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="graphai.core.common.ontology_utils.data.html#graphai.core.common.ontology_utils.data.OntologyData.load_data">load_data() (graphai.core.common.ontology_utils.data.OntologyData method)</a>
 </li>
       <li><a href="graphai.core.common.video.html#graphai.core.common.video.WhisperTranscriptionModel.load_model_whisper">load_model_whisper() (graphai.core.common.video.WhisperTranscriptionModel method)</a>
 </li>
       <li><a href="graphai.core.common.text_utils.html#graphai.core.common.text_utils.TranslationModels.load_models">load_models() (graphai.core.common.text_utils.TranslationModels method)</a>
+</li>
+      <li><a href="graphai.core.common.video.html#graphai.core.common.video.NLPModels.load_nlp_models">load_nlp_models() (graphai.core.common.video.NLPModels method)</a>
 </li>
       <li><a href="graphai.core.common.ontology_utils.data.html#graphai.core.common.ontology_utils.data.OntologyData.load_non_ontology_concept_names">load_non_ontology_concept_names() (graphai.core.common.ontology_utils.data.OntologyData method)</a>
 </li>
