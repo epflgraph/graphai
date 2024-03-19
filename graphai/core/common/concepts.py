@@ -5,7 +5,7 @@ from db_cache_manager.db import DB
 from graphai.core.common.config import config
 
 
-class NewConceptsGraph:
+class ConceptsGraph:
     def __init__(self):
         # Flag to know whether we've already loaded the data from the database
         self.loaded = False
