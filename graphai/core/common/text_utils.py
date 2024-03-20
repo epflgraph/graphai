@@ -585,6 +585,17 @@ class TranslationModels:
     def __init__(self):
         self.models = None
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
+        try:
+            print("Reading huggingface model path from config")
+            self.cache_dir = config['huggingface']['model_path']
+            if self.cache_dir == '':
+                self.cache_dir = None
+        except Exception:
+            print(
+                "The huggingface dl path could not be found in the config file, using default (~/.cache/huggingface). "
+                "To use a different one, make sure to add a [huggingface] section with the model_path parameter."
+            )
+            self.cache_dir = None
 
     def load_models(self):
         """
@@ -596,26 +607,34 @@ class TranslationModels:
             self.models = dict()
             print('Loading EN-FR')
             self.models['en-fr'] = dict()
-            self.models['en-fr']['tokenizer'] = AutoTokenizer.from_pretrained("Helsinki-NLP/opus-mt-en-fr")
-            self.models['en-fr']['model'] = AutoModelForSeq2SeqLM.from_pretrained("Helsinki-NLP/opus-mt-en-fr"). \
+            self.models['en-fr']['tokenizer'] = AutoTokenizer.from_pretrained("Helsinki-NLP/opus-mt-en-fr",
+                                                                              cache_dir=self.cache_dir)
+            self.models['en-fr']['model'] = AutoModelForSeq2SeqLM.from_pretrained("Helsinki-NLP/opus-mt-en-fr",
+                                                                                  cache_dir=self.cache_dir). \
                 to(self.device)
             self.models['en-fr']['segmenter'] = pysbd.Segmenter(language='en', clean=False)
             print('Loading FR-EN')
             self.models['fr-en'] = dict()
-            self.models['fr-en']['tokenizer'] = AutoTokenizer.from_pretrained("Helsinki-NLP/opus-mt-fr-en")
-            self.models['fr-en']['model'] = AutoModelForSeq2SeqLM.from_pretrained("Helsinki-NLP/opus-mt-fr-en"). \
+            self.models['fr-en']['tokenizer'] = AutoTokenizer.from_pretrained("Helsinki-NLP/opus-mt-fr-en",
+                                                                              cache_dir=self.cache_dir)
+            self.models['fr-en']['model'] = AutoModelForSeq2SeqLM.from_pretrained("Helsinki-NLP/opus-mt-fr-en",
+                                                                                  cache_dir=self.cache_dir). \
                 to(self.device)
             self.models['fr-en']['segmenter'] = pysbd.Segmenter(language='fr', clean=False)
             print('Loading DE-EN')
             self.models['de-en'] = dict()
-            self.models['de-en']['tokenizer'] = AutoTokenizer.from_pretrained("Helsinki-NLP/opus-mt-de-en")
-            self.models['de-en']['model'] = AutoModelForSeq2SeqLM.from_pretrained("Helsinki-NLP/opus-mt-de-en"). \
+            self.models['de-en']['tokenizer'] = AutoTokenizer.from_pretrained("Helsinki-NLP/opus-mt-de-en",
+                                                                              cache_dir=self.cache_dir)
+            self.models['de-en']['model'] = AutoModelForSeq2SeqLM.from_pretrained("Helsinki-NLP/opus-mt-de-en",
+                                                                                  cache_dir=self.cache_dir). \
                 to(self.device)
             self.models['de-en']['segmenter'] = pysbd.Segmenter(language='de', clean=False)
             print('Loading IT-EN')
             self.models['it-en'] = dict()
-            self.models['it-en']['tokenizer'] = AutoTokenizer.from_pretrained("Helsinki-NLP/opus-mt-it-en")
-            self.models['it-en']['model'] = AutoModelForSeq2SeqLM.from_pretrained("Helsinki-NLP/opus-mt-it-en"). \
+            self.models['it-en']['tokenizer'] = AutoTokenizer.from_pretrained("Helsinki-NLP/opus-mt-it-en",
+                                                                              cache_dir=self.cache_dir)
+            self.models['it-en']['model'] = AutoModelForSeq2SeqLM.from_pretrained("Helsinki-NLP/opus-mt-it-en",
+                                                                                  cache_dir=self.cache_dir). \
                 to(self.device)
             self.models['it-en']['segmenter'] = pysbd.Segmenter(language='it', clean=False)
 
