@@ -933,10 +933,23 @@ class WhisperTranscriptionModel:
             self.model_type = config['whisper']['model_type']
         except Exception:
             print(
-                "The whisper model type could not be found in the config file, using the 'medium' model type as the default. "
+                "The whisper model type could not be found in the config file, "
+                "using the 'medium' model type as the default. "
                 "To use a different one, make sure to add a [whisper] section with the model_type parameter."
             )
             self.model_type = 'medium'
+
+        try:
+            print("Reading whisper model path from config")
+            self.download_root = config['whisper']['model_path']
+            if self.download_root == '':
+                self.download_root = None
+        except Exception:
+            print(
+                "The whisper dl path could not be found in the config file, using default (~/.cache/whisper). "
+                "To use a different one, make sure to add a [whisper] section with the model_path parameter."
+            )
+            self.download_root = None
 
         # The actual Whisper model is lazy loaded in order not to load it twice (celery *and* gunicorn)
         self.model = None
@@ -953,7 +966,8 @@ class WhisperTranscriptionModel:
         # device=None ensures that the model will use CUDA if available and switch to CPUs otherwise.
         if self.model is None:
             print('Actually loading Whisper model...')
-            self.model = whisper.load_model(self.model_type, device=None, in_memory=True)
+            self.model = whisper.load_model(self.model_type, device=None, in_memory=True,
+                                            download_root=self.download_root)
 
     def detect_audio_segment_lang_whisper(self, input_filename_with_path):
         """

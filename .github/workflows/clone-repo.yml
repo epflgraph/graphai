@@ -56,6 +56,7 @@ jobs:
 
           echo "[whisper]" >> config.ini
           echo "model_type: ${{ vars.whisper_model_type }}" >> config.ini
+          echo "model_path: ${{ vars.whisper_model_path }}" >> config.ini
           echo "" >> config.ini
           
           echo "[fasttext]" >> config.ini
@@ -89,7 +90,7 @@ jobs:
           source /data/venvs/test_venv/bin/activate
           fasttext-reduce --root_dir ${{ vars.fasttext_path }} --lang en --dim ${{ vars.fasttext_dim }}
           fasttext-reduce --root_dir ${{ vars.fasttext_path }} --lang fr --dim ${{ vars.fasttext_dim }}
-          python -c "import whisper; whisper.load_model('${{ vars.whisper_model_type }}');"
+          python -c "import whisper; whisper.load_model('${{ vars.whisper_model_type }}', download_root='${{ vars.whisper_model_path }}');"
           python -c "from transformers import AutoModelForSeq2SeqLM; AutoModelForSeq2SeqLM.from_pretrained('Helsinki-NLP/opus-mt-en-fr')"
           python -c "from transformers import AutoModelForSeq2SeqLM; AutoModelForSeq2SeqLM.from_pretrained('Helsinki-NLP/opus-mt-fr-en')"
           opentelemetry-bootstrap --action=install
