@@ -21,8 +21,8 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="graphai.core.utils package" href="graphai.core.utils.html" />
-    <link rel="prev" title="graphai.core.text.draw module" href="graphai.core.text.draw.html" /> 
+    <link rel="next" title="graphai.core.text.scores module" href="graphai.core.text.scores.html" />
+    <link rel="prev" title="graphai.core.text.graph module" href="graphai.core.text.graph.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -160,9 +160,9 @@ participles or adverbs. Default: False.</p></li>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="graphai.core.text.keywords.get_keywords">
-<span class="sig-prename descclassname"><span class="pre">graphai.core.text.keywords.</span></span><span class="sig-name descname"><span class="pre">get_keywords</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_nltk</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.text.keywords.get_keywords" title="Link to this definition"></a></dt>
-<dd><p>Normalize raw text and extract keywords.</p>
+<dt class="sig sig-object py" id="graphai.core.text.keywords.extract_keywords">
+<span class="sig-prename descclassname"><span class="pre">graphai.core.text.keywords.</span></span><span class="sig-name descname"><span class="pre">extract_keywords</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_nltk</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.text.keywords.extract_keywords" title="Link to this definition"></a></dt>
+<dd><p>Extracts keywords from the given text, after normalising it (solving encoding problems, stripping HTML, lowercasing, etc.).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -186,7 +186,7 @@ participles or adverbs. Default: False.</p></li>
 <span class="gp">&gt;&gt;&gt; </span>    <span class="s2">&quot;It ain&#39;t what they call &#39;rock and roll&#39;&quot;</span><span class="p">,</span>
 <span class="gp">&gt;&gt;&gt; </span>    <span class="s2">&quot;&lt;/p&gt;&quot;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="p">])</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">get_keywords</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">extract_keywords</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
 <span class="go">[&#39;brown baggies&#39;, &#39;young boys&#39;, &#39;trumpet playin&#39;, &#39;corner drunk&#39;, &#39;platform soles&#39;]</span>
 </pre></div>
 </div>
@@ -198,8 +198,8 @@ participles or adverbs. Default: False.</p></li>
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="graphai.core.text.draw.html" class="btn btn-neutral float-left" title="graphai.core.text.draw module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="graphai.core.utils.html" class="btn btn-neutral float-right" title="graphai.core.utils package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="graphai.core.text.graph.html" class="btn btn-neutral float-left" title="graphai.core.text.graph module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="graphai.core.text.scores.html" class="btn btn-neutral float-right" title="graphai.core.text.scores module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

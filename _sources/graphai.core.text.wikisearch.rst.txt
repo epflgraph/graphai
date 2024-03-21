@@ -1,7 +1,7 @@
-graphai.core.common.ontology module
+graphai.core.text.wikisearch module
 ===================================
 
-.. automodule:: graphai.core.common.ontology
+.. automodule:: graphai.core.text.wikisearch
    :members:
    :undoc-members:
    :show-inheritance:

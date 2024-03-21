@@ -26,8 +26,6 @@ Submodules
    graphai.core.common.common_utils
    graphai.core.common.config
    graphai.core.common.gpt_message_presets
-   graphai.core.common.graph
-   graphai.core.common.ontology
    graphai.core.common.scraping
    graphai.core.common.text_utils
    graphai.core.common.video

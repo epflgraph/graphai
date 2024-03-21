@@ -1,7 +1,0 @@
-graphai.core.interfaces.wp module
-=================================
-
-.. automodule:: graphai.core.interfaces.wp
-   :members:
-   :undoc-members:
-   :show-inheritance:

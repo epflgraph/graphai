@@ -13,7 +13,6 @@ Submodules
    :maxdepth: 1
 
    graphai.api.common.celery_tools
-   graphai.api.common.graph
    graphai.api.common.log
    graphai.api.common.ontology
    graphai.api.common.translation

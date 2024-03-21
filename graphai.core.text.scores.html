@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>graphai.core.text.scores module &mdash; EPFL Graph AI</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="graphai.core.text.wikisearch module" href="graphai.core.text.wikisearch.html" />
+    <link rel="prev" title="graphai.core.text.keywords module" href="graphai.core.text.keywords.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="graphai.html" class="icon icon-home">
+            graphai
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="graphai.api.html">graphai.api package</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="graphai.core.html">graphai.core package</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="graphai.core.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="graphai.core.common.html">graphai.core.common package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="graphai.core.interfaces.html">graphai.core.interfaces package</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="graphai.core.text.html">graphai.core.text package</a><ul class="current">
+<li class="toctree-l4 current"><a class="reference internal" href="graphai.core.text.html#submodules">Submodules</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="graphai.core.utils.html">graphai.core.utils package</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="graphai.pipelines.html">graphai.pipelines package</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="graphai.definitions.html">graphai.definitions module</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="graphai.html">graphai</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="graphai.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="graphai.core.html">graphai.core package</a></li>
+          <li class="breadcrumb-item"><a href="graphai.core.text.html">graphai.core.text package</a></li>
+      <li class="breadcrumb-item active">graphai.core.text.scores module</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/graphai.core.text.scores.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-graphai.core.text.scores">
+<span id="graphai-core-text-scores-module"></span><h1>graphai.core.text.scores module<a class="headerlink" href="#module-graphai.core.text.scores" title="Link to this heading"></a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.core.text.scores.compute_levenshtein_score">
+<span class="sig-prename descclassname"><span class="pre">graphai.core.text.scores.</span></span><span class="sig-name descname"><span class="pre">compute_levenshtein_score</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">results</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.text.scores.compute_levenshtein_score" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.core.text.scores.compute_keywords_score">
+<span class="sig-prename descclassname"><span class="pre">graphai.core.text.scores.</span></span><span class="sig-name descname"><span class="pre">compute_keywords_score</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">results</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">smoothing</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.text.scores.compute_keywords_score" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.core.text.scores.compute_mixed_score">
+<span class="sig-prename descclassname"><span class="pre">graphai.core.text.scores.</span></span><span class="sig-name descname"><span class="pre">compute_mixed_score</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">results</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.text.scores.compute_mixed_score" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.core.text.scores.aggregate_results">
+<span class="sig-prename descclassname"><span class="pre">graphai.core.text.scores.</span></span><span class="sig-name descname"><span class="pre">aggregate_results</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">results</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.5</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.text.scores.aggregate_results" title="Link to this definition"></a></dt>
+<dd><p>Aggregates a pandas DataFrame of keyword-concept results, i.e. unique by (keywords, concept_id), into a pandas DataFrame of concept results,
+i.e. unique by concept_id.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>results</strong> (<em>pd.DataFrame</em>) – A pandas DataFrame with columns [‘keywords’, ‘concept_id’, ‘concept_name’, ‘search_score’, ‘levenshtein_score’, ‘graph_score’,</p></li>
+<li><p><strong>'ontology_local_score'</strong> – </p></li>
+<li><p><strong>'ontology_global_score'</strong> – </p></li>
+<li><p><strong>'keywords_score'</strong><strong>]</strong><strong>.</strong> – </p></li>
+<li><p><strong>coef</strong> (<em>float</em>) – A number in [0, 1] that controls how the scores of the aggregated concepts are computed.</p></li>
+<li><p><strong>keywords</strong> (<em>A value</em><em> of </em><em>0 takes the sum</em><em> of </em><em>scores over</em>) – </p></li>
+<li><p><strong>[</strong><strong>0</strong> (<em>then normalises in</em>) – </p></li>
+<li><p><strong>keywords.</strong> (<em>1</em><em>]</em><em>. A value</em><em> of </em><em>1 takes the max</em><em> of </em><em>scores over</em>) – </p></li>
+<li><p><strong>Default</strong> (<em>Any value in between linearly interpolates those two approaches.</em>) – 0.5.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A pandas DataFrame with columns [‘concept_id’, ‘concept_name’, ‘search_score’, ‘levenshtein_score’, ‘graph_score’,
+‘ontology_local_score’, ‘ontology_global_score’, ‘keywords_score’].</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.core.text.scores.filter_results">
+<span class="sig-prename descclassname"><span class="pre">graphai.core.text.scores.</span></span><span class="sig-name descname"><span class="pre">filter_results</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">results</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epsilon</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_votes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.text.scores.filter_results" title="Link to this definition"></a></dt>
+<dd><p>Filters a DataFrame of concept results depending on their scores, based on some criteria specified in the parameters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>results</strong> (<em>pd.DataFrame</em>) – A pandas DataFrame with columns [‘concept_id’, ‘concept_name’, ‘search_score’, ‘levenshtein_score’, ‘graph_score’,</p></li>
+<li><p><strong>'ontology_local_score'</strong> – </p></li>
+<li><p><strong>'ontology_global_score'</strong> – </p></li>
+<li><p><strong>'keywords_score'</strong><strong>]</strong><strong>.</strong> – </p></li>
+<li><p><strong>epsilon</strong> (<em>float</em>) – A number in [0, 1] that is used as a threshold for all the scores to decide whether the concept is good enough</p></li>
+<li><p><strong>Default</strong> (<em>for at least this amount</em><em> of </em><em>scores.</em>) – 0.1.</p></li>
+<li><p><strong>min_votes</strong> (<em>int</em>) – A number between 0 and the number of scores. A concept will be kept iff it is good enough</p></li>
+<li><p><strong>Default</strong> – <ol class="arabic simple" start="5">
+<li></li>
+</ol>
+</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A pandas DataFrame with columns [‘concept_id’, ‘concept_name’, ‘search_score’, ‘levenshtein_score’, ‘graph_score’,
+‘ontology_local_score’, ‘ontology_global_score’, ‘keywords_score’], which is a subset of results.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.core.text.scores.compute_scores">
+<span class="sig-prename descclassname"><span class="pre">graphai.core.text.scores.</span></span><span class="sig-name descname"><span class="pre">compute_scores</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">results</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">graph</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">restrict_to_ontology</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">graph_score_smoothing</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ontology_score_smoothing</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keywords_score_smoothing</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">aggregation_coef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filtering_threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filtering_min_votes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">refresh_scores</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.text.scores.compute_scores" title="Link to this definition"></a></dt>
+<dd><p>Gathers wikisearch results, computes several scores for them, and finally aggregates and filters them.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>results</strong> (<em>pd.DataFrame</em>) – A pandas DataFrame with columns [‘keywords’, ‘concept_id’, ‘concept_name’, ‘searchrank’, ‘search_score’].</p></li>
+<li><p><strong>graph</strong> (<a class="reference internal" href="graphai.core.text.graph.html#graphai.core.text.graph.ConceptsGraph" title="graphai.core.text.graph.ConceptsGraph"><em>ConceptsGraph</em></a>) – The concepts graph and ontology object.</p></li>
+<li><p><strong>restrict_to_ontology</strong> (<em>bool</em>) – Whether to filter concepts that are not in the ontology. Default: False.</p></li>
+<li><p><strong>graph_score_smoothing</strong> (<em>bool</em>) – Whether to apply a transformation to the graph scores that bumps scores to avoid</p></li>
+<li><p><strong>Default</strong> (<em>for at least this amount</em><em> of </em><em>scores.</em>) – True.</p></li>
+<li><p><strong>ontology_score_smoothing</strong> (<em>bool</em>) – Whether to apply a transformation to the ontology scores that pushes scores away from 0.5. Default: True.</p></li>
+<li><p><strong>keywords_score_smoothing</strong> (<em>bool</em>) – Whether to apply a transformation to the keywords scores that bumps scores to avoid</p></li>
+<li><p><strong>Default</strong> – True.</p></li>
+<li><p><strong>aggregation_coef</strong> (<em>float</em>) – A number in [0, 1] that controls how the scores of the aggregated pages are computed.</p></li>
+<li><p><strong>Keywords</strong> (<em>A value</em><em> of </em><em>0 takes the sum</em><em> of </em><em>scores over</em>) – </p></li>
+<li><p><strong>[</strong><strong>0</strong> (<em>then normalises in</em>) – </p></li>
+<li><p><strong>Keywords.</strong> (<em>1</em><em>]</em><em>. A value</em><em> of </em><em>1 takes the max</em><em> of </em><em>scores over</em>) – </p></li>
+<li><p><strong>Default</strong> – 0.5.</p></li>
+<li><p><strong>filtering_threshold</strong> (<em>float</em>) – A number in [0, 1] that is used as a threshold for all the scores to decide whether the page is good enough</p></li>
+<li><p><strong>Default</strong> – 0.1.</p></li>
+<li><p><strong>filtering_min_votes</strong> (<em>int</em>) – A number between 0 and the number of scores (excluding MixedScore). A page will be kept iff it is good enough</p></li>
+<li><p><strong>Default</strong> – <ol class="arabic simple" start="5">
+<li></li>
+</ol>
+</p></li>
+<li><p><strong>refresh_scores</strong> (<em>bool</em>) – Whether to recompute scores after filtering. Default: True.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A pandas DataFrame with columns [‘concept_id’, ‘concept_name’, ‘search_score’, ‘levenshtein_score’, ‘graph_score’,
+‘ontology_local_score’, ‘ontology_global_score’, ‘keywords_score’, ‘mixed_score’].</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="graphai.core.text.keywords.html" class="btn btn-neutral float-left" title="graphai.core.text.keywords module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="graphai.core.text.wikisearch.html" class="btn btn-neutral float-right" title="graphai.core.text.wikisearch module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Aitor Pérez.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

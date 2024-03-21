@@ -1,7 +1,7 @@
-graphai.api.common.graph module
+graphai.core.text.scores module
 ===============================
 
-.. automodule:: graphai.api.common.graph
+.. automodule:: graphai.core.text.scores
    :members:
    :undoc-members:
    :show-inheritance:

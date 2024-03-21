@@ -94,66 +94,6 @@
              
   <section id="module-graphai.api.celery_tasks.text">
 <span id="graphai-api-celery-tasks-text-module"></span><h1>graphai.api.celery_tasks.text module<a class="headerlink" href="#module-graphai.api.celery_tasks.text" title="Link to this heading"></a></h1>
-<dl class="py function">
-<dt class="sig sig-object py" id="graphai.api.celery_tasks.text.aggregate_results">
-<span class="sig-prename descclassname"><span class="pre">graphai.api.celery_tasks.text.</span></span><span class="sig-name descname"><span class="pre">aggregate_results</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">results</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.5</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.api.celery_tasks.text.aggregate_results" title="Link to this definition"></a></dt>
-<dd><p>Aggregates a pandas DataFrame of intermediate wikify results, unique by (Keywords, PageID), into a pandas DataFrame
-of final wikify results, unique by PageID. Then computes the MixedScore for every page as a convex combination of the other scores.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>results</strong> (<em>pd.DataFrame</em>) – A pandas DataFrame with columns [‘Keywords’, ‘PageID’, ‘PageTitle’, ‘SearchScore’, ‘LevenshteinScore’, ‘GraphScore’,</p></li>
-<li><p><strong>'OntologyLocalScore'</strong> – </p></li>
-<li><p><strong>'OntologyGlobalScore'</strong> – </p></li>
-<li><p><strong>'KeywordsScore'</strong><strong>]</strong><strong>.</strong> – </p></li>
-<li><p><strong>coef</strong> (<em>float</em>) – A number in [0, 1] that controls how the scores of the aggregated pages are computed.</p></li>
-<li><p><strong>Keywords</strong> (<em>A value</em><em> of </em><em>0 takes the sum</em><em> of </em><em>scores over</em>) – </p></li>
-<li><p><strong>[</strong><strong>0</strong> (<em>then normalises in</em>) – </p></li>
-<li><p><strong>Keywords.</strong> (<em>1</em><em>]</em><em>. A value</em><em> of </em><em>1 takes the max</em><em> of </em><em>scores over</em>) – </p></li>
-<li><p><strong>Default</strong> (<em>Any value in between linearly interpolates those two approaches.</em>) – 0.5.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>A pandas DataFrame with columns [‘PageID’, ‘PageTitle’, ‘SearchScore’, ‘LevenshteinScore’, ‘GraphScore’,
-‘OntologyLocalScore’, ‘OntologyGlobalScore’, ‘KeywordsScore’, ‘MixedScore’].</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>pd.DataFrame</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="graphai.api.celery_tasks.text.filter_results">
-<span class="sig-prename descclassname"><span class="pre">graphai.api.celery_tasks.text.</span></span><span class="sig-name descname"><span class="pre">filter_results</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">results</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epsilon</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_votes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.api.celery_tasks.text.filter_results" title="Link to this definition"></a></dt>
-<dd><p>Filters a DataFrame of aggregated wikify results depending on their scores, based on some criteria specified in the parameters.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>results</strong> (<em>pd.DataFrame</em>) – A pandas DataFrame with columns [‘PageID’, ‘PageTitle’, ‘SearchScore’, ‘LevenshteinScore’, ‘GraphScore’,</p></li>
-<li><p><strong>'OntologyLocalScore'</strong> – </p></li>
-<li><p><strong>'OntologyGlobalScore'</strong> – </p></li>
-<li><p><strong>'KeywordsScore'</strong> – </p></li>
-<li><p><strong>'MixedScore'</strong><strong>]</strong><strong>.</strong> – </p></li>
-<li><p><strong>epsilon</strong> (<em>float</em>) – A number in [0, 1] that is used as a threshold for all the scores to decide whether the page is good enough</p></li>
-<li><p><strong>Default</strong> (<em>for at least this amount</em><em> of </em><em>scores.</em>) – 0.1.</p></li>
-<li><p><strong>min_votes</strong> (<em>int</em>) – A number between 0 and the number of scores (excluding MixedScore). A page will be kept iff it is good enough</p></li>
-<li><p><strong>Default</strong> – <ol class="arabic simple" start="5">
-<li></li>
-</ol>
-</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>A pandas DataFrame with columns [‘PageID’, ‘PageTitle’, ‘SearchScore’, ‘LevenshteinScore’, ‘GraphScore’,
-‘OntologyLocalScore’, ‘OntologyGlobalScore’, ‘KeywordsScore’, ‘MixedScore’].</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>pd.DataFrame</p>
-</dd>
-</dl>
-</dd></dl>
-
 </section>
 
 

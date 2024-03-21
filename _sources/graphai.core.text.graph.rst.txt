@@ -1,0 +1,7 @@
+graphai.core.text.graph module
+==============================
+
+.. automodule:: graphai.core.text.graph
+   :members:
+   :undoc-members:
+   :show-inheritance:
