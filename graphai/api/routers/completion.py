@@ -32,7 +32,7 @@ from graphai.api.celery_tasks.completion import (
     summarization_text_fingerprint_find_closest_callback_task,
     summarization_retrieve_text_fingerprint_callback_task,
     lookup_text_completion_task,
-    get_keywords_for_summarization_task,
+    extract_keywords_for_summarization_task,
     completion_text_callback_task,
     request_text_completion_task,
     simulate_completion_task,
@@ -109,7 +109,7 @@ def get_completion_task_chain(token, text, text_type, result_type,
     else:
         task_list = [lookup_text_completion_task.s(token, text, force)]
     if keywords:
-        task_list.append(get_keywords_for_summarization_task.s())
+        task_list.append(extract_keywords_for_summarization_task.s())
     task_list.append(request_text_completion_task.s(text_type, result_type, debug))
     task_list.append(completion_text_callback_task.s(force))
     return task_list

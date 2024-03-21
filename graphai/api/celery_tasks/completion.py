@@ -4,7 +4,7 @@ from celery import shared_task
 from graphai.core.common.text_utils import force_dict_to_text, ChatGPTSummarizer, find_best_slide_subset
 from graphai.core.common.common_utils import get_current_datetime
 from graphai.core.common.caching import CompletionDBCachingManager
-from graphai.core.text.keywords import get_keywords
+from graphai.core.text.keywords import extract_keywords
 from graphai.api.celery_tasks.common import compute_text_fingerprint_common, fingerprint_lookup_retrieve_from_db, \
     fingerprint_lookup_parallel, fingerprint_lookup_direct, fingerprint_lookup_callback
 
@@ -104,16 +104,16 @@ def lookup_text_completion_task(self, token, text, force=False):
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='text_6.summarize_text_get_keywords', ignore_result=False)
-def get_keywords_for_summarization_task(self, input_dict):
+             name='text_6.summarize_text_extract_keywords', ignore_result=False)
+def extract_keywords_for_summarization_task(self, input_dict):
     existing_results = input_dict['existing_results']
     text = input_dict['text']
     if existing_results is not None or text is None or len(text) == 0:
         return input_dict
     if isinstance(text, dict):
-        new_text = {k: ', '.join(get_keywords(v)) for k, v in text.items()}
+        new_text = {k: ', '.join(extract_keywords(v)) for k, v in text.items()}
     else:
-        new_text = ', '.join(get_keywords(text))
+        new_text = ', '.join(extract_keywords(text))
     if len(new_text) > 0:
         input_dict['text'] = new_text
     return input_dict

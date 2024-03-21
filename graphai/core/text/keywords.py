@@ -128,9 +128,9 @@ def rake_extract(text, use_nltk, split_words=False, return_scores=False, thresho
     return list(set([keywords for keywords, score in keyword_list]))
 
 
-def get_keywords(text, use_nltk=False):
+def extract_keywords(text, use_nltk=False):
     """
-    Normalize raw text and extract keywords.
+    Extracts keywords from the given text, after normalising it (solving encoding problems, stripping HTML, lowercasing, etc.).
 
     Args:
         text (str): Text to extract keywords from.
@@ -148,7 +148,7 @@ def get_keywords(text, use_nltk=False):
         >>>     "It ain't what they call 'rock and roll'",
         >>>     "</p>"
         >>> ])
-        >>> get_keywords(text)
+        >>> extract_keywords(text)
         ['brown baggies', 'young boys', 'trumpet playin', 'corner drunk', 'platform soles']
     """
 
