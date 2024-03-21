@@ -5,18 +5,15 @@ import networkx as nx
 import matplotlib.pyplot as plt
 
 
-def draw_ontology(results, ontology, level):
+def draw_ontology(results, graph, level=3):
     """
     Draws the ontology neighbourhood induced by the given set of wikify results. The resulting svg is not returned but stored in /tmp/file.svg.
 
     Args:
-        results (list(dict)): A serialised (orient='records') pandas DataFrame with columns ['PageID', 'PageTitle', 'SearchScore',
-        'LevenshteinScore', 'GraphScore', 'OntologyLocalScore', 'OntologyGlobalScore', 'KeywordsScore', 'MixedScore'].
-        ontology (Ontology): The ontology object.
-        level (int): How many levels to go up in the ontology from the concepts.
-
-    Returns:
-        bool: Whether the drawing succeeded.
+        results (pd.DataFrame): A pandas DataFrame with columns ['concept_id', 'concept_name', 'search_score',
+        'levenshtein_score', 'graph_score', 'ontology_local_score', 'ontology_global_score', 'keywords_score', 'mixed_score'].
+        graph (ConceptsGraph): The concepts graph and ontology object.
+        level (int): Level up to which the visualisation considers categories. Default: 3.
     """
 
     # Turn off pyplot's interactive mode and use non-rendering backend
@@ -27,49 +24,49 @@ def draw_ontology(results, ontology, level):
     # Save empty figure in case of empty input
     if not results:
         plt.savefig('/tmp/file.svg', format='svg')
-        return True
+        return
 
     ################################################################
 
     # Init ontology in case it is not initialised
-    ontology.fetch_from_db()
+    graph.load_from_db()
 
     ################################################################
 
     # Add categories to results
     results = pd.merge(
         pd.DataFrame(results),
-        ontology.concepts_categories.rename(columns={'CategoryID': 'Category1ID'}),
+        graph.concepts_categories.rename(columns={'category_id': 'level_4_category_id'}),
         how='inner',
-        on='PageID'
+        on='concept_id'
     )
 
-    for i in range(1, level):
+    for i in reversed(range(level, 4)):
         results = pd.merge(
             results,
-            ontology.categories_categories.rename(columns={'ChildCategoryID': f'Category{i}ID', 'ParentCategoryID': f'Category{i + 1}ID'}),
+            graph.categories_categories.rename(columns={'child_category_id': f'level_{i + 1}_category_id', 'parent_category_id': f'level_{i}_category_id'}),
             how='inner',
-            on=f'Category{i}ID'
+            on=f'level_{i + 1}_category_id'
         )
 
     ################################################################
 
     # Create node lists with node attributes in networkx format
-    concept_nodes = results[['PageID', 'PageTitle', 'SearchScore', 'LevenshteinScore', 'GraphScore', 'OntologyLocalScore', 'OntologyGlobalScore', 'KeywordsScore', 'MixedScore']].to_dict(orient='records')
-    concept_nodes = [(d['PageTitle'], {**d, 'Type': 'concept'}) for d in concept_nodes]
+    concept_nodes = results[['concept_id', 'concept_name', 'search_score', 'levenshtein_score', 'graph_score', 'ontology_local_score', 'ontology_global_score', 'keywords_score', 'mixed_score']].to_dict(orient='records')
+    concept_nodes = [(d['concept_name'], {**d, 'type': 'concept'}) for d in concept_nodes]
 
     category_nodes = []
-    for i in range(level):
-        category_nodes.append([(c, {'Type': f'category{i+1}'}) for c in results[f'Category{i + 1}ID'].drop_duplicates()])
+    for i in reversed(range(level, 4 + 1)):
+        category_nodes.append([(c, {'type': f'level_{i}_category_id'}) for c in results[f'level_{i}_category_id'].drop_duplicates()])
 
     # Create edge lists in networkx format
-    concept_category_edges = results[['PageTitle', 'Category1ID']].to_dict(orient='records')
-    concept_category_edges = [(d['PageTitle'], d['Category1ID']) for d in concept_category_edges]
+    concept_category_edges = results[['concept_name', 'level_4_category_id']].to_dict(orient='records')
+    concept_category_edges = [(d['concept_name'], d['level_4_category_id']) for d in concept_category_edges]
 
     category_category_edges = []
-    for i in range(1, level):
-        edges = results[[f'Category{i}ID', f'Category{i + 1}ID']].drop_duplicates().to_dict(orient='records')
-        edges = [(d[f'Category{i}ID'], d[f'Category{i + 1}ID']) for d in edges]
+    for i in reversed(range(level, 4)):
+        edges = results[[f'level_{i + 1}_category_id', f'level_{i}_category_id']].drop_duplicates().to_dict(orient='records')
+        edges = [(d[f'level_{i + 1}_category_id'], d[f'level_{i}_category_id']) for d in edges]
         category_category_edges.append(edges)
 
     ################################################################
@@ -96,7 +93,7 @@ def draw_ontology(results, ontology, level):
     # Save empty figure in case there is not any connected component
     if n_connected_components == 0:
         plt.savefig('/tmp/file.svg', format='svg')
-        return True
+        return
 
     ################################################################
 
@@ -129,7 +126,7 @@ def draw_ontology(results, ontology, level):
         pos = nx.spring_layout(H, seed=0)
 
         # Plot each subset of nodes separately
-        nx.draw_networkx_nodes(H, pos, ax=ax, nodelist=[n for n, _ in concept_nodes if n in H.nodes()], node_size=[400 * d['MixedScore'] for n, d in concept_nodes if n in H.nodes()], node_color=[d['MixedScore'] for n, d in concept_nodes if n in H.nodes()], cmap='Blues', vmin=0, vmax=1, alpha=0.8)
+        nx.draw_networkx_nodes(H, pos, ax=ax, nodelist=[n for n, _ in concept_nodes if n in H.nodes()], node_size=[400 * d['mixed_score'] for n, d in concept_nodes if n in H.nodes()], node_color=[d['mixed_score'] for n, d in concept_nodes if n in H.nodes()], cmap='Blues', vmin=0, vmax=1, alpha=0.8)
 
         colors = ['tab:green', 'tab:red', 'tab:orange', 'tab:purple', 'tab:gray']
         j = 0
@@ -147,24 +144,20 @@ def draw_ontology(results, ontology, level):
     # fig.suptitle(f'Results for "{data["raw_text"][:92] + "..." if len(data["raw_text"]) > 92 else data["raw_text"]}"')
     plt.savefig('/tmp/file.svg', format='svg')
 
-    return True
+    plt.close('all')
 
 
 def draw_graph(results, graph, concept_score_threshold=0.3, edge_threshold=0.3, min_component_size=3):
     """
-    Celery task that draws the concepts graph neighbourhood induced by the given set of wikify results. The resulting svg is not returned
-    but stored in /tmp/file.svg.
+    Draws the concept graph neighbourhood induced by the given set of wikify results. The resulting svg is not returned but stored in /tmp/file.svg.
 
     Args:
-        results (list(dict)): A serialised (orient='records') pandas DataFrame with columns ['PageID', 'PageTitle', 'SearchScore',
-        'LevenshteinScore', 'GraphScore', 'OntologyLocalScore', 'OntologyGlobalScore', 'KeywordsScore', 'MixedScore'].
-        graph (ConceptsGraph): The concepts graph object.
+        results (pd.DataFrame): A pandas DataFrame with columns ['concept_id', 'concept_name', 'search_score',
+        'levenshtein_score', 'graph_score', 'ontology_local_score', 'ontology_global_score', 'keywords_score', 'mixed_score'].
+        graph (ConceptsGraph): The concepts graph and ontology object.
         concept_score_threshold (float): Score threshold below which concepts are filtered out. Default: 0.3.
         edge_threshold (float): Score threshold below which edges are filtered out. Default: 0.3.
         min_component_size (int): Size threshold below which connected components are filtered out. Default: 3.
-
-    Returns:
-        bool: Whether the drawing succeeded.
     """
 
     # Turn off pyplot's interactive mode and use non-rendering backend
@@ -175,51 +168,51 @@ def draw_graph(results, graph, concept_score_threshold=0.3, edge_threshold=0.3, 
     # Save empty figure in case of empty input
     if not results:
         plt.savefig('/tmp/file.svg', format='svg')
-        return True
+        return
 
     ################################################################
 
     # Init graph in case it is not initialised
-    graph.fetch_from_db()
+    graph.load_from_db()
 
     ################################################################
 
     # Filter results depending on score
     results = pd.DataFrame(results)
-    results = results[results['MixedScore'] >= concept_score_threshold]
+    results = results[results['mixed_score'] >= concept_score_threshold]
 
     ################################################################
 
     # Keep only edges lexicographically sorted and above threshold
     concepts_concepts = graph.concepts_concepts[
-        (graph.concepts_concepts['SourcePageID'] < graph.concepts_concepts['TargetPageID'])
-        & (graph.concepts_concepts['NormalisedScore'] >= edge_threshold)
+        (graph.concepts_concepts['source_concept_id'] < graph.concepts_concepts['target_concept_id'])
+        & (graph.concepts_concepts['score'] >= edge_threshold)
     ]
 
     # Add concept titles
     concepts_concepts = pd.merge(
         concepts_concepts,
-        results[['PageID', 'PageTitle']].rename(columns={'PageID': 'SourcePageID', 'PageTitle': 'SourcePageTitle'}),
+        results[['concept_id', 'concept_name']].rename(columns={'concept_id': 'source_concept_id', 'concept_name': 'source_concept_name'}),
         how='inner',
-        on='SourcePageID'
+        on='source_concept_id'
     )
 
     concepts_concepts = pd.merge(
         concepts_concepts,
-        results[['PageID', 'PageTitle']].rename(columns={'PageID': 'TargetPageID', 'PageTitle': 'TargetPageTitle'}),
+        results[['concept_id', 'concept_name']].rename(columns={'concept_id': 'target_concept_id', 'concept_name': 'target_concept_name'}),
         how='inner',
-        on='TargetPageID'
+        on='target_concept_id'
     )
 
     #################################################################
 
     # Create node lists with node attributes in networkx format
-    nodes = results[['PageID', 'PageTitle', 'SearchScore', 'LevenshteinScore', 'GraphScore', 'OntologyLocalScore', 'OntologyGlobalScore', 'KeywordsScore', 'MixedScore']].to_dict(orient='records')
-    nodes = [(d['PageTitle'], d) for d in nodes]
+    nodes = results[['concept_id', 'concept_name', 'search_score', 'levenshtein_score', 'graph_score', 'ontology_local_score', 'ontology_global_score', 'keywords_score', 'mixed_score']].to_dict(orient='records')
+    nodes = [(d['concept_name'], d) for d in nodes]
 
     # Create edge lists in networkx format
-    edges = concepts_concepts[['SourcePageTitle', 'TargetPageTitle', 'NormalisedScore']].to_dict(orient='records')
-    edges = [(d['SourcePageTitle'], d['TargetPageTitle'], {'Score': d['NormalisedScore']}) for d in edges]
+    edges = concepts_concepts[['source_concept_name', 'target_concept_name', 'score']].to_dict(orient='records')
+    edges = [(d['source_concept_name'], d['target_concept_name'], {'score': d['score']}) for d in edges]
 
     ################################################################
 
@@ -240,7 +233,7 @@ def draw_graph(results, graph, concept_score_threshold=0.3, edge_threshold=0.3, 
     # Save empty figure in case there is not any connected component
     if n_connected_components == 0:
         plt.savefig('/tmp/file.svg', format='svg')
-        return True
+        return
 
     ################################################################
 
@@ -270,13 +263,13 @@ def draw_graph(results, graph, concept_score_threshold=0.3, edge_threshold=0.3, 
         H = G.subgraph(component_nodes)
 
         # Compute position of all nodes before plotting them
-        pos = nx.spring_layout(H, iterations=1000, weight='Score', seed=0)
+        pos = nx.spring_layout(H, iterations=1000, weight='score', seed=0)
 
         # Plot nodes
-        nx.draw_networkx_nodes(H, pos, ax=ax, nodelist=[n for n, _ in nodes if n in H.nodes()], node_size=[400 * d['MixedScore'] for n, d in nodes if n in H.nodes()], node_color=[d['MixedScore'] for n, d in nodes if n in H.nodes()], cmap='Blues', vmin=0, vmax=1, alpha=0.8)
+        nx.draw_networkx_nodes(H, pos, ax=ax, nodelist=[n for n, _ in nodes if n in H.nodes()], node_size=[400 * d['mixed_score'] for n, d in nodes if n in H.nodes()], node_color=[d['mixed_score'] for n, d in nodes if n in H.nodes()], cmap='Blues', vmin=0, vmax=1, alpha=0.8)
 
         # Plot edges and labels
-        nx.draw_networkx_edges(H, pos, ax=ax, edgelist=[(s, t) for s, t, _ in edges if (s, t) in H.edges()], width=[d['Score'] for s, t, d in edges if (s, t) in H.edges()], alpha=0.5)
+        nx.draw_networkx_edges(H, pos, ax=ax, edgelist=[(s, t) for s, t, _ in edges if (s, t) in H.edges()], width=[d['score'] for s, t, d in edges if (s, t) in H.edges()], alpha=0.5)
         nx.draw_networkx_labels(H, pos, ax=ax, font_size=5, clip_on=False)
 
         ax.autoscale()
@@ -285,4 +278,4 @@ def draw_graph(results, graph, concept_score_threshold=0.3, edge_threshold=0.3, 
     # fig.suptitle(f'Results for "{data["raw_text"][:92] + "..." if len(data["raw_text"]) > 92 else data["raw_text"]}"')
     plt.savefig('/tmp/file.svg', format='svg')
 
-    return True
+    plt.close('all')
