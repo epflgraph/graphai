@@ -12,8 +12,14 @@ from graphai.core.common.video import retrieve_file_from_url, retrieve_file_from
     compute_ocr_noise_level, compute_ocr_threshold, compute_video_ocr_transitions, check_ocr_and_hash_thresholds, \
     generate_random_token, md5_video_or_audio, generate_symbolic_token, read_txt_gz_file, \
     FRAME_FORMAT_PNG, TESSERACT_OCR_FORMAT
-from graphai.core.common.caching import AudioDBCachingManager, SlideDBCachingManager, \
-    VideoDBCachingManager
+from graphai.core.common.caching import (
+    AudioDBCachingManager,
+    SlideDBCachingManager,
+    VideoDBCachingManager,
+    get_video_token_status,
+    get_image_token_status,
+    get_audio_token_status
+)
 from graphai.core.common.common_utils import file_exists, get_current_datetime, strtobool
 from itertools import chain
 from graphai.api.celery_tasks.common import fingerprint_lookup_retrieve_from_db, \
@@ -82,7 +88,7 @@ def retrieve_file_from_url_callback_task(self, results, url, force=False):
                 }
             )
         db_manager.insert_or_update_details(results['token'], values_to_insert=values)
-
+    results['token_status'] = get_video_token_status(results['token'])
     return results
 
 
@@ -291,6 +297,7 @@ def extract_audio_callback_task(self, results, origin_token, force=False):
                 db_manager.insert_or_update_closest_match(results['token'], {
                     'most_similar_token': symbolic_token
                 })
+    results['token_status'] = get_audio_token_status(results['token'])
     return results
 
 
@@ -331,8 +338,14 @@ def extract_and_sample_frames_task(self, token, force=False, force_non_self=Fals
                     'result': None,
                     'sample_indices': None,
                     'fresh': False,
-                    'slide_tokens': {x['slide_number']: {'token': x['id_token'], 'timestamp': int(x['timestamp'])}
-                                     for x in existing_slides}
+                    'slide_tokens': {
+                        x['slide_number']: {
+                            'token': x['id_token'],
+                            'token_status': get_image_token_status(x['id_token']),
+                            'timestamp': int(x['timestamp'])
+                        }
+                        for x in existing_slides
+                    }
                 }
             else:
                 # If force==True, then we need to first delete the existing rows in case the results this time are
@@ -607,6 +620,8 @@ def detect_slides_callback_task(self, results, token, force=False):
     else:
         # Getting cached or null results that have been passed along the chain of tasks
         slide_tokens = results['slide_tokens']
+    for slide_number in slide_tokens:
+        slide_tokens[slide_number]['token_status'] = get_image_token_status(slide_tokens[slide_number]['token'])
     return {
         'slide_tokens': slide_tokens,
         'fresh': results['fresh']
