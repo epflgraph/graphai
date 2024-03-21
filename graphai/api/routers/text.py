@@ -13,17 +13,6 @@ from graphai.api.schemas.text import (
     WikifyFromKeywordsRequest,
     WikifyResponse,
 )
-# from graphai.api.celery_tasks.text import (
-#     extract_keywords_task,
-#     wikisearch_task,
-#     wikisearch_callback_task,
-#     compute_scores_task,
-#     purge_irrelevant_task,
-#     aggregate_task,
-#     draw_ontology_task,
-#     draw_graph_task,
-#     text_test_task,
-# )
 from graphai.api.celery_tasks.text import (
     extract_keywords_task,
     wikisearch_task,
@@ -93,10 +82,10 @@ async def wikify(
 
     1. Keyword extraction: Automatic extraction of keywords from the text. Omitted if keyword_list is provided as
         input instead of raw_text.
-    2. Wikisearch: For each set of keywords, a set of 10 concepts (Wikipedia pages) is retrieved. This can be done
-        through requests to the Wikipedia API or through elasticsearch requests.
-    3. Scores: For each pair of keywords and concept, several scores are derived, taking into account the ontology
-        of concepts and the concepts graph, among others.
+    2. Wikisearch: For each set of keywords, a set of at most 10 concepts (Wikipedia pages) is retrieved. This can be
+        done through requests to the Wikipedia API or through elasticsearch requests.
+    3. Scores: For each pair of keywords and concept, several scores are derived, taking into account the concepts graph and
+        the ontology, among others.
     4. Aggregation and filter: For each concept, their scores are aggregated and filtered according to some rules,
         to keep only the most relevant results.
     """
@@ -114,54 +103,6 @@ async def wikify(
         return []
 
     n = 16
-
-    # if refresh_scores:
-    #     # We compute scores, filter results based on those and then recompute scores before returning
-    #     old_job = chain(
-    #         extract_keywords_task.s(raw_text),
-    #         group(wikisearch_task.s(fraction=(i / n, (i + 1) / n), method=method) for i in range(n)),
-    #         wikisearch_callback_task.s(),
-    #         compute_scores_task.s(
-    #             restrict_to_ontology=restrict_to_ontology,
-    #             graph_score_smoothing=graph_score_smoothing,
-    #             ontology_score_smoothing=ontology_score_smoothing,
-    #             keywords_score_smoothing=keywords_score_smoothing
-    #         ),
-    #         purge_irrelevant_task.s(
-    #             coef=normalisation_coef,
-    #             epsilon=filtering_threshold,
-    #             min_votes=filtering_min_votes
-    #         ),
-    #         compute_scores_task.s(
-    #             restrict_to_ontology=restrict_to_ontology,
-    #             graph_score_smoothing=graph_score_smoothing,
-    #             ontology_score_smoothing=ontology_score_smoothing,
-    #             keywords_score_smoothing=keywords_score_smoothing
-    #         ),
-    #         aggregate_task.s(
-    #             coef=normalisation_coef,
-    #             filter=False
-    #         )
-    #     )
-    # else:
-    #     # We compute scores, filter results based on those and return them directly
-    #     old_job = chain(
-    #         extract_keywords_task.s(raw_text),
-    #         group(wikisearch_task.s(fraction=(i / n, (i + 1) / n), method=method) for i in range(n)),
-    #         wikisearch_callback_task.s(),
-    #         compute_scores_task.s(
-    #             restrict_to_ontology=restrict_to_ontology,
-    #             graph_score_smoothing=graph_score_smoothing,
-    #             ontology_score_smoothing=ontology_score_smoothing,
-    #             keywords_score_smoothing=keywords_score_smoothing
-    #         ),
-    #         aggregate_task.s(
-    #             coef=normalisation_coef,
-    #             filter=True,
-    #             epsilon=filtering_threshold,
-    #             min_votes=filtering_min_votes
-    #         )
-    #     )
 
     job = chain(
         extract_keywords_task.s(raw_text),

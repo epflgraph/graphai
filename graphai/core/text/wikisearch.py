@@ -2,10 +2,6 @@ import requests
 
 import pandas as pd
 
-from elasticsearch_interface.es import ES
-
-from graphai.core.common.config import config
-
 
 def search_wikipedia_api(text, limit=10):
     """
