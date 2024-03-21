@@ -13,13 +13,21 @@ from graphai.api.schemas.text import (
     WikifyFromKeywordsRequest,
     WikifyResponse,
 )
+# from graphai.api.celery_tasks.text import (
+#     extract_keywords_task,
+#     wikisearch_task,
+#     wikisearch_callback_task,
+#     compute_scores_task,
+#     purge_irrelevant_task,
+#     aggregate_task,
+#     draw_ontology_task,
+#     draw_graph_task,
+#     text_test_task,
+# )
 from graphai.api.celery_tasks.text import (
     extract_keywords_task,
     wikisearch_task,
-    wikisearch_callback_task,
     compute_scores_task,
-    purge_irrelevant_task,
-    aggregate_task,
     draw_ontology_task,
     draw_graph_task,
     text_test_task,
@@ -73,7 +81,7 @@ async def wikify(
     graph_score_smoothing: Optional[bool] = True,
     ontology_score_smoothing: Optional[bool] = True,
     keywords_score_smoothing: Optional[bool] = True,
-    normalisation_coef: Optional[float] = 0.5,
+    aggregation_coef: Optional[float] = 0.5,
     filtering_threshold: Optional[float] = 0.1,
     filtering_min_votes: Optional[int] = 5,
     refresh_scores: Optional[bool] = True,
@@ -107,59 +115,91 @@ async def wikify(
 
     n = 16
 
-    if refresh_scores:
-        # We compute scores, filter results based on those and then recompute scores before returning
-        job = chain(
-            extract_keywords_task.s(raw_text),
-            group(wikisearch_task.s(fraction=(i / n, (i + 1) / n), method=method) for i in range(n)),
-            wikisearch_callback_task.s(),
-            compute_scores_task.s(
-                restrict_to_ontology=restrict_to_ontology,
-                graph_score_smoothing=graph_score_smoothing,
-                ontology_score_smoothing=ontology_score_smoothing,
-                keywords_score_smoothing=keywords_score_smoothing
-            ),
-            purge_irrelevant_task.s(
-                coef=normalisation_coef,
-                epsilon=filtering_threshold,
-                min_votes=filtering_min_votes
-            ),
-            compute_scores_task.s(
-                restrict_to_ontology=restrict_to_ontology,
-                graph_score_smoothing=graph_score_smoothing,
-                ontology_score_smoothing=ontology_score_smoothing,
-                keywords_score_smoothing=keywords_score_smoothing
-            ),
-            aggregate_task.s(
-                coef=normalisation_coef,
-                filter=False
-            )
+    # if refresh_scores:
+    #     # We compute scores, filter results based on those and then recompute scores before returning
+    #     old_job = chain(
+    #         extract_keywords_task.s(raw_text),
+    #         group(wikisearch_task.s(fraction=(i / n, (i + 1) / n), method=method) for i in range(n)),
+    #         wikisearch_callback_task.s(),
+    #         compute_scores_task.s(
+    #             restrict_to_ontology=restrict_to_ontology,
+    #             graph_score_smoothing=graph_score_smoothing,
+    #             ontology_score_smoothing=ontology_score_smoothing,
+    #             keywords_score_smoothing=keywords_score_smoothing
+    #         ),
+    #         purge_irrelevant_task.s(
+    #             coef=normalisation_coef,
+    #             epsilon=filtering_threshold,
+    #             min_votes=filtering_min_votes
+    #         ),
+    #         compute_scores_task.s(
+    #             restrict_to_ontology=restrict_to_ontology,
+    #             graph_score_smoothing=graph_score_smoothing,
+    #             ontology_score_smoothing=ontology_score_smoothing,
+    #             keywords_score_smoothing=keywords_score_smoothing
+    #         ),
+    #         aggregate_task.s(
+    #             coef=normalisation_coef,
+    #             filter=False
+    #         )
+    #     )
+    # else:
+    #     # We compute scores, filter results based on those and return them directly
+    #     old_job = chain(
+    #         extract_keywords_task.s(raw_text),
+    #         group(wikisearch_task.s(fraction=(i / n, (i + 1) / n), method=method) for i in range(n)),
+    #         wikisearch_callback_task.s(),
+    #         compute_scores_task.s(
+    #             restrict_to_ontology=restrict_to_ontology,
+    #             graph_score_smoothing=graph_score_smoothing,
+    #             ontology_score_smoothing=ontology_score_smoothing,
+    #             keywords_score_smoothing=keywords_score_smoothing
+    #         ),
+    #         aggregate_task.s(
+    #             coef=normalisation_coef,
+    #             filter=True,
+    #             epsilon=filtering_threshold,
+    #             min_votes=filtering_min_votes
+    #         )
+    #     )
+
+    job = chain(
+        extract_keywords_task.s(raw_text),
+        group(wikisearch_task.s(fraction=(i / n, (i + 1) / n), method=method) for i in range(n)),
+        compute_scores_task.s(
+            restrict_to_ontology=restrict_to_ontology,
+            graph_score_smoothing=graph_score_smoothing,
+            ontology_score_smoothing=ontology_score_smoothing,
+            keywords_score_smoothing=keywords_score_smoothing,
+            aggregation_coef=aggregation_coef,
+            filtering_threshold=filtering_threshold,
+            filtering_min_votes=filtering_min_votes,
+            refresh_scores=refresh_scores,
         )
-    else:
-        # We compute scores, filter results based on those and return them directly
-        job = chain(
-            extract_keywords_task.s(raw_text),
-            group(wikisearch_task.s(fraction=(i / n, (i + 1) / n), method=method) for i in range(n)),
-            wikisearch_callback_task.s(),
-            compute_scores_task.s(
-                restrict_to_ontology=restrict_to_ontology,
-                graph_score_smoothing=graph_score_smoothing,
-                ontology_score_smoothing=ontology_score_smoothing,
-                keywords_score_smoothing=keywords_score_smoothing
-            ),
-            aggregate_task.s(
-                coef=normalisation_coef,
-                filter=True,
-                epsilon=filtering_threshold,
-                min_votes=filtering_min_votes
-            )
-        )
+    )
 
     # Schedule job
     results = job.apply_async(priority=10)
 
     # Wait for results
     results = results.get(timeout=300)
+
+    # FIXME delete this and go ahead with the new lowercased keys
+    # Replace column names not to break compatibility
+    columns_map = {
+        'keywords': 'Keywords',
+        'concept_id': 'PageID',
+        'concept_name': 'PageTitle',
+        'searchrank': 'Searchrank',
+        'search_score': 'SearchScore',
+        'levenshtein_score': 'LevenshteinScore',
+        'graph_score': 'GraphScore',
+        'ontology_local_score': 'OntologyLocalScore',
+        'ontology_global_score': 'OntologyGlobalScore',
+        'keywords_score': 'KeywordsScore',
+        'mixed_score': 'MixedScore',
+    }
+    results = results.rename(columns=columns_map)
 
     return results.to_dict(orient='records')
 

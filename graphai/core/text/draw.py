@@ -5,7 +5,7 @@ import networkx as nx
 import matplotlib.pyplot as plt
 
 
-def draw_ontology(results, graph, level):
+def draw_ontology(results, graph, level=3):
     """
     Draws the ontology neighbourhood induced by the given set of wikify results. The resulting svg is not returned but stored in /tmp/file.svg.
 
@@ -13,7 +13,7 @@ def draw_ontology(results, graph, level):
         results (list(dict)): A serialised (orient='records') pandas DataFrame with columns ['concept_id', 'concept_name', 'search_score',
         'levenshtein_score', 'graph_score', 'ontology_local_score', 'ontology_global_score', 'keywords_score', 'mixed_score'].
         graph (ConceptsGraph): The concepts graph and ontology object.
-        level (int): Level up to which the visualisation considers categories.
+        level (int): Level up to which the visualisation considers categories. Default: 3.
     """
 
     # Turn off pyplot's interactive mode and use non-rendering backend

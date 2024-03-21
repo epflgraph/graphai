@@ -14,7 +14,9 @@ from graphai.core.common.common_utils import strtobool
 
 from graphai.core.interfaces.wp import WP
 
-from graphai.core.text.keywords import get_keywords
+from graphai.core.text.keywords import extract_keywords
+from graphai.core.text.wikisearch import wikisearch
+from graphai.core.text.scores import compute_scores
 from graphai.core.text.draw import draw_ontology, draw_graph
 
 
@@ -39,23 +41,39 @@ def text_init_task(self):
 
 
 @shared_task(bind=True, name='text_10.extract_keywords')
-def extract_keywords_task(self, raw_text, use_nltk=False):
-    """
-    Celery task that extracts keywords from a given text.
-
-    Args:
-        raw_text (str): Text to extract keywords from.
-        use_nltk (bool): Whether to use nltk-rake for keyword extraction, otherwise python-rake is used. Default: False.
-
-    Returns:
-        list[str]: A list containing the keywords extracted from the text.
-    """
-
-    return get_keywords(raw_text, use_nltk)
+def extract_keywords_task(self, raw_text, **kwargs):
+    return extract_keywords(raw_text, **kwargs)
 
 
-@shared_task(bind=True, name='text_10.wikisearch', wp=WP(), es=ES(config['elasticsearch'], 'aitor_concepts'))
-def wikisearch_task(self, keywords_list, fraction=(0, 1), method='es-base'):
+@shared_task(bind=True, name='text_10.wikisearch', es=ES(config['elasticsearch'], index='aitor_concepts'))
+def wikisearch_task(self, keywords_list, **kwargs):
+    return wikisearch(keywords_list, es=self.es, **kwargs)
+
+
+@shared_task(bind=True, name='text_10.compute_scores', graph=graph)
+def compute_scores_task(self, results, **kwargs):
+    return compute_scores(pd.concat(results, ignore_index=True), graph=self.graph, **kwargs)
+
+
+@shared_task(bind=True, name='text_10.draw_ontology', graph=graph)
+def draw_ontology_task(self, results, **kwargs):
+    return draw_ontology(results, graph=self.graph, **kwargs)
+
+
+@shared_task(bind=True, name='text_10.draw_graph', graph=graph)
+def draw_graph_task(self, results, **kwargs):
+    return draw_graph(results, graph=self.graph, **kwargs)
+
+
+@shared_task(bind=True, name='text_10.sleeper')
+def text_test_task(self):
+    sleep(15)
+    print('It worked')
+    return 0
+
+
+@shared_task(bind=True, name='text_10.old_wikisearch', wp=WP(), es=ES(config['elasticsearch'], 'aitor_concepts'))
+def old_wikisearch_task(self, keywords_list, fraction=(0, 1), method='es-base'):
     """
     Celery task that finds 10 relevant Wikipedia pages for each set of keywords in a list.
 
@@ -138,8 +156,8 @@ def wikisearch_task(self, keywords_list, fraction=(0, 1), method='es-base'):
     return all_results
 
 
-@shared_task(bind=True, name='text_10.wikisearch_callback')
-def wikisearch_callback_task(self, results):
+@shared_task(bind=True, name='text_10.old_wikisearch_callback')
+def old_wikisearch_callback_task(self, results):
     """
     Celery task that aggregates the results from the wikisearch task. It combines all parallel results into one single DataFrame.
 
@@ -154,11 +172,13 @@ def wikisearch_callback_task(self, results):
     # Concatenate all results in a single DataFrame
     results = pd.concat(results, ignore_index=True)
 
+    print(results)
+
     return results
 
 
-@shared_task(bind=True, name='text_10.compute_scores', graph=graph)
-def compute_scores_task(self, results, restrict_to_ontology=False, graph_score_smoothing=True, ontology_score_smoothing=True, keywords_score_smoothing=True):
+@shared_task(bind=True, name='text_10.old_compute_scores', graph=graph)
+def old_compute_scores_task(self, results, restrict_to_ontology=False, graph_score_smoothing=True, ontology_score_smoothing=True, keywords_score_smoothing=True):
     """
     Celery task that computes the GraphScore, OntologyLocalScore, OntologyGlobalScore and KeywordsScore to a DataFrame of wikisearch results.
 
@@ -177,6 +197,7 @@ def compute_scores_task(self, results, restrict_to_ontology=False, graph_score_s
         'OntologyLocalScore', 'OntologyGlobalScore', 'KeywordsScore'].
     """
 
+    # Return if there are no results
     if len(results) == 0:
         return results
 
@@ -228,7 +249,7 @@ def compute_scores_task(self, results, restrict_to_ontology=False, graph_score_s
     return results
 
 
-def aggregate_results(results, coef=0.5):
+def old_aggregate_results(results, coef=0.5):
     """
     Aggregates a pandas DataFrame of intermediate wikify results, unique by (Keywords, PageID), into a pandas DataFrame
     of final wikify results, unique by PageID. Then computes the MixedScore for every page as a convex combination of the other scores.
@@ -348,7 +369,7 @@ def aggregate_results(results, coef=0.5):
     return results
 
 
-def filter_results(results, epsilon=0.1, min_votes=5):
+def old_filter_results(results, epsilon=0.1, min_votes=5):
     """
     Filters a DataFrame of aggregated wikify results depending on their scores, based on some criteria specified in the parameters.
 
@@ -387,8 +408,8 @@ def filter_results(results, epsilon=0.1, min_votes=5):
     return results
 
 
-@shared_task(bind=True, name='text_10.purge_irrelevant')
-def purge_irrelevant_task(self, results, coef=0.5, epsilon=0.1, min_votes=5):
+@shared_task(bind=True, name='text_10.old_purge_irrelevant')
+def old_purge_irrelevant_task(self, results, coef=0.5, epsilon=0.1, min_votes=5):
     """
     Celery task that aggregates intermediate wikify results and filters irrelevant pages,
     then drops all scores that don't apply anymore for recomputation.
@@ -423,8 +444,8 @@ def purge_irrelevant_task(self, results, coef=0.5, epsilon=0.1, min_votes=5):
     return results
 
 
-@shared_task(bind=True, name='text_10.aggregate')
-def aggregate_task(self, results, coef=0.5, filter=False, epsilon=0.1, min_votes=5):
+@shared_task(bind=True, name='text_10.old_aggregate')
+def old_aggregate_task(self, results, coef=0.5, filter=False, epsilon=0.1, min_votes=5):
     """
     Celery task that aggregates a pandas DataFrame of intermediate wikify results, unique by (Keywords, PageID), into a pandas DataFrame
     of final wikify results, unique by PageID. Then computes the MixedScore for every page as a convex combination of the other scores.
@@ -453,46 +474,3 @@ def aggregate_task(self, results, coef=0.5, filter=False, epsilon=0.1, min_votes
         results = filter_results(results, epsilon=epsilon, min_votes=min_votes)
 
     return results
-
-
-@shared_task(bind=True, name='text_10.draw_ontology', graph=graph)
-def draw_ontology_task(self, results, level=2):
-    """
-    Celery task that draws the ontology neighbourhood induced by the given set of wikify results.
-
-    Args:
-        results (list(dict)): A serialised (orient='records') pandas DataFrame with columns ['PageID', 'PageTitle', 'SearchScore',
-        'LevenshteinScore', 'GraphScore', 'OntologyLocalScore', 'OntologyGlobalScore', 'KeywordsScore', 'MixedScore'].
-        level (int): How many levels to go up in the ontology from the concepts. Default: 2.
-
-    Returns:
-        bool: Whether the drawing succeeded.
-    """
-
-    return draw_ontology(results, self.graph, level)
-
-
-@shared_task(bind=True, name='text_10.draw_graph', graph=graph)
-def draw_graph_task(self, results, concept_score_threshold=0.3, edge_threshold=0.3, min_component_size=3):
-    """
-    Celery task that draws the concepts graph neighbourhood induced by the given set of wikify results.
-
-    Args:
-        results (list(dict)): A serialised (orient='records') pandas DataFrame with columns ['PageID', 'PageTitle', 'SearchScore',
-        'LevenshteinScore', 'GraphScore', 'OntologyLocalScore', 'OntologyGlobalScore', 'KeywordsScore', 'MixedScore'].
-        concept_score_threshold (float): Score threshold below which concepts are filtered out. Default: 0.3.
-        edge_threshold (float): Score threshold below which edges are filtered out. Default: 0.3.
-        min_component_size (int): Size threshold below which connected components are filtered out. Default: 3.
-
-    Returns:
-        bool: Whether the drawing succeeded.
-    """
-
-    return draw_graph(results, self.graph, concept_score_threshold, edge_threshold, min_component_size)
-
-
-@shared_task(bind=True, name='text_10.sleeper')
-def text_test_task(self):
-    sleep(15)
-    print('It worked')
-    return 0
