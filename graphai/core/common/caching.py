@@ -629,7 +629,13 @@ def get_cached_col_names_using_origin(token, db_manager_origin, db_manager, col_
         values.append(db_manager.get_details_using_origin(closest_token, cols))
     else:
         values.append(None)
-    return find_non_null_values_in_results(values, col_map)
+    new_values = list()
+    for value in values:
+        if value is not None:
+            new_values.append(value[0])
+        else:
+            new_values.append(None)
+    return find_non_null_values_in_results(new_values, col_map)
 
 
 def get_token_status(token, file_manager, db_manager):
