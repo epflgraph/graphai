@@ -47,6 +47,7 @@ async def keywords(data: KeywordsRequest, use_nltk: Optional[bool] = False):
     if not data.raw_text:
         return []
 
+    # Set job and run it
     job = chain(extract_keywords_task.s(data.raw_text, use_nltk=use_nltk))
     keyword_list = job.apply_async(priority=10).get(timeout=10)
 
@@ -87,6 +88,7 @@ async def wikify(
         if not data.raw_text:
             return []
 
+        # Set job and run it
         job = chain(extract_keywords_task.s(data.raw_text))
         keyword_list = job.apply_async(priority=10).get(timeout=300)
     else:
@@ -149,10 +151,8 @@ async def wikify_ontology_svg(
     if level not in [1, 2, 3, 4, 5]:
         level = 2
 
-    # Set up job
-    job = draw_ontology_task.s(results, level)
-
-    # Schedule job and block
+    # Set job and run it
+    job = draw_ontology_task.s(results, level=level)
     job.apply_async(priority=10).get(timeout=10)
 
     # Return file
@@ -173,10 +173,8 @@ async def wikify_graph_svg(
     # Convert WikifyResponseElems into dictionaries
     results = [vars(result) for result in results]
 
-    # Set up job
-    job = draw_graph_task.s(results, concept_score_threshold, edge_threshold, min_component_size)
-
-    # Schedule job and block
+    # Set job and run it
+    job = draw_graph_task.s(results, concept_score_threshold=concept_score_threshold, edge_threshold=edge_threshold, min_component_size=min_component_size)
     job.apply_async(priority=10).get(timeout=10)
 
     # Return file

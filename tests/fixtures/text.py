@@ -32,35 +32,53 @@ def euclid():
 @pytest.fixture
 def wave_fields_wikisearch_df():
     return pd.DataFrame([
-        ['acoustic wave fields', 1901541, """Ion_acoustic_wave""", 1, 1, 0.848181],
-        ['acoustic wave fields', 459844, """Surface_acoustic_wave""", 2, 0.888889, 0.750277],
-        ['acoustic wave fields', 144940, """Longitudinal_wave""", 3, 0.777778, 0.367288],
-        ['acoustic wave fields', 6101054, """Acoustic_levitation""", 4, 0.666667, 0.626132],
-        ['acoustic wave fields', 33516, """Wave""", 5, 0.555556, 0.200000],
-        ['acoustic wave fields', 24476128, """Acoustic_metamaterial""", 6, 0.444444, 0.750277],
-        ['acoustic wave fields', 299813, """Acoustical_engineering""", 7, 0.333333, 0.640000],
-        ['acoustic wave fields', 5786179, """Acoustic_wave""", 8, 0.222222, 0.932414],
-        ['acoustic wave fields', 35537980, """Acoustic_attenuation""", 9, 0.111111, 0.692308],
-        ['acoustic wave fields', 2630105, """Acoustic_wave_equation""", 10, 0, 0.862069]
-    ], columns=['Keywords', 'PageID', 'PageTitle', 'Searchrank', 'SearchScore', 'LevenshteinScore'])
-
-
-@pytest.fixture
-def wave_fields_scores_df():
-    return pd.DataFrame([
-        ['acoustic wave fields', 459844, """Surface_acoustic_wave""", 2, 0.888889, 0.750277, 527, 111, 0.2375, 0.2375, 0.086486, 1.0],
-        ['acoustic wave fields', 144940, """Longitudinal_wave""", 3, 0.777778, 0.367288, 974, 194, 0.7125, 0.7125, 0.913514, 1.0],
-        ['acoustic wave fields', 33516, """Wave""", 4, 0.555556, 0.200000, 974, 194, 0.7125, 0.7125, 1.000000, 1.0]
-    ], columns=['Keywords', 'PageID', 'PageTitle', 'Searchrank', 'SearchScore', 'LevenshteinScore', 'CategoryID', 'Category2ID', 'OntologyLocalScore', 'OntologyGlobalScore', 'GraphScore', 'KeywordsScore'])
+        ['acoustic wave fields', 1901541, """Ion acoustic wave""", 1, 1],
+        ['acoustic wave fields', 459844, """Surface acoustic wave""", 2, 0.888889],
+        ['acoustic wave fields', 144940, """Longitudinal wave""", 3, 0.777778],
+        ['acoustic wave fields', 6101054, """Acoustic levitation""", 4, 0.666667],
+        ['acoustic wave fields', 33516, """Wave""", 5, 0.555556],
+        ['acoustic wave fields', 24476128, """Acoustic metamaterial""", 6, 0.444444],
+        ['acoustic wave fields', 299813, """Acoustical engineering""", 7, 0.333333],
+        ['acoustic wave fields', 5786179, """Acoustic wave""", 8, 0.222222],
+        ['acoustic wave fields', 35537980, """Acoustic attenuation""", 9, 0.111111],
+        ['acoustic wave fields', 2630105, """Acoustic wave equation""", 10, 0]
+    ], columns=['keywords', 'concept_id', 'concept_name', 'searchrank', 'search_score'])
 
 
 @pytest.fixture
 def wave_fields_wikified_json():
     return [
-        {'PageID': 459844, 'PageTitle': """Surface_acoustic_wave""", 'SearchScore': 0.888889, 'LevenshteinScore': 0.750277, 'GraphScore': 0.086486,
-         'OntologyLocalScore': 0.2375, 'OntologyGlobalScore': 0.2375, 'KeywordsScore': 1.0, 'MixedScore': 0.658343},
-        {'PageID': 144940, 'PageTitle': """Longitudinal_wave""", 'SearchScore': 0.777778, 'LevenshteinScore': 0.367288, 'GraphScore': 0.913514,
-         'OntologyLocalScore': 0.7125, 'OntologyGlobalScore': 0.7125, 'KeywordsScore': 1.0, 'MixedScore': 0.780125},
-        {'PageID': 33516, 'PageTitle': """Wave""", 'SearchScore': 0.555556, 'LevenshteinScore': 0.200000, 'GraphScore': 1.000000,
-         'OntologyLocalScore': 0.7125, 'OntologyGlobalScore': 0.7125, 'KeywordsScore': 1.0, 'MixedScore': 0.719236}
+        {
+            'concept_id': '459844',
+            'concept_name': """Surface acoustic wave""",
+            'search_score': 0.888889,
+            'levenshtein_score': 0.750277,
+            'graph_score': 0.086486,
+            'ontology_local_score': 0.2375,
+            'ontology_global_score': 0.2375,
+            'keywords_score': 1.0,
+            'mixed_score': 0.658343,
+        },
+        {
+            'concept_id': '144940',
+            'concept_name': """Longitudinal wave""",
+            'search_score': 0.777778,
+            'levenshtein_score': 0.367288,
+            'graph_score': 0.913514,
+            'ontology_local_score': 0.7125,
+            'ontology_global_score': 0.7125,
+            'keywords_score': 1.0,
+            'mixed_score': 0.780125,
+        },
+        {
+            'concept_id': '33516',
+            'concept_name': """Wave""",
+            'search_score': 0.555556,
+            'levenshtein_score': 0.200000,
+            'graph_score': 1.000000,
+            'ontology_local_score': 0.7125,
+            'ontology_global_score': 0.7125,
+            'keywords_score': 1.0,
+            'mixed_score': 0.719236,
+        },
     ]

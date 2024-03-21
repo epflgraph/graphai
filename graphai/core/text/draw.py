@@ -10,7 +10,7 @@ def draw_ontology(results, graph, level=3):
     Draws the ontology neighbourhood induced by the given set of wikify results. The resulting svg is not returned but stored in /tmp/file.svg.
 
     Args:
-        results (list(dict)): A serialised (orient='records') pandas DataFrame with columns ['concept_id', 'concept_name', 'search_score',
+        results (pd.DataFrame): A pandas DataFrame with columns ['concept_id', 'concept_name', 'search_score',
         'levenshtein_score', 'graph_score', 'ontology_local_score', 'ontology_global_score', 'keywords_score', 'mixed_score'].
         graph (ConceptsGraph): The concepts graph and ontology object.
         level (int): Level up to which the visualisation considers categories. Default: 3.
@@ -24,7 +24,7 @@ def draw_ontology(results, graph, level=3):
     # Save empty figure in case of empty input
     if not results:
         plt.savefig('/tmp/file.svg', format='svg')
-        return True
+        return
 
     ################################################################
 
@@ -93,7 +93,7 @@ def draw_ontology(results, graph, level=3):
     # Save empty figure in case there is not any connected component
     if n_connected_components == 0:
         plt.savefig('/tmp/file.svg', format='svg')
-        return True
+        return
 
     ################################################################
 
@@ -144,13 +144,15 @@ def draw_ontology(results, graph, level=3):
     # fig.suptitle(f'Results for "{data["raw_text"][:92] + "..." if len(data["raw_text"]) > 92 else data["raw_text"]}"')
     plt.savefig('/tmp/file.svg', format='svg')
 
+    plt.close('all')
+
 
 def draw_graph(results, graph, concept_score_threshold=0.3, edge_threshold=0.3, min_component_size=3):
     """
     Draws the concept graph neighbourhood induced by the given set of wikify results. The resulting svg is not returned but stored in /tmp/file.svg.
 
     Args:
-        results (list(dict)): A serialised (orient='records') pandas DataFrame with columns ['concept_id', 'concept_name', 'search_score',
+        results (pd.DataFrame): A pandas DataFrame with columns ['concept_id', 'concept_name', 'search_score',
         'levenshtein_score', 'graph_score', 'ontology_local_score', 'ontology_global_score', 'keywords_score', 'mixed_score'].
         graph (ConceptsGraph): The concepts graph and ontology object.
         concept_score_threshold (float): Score threshold below which concepts are filtered out. Default: 0.3.
@@ -166,7 +168,7 @@ def draw_graph(results, graph, concept_score_threshold=0.3, edge_threshold=0.3, 
     # Save empty figure in case of empty input
     if not results:
         plt.savefig('/tmp/file.svg', format='svg')
-        return True
+        return
 
     ################################################################
 
@@ -231,7 +233,7 @@ def draw_graph(results, graph, concept_score_threshold=0.3, edge_threshold=0.3, 
     # Save empty figure in case there is not any connected component
     if n_connected_components == 0:
         plt.savefig('/tmp/file.svg', format='svg')
-        return True
+        return
 
     ################################################################
 
@@ -275,3 +277,5 @@ def draw_graph(results, graph, concept_score_threshold=0.3, edge_threshold=0.3, 
     # Set title, remove space between axs and display the plot
     # fig.suptitle(f'Results for "{data["raw_text"][:92] + "..." if len(data["raw_text"]) > 92 else data["raw_text"]}"')
     plt.savefig('/tmp/file.svg', format='svg')
+
+    plt.close('all')
