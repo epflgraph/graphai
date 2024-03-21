@@ -1,7 +1,10 @@
 from pydantic import BaseModel, Field
-from typing import Union, Literal, Dict
+from typing import Union, Literal, Dict, List
 
-from graphai.api.schemas.common import TaskStatusResponse
+from graphai.api.schemas.common import (
+    TaskStatusResponse,
+    TokenStatus
+)
 
 
 class RetrieveURLRequest(BaseModel):
@@ -24,10 +27,23 @@ class RetrieveURLRequest(BaseModel):
     )
 
 
+class VideoTokenStatus(TokenStatus):
+    cached: List[Literal['calculate_fingerprint', 'extract_audio', 'detect_slides']] = Field(
+        title="Cached results",
+        description="List of video endpoints whose results have already been cached for this token"
+    )
+
+
 class RetrieveURLResponseInner(BaseModel):
     token: Union[str, None] = Field(
         title="Token",
         description="Result token, null if task has failed"
+    )
+
+    token_status: Union[VideoTokenStatus, None] = Field(
+        title="Token status",
+        description="Status of the returned token",
+        default=None
     )
 
     fresh: bool = Field(
@@ -115,19 +131,35 @@ class ExtractAudioRequest(BaseModel):
     )
 
 
+class AudioTokenStatus(TokenStatus):
+    cached: List[Literal['calculate_fingerprint', 'transcribe', 'detect_language']] = Field(
+        title="Cached results",
+        description="List of audio endpoints whose results have already been cached for this token"
+    )
+
+
 class ExtractAudioTaskResponse(BaseModel):
     token: Union[str, None] = Field(
         title="Token",
         description="Result token, null if task has failed"
     )
+
+    token_status: Union[AudioTokenStatus, None] = Field(
+        title="Token status",
+        description="Status of the returned token",
+        default=None
+    )
+
     successful: bool = Field(
         title="Success flag",
         description="True if task successful, False otherwise"
     )
+
     fresh: bool = Field(
         title="Freshness flag",
         description="Whether the result was computed freshly or an existing cached result was returned."
     )
+
     duration: float = Field(
         title="Audio duration",
         description="Duration of audio based on the length of its video file. This value is exact as it is based "
@@ -173,9 +205,22 @@ class DetectSlidesRequest(BaseModel):
     )
 
 
+class SlideTokenStatus(TokenStatus):
+    cached: Union[List[Literal['calculate_fingerprint', 'extract_text', 'detect_language']], None] = Field(
+        title="Cached results",
+        description="List of image endpoints whose results have already been cached for this token"
+    )
+
+
 class SlideTokenAndTimeStamp(BaseModel):
     token: str = Field(
         title="Slide token"
+    )
+
+    token_status: Union[SlideTokenStatus, None] = Field(
+        title="Token status",
+        description="Status of the returned token",
+        default=None
     )
 
     timestamp: int = Field(
