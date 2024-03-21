@@ -37,9 +37,6 @@ class ConceptsGraph:
         conditions = {'is_unused': False}
         self.concepts = pd.DataFrame(db.find(table_name, fields=fields, conditions=conditions), columns=columns)
 
-        print('Concept nodes loaded')
-        print(self.concepts.info())
-
         ################################################################
 
         # Load Concept-Concept edges (graph)
@@ -54,9 +51,6 @@ class ConceptsGraph:
             self.concepts_concepts.rename(columns={'source_concept_id': 'target_concept_id', 'target_concept_id': 'source_concept_id'})
         ]).reset_index(drop=True)
 
-        print('Concept-Concept edges loaded')
-        print(self.concepts_concepts.info())
-
         ################################################################
 
         # Load Category nodes
@@ -65,9 +59,6 @@ class ConceptsGraph:
         columns = ['category_id', 'category_name', 'depth']
         self.categories = pd.DataFrame(db.find(table_name, fields=fields), columns=columns)
 
-        print('Category nodes loaded')
-        print(self.categories.info())
-
         ################################################################
 
         # Load Category-Category edges (ontology category tree)
@@ -75,9 +66,6 @@ class ConceptsGraph:
         fields = ['from_id', 'to_id']
         columns = ['child_category_id', 'parent_category_id']
         self.categories_categories = pd.DataFrame(db.find(table_name, fields=fields), columns=columns)
-
-        print('Category-Category edges loaded')
-        print(self.categories_categories.info())
 
         ################################################################
 
@@ -99,9 +87,6 @@ class ConceptsGraph:
 
         # Merge both tables through clusters to get the Concept-Category edges (ontology concept to level 4 category association)
         self.concepts_categories = pd.merge(concepts_clusters, clusters_categories, how='inner', on='cluster_id')[['concept_id', 'category_id']]
-
-        print('Concept-Category edges loaded')
-        print(self.concepts_categories.info())
 
         ################################################################
 

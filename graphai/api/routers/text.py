@@ -43,23 +43,14 @@ async def keywords(data: KeywordsRequest, use_nltk: Optional[bool] = False):
     list of keywords from the text.
     """
 
-    # Get input parameters
-    raw_text = data.raw_text
-
     # Return if no input
-    if not raw_text:
+    if not data.raw_text:
         return []
 
-    # Set up job
-    job = extract_keywords_task.s(raw_text, use_nltk=use_nltk)
+    job = chain(extract_keywords_task.s(data.raw_text, use_nltk=use_nltk))
+    keyword_list = job.apply_async(priority=10).get(timeout=10)
 
-    # Schedule job
-    results = job.apply_async(priority=10)
-
-    # Wait for results
-    results = results.get(timeout=10)
-
-    return results
+    return keyword_list
 
 
 @router.post('/wikify', response_model=WikifyResponse)
@@ -90,23 +81,25 @@ async def wikify(
         to keep only the most relevant results.
     """
 
-    # Get input parameters
+    # Extract keywords if input is raw text
     if isinstance(data, WikifyFromRawTextRequest):
-        raw_text = data.raw_text
-    elif isinstance(data, WikifyFromKeywordsRequest):
-        raw_text = data.keywords
+        # Return if no input
+        if not data.raw_text:
+            return []
+
+        job = chain(extract_keywords_task.s(data.raw_text))
+        keyword_list = job.apply_async(priority=10).get(timeout=300)
     else:
+        keyword_list = data.keywords
+
+    # Return if no keywords
+    if not keyword_list:
         return []
 
-    # Return if no input
-    if not raw_text:
-        return []
-
+    # Do wikisearch in parallel and then gather all results, compute scores, aggregate and filter
     n = 16
-
     job = chain(
-        extract_keywords_task.s(raw_text),
-        group(wikisearch_task.s(fraction=(i / n, (i + 1) / n), method=method) for i in range(n)),
+        group(wikisearch_task.s(keyword_list, fraction=(i / n, (i + 1) / n), method=method) for i in range(n)),
         compute_scores_task.s(
             restrict_to_ontology=restrict_to_ontology,
             graph_score_smoothing=graph_score_smoothing,
@@ -118,12 +111,7 @@ async def wikify(
             refresh_scores=refresh_scores,
         )
     )
-
-    # Schedule job
-    results = job.apply_async(priority=10)
-
-    # Wait for results
-    results = results.get(timeout=300)
+    results = job.apply_async(priority=10).get(timeout=300)
 
     # FIXME delete this and go ahead with the new lowercased keys
     # Replace column names not to break compatibility
