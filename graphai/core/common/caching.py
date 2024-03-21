@@ -595,3 +595,113 @@ class FingerprintParameters:
 
     def get_min_sim_video(self):
         return self.min_similarity['video']
+
+
+def empty_list_to_null(list_of_values):
+    if len(list_of_values) > 0:
+        return list_of_values
+    return None
+
+
+def find_non_null_values_in_results(values, col_map):
+    values = [v for v in values if v is not None]
+    results = list()
+    for col in col_map.keys():
+        for value in values:
+            if value.get(col, None) is not None:
+                results.append(col_map[col])
+                break
+    return results
+
+
+def get_cached_col_names(token, db_manager, col_map):
+    cols = list(col_map.keys())
+    values = db_manager.get_details(token, cols, using_most_similar=True)
+    return find_non_null_values_in_results(values, col_map)
+
+
+def get_cached_col_names_using_origin(token, db_manager_origin, db_manager, col_map):
+    cols = list(col_map.keys())
+    cols = list(set(cols) - {'origin_token'})
+    closest_token = db_manager_origin.get_closest_match(token)
+    values = [db_manager.get_details_using_origin(token, cols)]
+    if closest_token is not None and closest_token != token:
+        values.append(db_manager.get_details_using_origin(closest_token, cols))
+    else:
+        values.append(None)
+    return find_non_null_values_in_results(values, col_map)
+
+
+def get_token_status(token, file_manager, db_manager):
+    if token is None:
+        raise Exception("Token is null")
+    token_exists = db_manager.get_details(token, [])[0] is not None
+    if not token_exists:
+        raise Exception("Token does not exist")
+    return os.path.isfile(file_manager.generate_filepath(token))
+
+
+def get_video_token_status(token):
+    video_config = VideoConfig()
+    video_db_manager = VideoDBCachingManager()
+    image_db_manager = SlideDBCachingManager()
+    audio_db_manager = AudioDBCachingManager()
+    try:
+        active = get_token_status(token, video_config, video_db_manager)
+    except Exception as e:
+        return None
+    cached_cols_own = get_cached_col_names(token, video_db_manager,
+                                           {
+                                               'fingerprint': 'calculate_fingerprint'
+                                           })
+    cached_cols_image = get_cached_col_names_using_origin(token, video_db_manager, image_db_manager,
+                                                          {
+                                                              'origin_token': 'detect_slides'
+                                                          })
+    cached_cols_audio = get_cached_col_names_using_origin(token, video_db_manager, audio_db_manager,
+                                                          {
+                                                              'origin_token': 'extract_audio'
+                                                          })
+    cached_cols = cached_cols_own + cached_cols_image + cached_cols_audio
+    return {
+        'active': active,
+        'cached': empty_list_to_null(cached_cols)
+    }
+
+
+def get_image_token_status(token):
+    video_config = VideoConfig()
+    image_db_manager = SlideDBCachingManager()
+    try:
+        active = get_token_status(token, video_config, image_db_manager)
+    except Exception as e:
+        return None
+    cached_cols = get_cached_col_names(token, image_db_manager,
+                                       {
+                                           'fingerprint': 'calculate_fingerprint',
+                                           'ocr_google_1_results': 'extract_text',
+                                           'language': 'detect_language'
+                                       })
+    return {
+        'active': active,
+        'cached': empty_list_to_null(cached_cols)
+    }
+
+
+def get_audio_token_status(token):
+    video_config = VideoConfig()
+    audio_db_manager = AudioDBCachingManager()
+    try:
+        active = get_token_status(token, video_config, audio_db_manager)
+    except Exception as e:
+        return None
+    cached_cols = get_cached_col_names(token, audio_db_manager,
+                                       {
+                                           'fingerprint': 'calculate_fingerprint',
+                                           'transcript_results': 'transcribe',
+                                           'language': 'detect_language'
+                                       })
+    return {
+        'active': active,
+        'cached': empty_list_to_null(cached_cols)
+    }
