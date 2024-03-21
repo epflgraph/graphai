@@ -100,13 +100,10 @@ async def extract_text(data: ExtractTextRequest):
     method = data.method
     force = data.force
     assert method in ['google', 'tesseract']
-    # If force=True, fingerprinting is skipped
+    # Fingerprinting is always performed but with force=False, regardless of the provided force flag.
     # The tasks are slide text extraction and callback. These are the same for extract_text and detect_language.
-    if not force:
-        task_list = get_slide_fingerprint_chain_list(token, force, ignore_fp_results=True, results_to_return=token)
-        task_list += [extract_slide_text_task.s(method, force)]
-    else:
-        task_list = [extract_slide_text_task.s(token, method, force)]
+    task_list = get_slide_fingerprint_chain_list(token, False, ignore_fp_results=True, results_to_return=token)
+    task_list += [extract_slide_text_task.s(method, force)]
 
     task_list += [extract_slide_text_callback_task.s(token, force)]
     task = chain(task_list)
