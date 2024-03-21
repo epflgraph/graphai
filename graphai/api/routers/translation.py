@@ -115,15 +115,14 @@ async def translate(data: TranslationRequest):
     token = generate_translation_text_token(text, src, tgt)
     return_list = isinstance(text, list)
     text = translation_list_to_text(text)
-    # If force=True, fingerprinting is skipped
+    # Fingerprinting is always performed but with force=False, regardless of the provided force flag.
     # The tasks are translation and its callback
-    if not force:
-        task_list = get_translation_text_fingerprint_chain_list(token, text, src, tgt, force,
-                                                                ignore_fp_results=True, results_to_return=token)
-        task_list += [translate_text_task.s(text, src, tgt, force)]
-    else:
-        task_list = [translate_text_task.s(token, text, src, tgt, force)]
-    task_list += [translate_text_callback_task.s(token, text, src, tgt, force, return_list)]
+    task_list = get_translation_text_fingerprint_chain_list(token, text, src, tgt, False,
+                                                            ignore_fp_results=True, results_to_return=token)
+    task_list += [
+        translate_text_task.s(text, src, tgt, force),
+        translate_text_callback_task.s(token, text, src, tgt, force, return_list)
+    ]
     task = chain(task_list)
     task = task.apply_async(priority=6)
     return {'task_id': task.id}
