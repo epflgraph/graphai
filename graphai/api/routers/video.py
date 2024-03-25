@@ -28,6 +28,7 @@ from graphai.api.celery_tasks.video import (
     compute_slide_transitions_parallel_task,
     compute_slide_transitions_callback_task,
     detect_slides_callback_task,
+    reextract_cached_slides_task,
     compute_video_fingerprint_task,
     compute_video_fingerprint_callback_task,
     video_fingerprint_find_closest_retrieve_from_db_task,
@@ -182,23 +183,27 @@ async def detect_slides(data: DetectSlidesRequest):
     token = data.token
     force = data.force
     force_non_self = data.force_non_self
+    recalculate = data.recalculate_cached
     language = data.language
-    n_jobs = 8
-    # This is the maximum similarity threshold used for image hashes when finding slide transitions.
-    hash_thresh = 0.95
-    # Fingerprinting is always performed but with force=False, regardless of the provided force flag.
-    # Task list involves extracting and sampling frames, parallel noise level comp and its callback, then a dummy task
-    # because of celery's need for an additional non-group task in the middle, then slide transition comp and its
-    # callback, followed by a final callback that inserts the results into the cache db.
     task_list = get_video_fingerprint_chain_list(token, force=False,
                                                  ignore_fp_results=True, results_to_return=token)
-    task_list += [extract_and_sample_frames_task.s(force, force_non_self)]
-    task_list += [group(compute_noise_level_parallel_task.s(i, n_jobs, language) for i in range(n_jobs)),
-                  compute_noise_threshold_callback_task.s(hash_thresh),
-                  video_dummy_task.s(),
-                  group(compute_slide_transitions_parallel_task.s(i, n_jobs, language) for i in range(n_jobs)),
-                  compute_slide_transitions_callback_task.s(language),
-                  detect_slides_callback_task.s(token, force)]
+    if not recalculate:
+        n_jobs = 8
+        # This is the maximum similarity threshold used for image hashes when finding slide transitions.
+        hash_thresh = 0.95
+        # Fingerprinting is always performed but with force=False, regardless of the provided force flag.
+        # Task list involves extracting and sampling frames, parallel noise level comp and its callback, then a dummy task
+        # because of celery's need for an additional non-group task in the middle, then slide transition comp and its
+        # callback, followed by a final callback that inserts the results into the cache db.
+        task_list += [extract_and_sample_frames_task.s(force, force_non_self)]
+        task_list += [group(compute_noise_level_parallel_task.s(i, n_jobs, language) for i in range(n_jobs)),
+                      compute_noise_threshold_callback_task.s(hash_thresh),
+                      video_dummy_task.s(),
+                      group(compute_slide_transitions_parallel_task.s(i, n_jobs, language) for i in range(n_jobs)),
+                      compute_slide_transitions_callback_task.s(language),
+                      detect_slides_callback_task.s(token, force)]
+    else:
+        task_list += [reextract_cached_slides_task.s()]
     task = chain(task_list)
     task = task.apply_async(priority=2)
     return {'task_id': task.id}

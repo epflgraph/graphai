@@ -12,8 +12,14 @@ from graphai.core.common.video import retrieve_file_from_url, retrieve_file_from
     compute_ocr_noise_level, compute_ocr_threshold, compute_video_ocr_transitions, check_ocr_and_hash_thresholds, \
     generate_random_token, md5_video_or_audio, generate_symbolic_token, read_txt_gz_file, \
     FRAME_FORMAT_PNG, TESSERACT_OCR_FORMAT
-from graphai.core.common.caching import AudioDBCachingManager, SlideDBCachingManager, \
-    VideoDBCachingManager
+from graphai.core.common.caching import (
+    AudioDBCachingManager,
+    SlideDBCachingManager,
+    VideoDBCachingManager,
+    get_video_token_status,
+    get_image_token_status,
+    get_audio_token_status
+)
 from graphai.core.common.common_utils import file_exists, get_current_datetime, strtobool
 from itertools import chain
 from graphai.api.celery_tasks.common import fingerprint_lookup_retrieve_from_db, \
@@ -82,7 +88,7 @@ def retrieve_file_from_url_callback_task(self, results, url, force=False):
                 }
             )
         db_manager.insert_or_update_details(results['token'], values_to_insert=values)
-
+    results['token_status'] = get_video_token_status(results['token'])
     return results
 
 
@@ -291,6 +297,7 @@ def extract_audio_callback_task(self, results, origin_token, force=False):
                 db_manager.insert_or_update_closest_match(results['token'], {
                     'most_similar_token': symbolic_token
                 })
+    results['token_status'] = get_audio_token_status(results['token'])
     return results
 
 
@@ -331,8 +338,13 @@ def extract_and_sample_frames_task(self, token, force=False, force_non_self=Fals
                     'result': None,
                     'sample_indices': None,
                     'fresh': False,
-                    'slide_tokens': {x['slide_number']: {'token': x['id_token'], 'timestamp': int(x['timestamp'])}
-                                     for x in existing_slides}
+                    'slide_tokens': {
+                        x['slide_number']: {
+                            'token': x['id_token'],
+                            'timestamp': int(x['timestamp'])
+                        }
+                        for x in existing_slides
+                    }
                 }
             else:
                 # If force==True, then we need to first delete the existing rows in case the results this time are
@@ -607,9 +619,58 @@ def detect_slides_callback_task(self, results, token, force=False):
     else:
         # Getting cached or null results that have been passed along the chain of tasks
         slide_tokens = results['slide_tokens']
+    if slide_tokens is not None:
+        for slide_number in slide_tokens:
+            slide_tokens[slide_number]['token_status'] = get_image_token_status(slide_tokens[slide_number]['token'])
     return {
         'slide_tokens': slide_tokens,
         'fresh': results['fresh']
+    }
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
+             name='video_2.reextract_cached_slides', ignore_result=False,
+             file_manager=file_management_config)
+def reextract_cached_slides_task(self, token):
+    video_db_manager = VideoDBCachingManager()
+    closest_token = video_db_manager.get_closest_match(token)
+    slide_db_manager = SlideDBCachingManager()
+    existing_slides_own = slide_db_manager.get_details_using_origin(token, cols=['slide_number', 'timestamp'])
+    if closest_token is not None and closest_token != token:
+        existing_slides_closest = slide_db_manager.get_details_using_origin(closest_token,
+                                                                            cols=['slide_number', 'timestamp'])
+    else:
+        existing_slides_closest = None
+    if existing_slides_own is None and existing_slides_closest is None:
+        return {
+            'slide_tokens': None,
+            'fresh': False
+        }
+    existing_slides = existing_slides_own if existing_slides_own is not None else existing_slides_closest
+    token_to_use_as_name = existing_slides[0]['origin_token']
+    timestamps_to_keep = sorted([x['timestamp'] for x in existing_slides])
+    output_folder = token_to_use_as_name + '_slides'
+    output_folder_with_path = self.file_manager.generate_filepath(output_folder)
+    input_filename_with_path = self.file_manager.generate_filepath(token)
+    output_folder = extract_frames(input_filename_with_path, output_folder_with_path, output_folder)
+    # If there was an error of any kind (e.g. non-existing video file), the returned token will be None
+    if output_folder is None:
+        return {
+            'slide_tokens': None,
+            'fresh': False
+        }
+    list_of_slides = [FRAME_FORMAT_PNG % x for x in timestamps_to_keep]
+    for f in os.listdir(output_folder_with_path):
+        if f not in list_of_slides:
+            os.remove(os.path.join(output_folder_with_path, f))
+    slide_tokens = [os.path.join(output_folder, s) for s in list_of_slides]
+    slide_tokens = {i + 1: {'token': slide_tokens[i], 'timestamp': timestamps_to_keep[i]}
+                    for i in range(len(slide_tokens))}
+    for slide_number in slide_tokens:
+        slide_tokens[slide_number]['token_status'] = get_image_token_status(slide_tokens[slide_number]['token'])
+    return {
+        'slide_tokens': slide_tokens,
+        'fresh': True
     }
 
 

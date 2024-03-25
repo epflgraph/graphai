@@ -67,6 +67,14 @@ def get_audio_fingerprint_chain_list(token, force=False, min_similarity=None, n_
     return task_list
 
 
+def get_audio_language_detection_task_chain(token, force, n_divs=15, len_segment=30):
+    return [
+        detect_language_retrieve_from_db_and_split_task.s(force, n_divs, len_segment),
+        group(detect_language_parallel_task.s(i) for i in range(n_divs)),
+        detect_language_callback_task.s(token, force)
+    ]
+
+
 @router.post('/calculate_fingerprint', response_model=TaskIDResponse)
 async def calculate_audio_fingerprint(data: AudioFingerprintRequest):
     token = data.token
@@ -107,31 +115,16 @@ async def transcribe(data: AudioTranscriptionRequest):
     strict_silence = data.strict
 
     # If the language is already provided, we won't need to detect it. Otherwise, detection tasks are added.
-    # If force=True, fingerprinting is skipped
+    # Fingerprinting is always performed but with force=False, regardless of the provided force flag.
     # The tasks are transcription and its callback
-    if lang is not None:
-        if not force:
-            task_list = get_audio_fingerprint_chain_list(token, force, ignore_fp_results=True,
-                                                         results_to_return={'token': token, 'language': lang})
-            task_list += [transcribe_task.s(strict_silence, force)]
-        else:
-            task_list = [transcribe_task.s({'token': token, 'language': lang}, strict_silence, force)]
-    else:
-        n_divs = 15
-        len_segment = 30
-        if not force:
-            task_list = get_audio_fingerprint_chain_list(token, force, ignore_fp_results=True,
-                                                         results_to_return=token)
-            task_list += [detect_language_retrieve_from_db_and_split_task.s(force, n_divs, len_segment)]
-        else:
-            task_list = [detect_language_retrieve_from_db_and_split_task.s(token, force, n_divs, len_segment)]
-
-        task_list += [
-            group(detect_language_parallel_task.s(i) for i in range(n_divs)),
-            detect_language_callback_task.s(token, force),
-            transcribe_task.s(strict_silence, force),
-        ]
-    task_list += [transcribe_callback_task.s(token, force)]
+    task_list = get_audio_fingerprint_chain_list(token, False, ignore_fp_results=True,
+                                                 results_to_return={'token': token, 'language': lang})
+    if lang is None:
+        task_list += get_audio_language_detection_task_chain(token, force)
+    task_list += [
+        transcribe_task.s(strict_silence, force),
+        transcribe_callback_task.s(token, force)
+    ]
     task = chain(task_list)
 
     task = task.apply_async(priority=2)
@@ -160,21 +153,12 @@ async def detect_language(data: AudioDetectLanguageRequest):
     print('Detecting language')
     token = data.token
     force = data.force
-    n_divs = 15
-    len_segment = 30
-    # If force=True, fingerprinting is skipped
+    # Fingerprinting is always performed but with force=False, regardless of the provided force flag.
     # The tasks are splitting the audio into n_divs segments of 30 seconds each, parallel language detection,
     # and then aggregation and db insertion in the callback. Then the transcription tasks continue.
-    if not force:
-        task_list = get_audio_fingerprint_chain_list(token, force, ignore_fp_results=True,
-                                                     results_to_return=token)
-        task_list += [detect_language_retrieve_from_db_and_split_task.s(force, n_divs, len_segment)]
-    else:
-        task_list = [detect_language_retrieve_from_db_and_split_task.s(token, force, n_divs, len_segment)]
-    task_list += [
-        group(detect_language_parallel_task.s(i) for i in range(n_divs)),
-        detect_language_callback_task.s(token, force)
-    ]
+    task_list = get_audio_fingerprint_chain_list(token, False, ignore_fp_results=True,
+                                                 results_to_return=token)
+    task_list += get_audio_language_detection_task_chain(token, force)
     task = chain(task_list)
     task = task.apply_async(priority=2)
     return {'task_id': task.id}

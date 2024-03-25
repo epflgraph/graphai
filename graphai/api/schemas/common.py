@@ -1,7 +1,7 @@
 import abc
 
 from pydantic import BaseModel, Field, Json
-from typing import Union
+from typing import Union, List
 
 
 class TaskIDResponse(BaseModel):
@@ -40,4 +40,17 @@ class FileRequest(BaseModel):
     token: str = Field(
         title="File name",
         description="The name of the file to be downloaded (received as a response from another endpoint)."
+    )
+
+
+class TokenStatus(BaseModel):
+    active: bool = Field(
+        title="Token active",
+        description="Whether the token's file is available (which makes calculations possible, otherwise only cached "
+                    "results can be returned for this token)."
+    )
+
+    cached: List[str] = Field(
+        title="Cached results",
+        description="List of endpoints whose results have already been cached for this token"
     )

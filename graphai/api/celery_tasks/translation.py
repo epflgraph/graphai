@@ -96,7 +96,7 @@ def translate_text_task(self, token, text, src, tgt, force=False):
     if not force:
         existing_list = db_manager.get_details(token, ['target'], using_most_similar=True)
         # Unlike with audio and image, the token may not already exist in the table when this task is invoked.
-        #  Therefore, the task doesn't fail if the token doesn't exist.
+        # Therefore, the task doesn't fail if the token doesn't exist.
         for existing in existing_list:
             if existing is None:
                 continue
