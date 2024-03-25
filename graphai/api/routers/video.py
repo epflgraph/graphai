@@ -103,6 +103,7 @@ async def get_retrieve_file_status(task_id):
         if 'token' in task_results:
             task_results = {
                 'token': task_results['token'],
+                'token_status': task_results['token_status'],
                 'fresh': task_results['fresh'],
                 'successful': task_results['token'] is not None
             }
@@ -169,6 +170,7 @@ async def extract_audio_status(task_id):
         if 'token' in task_results:
             task_results = {
                 'token': task_results['token'],
+                'token_status': task_results['token_status'],
                 'fresh': task_results['fresh'],
                 'duration': task_results['duration'],
                 'successful': task_results['token'] is not None
