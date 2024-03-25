@@ -341,7 +341,6 @@ def extract_and_sample_frames_task(self, token, force=False, force_non_self=Fals
                     'slide_tokens': {
                         x['slide_number']: {
                             'token': x['id_token'],
-                            'token_status': get_image_token_status(x['id_token']),
                             'timestamp': int(x['timestamp'])
                         }
                         for x in existing_slides
@@ -620,8 +619,9 @@ def detect_slides_callback_task(self, results, token, force=False):
     else:
         # Getting cached or null results that have been passed along the chain of tasks
         slide_tokens = results['slide_tokens']
-    for slide_number in slide_tokens:
-        slide_tokens[slide_number]['token_status'] = get_image_token_status(slide_tokens[slide_number]['token'])
+    if slide_tokens is not None:
+        for slide_number in slide_tokens:
+            slide_tokens[slide_number]['token_status'] = get_image_token_status(slide_tokens[slide_number]['token'])
     return {
         'slide_tokens': slide_tokens,
         'fresh': results['fresh']
