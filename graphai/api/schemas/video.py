@@ -182,6 +182,16 @@ class DetectSlidesRequest(BaseModel):
         description="The token that identifies the requested file"
     )
 
+    recalculate_cached: bool = Field(
+        title="Only perform a cache recalculation",
+        description="If set to True, this flag OVERRIDES both the 'force' and the 'force_non_self' flag, "
+                    "assumes that the slides for this video have been previously computed and cached, "
+                    "and recreates the slide files by extracting video frames and then only keeping the "
+                    "timestamps indicated in the cache. Will fail with null results if the video token is "
+                    "inactive, or if its slides have not previously been computed and cached in the database.",
+        default=False
+    )
+
     force_non_self: bool = Field(
         title="Force recompute on non-self cache hits",
         description="Whether to perform a cache check only on the token itself, and thus to force a computation "
