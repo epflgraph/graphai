@@ -654,7 +654,7 @@ def get_video_token_status(token):
     audio_db_manager = AudioDBCachingManager()
     try:
         active = get_token_status(token, video_config, video_db_manager)
-    except Exception as e:
+    except Exception:
         return None
     cached_cols_own = get_cached_col_names(token, video_db_manager,
                                            {
@@ -680,7 +680,7 @@ def get_image_token_status(token):
     image_db_manager = SlideDBCachingManager()
     try:
         active = get_token_status(token, video_config, image_db_manager)
-    except Exception as e:
+    except Exception:
         return None
     cached_cols = get_cached_col_names(token, image_db_manager,
                                        {
@@ -699,7 +699,7 @@ def get_audio_token_status(token):
     audio_db_manager = AudioDBCachingManager()
     try:
         active = get_token_status(token, video_config, audio_db_manager)
-    except Exception as e:
+    except Exception:
         return None
     cached_cols = get_cached_col_names(token, audio_db_manager,
                                        {

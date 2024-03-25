@@ -628,8 +628,6 @@ def detect_slides_callback_task(self, results, token, force=False):
     }
 
 
-
-
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='video_2.reextract_cached_slides', ignore_result=False,
              file_manager=file_management_config)
