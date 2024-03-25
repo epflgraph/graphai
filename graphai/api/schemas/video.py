@@ -28,7 +28,7 @@ class RetrieveURLRequest(BaseModel):
 
 
 class VideoTokenStatus(TokenStatus):
-    cached: List[Literal['calculate_fingerprint', 'extract_audio', 'detect_slides']] = Field(
+    cached: Union[List[Literal['calculate_fingerprint', 'extract_audio', 'detect_slides']], None] = Field(
         title="Cached results",
         description="List of video endpoints whose results have already been cached for this token"
     )
@@ -132,7 +132,7 @@ class ExtractAudioRequest(BaseModel):
 
 
 class AudioTokenStatus(TokenStatus):
-    cached: List[Literal['calculate_fingerprint', 'transcribe', 'detect_language']] = Field(
+    cached: Union[List[Literal['calculate_fingerprint', 'transcribe', 'detect_language']], None] = Field(
         title="Cached results",
         description="List of audio endpoints whose results have already been cached for this token"
     )
