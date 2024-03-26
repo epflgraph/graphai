@@ -43,7 +43,7 @@ oauth2_scheme = OAuth2PasswordBearer(
         "scraping": "Access website scraping endpoints.",
         "ontology": "Access ontology endpoints.",
         "image": "Access slide OCR endpoints.",
-        "completion": "Access ChatGPT-based content generation/summarization endpoints."
+        "completion": "Access slide subset selection endpoint (formerly included ChatGPT-based endpoints, now deleted)."
     }
 )
 
