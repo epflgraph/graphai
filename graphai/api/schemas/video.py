@@ -114,16 +114,6 @@ class ExtractAudioRequest(BaseModel):
         description="The token that identifies the requested file"
     )
 
-    force_non_self: bool = Field(
-        title="Force recompute on non-self cache hits",
-        description="Whether to perform a cache check only on the token itself, and thus to force a computation "
-                    "if the computation has not been performed for this token itself."
-                    "`true` by default. If you fully process every file before its token's expiration, "
-                    "you can set this to `false` safely without worrying about failed calls due to cache misses. "
-                    "This flag's value is overridden if `force` is set to `true`.",
-        default=True
-    )
-
     force: bool = Field(
         title="Force recompute",
         description="Whether to force a recomputation under any circumstances. False by default.",
@@ -184,22 +174,12 @@ class DetectSlidesRequest(BaseModel):
 
     recalculate_cached: bool = Field(
         title="Only perform a cache recalculation",
-        description="If set to True, this flag OVERRIDES both the 'force' and the 'force_non_self' flag, "
-                    "assumes that the slides for this video have been previously computed and cached, "
+        description="If set to True, this flag OVERRIDES the 'force' flag, assumes that this video token is active and"
+                    "that the slides for this video have been previously computed and cached, "
                     "and recreates the slide files by extracting video frames and then only keeping the "
                     "timestamps indicated in the cache. Will fail with null results if the video token is "
                     "inactive, or if its slides have not previously been computed and cached in the database.",
         default=False
-    )
-
-    force_non_self: bool = Field(
-        title="Force recompute on non-self cache hits",
-        description="Whether to perform a cache check only on the token itself, and thus to force a computation "
-                    "if the computation has not been performed for this token itself."
-                    "`true` by default. If you fully process every file before its token's expiration, "
-                    "you can set this to `false` safely without worrying about failed calls due to cache misses. "
-                    "This flag's value is overridden if `force` is set to `true`.",
-        default=True
     )
 
     force: bool = Field(

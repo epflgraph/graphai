@@ -183,7 +183,7 @@ def get_file_task(self, filename):
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='video_2.extract_audio', ignore_result=False,
              file_manager=file_management_config)
-def extract_audio_task(self, token, force=False, force_non_self=False):
+def extract_audio_task(self, token, force=False):
     input_filename_with_path = self.file_manager.generate_filepath(token)
     output_token, input_duration = detect_audio_format_and_duration(input_filename_with_path, token)
     if output_token is None:
@@ -215,17 +215,7 @@ def extract_audio_task(self, token, force=False, force_non_self=False):
             existing_closest = None
         # We first look at the video's own existing audio, then at that of the closest match because the video's
         # own precomputed audio (if any) takes precedence.
-        video_url = video_db_manager.get_details(token, ['origin_token'], using_most_similar=False)[0]
-        if video_url is not None:
-            video_url = video_url.get('origin_token', None)
-        if force_non_self and video_url is not None:
-            # If force_non_self is True, we only return a cache hit on self, not on a distinct closest token.
-            # We only do this, however, if the token is not expired. For expired tokens, a forced computation
-            # is not possible at all, so we just perform the full cache lookup.
-            all_existing = [existing_own]
-        else:
-            # Otherwise, we look at every possible cache hit
-            all_existing = [existing_own, existing_closest]
+        all_existing = [existing_own, existing_closest]
         for existing in all_existing:
             if existing is not None:
                 print('Returning cached result')
@@ -304,7 +294,7 @@ def extract_audio_callback_task(self, results, origin_token, force=False):
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='video_2.extract_and_sample_frames', ignore_result=False,
              file_manager=file_management_config)
-def extract_and_sample_frames_task(self, token, force=False, force_non_self=False):
+def extract_and_sample_frames_task(self, token, force=False):
     # Checking for existing cached results
     video_db_manager = VideoDBCachingManager()
     # Retrieving the closest match of the current video
@@ -319,15 +309,7 @@ def extract_and_sample_frames_task(self, token, force=False, force_non_self=Fals
     # We first look at the video's own existing slides, then at those of the closest match because the video's
     # own precomputed slides (if any) take precedence.
     input_filename_with_path = self.file_manager.generate_filepath(token)
-    video_url = video_db_manager.get_details(token, ['origin_token'], using_most_similar=False)[0]
-    if video_url is not None:
-        video_url = video_url.get('origin_token', None)
-    if force_non_self and video_url is not None:
-        # If most similar token cache hits are disallowed AND the token hasn't expired (meaning that a computation
-        # is possible)
-        all_existing = [existing_slides_own]
-    else:
-        all_existing = [existing_slides_own, existing_slides_closest]
+    all_existing = [existing_slides_own, existing_slides_closest]
     for existing_slides in all_existing:
         # If we have a cache hit
         if existing_slides is not None:
