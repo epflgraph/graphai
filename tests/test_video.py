@@ -161,7 +161,7 @@ def test__video_detect_slides__detect_slides__integration(fixture_app, celery_wo
 
     # Re-detecting slides, which should yield a cache hit this time
     response = fixture_app.post('/video/detect_slides',
-                                data=json.dumps({"token": video_token, "force_non_self": True}),
+                                data=json.dumps({"token": video_token}),
                                 timeout=timeout)
 
     assert response.status_code == 200

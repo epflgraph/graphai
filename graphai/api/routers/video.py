@@ -151,11 +151,10 @@ async def get_file(data: FileRequest):
 async def extract_audio(data: ExtractAudioRequest):
     token = data.token
     force = data.force
-    force_non_self = data.force_non_self
     # Fingerprinting is always performed but with force=False, regardless of the provided force flag.
     task_list = get_video_fingerprint_chain_list(token, force=False,
                                                  ignore_fp_results=True, results_to_return=token)
-    task_list += [extract_audio_task.s(force, force_non_self)]
+    task_list += [extract_audio_task.s(force)]
     task_list += [extract_audio_callback_task.s(token, force)]
     task = chain(task_list)
     task = task.apply_async(priority=2)
@@ -184,7 +183,6 @@ async def extract_audio_status(task_id):
 async def detect_slides(data: DetectSlidesRequest):
     token = data.token
     force = data.force
-    force_non_self = data.force_non_self
     recalculate = data.recalculate_cached
     language = data.language
     task_list = get_video_fingerprint_chain_list(token, force=False,
@@ -197,7 +195,7 @@ async def detect_slides(data: DetectSlidesRequest):
         # Task list involves extracting and sampling frames, parallel noise level comp and its callback, then a dummy task
         # because of celery's need for an additional non-group task in the middle, then slide transition comp and its
         # callback, followed by a final callback that inserts the results into the cache db.
-        task_list += [extract_and_sample_frames_task.s(force, force_non_self)]
+        task_list += [extract_and_sample_frames_task.s(force)]
         task_list += [group(compute_noise_level_parallel_task.s(i, n_jobs, language) for i in range(n_jobs)),
                       compute_noise_threshold_callback_task.s(hash_thresh),
                       video_dummy_task.s(),
