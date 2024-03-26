@@ -12,7 +12,6 @@ Subpackages
 .. toctree::
    :maxdepth: 1
 
-   graphai.core.common.json_repair
    graphai.core.common.ontology_utils
 
 Submodules
@@ -25,7 +24,6 @@ Submodules
    graphai.core.common.caching
    graphai.core.common.common_utils
    graphai.core.common.config
-   graphai.core.common.gpt_message_presets
    graphai.core.common.scraping
    graphai.core.common.text_utils
    graphai.core.common.video
