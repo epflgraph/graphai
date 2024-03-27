@@ -487,6 +487,7 @@ def find_closest_fingerprint_from_list(target_fp, fp_list, token_list, date_list
         min_similarity: Minimum similarity value. If the similarity of the most similar candidate to the target
                         is lower than this value, None will be returned as the result.
         decoder_func: The function that decodes the string hash, different for audio vs image hashes
+        strip_underscores: For text fingerprints, removes the trailing underscores
 
     Returns:
         Closest fingerprint, its token, and the highest score. All three are None if the closest one does not
@@ -530,6 +531,14 @@ def find_closest_image_fingerprint_from_list(target_fp, fp_list, token_list, dat
     """
     return find_closest_fingerprint_from_list(target_fp, fp_list, token_list, date_list, min_similarity,
                                               decoder_func=imagehash.hex_to_hash)
+
+
+def find_closest_text_fingerprint_from_list(target_fp, fp_list, token_list, date_list, min_similarity=0.8):
+    """
+    Finds closest image fingerprint from list
+    """
+    return find_closest_fingerprint_from_list(target_fp, fp_list, token_list, date_list, min_similarity,
+                                              decoder_func=imagehash.hex_to_hash, strip_underscores=True)
 
 
 def extract_frames(input_filename_with_path, output_folder_with_path, output_folder):
