@@ -477,7 +477,7 @@ def compare_encoded_fingerprints(f1, f2=None, decoder_func=chromaprint.decode_fi
 
 
 def find_closest_fingerprint_from_list(target_fp, fp_list, token_list, date_list, min_similarity=0.8,
-                                       decoder_func=chromaprint.decode_fingerprint):
+                                       decoder_func=chromaprint.decode_fingerprint, strip_underscores=False):
     """
     Given a target fingerprint and a list of candidate fingerprints, finds the one with the highest similarity
     to the target whose similarity is above a minimum value.
@@ -488,6 +488,7 @@ def find_closest_fingerprint_from_list(target_fp, fp_list, token_list, date_list
         min_similarity: Minimum similarity value. If the similarity of the most similar candidate to the target
                         is lower than this value, None will be returned as the result.
         decoder_func: The function that decodes the string hash, different for audio vs image hashes
+        strip_underscores: For text fingerprints, removes the trailing underscores
 
     Returns:
         Closest fingerprint, its token, and the highest score. All three are None if the closest one does not
@@ -497,6 +498,12 @@ def find_closest_fingerprint_from_list(target_fp, fp_list, token_list, date_list
     if len(fp_list) == 0:
         return None, None, None, None
     if min_similarity < 1:
+        if strip_underscores:
+            trailing_underscores = '_'.join(target_fp.split('_')[1:])
+            target_fp = target_fp.split('_')[0]
+            fp_list = [x for x in fp_list if x.endswith(trailing_underscores)]
+            if len(fp_list) == 0:
+                return None, None, None, None
         fp_similarities = np.array([compare_encoded_fingerprints(target_fp, fp2, decoder_func) for fp2 in fp_list])
     else:
         # if an exact match is required, we switch to a much faster equality comparison
@@ -525,6 +532,14 @@ def find_closest_image_fingerprint_from_list(target_fp, fp_list, token_list, dat
     """
     return find_closest_fingerprint_from_list(target_fp, fp_list, token_list, date_list, min_similarity,
                                               decoder_func=imagehash.hex_to_hash)
+
+
+def find_closest_text_fingerprint_from_list(target_fp, fp_list, token_list, date_list, min_similarity=0.8):
+    """
+    Finds closest image fingerprint from list
+    """
+    return find_closest_fingerprint_from_list(target_fp, fp_list, token_list, date_list, min_similarity,
+                                              decoder_func=imagehash.hex_to_hash, strip_underscores=True)
 
 
 def extract_frames(input_filename_with_path, output_folder_with_path, output_folder):
