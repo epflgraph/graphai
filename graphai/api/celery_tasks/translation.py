@@ -1,6 +1,6 @@
 from celery import shared_task
 from graphai.api.common.translation import translation_models
-from graphai.core.common.text_utils import detect_text_language
+from graphai.core.common.text_utils import detect_text_language, translation_text_back_to_list
 from graphai.core.common.common_utils import get_current_datetime
 from graphai.core.common.caching import TextDBCachingManager
 from graphai.api.celery_tasks.common import compute_text_fingerprint_common, fingerprint_lookup_retrieve_from_db, \
@@ -11,10 +11,24 @@ LONG_TEXT_ERROR = "Unpunctuated text too long (over 512 tokens), " \
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='text_6.fingerprint_translation_text', ignore_result=False)
-def compute_translation_text_fingerprint_task(self, token, text, force=False):
+             name='caching_6.cache_lookup_fingerprint_translation_text', ignore_result=False)
+def cache_lookup_translation_text_fingerprint_task(self, token):
     db_manager = TextDBCachingManager()
-    return compute_text_fingerprint_common(db_manager, token, text, force)
+    existing = db_manager.get_details(token, cols=['fingerprint'])[0]
+    if existing is not None and existing['fingerprint'] is not None:
+        existing_closest = db_manager.get_closest_match(token)
+        return {
+            'result': existing['fingerprint'],
+            'closest': existing_closest,
+            'fresh': False
+        }
+    return None
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
+             name='text_6.fingerprint_translation_text', ignore_result=False)
+def compute_translation_text_fingerprint_task(self, token, text):
+    return compute_text_fingerprint_common(token, text)
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
@@ -81,8 +95,31 @@ def translation_retrieve_text_fingerprint_callback_task(self, results):
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
+             name='caching_6.cache_lookup_translate_text', translation_obj=translation_models, ignore_result=False)
+def cache_lookup_translate_text_task(self, token, return_list=False):
+    db_manager = TextDBCachingManager()
+    existing_list = db_manager.get_details(token, ['target'], using_most_similar=True)
+    # Unlike with audio and image, the token may not already exist in the table when this task is invoked.
+    # Therefore, the task doesn't fail if the token doesn't exist.
+    for existing in existing_list:
+        if existing is None:
+            continue
+        if existing['target'] is not None:
+            print('Returning cached result')
+            return {
+                'result': translation_text_back_to_list(existing['target'], return_list=return_list),
+                'text_too_large': False,
+                'successful': True,
+                'fresh': False,
+                'return_list': return_list,
+                'device': None
+            }
+    return None
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='text_6.translate_text', translation_obj=translation_models, ignore_result=False)
-def translate_text_task(self, token, text, src, tgt, force=False):
+def translate_text_task(self, text, src, tgt):
     if src == tgt:
         return {
             'result': "'source' and 'target' languages must be different!",
@@ -91,24 +128,6 @@ def translate_text_task(self, token, text, src, tgt, force=False):
             'fresh': False,
             'device': None
         }
-
-    db_manager = TextDBCachingManager()
-    if not force:
-        existing_list = db_manager.get_details(token, ['target'], using_most_similar=True)
-        # Unlike with audio and image, the token may not already exist in the table when this task is invoked.
-        # Therefore, the task doesn't fail if the token doesn't exist.
-        for existing in existing_list:
-            if existing is None:
-                continue
-            if existing['target'] is not None:
-                print('Returning cached result')
-                return {
-                    'result': existing['target'],
-                    'text_too_large': False,
-                    'successful': True,
-                    'fresh': False,
-                    'device': None
-                }
 
     how = f"{src}-{tgt}"
     try:
@@ -164,7 +183,11 @@ def translate_text_callback_task(self, results, token, text, src, tgt, force=Fal
     elif not results['successful']:
         # in case we fingerprinted something and then failed to translate it, we delete its cache row
         db_manager.delete_cache_rows([token])
-    results['return_list'] = return_list
+
+    # If the computation was successful and return_list is True, we want to convert the text results
+    # back to a list (because this flag means that the original input was a list of strings)
+    if results['successful']:
+        results['result'] = translation_text_back_to_list(results['result'], return_list=return_list)
     return results
 
 
