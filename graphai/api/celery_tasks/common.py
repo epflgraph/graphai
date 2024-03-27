@@ -1,7 +1,7 @@
 from celery import shared_task
 
 from graphai.core.common.video import find_closest_audio_fingerprint_from_list, \
-    find_closest_image_fingerprint_from_list
+    find_closest_image_fingerprint_from_list, find_closest_text_fingerprint_from_list
 from graphai.core.common.text_utils import perceptual_hash_text
 
 
@@ -141,6 +141,8 @@ def fingerprint_lookup_parallel(input_dict, i, n_total, min_similarity, db_manag
     # Note: null fingerprint values are automatically handled and don't need to be filtered out.
     if data_type == 'audio':
         find_closest_func = find_closest_audio_fingerprint_from_list
+    elif data_type == 'text':
+        find_closest_func = find_closest_text_fingerprint_from_list
     else:
         # Text, video, and image fingerprinting are done the same way,
         #  so they are all treated as the same here.
