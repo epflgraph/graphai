@@ -25,18 +25,7 @@ def format_api_results(id, name, status, result):
     }
 
 
-def compute_text_fingerprint_common(db_manager, token, text, force=False):
-    existing = db_manager.get_details(token, cols=['fingerprint'])[0]
-
-    if existing is not None and not force:
-        if existing['fingerprint'] is not None:
-            return {
-                'result': existing['fingerprint'],
-                'fp_token': existing['id_token'],
-                'perform_lookup': False,
-                'fresh': False
-            }
-
+def compute_text_fingerprint_common(token, text):
     fp = perceptual_hash_text(text)
 
     return {
