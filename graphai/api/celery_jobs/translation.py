@@ -31,6 +31,8 @@ def get_translation_text_fingerprint_chain_list(token, text, src, tgt, min_simil
     if min_similarity is None:
         fp_parameters = FingerprintParameters()
         min_similarity = fp_parameters.get_min_sim_text()
+    print(min_similarity)
+    print(min_similarity == 1.0)
 
     # Generating the equality condition dictionary
     equality_conditions = generate_src_tgt_dict(src, tgt)
@@ -40,7 +42,7 @@ def get_translation_text_fingerprint_chain_list(token, text, src, tgt, min_simil
         compute_translation_text_fingerprint_task.s(token, text),
         compute_translation_text_fingerprint_callback_task.s(text, src, tgt)
     ]
-    if min_similarity == 1:
+    if min_similarity == 1.0:
         task_list += [translation_text_fingerprint_find_closest_direct_task.s(equality_conditions)]
     else:
         task_list += [
@@ -84,7 +86,7 @@ def fingerprint_job(text, src, tgt, force):
     # Computation
     #############
     text = translation_list_to_text(text)
-    task_list = get_translation_text_fingerprint_chain_list(token, text, src, tgt, force,
+    task_list = get_translation_text_fingerprint_chain_list(token, text, src, tgt,
                                                             ignore_fp_results=False)
     task = chain(task_list)
     task = task.apply_async(priority=6)
@@ -116,13 +118,16 @@ def translation_job(text, src, tgt, force):
     direct_fingerprint_lookup_task_id = fingerprint_lookup_job(token)
     if direct_fingerprint_lookup_task_id is None:
         # If the result is None, it means that there is no cached fingerprint, so we need to do fingerprinting
-        task_list = get_translation_text_fingerprint_chain_list(token, text, src, tgt, False,
+        # The first task, "translate_text_task", will only have 'src' and 'tgt' in its signature
+        # because the first argument (which is 'text') will come from the preceding task chain.
+        task_list = get_translation_text_fingerprint_chain_list(token, text, src, tgt,
                                                                 ignore_fp_results=True, results_to_return=text)
+        task_list += [translate_text_task.s(src, tgt)]
     else:
-        task_list = list()
+        # If "translate_text_task" is the first task in the chain, then it'll have the full signature.
+        task_list = [translate_text_task.s(text, src, tgt)]
 
     task_list += [
-        translate_text_task.s(src, tgt),
         translate_text_callback_task.s(token, text, src, tgt, force, return_list)
     ]
     task = chain(task_list)
