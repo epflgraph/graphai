@@ -50,9 +50,7 @@ def fingerprint_lookup_retrieve_from_db(results, db_manager, equality_conditions
     """
     target_fingerprint = results['result']
 
-    # If the fingerprint computation has been unsuccessful or if cached results are being returned,
-    # then there it is not necessary (or even possible, in the former case) to compute the closest
-    # audio fingerprint, so we just pass the fingerprinting results along.
+    # If the fingerprint computation has been unsuccessful, we just pass the fingerprinting results along.
     if not results['perform_lookup']:
         return {
             'target_fp': None,
