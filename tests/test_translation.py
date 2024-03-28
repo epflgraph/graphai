@@ -31,7 +31,7 @@ def test__translation_translate__translate_text__mock_task(mock_run, en_to_fr_te
 @pytest.mark.usefixtures('en_to_fr_text', 'fr_to_en_text')
 def test__translation_translate__translate_text__run_task(en_to_fr_text, fr_to_en_text):
     # Call the task
-    en_fr_translated = translate_text_task.run('mock_token_en_fr', en_to_fr_text, "en", "fr", True)
+    en_fr_translated = translate_text_task.run(en_to_fr_text, "en", "fr")
 
     # Assert that the results are correct
     assert isinstance(en_fr_translated, dict)
@@ -43,7 +43,7 @@ def test__translation_translate__translate_text__run_task(en_to_fr_text, fr_to_e
     #############################################################
 
     # Call the task
-    fr_en_translated = translate_text_task.run('mock_token_fr_en', fr_to_en_text, "fr", "en", True)
+    fr_en_translated = translate_text_task.run(fr_to_en_text, "fr", "en")
 
     # Assert that the results are correct
     assert isinstance(fr_en_translated, dict)
@@ -145,7 +145,7 @@ def test__translation_translate__translate_text__integration(fixture_app, celery
 @pytest.mark.usefixtures('en_to_fr_text', 'fr_to_en_text')
 def test__translation_calculate_fingerprint__compute_text_fingerprint__run_task(en_to_fr_text, fr_to_en_text):
     # Call the task
-    fp = compute_translation_text_fingerprint_task.run('mock_token_en_fr', en_to_fr_text, True)
+    fp = compute_translation_text_fingerprint_task.run('mock_token_en_fr', en_to_fr_text)
 
     # Assert that the results are correct
     assert isinstance(fp, dict)
@@ -157,7 +157,7 @@ def test__translation_calculate_fingerprint__compute_text_fingerprint__run_task(
     #############################################################
 
     # Call the task
-    fp = compute_translation_text_fingerprint_task.run('mock_token_fr_en', fr_to_en_text, True)
+    fp = compute_translation_text_fingerprint_task.run('mock_token_fr_en', fr_to_en_text)
 
     # Assert that the results are correct
     assert isinstance(fp, dict)
