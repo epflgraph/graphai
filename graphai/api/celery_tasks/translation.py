@@ -111,7 +111,6 @@ def cache_lookup_translate_text_task(self, token, return_list=False):
                 'text_too_large': False,
                 'successful': True,
                 'fresh': False,
-                'return_list': return_list,
                 'device': None
             }
     return None
