@@ -20,7 +20,6 @@ from graphai.api.celery_tasks.common import (
 )
 from graphai.api.routers.auth import get_current_active_user
 
-from graphai.core.common.text_utils import translation_text_back_to_list
 from graphai.core.interfaces.celery_config import get_task_info
 
 
