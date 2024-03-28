@@ -85,9 +85,9 @@ def fingerprint_job(text, src, tgt, force):
         if direct_lookup_task_id is not None:
             return direct_lookup_task_id
 
-    #############
-    # Computation
-    #############
+    #################
+    # Computation job
+    #################
     text = translation_list_to_text(text)
     task_list = get_translation_text_fingerprint_chain_list(token, text, src, tgt,
                                                             ignore_fp_results=False)
@@ -127,9 +127,14 @@ def translation_job(text, src, tgt, force):
                                                                 ignore_fp_results=True, results_to_return=text)
         task_list += [translate_text_task.s(src, tgt)]
     else:
+        # We end up here if the fingerprint results are already cached. Remember that setting force=True
+        # in the translation endpoint only forces a re-translation, NOT a re-fingerprinting!
+
         # If "translate_text_task" is the first task in the chain, then it'll have the full signature.
         task_list = [translate_text_task.s(text, src, tgt)]
-
+    #########################
+    # Rest of computation job
+    #########################
     task_list += [
         translate_text_callback_task.s(token, text, src, tgt, force, return_list)
     ]
