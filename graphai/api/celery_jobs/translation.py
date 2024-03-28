@@ -19,8 +19,11 @@ from graphai.api.celery_tasks.common import (
     ignore_fingerprint_results_callback_task,
 )
 
-from graphai.core.common.text_utils import generate_src_tgt_dict, generate_translation_text_token, \
+from graphai.core.common.text_utils import (
+    generate_src_tgt_dict,
+    generate_translation_text_token,
     translation_list_to_text
+)
 
 from graphai.core.common.caching import FingerprintParameters
 
