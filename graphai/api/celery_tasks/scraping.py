@@ -99,7 +99,9 @@ def cache_lookup_process_all_sublinks_task(self, token, headers, long_patterns):
         existing_long_patterns = existing[0]['long_patterns_removed'] == 1
         headers_match = existing_headers == headers
         long_patterns_match = existing_long_patterns == long_patterns
-        base_url_content = [x for x in existing if x['id_token'] == x['origin_token']][0]['content']
+        base_url_element = [x for x in existing if x['id_token'] == x['origin_token']][0]
+        validated_url = base_url_element['link']
+        base_url_content = base_url_element['content']
         # We only return the cached results if their header and pattern removal flags are the same as the request
         # and if the cached results are not null
         if base_url_content is not None and headers_match and long_patterns_match:
@@ -108,7 +110,15 @@ def cache_lookup_process_all_sublinks_task(self, token, headers, long_patterns):
             contents = [r['content'] for r in existing]
             page_types = [r['page_type'] for r in existing]
             data_dict = reconstruct_data_dict(sublinks, tokens, contents, page_types)
-            return data_dict
+            return {
+                'token': token,
+                'sublinks': sublinks,
+                'data': data_dict,
+                'validated_url': validated_url,
+                'status_msg': "",
+                'fresh': False,
+                'successful': True
+            }
     return None
 
 
