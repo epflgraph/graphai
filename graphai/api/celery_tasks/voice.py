@@ -26,9 +26,6 @@ def cache_lookup_audio_fingerprint_task(self, token):
     db_manager = AudioDBCachingManager()
     existing_list = db_manager.get_details(token, cols=['fingerprint', 'duration'],
                                            using_most_similar=True)
-    # If the cache row itself does not exist, there's no corresponding audio file at all
-    if existing_list[0] is None:
-        return None
 
     for existing in existing_list:
         if existing is None:
@@ -160,34 +157,43 @@ def retrieve_audio_fingerprint_callback_task(self, results):
     return results_to_return
 
 
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
+             name='caching_6.cache_lookup_detect_language_audio', ignore_result=False)
+def cache_lookup_audio_language_task(self, token):
+    db_manager = AudioDBCachingManager()
+    existing_list = db_manager.get_details(token, ['language'],
+                                           using_most_similar=True)
+    for existing in existing_list:
+        if existing is None:
+            continue
+        if existing['language'] is not None:
+            print('Returning cached result')
+            return {
+                'token': token,
+                'language': existing['language'],
+                'fresh': False
+            }
+    return None
+
+
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True,
              retry_kwargs={"max_retries": 2}, name='video_2.detect_language_retrieve_from_db', ignore_result=False,
              file_manager=file_management_config)
-def detect_language_retrieve_from_db_and_split_task(self, input_dict, force=False, n_divs=5, segment_length=30):
+def detect_language_retrieve_from_db_and_split_task(self, input_dict, n_divs=5, segment_length=30):
     token = input_dict['token']
+
     db_manager = AudioDBCachingManager()
-    existing_list = db_manager.get_details(token, ['duration', 'language'],
-                                           using_most_similar=True)
-    if existing_list[0] is None:
-        # The token doesn't exist in the cache, so the file doesn't exist
+    existing = db_manager.get_details(token, ['duration'],
+                                      using_most_similar=True)[0]
+    if existing is None or existing['duration'] is None:
+        # We need the duration of the file from the cache, so the task fails if the cache row doesn't exist
         return {
             'temp_tokens': None,
             'lang': None,
             'fresh': False
         }
 
-    if not force:
-        for existing in existing_list:
-            if existing is None:
-                continue
-            if existing['language'] is not None:
-                # A recomputation is not forced and a value already exists
-                return {
-                    'temp_tokens': None,
-                    'lang': existing['language'],
-                    'fresh': False
-                }
-
+    duration = existing['duration']
     input_filename_with_path = self.file_manager.generate_filepath(token)
     result_tokens = list()
 
@@ -198,7 +204,7 @@ def detect_language_retrieve_from_db_and_split_task(self, input_dict, force=Fals
                                                                              force_dir=TEMP_SUBFOLDER)
         current_result = extract_media_segment(
             input_filename_with_path, current_output_token_with_path, current_output_token,
-            start=existing_list[0]['duration'] * i / n_divs, length=segment_length)
+            start=duration * i / n_divs, length=segment_length)
         if current_result is None:
             print('Unspecified error while creating temp files')
             return {

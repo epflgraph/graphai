@@ -9,6 +9,7 @@ from graphai.api.celery_tasks.voice import (
     audio_fingerprint_find_closest_parallel_task,
     audio_fingerprint_find_closest_callback_task,
     retrieve_audio_fingerprint_callback_task,
+    cache_lookup_audio_language_task,
     detect_language_retrieve_from_db_and_split_task,
     detect_language_parallel_task,
     detect_language_callback_task
@@ -36,12 +37,16 @@ def get_audio_fingerprint_chain_list(token, force=False, min_similarity=None, n_
     return task_list
 
 
-def get_audio_language_detection_task_chain(token, force, n_divs=15, len_segment=30):
-    return [
-        detect_language_retrieve_from_db_and_split_task.s(force, n_divs, len_segment),
+def get_audio_language_detection_task_chain(token, force, n_divs=15, len_segment=30, start_of_chain=False):
+    if start_of_chain:
+        task_list = [detect_language_retrieve_from_db_and_split_task.s({'token': token}, n_divs, len_segment)]
+    else:
+        task_list = [detect_language_retrieve_from_db_and_split_task.s(n_divs, len_segment)]
+    task_list += [
         group(detect_language_parallel_task.s(i) for i in range(n_divs)),
         detect_language_callback_task.s(token, force)
     ]
+    return task_list
 
 
 def fingerprint_lookup_job(token):
@@ -70,7 +75,41 @@ def fingerprint_job(token, force):
     #################
     # Computation job
     #################
-    task_list = get_audio_fingerprint_chain_list(token, force)
+    task_list = get_audio_fingerprint_chain_list(token, force, ignore_fp_results=False)
+    task = chain(task_list)
+    task = task.apply_async(priority=2)
+    return task.id
+
+
+def detect_language_job(token, force):
+    ##############################
+    # Detect language cache lookup
+    ##############################
+    if not force:
+        direct_lookup_job = cache_lookup_audio_language_task.s(token)
+        direct_lookup_job = direct_lookup_job.apply_async(priority=6)
+        direct_lookup_task_id = direct_lookup_job.id
+        # We block on this task since we need its results to decide what to do next
+        direct_lookup_results = direct_lookup_job.get(timeout=20)
+        # If the cache lookup yielded results, then return the id of the task, otherwise we proceed normally with the
+        # computations
+        if direct_lookup_results is not None:
+            return direct_lookup_task_id
+
+    ##########################
+    # Fingerprint cache lookup
+    ##########################
+    # Now we do a fingerprint lookup to see if we can skip the fingerprinting chain or if it needs to be included
+    direct_fingerprint_lookup_task_id = fingerprint_lookup_job(token)
+    if direct_fingerprint_lookup_task_id is None:
+        # If the result is None, it means that there is no cached fingerprint, so we need to do fingerprinting
+        task_list = get_audio_fingerprint_chain_list(token, False, ignore_fp_results=True,
+                                                     results_to_return={'token': token})
+        task_list += get_audio_language_detection_task_chain(token, force)
+    else:
+        # We end up here if the fingerprint results are already cached.
+        task_list = get_audio_language_detection_task_chain(token, force, start_of_chain=True)
+
     task = chain(task_list)
     task = task.apply_async(priority=2)
     return task.id
