@@ -157,7 +157,7 @@ async def detect_language(data: AudioDetectLanguageRequest):
     # The tasks are splitting the audio into n_divs segments of 30 seconds each, parallel language detection,
     # and then aggregation and db insertion in the callback. Then the transcription tasks continue.
     task_list = get_audio_fingerprint_chain_list(token, False, ignore_fp_results=True,
-                                                 results_to_return=token)
+                                                 results_to_return={'token': token})
     task_list += get_audio_language_detection_task_chain(token, force)
     task = chain(task_list)
     task = task.apply_async(priority=2)
