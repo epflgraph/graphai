@@ -5,8 +5,7 @@ from celery import group, chain
 from graphai.api.celery_jobs.voice import (
     fingerprint_job,
     detect_language_job,
-    get_audio_fingerprint_chain_list,
-    get_audio_language_detection_task_chain
+    transcribe_job
 )
 from graphai.api.schemas.common import TaskIDResponse
 from graphai.api.schemas.voice import (
@@ -69,22 +68,8 @@ async def transcribe(data: AudioTranscriptionRequest):
     force = data.force
     lang = data.force_lang
     strict_silence = data.strict
-
-    # If the language is already provided, we won't need to detect it. Otherwise, detection tasks are added.
-    # Fingerprinting is always performed but with force=False, regardless of the provided force flag.
-    # The tasks are transcription and its callback
-    task_list = get_audio_fingerprint_chain_list(token, False, ignore_fp_results=True,
-                                                 results_to_return={'token': token, 'language': lang})
-    if lang is None:
-        task_list += get_audio_language_detection_task_chain(token, force)
-    task_list += [
-        transcribe_task.s(strict_silence, force),
-        transcribe_callback_task.s(token, force)
-    ]
-    task = chain(task_list)
-
-    task = task.apply_async(priority=2)
-    return {'task_id': task.id}
+    task_id = transcribe_job(token, force, lang, strict_silence)
+    return {'task_id': task_id}
 
 
 @router.get('/transcribe/status/{task_id}', response_model=AudioTranscriptionResponse)
