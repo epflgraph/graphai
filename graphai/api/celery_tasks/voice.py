@@ -229,12 +229,11 @@ def detect_language_retrieve_from_db_and_split_task(self, input_dict, n_divs=5, 
 def detect_language_parallel_task(self, tokens_dict, i):
     if not tokens_dict['fresh']:
         return {
-            'lang': tokens_dict['lang'],
-            'fresh': tokens_dict['fresh']
+            'lang': None,
+            'fresh': False
         }
 
     current_token = tokens_dict['temp_tokens'][i]
-
     try:
         language = self.model.detect_audio_segment_lang_whisper(
             self.file_manager.generate_filepath(current_token, force_dir=TEMP_SUBFOLDER)
@@ -255,40 +254,33 @@ def detect_language_parallel_task(self, tokens_dict, i):
              retry_kwargs={"max_retries": 2}, name='video_2.detect_language_callback', ignore_result=False,
              file_manager=file_management_config)
 def detect_language_callback_task(self, results_list, token, force=False):
-    # The logic here is twofold:
-    # 1. If the results are not fresh (in which case all fresh flags are False),
-    #     they'll be passed through but not reinserted into the database.
-    # 2. If the computation has been performed, even a single error in the parallel task
-    #     (corresponding to a False value for the fresh flag) will cause a failure.
+    # Here, even a single error (corresponding to a None value for the 'lang' key) will cause a failure.
+    # If all the detected languages are non-null, the results are valid and are inserted into the database.
     if all([x['lang'] is not None for x in results_list]):
         # This indicates success (regardless of freshness)
         languages = [x['lang'] for x in results_list]
         most_common_lang = Counter(languages).most_common(1)[0][0]
-        fresh = False
-        if all([x['fresh'] for x in results_list]):
-            # This indicates freshness
-            fresh = True
-            values_dict = {'language': most_common_lang}
+        values_dict = {'language': most_common_lang}
 
-            # Inserting values for original token
-            db_manager = AudioDBCachingManager()
-            db_manager.insert_or_update_details(
-                token, values_dict
-            )
-            if not force:
-                closest = db_manager.get_closest_match(token)
-                if closest is not None and closest != token:
-                    # If force=False and there's a closest match, it means that the closest match has not
-                    # had this computation performed on it, so we insert these results for the closest match
-                    # as well.
-                    db_manager.insert_or_update_details(
-                        closest, values_dict
-                    )
+        # Inserting values for original token
+        db_manager = AudioDBCachingManager()
+        db_manager.insert_or_update_details(
+            token, values_dict
+        )
+        if not force:
+            closest = db_manager.get_closest_match(token)
+            if closest is not None and closest != token:
+                # If force=False and there's a closest match, it means that the closest match has not
+                # had this computation performed on it, so we insert these results for the closest match
+                # as well.
+                db_manager.insert_or_update_details(
+                    closest, values_dict
+                )
 
         return {
             'token': token,
             'language': most_common_lang,
-            'fresh': fresh
+            'fresh': True
         }
 
     return {
@@ -296,6 +288,32 @@ def detect_language_callback_task(self, results_list, token, force=False):
         'language': None,
         'fresh': False
     }
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
+             name='caching_6.cache_lookup_transcribe_audio', ignore_result=False)
+def cache_lookup_audio_transcript_task(self, token):
+    db_manager = AudioDBCachingManager()
+    existing_list = db_manager.get_details(token, ['transcript_results', 'subtitle_results', 'language'],
+                                           using_most_similar=True)
+    for existing in existing_list:
+        if existing is None:
+            continue
+        if (existing['transcript_results'] is not None
+                and existing['subtitle_results'] is not None
+                and existing['language'] is not None):
+            print('Returning cached result')
+            transcript_results = existing['transcript_results']
+            subtitle_results = existing['subtitle_results']
+            language_result = existing['language']
+
+            return {
+                'transcript_results': transcript_results,
+                'subtitle_results': subtitle_results,
+                'language': language_result,
+                'fresh': False
+            }
+    return None
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True,
