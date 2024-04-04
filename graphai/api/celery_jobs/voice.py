@@ -12,7 +12,10 @@ from graphai.api.celery_tasks.voice import (
     cache_lookup_audio_language_task,
     detect_language_retrieve_from_db_and_split_task,
     detect_language_parallel_task,
-    detect_language_callback_task
+    detect_language_callback_task,
+    cache_lookup_audio_transcript_task,
+    transcribe_task,
+    transcribe_callback_task
 )
 from graphai.core.common.caching import FingerprintParameters
 
@@ -62,6 +65,22 @@ def fingerprint_lookup_job(token):
     return None
 
 
+def language_lookup_job(token, return_results=False):
+    direct_lookup_job = cache_lookup_audio_language_task.s(token)
+    direct_lookup_job = direct_lookup_job.apply_async(priority=6)
+    direct_lookup_task_id = direct_lookup_job.id
+    # We block on this task since we need its results to decide what to do next
+    direct_lookup_results = direct_lookup_job.get(timeout=20)
+    # If the cache lookup yielded results, then return the id of the task, otherwise we proceed normally with the
+    # computations
+    if direct_lookup_results is not None:
+        if return_results:
+            return direct_lookup_results
+        else:
+            return direct_lookup_task_id
+    return None
+
+
 def fingerprint_job(token, force):
     ##############
     # Cache lookup
@@ -86,7 +105,36 @@ def detect_language_job(token, force):
     # Detect language cache lookup
     ##############################
     if not force:
-        direct_lookup_job = cache_lookup_audio_language_task.s(token)
+        direct_lookup_task_id = language_lookup_job(token)
+        if direct_lookup_task_id is not None:
+            return direct_lookup_task_id
+
+    ##########################
+    # Fingerprint cache lookup
+    ##########################
+    # Now we do a fingerprint lookup to see if we can skip the fingerprinting chain or if it needs to be included.
+    # The force flag does not apply to fingerprinting, so we always do a cache lookup first.
+    direct_fingerprint_lookup_task_id = fingerprint_lookup_job(token)
+    if direct_fingerprint_lookup_task_id is None:
+        # If the result is None, it means that there is no cached fingerprint, so we need to do fingerprinting
+        task_list = get_audio_fingerprint_chain_list(token, False, ignore_fp_results=True,
+                                                     results_to_return={'token': token})
+        task_list += get_audio_language_detection_task_chain(token, force, start_of_chain=False)
+    else:
+        # We end up here if the fingerprint results are already cached.
+        task_list = get_audio_language_detection_task_chain(token, force, start_of_chain=True)
+
+    task = chain(task_list)
+    task = task.apply_async(priority=2)
+    return task.id
+
+
+def transcribe_job(token, force, lang=None, strict_silence=False):
+    #########################
+    # Transcribe cache lookup
+    #########################
+    if not force:
+        direct_lookup_job = cache_lookup_audio_transcript_task.s(token)
         direct_lookup_job = direct_lookup_job.apply_async(priority=6)
         direct_lookup_task_id = direct_lookup_job.id
         # We block on this task since we need its results to decide what to do next
@@ -96,19 +144,54 @@ def detect_language_job(token, force):
         if direct_lookup_results is not None:
             return direct_lookup_task_id
 
-    ##########################
+    task_list = list()
+    #######################################
+    # Fingerprint and language cache lookup
+    #######################################
+
     # Fingerprint cache lookup
-    ##########################
-    # Now we do a fingerprint lookup to see if we can skip the fingerprinting chain or if it needs to be included
     direct_fingerprint_lookup_task_id = fingerprint_lookup_job(token)
+
+    # If the language of the transcript has not been forced by the user, we do a language cache lookup too
+    if lang is None:
+        direct_language_lookup_task_results = language_lookup_job(token, return_results=True)
+        if direct_language_lookup_task_results is not None:
+            lang = direct_language_lookup_task_results['language']
+
     if direct_fingerprint_lookup_task_id is None:
-        # If the result is None, it means that there is no cached fingerprint, so we need to do fingerprinting
-        task_list = get_audio_fingerprint_chain_list(token, False, ignore_fp_results=True,
-                                                     results_to_return={'token': token})
-        task_list += get_audio_language_detection_task_chain(token, force)
+        # If the fingerprint was not cached
+        if lang is None:
+            # If the language is not forced and has not been cached, then we do both fingerprinting and lang detection.
+            task_list += get_audio_fingerprint_chain_list(token, False, ignore_fp_results=True,
+                                                          results_to_return={'token': token})
+            task_list += get_audio_language_detection_task_chain(token, force, start_of_chain=False)
+        else:
+            # Otherwise we only do fingerprinting.
+            task_list += get_audio_fingerprint_chain_list(token, False, ignore_fp_results=True,
+                                                          results_to_return={'token': token, 'language': lang})
     else:
-        # We end up here if the fingerprint results are already cached.
-        task_list = get_audio_language_detection_task_chain(token, force, start_of_chain=True)
+        # If the fingerprint was already cached
+        if lang is None:
+            # If the language is not forced and has not been cached, then we do lang detection.
+            task_list += get_audio_language_detection_task_chain(token, force, start_of_chain=True)
+
+    # Now it's time to add the transcription tasks
+    # If we have tasks in the job before the transcribe task, then we skip the first input of the task
+    # Otherwise we have to include the first input as well.
+
+    if len(task_list) > 0:
+        task_list += [
+            transcribe_task.s(strict_silence, force)
+        ]
+    else:
+        task_list += [
+            transcribe_task.s({'token': token, 'language': lang}, strict_silence, force)
+        ]
+
+    # Finally we add the transcription callback task
+    task_list += [
+        transcribe_callback_task.s(token, force)
+    ]
 
     task = chain(task_list)
     task = task.apply_async(priority=2)
