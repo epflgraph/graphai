@@ -2,6 +2,11 @@ from fastapi import APIRouter, Security
 
 from celery import group, chain
 
+from graphai.api.celery_jobs.voice import (
+    fingerprint_job,
+    get_audio_fingerprint_chain_list,
+    get_audio_language_detection_task_chain
+)
 from graphai.api.schemas.common import TaskIDResponse
 from graphai.api.schemas.voice import (
     AudioFingerprintRequest,
@@ -13,23 +18,13 @@ from graphai.api.schemas.voice import (
 )
 from graphai.api.routers.auth import get_current_active_user
 
-from graphai.api.celery_tasks.common import format_api_results, ignore_fingerprint_results_callback_task
+from graphai.api.celery_tasks.common import format_api_results
 from graphai.api.celery_tasks.voice import (
-    compute_audio_fingerprint_task,
-    compute_audio_fingerprint_callback_task,
-    audio_fingerprint_find_closest_retrieve_from_db_task,
-    audio_fingerprint_find_closest_parallel_task,
-    audio_fingerprint_find_closest_callback_task,
-    retrieve_audio_fingerprint_callback_task,
-    detect_language_retrieve_from_db_and_split_task,
-    detect_language_parallel_task,
-    detect_language_callback_task,
     transcribe_task,
     transcribe_callback_task,
     video_test_task,
 )
 from graphai.core.interfaces.celery_config import get_task_info
-from graphai.core.common.caching import FingerprintParameters
 
 # Initialise video router
 router = APIRouter(
@@ -40,42 +35,12 @@ router = APIRouter(
 )
 
 
-def get_audio_fingerprint_chain_list(token, force=False, min_similarity=None, n_jobs=8,
-                                     ignore_fp_results=False, results_to_return=None):
-    # Loading minimum similarity parameter for audio
-    if min_similarity is None:
-        fp_parameters = FingerprintParameters()
-        min_similarity = fp_parameters.get_min_sim_audio()
-    # If remove_silence=True, then a silence removal task and its callback are added at the beginning
-    # Otherwise, the tasks are the same as any other fingerprinting chain: compute fp and callback, then lookup.
-    task_list = [compute_audio_fingerprint_task.s(token, force),
-                 compute_audio_fingerprint_callback_task.s(force),
-                 audio_fingerprint_find_closest_retrieve_from_db_task.s(),
-                 group(audio_fingerprint_find_closest_parallel_task.s(i, n_jobs, min_similarity) for i in range(n_jobs)),
-                 audio_fingerprint_find_closest_callback_task.s()]
-    if ignore_fp_results:
-        task_list += [ignore_fingerprint_results_callback_task.s(results_to_return)]
-    else:
-        task_list += [retrieve_audio_fingerprint_callback_task.s()]
-    return task_list
-
-
-def get_audio_language_detection_task_chain(token, force, n_divs=15, len_segment=30):
-    return [
-        detect_language_retrieve_from_db_and_split_task.s(force, n_divs, len_segment),
-        group(detect_language_parallel_task.s(i) for i in range(n_divs)),
-        detect_language_callback_task.s(token, force)
-    ]
-
-
 @router.post('/calculate_fingerprint', response_model=TaskIDResponse)
 async def calculate_audio_fingerprint(data: AudioFingerprintRequest):
     token = data.token
     force = data.force
-    task_list = get_audio_fingerprint_chain_list(token, force)
-    task = chain(task_list)
-    task = task.apply_async(priority=2)
-    return {'task_id': task.id}
+    task_id = fingerprint_job(token, force)
+    return {'task_id': task_id}
 
 
 @router.get('/calculate_fingerprint/status/{task_id}', response_model=AudioFingerprintResponse)
