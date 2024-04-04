@@ -226,7 +226,8 @@ def retrieve_audio_fingerprint_callback_task(self, results):
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True,
              retry_kwargs={"max_retries": 2}, name='video_2.detect_language_retrieve_from_db', ignore_result=False,
              file_manager=file_management_config)
-def detect_language_retrieve_from_db_and_split_task(self, token, force=False, n_divs=5, segment_length=30):
+def detect_language_retrieve_from_db_and_split_task(self, input_dict, force=False, n_divs=5, segment_length=30):
+    token = input_dict['token']
     db_manager = AudioDBCachingManager()
     existing_list = db_manager.get_details(token, ['duration', 'language'],
                                            using_most_similar=True)
