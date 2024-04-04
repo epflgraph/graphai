@@ -4,12 +4,20 @@ from collections import Counter
 
 from celery import shared_task
 
-from graphai.api.common.video import file_management_config, transcription_model
-from graphai.core.common.video import remove_silence_doublesided, perceptual_hash_audio, \
+from graphai.api.common.video import (
+    file_management_config,
+    transcription_model
+)
+from graphai.core.common.video import (
+    perceptual_hash_audio,
     extract_media_segment
+)
 from graphai.core.common.caching import TEMP_SUBFOLDER, AudioDBCachingManager
-from graphai.api.celery_tasks.common import fingerprint_lookup_retrieve_from_db, fingerprint_lookup_parallel, \
+from graphai.api.celery_tasks.common import (
+    fingerprint_lookup_retrieve_from_db,
+    fingerprint_lookup_parallel,
     fingerprint_lookup_callback
+)
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
@@ -18,19 +26,19 @@ def cache_lookup_audio_fingerprint_task(self, token):
     db_manager = AudioDBCachingManager()
     existing_list = db_manager.get_details(token, cols=['fingerprint', 'duration'],
                                            using_most_similar=True)
-    # The information on audio file needs to have been inserted into the cache table when
-    # the audio was extracted from the video. Therefore, the `existing` row needs to *exist*,
-    # even if its fingerprint and many of its other fields are null.
+    # If the cache row itself does not exist, there's no corresponding audio file at all
     if existing_list[0] is None:
-        print('Audio file not found!')
         return None
 
     for existing in existing_list:
         if existing is None:
             continue
         if existing['fingerprint'] is not None:
+            # We have a cache hit, now we gather all the results that should be returned
+            # The closest match
             existing_closest = db_manager.get_closest_match(token)
             if existing_closest is not None:
+                # If the closest match exists, we also want to return its origin token
                 existing_closest_origin = db_manager.get_origin(existing_closest)
             else:
                 existing_closest_origin = None
@@ -50,7 +58,13 @@ def cache_lookup_audio_fingerprint_task(self, token):
              name='video_2.audio_fingerprint', ignore_result=False,
              file_manager=file_management_config)
 def compute_audio_fingerprint_task(self, fp_token):
-    if fp_token is None:
+    # Making sure that the cache row for the audio file already exists.
+    # This cache row is created when the audio is extracted from its corresponding video, so it must exist!
+    # We also need this cache row later in order to be able to return the duration of the audio file.
+    db_manager = AudioDBCachingManager()
+    existing = db_manager.get_details(fp_token, cols=['duration'],
+                                      using_most_similar=False)[0]
+    if existing is None:
         return {
             'result': None,
             'fp_token': None,
@@ -70,17 +84,12 @@ def compute_audio_fingerprint_task(self, fp_token):
             'duration': 0.0
         }
 
-    db_manager = AudioDBCachingManager()
-    existing = db_manager.get_details(fp_token, cols=['duration'],
-                                      using_most_similar=False)[0]
-    duration = existing['duration']
-
     return {
         'result': fingerprint,
         'fp_token': fp_token,
         'perform_lookup': True,
         'fresh': True,
-        'duration': duration
+        'duration': existing['duration']
     }
 
 
