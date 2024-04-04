@@ -13,118 +13,52 @@ from graphai.api.celery_tasks.common import fingerprint_lookup_retrieve_from_db,
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='video_2.audio_silenceremoval', ignore_result=False,
-             file_manager=file_management_config)
-def remove_audio_silence_task(self, token, force=False, threshold=0.0):
-    input_filename_with_path = self.file_manager.generate_filepath(token)
-    audio_type = token.split('.')[-1]
-    output_suffix = '_nosilence.' + audio_type
-    output_token = token + output_suffix
-    output_filename_with_path = self.file_manager.generate_filepath(output_token)
+             name='caching_6.cache_lookup_fingerprint_audio', ignore_result=False)
+def cache_lookup_audio_fingerprint_task(self, token):
     db_manager = AudioDBCachingManager()
-    existing = db_manager.get_details(token, cols=['nosilence_token', 'nosilence_duration'])[0]
-
-    # The information on audio file needs to have been inserted into the cache table when
-    # the audio was extracted from the video. Therefore, the `existing` row needs to *exist*.
-    if existing is None:
-        print('Audio file not found!')
-        return {
-            'fp_token': None,
-            'fresh': False,
-            'duration': 0.0
-        }
-
-    if not force:
-        if existing['nosilence_token'] is not None:
-            print('Returning cached result')
-            return {
-                'fp_token': existing['nosilence_token'],
-                'fresh': False,
-                'duration': existing['nosilence_duration']
-            }
-
-    fp_token, duration = remove_silence_doublesided(input_filename_with_path, output_filename_with_path,
-                                                    output_token, threshold=threshold)
-
-    if fp_token is None:
-        return {
-            'fp_token': None,
-            'fresh': False,
-            'duration': 0.0
-        }
-
-    return {
-        'fp_token': fp_token,
-        'fresh': True,
-        'duration': duration
-    }
-
-
-@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='video_2.audio_silenceremoval_callback', ignore_result=False,
-             file_manager=file_management_config)
-def remove_audio_silence_callback_task(self, result, audio_token):
-    if result['fp_token'] is not None and result['fresh']:
-        db_manager = AudioDBCachingManager()
-        db_manager.insert_or_update_details(
-            audio_token,
-            {
-                'nosilence_token': result['fp_token'],
-                'nosilence_duration': result['duration']
-            }
-        )
-
-    return result
-
-
-@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='video_2.audio_fingerprint', ignore_result=False,
-             file_manager=file_management_config)
-def compute_audio_fingerprint_task(self, input_dict, audio_token, force=False):
-    fp_token = input_dict['fp_token']
-    if fp_token is None:
-        return {
-            'result': None,
-            'fp_token': None,
-            'perform_lookup': False,
-            'fresh': False,
-            'duration': 0.0,
-            'fp_nosilence': 0
-        }
-
-    db_manager = AudioDBCachingManager()
-    existing_list = db_manager.get_details(audio_token, cols=['fingerprint', 'duration',
-                                                              'nosilence_duration', 'fp_nosilence'],
+    existing_list = db_manager.get_details(token, cols=['fingerprint', 'duration'],
                                            using_most_similar=True)
     # The information on audio file needs to have been inserted into the cache table when
     # the audio was extracted from the video. Therefore, the `existing` row needs to *exist*,
     # even if its fingerprint and many of its other fields are null.
     if existing_list[0] is None:
         print('Audio file not found!')
+        return None
+
+    for existing in existing_list:
+        if existing is None:
+            continue
+        if existing['fingerprint'] is not None:
+            existing_closest = db_manager.get_closest_match(token)
+            if existing_closest is not None:
+                existing_closest_origin = db_manager.get_origin(existing_closest)
+            else:
+                existing_closest_origin = None
+            print('Returning cached result')
+            return {
+                'result': existing['fingerprint'],
+                'fresh': False,
+                'closest_token': existing_closest,
+                'closest_token_origin': existing_closest_origin,
+                'duration': existing['duration']
+            }
+
+    return None
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
+             name='video_2.audio_fingerprint', ignore_result=False,
+             file_manager=file_management_config)
+def compute_audio_fingerprint_task(self, fp_token):
+    if fp_token is None:
         return {
             'result': None,
             'fp_token': None,
             'perform_lookup': False,
             'fresh': False,
-            'duration': 0.0,
-            'fp_nosilence': 0
+            'duration': 0.0
         }
 
-    if not force:
-        for existing in existing_list:
-            if existing is None:
-                continue
-            if existing['fingerprint'] is not None:
-                print('Returning cached result')
-                return {
-                    'result': existing['fingerprint'],
-                    'fp_token': existing['id_token'],
-                    'perform_lookup': False,
-                    'fresh': False,
-                    'duration': existing['duration'] if existing['fp_nosilence'] == 0 else existing[
-                        'nosilence_duration'],
-                    'fp_nosilence': existing['fp_nosilence']
-                }
     fp_token_with_path = self.file_manager.generate_filepath(fp_token)
     fingerprint, decoded = perceptual_hash_audio(fp_token_with_path)
     if fingerprint is None:
@@ -133,24 +67,20 @@ def compute_audio_fingerprint_task(self, input_dict, audio_token, force=False):
             'fp_token': None,
             'perform_lookup': False,
             'fresh': False,
-            'duration': 0.0,
-            'fp_nosilence': 0
+            'duration': 0.0
         }
 
-    if input_dict.get('duration', None) is None:
-        duration = existing_list[0]['duration']
-        fp_nosilence = 0
-    else:
-        duration = input_dict['duration']
-        fp_nosilence = 1
+    db_manager = AudioDBCachingManager()
+    existing = db_manager.get_details(fp_token, cols=['duration'],
+                                      using_most_similar=False)[0]
+    duration = existing['duration']
 
     return {
         'result': fingerprint,
         'fp_token': fp_token,
         'perform_lookup': True,
         'fresh': True,
-        'duration': duration,
-        'fp_nosilence': fp_nosilence
+        'duration': duration
     }
 
 
@@ -165,7 +95,6 @@ def compute_audio_fingerprint_callback_task(self, results, force=False):
             token,
             {
                 'fingerprint': results['result'],
-                'fp_nosilence': results['fp_nosilence']
             }
         )
         if not force:
@@ -179,7 +108,6 @@ def compute_audio_fingerprint_callback_task(self, results, force=False):
                     closest_token,
                     {
                         'fingerprint': results['result'],
-                        'fp_nosilence': results['fp_nosilence']
                     }
                 )
                 results['fp_token'] = closest_token

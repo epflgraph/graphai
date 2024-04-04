@@ -21,8 +21,6 @@ from graphai.api.celery_tasks.voice import (
     audio_fingerprint_find_closest_parallel_task,
     audio_fingerprint_find_closest_callback_task,
     retrieve_audio_fingerprint_callback_task,
-    remove_audio_silence_task,
-    remove_audio_silence_callback_task,
     detect_language_retrieve_from_db_and_split_task,
     detect_language_parallel_task,
     detect_language_callback_task,
@@ -42,24 +40,19 @@ router = APIRouter(
 )
 
 
-def get_audio_fingerprint_chain_list(token, force=False, min_similarity=None, n_jobs=8, remove_silence=False,
-                                     threshold=None, ignore_fp_results=False, results_to_return=None):
+def get_audio_fingerprint_chain_list(token, force=False, min_similarity=None, n_jobs=8,
+                                     ignore_fp_results=False, results_to_return=None):
     # Loading minimum similarity parameter for audio
     if min_similarity is None:
         fp_parameters = FingerprintParameters()
         min_similarity = fp_parameters.get_min_sim_audio()
     # If remove_silence=True, then a silence removal task and its callback are added at the beginning
     # Otherwise, the tasks are the same as any other fingerprinting chain: compute fp and callback, then lookup.
-    if not remove_silence or threshold is None:
-        task_list = [compute_audio_fingerprint_task.s({'fp_token': token}, token, force)]
-    else:
-        task_list = [remove_audio_silence_task.s(token, force, threshold),
-                     remove_audio_silence_callback_task.s(token),
-                     compute_audio_fingerprint_task.s(token, force)]
-    task_list += [compute_audio_fingerprint_callback_task.s(force),
-                  audio_fingerprint_find_closest_retrieve_from_db_task.s(),
-                  group(audio_fingerprint_find_closest_parallel_task.s(i, n_jobs, min_similarity) for i in range(n_jobs)),
-                  audio_fingerprint_find_closest_callback_task.s()]
+    task_list = [compute_audio_fingerprint_task.s(token, force),
+                 compute_audio_fingerprint_callback_task.s(force),
+                 audio_fingerprint_find_closest_retrieve_from_db_task.s(),
+                 group(audio_fingerprint_find_closest_parallel_task.s(i, n_jobs, min_similarity) for i in range(n_jobs)),
+                 audio_fingerprint_find_closest_callback_task.s()]
     if ignore_fp_results:
         task_list += [ignore_fingerprint_results_callback_task.s(results_to_return)]
     else:
@@ -79,9 +72,7 @@ def get_audio_language_detection_task_chain(token, force, n_divs=15, len_segment
 async def calculate_audio_fingerprint(data: AudioFingerprintRequest):
     token = data.token
     force = data.force
-    remove_silence = data.remove_silence
-    threshold = data.threshold
-    task_list = get_audio_fingerprint_chain_list(token, force, remove_silence=remove_silence, threshold=threshold)
+    task_list = get_audio_fingerprint_chain_list(token, force)
     task = chain(task_list)
     task = task.apply_async(priority=2)
     return {'task_id': task.id}
@@ -99,7 +90,6 @@ async def calculate_audio_fingerprint_status(task_id):
                 'closest_token': task_results['closest'],
                 'closest_token_origin': task_results['closest_origin'],
                 'duration': task_results['duration'],
-                'fp_nosilence': True if task_results['fp_nosilence'] == 1 else False,
                 'successful': task_results['result'] is not None
             }
         else:
