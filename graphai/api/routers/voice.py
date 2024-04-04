@@ -4,6 +4,7 @@ from celery import group, chain
 
 from graphai.api.celery_jobs.voice import (
     fingerprint_job,
+    detect_language_job,
     get_audio_fingerprint_chain_list,
     get_audio_language_detection_task_chain
 )
@@ -108,15 +109,8 @@ async def detect_language(data: AudioDetectLanguageRequest):
     print('Detecting language')
     token = data.token
     force = data.force
-    # Fingerprinting is always performed but with force=False, regardless of the provided force flag.
-    # The tasks are splitting the audio into n_divs segments of 30 seconds each, parallel language detection,
-    # and then aggregation and db insertion in the callback. Then the transcription tasks continue.
-    task_list = get_audio_fingerprint_chain_list(token, False, ignore_fp_results=True,
-                                                 results_to_return={'token': token})
-    task_list += get_audio_language_detection_task_chain(token, force)
-    task = chain(task_list)
-    task = task.apply_async(priority=2)
-    return {'task_id': task.id}
+    task_id = detect_language_job(token, force)
+    return {'task_id': task_id}
 
 
 @router.post('/priority_test')
