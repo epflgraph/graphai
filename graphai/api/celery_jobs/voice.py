@@ -150,10 +150,12 @@ def transcribe_job(token, force, lang=None, strict_silence=False):
     #######################################
 
     # Fingerprint cache lookup
+    # Fingerprinting is never forced in non-fingerprinting jobs
     direct_fingerprint_lookup_task_id = fingerprint_lookup_job(token)
 
-    # If the language of the transcript has not been forced by the user, we do a language cache lookup too
-    if lang is None:
+    # If the language of the transcript has not been forced by the user and there is no forced recompute,
+    # we do a language cache lookup too.
+    if lang is None and not force:
         direct_language_lookup_task_results = language_lookup_job(token, return_results=True)
         if direct_language_lookup_task_results is not None:
             lang = direct_language_lookup_task_results['language']
@@ -181,11 +183,11 @@ def transcribe_job(token, force, lang=None, strict_silence=False):
 
     if len(task_list) > 0:
         task_list += [
-            transcribe_task.s(strict_silence, force)
+            transcribe_task.s(strict_silence)
         ]
     else:
         task_list += [
-            transcribe_task.s({'token': token, 'language': lang}, strict_silence, force)
+            transcribe_task.s({'token': token, 'language': lang}, strict_silence)
         ]
 
     # Finally we add the transcription callback task
