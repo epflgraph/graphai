@@ -389,9 +389,3 @@ def transcribe_callback_task(self, results, token, force=False):
                     closest, values_dict
                 )
     return results
-
-
-@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='video_2.sleeper', ignore_result=False)
-def video_test_task(self):
-    sleep(30)
