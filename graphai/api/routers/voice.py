@@ -1,7 +1,5 @@
 from fastapi import APIRouter, Security
 
-from celery import group
-
 from graphai.api.celery_jobs.voice import (
     fingerprint_job,
     detect_language_job,
@@ -17,11 +15,8 @@ from graphai.api.schemas.voice import (
     AudioDetectLanguageResponse,
 )
 from graphai.api.routers.auth import get_current_active_user
-
 from graphai.api.celery_tasks.common import format_api_results
-from graphai.api.celery_tasks.voice import (
-    video_test_task
-)
+
 from graphai.core.interfaces.celery_config import get_task_info
 
 # Initialise video router
@@ -94,13 +89,6 @@ async def detect_language(data: AudioDetectLanguageRequest):
     force = data.force
     task_id = detect_language_job(token, force)
     return {'task_id': task_id}
-
-
-@router.post('/priority_test')
-async def priority_test():
-    print('launching a dummy')
-    task = group(video_test_task.s() for i in range(8)).apply_async(priority=2)
-    return {'id': task.id}
 
 
 @router.get('/detect_language/status/{task_id}', response_model=AudioDetectLanguageResponse)
