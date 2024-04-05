@@ -984,6 +984,19 @@ class WhisperTranscriptionModel:
             self.model = whisper.load_model(self.model_type, device=None, in_memory=True,
                                             download_root=self.download_root)
 
+    def get_silence_thresholds(self, strict_silence=False):
+        if strict_silence:
+            if self.model_type == 'base':
+                no_speech_threshold = 0.5
+                logprob_threshold = -0.5
+            else:
+                no_speech_threshold = 0.5
+                logprob_threshold = -0.45
+        else:
+            no_speech_threshold = 0.6
+            logprob_threshold = -1
+        return no_speech_threshold, logprob_threshold
+
     def detect_audio_segment_lang_whisper(self, input_filename_with_path):
         """
         Detects the language of an audio file using a 30-second sample
@@ -1005,7 +1018,7 @@ class WhisperTranscriptionModel:
         return max(probs, key=probs.get)
 
     def transcribe_audio_whisper(self, input_filename_with_path, force_lang=None, verbose=False,
-                                 no_speech_threshold=0.6, logprob_threshold=-1):
+                                 strict_silence=False):
         """
         Transcribes an audio file using whisper
         Args:
@@ -1013,9 +1026,8 @@ class WhisperTranscriptionModel:
             force_lang: Whether to explicitly feed the model the language of the audio.
                         None results in automatic detection.
             verbose: Verbosity of the transcription
-            no_speech_threshold: If the probability of a segment containing no speech is above this threshold
-            (and the model has low confidence in the text it has predicted), it is treated as silent.
-            logprob_threshold: Log probability threshold
+            strict_silence: Whether silence detection is strict or lenient.
+                            Affects the logprob and no speech thresholds.
         Returns:
             A dictionary with three keys: 'text' contains the full transcript, 'segments' contains a JSON-like dict of
             translated segments which can be used as subtitles, and 'language' which contains the language code.
@@ -1027,6 +1039,7 @@ class WhisperTranscriptionModel:
         if force_lang not in [None, 'en', 'fr', 'de', 'it']:
             force_lang = 'en'
         try:
+            no_speech_threshold, logprob_threshold = self.get_silence_thresholds(strict_silence)
             # setting fp16 to True makes sure that the model uses GPUs if available (otherwise
             # Whisper automatically switches to fp32)
             if force_lang is None:
@@ -1037,10 +1050,24 @@ class WhisperTranscriptionModel:
                 result = self.model.transcribe(input_filename_with_path, verbose=verbose, language=force_lang,
                                                fp16=True, no_speech_threshold=no_speech_threshold,
                                                logprob_threshold=logprob_threshold)
+            transcript_results = result['text']
+            subtitle_results = result['segments']
+            language_result = result['language']
+
+            if strict_silence:
+                subtitle_results = [
+                    x for x in subtitle_results
+                    if x['avg_logprob'] >= -1.0
+                ]
+                transcript_results = ''.join([x['text'] for x in subtitle_results])
+            return {
+                'text': transcript_results,
+                'segments': subtitle_results,
+                'language': language_result
+            }
         except Exception as e:
             print(e, file=sys.stderr)
             return None
-        return result
 
 
 class GoogleOCRModel:
