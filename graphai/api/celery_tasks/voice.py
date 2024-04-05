@@ -43,8 +43,8 @@ def cache_lookup_audio_fingerprint_task(self, token):
             return {
                 'result': existing['fingerprint'],
                 'fresh': False,
-                'closest_token': existing_closest,
-                'closest_token_origin': existing_closest_origin,
+                'closest': existing_closest,
+                'closest_origin': existing_closest_origin,
                 'duration': existing['duration']
             }
 
@@ -318,7 +318,7 @@ def cache_lookup_audio_transcript_task(self, token):
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True,
              retry_kwargs={"max_retries": 2}, name='video_2.transcribe', ignore_result=False,
              file_manager=file_management_config, model=transcription_model)
-def transcribe_task(self, input_dict, strict_silence=False, force=False):
+def transcribe_task(self, input_dict, strict_silence=False):
     token = input_dict['token']
     lang = input_dict['language']
 
@@ -332,54 +332,9 @@ def transcribe_task(self, input_dict, strict_silence=False, force=False):
             'fresh': False
         }
 
-    if not force:
-        # using_most_similar is True here because if the transcript has previously been computed
-        # for this token, then the results have also been inserted into the table for its closest
-        # neighbor. However, it's also possible that the results have been computed for its closest
-        # neighbor but not for itself.
-        db_manager = AudioDBCachingManager()
-        existing_list = db_manager.get_details(token, ['transcript_results', 'subtitle_results', 'language'],
-                                               using_most_similar=True)
-        if existing_list[0] is None:
-            return {
-                'transcript_results': None,
-                'subtitle_results': None,
-                'language': None,
-                'fresh': False
-            }
-
-        for existing in existing_list:
-            if existing is None:
-                continue
-
-            if existing['transcript_results'] is not None and existing['subtitle_results'] is not None and \
-                    existing['language'] is not None:
-                print('Returning cached result')
-                transcript_results = existing['transcript_results']
-                subtitle_results = existing['subtitle_results']
-                language_result = existing['language']
-
-                return {
-                    'transcript_results': transcript_results,
-                    'subtitle_results': subtitle_results,
-                    'language': language_result,
-                    'fresh': False
-                }
-
-    if strict_silence:
-        if self.model.model_type == 'base':
-            no_speech_threshold = 0.5
-            logprob_threshold = -0.5
-        else:
-            no_speech_threshold = 0.5
-            logprob_threshold = -0.45
-    else:
-        no_speech_threshold = 0.6
-        logprob_threshold = -1
-    input_filename_with_path = self.file_manager.generate_filepath(token)
-    result_dict = self.model.transcribe_audio_whisper(input_filename_with_path, force_lang=lang, verbose=True,
-                                                      no_speech_threshold=no_speech_threshold,
-                                                      logprob_threshold=logprob_threshold)
+    result_dict = self.model.transcribe_audio_whisper(self.file_manager.generate_filepath(token),
+                                                      force_lang=lang, verbose=True,
+                                                      strict_silence=strict_silence)
 
     if result_dict is None:
         return {
@@ -391,16 +346,9 @@ def transcribe_task(self, input_dict, strict_silence=False, force=False):
 
     transcript_results = result_dict['text']
     subtitle_results = result_dict['segments']
+    subtitle_results = json.dumps(subtitle_results)
     language_result = result_dict['language']
 
-    if strict_silence:
-        subtitle_results = [
-            x for x in subtitle_results
-            if x['avg_logprob'] >= -1.0
-        ]
-        transcript_results = ''.join([x['text'] for x in subtitle_results])
-
-    subtitle_results = json.dumps(subtitle_results)
     return {
         'transcript_results': transcript_results,
         'subtitle_results': subtitle_results,
