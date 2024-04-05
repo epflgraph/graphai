@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Security
 
-from celery import group, chain
+from celery import group
 
 from graphai.api.celery_jobs.voice import (
     fingerprint_job,
@@ -20,9 +20,7 @@ from graphai.api.routers.auth import get_current_active_user
 
 from graphai.api.celery_tasks.common import format_api_results
 from graphai.api.celery_tasks.voice import (
-    transcribe_task,
-    transcribe_callback_task,
-    video_test_task,
+    video_test_task
 )
 from graphai.core.interfaces.celery_config import get_task_info
 
