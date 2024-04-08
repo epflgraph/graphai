@@ -501,7 +501,7 @@ def find_closest_fingerprint_from_list(target_fp, fp_list, token_list, date_list
         if strip_underscores:
             trailing_underscores = '_'.join(target_fp.split('_')[1:])
             target_fp = target_fp.split('_')[0]
-            fp_list = [x for x in fp_list if x.endswith(trailing_underscores)]
+            fp_list = [x.split('_')[0] for x in fp_list if x.endswith(trailing_underscores)]
             if len(fp_list) == 0:
                 return None, None, None, None
         fp_similarities = np.array([compare_encoded_fingerprints(target_fp, fp2, decoder_func) for fp2 in fp_list])
