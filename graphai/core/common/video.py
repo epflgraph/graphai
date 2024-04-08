@@ -940,6 +940,13 @@ def compute_video_ocr_transitions(input_folder_with_path, frame_sample_indices, 
     return transition_list
 
 
+def get_ocr_colnames(method):
+    if method == 'tesseract':
+        return ['ocr_tesseract_results']
+    else:
+        return ['ocr_google_1_results', 'ocr_google_2_results']
+
+
 class WhisperTranscriptionModel:
     def __init__(self):
         try:

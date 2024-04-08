@@ -10,7 +10,10 @@ from graphai.api.celery_tasks.image import (
     slide_fingerprint_find_closest_retrieve_from_db_task,
     slide_fingerprint_find_closest_parallel_task,
     slide_fingerprint_find_closest_callback_task,
-    retrieve_slide_fingerprint_callback_task
+    retrieve_slide_fingerprint_callback_task,
+    cache_lookup_extract_slide_text_task,
+    extract_slide_text_task,
+    extract_slide_text_callback_task
 )
 
 from graphai.core.common.caching import FingerprintParameters
@@ -69,6 +72,48 @@ def fingerprint_job(token, force):
     # Computation job
     #################
     task_list = get_slide_fingerprint_chain_list(token, force, ignore_fp_results=False)
+    task = chain(task_list)
+    task = task.apply_async(priority=2)
+    return task.id
+
+
+def ocr_job(token, force=False, method='tesseract'):
+    ##################
+    # OCR cache lookup
+    ##################
+    if not force:
+        direct_lookup_job = cache_lookup_extract_slide_text_task.s(token, method)
+        direct_lookup_job = direct_lookup_job.apply_async(priority=6)
+        direct_lookup_task_id = direct_lookup_job.id
+        # We block on this task since we need its results to decide what to do next
+        direct_lookup_results = direct_lookup_job.get(timeout=20)
+        # If the cache lookup yielded results, then return the id of the task, otherwise we proceed normally with the
+        # computations
+        if direct_lookup_results is not None:
+            return direct_lookup_task_id
+
+    ##########################
+    # Fingerprint cache lookup
+    ##########################
+    # Fingerprint cache lookup
+    # Fingerprinting is never forced in non-fingerprinting jobs
+    direct_fingerprint_lookup_task_id = fingerprint_lookup_job(token)
+    if direct_fingerprint_lookup_task_id is None:
+        # If the result is None, it means that there is no cached fingerprint, so we need to do fingerprinting
+        task_list = get_slide_fingerprint_chain_list(token, False, ignore_fp_results=True,
+                                                     results_to_return=token)
+        # Reduced signature for the extract text task since first arg comes from prior tasks in the chain
+        task_list += [extract_slide_text_task.s(method)]
+    else:
+        # We end up here if the fingerprint results are already cached.
+        # Full signature for the extract text task
+        task_list = [extract_slide_text_task.s(token, method)]
+    #############################
+    # Rest of OCR computation job
+    #############################
+    task_list += [
+        extract_slide_text_callback_task.s(token, force)
+    ]
     task = chain(task_list)
     task = task.apply_async(priority=2)
     return task.id

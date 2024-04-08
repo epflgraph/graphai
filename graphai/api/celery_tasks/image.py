@@ -4,7 +4,7 @@ from graphai.api.celery_tasks.common import fingerprint_lookup_retrieve_from_db,
     fingerprint_lookup_callback, fingerprint_lookup_direct
 from graphai.api.common.video import file_management_config
 from graphai.core.common.video import perceptual_hash_image, perform_tesseract_ocr, \
-    GoogleOCRModel
+    GoogleOCRModel, get_ocr_colnames
 from graphai.core.common.text_utils import detect_text_language
 from graphai.core.common.caching import SlideDBCachingManager
 
@@ -144,51 +144,55 @@ def retrieve_slide_fingerprint_callback_task(self, results):
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='video_2.extract_slide_text', ignore_result=False,
-             file_manager=file_management_config)
-def extract_slide_text_task(self, token, method='tesseract', force=False):
-    if method == 'tesseract':
-        ocr_colnames = ['ocr_tesseract_results']
-    else:
-        ocr_colnames = ['ocr_google_1_results', 'ocr_google_2_results']
+             name='caching_6.cache_lookup_extract_slide_text', ignore_result=False)
+def cache_lookup_extract_slide_text_task(self, token, method='tesseract'):
+    ocr_colnames = get_ocr_colnames(method)
 
-    if not force:
-        db_manager = SlideDBCachingManager()
-        existing_list = db_manager.get_details(token, ocr_colnames + ['language'],
-                                               using_most_similar=True)
-        # Checking whether the token even exists
-        if existing_list[0] is None:
+    db_manager = SlideDBCachingManager()
+    existing_list = db_manager.get_details(token, ocr_colnames + ['language'],
+                                           using_most_similar=True)
+    # Checking whether the token even exists
+    if existing_list[0] is None:
+        return {
+            'results': None,
+            'language': None,
+            'fresh': False
+        }
+
+    for existing in existing_list:
+        if existing is None:
+            continue
+
+        if all([existing[ocr_colname] is not None for ocr_colname in ocr_colnames]):
+            print('Returning cached result')
+            results = [
+                {
+                    'method': ocr_colname,
+                    'text': existing[ocr_colname],
+                }
+                for ocr_colname in ocr_colnames
+            ]
+            language = existing['language']
+            fresh = False
+
+            if language is None:
+                language = detect_text_language(results[0]['text'])
+                fresh = True
+
             return {
-                'results': None,
-                'language': None,
-                'fresh': False
+                'results': results,
+                'language': language,
+                'fresh': fresh
             }
 
-        for existing in existing_list:
-            if existing is None:
-                continue
+    return None
 
-            if all([existing[ocr_colname] is not None for ocr_colname in ocr_colnames]):
-                print('Returning cached result')
-                results = [
-                    {
-                        'method': ocr_colname,
-                        'text': existing[ocr_colname],
-                    }
-                    for ocr_colname in ocr_colnames
-                ]
-                language = existing['language']
-                fresh = False
 
-                if language is None:
-                    language = detect_text_language(results[0]['text'])
-                    fresh = True
-
-                return {
-                    'results': results,
-                    'language': language,
-                    'fresh': fresh
-                }
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
+             name='video_2.extract_slide_text', ignore_result=False,
+             file_manager=file_management_config)
+def extract_slide_text_task(self, token, method='tesseract'):
+    ocr_colnames = get_ocr_colnames(method)
 
     if method == 'tesseract':
         res = perform_tesseract_ocr(self.file_manager.generate_filepath(token))
