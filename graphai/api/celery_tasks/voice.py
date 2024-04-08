@@ -126,7 +126,7 @@ def compute_audio_fingerprint_task(self, input_dict, audio_token, force=False):
                     'fp_nosilence': existing['fp_nosilence']
                 }
     fp_token_with_path = self.file_manager.generate_filepath(fp_token)
-    fingerprint, decoded = perceptual_hash_audio(fp_token_with_path)
+    fingerprint = perceptual_hash_audio(fp_token_with_path)
     if fingerprint is None:
         return {
             'result': None,
