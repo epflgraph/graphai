@@ -16,6 +16,9 @@ from graphai.api.celery_jobs.image import (
     fingerprint_job,
     ocr_job
 )
+from graphai.api.celery_jobs.image import (
+    fingerprint_job
+)
 from graphai.api.routers.auth import get_current_active_user
 
 from graphai.core.interfaces.celery_config import get_task_info
