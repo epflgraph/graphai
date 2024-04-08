@@ -1,5 +1,4 @@
 import json
-from time import sleep
 from collections import Counter
 
 from celery import shared_task
@@ -70,8 +69,7 @@ def compute_audio_fingerprint_task(self, fp_token):
             'duration': 0.0
         }
 
-    fp_token_with_path = self.file_manager.generate_filepath(fp_token)
-    fingerprint = perceptual_hash_audio(fp_token_with_path)
+    fingerprint = perceptual_hash_audio(self.file_manager.generate_filepath(fp_token))
     if fingerprint is None:
         return {
             'result': None,
