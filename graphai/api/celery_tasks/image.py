@@ -10,12 +10,41 @@ from graphai.core.common.caching import SlideDBCachingManager
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
+             name='caching_6.cache_lookup_fingerprint_slide', ignore_result=False)
+def cache_lookup_slide_fingerprint_task(self, token):
+    db_manager = SlideDBCachingManager()
+    existing_list = db_manager.get_details(token, cols=['fingerprint'],
+                                           using_most_similar=True)
+    for existing in existing_list:
+        if existing is None:
+            continue
+        if existing['fingerprint'] is not None:
+            # We have a cache hit, now we gather all the results that should be returned
+            # The closest match
+            existing_closest = db_manager.get_closest_match(token)
+            if existing_closest is not None:
+                # If the closest match exists, we also want to return its origin token
+                existing_closest_origin = db_manager.get_origin(existing_closest)
+            else:
+                existing_closest_origin = None
+            print('Returning cached result')
+            return {
+                'result': existing['fingerprint'],
+                'fresh': False,
+                'closest': existing_closest,
+                'closest_origin': existing_closest_origin
+            }
+
+    return None
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='video_2.slide_fingerprint', ignore_result=False,
              file_manager=file_management_config)
-def compute_slide_fingerprint_task(self, token, force=False):
-    # Checking for existing cached results
+def compute_slide_fingerprint_task(self, token):
+    # Making sure the slide's cache row exists, because otherwise, the operation should be cancelled!
     db_manager = SlideDBCachingManager()
-    existing_slide_list = db_manager.get_details(token, cols=['fingerprint'], using_most_similar=True)
+    existing_slide_list = db_manager.get_details(token, cols=[], using_most_similar=False)
     if existing_slide_list[0] is None:
         return {
             'result': None,
@@ -23,19 +52,8 @@ def compute_slide_fingerprint_task(self, token, force=False):
             'perform_lookup': False,
             'fresh': False
         }
-    if not force:
-        for existing_slide in existing_slide_list:
-            if existing_slide is None:
-                continue
-            if existing_slide['fingerprint'] is not None:
-                return {
-                    'result': existing_slide['fingerprint'],
-                    'fp_token': existing_slide['id_token'],
-                    'perform_lookup': False,
-                    'fresh': False
-                }
-    slide_with_path = self.file_manager.generate_filepath(token)
-    fingerprint = perceptual_hash_image(slide_with_path)
+
+    fingerprint = perceptual_hash_image(self.file_manager.generate_filepath(token))
     if fingerprint is None:
         return {
             'result': None,
