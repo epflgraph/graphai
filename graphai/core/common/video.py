@@ -476,7 +476,7 @@ def compare_encoded_fingerprints(f1, f2=None, decoder_func=imagehash.hex_to_hash
 
 
 def find_closest_fingerprint_from_list(target_fp, fp_list, token_list, date_list, min_similarity=0.8,
-                                       decoder_func=imagehash.hex_to_hash):
+                                       decoder_func=imagehash.hex_to_hash, strip_underscores=True):
     """
     Given a target fingerprint and a list of candidate fingerprints, finds the one with the highest similarity
     to the target whose similarity is above a minimum value.
@@ -496,6 +496,12 @@ def find_closest_fingerprint_from_list(target_fp, fp_list, token_list, date_list
     if len(fp_list) == 0:
         return None, None, None, None
     if min_similarity < 1:
+        if strip_underscores:
+            trailing_underscores = '_'.join(target_fp.split('_')[1:])
+            target_fp = target_fp.split('_')[0]
+            fp_list = [x.split('_')[0] for x in fp_list if x.endswith(trailing_underscores)]
+            if len(fp_list) == 0:
+                return None, None, None, None
         fp_similarities = np.array([compare_encoded_fingerprints(target_fp, fp2, decoder_func) for fp2 in fp_list])
     else:
         # if an exact match is required, we switch to a much faster equality comparison
