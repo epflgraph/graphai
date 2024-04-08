@@ -18,6 +18,9 @@ from graphai.api.celery_tasks.image import (
     extract_slide_text_task,
     extract_slide_text_callback_task,
 )
+from graphai.api.celery_jobs.image import (
+    fingerprint_job
+)
 from graphai.api.routers.auth import get_current_active_user
 
 from graphai.core.interfaces.celery_config import get_task_info
@@ -35,10 +38,8 @@ router = APIRouter(
 async def calculate_slide_fingerprint(data: ImageFingerprintRequest):
     token = data.token
     force = data.force
-    task_list = get_slide_fingerprint_chain_list(token, force)
-    task = chain(task_list)
-    task = task.apply_async(priority=2)
-    return {'task_id': task.id}
+    task_id = fingerprint_job(token, force)
+    return {'task_id': task_id}
 
 
 @router.get('/calculate_fingerprint/status/{task_id}', response_model=ImageFingerprintResponse)
