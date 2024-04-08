@@ -1,7 +1,8 @@
 from fastapi import APIRouter, Security
 
-from celery import group, chain
+from celery import chain
 
+from graphai.api.celery_jobs.image import get_slide_fingerprint_chain_list
 from graphai.api.schemas.common import TaskIDResponse
 from graphai.api.schemas.image import (
     ImageFingerprintRequest,
@@ -11,24 +12,15 @@ from graphai.api.schemas.image import (
     DetectOCRLanguageResponse,
 )
 from graphai.api.celery_tasks.common import (
-    ignore_fingerprint_results_callback_task,
     format_api_results,
 )
 from graphai.api.celery_tasks.image import (
-    compute_slide_fingerprint_task,
-    compute_slide_fingerprint_callback_task,
-    slide_fingerprint_find_closest_retrieve_from_db_task,
-    slide_fingerprint_find_closest_parallel_task,
-    slide_fingerprint_find_closest_direct_task,
-    slide_fingerprint_find_closest_callback_task,
-    retrieve_slide_fingerprint_callback_task,
     extract_slide_text_task,
     extract_slide_text_callback_task,
 )
 from graphai.api.routers.auth import get_current_active_user
 
 from graphai.core.interfaces.celery_config import get_task_info
-from graphai.core.common.caching import FingerprintParameters
 
 # Initialise video router
 router = APIRouter(
@@ -37,32 +29,6 @@ router = APIRouter(
     responses={404: {'description': 'Not found'}},
     dependencies=[Security(get_current_active_user, scopes=['image'])]
 )
-
-
-def get_slide_fingerprint_chain_list(token, force, min_similarity=None, n_jobs=8,
-                                     ignore_fp_results=False, results_to_return=None):
-    # Loading minimum similarity parameter for image
-    if min_similarity is None:
-        fp_parameters = FingerprintParameters()
-        min_similarity = fp_parameters.get_min_sim_image()
-    # The usual fingerprinting task list consists of fingerprinting and its callback, then lookup
-    task_list = [
-        compute_slide_fingerprint_task.s(token, force),
-        compute_slide_fingerprint_callback_task.s(force)
-    ]
-    if min_similarity == 1:
-        task_list += [slide_fingerprint_find_closest_direct_task.s()]
-    else:
-        task_list += [
-            slide_fingerprint_find_closest_retrieve_from_db_task.s(),
-            group(slide_fingerprint_find_closest_parallel_task.s(i, n_jobs, min_similarity) for i in range(n_jobs))
-        ]
-    task_list += [slide_fingerprint_find_closest_callback_task.s()]
-    if ignore_fp_results:
-        task_list += [ignore_fingerprint_results_callback_task.s(results_to_return)]
-    else:
-        task_list += [retrieve_slide_fingerprint_callback_task.s()]
-    return task_list
 
 
 @router.post('/calculate_fingerprint', response_model=TaskIDResponse)
