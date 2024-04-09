@@ -1,5 +1,4 @@
 from fastapi import APIRouter, Security
-from celery import chain
 from typing import Union
 
 from graphai.api.schemas.ontology import (
@@ -26,21 +25,6 @@ from graphai.api.schemas.ontology import (
 from graphai.api.schemas.common import TaskIDResponse
 
 from graphai.api.celery_tasks.common import format_api_results
-from graphai.api.celery_tasks.ontology import (
-    get_cluster_parent_task,
-    get_cluster_children_task,
-    recompute_clusters_task,
-    break_up_cluster_task,
-    get_concept_category_similarity_task,
-    get_concept_cluster_similarity_task,
-    get_cluster_cluster_similarity_task,
-    get_concept_category_closest_task,
-    get_cluster_category_closest_task,
-    get_concept_concept_similarity_task,
-    get_concept_concept_closest_task,
-    get_category_category_similarity_task,
-    get_cluster_category_similarity_task
-)
 
 from graphai.api.celery_jobs.ontology import (
     tree_job,
@@ -49,7 +33,12 @@ from graphai.api.celery_jobs.ontology import (
     category_children_job,
     cluster_parent_job,
     cluster_children_job,
-    recompute_clusters_job
+    recompute_clusters_job,
+    graph_distance_job,
+    concept_nearest_category_job,
+    cluster_nearest_category_job,
+    concept_nearest_concept_job,
+    breakup_cluster_job
 )
 from graphai.api.routers.auth import get_current_active_user
 
@@ -134,27 +123,7 @@ async def compute_graph_distance(data: GraphDistanceRequest):
     tgt_type = data.tgt_type
     avg = data.avg
     coeffs = data.coeffs
-    assert coeffs is None or len(coeffs) == 2
-    if src_type == 'concept' and tgt_type == 'category':
-        task = get_concept_category_similarity_task.s(src, tgt, avg, coeffs)
-    elif src_type == 'category' and tgt_type == 'concept':
-        task = get_concept_category_similarity_task.s(tgt, src, avg, coeffs)
-    elif src_type == 'concept' and tgt_type == 'cluster':
-        task = get_concept_cluster_similarity_task.s(src, tgt, avg)
-    elif src_type == 'cluster' and tgt_type == 'concept':
-        task = get_concept_cluster_similarity_task.s(tgt, src, avg)
-    elif src_type == 'cluster' and tgt_type == 'cluster':
-        task = get_cluster_cluster_similarity_task.s(src, tgt, avg)
-    elif src_type == 'cluster' and tgt_type == 'category':
-        task = get_cluster_category_similarity_task.s(src, tgt, avg, coeffs)
-    elif src_type == 'category' and tgt_type == 'cluster':
-        task = get_cluster_category_similarity_task.s(tgt, src, avg, coeffs)
-    elif src_type == 'category' and tgt_type == 'category':
-        task = get_category_category_similarity_task.s(src, tgt, avg, coeffs)
-    else:
-        task = get_concept_concept_similarity_task.s(src, tgt)
-    res = task.apply_async(priority=6).get(timeout=30)
-    return res
+    return graph_distance_job(src, tgt, src_type, tgt_type, avg, coeffs)
 
 
 @router.post('/nearest_neighbor/concept/category', response_model=GraphConceptNearestCategoryResponse)
@@ -165,10 +134,7 @@ async def compute_graph_concept_nearest_category(data: GraphConceptNearestCatego
     top_n = data.top_n
     use_depth_3 = data.top_down_search
     return_clusters = data.return_clusters
-    assert coeffs is None or len(coeffs) == 2
-    task = get_concept_category_closest_task.s(src, avg, coeffs, top_n, use_depth_3, return_clusters)
-    res = task.apply_async(priority=6).get(timeout=30)
-    return res
+    return concept_nearest_category_job(src, avg, coeffs, top_n, use_depth_3, return_clusters)
 
 
 @router.post('/nearest_neighbor/cluster/category', response_model=GraphClusterNearestCategoryResponse)
@@ -178,26 +144,18 @@ async def compute_graph_cluster_nearest_category(data: GraphClusterNearestCatego
     coeffs = data.coeffs
     top_n = data.top_n
     use_depth_3 = data.top_down_search
-    assert coeffs is None or len(coeffs) == 2
-    task = get_cluster_category_closest_task.s(src, avg, coeffs, top_n, use_depth_3)
-    res = task.apply_async(priority=6).get(timeout=30)
-    return res
+    return cluster_nearest_category_job(src, avg, coeffs, top_n, use_depth_3)
 
 
 @router.post('/nearest_neighbor/concept/concept', response_model=GraphNearestConceptResponse)
 async def compute_graph_nearest_concept(data: GraphNearestConceptRequest):
     src = data.src
     top_n = data.top_n
-    task = get_concept_concept_closest_task.s(src, top_n)
-    res = task.apply_async(priority=6).get(timeout=30)
-    return res
+    return concept_nearest_concept_job(src, top_n)
 
 
 @router.post('/break_up_cluster', response_model=BreakUpClustersResponse)
 async def break_up_cluster(data: BreakUpClusterRequest):
     cluster_id = data.cluster_id
     n_clusters = data.n_clusters
-    task_list = [break_up_cluster_task.s(cluster_id, n_clusters)]
-    task = chain(task_list)
-    res = task.apply_async(priority=6).get(timeout=30)
-    return res
+    return breakup_cluster_job(cluster_id, n_clusters)
