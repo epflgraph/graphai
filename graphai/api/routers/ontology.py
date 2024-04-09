@@ -25,15 +25,8 @@ from graphai.api.schemas.ontology import (
 )
 from graphai.api.schemas.common import TaskIDResponse
 
-from graphai.api.common.log import log
 from graphai.api.celery_tasks.common import format_api_results
 from graphai.api.celery_tasks.ontology import (
-    get_ontology_tree_task,
-    get_category_info_task,
-    get_category_parent_task,
-    get_category_children_task,
-    get_category_concepts_task,
-    get_category_clusters_task,
     get_cluster_parent_task,
     get_cluster_children_task,
     recompute_clusters_task,
@@ -47,6 +40,16 @@ from graphai.api.celery_tasks.ontology import (
     get_concept_concept_closest_task,
     get_category_category_similarity_task,
     get_cluster_category_similarity_task
+)
+
+from graphai.api.celery_jobs.ontology import (
+    tree_job,
+    category_info_job,
+    category_parent_job,
+    category_children_job,
+    cluster_parent_job,
+    cluster_children_job,
+    recompute_clusters_job
 )
 from graphai.api.routers.auth import get_current_active_user
 
@@ -63,63 +66,46 @@ router = APIRouter(
 
 @router.get('/tree', response_model=TreeResponse)
 async def tree():
-    log('Returning the ontology tree')
-    results = get_ontology_tree_task.s().apply_async(priority=6).get(timeout=10)
-    return results
+    return tree_job()
 
 
 @router.post('/tree/category/info', response_model=Union[CategoryInfoResponse, None])
 async def cat_info(data: CategoryInfoRequest):
     category_id = data.category_id
-    results = get_category_info_task.s(category_id).apply_async(priority=6).get(timeout=10)
-    return results
+    return category_info_job(category_id)
 
 
 @router.post('/tree/category/parent', response_model=CategoryParentResponse)
 async def cat_parent(data: CategoryInfoRequest):
     category_id = data.category_id
-    results = get_category_parent_task.s(category_id).apply_async(priority=6).get(timeout=10)
-    return results
+    return category_parent_job(category_id)
 
 
 @router.post('/tree/category/children', response_model=TreeChildrenResponse)
 async def cat_children(data: CategoryChildrenRequest):
     category_id = data.category_id
     dest_type = data.tgt_type
-    if dest_type == 'category':
-        task = get_category_children_task.s(category_id)
-    elif dest_type == 'concept':
-        task = get_category_concepts_task.s(category_id)
-    else:
-        task = get_category_clusters_task.s(category_id)
-    results = task.apply_async(priority=6).get(timeout=10)
-    results['child_type'] = dest_type
-    return results
+    return category_children_job(category_id, dest_type)
 
 
 @router.post('/tree/cluster/parent', response_model=CategoryParentResponse)
 async def cluster_parent(data: ClusterInfoRequest):
     cluster_id = data.cluster_id
-    results = get_cluster_parent_task.s(cluster_id).apply_async(priority=6).get(timeout=10)
-    return results
+    return cluster_parent_job(cluster_id)
 
 
 @router.post('/tree/cluster/children', response_model=TreeChildrenResponse)
 async def cluster_children(data: ClusterInfoRequest):
     cluster_id = data.cluster_id
-    results = get_cluster_children_task.s(cluster_id).apply_async(priority=6).get(timeout=10)
-    results['child_type'] = 'concept'
-    return results
+    return cluster_children_job(cluster_id)
 
 
 @router.post('/recompute_clusters', response_model=TaskIDResponse)
 async def recompute_clusters(data: RecomputeClustersRequest):
     n_clusters = data.n_clusters
     min_n = data.min_n
-    task_list = [recompute_clusters_task.s(n_clusters, min_n)]
-    task = chain(task_list)
-    task = task.apply_async(priority=6)
-    return {'task_id': task.id}
+    task_id = recompute_clusters_job(n_clusters, min_n)
+    return {'task_id': task_id}
 
 
 @router.get('/recompute_clusters/status/{task_id}', response_model=RecomputeClustersResponse)
