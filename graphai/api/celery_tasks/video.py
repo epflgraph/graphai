@@ -7,7 +7,7 @@ from graphai.api.common.video import file_management_config, local_ocr_nlp_model
     transcription_model
 from graphai.api.common.ontology import ontology_data
 from graphai.api.common.translation import translation_models
-from graphai.core.common.video import retrieve_file_from_url, retrieve_file_from_kaltura, \
+from graphai.core.common.video import retrieve_file_from_url, create_filename_using_url_format, \
     detect_audio_format_and_duration, extract_audio_from_video, extract_frames, generate_frame_sample_indices, \
     compute_ocr_noise_level, compute_ocr_threshold, compute_video_ocr_transitions, check_ocr_and_hash_thresholds, \
     generate_random_token, md5_video_or_audio, generate_symbolic_token, read_txt_gz_file, \
@@ -28,42 +28,42 @@ from graphai.core.common.config import config
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='video_2.retrieve_url', ignore_result=False,
+             name='caching_6.cache_lookup_retrieve_url', ignore_result=False,
              file_manager=file_management_config)
-def retrieve_file_from_url_task(self, url, is_kaltura=True, force=False, force_token=None):
+def cache_lookup_retrieve_file_from_url_task(self, url):
     db_manager = VideoDBCachingManager()
     existing = db_manager.get_details_using_origin(url, [])
-    # force=True works as follows:
-    # If the url has never been retrieved before, it retrieves it normally.
-    # If, however, the url has been retrieved before, it re-downloads it under the *same* token.
-    # Effectively, the assumption is: one url <-> one token. This helps handle cases where the
-    # cache files reside on multiple servers and we want to call different endpoints on the same token
-    # in the two different servers and have all the results in one place in the end.
-    if not force:
-        if existing is not None:
-            return {
-                'token': existing[0]['id_token'],
-                'fresh': False
-            }
+
+    if existing is not None:
+        token = existing[0]['id_token']
+        return {
+            'token': token,
+            'fresh': False,
+            'token_status': get_video_token_status(token)
+        }
+
+    return None
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
+             name='video_2.retrieve_url', ignore_result=False,
+             file_manager=file_management_config)
+def retrieve_file_from_url_task(self, url, is_kaltura=True, force_token=None):
     if force_token is not None:
         token = force_token
     else:
+        db_manager = VideoDBCachingManager()
+        existing = db_manager.get_details_using_origin(url, [])
         if existing is not None:
-            # If the cache row already exists and force=True, then we don't create a new token, but instead
+            # If the cache row already exists, then we don't create a new token, but instead
             # use the id_token of the existing row (we remove the file extension because it will be re-added soon)
             token = existing[0]['id_token'].split('.')[0]
         else:
             # Otherwise, we generate a random token
             token = generate_random_token()
-    file_format = url.split('.')[-1].lower()
-    if file_format not in ['mp4', 'mkv', 'flv', 'avi', 'mov']:
-        file_format = 'mp4'
-    filename = token + '.' + file_format
+    filename = create_filename_using_url_format(token, url)
     filename_with_path = self.file_manager.generate_filepath(filename)
-    if is_kaltura:
-        results = retrieve_file_from_kaltura(url, filename_with_path, filename)
-    else:
-        results = retrieve_file_from_url(url, filename_with_path, filename)
+    results = retrieve_file_from_url(url, filename_with_path, filename, is_kaltura)
     return {
         'token': results,
         'fresh': results is not None

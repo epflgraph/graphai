@@ -146,11 +146,22 @@ def retrieve_file_from_youtube(url, output_filename_with_path, output_token):
         return None
 
 
-def retrieve_file_from_url(url, output_filename_with_path, output_token):
-    if 'youtube.com/' in url or 'youtu.be/' in url:
-        return retrieve_file_from_youtube(url, output_filename_with_path, output_token)
+def retrieve_file_from_url(url, output_filename_with_path, output_token, is_kaltura=False):
+    if is_kaltura:
+        return retrieve_file_from_kaltura(url, output_filename_with_path, output_token)
     else:
-        return retrieve_file_from_generic_url(url, output_filename_with_path, output_token)
+        if 'youtube.com/' in url or 'youtu.be/' in url:
+            return retrieve_file_from_youtube(url, output_filename_with_path, output_token)
+        else:
+            return retrieve_file_from_generic_url(url, output_filename_with_path, output_token)
+
+
+def create_filename_using_url_format(token, url):
+    file_format = url.split('.')[-1].lower()
+    if file_format not in ['mp4', 'mkv', 'flv', 'avi', 'mov']:
+        file_format = 'mp4'
+    filename = token + '.' + file_format
+    return filename
 
 
 def perform_probe(input_filename_with_path):

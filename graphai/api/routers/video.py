@@ -17,8 +17,6 @@ from graphai.api.schemas.video import (
 from graphai.api.celery_tasks.common import format_api_results, ignore_fingerprint_results_callback_task, \
     video_dummy_task
 from graphai.api.celery_tasks.video import (
-    retrieve_file_from_url_task,
-    retrieve_file_from_url_callback_task,
     get_file_task,
     extract_audio_task,
     extract_audio_callback_task,
@@ -37,6 +35,11 @@ from graphai.api.celery_tasks.video import (
     video_fingerprint_find_closest_callback_task,
     retrieve_video_fingerprint_callback_task
 )
+
+from graphai.api.celery_jobs.video import (
+    retrieve_url_job
+)
+
 from graphai.api.routers.auth import get_current_active_user
 
 from graphai.core.interfaces.celery_config import get_task_info
@@ -82,17 +85,8 @@ async def retrieve_file(data: RetrieveURLRequest):
     force = data.force
     # This flag determines if the URL is that of an m3u8 playlist or a video file (like a .mp4)
     is_playlist = data.playlist
-    # Overriding the is_playlist flag if the url ends with m3u8 (playlist) or mp4/mkv/flv/avi/mov (video file)
-    if url.endswith('.m3u8'):
-        is_playlist = True
-    elif any([url.endswith(e) for e in ['.mp4', '.mkv', '.flv', '.avi', '.mov']]):
-        is_playlist = False
-    # First retrieve the file, and then do the database callback
-    task_list = [retrieve_file_from_url_task.s(url, is_playlist, force, None),
-                 retrieve_file_from_url_callback_task.s(url, force)]
-    task = chain(task_list)
-    task = task.apply_async(priority=2)
-    return {'task_id': task.id}
+    task_id = retrieve_url_job(url, force, is_playlist)
+    return {'task_id': task_id}
 
 
 # For each async endpoint, we also have a status endpoint since they have different response models.
