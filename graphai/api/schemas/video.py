@@ -114,6 +114,15 @@ class ExtractAudioRequest(BaseModel):
         description="The token that identifies the requested file"
     )
 
+    recalculate_cached: bool = Field(
+        title="Only perform a cache recalculation",
+        description="If set to True, this flag OVERRIDES the 'force' flag, assumes that this video token is active and"
+                    "that the audio for this video have been previously computed and cached, and recreates "
+                    "the audio file. Will fail with null results if the video token is inactive, or if its audio "
+                    "has not previously been computed and cached in the database.",
+        default=False
+    )
+
     force: bool = Field(
         title="Force recompute",
         description="Whether to force a recomputation under any circumstances. False by default.",
