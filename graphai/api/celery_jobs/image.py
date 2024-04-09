@@ -77,7 +77,7 @@ def fingerprint_job(token, force):
     return task.id
 
 
-def ocr_job(token, force=False, method='tesseract'):
+def ocr_job(token, force=False, method='google'):
     ##################
     # OCR cache lookup
     ##################
