@@ -22,6 +22,7 @@ from graphai.api.celery_tasks.video import (
     get_file_task,
     extract_audio_task,
     extract_audio_callback_task,
+    reextract_cached_audio_task,
     extract_and_sample_frames_task,
     compute_noise_level_parallel_task,
     compute_noise_threshold_callback_task,
@@ -151,11 +152,17 @@ async def get_file(data: FileRequest):
 async def extract_audio(data: ExtractAudioRequest):
     token = data.token
     force = data.force
+    recalculate = data.recalculate_cached
     # Fingerprinting is always performed but with force=False, regardless of the provided force flag.
     task_list = get_video_fingerprint_chain_list(token, force=False,
                                                  ignore_fp_results=True, results_to_return=token)
-    task_list += [extract_audio_task.s(force)]
-    task_list += [extract_audio_callback_task.s(token, force)]
+    if not recalculate:
+        task_list += [
+            extract_audio_task.s(force),
+            extract_audio_callback_task.s(token, force)
+        ]
+    else:
+        task_list += [reextract_cached_audio_task.s()]
     task = chain(task_list)
     task = task.apply_async(priority=2)
     return {'task_id': task.id}

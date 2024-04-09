@@ -292,6 +292,50 @@ def extract_audio_callback_task(self, results, origin_token, force=False):
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
+             name='video_2.reextract_cached_audio', ignore_result=False,
+             file_manager=file_management_config)
+def reextract_cached_audio_task(self, token):
+    video_db_manager = VideoDBCachingManager()
+    closest_token = video_db_manager.get_closest_match(token)
+    audio_db_manager = AudioDBCachingManager()
+    existing_audio_own = audio_db_manager.get_details_using_origin(token, cols=['duration'])
+    if closest_token is not None and closest_token != token:
+        existing_audio_closest = audio_db_manager.get_details_using_origin(closest_token,
+                                                                           cols=['duration'])
+    else:
+        existing_audio_closest = None
+    if existing_audio_own is None and existing_audio_closest is None:
+        return {
+            'token': None,
+            'fresh': False,
+            'duration': 0.0,
+            'token_status': None
+        }
+    existing_audio = existing_audio_own if existing_audio_own is not None else existing_audio_closest
+    token_to_use_as_name = existing_audio[0]['id_token']
+    output_filename_with_path = self.file_manager.generate_filepath(token_to_use_as_name)
+    input_filename_with_path = self.file_manager.generate_filepath(token)
+    output_filename = extract_audio_from_video(
+        input_filename_with_path, output_filename_with_path, token_to_use_as_name
+    )
+    # If there was an error of any kind (e.g. non-existing video file), the returned token will be None
+    if output_filename is None:
+        return {
+            'token': None,
+            'fresh': False,
+            'duration': 0.0,
+            'token_status': None
+        }
+
+    return {
+        'token': output_filename,
+        'fresh': True,
+        'duration': existing_audio[0]['duration'],
+        'token_status': get_audio_token_status(output_filename)
+    }
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='video_2.extract_and_sample_frames', ignore_result=False,
              file_manager=file_management_config)
 def extract_and_sample_frames_task(self, token, force=False):
