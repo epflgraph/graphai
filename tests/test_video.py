@@ -71,7 +71,7 @@ def test__video_detect_slides__extract_and_sample_frames_task__run_task(test_vid
 
 @pytest.mark.usefixtures('test_video_token')
 def test__video_extract_audio__extract_audio_task__run_task(test_video_token):
-    results = extract_audio_task(test_video_token, True)
+    results = extract_audio_task(test_video_token)
 
     assert isinstance(results, dict)
     assert 'token' in results
