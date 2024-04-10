@@ -1,7 +1,19 @@
 from celery import shared_task
 
-from graphai.core.common.video import find_closest_audio_fingerprint_from_list, \
-    find_closest_image_fingerprint_from_list, find_closest_text_fingerprint_from_list
+from graphai.api.common.ontology import ontology_data
+from graphai.api.common.translation import translation_models
+from graphai.api.common.video import (
+    transcription_model,
+    local_ocr_nlp_models
+)
+from graphai.core.common.common_utils import strtobool
+from graphai.core.common.config import config
+
+from graphai.core.common.video import (
+    find_closest_audio_fingerprint_from_list,
+    find_closest_image_fingerprint_from_list,
+    find_closest_text_fingerprint_from_list
+)
 from graphai.core.common.text_utils import perceptual_hash_text
 
 
@@ -285,3 +297,35 @@ def video_dummy_task(self, results):
     # Whenever there are two groups in one chain of tasks, there need to be at least
     # TWO tasks between them, and this dummy task is simply an f(x)=x function.
     return results
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
+             name='video_2.init', ignore_result=False,
+             transcription_obj=transcription_model,
+             nlp_obj=local_ocr_nlp_models,
+             translation_obj=translation_models,
+             ontology_data_obj=ontology_data)
+def video_init_task(self):
+    # This task initialises the video celery worker by loading into memory the transcription and NLP models
+    print('Start video_init task')
+
+    if strtobool(config['preload']['video']):
+        print('Loading transcription model...')
+        self.transcription_obj.load_model_whisper()
+
+        print('Loading NLP models...')
+        self.nlp_obj.load_nlp_models()
+
+        print('Loading translation models...')
+        self.translation_obj.load_models()
+    else:
+        print('Skipping preloading for video endpoints.')
+
+    if strtobool(config['preload']['ontology']):
+        print('Loading ontology data...')
+        self.ontology_data_obj.load_data()
+    else:
+        print('Skipping preloading for ontology endpoints.')
+
+    print('All video processing objects loaded')
+    return True
