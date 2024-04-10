@@ -661,7 +661,9 @@ def reextract_cached_slides_task(self, token):
     timestamps_to_keep = sorted([x['timestamp'] for x in existing_slides])
     output_folder = token_to_use_as_name + '_slides'
     output_folder_with_path = self.file_manager.generate_filepath(output_folder)
-
+    # If the slides folder already exists, it needs to be deleted recursively
+    if os.path.exists(output_folder_with_path):
+        shutil.rmtree(output_folder_with_path)
     output_folder = extract_frames(self.file_manager.generate_filepath(token),
                                    output_folder_with_path,
                                    output_folder)
