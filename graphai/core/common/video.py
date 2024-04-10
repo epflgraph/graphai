@@ -251,7 +251,7 @@ def md5_video_or_audio(input_filename_with_path, video=True):
     return (result.decode('utf8').strip())[4:]
 
 
-def detect_audio_format_and_duration(input_filename_with_path, input_token):
+def detect_audio_duration(input_filename_with_path):
     """
     Detects the duration of the audio track of the provided video file and returns its name in ogg format
     Args:
@@ -259,22 +259,24 @@ def detect_audio_format_and_duration(input_filename_with_path, input_token):
         input_token: Token of input file
 
     Returns:
-        Token of output file consisting of input token + audio format, plus audio duration.
+        Audio duration.
     """
     try:
         probe_results = perform_probe(input_filename_with_path)
     except Exception as e:
         print(e, file=sys.stderr)
-        return None, None
+        return None
     if probe_results.get('format', None) is None or probe_results['format'].get('duration', None) is None:
         try:
             probe_results = perform_slow_audio_probe(input_filename_with_path)
         except Exception as e:
             print(e, file=sys.stderr)
-            return None, None
-    output_suffix = '_audio.ogg'
-    output_token = input_token + output_suffix
-    return output_token, float(probe_results['format']['duration'])
+            return None
+    return float(probe_results['format']['duration'])
+
+
+def generate_audio_token(token):
+    return token + '_audio.ogg'
 
 
 def extract_audio_from_video(input_filename_with_path, output_filename_with_path, output_token):
@@ -286,11 +288,14 @@ def extract_audio_from_video(input_filename_with_path, output_filename_with_path
         output_token: Token of output file
 
     Returns:
-        Output token if successful, None if not.
+        Output token and duration of audio if successful, None if not.
     """
     if not file_exists(input_filename_with_path):
         print(f'ffmpeg error: File {input_filename_with_path} does not exist')
-        return None
+        return None, None
+    duration = detect_audio_duration(input_filename_with_path)
+    if duration is None:
+        return None, None
     try:
         err = ffmpeg.input(input_filename_with_path).audio. \
             output(output_filename_with_path, acodec='libopus', ar=48000). \
@@ -300,9 +305,9 @@ def extract_audio_from_video(input_filename_with_path, output_filename_with_path
         err = str(e)
 
     if file_exists(output_filename_with_path) and ('ffmpeg error' not in err):
-        return output_token
+        return output_token, duration
     else:
-        return None
+        return None, None
 
 
 def extract_media_segment(input_filename_with_path, output_filename_with_path, output_token, start, length):

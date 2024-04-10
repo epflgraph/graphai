@@ -8,9 +8,9 @@ from graphai.api.common.video import file_management_config, local_ocr_nlp_model
 from graphai.api.common.ontology import ontology_data
 from graphai.api.common.translation import translation_models
 from graphai.core.common.video import retrieve_file_from_url, create_filename_using_url_format, \
-    detect_audio_format_and_duration, extract_audio_from_video, extract_frames, generate_frame_sample_indices, \
+    detect_audio_duration, extract_audio_from_video, extract_frames, generate_frame_sample_indices, \
     compute_ocr_noise_level, compute_ocr_threshold, compute_video_ocr_transitions, check_ocr_and_hash_thresholds, \
-    generate_random_token, md5_video_or_audio, generate_symbolic_token, read_txt_gz_file, \
+    generate_random_token, md5_video_or_audio, generate_symbolic_token, read_txt_gz_file, generate_audio_token, \
     FRAME_FORMAT_PNG, TESSERACT_OCR_FORMAT
 from graphai.core.common.caching import (
     AudioDBCachingManager,
@@ -187,53 +187,47 @@ def get_file_task(self, filename):
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
+             name='caching_6.cache_lookup_extract_audio', ignore_result=False,
+             file_manager=file_management_config)
+def cache_lookup_extract_audio_task(self, token):
+    # Here, the caching logic is a bit complicated. The results of audio extraction are cached in the
+    # audio tables, whereas the closest-matching video is cached in the video tables. As a result, we
+    # need to look for the cached extracted audio of two videos: the provided token and its closest
+    # token.
+    video_db_manager = VideoDBCachingManager()
+    audio_db_manager = AudioDBCachingManager()
+    # Retrieving the closest match of the current video
+    closest_token = video_db_manager.get_closest_match(token)
+    # Looking up the cached audio result of the current video
+    existing_own = audio_db_manager.get_details_using_origin(token, cols=['duration'])
+    # Looking up the cached audio result of the closest match video (if it's not the same as the current video)
+    if closest_token is not None and closest_token != token:
+        existing_closest = audio_db_manager.get_details_using_origin(closest_token, cols=['duration'])
+    else:
+        existing_closest = None
+    # We first look at the video's own existing audio, then at that of the closest match because the video's
+    # own precomputed audio (if any) takes precedence.
+    all_existing = [existing_own, existing_closest]
+    for existing in all_existing:
+        if existing is not None:
+            print('Returning cached result')
+            return {
+                'token': existing[0]['id_token'],
+                'fresh': False,
+                'duration': existing[0]['duration']
+            }
+
+    return None
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='video_2.extract_audio', ignore_result=False,
              file_manager=file_management_config)
-def extract_audio_task(self, token, force=False):
-    input_filename_with_path = self.file_manager.generate_filepath(token)
-    output_token, input_duration = detect_audio_format_and_duration(input_filename_with_path, token)
-    if output_token is None:
-        return {
-            'token': None,
-            'fresh': False,
-            'duration': 0.0
-        }
-
-    output_filename_with_path = self.file_manager.generate_filepath(output_token)
-
-    # Here, the existing row can be None because the row is inserted into the table
-    # only after extracting the audio from the video.
-    if not force:
-        # Here, the caching logic is a bit complicated. The results of audio extraction are cached in the
-        # audio tables, whereas the closest-matching video is cached in the video tables. As a result, we
-        # need to look for the cached extracted audio of two videos: the provided token and its closest
-        # token.
-        video_db_manager = VideoDBCachingManager()
-        audio_db_manager = AudioDBCachingManager()
-        # Retrieving the closest match of the current video
-        closest_token = video_db_manager.get_closest_match(token)
-        # Looking up the cached audio result of the current video
-        existing_own = audio_db_manager.get_details_using_origin(token, cols=['duration'])
-        # Looking up the cached audio result of the closest match video (if it's not the same as the current video)
-        if closest_token is not None and closest_token != token:
-            existing_closest = audio_db_manager.get_details_using_origin(closest_token, cols=['duration'])
-        else:
-            existing_closest = None
-        # We first look at the video's own existing audio, then at that of the closest match because the video's
-        # own precomputed audio (if any) takes precedence.
-        all_existing = [existing_own, existing_closest]
-        for existing in all_existing:
-            if existing is not None:
-                print('Returning cached result')
-                return {
-                    'token': existing[0]['id_token'],
-                    'fresh': False,
-                    'duration': existing[0]['duration']
-                }
-
-    results = extract_audio_from_video(input_filename_with_path,
-                                       output_filename_with_path,
-                                       output_token)
+def extract_audio_task(self, token):
+    output_token = generate_audio_token(token)
+    results, input_duration = extract_audio_from_video(self.file_manager.generate_filepath(token),
+                                                       self.file_manager.generate_filepath(output_token),
+                                                       output_token)
     if results is None:
         return {
             'token': None,
@@ -321,7 +315,7 @@ def reextract_cached_audio_task(self, token):
     token_to_use_as_name = existing_audio[0]['id_token']
     output_filename_with_path = self.file_manager.generate_filepath(token_to_use_as_name)
     input_filename_with_path = self.file_manager.generate_filepath(token)
-    output_filename = extract_audio_from_video(
+    output_filename, _ = extract_audio_from_video(
         input_filename_with_path, output_filename_with_path, token_to_use_as_name
     )
     # If there was an error of any kind (e.g. non-existing video file), the returned token will be None

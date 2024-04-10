@@ -11,7 +11,11 @@ from graphai.api.celery_tasks.video import (
     video_fingerprint_find_closest_retrieve_from_db_task,
     video_fingerprint_find_closest_parallel_task,
     video_fingerprint_find_closest_callback_task,
-    retrieve_video_fingerprint_callback_task
+    retrieve_video_fingerprint_callback_task,
+    cache_lookup_extract_audio_task,
+    extract_audio_task,
+    extract_audio_callback_task,
+    reextract_cached_audio_task
 )
 from graphai.core.common.caching import FingerprintParameters
 
@@ -93,6 +97,61 @@ def fingerprint_job(token, force):
     #################
     # This is the fingerprinting job, so ignore_fp_results is False
     task_list = get_video_fingerprint_chain_list(token, ignore_fp_results=False)
+    task = chain(task_list)
+    task = task.apply_async(priority=2)
+    return task.id
+
+
+def extract_audio_job(token, force=False, recalculate_cached=False):
+    ############################
+    # Extract audio cache lookup
+    ############################
+    # We only do the cache lookup if both force and recalculate_cached flags are False
+    # If force=True, we explicitly want to skip the cached results
+    # If recalculate_cached=True, we want to re-extract the audio based on cache, and not just return the cached result!
+    if not force and not recalculate_cached:
+        direct_lookup_job = cache_lookup_extract_audio_task.s(token)
+        direct_lookup_job = direct_lookup_job.apply_async(priority=6)
+        direct_lookup_task_id = direct_lookup_job.id
+        # We block on this task since we need its results to decide what to do next
+        direct_lookup_results = direct_lookup_job.get(timeout=20)
+        # If the cache lookup yielded results, then return the id of the task, otherwise we proceed normally with the
+        # computations
+        if direct_lookup_results is not None:
+            return direct_lookup_task_id
+
+    ##########################
+    # Fingerprint cache lookup
+    ##########################
+    # Fingerprinting is never forced in non-fingerprinting jobs
+    direct_fingerprint_lookup_task_id = fingerprint_lookup_job(token)
+
+    #################
+    # (Re)Computation
+    #################
+    if direct_fingerprint_lookup_task_id is None:
+        # If the fingerprint is not cached, we add the fingerprinting chain
+        task_list = get_video_fingerprint_chain_list(token, ignore_fp_results=True, results_to_return=token)
+        if not recalculate_cached:
+            # If the recalculate flag is not set, we add the normal audio extraction chain
+            task_list += [
+                extract_audio_task.s(),
+                extract_audio_callback_task.s(token, force)
+            ]
+        else:
+            # If a recalculation is requested, we add the re-extraction task
+            task_list += [reextract_cached_audio_task.s()]
+    else:
+        # If the fingerprint is already cached
+        # Same as above, but with the starting tasks having their full signature since fingerprinting is skipped
+        if not recalculate_cached:
+            task_list = [
+                extract_audio_task.s(token),
+                extract_audio_callback_task.s(token, force)
+            ]
+        else:
+            task_list = [reextract_cached_audio_task.s(token)]
+
     task = chain(task_list)
     task = task.apply_async(priority=2)
     return task.id
