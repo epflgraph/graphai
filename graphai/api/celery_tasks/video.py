@@ -336,10 +336,9 @@ def reextract_cached_audio_task(self, token):
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='video_2.extract_and_sample_frames', ignore_result=False,
+             name='caching_6.cache_lookup_detect_slides', ignore_result=False,
              file_manager=file_management_config)
-def extract_and_sample_frames_task(self, token, force=False):
-    # Checking for existing cached results
+def cache_lookup_detect_slides_task(self, token):
     video_db_manager = VideoDBCachingManager()
     # Retrieving the closest match of the current video
     closest_token = video_db_manager.get_closest_match(token)
@@ -352,69 +351,64 @@ def extract_and_sample_frames_task(self, token, force=False):
         existing_slides_closest = None
     # We first look at the video's own existing slides, then at those of the closest match because the video's
     # own precomputed slides (if any) take precedence.
-    input_filename_with_path = self.file_manager.generate_filepath(token)
     all_existing = [existing_slides_own, existing_slides_closest]
     for existing_slides in all_existing:
-        # If we have a cache hit
         if existing_slides is not None:
-            # If the force flag is off, we return the cache hit
-            if not force:
-                print('Returning cached result')
-                return {
-                    'result': None,
-                    'sample_indices': None,
-                    'fresh': False,
-                    'slide_tokens': {
-                        x['slide_number']: {
-                            'token': x['id_token'],
-                            'timestamp': int(x['timestamp'])
-                        }
-                        for x in existing_slides
+            print('Returning cached result')
+            return {
+                'fresh': False,
+                'slide_tokens': {
+                    x['slide_number']: {
+                        'token': x['id_token'],
+                        'timestamp': int(x['timestamp']),
+                        'token_status': get_image_token_status(x['id_token'])
                     }
+                    for x in existing_slides
                 }
-            else:
-                # If force==True, then we need to first delete the existing rows in case the results this time are
-                # different from what they were before, since unlike audio endpoints, there's multiple rows per
-                # video here (although the old files are not deleted because there may be symlinks to them).
-                # This will require a force-recomputation of every other property that pertains to the video
-                # whose slides have been force-recomputed, e.g. fingerprints and text OCRs.
-                # Obviously, this only applies to the video itself, and not the closest match found,
-                # hence the `if` below.
-                # In general, force is only there for debugging and testing.
-                if existing_slides[0]['origin_token'] == token:
-                    # If the file doesn't exist, we don't allow for a forced recomputation since it'd involve deleting
-                    # the existing cache rows, which can't be replaced (since the original video file is gone).
-                    if not file_exists(input_filename_with_path):
-                        return {
-                            'result': None,
-                            'sample_indices': None,
-                            'fresh': False,
-                            'slide_tokens': None
-                        }
-                    # If everything's fine, we delete the cache rows before continuing
-                    slide_db_manager.delete_cache_rows([x['id_token'] for x in existing_slides])
-                    # We break because we're done with the cache lookup
-                    break
+            }
+
+    return None
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
+             name='video_2.check_and_delete_existing_slides', ignore_result=False,
+             file_manager=file_management_config)
+def check_and_delete_existing_slides_task(self, token):
+    # This task is only used when detect_slides is triggered with force=True.
+    # In such a case we need to check the cache and *delete* any existing slide cache rows before we proceed.
+    # Before we do such a thing, we need to make sure the video file exists, because the cache rows of
+    # an inactive token should not be deleted.
+    slide_db_manager = SlideDBCachingManager()
+    existing_slides_own = slide_db_manager.get_details_using_origin(token, cols=[])
+    if existing_slides_own is not None and file_exists(self.file_manager.generate_filepath(token)):
+        slide_db_manager.delete_cache_rows([x['id_token'] for x in existing_slides_own])
+    return token
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
+             name='video_2.extract_and_sample_frames', ignore_result=False,
+             file_manager=file_management_config)
+def extract_and_sample_frames_task(self, token):
     # Extracting frames
     print('Extracting frames...')
     output_folder = token + '_all_frames'
     output_folder_with_path = self.file_manager.generate_filepath(output_folder)
-    output_folder = extract_frames(input_filename_with_path, output_folder_with_path, output_folder)
+    output_folder = extract_frames(self.file_manager.generate_filepath(token),
+                                   output_folder_with_path,
+                                   output_folder)
     # If there was an error of any kind (e.g. non-existing video file), the returned token will be None
     if output_folder is None:
         return {
             'result': None,
             'sample_indices': None,
-            'fresh': False,
-            'slide_tokens': None
+            'fresh': False
         }
     # Generating frame sample indices
     frame_indices = generate_frame_sample_indices(self.file_manager.generate_filepath(output_folder))
     return {
         'result': output_folder,
         'sample_indices': frame_indices,
-        'fresh': True,
-        'slide_tokens': None
+        'fresh': True
     }
 
 
@@ -428,8 +422,7 @@ def compute_noise_level_parallel_task(self, results, i, n, language=None):
             'result': None,
             'sample_indices': None,
             'noise_level': None,
-            'fresh': False,
-            'slide_tokens': results['slide_tokens']
+            'fresh': False
         }
 
     all_sample_indices = results['sample_indices']
@@ -447,8 +440,7 @@ def compute_noise_level_parallel_task(self, results, i, n, language=None):
         'result': results['result'],
         'sample_indices': results['sample_indices'],
         'noise_level': noise_level_list,
-        'fresh': True,
-        'slide_tokens': None
+        'fresh': True
     }
 
 
@@ -460,8 +452,7 @@ def compute_noise_threshold_callback_task(self, results, hash_thresh=0.8):
             'result': None,
             'sample_indices': None,
             'threshold': None,
-            'fresh': False,
-            'slide_tokens': results[0]['slide_tokens']
+            'fresh': False
         }
 
     list_of_noise_value_lists = [x['noise_level'] for x in results]
@@ -473,8 +464,7 @@ def compute_noise_threshold_callback_task(self, results, hash_thresh=0.8):
         'sample_indices': results[0]['sample_indices'],
         'threshold': threshold,
         'hash_threshold': hash_thresh,
-        'fresh': True,
-        'slide_tokens': None
+        'fresh': True
     }
 
 
@@ -488,8 +478,7 @@ def compute_slide_transitions_parallel_task(self, results, i, n, language=None):
             'transitions': None,
             'threshold': None,
             'hash_threshold': None,
-            'fresh': False,
-            'slide_tokens': results['slide_tokens']
+            'fresh': False
         }
 
     all_sample_indices = results['sample_indices']
@@ -511,8 +500,7 @@ def compute_slide_transitions_parallel_task(self, results, i, n, language=None):
         'transitions': slide_transition_list,
         'threshold': results['threshold'],
         'hash_threshold': results['hash_threshold'],
-        'fresh': True,
-        'slide_tokens': None
+        'fresh': True
     }
 
 
@@ -524,8 +512,7 @@ def compute_slide_transitions_callback_task(self, results, language=None):
         return {
             'result': None,
             'slides': None,
-            'fresh': False,
-            'slide_tokens': results[0]['slide_tokens']
+            'fresh': False
         }
 
     # Cleaning up the slides in-between slices
@@ -554,8 +541,7 @@ def compute_slide_transitions_callback_task(self, results, language=None):
     return {
         'result': results[0]['result'],
         'slides': all_transitions,
-        'fresh': True,
-        'slide_tokens': None
+        'fresh': True
     }
 
 
@@ -563,6 +549,7 @@ def compute_slide_transitions_callback_task(self, results, language=None):
              name='video_2.detect_slides_callback', ignore_result=False,
              file_manager=file_management_config)
 def detect_slides_callback_task(self, results, token, force=False):
+    slide_tokens = None
     if results['fresh']:
         # Delete non-slide frames from the frames directory
         list_of_slides = [(FRAME_FORMAT_PNG) % (x) for x in results['slides']]
@@ -642,9 +629,6 @@ def detect_slides_callback_task(self, results, token, force=False):
                     db_manager.insert_or_update_closest_match(current_token, {
                         'most_similar_token': symbolic_token
                     })
-    else:
-        # Getting cached or null results that have been passed along the chain of tasks
-        slide_tokens = results['slide_tokens']
     if slide_tokens is not None:
         for slide_number in slide_tokens:
             slide_tokens[slide_number]['token_status'] = get_image_token_status(slide_tokens[slide_number]['token'])
@@ -677,8 +661,10 @@ def reextract_cached_slides_task(self, token):
     timestamps_to_keep = sorted([x['timestamp'] for x in existing_slides])
     output_folder = token_to_use_as_name + '_slides'
     output_folder_with_path = self.file_manager.generate_filepath(output_folder)
-    input_filename_with_path = self.file_manager.generate_filepath(token)
-    output_folder = extract_frames(input_filename_with_path, output_folder_with_path, output_folder)
+
+    output_folder = extract_frames(self.file_manager.generate_filepath(token),
+                                   output_folder_with_path,
+                                   output_folder)
     # If there was an error of any kind (e.g. non-existing video file), the returned token will be None
     if output_folder is None:
         return {
