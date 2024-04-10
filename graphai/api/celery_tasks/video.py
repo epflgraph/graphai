@@ -93,21 +93,27 @@ def retrieve_file_from_url_callback_task(self, results, url, force=False):
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='video_2.fingerprint_video', ignore_result=False,
+             name='caching_6.cache_lookup_fingerprint_video', ignore_result=False,
              file_manager=file_management_config)
-def compute_video_fingerprint_task(self, token, force=False):
+def cache_lookup_fingerprint_video_task(self, token):
     db_manager = VideoDBCachingManager()
     existing = db_manager.get_details(token, ['fingerprint'])[0]
-    # We don't fail the task if the video isn't already cached because some videos won't come from a URI.
-    if not force and existing is not None and existing['fingerprint'] is not None:
+    if existing is not None and existing['fingerprint'] is not None:
         return {
             'result': existing['fingerprint'],
             'fp_token': existing['id_token'],
             'perform_lookup': False,
             'fresh': False
         }
-    input_filename_with_path = self.file_manager.generate_filepath(token)
-    fp = md5_video_or_audio(input_filename_with_path, video=True)
+
+    return None
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
+             name='video_2.fingerprint_video', ignore_result=False,
+             file_manager=file_management_config)
+def compute_video_fingerprint_task(self, token):
+    fp = md5_video_or_audio(self.file_manager.generate_filepath(token), video=True)
     return {
         'result': fp,
         'fp_token': token if fp is not None else None,
