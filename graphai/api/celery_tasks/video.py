@@ -1,17 +1,27 @@
 import os
 import shutil
+from itertools import chain
 
 from celery import shared_task
 
-from graphai.api.common.video import file_management_config, local_ocr_nlp_models, \
-    transcription_model
-from graphai.api.common.ontology import ontology_data
-from graphai.api.common.translation import translation_models
-from graphai.core.common.video import retrieve_file_from_url, create_filename_using_url_format, \
-    detect_audio_duration, extract_audio_from_video, extract_frames, generate_frame_sample_indices, \
-    compute_ocr_noise_level, compute_ocr_threshold, compute_video_ocr_transitions, check_ocr_and_hash_thresholds, \
-    generate_random_token, md5_video_or_audio, generate_symbolic_token, read_txt_gz_file, generate_audio_token, \
-    FRAME_FORMAT_PNG, TESSERACT_OCR_FORMAT
+from graphai.core.common.video import (
+    retrieve_file_from_url,
+    create_filename_using_url_format,
+    extract_audio_from_video,
+    extract_frames,
+    generate_frame_sample_indices,
+    compute_ocr_noise_level,
+    compute_ocr_threshold,
+    compute_video_ocr_transitions,
+    check_ocr_and_hash_thresholds,
+    generate_random_token,
+    md5_video_or_audio,
+    generate_symbolic_token,
+    read_txt_gz_file,
+    generate_audio_token,
+    FRAME_FORMAT_PNG,
+    TESSERACT_OCR_FORMAT
+)
 from graphai.core.common.caching import (
     AudioDBCachingManager,
     SlideDBCachingManager,
@@ -20,11 +30,19 @@ from graphai.core.common.caching import (
     get_image_token_status,
     get_audio_token_status
 )
-from graphai.core.common.common_utils import file_exists, get_current_datetime, strtobool
-from itertools import chain
-from graphai.api.celery_tasks.common import fingerprint_lookup_retrieve_from_db, \
-    fingerprint_lookup_parallel, fingerprint_lookup_callback
-from graphai.core.common.config import config
+from graphai.core.common.common_utils import (
+    get_current_datetime
+)
+
+from graphai.api.common.video import (
+    file_management_config,
+    local_ocr_nlp_models
+)
+from graphai.api.celery_tasks.common import (
+    fingerprint_lookup_retrieve_from_db,
+    fingerprint_lookup_parallel,
+    fingerprint_lookup_callback
+)
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
@@ -371,30 +389,14 @@ def cache_lookup_detect_slides_task(self, token):
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='video_2.check_and_delete_existing_slides', ignore_result=False,
-             file_manager=file_management_config)
-def check_and_delete_existing_slides_task(self, token):
-    # This task is only used when detect_slides is triggered with force=True.
-    # In such a case we need to check the cache and *delete* any existing slide cache rows before we proceed.
-    # Before we do such a thing, we need to make sure the video file exists, because the cache rows of
-    # an inactive token should not be deleted.
-    slide_db_manager = SlideDBCachingManager()
-    existing_slides_own = slide_db_manager.get_details_using_origin(token, cols=[])
-    if existing_slides_own is not None and file_exists(self.file_manager.generate_filepath(token)):
-        slide_db_manager.delete_cache_rows([x['id_token'] for x in existing_slides_own])
-    return token
-
-
-@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='video_2.extract_and_sample_frames', ignore_result=False,
              file_manager=file_management_config)
 def extract_and_sample_frames_task(self, token):
     # Extracting frames
     print('Extracting frames...')
     output_folder = token + '_all_frames'
-    output_folder_with_path = self.file_manager.generate_filepath(output_folder)
     output_folder = extract_frames(self.file_manager.generate_filepath(token),
-                                   output_folder_with_path,
+                                   self.file_manager.generate_filepath(output_folder),
                                    output_folder)
     # If there was an error of any kind (e.g. non-existing video file), the returned token will be None
     if output_folder is None:
@@ -551,6 +553,21 @@ def compute_slide_transitions_callback_task(self, results, language=None):
 def detect_slides_callback_task(self, results, token, force=False):
     slide_tokens = None
     if results['fresh']:
+        db_manager = SlideDBCachingManager()
+        #####################################
+        # Deleting pre-existing cached slides
+        #####################################
+        if force:
+            # If force=True, then there's the possibility that the cache contains previously-extracted slides.
+            # Since the new slides and the old slides may not be 100% identical,
+            # the old cache rows need to be deleted first.
+            existing_slides_own = db_manager.get_details_using_origin(token, cols=[])
+            if existing_slides_own is not None:
+                db_manager.delete_cache_rows([x['id_token'] for x in existing_slides_own])
+
+        ###############################################
+        # Removing non-slide frames and leftover slides
+        ###############################################
         # Delete non-slide frames from the frames directory
         list_of_slides = [(FRAME_FORMAT_PNG) % (x) for x in results['slides']]
         list_of_ocr_results = [(TESSERACT_OCR_FORMAT) % (x) for x in results['slides']]
@@ -575,6 +592,10 @@ def detect_slides_callback_task(self, results, token, force=False):
         else:
             # If the _all_frames folder doesn't exist, assert that the slides folder does!
             assert os.path.exists(slides_folder_with_path)
+
+        ####################################
+        # Result formatting and DB insertion
+        ####################################
         slide_tokens = [os.path.join(slides_folder, s) for s in list_of_slides]
         ocr_tokens = [os.path.join(slides_folder, s) for s in list_of_ocr_results]
         slide_tokens = {i + 1: {'token': slide_tokens[i], 'timestamp': results['slides'][i]}
@@ -582,7 +603,6 @@ def detect_slides_callback_task(self, results, token, force=False):
         ocr_tokens = {i + 1: ocr_tokens[i] for i in range(len(ocr_tokens))}
         current_datetime = get_current_datetime()
         # Inserting fresh results into the database
-        db_manager = SlideDBCachingManager()
         for slide_number in slide_tokens:
             db_manager.insert_or_update_details(
                 slide_tokens[slide_number]['token'],
@@ -624,8 +644,8 @@ def detect_slides_callback_task(self, results, token, force=False):
                             'date_added': current_datetime
                         }
                     )
-                    # We make the symlink file the closest match of the main file (to make sure closest match refs flow in
-                    # the same direction).
+                    # We make the symlink file the closest match of the main file (to make sure
+                    # closest match refs flow in the same direction).
                     db_manager.insert_or_update_closest_match(current_token, {
                         'most_similar_token': symbolic_token
                     })
@@ -686,35 +706,3 @@ def reextract_cached_slides_task(self, token):
         'slide_tokens': slide_tokens,
         'fresh': True
     }
-
-
-@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='video_2.init', ignore_result=False,
-             transcription_obj=transcription_model,
-             nlp_obj=local_ocr_nlp_models,
-             translation_obj=translation_models,
-             ontology_data_obj=ontology_data)
-def video_init_task(self):
-    # This task initialises the video celery worker by loading into memory the transcription and NLP models
-    print('Start video_init task')
-
-    if strtobool(config['preload']['video']):
-        print('Loading transcription model...')
-        self.transcription_obj.load_model_whisper()
-
-        print('Loading NLP models...')
-        self.nlp_obj.load_nlp_models()
-
-        print('Loading translation models...')
-        self.translation_obj.load_models()
-    else:
-        print('Skipping preloading for video endpoints.')
-
-    if strtobool(config['preload']['ontology']):
-        print('Loading ontology data...')
-        self.ontology_data_obj.load_data()
-    else:
-        print('Skipping preloading for ontology endpoints.')
-
-    print('All video processing objects loaded')
-    return True

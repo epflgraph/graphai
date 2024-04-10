@@ -56,7 +56,7 @@ def test__video_calculate_fingerprint__compute_video_fingerprint_task__run_task(
 
 @pytest.mark.usefixtures('test_video_token')
 def test__video_detect_slides__extract_and_sample_frames_task__run_task(test_video_token):
-    results = extract_and_sample_frames_task(test_video_token, True)
+    results = extract_and_sample_frames_task(test_video_token)
 
     assert isinstance(results, dict)
     assert 'result' in results

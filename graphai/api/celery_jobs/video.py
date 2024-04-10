@@ -1,6 +1,7 @@
 from celery import chain, group
 
 from graphai.api.celery_tasks.common import ignore_fingerprint_results_callback_task
+from graphai.api.celery_tasks.common import video_dummy_task
 from graphai.api.celery_tasks.video import (
     cache_lookup_retrieve_file_from_url_task,
     retrieve_file_from_url_task,
@@ -15,7 +16,16 @@ from graphai.api.celery_tasks.video import (
     cache_lookup_extract_audio_task,
     extract_audio_task,
     extract_audio_callback_task,
-    reextract_cached_audio_task
+    reextract_cached_audio_task,
+    cache_lookup_detect_slides_task,
+    extract_and_sample_frames_task,
+    compute_noise_level_parallel_task,
+    compute_noise_threshold_callback_task,
+    compute_slide_transitions_parallel_task,
+    compute_slide_transitions_callback_task,
+    detect_slides_callback_task,
+    reextract_cached_slides_task,
+    get_file_task
 )
 from graphai.core.common.caching import FingerprintParameters
 
@@ -155,3 +165,70 @@ def extract_audio_job(token, force=False, recalculate_cached=False):
     task = chain(task_list)
     task = task.apply_async(priority=2)
     return task.id
+
+
+def detect_slides_job(token, language, force=False, recalculate_cached=False):
+    ############################
+    # Detect slides cache lookup
+    ############################
+    # We only do the cache lookup if both force and recalculate_cached flags are False
+    # If force=True, we explicitly want to skip the cached results
+    # If recalculate_cached=True, we want to re-extract the audio based on cache, and not just return the cached result!
+    if not force and not recalculate_cached:
+        direct_lookup_job = cache_lookup_detect_slides_task.s(token)
+        direct_lookup_job = direct_lookup_job.apply_async(priority=6)
+        direct_lookup_task_id = direct_lookup_job.id
+        # We block on this task since we need its results to decide what to do next
+        direct_lookup_results = direct_lookup_job.get(timeout=20)
+        # If the cache lookup yielded results, then return the id of the task, otherwise we proceed normally with the
+        # computations
+        if direct_lookup_results is not None:
+            return direct_lookup_task_id
+
+    ##########################
+    # Fingerprint cache lookup
+    ##########################
+    # Fingerprinting is never forced in non-fingerprinting jobs
+    direct_fingerprint_lookup_task_id = fingerprint_lookup_job(token)
+
+    #################
+    # (Re)Computation
+    #################
+    if not recalculate_cached:
+        if direct_fingerprint_lookup_task_id is None:
+            # If there's no fingerprint, add the fingerprinting chain
+            task_list = get_video_fingerprint_chain_list(token, ignore_fp_results=True, results_to_return=token)
+            task_list += [extract_and_sample_frames_task.s()]
+        else:
+            # Otherwise the first task gets its full signature
+            task_list = [extract_and_sample_frames_task.s(token)]
+        # Now we add the rest
+        n_jobs = 8
+        # This is the maximum similarity threshold used for image hashes when finding slide transitions.
+        hash_thresh = 0.95
+        # The dummy task is there because of a celery peculiarity where a group chord cannot be immediately followed
+        # by another group.
+        task_list += [group(compute_noise_level_parallel_task.s(i, n_jobs, language) for i in range(n_jobs)),
+                      compute_noise_threshold_callback_task.s(hash_thresh),
+                      video_dummy_task.s(),
+                      group(compute_slide_transitions_parallel_task.s(i, n_jobs, language) for i in range(n_jobs)),
+                      compute_slide_transitions_callback_task.s(language),
+                      detect_slides_callback_task.s(token, force)]
+    else:
+        if direct_fingerprint_lookup_task_id is None:
+            # If there's no fingerprint, add the fingerprinting chain
+            task_list = get_video_fingerprint_chain_list(token, ignore_fp_results=True, results_to_return=token)
+            task_list += [reextract_cached_slides_task.s()]
+        else:
+            # Full signature for first task
+            task_list = [reextract_cached_slides_task.s(token)]
+
+    task = chain(task_list)
+    task = task.apply_async(priority=2)
+    return task.id
+
+
+def get_file_job(token):
+    task = get_file_task.s(token)
+    result = task.apply_async(priority=2).get(timeout=300)
+    return result

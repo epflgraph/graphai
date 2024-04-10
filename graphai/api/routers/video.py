@@ -1,6 +1,5 @@
 from fastapi import APIRouter, Security
 from fastapi.responses import FileResponse
-from celery import group, chain
 
 from graphai.api.schemas.common import TaskIDResponse, FileRequest
 from graphai.api.schemas.video import (
@@ -14,26 +13,14 @@ from graphai.api.schemas.video import (
     VideoFingerprintResponse
 )
 
-from graphai.api.celery_tasks.common import format_api_results, video_dummy_task
-from graphai.api.celery_tasks.video import (
-    get_file_task,
-    extract_audio_task,
-    extract_audio_callback_task,
-    reextract_cached_audio_task,
-    extract_and_sample_frames_task,
-    compute_noise_level_parallel_task,
-    compute_noise_threshold_callback_task,
-    compute_slide_transitions_parallel_task,
-    compute_slide_transitions_callback_task,
-    detect_slides_callback_task,
-    reextract_cached_slides_task
-)
+from graphai.api.celery_tasks.common import format_api_results
 
 from graphai.api.celery_jobs.video import (
     retrieve_url_job,
     fingerprint_job,
     extract_audio_job,
-    get_video_fingerprint_chain_list
+    detect_slides_job,
+    get_file_job
 )
 
 from graphai.api.routers.auth import get_current_active_user
@@ -106,7 +93,7 @@ async def calculate_video_fingerprint_status(task_id):
 @router.post('/get_file')
 async def get_file(data: FileRequest):
     token = data.token
-    return FileResponse(get_file_task.apply_async(args=[token], priority=2).get())
+    return FileResponse(get_file_job(token))
 
 
 @router.post('/extract_audio', response_model=TaskIDResponse)
@@ -142,28 +129,8 @@ async def detect_slides(data: DetectSlidesRequest):
     force = data.force
     recalculate = data.recalculate_cached
     language = data.language
-    task_list = get_video_fingerprint_chain_list(token, force=False,
-                                                 ignore_fp_results=True, results_to_return=token)
-    if not recalculate:
-        n_jobs = 8
-        # This is the maximum similarity threshold used for image hashes when finding slide transitions.
-        hash_thresh = 0.95
-        # Fingerprinting is always performed but with force=False, regardless of the provided force flag.
-        # Task list involves extracting and sampling frames, parallel noise level comp and its callback, then a dummy task
-        # because of celery's need for an additional non-group task in the middle, then slide transition comp and its
-        # callback, followed by a final callback that inserts the results into the cache db.
-        task_list += [extract_and_sample_frames_task.s(force)]
-        task_list += [group(compute_noise_level_parallel_task.s(i, n_jobs, language) for i in range(n_jobs)),
-                      compute_noise_threshold_callback_task.s(hash_thresh),
-                      video_dummy_task.s(),
-                      group(compute_slide_transitions_parallel_task.s(i, n_jobs, language) for i in range(n_jobs)),
-                      compute_slide_transitions_callback_task.s(language),
-                      detect_slides_callback_task.s(token, force)]
-    else:
-        task_list += [reextract_cached_slides_task.s()]
-    task = chain(task_list)
-    task = task.apply_async(priority=2)
-    return {'task_id': task.id}
+    task_id = detect_slides_job(token, language, force, recalculate)
+    return {'task_id': task_id}
 
 
 @router.get('/detect_slides/status/{task_id}', response_model=DetectSlidesResponse)
