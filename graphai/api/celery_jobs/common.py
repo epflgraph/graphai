@@ -1,4 +1,4 @@
-def direct_lookup_generic_job(token, task_fn):
+def direct_lookup_generic_job(task_fn, token, *args):
     """
     Launches a direct cache lookup job
     Args:
@@ -8,7 +8,11 @@ def direct_lookup_generic_job(token, task_fn):
     Returns:
         The id of the cache lookup task in case of a cache hit, None in case of a miss
     """
-    direct_lookup_job = task_fn.s(token)
+    args = list(args)
+    if len(args) == 0:
+        direct_lookup_job = task_fn.s(token)
+    else:
+        direct_lookup_job = task_fn.s(token, *args)
     direct_lookup_job = direct_lookup_job.apply_async(priority=6)
     direct_lookup_task_id = direct_lookup_job.id
     # We block on this task since we need its results to decide what to do next
