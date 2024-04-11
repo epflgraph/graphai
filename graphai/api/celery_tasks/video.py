@@ -78,12 +78,12 @@ def retrieve_file_from_url_callback_task(self, results, url, force=False):
         db_manager = VideoDBCachingManager()
         current_datetime = get_current_datetime()
         values = {
-            'date_modified': current_datetime
+            'date_modified': current_datetime,
+            'origin_token': url
         }
-        if not force:
+        if not force or db_manager.get_details(results['token'], [], using_most_similar=False)[0] is None:
             values.update(
                 {
-                    'origin_token': url,
                     'date_added': current_datetime
                 }
             )
