@@ -669,9 +669,8 @@ def reextract_cached_slides_task(self, token):
             'fresh': False
         }
     existing_slides = existing_slides_own if existing_slides_own is not None else existing_slides_closest
-    token_to_use_as_name = existing_slides[0]['origin_token']
+    output_folder = existing_slides[0]['id_token'].split('/')[0]
     timestamps_to_keep = sorted([x['timestamp'] for x in existing_slides])
-    output_folder = token_to_use_as_name + '_slides'
     output_folder_with_path = self.file_manager.generate_filepath(output_folder)
     input_filename_with_path = self.file_manager.generate_filepath(token)
     output_folder = extract_frames(input_filename_with_path, output_folder_with_path, output_folder)
