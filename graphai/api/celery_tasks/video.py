@@ -258,19 +258,15 @@ def extract_audio_callback_task(self, results, origin_token, force=False):
                 'date_added': current_datetime
             }
         )
-        # Inserting the results for the closest match happens only if the results are fresh while the
-        # force flag was False. Fresh results with force=False AND a non-null, non-identical closest-match
-        # mean that there's another video identical to this one, and NEITHER has had its audio extracted
-        # before. That's why we would insert the results for both videos in such a case. If force=True,
-        # we don't care about the closest match at all.
         if not force:
+            # If the force flag is False, we may need to propagate the results of this computation to its closest match.
+            # The propagation happens if:
+            # 1. The token has a closest match (that isn't itself)
+            # 2. The closest match does NOT have cached slide results
             video_db_manager = VideoDBCachingManager()
             closest_video_match = video_db_manager.get_closest_match(origin_token)
-            # This only happens if the other video has been fingerprinted before having its audio extracted.
-            # A case where this happens is an old video that have had slide detection performed on it,
-            # but not audio extraction. When extract_audio is called on a new identical video, the results
-            # of audio extraction on the latter need to be inserted for the former as well.
-            if closest_video_match is not None and closest_video_match != origin_token:
+            if (closest_video_match is not None and closest_video_match != origin_token
+                    and db_manager.get_details_using_origin(closest_video_match, []) is None):
                 symbolic_token = generate_symbolic_token(closest_video_match, results['token'])
                 self.file_manager.create_symlink(self.file_manager.generate_filepath(results['token']), symbolic_token)
                 # Everything is the same aside from the id_token, which is the symbolic token, and the origin_token,
@@ -610,15 +606,14 @@ def detect_slides_callback_task(self, results, token, force=False):
                 }
             )
         if not force:
-            # Now we check if the video had a closest video match, and if so, insert these results for that
-            # video as well, but only if force is False because otherwise we ignore the closest match.
+            # If the force flag is False, we may need to propagate the results of this computation to its closest match.
+            # The propagation happens if:
+            # 1. The token has a closest match (that isn't itself)
+            # 2. The closest match does NOT have cached slide results
             video_db_manager = VideoDBCachingManager()
             closest_video_match = video_db_manager.get_closest_match(token)
-            # This only happens if the other video has been fingerprinted before having its slides extracted.
-            # A case where this happens is an old video that have had audio extraction performed on it,
-            # but not slide detection. When detect_slides is called on a new identical video, the results
-            # of slide detection on the latter need to be inserted for the former as well.
-            if closest_video_match is not None and closest_video_match != token:
+            if (closest_video_match is not None and closest_video_match != token
+                    and db_manager.get_details_using_origin(closest_video_match, []) is None):
                 for slide_number in slide_tokens:
                     # For each slide, we get its token (which is the name of its file) and create a new file with a new
                     # token that has a symlink to the actual slide file.
