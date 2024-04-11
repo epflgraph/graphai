@@ -81,7 +81,8 @@ def retrieve_file_from_url_callback_task(self, results, url, force=False):
             'date_modified': current_datetime,
             'origin_token': url
         }
-        if not force or db_manager.get_details(results['token'], [], using_most_similar=False)[0] is None:
+        if db_manager.get_details(results['token'], [], using_most_similar=False)[0] is None:
+            # If the row doesn't already exist in the database, we also set its date_added value
             values.update(
                 {
                     'date_added': current_datetime
