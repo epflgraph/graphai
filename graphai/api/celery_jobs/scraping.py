@@ -12,23 +12,13 @@ from graphai.api.celery_tasks.scraping import (
     scraping_dummy_task
 )
 
+from graphai.api.celery_jobs.common import direct_lookup_generic_job
+
 from graphai.core.common.scraping import create_base_url_token
 
 
 def sublink_lookup_job(token, return_results=False):
-    direct_lookup_job = cache_lookup_get_sublinks_task.s(token)
-    direct_lookup_job = direct_lookup_job.apply_async(priority=6)
-    direct_lookup_task_id = direct_lookup_job.id
-    # We block on this task since we need its results to decide what to do next
-    direct_lookup_results = direct_lookup_job.get(timeout=20)
-    # If the cache lookup yielded results, then return the id of the task, otherwise we proceed normally with the
-    # computations
-    if direct_lookup_results is not None:
-        if return_results:
-            return direct_lookup_results
-        else:
-            return direct_lookup_task_id
-    return None
+    return direct_lookup_generic_job(cache_lookup_get_sublinks_task, token, return_results)
 
 
 def extract_sublinks_job(url, force=False):
@@ -59,14 +49,9 @@ def extract_content_job(url, force=False, headers=False, long_patterns=False):
     # Content extraction cache lookup
     #################################
     if not force:
-        direct_lookup_job = cache_lookup_process_all_sublinks_task.s(token, headers, long_patterns)
-        direct_lookup_job = direct_lookup_job.apply_async(priority=6)
-        direct_lookup_task_id = direct_lookup_job.id
-        # We block on this task since we need its results to decide what to do next
-        direct_lookup_results = direct_lookup_job.get(timeout=20)
-        # If the cache lookup yielded results, then return the id of the task, otherwise we proceed normally with the
-        # computations
-        if direct_lookup_results is not None:
+        direct_lookup_task_id = direct_lookup_generic_job(cache_lookup_process_all_sublinks_task,
+                                                          token, False, headers, long_patterns)
+        if direct_lookup_task_id is not None:
             return direct_lookup_task_id
     #################################
     # Sublink extraction cache lookup

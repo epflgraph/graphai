@@ -14,10 +14,10 @@ from graphai.api.celery_tasks.translation import (
     translation_text_fingerprint_find_closest_callback_task,
     translation_retrieve_text_fingerprint_callback_task,
 )
-
 from graphai.api.celery_tasks.common import (
     ignore_fingerprint_results_callback_task,
 )
+from graphai.api.celery_jobs.common import direct_lookup_generic_job
 
 from graphai.core.common.text_utils import (
     generate_src_tgt_dict,
@@ -62,16 +62,7 @@ def get_translation_text_fingerprint_chain_list(token, text, src, tgt, min_simil
 
 
 def fingerprint_lookup_job(token):
-    direct_lookup_job = cache_lookup_translation_text_fingerprint_task.s(token)
-    direct_lookup_job = direct_lookup_job.apply_async(priority=6)
-    direct_lookup_task_id = direct_lookup_job.id
-    # We block on this task since we need its results to decide what to do next
-    direct_lookup_results = direct_lookup_job.get(timeout=20)
-    # If the cache lookup yielded results, then return the id of the task, otherwise we proceed normally with the
-    # computations
-    if direct_lookup_results is not None:
-        return direct_lookup_task_id
-    return None
+    return direct_lookup_generic_job(cache_lookup_translation_text_fingerprint_task, token)
 
 
 def fingerprint_job(text, src, tgt, force):
@@ -104,14 +95,9 @@ def translation_job(text, src, tgt, force):
     # Translation cache lookup
     ##########################
     if not force:
-        direct_lookup_job = cache_lookup_translate_text_task.s(token, return_list)
-        direct_lookup_job = direct_lookup_job.apply_async(priority=6)
-        direct_lookup_task_id = direct_lookup_job.id
-        # We block on this task since we need its results to decide what to do next
-        direct_lookup_results = direct_lookup_job.get(timeout=20)
-        # If the cache lookup yielded results, then return the id of the task, otherwise we proceed normally with the
-        # computations
-        if direct_lookup_results is not None:
+        direct_lookup_task_id = direct_lookup_generic_job(cache_lookup_translate_text_task, token,
+                                                          False, return_list)
+        if direct_lookup_task_id is not None:
             return direct_lookup_task_id
 
     ##########################
