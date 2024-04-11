@@ -27,6 +27,7 @@ from graphai.api.celery_tasks.video import (
     reextract_cached_slides_task,
     get_file_task
 )
+from graphai.api.celery_jobs.common import direct_lookup_generic_job
 from graphai.core.common.caching import FingerprintParameters
 
 
@@ -80,16 +81,7 @@ def retrieve_url_job(url, force=False, is_playlist=False):
 
 
 def fingerprint_lookup_job(token):
-    direct_lookup_job = cache_lookup_fingerprint_video_task.s(token)
-    direct_lookup_job = direct_lookup_job.apply_async(priority=6)
-    direct_lookup_task_id = direct_lookup_job.id
-    # We block on this task since we need its results to decide what to do next
-    direct_lookup_results = direct_lookup_job.get(timeout=20)
-    # If the cache lookup yielded results, then return the id of the task, otherwise we proceed normally with the
-    # computations
-    if direct_lookup_results is not None:
-        return direct_lookup_task_id
-    return None
+    return direct_lookup_generic_job(token, cache_lookup_fingerprint_video_task)
 
 
 def fingerprint_job(token, force):
@@ -120,14 +112,8 @@ def extract_audio_job(token, force=False, recalculate_cached=False):
     # If force=True, we explicitly want to skip the cached results
     # If recalculate_cached=True, we want to re-extract the audio based on cache, and not just return the cached result!
     if not force and not recalculate_cached:
-        direct_lookup_job = cache_lookup_extract_audio_task.s(token)
-        direct_lookup_job = direct_lookup_job.apply_async(priority=6)
-        direct_lookup_task_id = direct_lookup_job.id
-        # We block on this task since we need its results to decide what to do next
-        direct_lookup_results = direct_lookup_job.get(timeout=20)
-        # If the cache lookup yielded results, then return the id of the task, otherwise we proceed normally with the
-        # computations
-        if direct_lookup_results is not None:
+        direct_lookup_task_id = direct_lookup_generic_job(token, cache_lookup_extract_audio_task)
+        if direct_lookup_task_id is not None:
             return direct_lookup_task_id
 
     ##########################
@@ -175,14 +161,8 @@ def detect_slides_job(token, language, force=False, recalculate_cached=False):
     # If force=True, we explicitly want to skip the cached results
     # If recalculate_cached=True, we want to re-extract the audio based on cache, and not just return the cached result!
     if not force and not recalculate_cached:
-        direct_lookup_job = cache_lookup_detect_slides_task.s(token)
-        direct_lookup_job = direct_lookup_job.apply_async(priority=6)
-        direct_lookup_task_id = direct_lookup_job.id
-        # We block on this task since we need its results to decide what to do next
-        direct_lookup_results = direct_lookup_job.get(timeout=20)
-        # If the cache lookup yielded results, then return the id of the task, otherwise we proceed normally with the
-        # computations
-        if direct_lookup_results is not None:
+        direct_lookup_task_id = direct_lookup_generic_job(token, cache_lookup_detect_slides_task)
+        if direct_lookup_task_id is not None:
             return direct_lookup_task_id
 
     ##########################
