@@ -31,8 +31,9 @@ from graphai.api.celery_jobs.common import direct_lookup_generic_job
 from graphai.core.common.caching import FingerprintParameters
 
 
-def get_video_fingerprint_chain_list(token, min_similarity=None, n_jobs=8,
+def get_video_fingerprint_chain_list(token=None, min_similarity=None, n_jobs=8,
                                      ignore_fp_results=False, results_to_return=None):
+    assert ignore_fp_results or token is not None
     # Retrieve minimum similarity parameter for video fingerprints
     if min_similarity is None:
         fp_parameters = FingerprintParameters()
@@ -78,6 +79,7 @@ def retrieve_url_job(url, force=False, is_playlist=False):
     # First retrieve the file, and then do the database callback
     task_list = [retrieve_file_from_url_task.s(url, is_playlist, None),
                  retrieve_file_from_url_callback_task.s(url, force)]
+    task_list += get_video_fingerprint_chain_list(None, ignore_fp_results=True)
     task = chain(task_list)
     task = task.apply_async(priority=2)
     return task.id
