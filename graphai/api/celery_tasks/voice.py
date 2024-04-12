@@ -53,12 +53,13 @@ def cache_lookup_audio_fingerprint_task(self, token):
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='video_2.audio_fingerprint', ignore_result=False,
              file_manager=file_management_config)
-def compute_audio_fingerprint_task(self, fp_token):
+def compute_audio_fingerprint_task(self, results):
+    token = results['token']
     # Making sure that the cache row for the audio file already exists.
     # This cache row is created when the audio is extracted from its corresponding video, so it must exist!
     # We also need this cache row later in order to be able to return the duration of the audio file.
     db_manager = AudioDBCachingManager()
-    existing = db_manager.get_details(fp_token, cols=['duration'],
+    existing = db_manager.get_details(token, cols=['fingerprint', 'duration'],
                                       using_most_similar=False)[0]
     if existing is None:
         return {
@@ -66,25 +67,26 @@ def compute_audio_fingerprint_task(self, fp_token):
             'fp_token': None,
             'perform_lookup': False,
             'fresh': False,
-            'duration': 0.0
+            'duration': 0.0,
+            'original_results': results
         }
-
-    fingerprint = perceptual_hash_audio(self.file_manager.generate_filepath(fp_token))
-    if fingerprint is None:
-        return {
-            'result': None,
-            'fp_token': None,
-            'perform_lookup': False,
-            'fresh': False,
-            'duration': 0.0
-        }
-
+    if existing['fingerprint'] is not None:
+        fp = existing['fingerprint']
+        fresh = False
+        perform_lookup = False
+        fp_token = None
+    else:
+        fp = perceptual_hash_audio(self.file_manager.generate_filepath(token))
+        fresh = fp is not None
+        perform_lookup = fp is not None
+        fp_token = token if fp is not None else None
     return {
-        'result': fingerprint,
+        'result': fp,
         'fp_token': fp_token,
-        'perform_lookup': True,
-        'fresh': True,
-        'duration': existing['duration']
+        'perform_lookup': perform_lookup,
+        'fresh': fresh,
+        'duration': existing['duration'],
+        'original_results': results
     }
 
 

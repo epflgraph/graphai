@@ -62,6 +62,28 @@ def get_video_fingerprint_chain_list(token=None, min_similarity=None, n_jobs=8,
     return task_list
 
 
+def get_audio_fingerprint_chain_list(token=None, force=False, min_similarity=None, n_jobs=8,
+                                     ignore_fp_results=False):
+    assert ignore_fp_results or token is not None
+    # Loading minimum similarity parameter for audio
+    if min_similarity is None:
+        fp_parameters = FingerprintParameters()
+        min_similarity = fp_parameters.get_min_sim_audio()
+    if ignore_fp_results:
+        task_list = [compute_audio_fingerprint_task.s()]
+    else:
+        task_list = [compute_audio_fingerprint_task.s({'token': token})]
+    task_list += [compute_audio_fingerprint_callback_task.s(force),
+                  audio_fingerprint_find_closest_retrieve_from_db_task.s(),
+                  group(audio_fingerprint_find_closest_parallel_task.s(i, n_jobs, min_similarity) for i in range(n_jobs)),
+                  audio_fingerprint_find_closest_callback_task.s()]
+    if ignore_fp_results:
+        task_list += [ignore_fingerprint_results_callback_task.s()]
+    else:
+        task_list += [retrieve_audio_fingerprint_callback_task.s()]
+    return task_list
+
+
 def retrieve_url_job(url, force=False, is_playlist=False):
     if not force:
         direct_lookup_job = cache_lookup_retrieve_file_from_url_task.s(url)
@@ -136,6 +158,10 @@ def extract_audio_job(token, force=False, recalculate_cached=False):
     else:
         task_list = [reextract_cached_audio_task.s(token)]
 
+    ################
+    # Fingerprinting
+    ################
+    task_list += get_audio_fingerprint_chain_list(None, ignore_fp_results=True)
 
     task = chain(task_list)
     task = task.apply_async(priority=2)
@@ -183,23 +209,3 @@ def get_file_job(token):
     task = get_file_task.s(token)
     result = task.apply_async(priority=2).get(timeout=300)
     return result
-
-
-def get_audio_fingerprint_chain_list(token, force=False, min_similarity=None, n_jobs=8,
-                                     ignore_fp_results=False, results_to_return=None):
-    # Loading minimum similarity parameter for audio
-    if min_similarity is None:
-        fp_parameters = FingerprintParameters()
-        min_similarity = fp_parameters.get_min_sim_audio()
-    # If remove_silence=True, then a silence removal task and its callback are added at the beginning
-    # Otherwise, the tasks are the same as any other fingerprinting chain: compute fp and callback, then lookup.
-    task_list = [compute_audio_fingerprint_task.s(token),
-                 compute_audio_fingerprint_callback_task.s(force),
-                 audio_fingerprint_find_closest_retrieve_from_db_task.s(),
-                 group(audio_fingerprint_find_closest_parallel_task.s(i, n_jobs, min_similarity) for i in range(n_jobs)),
-                 audio_fingerprint_find_closest_callback_task.s()]
-    if ignore_fp_results:
-        task_list += [ignore_fingerprint_results_callback_task.s(results_to_return)]
-    else:
-        task_list += [retrieve_audio_fingerprint_callback_task.s()]
-    return task_list
