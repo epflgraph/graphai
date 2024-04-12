@@ -54,3 +54,8 @@ class TokenStatus(BaseModel):
         title="Cached results",
         description="List of endpoints whose results have already been cached for this token"
     )
+
+    fingerprinted: bool = Field(
+        title="Fingerprinted",
+        description="Whether this token has been fingerprinted"
+    )

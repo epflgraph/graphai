@@ -585,6 +585,13 @@ def get_token_status(token, file_manager, db_manager):
     return os.path.isfile(file_manager.generate_filepath(token))
 
 
+def is_fingerprinted(cached_cols):
+    if 'calculate_fingerprint' in cached_cols:
+        return True
+    else:
+        return False
+
+
 def get_video_token_status(token):
     video_config = VideoConfig()
     video_db_manager = VideoDBCachingManager()
@@ -607,9 +614,11 @@ def get_video_token_status(token):
                                                               'origin_token': 'extract_audio'
                                                           })
     cached_cols = cached_cols_own + cached_cols_image + cached_cols_audio
+
     return {
         'active': active,
-        'cached': empty_list_to_null(cached_cols)
+        'cached': empty_list_to_null(cached_cols),
+        'fingerprinted': is_fingerprinted(cached_cols)
     }
 
 
@@ -628,7 +637,8 @@ def get_image_token_status(token):
                                        })
     return {
         'active': active,
-        'cached': empty_list_to_null(cached_cols)
+        'cached': empty_list_to_null(cached_cols),
+        'fingerprinted': is_fingerprinted(cached_cols)
     }
 
 
@@ -647,5 +657,6 @@ def get_audio_token_status(token):
                                        })
     return {
         'active': active,
-        'cached': empty_list_to_null(cached_cols)
+        'cached': empty_list_to_null(cached_cols),
+        'fingerprinted': is_fingerprinted(cached_cols)
     }
