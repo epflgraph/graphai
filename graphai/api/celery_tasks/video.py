@@ -131,13 +131,15 @@ def cache_lookup_fingerprint_video_task(self, token):
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='video_2.fingerprint_video', ignore_result=False,
              file_manager=file_management_config)
-def compute_video_fingerprint_task(self, token):
+def compute_video_fingerprint_task(self, results):
+    token = results['token']
     fp = md5_video_or_audio(self.file_manager.generate_filepath(token), video=True)
     return {
         'result': fp,
         'fp_token': token if fp is not None else None,
         'perform_lookup': fp is not None,
-        'fresh': fp is not None
+        'fresh': fp is not None,
+        'original_results': results
     }
 
 
