@@ -28,11 +28,14 @@ from graphai.api.celery_tasks.video import (
     get_file_task
 )
 from graphai.api.celery_jobs.common import direct_lookup_generic_job
+from graphai.api.celery_tasks.voice import compute_audio_fingerprint_task, compute_audio_fingerprint_callback_task, \
+    audio_fingerprint_find_closest_retrieve_from_db_task, audio_fingerprint_find_closest_parallel_task, \
+    audio_fingerprint_find_closest_callback_task, retrieve_audio_fingerprint_callback_task
 from graphai.core.common.caching import FingerprintParameters
 
 
 def get_video_fingerprint_chain_list(token=None, min_similarity=None, n_jobs=8,
-                                     ignore_fp_results=False, results_to_return=None):
+                                     ignore_fp_results=False):
     assert ignore_fp_results or token is not None
     # Retrieve minimum similarity parameter for video fingerprints
     if min_similarity is None:
@@ -121,37 +124,18 @@ def extract_audio_job(token, force=False, recalculate_cached=False):
         if direct_lookup_task_id is not None:
             return direct_lookup_task_id
 
-    ##########################
-    # Fingerprint cache lookup
-    ##########################
-    # Fingerprinting is never forced in non-fingerprinting jobs
-    direct_fingerprint_lookup_task_id = fingerprint_lookup_job(token)
-
     #################
     # (Re)Computation
     #################
-    if direct_fingerprint_lookup_task_id is None:
-        # If the fingerprint is not cached, we add the fingerprinting chain
-        task_list = get_video_fingerprint_chain_list(token, ignore_fp_results=True, results_to_return=token)
-        if not recalculate_cached:
-            # If the recalculate flag is not set, we add the normal audio extraction chain
-            task_list += [
-                extract_audio_task.s(),
-                extract_audio_callback_task.s(token, force)
-            ]
-        else:
-            # If a recalculation is requested, we add the re-extraction task
-            task_list += [reextract_cached_audio_task.s()]
+
+    if not recalculate_cached:
+        task_list = [
+            extract_audio_task.s(token),
+            extract_audio_callback_task.s(token, force)
+        ]
     else:
-        # If the fingerprint is already cached
-        # Same as above, but with the starting tasks having their full signature since fingerprinting is skipped
-        if not recalculate_cached:
-            task_list = [
-                extract_audio_task.s(token),
-                extract_audio_callback_task.s(token, force)
-            ]
-        else:
-            task_list = [reextract_cached_audio_task.s(token)]
+        task_list = [reextract_cached_audio_task.s(token)]
+
 
     task = chain(task_list)
     task = task.apply_async(priority=2)
@@ -170,23 +154,11 @@ def detect_slides_job(token, language, force=False, recalculate_cached=False):
         if direct_lookup_task_id is not None:
             return direct_lookup_task_id
 
-    ##########################
-    # Fingerprint cache lookup
-    ##########################
-    # Fingerprinting is never forced in non-fingerprinting jobs
-    direct_fingerprint_lookup_task_id = fingerprint_lookup_job(token)
-
     #################
     # (Re)Computation
     #################
     if not recalculate_cached:
-        if direct_fingerprint_lookup_task_id is None:
-            # If there's no fingerprint, add the fingerprinting chain
-            task_list = get_video_fingerprint_chain_list(token, ignore_fp_results=True, results_to_return=token)
-            task_list += [extract_and_sample_frames_task.s()]
-        else:
-            # Otherwise the first task gets its full signature
-            task_list = [extract_and_sample_frames_task.s(token)]
+        task_list = [extract_and_sample_frames_task.s(token)]
         # Now we add the rest
         n_jobs = 8
         # This is the maximum similarity threshold used for image hashes when finding slide transitions.
@@ -200,13 +172,7 @@ def detect_slides_job(token, language, force=False, recalculate_cached=False):
                       compute_slide_transitions_callback_task.s(language),
                       detect_slides_callback_task.s(token, force)]
     else:
-        if direct_fingerprint_lookup_task_id is None:
-            # If there's no fingerprint, add the fingerprinting chain
-            task_list = get_video_fingerprint_chain_list(token, ignore_fp_results=True, results_to_return=token)
-            task_list += [reextract_cached_slides_task.s()]
-        else:
-            # Full signature for first task
-            task_list = [reextract_cached_slides_task.s(token)]
+        task_list = [reextract_cached_slides_task.s(token)]
 
     task = chain(task_list)
     task = task.apply_async(priority=2)
@@ -217,3 +183,23 @@ def get_file_job(token):
     task = get_file_task.s(token)
     result = task.apply_async(priority=2).get(timeout=300)
     return result
+
+
+def get_audio_fingerprint_chain_list(token, force=False, min_similarity=None, n_jobs=8,
+                                     ignore_fp_results=False, results_to_return=None):
+    # Loading minimum similarity parameter for audio
+    if min_similarity is None:
+        fp_parameters = FingerprintParameters()
+        min_similarity = fp_parameters.get_min_sim_audio()
+    # If remove_silence=True, then a silence removal task and its callback are added at the beginning
+    # Otherwise, the tasks are the same as any other fingerprinting chain: compute fp and callback, then lookup.
+    task_list = [compute_audio_fingerprint_task.s(token),
+                 compute_audio_fingerprint_callback_task.s(force),
+                 audio_fingerprint_find_closest_retrieve_from_db_task.s(),
+                 group(audio_fingerprint_find_closest_parallel_task.s(i, n_jobs, min_similarity) for i in range(n_jobs)),
+                 audio_fingerprint_find_closest_callback_task.s()]
+    if ignore_fp_results:
+        task_list += [ignore_fingerprint_results_callback_task.s(results_to_return)]
+    else:
+        task_list += [retrieve_audio_fingerprint_callback_task.s()]
+    return task_list
