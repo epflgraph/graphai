@@ -78,6 +78,15 @@ def generate_random_token():
     return ('%.06f' % time.time()).replace('.', '') + '%08d' % random.randint(0, int(1e7))
 
 
+def get_file_size(file_path):
+    if file_path is None:
+        return None
+    try:
+        return os.path.getsize(file_path)
+    except OSError:
+        return None
+
+
 def retrieve_file_from_generic_url(url, output_filename_with_path, output_token):
     """
     Retrieves a file from a given URL using WGET and stores it locally.
@@ -235,7 +244,13 @@ def md5_video_or_audio(input_filename_with_path, video=True):
             print("No audio found. If you're trying to has the audio track of a video file, "
                   "make sure your video has audio.")
             return None
-    result, _ = ffmpeg.output(in_stream, 'pipe:', c='copy', format='md5').run(capture_stdout=True)
+    try:
+        result, _ = ffmpeg.output(
+            in_stream, 'pipe:', c='copy', format='md5'
+        ).run(capture_stdout=True)
+    except Exception:
+        print("An error occurred while fingerprinting")
+        return None
     # The result looks like 'MD5=9735151f36a3e628b0816b1bba3b9640\n' so we clean it up
     return (result.decode('utf8').strip())[4:]
 
