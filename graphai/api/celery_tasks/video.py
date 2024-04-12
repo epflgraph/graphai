@@ -11,7 +11,7 @@ from graphai.core.common.video import retrieve_file_from_url, retrieve_file_from
     detect_audio_format_and_duration, extract_audio_from_video, extract_frames, generate_frame_sample_indices, \
     compute_ocr_noise_level, compute_ocr_threshold, compute_video_ocr_transitions, check_ocr_and_hash_thresholds, \
     generate_random_token, md5_video_or_audio, generate_symbolic_token, read_txt_gz_file, \
-    FRAME_FORMAT_PNG, TESSERACT_OCR_FORMAT
+    FRAME_FORMAT_PNG, TESSERACT_OCR_FORMAT, get_file_size
 from graphai.core.common.caching import (
     AudioDBCachingManager,
     SlideDBCachingManager,
@@ -43,7 +43,8 @@ def retrieve_file_from_url_task(self, url, is_kaltura=True, force=False, force_t
         if existing is not None:
             return {
                 'token': existing[0]['id_token'],
-                'fresh': False
+                'fresh': False,
+                'token_size': get_file_size(self.file_manager.generate_filepath(existing[0]['id_token']))
             }
     if force_token is not None:
         token = force_token
@@ -66,7 +67,8 @@ def retrieve_file_from_url_task(self, url, is_kaltura=True, force=False, force_t
         results = retrieve_file_from_url(url, filename_with_path, filename)
     return {
         'token': results,
-        'fresh': results is not None
+        'fresh': results is not None,
+        'token_size': get_file_size(filename_with_path)
     }
 
 

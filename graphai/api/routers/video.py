@@ -105,6 +105,7 @@ async def get_retrieve_file_status(task_id):
             task_results = {
                 'token': task_results['token'],
                 'token_status': task_results['token_status'],
+                'token_size': task_results['token_size'],
                 'fresh': task_results['fresh'],
                 'successful': task_results['token'] is not None
             }
