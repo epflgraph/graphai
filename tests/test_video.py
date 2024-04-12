@@ -40,7 +40,7 @@ def test__video_retrieve_url__retrieve_file_from_url_task__run_task(test_video_u
 
 @pytest.mark.usefixtures('test_video_token')
 def test__video_calculate_fingerprint__compute_video_fingerprint_task__run_task(test_video_token):
-    results = compute_video_fingerprint_task(test_video_token)
+    results = compute_video_fingerprint_task({'token': test_video_token})
 
     assert isinstance(results, dict)
     assert 'result' in results
