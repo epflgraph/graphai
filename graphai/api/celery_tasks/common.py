@@ -99,11 +99,21 @@ def fingerprint_lookup_parallel(input_dict, i, n_total, min_similarity, db_manag
         Dict with fingerprinting results, plus details of the closest match (which can be None)
     """
     assert data_type in ['audio', 'image', 'text', 'video']
-    # This parallel task's "closest fingerprint" result is null if either
-    # a) the computation has been disabled (indicated by the token list being null), or
-    # b) there are no previous fingerprints (indicated by the list of all tokens being empty)
+
+    ##################
+    # Unpacking values
+    ##################
     fp_results = input_dict['fp_results']
-    if not fp_results['perform_lookup'] or input_dict['cache_count'] is None or input_dict['cache_count'] == 0:
+    n_tokens_all = input_dict['cache_count']
+    fp_tokens = fp_results['fp_token']
+    target_fingerprints = input_dict['target_fp']
+
+    #############
+    # Exit checks
+    #############
+
+    # Exit if lookup is disabled or if no previous relevant fingerprints exist
+    if not fp_results['perform_lookup'] or n_tokens_all is None or n_tokens_all == 0:
         return {
             'closest': None,
             'closest_fp': None,
@@ -111,14 +121,13 @@ def fingerprint_lookup_parallel(input_dict, i, n_total, min_similarity, db_manag
             'max_score': None,
             'fp_results': fp_results
         }
-    token = fp_results['fp_token']
-    # Get the total number of tokens and fingerprints
-    n_tokens_all = input_dict['cache_count']
 
     # Compute the start and end indices
     start_index = int(i / n_total * n_tokens_all)
     end_index = int((i + 1) / n_total * n_tokens_all)
     limit = end_index - start_index
+
+    # Exit if the length of the assigned segment is zero
     if limit <= 0:
         return {
             'closest': None,
@@ -127,14 +136,18 @@ def fingerprint_lookup_parallel(input_dict, i, n_total, min_similarity, db_manag
             'max_score': None,
             'fp_results': fp_results
         }
-    # The resulting list will be sorted by date_added (asc)
-    # Nulls are not allowed because if a row doesn't have a fingerprint, it makes no sense to include it in a
-    # fingerprint lookup.
+
+    ##############
+    # Calculations
+    ##############
+
+    # Get all fingerprints with their tokens, excluding the tokens of the current computation
     tokens_and_fingerprints = db_manager.get_all_details(
-        ['fingerprint', 'date_added'], start=start_index, limit=limit, exclude_token=token,
+        ['fingerprint', 'date_added'], start=start_index, limit=limit, exclude_token=fp_tokens,
         allow_nulls=False, equality_conditions=equality_conditions
     )
 
+    # If there are no fingerprints in the cache at all, we exit
     if tokens_and_fingerprints is None or len(tokens_and_fingerprints) == 0:
         return {
             'closest': None,
@@ -157,8 +170,9 @@ def fingerprint_lookup_parallel(input_dict, i, n_total, min_similarity, db_manag
         # Text, video, and image fingerprinting are done the same way,
         #  so they are all treated as the same here.
         find_closest_func = find_closest_image_fingerprint_from_list
+
     closest_token, closest_fingerprint, closest_date, score = find_closest_func(
-        input_dict['target_fp'],
+        target_fingerprints,
         all_fingerprints,
         all_tokens,
         all_dates,
@@ -175,9 +189,23 @@ def fingerprint_lookup_parallel(input_dict, i, n_total, min_similarity, db_manag
 
 
 def fingerprint_lookup_direct(fp_results, db_manager, equality_conditions=None):
-    target_fingerprint = fp_results['result']
-    token = fp_results['fp_token']
+    ###########
+    # Unpacking
+    ###########
+    target_fingerprints = fp_results['result']
+    fp_tokens = fp_results['fp_token']
+    # Cast to list
+    has_been_cast_to_list = False
+    if not isinstance(target_fingerprints, list):
+        target_fingerprints = [target_fingerprints]
+        has_been_cast_to_list = True
+    # Initialize equality conditions if null
+    if equality_conditions is None:
+        equality_conditions = dict()
 
+    ############
+    # Exit check
+    ############
     if not fp_results['perform_lookup']:
         # The results are returned as a list to mimic the behavior of the group-chord fingerprint lookup path
         return [{
@@ -188,35 +216,53 @@ def fingerprint_lookup_direct(fp_results, db_manager, equality_conditions=None):
             'fp_results': fp_results
         }]
 
-    if equality_conditions is None:
-        equality_conditions = dict()
-    equality_conditions['fingerprint'] = target_fingerprint
+    #############
+    # Calculation
+    #############
+    closest_token = list()
+    closest_fingerprint = list()
+    best_date = list()
+    score = list()
+    for target_fingerprint in target_fingerprints:
+        current_equality_conditions = equality_conditions.copy()
+        current_equality_conditions['fingerprint'] = target_fingerprint
 
-    tokens_and_fingerprints = db_manager.get_all_details(
-        ['fingerprint', 'date_added'], start=0, limit=-1, exclude_token=token,
-        allow_nulls=False, equality_conditions=equality_conditions
-    )
+        tokens_and_fingerprints = db_manager.get_all_details(
+            ['fingerprint', 'date_added'], start=0, limit=-1, exclude_token=fp_tokens,
+            allow_nulls=False, equality_conditions=equality_conditions
+        )
 
-    if tokens_and_fingerprints is None or len(tokens_and_fingerprints) == 0:
-        return [{
-            'closest': None,
-            'closest_fp': None,
-            'closest_date': None,
-            'max_score': None,
-            'fp_results': fp_results
-        }]
+        if tokens_and_fingerprints is None or len(tokens_and_fingerprints) == 0:
+            closest_token.append(None)
+            closest_fingerprint.append(None)
+            best_date.append(None)
+            score.append(None)
+        else:
+            all_tokens = list(tokens_and_fingerprints.keys())
+            all_fingerprints = [tokens_and_fingerprints[key]['fingerprint'] for key in all_tokens]
+            all_dates = [tokens_and_fingerprints[key]['date_added'] for key in all_tokens]
 
-    all_tokens = list(tokens_and_fingerprints.keys())
-    all_fingerprints = [tokens_and_fingerprints[key]['fingerprint'] for key in all_tokens]
-    all_dates = [tokens_and_fingerprints[key]['date_added'] for key in all_tokens]
+            # Since the results are ordered by `date_added`, the first element is the earliest match
+            current_closest_token, current_closest_fingerprint, current_best_date, current_score = (
+                all_tokens[0], all_fingerprints[0], all_dates[0], 1
+            )
+            closest_token.append(current_closest_token)
+            closest_fingerprint.append(current_closest_fingerprint)
+            best_date.append(current_best_date)
+            score.append(current_score)
 
-    # Since the results are ordered by `date_added`, the first element is the earliest match
-    closest_token, closest_fingerprint, closest_date, score = all_tokens[0], all_fingerprints[0], all_dates[0], 1
+    if has_been_cast_to_list:
+        # If the input was a single fingerprint, we take the results out of their lists before returning them
+        closest_token = closest_token[0]
+        closest_fingerprint = closest_fingerprint[0]
+        best_date = best_date[0]
+        score = score[0]
 
+    # The return value is a list of dictionaries (well, one dictionary) to mimic the behavior of a group + chord
     return [{
         'closest': closest_token,
         'closest_fp': closest_fingerprint,
-        'closest_date': closest_date,
+        'closest_date': best_date,
         'max_score': score,
         'fp_results': fp_results
     }]
