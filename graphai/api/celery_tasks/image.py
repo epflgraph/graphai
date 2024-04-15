@@ -71,31 +71,89 @@ def compute_slide_fingerprint_task(self, token):
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
+             name='video_2.slide_set_fingerprint', ignore_result=False,
+             file_manager=file_management_config)
+def compute_slide_set_fingerprint_task(self, results, origin_token):
+    # Making sure the cache rows exist, because otherwise, the operation should be cancelled!
+    db_manager = SlideDBCachingManager()
+    existing_slide_list = db_manager.get_details_using_origin(origin_token, cols=['fingerprint'])
+    if existing_slide_list is None:
+        return {
+            'result': None,
+            'fp_token': None,
+            'perform_lookup': False,
+            'fresh': False,
+            'original_results': results
+        }
+    if all(existing_slide['fingerprint'] is not None for existing_slide in existing_slide_list):
+        return {
+            'result': None,
+            'fp_token': None,
+            'perform_lookup': False,
+            'fresh': False,
+            'original_results': results
+        }
+    tokens = [existing_slide['id_token'] for existing_slide in existing_slide_list
+              if existing_slide['fingerprint'] is None]
+    fingerprints = [perceptual_hash_image(self.file_manager.generate_filepath(token)) for token in tokens]
+    if any(fp is None for fp in fingerprints):
+        return {
+            'result': None,
+            'fp_token': None,
+            'perform_lookup': False,
+            'fresh': False,
+            'original_results': results
+        }
+
+    return {
+        'result': fingerprints,
+        'fp_token': tokens,
+        'perform_lookup': True,
+        'fresh': True,
+        'original_results': results
+    }
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='video_2.slide_fingerprint_callback', ignore_result=False)
 def compute_slide_fingerprint_callback_task(self, results, force=False):
     if results['fresh']:
-        token = results['fp_token']
-        db_manager = SlideDBCachingManager()
-        db_manager.insert_or_update_details(
-            token,
-            {
-                'fingerprint': results['result'],
-            }
-        )
-        if not force:
-            closest_token = db_manager.get_closest_match(token)
-            # If this token has a closest token, it means that their relationship comes from their parent videos,
-            # and that the closest token's fingerprint has not been calculated either (otherwise `fresh` wouldn't be True).
-            # In that case, we insert the computed fingerprint for the closest token as well, and then we will perform the
-            # fingerprint lookup for that token instead of the one we computed the fingerprint for.
-            if closest_token is not None and closest_token != token:
-                db_manager.insert_or_update_details(
-                    closest_token,
-                    {
-                        'fingerprint': results['result'],
-                    }
-                )
-                results['fp_token'] = closest_token
+        tokens = results['fp_token']
+        fp_results = results['result']
+        if not isinstance(tokens, list):
+            tokens = [tokens]
+            fp_results = [fp_results]
+        fp_tokens_to_pass_on = list()
+        for i in range(len(tokens)):
+            token = tokens[i]
+            current_fp_result = fp_results[i]
+            db_manager = SlideDBCachingManager()
+            db_manager.insert_or_update_details(
+                token,
+                {
+                    'fingerprint': current_fp_result,
+                }
+            )
+            if not force:
+                closest_token = db_manager.get_closest_match(token)
+                # If this token has a closest token, it means that their relationship comes from their parent videos,
+                # and that the closest token's fingerprint has not been calculated either (otherwise `fresh` wouldn't be True).
+                # In that case, we insert the computed fingerprint for the closest token as well, and then we will perform the
+                # fingerprint lookup for that token instead of the one we computed the fingerprint for.
+                if closest_token is not None and closest_token != token:
+                    db_manager.insert_or_update_details(
+                        closest_token,
+                        {
+                            'fingerprint': current_fp_result,
+                        }
+                    )
+                    fp_tokens_to_pass_on.append(closest_token)
+                else:
+                    fp_tokens_to_pass_on.append(token)
+            else:
+                fp_tokens_to_pass_on.append(token)
+        results['fp_token'] = fp_tokens_to_pass_on
+        results['result'] = fp_results
     return results
 
 
