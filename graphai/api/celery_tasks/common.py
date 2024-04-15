@@ -229,7 +229,7 @@ def fingerprint_lookup_direct(fp_results, db_manager, equality_conditions=None):
 
         tokens_and_fingerprints = db_manager.get_all_details(
             ['fingerprint', 'date_added'], start=0, limit=-1, exclude_token=fp_tokens,
-            allow_nulls=False, equality_conditions=equality_conditions
+            allow_nulls=False, equality_conditions=current_equality_conditions
         )
 
         if tokens_and_fingerprints is None or len(tokens_and_fingerprints) == 0:
@@ -278,13 +278,30 @@ def fingerprint_lookup_callback(results_list, db_manager):
     Returns:
         Results of fingerprinting and the closest match
     """
-    # Passing fingerprinting results along if it's been unsuccessful or a cached result has been returned
-    # This is essentially the same check as in all the other find_closest tasks.
+    ###########
+    # Unpacking
+    ###########
     fp_results = results_list[0]['fp_results']
-    original_token = fp_results['fp_token']
+    original_tokens = fp_results['fp_token']
+    results = [(x.get('closest', None),
+                x.get('closest_fp', None),
+                x.get('closest_date', None),
+                x.get('max_score', None))
+               for x in results_list]
+    has_been_cast_to_list = False
+    if original_tokens is not None and not isinstance(original_tokens, list):
+        original_tokens = [original_tokens]
+        results = [([x[0]], [x[1]], [x[2]], [x[3]]) for x in results]
+        has_been_cast_to_list = True
+
+    ############
+    # Exit check
+    ############
     if not fp_results['perform_lookup']:
-        if original_token is not None:
-            closest = db_manager.get_closest_match(original_token)
+        if original_tokens is not None:
+            closest = [db_manager.get_closest_match(original_token) for original_token in original_tokens]
+            if has_been_cast_to_list:
+                closest = closest[0]
         else:
             closest = None
         return {
@@ -292,29 +309,42 @@ def fingerprint_lookup_callback(results_list, db_manager):
             'score': None,
             'fp_results': fp_results
         }
-    results = [(x['closest'], x['closest_fp'], x['closest_date'], x['max_score']) for x in results_list]
-    results = [x for x in results if x[0] is not None]
-    # We sort the results by their dates (asc)
-    results = sorted(results, key=lambda x: x[2])
-    # If all results are null and the list is thus empty, then no closest fingerprint has been found,
-    # and therefore, the closest token to this one is itself.
-    if len(results) == 0:
-        closest_token = original_token
-        max_score = -1
-    else:
-        max_score = max([x[3] for x in results])
-        # Since the results were sorted (asc) by date, the first one with the max score is the one with the lowest
-        # date_added value. This ensures consistency in closest-token assignments because it ensures that even if there
-        # are multiple matches, the same one will be chosen every time -- the one that was created first.
-        closest_token = [x[0] for x in results if x[3] == max_score][0]
-        closest_token = db_manager.get_closest_match(closest_token)
-    # Whether the closest token is itself or another token, we store the result in the database.
-    db_manager.insert_or_update_closest_match(
-        original_token,
-        {
-            'most_similar_token': closest_token
-        }
-    )
+
+    #############
+    # Calculation
+    #############
+    closest_token = list()
+    max_score = list()
+    for i in range(len(original_tokens)):
+        current_original_token = original_tokens[i]
+        current_results = [(x[0][i], x[1][i], x[2][i], x[3][i]) for x in results]
+        current_results = [x for x in current_results if x[0] is not None]
+        # We sort the results by their dates (asc)
+        current_results = sorted(current_results, key=lambda x: x[2])
+        # If all results are null and the list is thus empty, then no closest fingerprint has been found,
+        # and therefore, the closest token to this one is itself.
+        if len(current_results) == 0:
+            current_closest_token = current_original_token
+            current_max_score = -1
+        else:
+            current_max_score = max([x[3] for x in current_results])
+            # Since the results were sorted (asc) by date, the first one with the max score is the one with the lowest
+            # date_added value. This ensures consistency in closest-token assignments because it ensures that even if there
+            # are multiple matches, the same one will be chosen every time -- the one that was created first.
+            current_closest_token = [x[0] for x in current_results if x[3] == current_max_score][0]
+            current_closest_token = db_manager.get_closest_match(current_closest_token)
+        # Whether the closest token is itself or another token, we store the result in the database.
+        db_manager.insert_or_update_closest_match(
+            current_original_token,
+            {
+                'most_similar_token': current_closest_token
+            }
+        )
+        closest_token.append(current_closest_token)
+        max_score.append(current_max_score)
+    if has_been_cast_to_list:
+        closest_token = closest_token[0]
+        max_score = max_score[0]
     return {'closest': closest_token, 'score': max_score, 'fp_results': fp_results}
 
 
