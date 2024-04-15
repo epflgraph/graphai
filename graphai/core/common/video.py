@@ -533,28 +533,51 @@ def find_closest_fingerprint_from_list(target_fp, fp_list, token_list, date_list
         return None, None, None, None
 
 
+def find_closest_fingerprint_for_list_from_list(target_fp, fp_list, token_list, date_list, min_similarity=0.8,
+                                                decoder_func=imagehash.hex_to_hash, strip_underscores=True):
+    if isinstance(target_fp, str):
+        return find_closest_fingerprint_from_list(target_fp, fp_list, token_list, date_list, min_similarity,
+                                                  decoder_func, strip_underscores)
+    else:
+        closest_token_list = list()
+        closest_fp_list = list()
+        best_date_list = list()
+        score_list = list()
+        for current_fp in target_fp:
+            closest_token, closest_fingerprint, best_date, score = find_closest_fingerprint_from_list(
+                current_fp, fp_list, token_list, date_list, min_similarity,
+                decoder_func, strip_underscores
+            )
+            closest_token_list.append(closest_token)
+            closest_fp_list.append(closest_fingerprint)
+            best_date_list.append(best_date)
+            score_list.append(score)
+        return closest_token_list, closest_fp_list, best_date_list, score_list
+
+
 def find_closest_audio_fingerprint_from_list(target_fp, fp_list, token_list, date_list, min_similarity=0.8):
     """
     Finds closest audio fingerprint from list
     """
-    return find_closest_fingerprint_from_list(target_fp, fp_list, token_list, date_list, min_similarity,
-                                              decoder_func=imagehash.hex_to_hash)
+    return find_closest_fingerprint_for_list_from_list(target_fp, fp_list, token_list, date_list, min_similarity,
+                                                       decoder_func=imagehash.hex_to_hash)
 
 
 def find_closest_image_fingerprint_from_list(target_fp, fp_list, token_list, date_list, min_similarity=0.8):
     """
     Finds closest image fingerprint from list
     """
-    return find_closest_fingerprint_from_list(target_fp, fp_list, token_list, date_list, min_similarity,
-                                              decoder_func=imagehash.hex_to_hash)
+
+    return find_closest_fingerprint_for_list_from_list(target_fp, fp_list, token_list, date_list, min_similarity,
+                                                       decoder_func=imagehash.hex_to_hash)
 
 
 def find_closest_text_fingerprint_from_list(target_fp, fp_list, token_list, date_list, min_similarity=0.8):
     """
     Finds closest image fingerprint from list
     """
-    return find_closest_fingerprint_from_list(target_fp, fp_list, token_list, date_list, min_similarity,
-                                              decoder_func=imagehash.hex_to_hash, strip_underscores=True)
+    return find_closest_fingerprint_for_list_from_list(target_fp, fp_list, token_list, date_list, min_similarity,
+                                                       decoder_func=imagehash.hex_to_hash, strip_underscores=True)
 
 
 def extract_frames(input_filename_with_path, output_folder_with_path, output_folder):
