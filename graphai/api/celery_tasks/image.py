@@ -152,8 +152,11 @@ def compute_slide_fingerprint_callback_task(self, results, force=False):
                     fp_tokens_to_pass_on.append(token)
             else:
                 fp_tokens_to_pass_on.append(token)
-        results['fp_token'] = fp_tokens_to_pass_on
-        results['result'] = fp_results
+        # Now we add the correct fp tokens to pass to the fingerprint closest match lookups
+        if isinstance(results['fp_token'], list):
+            results['fp_token'] = fp_tokens_to_pass_on
+        else:
+            results['fp_token'] = fp_tokens_to_pass_on[0]
     return results
 
 
