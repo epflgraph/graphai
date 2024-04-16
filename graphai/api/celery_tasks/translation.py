@@ -1,10 +1,18 @@
 from celery import shared_task
 from graphai.api.common.translation import translation_models
-from graphai.core.common.text_utils import detect_text_language, translation_text_back_to_list
+from graphai.core.common.text_utils import (
+    detect_text_language,
+    translation_text_back_to_list,
+    perceptual_hash_text
+)
 from graphai.core.common.common_utils import get_current_datetime
 from graphai.core.common.caching import TextDBCachingManager
-from graphai.api.celery_tasks.common import compute_text_fingerprint_common, fingerprint_lookup_retrieve_from_db, \
-    fingerprint_lookup_parallel, fingerprint_lookup_callback, fingerprint_lookup_direct
+from graphai.api.celery_tasks.common import (
+    fingerprint_lookup_retrieve_from_db,
+    fingerprint_lookup_parallel,
+    fingerprint_lookup_callback,
+    fingerprint_lookup_direct
+)
 
 LONG_TEXT_ERROR = "Unpunctuated text too long (over 512 tokens), " \
                   "try adding punctuation or providing a smaller chunk of text."
@@ -28,26 +36,51 @@ def cache_lookup_translation_text_fingerprint_task(self, token):
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='text_6.fingerprint_translation_text', ignore_result=False)
 def compute_translation_text_fingerprint_task(self, token, text):
-    return compute_text_fingerprint_common(token, text)
+    fp = perceptual_hash_text(text)
+
+    return {
+        'result': fp,
+        'token': token,
+        'fresh': True
+    }
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='text_6.fingerprint_translation_text_callback', ignore_result=False)
 def compute_translation_text_fingerprint_callback_task(self, results, text, src, tgt):
-    if results['fresh']:
-        token = results['fp_token']
-        db_manager = TextDBCachingManager()
-        values_dict = {
-            'fingerprint': results['result'],
-            'source': text,
-            'source_lang': src,
-            'target_lang': tgt
+    # This task does not have the condition of the 'fresh' flag being True because text fingerprinting never fails
+    fp = results['result']
+    token = results['token']
+    db_manager = TextDBCachingManager()
+    # Super quick fingerprint lookup
+    closest_text = db_manager.get_all_details(['target'], allow_nulls=False,
+                                              equality_conditions={'fingerprint': fp,
+                                                                   'source_lang': src,
+                                                                   'target_lang': tgt})
+    if closest_text is not None:
+        translation = closest_text[0]['target']
+    else:
+        translation = None
+    values_dict = {
+        'fingerprint': results['result'],
+        'source': text,
+        'target': translation,
+        'source_lang': src,
+        'target_lang': tgt,
+        'date_added': get_current_datetime()
+    }
+    db_manager.insert_or_update_details(token, values_dict)
+    results['fp_results'] = dict()
+    if translation is not None:
+        results['fp_results']['original_results'] = {
+            'result': translation,
+            'text_too_large': False,
+            'successful': True,
+            'fresh': False,
+            'device': None
         }
-        existing = db_manager.get_details(token, ['date_added'], using_most_similar=False)[0]
-        if existing is None or existing['date_added'] is None:
-            current_datetime = get_current_datetime()
-            values_dict['date_added'] = current_datetime
-        db_manager.insert_or_update_details(token, values_dict)
+    else:
+        results['fp_results']['original_results'] = None
     return results
 
 

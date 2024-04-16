@@ -14,7 +14,6 @@ from graphai.core.common.video import (
     find_closest_image_fingerprint_from_list,
     find_closest_text_fingerprint_from_list
 )
-from graphai.core.common.text_utils import perceptual_hash_text
 
 
 def format_api_results(id, name, status, result):
@@ -34,17 +33,6 @@ def format_api_results(id, name, status, result):
         "task_name": name,
         "task_status": status,
         "task_result": result
-    }
-
-
-def compute_text_fingerprint_common(token, text):
-    fp = perceptual_hash_text(text)
-
-    return {
-        'result': fp,
-        'fp_token': token,
-        'perform_lookup': True,
-        'fresh': True
     }
 
 
