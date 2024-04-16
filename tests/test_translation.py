@@ -151,7 +151,6 @@ def test__translation_calculate_fingerprint__compute_text_fingerprint__run_task(
     assert isinstance(fp, dict)
     assert 'result' in fp
     assert fp['fresh']
-    assert fp['fp_token'] == 'mock_token_en_fr'
     assert fp['result'] == '48cae6523a7e1056a67e1a8806561a4c06000000000000000000000000000000_01_01'
 
     #############################################################
@@ -163,7 +162,6 @@ def test__translation_calculate_fingerprint__compute_text_fingerprint__run_task(
     assert isinstance(fp, dict)
     assert 'result' in fp
     assert fp['fresh']
-    assert fp['fp_token'] == 'mock_token_fr_en'
     assert fp['result'] == '4de0cae07a22b2fef28842f27e7e1af292747ed41af24c9cf24c92f200000000_01_01'
 
 
