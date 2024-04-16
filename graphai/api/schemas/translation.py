@@ -39,13 +39,6 @@ class TextFingerprintTaskResponse(BaseModel):
         description="Whether the result was computed freshly or an existing cached result was returned."
     )
 
-    closest_token: Union[str, None] = Field(
-        title="Closest token",
-        description="The token of the most similar existing text that the fingerprint lookup was able to find. Equal "
-                    "to original token if the most similar existing text did not satisfy the minimum similarity "
-                    "threshold."
-    )
-
     successful: bool = Field(
         title="Success flag",
         description="Whether the computation was successful."
