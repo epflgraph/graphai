@@ -19,10 +19,10 @@ from graphai.core.common.text_utils import (
 )
 
 
-def get_translation_text_fingerprint_chain_list(text, src, tgt):
+def get_translation_text_fingerprint_chain_list(token, text, src, tgt):
     # The tasks are fingerprinting and callback. The callback contains a lookup as well.
     task_list = [
-        compute_translation_text_fingerprint_task.s(text),
+        compute_translation_text_fingerprint_task.s(token, text),
         compute_translation_text_fingerprint_callback_task.s(text, src, tgt)
     ]
     return task_list
@@ -33,8 +33,8 @@ def fingerprint_lookup_job(token, return_results=False):
                                      return_results)
 
 
-def fingerprint_compute_job(text, src, tgt, asynchronous=True):
-    task_list = get_translation_text_fingerprint_chain_list(text, src, tgt)
+def fingerprint_compute_job(token, text, src, tgt, asynchronous=True):
+    task_list = get_translation_text_fingerprint_chain_list(token, text, src, tgt)
     task = chain(task_list)
     task = task.apply_async(priority=6)
     task_id = task.id
@@ -63,7 +63,7 @@ def fingerprint_job(text, src, tgt, force):
     # Computation job
     #################
     text = translation_list_to_text(text)
-    return fingerprint_compute_job(text, src, tgt, asynchronous=True)
+    return fingerprint_compute_job(token, text, src, tgt, asynchronous=True)
 
 
 def translation_job(text, src, tgt, force):
@@ -89,7 +89,7 @@ def translation_job(text, src, tgt, force):
         current_fingerprint = direct_fingerprint_lookup_results['result']
     # If the fingerprint was not cached, fingerprinting
     if current_fingerprint is None:
-        fp_computation_results = fingerprint_compute_job(text, src, tgt, asynchronous=False)
+        fp_computation_results = fingerprint_compute_job(token, text, src, tgt, asynchronous=False)
         current_fingerprint = fp_computation_results['result']
     # Fingerprint-based lookup
     if not force and current_fingerprint is not None:
