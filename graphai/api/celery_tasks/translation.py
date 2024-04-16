@@ -7,12 +7,6 @@ from graphai.core.common.text_utils import (
 )
 from graphai.core.common.common_utils import get_current_datetime
 from graphai.core.common.caching import TextDBCachingManager
-from graphai.api.celery_tasks.common import (
-    fingerprint_lookup_retrieve_from_db,
-    fingerprint_lookup_parallel,
-    fingerprint_lookup_callback,
-    fingerprint_lookup_direct
-)
 
 LONG_TEXT_ERROR = "Unpunctuated text too long (over 512 tokens), " \
                   "try adding punctuation or providing a smaller chunk of text."
@@ -52,6 +46,22 @@ def compute_translation_text_fingerprint_callback_task(self, results, text, src,
     fp = results['result']
     token = results['token']
     db_manager = TextDBCachingManager()
+    values_dict = {
+        'fingerprint': fp,
+        'source': text,
+        'source_lang': src,
+        'target_lang': tgt,
+        'date_added': get_current_datetime()
+    }
+    db_manager.insert_or_update_details(token, values_dict)
+
+    return results
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
+             name='caching_6.translation_text_lookup_using_fingerprint', ignore_result=False)
+def cache_lookup_translation_text_using_fingerprint_task(self, token, fp, src, tgt, return_list=False):
+    db_manager = TextDBCachingManager()
     # Super quick fingerprint lookup
     closest_text = db_manager.get_all_details(['target'], allow_nulls=False,
                                               equality_conditions={'fingerprint': fp,
@@ -59,93 +69,33 @@ def compute_translation_text_fingerprint_callback_task(self, results, text, src,
                                                                    'target_lang': tgt})
     if closest_text is not None:
         translation = closest_text[0]['target']
-    else:
-        translation = None
-    values_dict = {
-        'fingerprint': results['result'],
-        'source': text,
-        'target': translation,
-        'source_lang': src,
-        'target_lang': tgt,
-        'date_added': get_current_datetime()
-    }
-    db_manager.insert_or_update_details(token, values_dict)
-    results['fp_results'] = dict()
-    if translation is not None:
-        results['fp_results']['original_results'] = {
-            'result': translation,
+        db_manager.insert_or_update_details(token, {
+            'target': translation,
+        })
+        return {
+            'result': translation_text_back_to_list(translation, return_list=return_list),
             'text_too_large': False,
             'successful': True,
             'fresh': False,
             'device': None
         }
-    else:
-        results['fp_results']['original_results'] = None
-    return results
-
-
-@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='text_6.translation_text_fingerprint_find_closest_retrieve_from_db', ignore_result=False)
-def translation_text_fingerprint_find_closest_retrieve_from_db_task(self, results, equality_conditions):
-    db_manager = TextDBCachingManager()
-    return fingerprint_lookup_retrieve_from_db(results, db_manager, equality_conditions=equality_conditions)
-
-
-@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='text_6.translation_text_fingerprint_find_closest_parallel', ignore_result=False)
-def translation_text_fingerprint_find_closest_parallel_task(self, input_dict, i, n_total, equality_conditions,
-                                                            min_similarity=1):
-    db_manager = TextDBCachingManager()
-    # The equality conditions, which only apply to text fingerprint lookup, make sure that the fingerprint lookup
-    # happens only among the cached texts that have the same source and target languages as this one. This is
-    # to make sure that, for example, we don't include French to English cached translations when looking up
-    # cached results for an English to French translation.
-    return fingerprint_lookup_parallel(input_dict, i, n_total, min_similarity, db_manager, data_type='text',
-                                       equality_conditions=equality_conditions)
-
-
-@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='text_6.translation_text_fingerprint_find_closest_direct', ignore_result=False)
-def translation_text_fingerprint_find_closest_direct_task(self, results, equality_conditions):
-    db_manager = TextDBCachingManager()
-    return fingerprint_lookup_direct(results, db_manager, equality_conditions=equality_conditions)
-
-
-@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='text_6.translation_text_fingerprint_find_closest_callback', ignore_result=False)
-def translation_text_fingerprint_find_closest_callback_task(self, results_list):
-    db_manager = TextDBCachingManager()
-    return fingerprint_lookup_callback(results_list, db_manager)
-
-
-@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='text_6.retrieve_translation_text_fingerprint_final_callback', ignore_result=False)
-def translation_retrieve_text_fingerprint_callback_task(self, results):
-    # Returning the fingerprinting results, which is the part of this task whose results are sent back to the user.
-    results_to_return = results['fp_results']
-    results_to_return['closest'] = results['closest']
-    return results_to_return
+    return None
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='caching_6.cache_lookup_translate_text', translation_obj=translation_models, ignore_result=False)
 def cache_lookup_translate_text_task(self, token, return_list=False):
     db_manager = TextDBCachingManager()
-    existing_list = db_manager.get_details(token, ['target'], using_most_similar=True)
-    # Unlike with audio and image, the token may not already exist in the table when this task is invoked.
-    # Therefore, the task doesn't fail if the token doesn't exist.
-    for existing in existing_list:
-        if existing is None:
-            continue
-        if existing['target'] is not None:
-            print('Returning cached result')
-            return {
-                'result': translation_text_back_to_list(existing['target'], return_list=return_list),
-                'text_too_large': False,
-                'successful': True,
-                'fresh': False,
-                'device': None
-            }
+    existing = db_manager.get_details(token, ['target'], using_most_similar=False)[0]
+    if existing is not None and existing['target'] is not None:
+        print('Returning cached result')
+        return {
+            'result': translation_text_back_to_list(existing['target'], return_list=return_list),
+            'text_too_large': False,
+            'successful': True,
+            'fresh': False,
+            'device': None
+        }
     return None
 
 
