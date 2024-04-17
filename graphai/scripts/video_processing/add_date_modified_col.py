@@ -1,4 +1,4 @@
-from graphai.core.common.caching import VideoDBCachingManager
+from graphai.core.interfaces.caching import VideoDBCachingManager
 
 
 def main():

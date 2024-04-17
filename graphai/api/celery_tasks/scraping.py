@@ -1,5 +1,5 @@
 from celery import shared_task
-from graphai.core.common.scraping import (
+from graphai.core.scraping.scraping import (
     initialize_url,
     get_sublinks,
     process_all_sublinks,
@@ -8,7 +8,7 @@ from graphai.core.common.scraping import (
     reconstruct_data_dict
 )
 from graphai.core.common.common_utils import get_current_datetime
-from graphai.core.common.caching import ScrapingDBCachingManager
+from graphai.core.interfaces.caching import ScrapingDBCachingManager
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},

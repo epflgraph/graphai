@@ -1,6 +1,6 @@
-from graphai.core.common.caching import SlideDBCachingManager, AudioDBCachingManager, VideoConfig
+from graphai.core.interfaces.caching import SlideDBCachingManager, AudioDBCachingManager, VideoConfig
 from db_cache_manager.db import escape_everything
-from graphai.core.common.video import read_txt_gz_file
+from graphai.core.video.video import read_txt_gz_file
 from graphai.core.common.common_utils import read_json_file, read_text_file
 import json
 import argparse

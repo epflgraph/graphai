@@ -6,7 +6,7 @@ from time import sleep
 
 from graphai.api.celery_tasks.scraping import initialize_url_and_get_sublinks_task
 
-from graphai.core.common.scraping import create_base_url_token
+from graphai.core.scraping.scraping import create_base_url_token
 
 ################################################################
 # /scraping/sublinks                                           #

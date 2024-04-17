@@ -4,7 +4,7 @@ from itertools import chain
 
 from celery import shared_task
 
-from graphai.core.common.video import (
+from graphai.core.video.video import (
     retrieve_file_from_url,
     create_filename_using_url_format,
     extract_audio_from_video,
@@ -15,14 +15,14 @@ from graphai.core.common.video import (
     compute_video_ocr_transitions,
     check_ocr_and_hash_thresholds,
     generate_random_token,
-    md5_video_or_audio,
     generate_symbolic_token,
     read_txt_gz_file,
     generate_audio_token,
     FRAME_FORMAT_PNG,
-    TESSERACT_OCR_FORMAT, perceptual_hash_audio, perceptual_hash_image
+    TESSERACT_OCR_FORMAT
 )
-from graphai.core.common.caching import (
+from graphai.core.common.fingerprinting import md5_video_or_audio, perceptual_hash_audio, perceptual_hash_image
+from graphai.core.interfaces.caching import (
     AudioDBCachingManager,
     SlideDBCachingManager,
     VideoDBCachingManager,

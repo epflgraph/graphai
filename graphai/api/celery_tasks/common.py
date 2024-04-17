@@ -7,13 +7,10 @@ from graphai.api.common.video import (
     local_ocr_nlp_models
 )
 from graphai.core.common.common_utils import strtobool
-from graphai.core.common.config import config
+from graphai.core.interfaces.config import config
 
-from graphai.core.common.video import (
-    find_closest_audio_fingerprint_from_list,
-    find_closest_image_fingerprint_from_list,
-    find_closest_text_fingerprint_from_list
-)
+from graphai.core.common.fingerprinting import find_closest_audio_fingerprint_from_list, \
+    find_closest_image_fingerprint_from_list, find_closest_text_fingerprint_from_list
 
 
 def format_api_results(id, name, status, result):

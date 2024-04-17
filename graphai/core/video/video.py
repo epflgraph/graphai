@@ -1,13 +1,12 @@
 import os
 import sys
-import io
 import math
 import glob
 import re
 import random
 import json
 import time
-from datetime import datetime, timedelta
+from datetime import timedelta
 import gzip
 
 from sacremoses.tokenize import MosesTokenizer
@@ -16,22 +15,24 @@ import subprocess
 
 import numpy as np
 
-import acoustid
 import ffmpeg
 import imagehash
 from PIL import Image
-from fuzzywuzzy import fuzz
 
 import pytesseract
-from google.cloud import vision
-import whisper
 
 import fasttext
 from fasttext_reducer.reduce_fasttext_models import generate_target_path
 
-from graphai.core.common.config import config
-from graphai.core.common.common_utils import make_sure_path_exists, file_exists
-from graphai.core.common.text_utils import perceptual_hash_text
+from graphai.core.interfaces.config import config
+from graphai.core.common.common_utils import (
+    make_sure_path_exists,
+    file_exists
+)
+from graphai.core.common.fingerprinting import (
+    perceptual_hash_image,
+    compare_encoded_fingerprints
+)
 
 FRAME_FORMAT_PNG = 'frame-%06d.png'
 FRAME_FORMAT_JPG = 'frame-%06d.jpg'
@@ -217,40 +218,6 @@ def generate_symbolic_token(origin, token):
     return origin + '_' + token
 
 
-def md5_video_or_audio(input_filename_with_path, video=True):
-    """
-    Computes the md5 hash of the video or audio stream of a video file
-    Args:
-        input_filename_with_path: Full path of the input file
-        video: Whether to compute the md5 for the video stream or the audio stream
-
-    Returns:
-        MD5 hash
-    """
-    if not file_exists(input_filename_with_path):
-        print(f'ffmpeg error: File {input_filename_with_path} does not exist')
-        return None
-    in_stream = ffmpeg.input(input_filename_with_path)
-    if video:
-        # video
-        try:
-            in_stream = in_stream.video
-        except Exception:
-            print("No video found. If you're trying to hash an audio file, provide video=False.")
-            return None
-    else:
-        # audio
-        try:
-            in_stream = in_stream.audio
-        except Exception:
-            print("No audio found. If you're trying to has the audio track of a video file, "
-                  "make sure your video has audio.")
-            return None
-    result, _ = ffmpeg.output(in_stream, 'pipe:', c='copy', format='md5').run(capture_stdout=True)
-    # The result looks like 'MD5=9735151f36a3e628b0816b1bba3b9640\n' so we clean it up
-    return (result.decode('utf8').strip())[4:]
-
-
 def detect_audio_duration(input_filename_with_path):
     """
     Detects the duration of the audio track of the provided video file and returns its name in ogg format
@@ -338,246 +305,6 @@ def extract_media_segment(input_filename_with_path, output_filename_with_path, o
         return output_token
     else:
         return None
-
-
-def find_beginning_and_ending_silences(input_filename_with_path, distance_from_end_tol=0.01, noise_thresh=0.0001):
-    """
-    Detects silence at the beginning and the end of an audio file
-    Args:
-        input_filename_with_path: Path of input file
-        distance_from_end_tol: Tolerance value for distance of the silence from each end of the file in seconds
-        noise_thresh: Noise threshold
-
-    Returns:
-        A dictionary with the beginning and ending timestamps of the file with the two silences removed.
-    """
-    if not file_exists(input_filename_with_path):
-        raise Exception(f'ffmpeg error: File {input_filename_with_path} does not exist')
-    _, results = ffmpeg.input(input_filename_with_path)\
-                       .filter('silencedetect', n=noise_thresh)\
-                       .output('pipe:', format='null')\
-                       .run(capture_stderr=True)
-    results = results.decode('utf8')
-    # the audio length will be accurate since the filter forces a decoding of the audio file
-    audio_length = re.findall(r'time=\d{2}:\d{2}:\d{2}.\d+', results)
-    audio_length = [datetime.strptime(x.strip('time=').strip(), '%H:%M:%S.%f') for x in audio_length]
-    audio_length = max([t.hour * 3600 + t.minute * 60 + t.second + t.microsecond / 1e6 for t in audio_length])
-    results = re.split(r'[\n\r]', results)
-    results = [x for x in results if '[silencedetect' in x]
-    results = [x.split(']')[1].strip() for x in results]
-    if len(results) > 0:
-        silence_beginnings_and_ends = [float(result.split('|')[0].split(':')[1].strip()) for result in results]
-        if len(results) == 2:
-            silence_start = silence_beginnings_and_ends[0]
-            silence_end = silence_beginnings_and_ends[1]
-            if silence_start <= distance_from_end_tol:
-                return_dict = {'ss': silence_end, 'to': audio_length}
-            elif silence_end >= audio_length - distance_from_end_tol:
-                return_dict = {'ss': 0, 'to': silence_start}
-            else:
-                return_dict = {'ss': 0, 'to': audio_length}
-        else:
-            first_silence_start = silence_beginnings_and_ends[0]
-            first_silence_end = silence_beginnings_and_ends[1]
-            last_silence_start = silence_beginnings_and_ends[-2]
-            last_silence_end = silence_beginnings_and_ends[-1]
-            return_dict = dict()
-            if first_silence_start <= distance_from_end_tol:
-                return_dict['ss'] = first_silence_end
-            else:
-                return_dict['ss'] = 0
-            if last_silence_end >= audio_length - distance_from_end_tol:
-                return_dict['to'] = last_silence_start
-            else:
-                return_dict['to'] = audio_length
-    else:
-        return_dict = {'ss': 0, 'to': audio_length}
-    return return_dict
-
-
-def remove_silence_doublesided(input_filename_with_path, output_filename_with_path, output_token,
-                               threshold=0.0001):
-    """
-    Removes silence from the beginning and the end of the provided file.
-    Args:
-        input_filename_with_path: Path of the input file
-        output_filename_with_path: Path of the output file
-        output_token: Token of the output file (filename without path)
-        threshold: Noise threshold for silence detection
-
-    Returns:
-        Token of the resulting audio file and its duration if successful, None and 0 if unsuccessful
-    """
-    try:
-        from_and_to = find_beginning_and_ending_silences(input_filename_with_path, noise_thresh=threshold)
-        audio_length = from_and_to['to'] - from_and_to['ss']
-        output = extract_media_segment(input_filename_with_path, output_filename_with_path, output_token,
-                                       start=from_and_to['ss'], length=audio_length)
-    except Exception:
-        output = None
-        audio_length = 0.0
-
-    if output is not None and file_exists(output_filename_with_path):
-        return output, audio_length
-    else:
-        return None, 0.0
-
-
-def perceptual_hash_audio(input_filename_with_path, max_length=7200):
-    """
-    Computes the perceptual hash of an audio file
-    Args:
-        input_filename_with_path: Path of the input file
-        max_length: Maximum length of the file in seconds
-
-    Returns:
-        String representation of the computed fingerprint and its decoded representation. Both are None if the
-        file doesn't exist.
-    """
-    if not file_exists(input_filename_with_path):
-        print(f'File {input_filename_with_path} does not exist')
-        return None
-    results = acoustid.fingerprint_file(input_filename_with_path, maxlength=max_length)
-    fingerprint_value = results[1]
-    return perceptual_hash_text(fingerprint_value.decode('utf8'))
-
-
-def perceptual_hash_image(input_filename_with_path, hash_size=16):
-    """
-    Computes the perceptual hash of an image file
-    Args:
-        input_filename_with_path: Path of the input file
-        hash_size: Size of hash
-    Returns:
-        String representation of the computed fingerprint. None if file does not exist
-    """
-    if not file_exists(input_filename_with_path):
-        print(f'File {input_filename_with_path} does not exist')
-        return None
-    results = imagehash.dhash(Image.open(input_filename_with_path), hash_size=hash_size)
-    return str(results)
-
-
-def compare_decoded_fingerprints(decoded_1, decoded_2):
-    """
-    Compares two decoded fingerprints
-    Args:
-        decoded_1: Fingerprint 1
-        decoded_2: Fingerprint 2
-
-    Returns:
-        Fuzzy matching ratio between 0 and 1
-    """
-    return fuzz.ratio(decoded_1, decoded_2) / 100
-
-
-def compare_encoded_fingerprints(f1, f2=None, decoder_func=imagehash.hex_to_hash):
-    """
-    Compares two string-encoded audio fingerprints
-    and returns the ratio of the fuzzy match between them
-    (value between 0 and 1, with 1 indicating an exact match).
-    Args:
-        f1: The target fingerprint
-        f2: The second fingerprint, can be None (similarity is 0 if so)
-
-    Returns:
-        Ratio of fuzzy match between the two fingerprints
-    """
-    # when fuzzywuzzy is used in combination with python-Levenshtein (fuzzywuzzy[speedup],
-    # there's a 10-fold speedup here.
-    if f2 is None:
-        return 0
-    return compare_decoded_fingerprints(decoder_func(f1.encode('utf8')),
-                                        decoder_func(f2.encode('utf8')))
-
-
-def find_closest_fingerprint_from_list(target_fp, fp_list, token_list, date_list, min_similarity=0.8,
-                                       decoder_func=imagehash.hex_to_hash, strip_underscores=True):
-    """
-    Given a target fingerprint and a list of candidate fingerprints, finds the one with the highest similarity
-    to the target whose similarity is above a minimum value.
-    Args:
-        target_fp: Target fingerprint
-        fp_list: List of candidate fingerprints
-        token_list: List of tokens corresponding to those fingerprints
-        min_similarity: Minimum similarity value. If the similarity of the most similar candidate to the target
-                        is lower than this value, None will be returned as the result.
-        decoder_func: The function that decodes the string hash, different for audio vs image hashes
-        strip_underscores: For text fingerprints, removes the trailing underscores
-
-    Returns:
-        Closest fingerprint, its token, and the highest score. All three are None if the closest one does not
-        satisfy the minimum similarity criterion.
-    """
-    # If the list of fingerprints is empty, there's no "closest" fingerprint to the target and the result is null.
-    if len(fp_list) == 0:
-        return None, None, None, None
-    if min_similarity < 1:
-        if strip_underscores:
-            trailing_underscores = '_'.join(target_fp.split('_')[1:])
-            target_fp = target_fp.split('_')[0]
-            fp_list = [x.split('_')[0] for x in fp_list if x.endswith(trailing_underscores)]
-            if len(fp_list) == 0:
-                return None, None, None, None
-        fp_similarities = np.array([compare_encoded_fingerprints(target_fp, fp2, decoder_func) for fp2 in fp_list])
-    else:
-        # if an exact match is required, we switch to a much faster equality comparison
-        fp_similarities = [1 if target_fp == fp2 else 0 for fp2 in fp_list]
-    # The index returned by argmax is the first occurrence of the maximum
-    max_index = np.argmax(fp_similarities)
-    # If the similarity of the most similar fingerprint is also greater than the minimum similarity value,
-    # then it's a match. Otherwise, the result is null.
-    if fp_similarities[max_index] >= min_similarity:
-        return token_list[max_index], fp_list[max_index], date_list[max_index], fp_similarities[max_index]
-    else:
-        return None, None, None, None
-
-
-def find_closest_fingerprint_for_list_from_list(target_fp, fp_list, token_list, date_list, min_similarity=0.8,
-                                                decoder_func=imagehash.hex_to_hash, strip_underscores=True):
-    if isinstance(target_fp, str):
-        return find_closest_fingerprint_from_list(target_fp, fp_list, token_list, date_list, min_similarity,
-                                                  decoder_func, strip_underscores)
-    else:
-        closest_token_list = list()
-        closest_fp_list = list()
-        best_date_list = list()
-        score_list = list()
-        for current_fp in target_fp:
-            closest_token, closest_fingerprint, best_date, score = find_closest_fingerprint_from_list(
-                current_fp, fp_list, token_list, date_list, min_similarity,
-                decoder_func, strip_underscores
-            )
-            closest_token_list.append(closest_token)
-            closest_fp_list.append(closest_fingerprint)
-            best_date_list.append(best_date)
-            score_list.append(score)
-        return closest_token_list, closest_fp_list, best_date_list, score_list
-
-
-def find_closest_audio_fingerprint_from_list(target_fp, fp_list, token_list, date_list, min_similarity=0.8):
-    """
-    Finds closest audio fingerprint from list
-    """
-    return find_closest_fingerprint_for_list_from_list(target_fp, fp_list, token_list, date_list, min_similarity,
-                                                       decoder_func=imagehash.hex_to_hash)
-
-
-def find_closest_image_fingerprint_from_list(target_fp, fp_list, token_list, date_list, min_similarity=0.8):
-    """
-    Finds closest image fingerprint from list
-    """
-
-    return find_closest_fingerprint_for_list_from_list(target_fp, fp_list, token_list, date_list, min_similarity,
-                                                       decoder_func=imagehash.hex_to_hash)
-
-
-def find_closest_text_fingerprint_from_list(target_fp, fp_list, token_list, date_list, min_similarity=0.8):
-    """
-    Finds closest image fingerprint from list
-    """
-    return find_closest_fingerprint_for_list_from_list(target_fp, fp_list, token_list, date_list, min_similarity,
-                                                       decoder_func=imagehash.hex_to_hash, strip_underscores=True)
 
 
 def extract_frames(input_filename_with_path, output_folder_with_path, output_folder):
@@ -984,223 +711,3 @@ def get_ocr_colnames(method):
         return ['ocr_tesseract_results']
     else:
         return ['ocr_google_1_results', 'ocr_google_2_results']
-
-
-class WhisperTranscriptionModel:
-    def __init__(self):
-        try:
-            print("Reading whisper model type from config")
-            self.model_type = config['whisper']['model_type']
-        except Exception:
-            print(
-                "The whisper model type could not be found in the config file, "
-                "using the 'medium' model type as the default. "
-                "To use a different one, make sure to add a [whisper] section with the model_type parameter."
-            )
-            self.model_type = 'medium'
-
-        try:
-            print("Reading whisper model path from config")
-            self.download_root = config['whisper']['model_path']
-            if self.download_root == '':
-                self.download_root = None
-        except Exception:
-            print(
-                "The whisper dl path could not be found in the config file, using default (~/.cache/whisper). "
-                "To use a different one, make sure to add a [whisper] section with the model_path parameter."
-            )
-            self.download_root = None
-
-        # The actual Whisper model is lazy loaded in order not to load it twice (celery *and* gunicorn)
-        self.model = None
-
-    def load_model_whisper(self):
-        """
-        Lazy-loads a Whisper model into memory
-        Args:
-            model_type: Type of model, see Whisper docs for details
-
-        Returns:
-            Model object
-        """
-        # device=None ensures that the model will use CUDA if available and switch to CPUs otherwise.
-        if self.model is None:
-            print('Actually loading Whisper model...')
-            self.model = whisper.load_model(self.model_type, device=None, in_memory=True,
-                                            download_root=self.download_root)
-
-    def get_silence_thresholds(self, strict_silence=False):
-        if strict_silence:
-            if self.model_type == 'base':
-                no_speech_threshold = 0.5
-                logprob_threshold = -0.5
-            else:
-                no_speech_threshold = 0.5
-                logprob_threshold = -0.45
-        else:
-            no_speech_threshold = 0.6
-            logprob_threshold = -1
-        return no_speech_threshold, logprob_threshold
-
-    def detect_audio_segment_lang_whisper(self, input_filename_with_path):
-        """
-        Detects the language of an audio file using a 30-second sample
-        Args:
-            input_filename_with_path: Path to input file
-
-        Returns:
-            Highest-scoring language code (e.g. 'en')
-        """
-        self.load_model_whisper()
-        audio = whisper.load_audio(input_filename_with_path)
-        audio = whisper.pad_or_trim(audio)
-
-        # make log-Mel spectrogram and move to the same device as the model
-        mel = whisper.log_mel_spectrogram(audio).to(self.model.device)
-
-        # detect the spoken language
-        _, probs = self.model.detect_language(mel)
-        return max(probs, key=probs.get)
-
-    def transcribe_audio_whisper(self, input_filename_with_path, force_lang=None, verbose=False,
-                                 strict_silence=False):
-        """
-        Transcribes an audio file using whisper
-        Args:
-            input_filename_with_path: Path to input file
-            force_lang: Whether to explicitly feed the model the language of the audio.
-                        None results in automatic detection.
-            verbose: Verbosity of the transcription
-            strict_silence: Whether silence detection is strict or lenient.
-                            Affects the logprob and no speech thresholds.
-        Returns:
-            A dictionary with three keys: 'text' contains the full transcript, 'segments' contains a JSON-like dict of
-            translated segments which can be used as subtitles, and 'language' which contains the language code.
-        """
-        self.load_model_whisper()
-        if not file_exists(input_filename_with_path):
-            print(f'File {input_filename_with_path} does not exist')
-            return None
-        if force_lang not in [None, 'en', 'fr', 'de', 'it']:
-            force_lang = 'en'
-        try:
-            no_speech_threshold, logprob_threshold = self.get_silence_thresholds(strict_silence)
-            # setting fp16 to True makes sure that the model uses GPUs if available (otherwise
-            # Whisper automatically switches to fp32)
-            if force_lang is None:
-                result = self.model.transcribe(input_filename_with_path, verbose=verbose, fp16=True,
-                                               no_speech_threshold=no_speech_threshold,
-                                               logprob_threshold=logprob_threshold)
-            else:
-                result = self.model.transcribe(input_filename_with_path, verbose=verbose, language=force_lang,
-                                               fp16=True, no_speech_threshold=no_speech_threshold,
-                                               logprob_threshold=logprob_threshold)
-            transcript_results = result['text']
-            subtitle_results = result['segments']
-            language_result = result['language']
-
-            if strict_silence:
-                subtitle_results = [
-                    x for x in subtitle_results
-                    if x['avg_logprob'] >= -1.0
-                ]
-                transcript_results = ''.join([x['text'] for x in subtitle_results])
-            return {
-                'text': transcript_results,
-                'segments': subtitle_results,
-                'language': language_result
-            }
-        except Exception as e:
-            print(e, file=sys.stderr)
-            return None
-
-
-class GoogleOCRModel:
-    def __init__(self):
-        try:
-            print("Reading Google API key from config")
-            self.api_key = config['google']['api_key']
-        except Exception:
-            self.api_key = None
-
-        if self.api_key is None:
-            print(
-                "The Google API key could not be found in the config file. "
-                "Make sure to add a [google] section with the api_key parameter. "
-                "Google API endpoints cannot be used as there is no default API key."
-            )
-
-        # The actual Google model is lazy loaded in order not to load it twice (celery *and* gunicorn)
-        self.model = None
-
-    def establish_connection(self):
-        """
-        Lazily connects to the Google API
-        Returns:
-            True if a connection already exists or if a new connection is successfully established, False otherwise
-        """
-        if self.model is None:
-            if self.api_key is not None:
-                print('Establishing Google API connection...')
-                try:
-                    self.model = vision.ImageAnnotatorClient(client_options={"api_key": self.api_key})
-                    return True
-                except Exception:
-                    print('Failed to connect to Google API!')
-                    return False
-            else:
-                print('No API key provided!')
-                return False
-        else:
-            return True
-
-    def perform_ocr(self, input_filename_with_path):
-        """
-        Performs OCR with two methods (text_detection and document_text_detection)
-        Args:
-            input_filename_with_path: Full path of the input image file
-
-        Returns:
-            Text results of the two OCR methods
-        """
-        model_loaded = self.establish_connection()
-        if not model_loaded:
-            return None, None
-        # Loading the image
-        if not file_exists(input_filename_with_path):
-            print(f'Error: File {input_filename_with_path} does not exist')
-            return None, None
-        with io.open(input_filename_with_path, 'rb') as image_file:
-            image_content = image_file.read()
-        g_image_obj = vision.Image(content=image_content)
-        # Waiting for results (accounting for possible failures)
-        results_1 = self.wait_for_ocr_results(image_object=g_image_obj, method='dtd')
-        results_2 = self.wait_for_ocr_results(image_object=g_image_obj, method='td')
-        return results_1, results_2
-
-    def wait_for_ocr_results(self, image_object, method='dtd', retries=6):
-        """
-        Makes call to Google OCR API and waits for the results
-        Args:
-            image_object: Image object for the Google API
-            method: Method to use, 'td' for text detection and 'dtd' for document text detection
-            retries: Number of retries to perform in case of failure
-
-        Returns:
-            OCR results
-        """
-        assert method in ['dtd', 'td']
-        results = None
-        for i in range(retries):
-            try:
-                if method == 'dtd':
-                    results = self.model.document_text_detection(image=image_object)
-                else:
-                    results = self.model.text_detection(image=image_object)
-                break
-            except Exception:
-                print('Failed to call OCR engine. Trying again in 60 seconds ...')
-                time.sleep(5)
-        if results is not None:
-            results = results.full_text_annotation.text
-        return results

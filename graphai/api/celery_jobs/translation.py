@@ -13,7 +13,7 @@ from graphai.api.celery_tasks.translation import (
 
 from graphai.api.celery_jobs.common import direct_lookup_generic_job
 
-from graphai.core.common.text_utils import (
+from graphai.core.translation.text_utils import (
     generate_translation_text_token,
     translation_list_to_text
 )

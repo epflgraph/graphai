@@ -1,8 +1,8 @@
 from datetime import timedelta, datetime, timezone
 from typing import Annotated, Union
-from graphai.core.common.config import config
+from graphai.core.interfaces.config import config
 
-from graphai.core.common.auth_utils import (
+from graphai.api.common.auth_utils import (
     Token,
     TokenData,
     User,

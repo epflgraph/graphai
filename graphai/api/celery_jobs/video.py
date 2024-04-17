@@ -44,7 +44,7 @@ from graphai.api.celery_tasks.video import (
     retrieve_slide_fingerprint_callback_task
 )
 from graphai.api.celery_jobs.common import direct_lookup_generic_job
-from graphai.core.common.caching import FingerprintParameters
+from graphai.core.interfaces.caching import FingerprintParameters
 
 
 def get_video_fingerprint_chain_list(token=None, min_similarity=None, n_jobs=8,

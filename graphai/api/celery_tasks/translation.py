@@ -1,12 +1,12 @@
 from celery import shared_task
 from graphai.api.common.translation import translation_models
-from graphai.core.common.text_utils import (
+from graphai.core.translation.text_utils import (
     detect_text_language,
-    translation_text_back_to_list,
-    perceptual_hash_text
+    translation_text_back_to_list
 )
+from graphai.core.common.fingerprinting import perceptual_hash_text
 from graphai.core.common.common_utils import get_current_datetime
-from graphai.core.common.caching import TextDBCachingManager
+from graphai.core.interfaces.caching import TextDBCachingManager
 
 LONG_TEXT_ERROR = "Unpunctuated text too long (over 512 tokens), " \
                   "try adding punctuation or providing a smaller chunk of text."

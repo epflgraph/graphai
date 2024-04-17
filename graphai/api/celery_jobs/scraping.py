@@ -14,7 +14,7 @@ from graphai.api.celery_tasks.scraping import (
 
 from graphai.api.celery_jobs.common import direct_lookup_generic_job
 
-from graphai.core.common.scraping import create_base_url_token
+from graphai.core.scraping.scraping import create_base_url_token
 
 
 def sublink_lookup_job(token, return_results=False):

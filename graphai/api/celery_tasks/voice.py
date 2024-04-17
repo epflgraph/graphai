@@ -7,10 +7,10 @@ from graphai.api.common.video import (
     file_management_config,
     transcription_model
 )
-from graphai.core.common.video import (
+from graphai.core.video.video import (
     extract_media_segment
 )
-from graphai.core.common.caching import (
+from graphai.core.interfaces.caching import (
     TEMP_SUBFOLDER,
     AudioDBCachingManager
 )

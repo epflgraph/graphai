@@ -1,7 +1,7 @@
 import os
 from datetime import datetime, timedelta
 
-from graphai.core.common.caching import (
+from graphai.core.interfaces.caching import (
     VideoConfig,
     VideoDBCachingManager,
     AudioDBCachingManager,
@@ -9,7 +9,7 @@ from graphai.core.common.caching import (
     delete_file
 )
 from graphai.core.common.common_utils import format_datetime_for_mysql
-from graphai.core.common.config import config
+from graphai.core.interfaces.config import config
 
 
 def get_cleanup_interval():
