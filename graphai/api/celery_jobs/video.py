@@ -1,11 +1,10 @@
-from celery import chain, group
+from celery import (
+    chain,
+    group
+)
 
 from graphai.api.celery_tasks.common import ignore_fingerprint_results_callback_task
 from graphai.api.celery_tasks.common import video_dummy_task
-from graphai.api.celery_tasks.image import compute_slide_fingerprint_task, compute_slide_set_fingerprint_task, \
-    compute_slide_fingerprint_callback_task, slide_fingerprint_find_closest_direct_task, \
-    slide_fingerprint_find_closest_retrieve_from_db_task, slide_fingerprint_find_closest_parallel_task, \
-    slide_fingerprint_find_closest_callback_task, retrieve_slide_fingerprint_callback_task
 from graphai.api.celery_tasks.video import (
     cache_lookup_retrieve_file_from_url_task,
     retrieve_file_from_url_task,
@@ -29,12 +28,22 @@ from graphai.api.celery_tasks.video import (
     compute_slide_transitions_callback_task,
     detect_slides_callback_task,
     reextract_cached_slides_task,
-    get_file_task
+    get_file_task, compute_audio_fingerprint_task,
+    compute_audio_fingerprint_callback_task,
+    audio_fingerprint_find_closest_retrieve_from_db_task,
+    audio_fingerprint_find_closest_parallel_task,
+    audio_fingerprint_find_closest_callback_task,
+    retrieve_audio_fingerprint_callback_task,
+    compute_slide_fingerprint_task,
+    compute_slide_set_fingerprint_task,
+    compute_slide_fingerprint_callback_task,
+    slide_fingerprint_find_closest_retrieve_from_db_task,
+    slide_fingerprint_find_closest_parallel_task,
+    slide_fingerprint_find_closest_direct_task,
+    slide_fingerprint_find_closest_callback_task,
+    retrieve_slide_fingerprint_callback_task
 )
 from graphai.api.celery_jobs.common import direct_lookup_generic_job
-from graphai.api.celery_tasks.voice import compute_audio_fingerprint_task, compute_audio_fingerprint_callback_task, \
-    audio_fingerprint_find_closest_retrieve_from_db_task, audio_fingerprint_find_closest_parallel_task, \
-    audio_fingerprint_find_closest_callback_task, retrieve_audio_fingerprint_callback_task
 from graphai.core.common.caching import FingerprintParameters
 
 

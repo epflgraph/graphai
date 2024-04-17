@@ -20,7 +20,7 @@ from graphai.core.common.video import (
     read_txt_gz_file,
     generate_audio_token,
     FRAME_FORMAT_PNG,
-    TESSERACT_OCR_FORMAT
+    TESSERACT_OCR_FORMAT, perceptual_hash_audio, perceptual_hash_image
 )
 from graphai.core.common.caching import (
     AudioDBCachingManager,
@@ -41,7 +41,7 @@ from graphai.api.common.video import (
 from graphai.api.celery_tasks.common import (
     fingerprint_lookup_retrieve_from_db,
     fingerprint_lookup_parallel,
-    fingerprint_lookup_callback
+    fingerprint_lookup_callback, fingerprint_lookup_direct
 )
 
 
@@ -715,3 +715,276 @@ def reextract_cached_slides_task(self, token):
         'slide_tokens': slide_tokens,
         'fresh': True
     }
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
+             name='video_2.audio_fingerprint', ignore_result=False,
+             file_manager=file_management_config)
+def compute_audio_fingerprint_task(self, results):
+    token = results['token']
+    # Making sure that the cache row for the audio file already exists.
+    # This cache row is created when the audio is extracted from its corresponding video, so it must exist!
+    # We also need this cache row later in order to be able to return the duration of the audio file.
+    db_manager = AudioDBCachingManager()
+    existing = db_manager.get_details(token, cols=['fingerprint', 'duration'],
+                                      using_most_similar=False)[0]
+    if existing is None:
+        return {
+            'result': None,
+            'fp_token': None,
+            'perform_lookup': False,
+            'fresh': False,
+            'duration': 0.0,
+            'original_results': results
+        }
+    if existing['fingerprint'] is not None:
+        fp = existing['fingerprint']
+        fresh = False
+        perform_lookup = False
+        fp_token = None
+    else:
+        fp = perceptual_hash_audio(self.file_manager.generate_filepath(token))
+        fresh = fp is not None
+        perform_lookup = fp is not None
+        fp_token = token if fp is not None else None
+    return {
+        'result': fp,
+        'fp_token': fp_token,
+        'perform_lookup': perform_lookup,
+        'fresh': fresh,
+        'duration': existing['duration'],
+        'original_results': results
+    }
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
+             name='video_2.audio_fingerprint_callback', ignore_result=False,
+             file_manager=file_management_config)
+def compute_audio_fingerprint_callback_task(self, results, force=False):
+    if results['fresh']:
+        token = results['fp_token']
+        db_manager = AudioDBCachingManager()
+        db_manager.insert_or_update_details(
+            token,
+            {
+                'fingerprint': results['result'],
+            }
+        )
+        if not force:
+            closest_token = db_manager.get_closest_match(token)
+            # If this token has a closest token, it means that their relationship comes from their parent videos,
+            # and that the closest token's fingerprint has not been calculated either (otherwise `fresh` wouldn't be True).
+            # In that case, we insert the computed fingerprint for the closest token as well, and then we will perform the
+            # fingerprint lookup for that token instead of the one we computed the fingerprint for.
+            if closest_token is not None and closest_token != token:
+                db_manager.insert_or_update_details(
+                    closest_token,
+                    {
+                        'fingerprint': results['result'],
+                    }
+                )
+                results['fp_token'] = closest_token
+    return results
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
+             name='video_2.audio_fingerprint_find_closest_retrieve_from_db', ignore_result=False)
+def audio_fingerprint_find_closest_retrieve_from_db_task(self, results):
+    db_manager = AudioDBCachingManager()
+    return fingerprint_lookup_retrieve_from_db(results, db_manager)
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
+             name='video_2.audio_fingerprint_find_closest_parallel', ignore_result=False)
+def audio_fingerprint_find_closest_parallel_task(self, input_dict, i, n_total, min_similarity=0.8):
+    db_manager = AudioDBCachingManager()
+    return fingerprint_lookup_parallel(input_dict, i, n_total, min_similarity, db_manager, data_type='audio')
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
+             name='video_2.audio_fingerprint_find_closest_callback', ignore_result=False)
+def audio_fingerprint_find_closest_callback_task(self, results_list):
+    db_manager = AudioDBCachingManager()
+    return fingerprint_lookup_callback(results_list, db_manager)
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
+             name='video_2.retrieve_audio_fingerprint_final_callback', ignore_result=False)
+def retrieve_audio_fingerprint_callback_task(self, results):
+    # Returning the fingerprinting results, which is the part of this task whose results are sent back to the user.
+    results_to_return = results['fp_results']
+    results_to_return['closest'] = results['closest']
+    db_manager = AudioDBCachingManager()
+
+    if results_to_return['closest'] is not None:
+        results_to_return['closest_origin'] = db_manager.get_origin(results_to_return['closest'])
+    else:
+        results_to_return['closest_origin'] = None
+
+    return results_to_return
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
+             name='video_2.slide_fingerprint', ignore_result=False,
+             file_manager=file_management_config)
+def compute_slide_fingerprint_task(self, token):
+    # Making sure the slide's cache row exists, because otherwise, the operation should be cancelled!
+    db_manager = SlideDBCachingManager()
+    existing_slide_list = db_manager.get_details(token, cols=[], using_most_similar=False)
+    if existing_slide_list[0] is None:
+        return {
+            'result': None,
+            'fp_token': None,
+            'perform_lookup': False,
+            'fresh': False
+        }
+
+    fingerprint = perceptual_hash_image(self.file_manager.generate_filepath(token))
+    if fingerprint is None:
+        return {
+            'result': None,
+            'fp_token': None,
+            'perform_lookup': False,
+            'fresh': False
+        }
+
+    return {
+        'result': fingerprint,
+        'fp_token': token,
+        'perform_lookup': True,
+        'fresh': True
+    }
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
+             name='video_2.slide_set_fingerprint', ignore_result=False,
+             file_manager=file_management_config)
+def compute_slide_set_fingerprint_task(self, results, origin_token):
+    # Making sure the cache rows exist, because otherwise, the operation should be cancelled!
+    db_manager = SlideDBCachingManager()
+    existing_slide_list = db_manager.get_details_using_origin(origin_token, cols=['fingerprint'])
+    if existing_slide_list is None:
+        return {
+            'result': None,
+            'fp_token': None,
+            'perform_lookup': False,
+            'fresh': False,
+            'original_results': results
+        }
+    if all(existing_slide['fingerprint'] is not None for existing_slide in existing_slide_list):
+        return {
+            'result': None,
+            'fp_token': None,
+            'perform_lookup': False,
+            'fresh': False,
+            'original_results': results
+        }
+    tokens = [existing_slide['id_token'] for existing_slide in existing_slide_list
+              if existing_slide['fingerprint'] is None]
+    fingerprints = [perceptual_hash_image(self.file_manager.generate_filepath(token)) for token in tokens]
+    if any(fp is None for fp in fingerprints):
+        return {
+            'result': None,
+            'fp_token': None,
+            'perform_lookup': False,
+            'fresh': False,
+            'original_results': results
+        }
+
+    return {
+        'result': fingerprints,
+        'fp_token': tokens,
+        'perform_lookup': True,
+        'fresh': True,
+        'original_results': results
+    }
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
+             name='video_2.slide_fingerprint_callback', ignore_result=False)
+def compute_slide_fingerprint_callback_task(self, results, force=False):
+    if results['fresh']:
+        tokens = results['fp_token']
+        fp_results = results['result']
+        if not isinstance(tokens, list):
+            tokens = [tokens]
+            fp_results = [fp_results]
+        fp_tokens_to_pass_on = list()
+        for i in range(len(tokens)):
+            token = tokens[i]
+            current_fp_result = fp_results[i]
+            db_manager = SlideDBCachingManager()
+            db_manager.insert_or_update_details(
+                token,
+                {
+                    'fingerprint': current_fp_result,
+                }
+            )
+            if not force:
+                closest_token = db_manager.get_closest_match(token)
+                # If this token has a closest token, it means that their relationship comes from their parent videos,
+                # and that the closest token's fingerprint has not been calculated either (otherwise `fresh` wouldn't be True).
+                # In that case, we insert the computed fingerprint for the closest token as well, and then we will perform the
+                # fingerprint lookup for that token instead of the one we computed the fingerprint for.
+                if closest_token is not None and closest_token != token:
+                    db_manager.insert_or_update_details(
+                        closest_token,
+                        {
+                            'fingerprint': current_fp_result,
+                        }
+                    )
+                    fp_tokens_to_pass_on.append(closest_token)
+                else:
+                    fp_tokens_to_pass_on.append(token)
+            else:
+                fp_tokens_to_pass_on.append(token)
+        # Now we add the correct fp tokens to pass to the fingerprint closest match lookups
+        if isinstance(results['fp_token'], list):
+            results['fp_token'] = fp_tokens_to_pass_on
+        else:
+            results['fp_token'] = fp_tokens_to_pass_on[0]
+    return results
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
+             name='video_2.slide_fingerprint_find_closest_retrieve_from_db', ignore_result=False)
+def slide_fingerprint_find_closest_retrieve_from_db_task(self, results):
+    db_manager = SlideDBCachingManager()
+    return fingerprint_lookup_retrieve_from_db(results, db_manager)
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
+             name='video_2.slide_fingerprint_find_closest_parallel', ignore_result=False)
+def slide_fingerprint_find_closest_parallel_task(self, input_dict, i, n_total, min_similarity=1):
+    db_manager = SlideDBCachingManager()
+    return fingerprint_lookup_parallel(input_dict, i, n_total, min_similarity, db_manager, data_type='image')
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
+             name='video_2.slide_fingerprint_find_closest_direct', ignore_result=False)
+def slide_fingerprint_find_closest_direct_task(self, results):
+    db_manager = SlideDBCachingManager()
+    return fingerprint_lookup_direct(results, db_manager)
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
+             name='video_2.slide_fingerprint_find_closest_callback', ignore_result=False)
+def slide_fingerprint_find_closest_callback_task(self, results_list):
+    db_manager = SlideDBCachingManager()
+    return fingerprint_lookup_callback(results_list, db_manager)
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
+             name='video_2.retrieve_slide_fingerprint_final_callback', ignore_result=False)
+def retrieve_slide_fingerprint_callback_task(self, results):
+    # Returning the fingerprinting results, which is the part of this task whose results are sent back to the user.
+    results_to_return = results['fp_results']
+    results_to_return['closest'] = results['closest']
+    db_manager = SlideDBCachingManager()
+
+    if results_to_return['closest'] is not None:
+        results_to_return['closest_origin'] = db_manager.get_origin(results_to_return['closest'])
+    else:
+        results_to_return['closest_origin'] = None
+
+    return results_to_return
