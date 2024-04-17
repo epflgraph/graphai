@@ -1,8 +1,11 @@
 from celery import shared_task
 from graphai.api.common.ontology import ontology_data
-from graphai.core.common.ontology_utils.clustering import (
-    compute_all_graphs_from_scratch, assign_to_categories_using_existing,
-    combine_and_embed_laplacian, cluster_and_reassign_outliers, convert_cluster_labels_to_dict
+from graphai.core.ontology.clustering import (
+    compute_all_graphs_from_scratch,
+    assign_to_categories_using_existing,
+    combine_and_embed_laplacian,
+    cluster_and_reassign_outliers,
+    convert_cluster_labels_to_dict
 )
 
 

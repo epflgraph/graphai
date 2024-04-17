@@ -1,3 +1,3 @@
-from graphai.core.common.ontology_utils.data import OntologyData
+from graphai.core.ontology.data import OntologyData
 
 ontology_data = OntologyData()

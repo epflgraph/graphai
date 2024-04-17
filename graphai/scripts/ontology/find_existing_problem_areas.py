@@ -1,4 +1,4 @@
-from graphai.core.common.ontology_utils.data import OntologyData
+from graphai.core.ontology.data import OntologyData
 import pandas as pd
 import numpy as np
 
