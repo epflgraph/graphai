@@ -4,30 +4,6 @@ from typing import Union, Literal, List
 from graphai.api.schemas.common import TaskStatusResponse
 
 
-class TextFingerprintRequest(BaseModel):
-    text: Union[str, List[str]] = Field(
-        title="Text",
-        description="Text to translate, can be one string or a list of strings."
-    )
-
-    source: Literal['en', 'fr', 'de', 'it'] = Field(
-        title="Source language",
-        description="Language of the provided text",
-        default='fr'
-    )
-
-    target: Literal['en', 'fr', 'de', 'it'] = Field(
-        title="Target language",
-        description="Language to translate the text into",
-        default='en'
-    )
-
-    force: bool = Field(
-        title="Force recomputation",
-        default=False
-    )
-
-
 class TextFingerprintTaskResponse(BaseModel):
     result: Union[str, None] = Field(
         title="Fingerprint",

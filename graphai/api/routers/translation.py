@@ -6,7 +6,6 @@ from graphai.api.schemas.translation import (
     TranslationResponse,
     TextDetectLanguageRequest,
     TextDetectLanguageResponse,
-    TextFingerprintRequest,
     TextFingerprintResponse,
 )
 
@@ -32,7 +31,7 @@ router = APIRouter(
 
 
 @router.post('/calculate_fingerprint', response_model=TaskIDResponse)
-async def calculate_translation_text_fingerprint(data: TextFingerprintRequest):
+async def calculate_translation_text_fingerprint(data: TranslationRequest):
     text = data.text
     src = data.source
     tgt = data.target
