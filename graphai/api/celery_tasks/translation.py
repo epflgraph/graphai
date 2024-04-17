@@ -68,7 +68,8 @@ def cache_lookup_translation_text_using_fingerprint_task(self, token, fp, src, t
                                                                    'source_lang': src,
                                                                    'target_lang': tgt})
     if closest_text is not None:
-        translation = closest_text[0]['target']
+        all_keys = list(closest_text.keys())
+        translation = closest_text[all_keys[0]]['target']
         db_manager.insert_or_update_details(token, {
             'target': translation,
         })
