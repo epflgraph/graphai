@@ -3,7 +3,7 @@ from celery import (
     group
 )
 
-from graphai.api.celery_tasks.common import ignore_fingerprint_results_callback_task
+
 from graphai.api.celery_tasks.common import video_dummy_task
 from graphai.api.celery_tasks.video import (
     cache_lookup_retrieve_file_from_url_task,
@@ -16,6 +16,7 @@ from graphai.api.celery_tasks.video import (
     video_fingerprint_find_closest_parallel_task,
     video_fingerprint_find_closest_callback_task,
     retrieve_video_fingerprint_callback_task,
+    ignore_video_fingerprint_results_callback_task,
     cache_lookup_extract_audio_task,
     extract_audio_task,
     extract_audio_callback_task,
@@ -34,6 +35,7 @@ from graphai.api.celery_tasks.video import (
     audio_fingerprint_find_closest_parallel_task,
     audio_fingerprint_find_closest_callback_task,
     retrieve_audio_fingerprint_callback_task,
+    ignore_audio_fingerprint_results_callback_task,
     compute_slide_fingerprint_task,
     compute_slide_set_fingerprint_task,
     compute_slide_fingerprint_callback_task,
@@ -41,7 +43,8 @@ from graphai.api.celery_tasks.video import (
     slide_fingerprint_find_closest_parallel_task,
     slide_fingerprint_find_closest_direct_task,
     slide_fingerprint_find_closest_callback_task,
-    retrieve_slide_fingerprint_callback_task
+    retrieve_slide_fingerprint_callback_task,
+    ignore_slide_fingerprint_results_callback_task
 )
 from graphai.api.celery_jobs.common import direct_lookup_generic_job
 from graphai.core.interfaces.caching import FingerprintParameters
@@ -69,7 +72,7 @@ def get_video_fingerprint_chain_list(token=None, min_similarity=None, n_jobs=8,
     ]
     # If the fingerprinting is part of another endpoint, its results are ignored, otherwise they are returned.
     if ignore_fp_results:
-        task_list += [ignore_fingerprint_results_callback_task.s()]
+        task_list += [ignore_video_fingerprint_results_callback_task.s()]
     else:
         task_list += [retrieve_video_fingerprint_callback_task.s()]
     return task_list
@@ -91,7 +94,7 @@ def get_audio_fingerprint_chain_list(token=None, force=False, min_similarity=Non
                   group(audio_fingerprint_find_closest_parallel_task.s(i, n_jobs, min_similarity) for i in range(n_jobs)),
                   audio_fingerprint_find_closest_callback_task.s()]
     if ignore_fp_results:
-        task_list += [ignore_fingerprint_results_callback_task.s()]
+        task_list += [ignore_audio_fingerprint_results_callback_task.s()]
     else:
         task_list += [retrieve_audio_fingerprint_callback_task.s()]
     return task_list
@@ -122,7 +125,7 @@ def get_slide_fingerprint_chain_list(token=None, origin_token=None,
         ]
     task_list += [slide_fingerprint_find_closest_callback_task.s()]
     if ignore_fp_results:
-        task_list += [ignore_fingerprint_results_callback_task.s()]
+        task_list += [ignore_slide_fingerprint_results_callback_task.s()]
     else:
         task_list += [retrieve_slide_fingerprint_callback_task.s()]
     return task_list
