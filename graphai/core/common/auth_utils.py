@@ -52,7 +52,7 @@ def get_password_hash(password):
     return pwd_context.hash(password)
 
 
-@cachetools.func.ttl_cache(ttl=12*3600)
+@cachetools.func.ttl_cache(ttl=12 * 3600)
 def get_user(username: str):
     db_manager = DB(config['database'])
     columns = ['username', 'full_name', 'email', 'hashed_password', 'disabled', 'scopes']
