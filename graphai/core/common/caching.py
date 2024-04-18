@@ -540,50 +540,13 @@ class FingerprintParameters:
         return self.min_similarity['video']
 
 
-def empty_list_to_null(list_of_values):
-    if len(list_of_values) > 0:
-        return list_of_values
-    return None
+def is_fingerprinted(token, db_manager):
+    values = db_manager.get_details(token, ['fingerprint'], using_most_similar=False)[0]
+    exists = values is not None
+    return exists, exists and values['fingerprint'] is not None
 
 
-def find_non_null_values_in_results(values, col_map):
-    values = [v for v in values if v is not None]
-    if len(values) == 0:
-        return list()
-    results = list()
-    for col in col_map.keys():
-        for value in values:
-            if value.get(col, None) is not None:
-                results.append(col_map[col])
-                break
-    return results
-
-
-def get_cached_col_names(token, db_manager, col_map):
-    cols = list(col_map.keys())
-    values = db_manager.get_details(token, cols, using_most_similar=True)
-    return find_non_null_values_in_results(values, col_map)
-
-
-def get_cached_col_names_using_origin(token, db_manager_origin, db_manager, col_map):
-    cols = list(col_map.keys())
-    cols = list(set(cols) - {'origin_token'})
-    closest_token = db_manager_origin.get_closest_match(token)
-    values = [db_manager.get_details_using_origin(token, cols)]
-    if closest_token is not None and closest_token != token:
-        values.append(db_manager.get_details_using_origin(closest_token, cols))
-    else:
-        values.append(None)
-    new_values = list()
-    for value in values:
-        if value is not None:
-            new_values.append(value[0])
-        else:
-            new_values.append(None)
-    return find_non_null_values_in_results(new_values, col_map)
-
-
-def get_token_status(token, file_manager):
+def get_token_file_status(token, file_manager):
     if token is None:
         raise Exception("Token is null")
     return os.path.isfile(file_manager.generate_filepath(token))
@@ -592,28 +555,15 @@ def get_token_status(token, file_manager):
 def get_video_token_status(token):
     video_config = VideoConfig()
     video_db_manager = VideoDBCachingManager()
-    image_db_manager = SlideDBCachingManager()
-    audio_db_manager = AudioDBCachingManager()
     try:
-        active = get_token_status(token, video_config)
+        active = get_token_file_status(token, video_config)
     except Exception:
         return None
-    cached_cols_own = get_cached_col_names(token, video_db_manager,
-                                           {
-                                               'fingerprint': 'calculate_fingerprint'
-                                           })
-    cached_cols_image = get_cached_col_names_using_origin(token, video_db_manager, image_db_manager,
-                                                          {
-                                                              'origin_token': 'detect_slides'
-                                                          })
-    cached_cols_audio = get_cached_col_names_using_origin(token, video_db_manager, audio_db_manager,
-                                                          {
-                                                              'origin_token': 'extract_audio'
-                                                          })
-    cached_cols = cached_cols_own + cached_cols_image + cached_cols_audio
+
+    exists, has_fingerprint = is_fingerprinted(token, video_db_manager)
     return {
-        'active': active,
-        'cached': empty_list_to_null(cached_cols)
+        'active': active and exists,
+        'fingerprinted': has_fingerprint
     }
 
 
@@ -621,18 +571,14 @@ def get_image_token_status(token):
     video_config = VideoConfig()
     image_db_manager = SlideDBCachingManager()
     try:
-        active = get_token_status(token, video_config)
+        active = get_token_file_status(token, video_config)
     except Exception:
         return None
-    cached_cols = get_cached_col_names(token, image_db_manager,
-                                       {
-                                           'fingerprint': 'calculate_fingerprint',
-                                           'ocr_google_1_results': 'extract_text',
-                                           'language': 'detect_language'
-                                       })
+
+    exists, has_fingerprint = is_fingerprinted(token, image_db_manager)
     return {
-        'active': active,
-        'cached': empty_list_to_null(cached_cols)
+        'active': active and exists,
+        'fingerprinted': has_fingerprint
     }
 
 
@@ -640,16 +586,12 @@ def get_audio_token_status(token):
     video_config = VideoConfig()
     audio_db_manager = AudioDBCachingManager()
     try:
-        active = get_token_status(token, video_config)
+        active = get_token_file_status(token, video_config)
     except Exception:
         return None
-    cached_cols = get_cached_col_names(token, audio_db_manager,
-                                       {
-                                           'fingerprint': 'calculate_fingerprint',
-                                           'transcript_results': 'transcribe',
-                                           'language': 'detect_language'
-                                       })
+
+    exists, has_fingerprint = is_fingerprinted(token, audio_db_manager)
     return {
-        'active': active,
-        'cached': empty_list_to_null(cached_cols)
+        'active': active and exists,
+        'fingerprinted': has_fingerprint
     }

@@ -27,20 +27,13 @@ class RetrieveURLRequest(BaseModel):
     )
 
 
-class VideoTokenStatus(TokenStatus):
-    cached: Union[List[Literal['calculate_fingerprint', 'extract_audio', 'detect_slides']], None] = Field(
-        title="Cached results",
-        description="List of video endpoints whose results have already been cached for this token"
-    )
-
-
 class RetrieveURLResponseInner(BaseModel):
     token: Union[str, None] = Field(
         title="Token",
         description="Result token, null if task has failed"
     )
 
-    token_status: Union[VideoTokenStatus, None] = Field(
+    token_status: Union[TokenStatus, None] = Field(
         title="Token status",
         description="Status of the returned token",
         default=None
@@ -136,20 +129,13 @@ class ExtractAudioRequest(BaseModel):
     )
 
 
-class AudioTokenStatus(TokenStatus):
-    cached: Union[List[Literal['calculate_fingerprint', 'transcribe', 'detect_language']], None] = Field(
-        title="Cached results",
-        description="List of audio endpoints whose results have already been cached for this token"
-    )
-
-
 class ExtractAudioTaskResponse(BaseModel):
     token: Union[str, None] = Field(
         title="Token",
         description="Result token, null if task has failed"
     )
 
-    token_status: Union[AudioTokenStatus, None] = Field(
+    token_status: Union[TokenStatus, None] = Field(
         title="Token status",
         description="Status of the returned token",
         default=None
@@ -210,19 +196,12 @@ class DetectSlidesRequest(BaseModel):
     )
 
 
-class SlideTokenStatus(TokenStatus):
-    cached: Union[List[Literal['calculate_fingerprint', 'extract_text', 'detect_language']], None] = Field(
-        title="Cached results",
-        description="List of image endpoints whose results have already been cached for this token"
-    )
-
-
 class SlideTokenAndTimeStamp(BaseModel):
     token: str = Field(
         title="Slide token"
     )
 
-    token_status: Union[SlideTokenStatus, None] = Field(
+    token_status: Union[TokenStatus, None] = Field(
         title="Token status",
         description="Status of the returned token",
         default=None
