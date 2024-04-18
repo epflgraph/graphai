@@ -94,7 +94,7 @@ def retrieve_file_from_url_task(self, url, is_kaltura=True, force_token=None):
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='video_2.retrieve_url_callback', ignore_result=False,
              file_manager=file_management_config)
-def retrieve_file_from_url_callback_task(self, results, url, force=False):
+def retrieve_file_from_url_callback_task(self, results, url):
     if results['fresh']:
         db_manager = VideoDBCachingManager()
         current_datetime = get_current_datetime()
