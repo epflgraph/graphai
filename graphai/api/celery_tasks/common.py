@@ -8,6 +8,13 @@ from graphai.api.common.video import (
 )
 from graphai.core.common.common_utils import strtobool
 from graphai.core.interfaces.config import config
+from graphai.core.interfaces.caching import (
+    VideoDBCachingManager,
+    AudioDBCachingManager,
+    SlideDBCachingManager,
+    TextDBCachingManager,
+    ScrapingDBCachingManager
+)
 
 from graphai.core.common.fingerprinting import find_closest_audio_fingerprint_from_list, \
     find_closest_image_fingerprint_from_list, find_closest_text_fingerprint_from_list
@@ -380,4 +387,14 @@ def video_init_task(self):
         print('Skipping preloading for ontology endpoints.')
 
     print('All video processing objects loaded')
+
+    print('Initializing db caching managers...')
+    VideoDBCachingManager(initialize_database=True)
+    SlideDBCachingManager(initialize_database=True)
+    AudioDBCachingManager(initialize_database=True)
+    TextDBCachingManager(initialize_database=True)
+    ScrapingDBCachingManager(initialize_database=True)
+
+    print('Caching managers and database tables initialized')
+
     return True

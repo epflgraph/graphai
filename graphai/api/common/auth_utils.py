@@ -8,6 +8,7 @@ from graphai.core.interfaces.config import config
 
 import string
 import random
+import cachetools.func
 
 AUTH_SCHEMA = config['auth']['schema']
 ALL_SCOPES = ['user', 'voice', 'video', 'translation', 'text', 'scraping', 'ontology', 'image', 'completion']
@@ -51,6 +52,7 @@ def get_password_hash(password):
     return pwd_context.hash(password)
 
 
+@cachetools.func.ttl_cache(maxsize=1024, ttl=12 * 3600)
 def get_user(username: str):
     db_manager = DB(config['database'])
     columns = ['username', 'full_name', 'email', 'hashed_password', 'disabled', 'scopes']

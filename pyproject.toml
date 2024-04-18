@@ -61,7 +61,7 @@ dependencies = [
     "sphinx-material",
     "sphinx-rtd-theme",
     "pytest-celery",
-    "db-cache-manager>=0.1.1",
+    "db-cache-manager>=0.1.2",
     "elasticsearch-interface",
     "scikit-learn",
     "opentelemetry-distro==0.40b0",
@@ -74,7 +74,8 @@ dependencies = [
     "passlib[bcrypt]",
     "pybind11",
     "fasttext-wheel",
-    "fasttext-reducer>=0.1.1"
+    "fasttext-reducer>=0.1.1",
+    "cachetools"
 ]
 
 [tool.setuptools]

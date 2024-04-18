@@ -19,7 +19,8 @@ from graphai.core.video.video import (
     read_txt_gz_file,
     generate_audio_token,
     FRAME_FORMAT_PNG,
-    TESSERACT_OCR_FORMAT
+    TESSERACT_OCR_FORMAT,
+    get_file_size
 )
 from graphai.core.common.fingerprinting import md5_video_or_audio, perceptual_hash_audio, perceptual_hash_image
 from graphai.core.interfaces.caching import (
@@ -57,7 +58,8 @@ def cache_lookup_retrieve_file_from_url_task(self, url):
         return {
             'token': token,
             'fresh': False,
-            'token_status': get_video_token_status(token)
+            'token_status': get_video_token_status(token),
+            'token_size': get_file_size(self.file_manager.generate_filepath(token))
         }
 
     return None
@@ -84,7 +86,8 @@ def retrieve_file_from_url_task(self, url, is_kaltura=True, force_token=None):
     results = retrieve_file_from_url(url, filename_with_path, filename, is_kaltura)
     return {
         'token': results,
-        'fresh': results is not None
+        'fresh': results is not None,
+        'token_size': get_file_size(filename_with_path)
     }
 
 
@@ -810,9 +813,8 @@ def reextract_cached_slides_task(self, token):
             'fresh': False
         }
     existing_slides = existing_slides_own if existing_slides_own is not None else existing_slides_closest
-    token_to_use_as_name = existing_slides[0]['origin_token']
+    output_folder = existing_slides[0]['id_token'].split('/')[0]
     timestamps_to_keep = sorted([x['timestamp'] for x in existing_slides])
-    output_folder = token_to_use_as_name + '_slides'
     output_folder_with_path = self.file_manager.generate_filepath(output_folder)
     # If the slides folder already exists, it needs to be deleted recursively
     if os.path.exists(output_folder_with_path):
