@@ -39,6 +39,12 @@ class RetrieveURLResponseInner(BaseModel):
         default=None
     )
 
+    token_size: Union[int, None] = Field(
+        title="Token size",
+        description="Size of the returned token",
+        default=None
+    )
+
     fresh: bool = Field(
         title="Freshness flag",
         description="False if the URI had already been retrieved before, True if not and if retrieval was successful"
