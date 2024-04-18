@@ -1,7 +1,7 @@
 import abc
 
 from pydantic import BaseModel, Field, Json
-from typing import Union, List
+from typing import Union
 
 
 class TaskIDResponse(BaseModel):
