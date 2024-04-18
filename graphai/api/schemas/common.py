@@ -1,7 +1,7 @@
 import abc
 
 from pydantic import BaseModel, Field, Json
-from typing import Union, List
+from typing import Union
 
 
 class TaskIDResponse(BaseModel):
@@ -47,10 +47,12 @@ class TokenStatus(BaseModel):
     active: bool = Field(
         title="Token active",
         description="Whether the token's file is available (which makes calculations possible, otherwise only cached "
-                    "results can be returned for this token)."
+                    "results can be returned for this token).",
+        default=False
     )
 
-    cached: List[str] = Field(
-        title="Cached results",
-        description="List of endpoints whose results have already been cached for this token"
+    fingerprinted: bool = Field(
+        title="Fingerprinted",
+        description="Whether this token has a cached fingerprint in the database",
+        default=False
     )
