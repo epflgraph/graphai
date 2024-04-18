@@ -125,7 +125,6 @@ def test__video_detect_slides__detect_slides__integration(fixture_app, celery_wo
     assert video_token_response['task_result']['token'] is not None
     assert video_token_response['task_result']['token_status']['active']
     assert video_token_response['task_result']['token_status']['fingerprinted']
-    print(video_token_response['task_result'])
     assert video_token_response['task_result']['token_size'] > 0
 
     video_token = video_token_response['task_result']['token']
