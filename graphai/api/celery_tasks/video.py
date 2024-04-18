@@ -16,6 +16,8 @@ from graphai.core.common.caching import (
     AudioDBCachingManager,
     SlideDBCachingManager,
     VideoDBCachingManager,
+    TextDBCachingManager,
+    ScrapingDBCachingManager,
     get_video_token_status,
     get_image_token_status,
     get_audio_token_status
@@ -726,4 +728,14 @@ def video_init_task(self):
         print('Skipping preloading for ontology endpoints.')
 
     print('All video processing objects loaded')
+
+    print('Initializing db caching managers...')
+    VideoDBCachingManager(initialize_database=True)
+    SlideDBCachingManager(initialize_database=True)
+    AudioDBCachingManager(initialize_database=True)
+    TextDBCachingManager(initialize_database=True)
+    ScrapingDBCachingManager(initialize_database=True)
+
+    print('Caching managers and database tables initialized')
+
     return True
