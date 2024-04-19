@@ -684,7 +684,7 @@ def reextract_cached_slides_task(self, token):
             'slide_tokens': None,
             'fresh': False
         }
-    slides_to_timestamps = {FRAME_FORMAT_PNG % x: timestamps_to_keep for x in timestamps_to_keep}
+    slides_to_timestamps = {FRAME_FORMAT_PNG % x: x for x in timestamps_to_keep}
     # Fix rounding errors in frame extraction
     list_of_extracted_frames = os.listdir(output_folder_with_path)
     slides_not_in_frames = set(slides_to_timestamps.keys()) - set(list_of_extracted_frames)
