@@ -2,6 +2,7 @@ import errno
 import json
 import os
 from datetime import datetime
+import shutil
 
 
 def make_sure_path_exists(path, file_at_the_end=False, full_perm=True):
@@ -132,3 +133,7 @@ def strtobool(val):
         return False
     else:
         raise ValueError("invalid truth value %r" % (val,))
+
+
+def copy_file_within_folder(folder_name, src_file, dest_file):
+    shutil.copyfile(os.path.join(folder_name, src_file), os.path.join(folder_name, dest_file))
