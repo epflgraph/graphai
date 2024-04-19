@@ -47,13 +47,13 @@ def test__scraping_sublinks__initialize_url_and_get_sublinks_task__run_task(test
 
 @pytest.mark.celery(accept_content=['pickle', 'json'], result_serializer='pickle', task_serializer='pickle')
 @pytest.mark.usefixtures('test_url')
-def test__scraping_content__process_all_sublinks__integration(fixture_app, celery_worker, test_url,
+def test__scraping_content__process_all_sublinks__integration(fixture_app, celery_worker, test_url_2,
                                                               timeout=30):
     # The celery_worker object is necessary for async tasks, otherwise the status will be permanently stuck on
     # PENDING.
     # First, we call the summary endpoint with force=True to test the full task pipeline working
     response = fixture_app.post('/scraping/content',
-                                data=json.dumps({"token": create_base_url_token(test_url), "url": test_url,
+                                data=json.dumps({"token": create_base_url_token(test_url_2), "url": test_url_2,
                                                  "force": True, "remove_headers": False,
                                                  "remove_long_patterns": False}),
                                 timeout=timeout)
@@ -86,11 +86,9 @@ def test__scraping_content__process_all_sublinks__integration(fixture_app, celer
     assert summary_results['task_result']['successful'] is True
     assert summary_results['task_result']['fresh'] is True
     data = summary_results['task_result']['data']
-    assert 'https://www.epfl.ch/labs/chili/people' in data
-    assert 'https://www.epfl.ch/labs/chili' in data
-    assert data['https://www.epfl.ch/labs/chili/people']['pagetype'] == 'people'
-    assert data['https://www.epfl.ch/labs/chili']['pagetype'] == 'homepage'
-    assert len(data['https://www.epfl.ch/labs/chili']['content']) > 0
+    assert 'https://www.epfl.ch/fr' in data
+    assert data['https://www.epfl.ch/fr']['pagetype'] == 'homepage'
+    assert len(data['https://www.epfl.ch/fr']['content']) > 0
     original_data = data
 
     ################################################
