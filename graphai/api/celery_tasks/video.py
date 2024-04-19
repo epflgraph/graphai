@@ -22,7 +22,7 @@ from graphai.core.common.caching import (
     get_image_token_status,
     get_audio_token_status
 )
-from graphai.core.common.common_utils import file_exists, get_current_datetime, strtobool
+from graphai.core.common.common_utils import file_exists, get_current_datetime, strtobool, copy_file_within_folder
 from itertools import chain
 from graphai.api.celery_tasks.common import fingerprint_lookup_retrieve_from_db, \
     fingerprint_lookup_parallel, fingerprint_lookup_callback
@@ -684,11 +684,25 @@ def reextract_cached_slides_task(self, token):
             'slide_tokens': None,
             'fresh': False
         }
-    list_of_slides = [FRAME_FORMAT_PNG % x for x in timestamps_to_keep]
-    for f in os.listdir(output_folder_with_path):
-        if f not in list_of_slides:
+    slides_to_timestamps = {FRAME_FORMAT_PNG % x: x for x in timestamps_to_keep}
+    # Fix rounding errors in frame extraction
+    list_of_extracted_frames = os.listdir(output_folder_with_path)
+    slides_not_in_frames = set(slides_to_timestamps.keys()) - set(list_of_extracted_frames)
+    timestamps_not_in_frames = [slides_to_timestamps[x] for x in slides_not_in_frames]
+    for timestamp in timestamps_not_in_frames:
+        if timestamp == 0:
+            copy_file_within_folder(output_folder_with_path,
+                                    FRAME_FORMAT_PNG % (timestamp + 1),
+                                    FRAME_FORMAT_PNG % timestamp)
+        if timestamp == max(timestamps_to_keep):
+            copy_file_within_folder(output_folder_with_path,
+                                    max(list_of_extracted_frames),
+                                    FRAME_FORMAT_PNG % timestamp)
+    # Remove unused frames
+    for f in list_of_extracted_frames:
+        if f not in slides_to_timestamps:
             os.remove(os.path.join(output_folder_with_path, f))
-    slide_tokens = [os.path.join(output_folder, s) for s in list_of_slides]
+    slide_tokens = [os.path.join(output_folder, s) for s in slides_to_timestamps]
     slide_tokens = {i + 1: {'token': slide_tokens[i], 'timestamp': timestamps_to_keep[i]}
                     for i in range(len(slide_tokens))}
     for slide_number in slide_tokens:
