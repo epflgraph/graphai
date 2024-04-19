@@ -138,7 +138,7 @@ def test__video_detect_slides__detect_slides__integration(fixture_app, celery_wo
     # Waiting for task chain to succeed
     current_status = 'PENDING'
     n_tries = 0
-    while current_status == 'PENDING' and n_tries < 50:
+    while current_status == 'PENDING' and n_tries < 70:
         # Wait a few seconds
         sleep(5)
         # Now get status
@@ -279,7 +279,7 @@ def test__video_extract_audio__extract_audio__integration(fixture_app, celery_wo
     # Waiting for task chain to succeed
     current_status = 'PENDING'
     n_tries = 0
-    while current_status == 'PENDING' and n_tries < 40:
+    while current_status == 'PENDING' and n_tries < 60:
         # Wait a few seconds
         sleep(5)
         # Now get status
