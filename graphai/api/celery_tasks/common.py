@@ -76,7 +76,6 @@ def fingerprint_lookup_retrieve_from_db(results, db_manager, equality_conditions
         results['fp_token'], ['date_added'], using_most_similar=False
     )[0]['date_added']
 
-
     # Retrieving all the tokens and their fingerprints. Since at least one audio has been extracted
     # (i.e. this one), this result is never null. In addition, there's at least one non-null fingerprint
     # value (again, for the present file).
