@@ -71,6 +71,11 @@ def fingerprint_lookup_retrieve_from_db(results, db_manager, equality_conditions
             'fp_results': results
         }
 
+    # If we're here, the fp_token is not null
+    latest_allowed_date = db_manager.get_details(
+        results['fp_token'], ['date_added'], using_most_similar=False
+    )[0]['date_added']
+
     # Retrieving all the tokens and their fingerprints. Since at least one audio has been extracted
     # (i.e. this one), this result is never null. In addition, there's at least one non-null fingerprint
     # value (again, for the present file).
@@ -79,7 +84,8 @@ def fingerprint_lookup_retrieve_from_db(results, db_manager, equality_conditions
     return {
         'target_fp': target_fingerprint,
         'cache_count': n_cache_rows,
-        'fp_results': results
+        'fp_results': results,
+        'latest_allowed_date': latest_allowed_date
     }
 
 
@@ -113,6 +119,7 @@ def fingerprint_lookup_parallel(input_dict, i, n_total, min_similarity, db_manag
             'fp_results': fp_results
         }
     token = fp_results['fp_token']
+    latest_allowed_date = input_dict['latest_allowed_date']
     # Get the total number of tokens and fingerprints
     n_tokens_all = input_dict['cache_count']
 
@@ -133,7 +140,7 @@ def fingerprint_lookup_parallel(input_dict, i, n_total, min_similarity, db_manag
     # fingerprint lookup.
     tokens_and_fingerprints = db_manager.get_all_details(
         ['fingerprint', 'date_added'], start=start_index, limit=limit, exclude_token=token,
-        allow_nulls=False, equality_conditions=equality_conditions
+        allow_nulls=False, equality_conditions=equality_conditions, latest_date=latest_allowed_date
     )
 
     if tokens_and_fingerprints is None or len(tokens_and_fingerprints) == 0:
@@ -191,9 +198,14 @@ def fingerprint_lookup_direct(fp_results, db_manager, equality_conditions=None):
         equality_conditions = dict()
     equality_conditions['fingerprint'] = target_fingerprint
 
+    # If we're here, the fp_token is not null
+    latest_allowed_date = db_manager.get_details(
+        token, ['date_added'], using_most_similar=False
+    )[0]['date_added']
+
     tokens_and_fingerprints = db_manager.get_all_details(
         ['fingerprint', 'date_added'], start=0, limit=-1, exclude_token=token,
-        allow_nulls=False, equality_conditions=equality_conditions
+        allow_nulls=False, equality_conditions=equality_conditions, latest_date=latest_allowed_date
     )
 
     if tokens_and_fingerprints is None or len(tokens_and_fingerprints) == 0:
