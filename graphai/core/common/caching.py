@@ -515,7 +515,7 @@ class FingerprintParameters:
         defaults = {
             'text': '1.0',
             'image': '1.0',
-            'audio': '0.8',
+            'audio': '1.0',
             'video': '1.0'
         }
         try:
