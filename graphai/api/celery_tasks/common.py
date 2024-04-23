@@ -20,6 +20,18 @@ from graphai.core.common.fingerprinting import find_closest_audio_fingerprint_fr
     find_closest_image_fingerprint_from_list, find_closest_text_fingerprint_from_list
 
 
+def lookup_latest_allowed_date(fp_tokens, db_manager):
+    if isinstance(fp_tokens, list):
+        token_to_use_for_date_lookup = fp_tokens[0]
+    else:
+        token_to_use_for_date_lookup = fp_tokens
+    # If we're here, the fp_token is not null
+    latest_allowed_date = db_manager.get_details(
+        token_to_use_for_date_lookup, ['date_added'], using_most_similar=False
+    )[0]['date_added']
+    return latest_allowed_date
+
+
 def format_api_results(id, name, status, result):
     """
     Formats results coming from celery into the common output format of the API
@@ -53,6 +65,7 @@ def fingerprint_lookup_retrieve_from_db(results, db_manager, equality_conditions
         Dict of original results plus the number of relevant cache rows.
     """
     target_fingerprint = results['result']
+    fp_tokens = results['fp_token']
 
     # If the fingerprint computation has been unsuccessful, we just pass the fingerprinting results along.
     if not results['perform_lookup']:
@@ -62,6 +75,11 @@ def fingerprint_lookup_retrieve_from_db(results, db_manager, equality_conditions
             'fp_results': results
         }
 
+    ####################
+    # Latest date lookup
+    ####################
+    latest_allowed_date = lookup_latest_allowed_date(fp_tokens, db_manager)
+
     # Retrieving all the tokens and their fingerprints. Since at least one audio has been extracted
     # (i.e. this one), this result is never null. In addition, there's at least one non-null fingerprint
     # value (again, for the present file).
@@ -70,7 +88,8 @@ def fingerprint_lookup_retrieve_from_db(results, db_manager, equality_conditions
     return {
         'target_fp': target_fingerprint,
         'cache_count': n_cache_rows,
-        'fp_results': results
+        'fp_results': results,
+        'latest_allowed_date': latest_allowed_date
     }
 
 
@@ -99,6 +118,7 @@ def fingerprint_lookup_parallel(input_dict, i, n_total, min_similarity, db_manag
     n_tokens_all = input_dict['cache_count']
     fp_tokens = fp_results['fp_token']
     target_fingerprints = input_dict['target_fp']
+    latest_allowed_date = input_dict.get('latest_allowed_date', None)
 
     #############
     # Exit checks
@@ -136,7 +156,7 @@ def fingerprint_lookup_parallel(input_dict, i, n_total, min_similarity, db_manag
     # Get all fingerprints with their tokens, excluding the tokens of the current computation
     tokens_and_fingerprints = db_manager.get_all_details(
         ['fingerprint', 'date_added'], start=start_index, limit=limit, exclude_token=fp_tokens,
-        allow_nulls=False, equality_conditions=equality_conditions
+        allow_nulls=False, equality_conditions=equality_conditions, latest_date=latest_allowed_date
     )
 
     # If there are no fingerprints in the cache at all, we exit
@@ -215,13 +235,14 @@ def fingerprint_lookup_direct(fp_results, db_manager, equality_conditions=None):
     closest_fingerprint = list()
     best_date = list()
     score = list()
+    latest_allowed_date = lookup_latest_allowed_date(fp_tokens, db_manager)
     for target_fingerprint in target_fingerprints:
         current_equality_conditions = equality_conditions.copy()
         current_equality_conditions['fingerprint'] = target_fingerprint
 
         tokens_and_fingerprints = db_manager.get_all_details(
             ['fingerprint', 'date_added'], start=0, limit=-1, exclude_token=fp_tokens,
-            allow_nulls=False, equality_conditions=current_equality_conditions
+            allow_nulls=False, equality_conditions=current_equality_conditions, latest_date=latest_allowed_date
         )
 
         if tokens_and_fingerprints is None or len(tokens_and_fingerprints) == 0:
