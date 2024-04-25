@@ -179,8 +179,8 @@ def fingerprint_lookup_parallel(input_dict, i, n_total, min_similarity, db_manag
     elif data_type == 'text':
         find_closest_func = find_closest_text_fingerprint_from_list
     else:
-        # Text, video, and image fingerprinting are done the same way,
-        #  so they are all treated as the same here.
+        # Video and image fingerprinting are done the same way,
+        # so they are both treated the same here.
         find_closest_func = find_closest_image_fingerprint_from_list
 
     closest_token, closest_fingerprint, closest_date, score = find_closest_func(
