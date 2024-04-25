@@ -1,0 +1,17 @@
+graphai.core.video package
+==========================
+
+.. automodule:: graphai.core.video
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 1
+
+   graphai.core.video.ocr
+   graphai.core.video.transcribe
+   graphai.core.video.video

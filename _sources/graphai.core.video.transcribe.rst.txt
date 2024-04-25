@@ -1,0 +1,7 @@
+graphai.core.video.transcribe module
+====================================
+
+.. automodule:: graphai.core.video.transcribe
+   :members:
+   :undoc-members:
+   :show-inheritance:

@@ -1,7 +1,7 @@
-graphai.core.common.auth\_utils module
+graphai.api.celery\_jobs.common module
 ======================================
 
-.. automodule:: graphai.core.common.auth_utils
+.. automodule:: graphai.api.celery_jobs.common
    :members:
    :undoc-members:
    :show-inheritance:

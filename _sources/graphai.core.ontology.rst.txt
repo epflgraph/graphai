@@ -1,0 +1,16 @@
+graphai.core.ontology package
+=============================
+
+.. automodule:: graphai.core.ontology
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 1
+
+   graphai.core.ontology.clustering
+   graphai.core.ontology.data

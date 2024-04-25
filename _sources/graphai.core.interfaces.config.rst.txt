@@ -1,0 +1,7 @@
+graphai.core.interfaces.config module
+=====================================
+
+.. automodule:: graphai.core.interfaces.config
+   :members:
+   :undoc-members:
+   :show-inheritance:

@@ -1,7 +1,7 @@
-graphai.core.common.config module
+graphai.core.ontology.data module
 =================================
 
-.. automodule:: graphai.core.common.config
+.. automodule:: graphai.core.ontology.data
    :members:
    :undoc-members:
    :show-inheritance:

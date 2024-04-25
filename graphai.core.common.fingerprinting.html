@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>graphai.core.common.fingerprinting module &mdash; EPFL Graph AI</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="graphai.core.interfaces package" href="graphai.core.interfaces.html" />
+    <link rel="prev" title="graphai.core.common.common_utils module" href="graphai.core.common.common_utils.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="graphai.html" class="icon icon-home">
+            graphai
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="graphai.api.html">graphai.api package</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="graphai.core.html">graphai.core package</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="graphai.core.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="graphai.core.common.html">graphai.core.common package</a><ul class="current">
+<li class="toctree-l4 current"><a class="reference internal" href="graphai.core.common.html#submodules">Submodules</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="graphai.core.interfaces.html">graphai.core.interfaces package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="graphai.core.ontology.html">graphai.core.ontology package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="graphai.core.scraping.html">graphai.core.scraping package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="graphai.core.text.html">graphai.core.text package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="graphai.core.translation.html">graphai.core.translation package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="graphai.core.utils.html">graphai.core.utils package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="graphai.core.video.html">graphai.core.video package</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="graphai.pipelines.html">graphai.pipelines package</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="graphai.definitions.html">graphai.definitions module</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="graphai.html">graphai</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="graphai.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="graphai.core.html">graphai.core package</a></li>
+          <li class="breadcrumb-item"><a href="graphai.core.common.html">graphai.core.common package</a></li>
+      <li class="breadcrumb-item active">graphai.core.common.fingerprinting module</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/graphai.core.common.fingerprinting.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-graphai.core.common.fingerprinting">
+<span id="graphai-core-common-fingerprinting-module"></span><h1>graphai.core.common.fingerprinting module<a class="headerlink" href="#module-graphai.core.common.fingerprinting" title="Link to this heading"></a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.core.common.fingerprinting.perceptual_hash_text">
+<span class="sig-prename descclassname"><span class="pre">graphai.core.common.fingerprinting.</span></span><span class="sig-name descname"><span class="pre">perceptual_hash_text</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.fingerprinting.perceptual_hash_text" title="Link to this definition"></a></dt>
+<dd><p>Computes the perceptual hash of a strong
+:param s: String to hash
+:param min_window_length: Minimum window length for k-grams
+:param max_window_length: Maximum window length for k-grams
+:param hash_len: Length of the hash</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Perceptual hash of string</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.core.common.fingerprinting.md5_video_or_audio">
+<span class="sig-prename descclassname"><span class="pre">graphai.core.common.fingerprinting.</span></span><span class="sig-name descname"><span class="pre">md5_video_or_audio</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_filename_with_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">video</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.fingerprinting.md5_video_or_audio" title="Link to this definition"></a></dt>
+<dd><p>Computes the md5 hash of the video or audio stream of a video file
+:param input_filename_with_path: Full path of the input file
+:param video: Whether to compute the md5 for the video stream or the audio stream</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>MD5 hash</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.core.common.fingerprinting.perceptual_hash_audio">
+<span class="sig-prename descclassname"><span class="pre">graphai.core.common.fingerprinting.</span></span><span class="sig-name descname"><span class="pre">perceptual_hash_audio</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_filename_with_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">7200</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.fingerprinting.perceptual_hash_audio" title="Link to this definition"></a></dt>
+<dd><p>Computes the perceptual hash of an audio file
+:param input_filename_with_path: Path of the input file
+:param max_length: Maximum length of the file in seconds</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>String representation of the computed fingerprint and its decoded representation. Both are None if the
+file doesn’t exist.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.core.common.fingerprinting.perceptual_hash_image">
+<span class="sig-prename descclassname"><span class="pre">graphai.core.common.fingerprinting.</span></span><span class="sig-name descname"><span class="pre">perceptual_hash_image</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_filename_with_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hash_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">16</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.fingerprinting.perceptual_hash_image" title="Link to this definition"></a></dt>
+<dd><p>Computes the perceptual hash of an image file
+:param input_filename_with_path: Path of the input file
+:param hash_size: Size of hash</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>String representation of the computed fingerprint. None if file does not exist</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.core.common.fingerprinting.compare_decoded_fingerprints">
+<span class="sig-prename descclassname"><span class="pre">graphai.core.common.fingerprinting.</span></span><span class="sig-name descname"><span class="pre">compare_decoded_fingerprints</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">decoded_1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">decoded_2</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.fingerprinting.compare_decoded_fingerprints" title="Link to this definition"></a></dt>
+<dd><p>Compares two decoded fingerprints
+:param decoded_1: Fingerprint 1
+:param decoded_2: Fingerprint 2</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Fuzzy matching ratio between 0 and 1</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.core.common.fingerprinting.compare_encoded_fingerprints">
+<span class="sig-prename descclassname"><span class="pre">graphai.core.common.fingerprinting.</span></span><span class="sig-name descname"><span class="pre">compare_encoded_fingerprints</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">f2=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">decoder_func=&lt;function</span> <span class="pre">hex_to_hash&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.fingerprinting.compare_encoded_fingerprints" title="Link to this definition"></a></dt>
+<dd><p>Compares two string-encoded audio fingerprints
+and returns the ratio of the fuzzy match between them
+(value between 0 and 1, with 1 indicating an exact match).
+:param f1: The target fingerprint
+:param f2: The second fingerprint, can be None (similarity is 0 if so)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Ratio of fuzzy match between the two fingerprints</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.core.common.fingerprinting.find_closest_fingerprint_from_list">
+<span class="sig-prename descclassname"><span class="pre">graphai.core.common.fingerprinting.</span></span><span class="sig-name descname"><span class="pre">find_closest_fingerprint_from_list</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target_fp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fp_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">token_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">date_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_similarity=0.8</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">decoder_func=&lt;function</span> <span class="pre">hex_to_hash&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strip_underscores=True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.fingerprinting.find_closest_fingerprint_from_list" title="Link to this definition"></a></dt>
+<dd><p>Given a target fingerprint and a list of candidate fingerprints, finds the one with the highest similarity
+to the target whose similarity is above a minimum value.
+:param target_fp: Target fingerprint
+:param fp_list: List of candidate fingerprints
+:param token_list: List of tokens corresponding to those fingerprints
+:param min_similarity: Minimum similarity value. If the similarity of the most similar candidate to the target</p>
+<aside class="system-message">
+<p class="system-message-title">System Message: ERROR/3 (<span class="docutils literal">/data/actions-runner/_work/graphai/graphai/main/graphai/core/common/fingerprinting.py:docstring of graphai.core.common.fingerprinting.find_closest_fingerprint_from_list</span>, line 7)</p>
+<p>Unexpected indentation.</p>
+</aside>
+<blockquote>
+<div><p>is lower than this value, None will be returned as the result.</p>
+</div></blockquote>
+<aside class="system-message">
+<p class="system-message-title">System Message: WARNING/2 (<span class="docutils literal">/data/actions-runner/_work/graphai/graphai/main/graphai/core/common/fingerprinting.py:docstring of graphai.core.common.fingerprinting.find_closest_fingerprint_from_list</span>, line 8)</p>
+<p>Block quote ends without a blank line; unexpected unindent.</p>
+</aside>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>decoder_func</strong> – The function that decodes the string hash, different for audio vs image hashes</p></li>
+<li><p><strong>strip_underscores</strong> – For text fingerprints, removes the trailing underscores</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Closest fingerprint, its token, and the highest score. All three are None if the closest one does not
+satisfy the minimum similarity criterion.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.core.common.fingerprinting.find_closest_fingerprint_for_list_from_list">
+<span class="sig-prename descclassname"><span class="pre">graphai.core.common.fingerprinting.</span></span><span class="sig-name descname"><span class="pre">find_closest_fingerprint_for_list_from_list</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target_fp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fp_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">token_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">date_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_similarity=0.8</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">decoder_func=&lt;function</span> <span class="pre">hex_to_hash&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strip_underscores=True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.fingerprinting.find_closest_fingerprint_for_list_from_list" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.core.common.fingerprinting.find_closest_audio_fingerprint_from_list">
+<span class="sig-prename descclassname"><span class="pre">graphai.core.common.fingerprinting.</span></span><span class="sig-name descname"><span class="pre">find_closest_audio_fingerprint_from_list</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target_fp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fp_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">token_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">date_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_similarity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.8</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.fingerprinting.find_closest_audio_fingerprint_from_list" title="Link to this definition"></a></dt>
+<dd><p>Finds closest audio fingerprint from list</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.core.common.fingerprinting.find_closest_image_fingerprint_from_list">
+<span class="sig-prename descclassname"><span class="pre">graphai.core.common.fingerprinting.</span></span><span class="sig-name descname"><span class="pre">find_closest_image_fingerprint_from_list</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target_fp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fp_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">token_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">date_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_similarity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.8</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.fingerprinting.find_closest_image_fingerprint_from_list" title="Link to this definition"></a></dt>
+<dd><p>Finds closest image fingerprint from list</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.core.common.fingerprinting.find_closest_text_fingerprint_from_list">
+<span class="sig-prename descclassname"><span class="pre">graphai.core.common.fingerprinting.</span></span><span class="sig-name descname"><span class="pre">find_closest_text_fingerprint_from_list</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target_fp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fp_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">token_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">date_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_similarity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.8</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.fingerprinting.find_closest_text_fingerprint_from_list" title="Link to this definition"></a></dt>
+<dd><p>Finds closest image fingerprint from list</p>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="graphai.core.common.common_utils.html" class="btn btn-neutral float-left" title="graphai.core.common.common_utils module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="graphai.core.interfaces.html" class="btn btn-neutral float-right" title="graphai.core.interfaces package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Aitor Pérez.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

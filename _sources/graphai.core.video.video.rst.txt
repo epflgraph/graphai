@@ -1,0 +1,7 @@
+graphai.core.video.video module
+===============================
+
+.. automodule:: graphai.core.video.video
+   :members:
+   :undoc-members:
+   :show-inheritance:

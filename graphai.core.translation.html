@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>graphai.core.common.ontology_utils package &mdash; EPFL Graph AI</title>
+  <title>graphai.core.translation package &mdash; EPFL Graph AI</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
 
@@ -21,8 +21,8 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="graphai.core.common.ontology_utils.clustering module" href="graphai.core.common.ontology_utils.clustering.html" />
-    <link rel="prev" title="graphai.core.common package" href="graphai.core.common.html" /> 
+    <link rel="next" title="graphai.core.translation.text_utils module" href="graphai.core.translation.text_utils.html" />
+    <link rel="prev" title="graphai.core.text.wikisearch module" href="graphai.core.text.wikisearch.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -48,14 +48,17 @@
 <li class="toctree-l1"><a class="reference internal" href="graphai.api.html">graphai.api package</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="graphai.core.html">graphai.core package</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="graphai.core.html#subpackages">Subpackages</a><ul class="current">
-<li class="toctree-l3 current"><a class="reference internal" href="graphai.core.common.html">graphai.core.common package</a><ul class="current">
-<li class="toctree-l4 current"><a class="reference internal" href="graphai.core.common.html#subpackages">Subpackages</a></li>
-<li class="toctree-l4"><a class="reference internal" href="graphai.core.common.html#submodules">Submodules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="graphai.core.common.html">graphai.core.common package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="graphai.core.interfaces.html">graphai.core.interfaces package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="graphai.core.ontology.html">graphai.core.ontology package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="graphai.core.scraping.html">graphai.core.scraping package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="graphai.core.text.html">graphai.core.text package</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">graphai.core.translation package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#submodules">Submodules</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="graphai.core.interfaces.html">graphai.core.interfaces package</a></li>
-<li class="toctree-l3"><a class="reference internal" href="graphai.core.text.html">graphai.core.text package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="graphai.core.utils.html">graphai.core.utils package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="graphai.core.video.html">graphai.core.video package</a></li>
 </ul>
 </li>
 </ul>
@@ -81,10 +84,9 @@
   <ul class="wy-breadcrumbs">
       <li><a href="graphai.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="graphai.core.html">graphai.core package</a></li>
-          <li class="breadcrumb-item"><a href="graphai.core.common.html">graphai.core.common package</a></li>
-      <li class="breadcrumb-item active">graphai.core.common.ontology_utils package</li>
+      <li class="breadcrumb-item active">graphai.core.translation package</li>
       <li class="wy-breadcrumbs-aside">
-            <a href="_sources/graphai.core.common.ontology_utils.rst.txt" rel="nofollow"> View page source</a>
+            <a href="_sources/graphai.core.translation.rst.txt" rel="nofollow"> View page source</a>
       </li>
   </ul>
   <hr/>
@@ -92,14 +94,13 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="module-graphai.core.common.ontology_utils">
-<span id="graphai-core-common-ontology-utils-package"></span><h1>graphai.core.common.ontology_utils package<a class="headerlink" href="#module-graphai.core.common.ontology_utils" title="Link to this heading"></a></h1>
+  <section id="module-graphai.core.translation">
+<span id="graphai-core-translation-package"></span><h1>graphai.core.translation package<a class="headerlink" href="#module-graphai.core.translation" title="Link to this heading"></a></h1>
 <section id="submodules">
 <h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading"></a></h2>
 <div class="toctree-wrapper compound">
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="graphai.core.common.ontology_utils.clustering.html">graphai.core.common.ontology_utils.clustering module</a></li>
-<li class="toctree-l1"><a class="reference internal" href="graphai.core.common.ontology_utils.data.html">graphai.core.common.ontology_utils.data module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="graphai.core.translation.text_utils.html">graphai.core.translation.text_utils module</a></li>
 </ul>
 </div>
 </section>
@@ -109,8 +110,8 @@
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="graphai.core.common.html" class="btn btn-neutral float-left" title="graphai.core.common package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="graphai.core.common.ontology_utils.clustering.html" class="btn btn-neutral float-right" title="graphai.core.common.ontology_utils.clustering module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="graphai.core.text.wikisearch.html" class="btn btn-neutral float-left" title="graphai.core.text.wikisearch module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="graphai.core.translation.text_utils.html" class="btn btn-neutral float-right" title="graphai.core.translation.text_utils module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

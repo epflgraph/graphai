@@ -1,7 +1,7 @@
-graphai.core.common.text\_utils module
+graphai.core.interfaces.caching module
 ======================================
 
-.. automodule:: graphai.core.common.text_utils
+.. automodule:: graphai.core.interfaces.caching
    :members:
    :undoc-members:
    :show-inheritance:

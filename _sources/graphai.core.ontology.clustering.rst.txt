@@ -1,0 +1,7 @@
+graphai.core.ontology.clustering module
+=======================================
+
+.. automodule:: graphai.core.ontology.clustering
+   :members:
+   :undoc-members:
+   :show-inheritance:

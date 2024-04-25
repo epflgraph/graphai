@@ -12,6 +12,7 @@ Subpackages
 .. toctree::
    :maxdepth: 1
 
+   graphai.api.celery_jobs
    graphai.api.celery_tasks
    graphai.api.common
    graphai.api.routers

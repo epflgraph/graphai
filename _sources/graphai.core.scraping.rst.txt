@@ -1,0 +1,15 @@
+graphai.core.scraping package
+=============================
+
+.. automodule:: graphai.core.scraping
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 1
+
+   graphai.core.scraping.scraping

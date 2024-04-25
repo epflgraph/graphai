@@ -1,0 +1,7 @@
+graphai.core.translation.text\_utils module
+===========================================
+
+.. automodule:: graphai.core.translation.text_utils
+   :members:
+   :undoc-members:
+   :show-inheritance:
