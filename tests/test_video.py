@@ -24,7 +24,7 @@ from graphai.api.celery_tasks.video import (
 
 @pytest.mark.usefixtures('test_video_url', 'test_video_token')
 def test__video_retrieve_url__retrieve_file_from_url_task__run_task(test_video_url, test_video_token):
-    results = retrieve_file_from_url_task(test_video_url, True, force=True,
+    results = retrieve_file_from_url_task(test_video_url, True,
                                           force_token=test_video_token[:-4])
 
     assert isinstance(results, dict)
@@ -40,7 +40,7 @@ def test__video_retrieve_url__retrieve_file_from_url_task__run_task(test_video_u
 
 @pytest.mark.usefixtures('test_video_token')
 def test__video_calculate_fingerprint__compute_video_fingerprint_task__run_task(test_video_token):
-    results = compute_video_fingerprint_task(test_video_token, True)
+    results = compute_video_fingerprint_task({'token': test_video_token})
 
     assert isinstance(results, dict)
     assert 'result' in results
@@ -56,7 +56,7 @@ def test__video_calculate_fingerprint__compute_video_fingerprint_task__run_task(
 
 @pytest.mark.usefixtures('test_video_token')
 def test__video_detect_slides__extract_and_sample_frames_task__run_task(test_video_token):
-    results = extract_and_sample_frames_task(test_video_token, True)
+    results = extract_and_sample_frames_task(test_video_token)
 
     assert isinstance(results, dict)
     assert 'result' in results
@@ -71,7 +71,7 @@ def test__video_detect_slides__extract_and_sample_frames_task__run_task(test_vid
 
 @pytest.mark.usefixtures('test_video_token')
 def test__video_extract_audio__extract_audio_task__run_task(test_video_token):
-    results = extract_audio_task(test_video_token, True)
+    results = extract_audio_task(test_video_token)
 
     assert isinstance(results, dict)
     assert 'token' in results
@@ -123,6 +123,9 @@ def test__video_detect_slides__detect_slides__integration(fixture_app, celery_wo
     assert 'task_result' in video_token_response
     assert video_token_response['task_status'] == 'SUCCESS'
     assert video_token_response['task_result']['token'] is not None
+    assert video_token_response['task_result']['token_status']['active']
+    assert video_token_response['task_result']['token_status']['fingerprinted']
+    assert video_token_response['task_result']['token_size'] > 0
 
     video_token = video_token_response['task_result']['token']
 
@@ -157,6 +160,8 @@ def test__video_detect_slides__detect_slides__integration(fixture_app, celery_wo
     assert isinstance(slides['task_result']['slide_tokens'], dict)
     assert video_token in slides['task_result']['slide_tokens']['1']['token']
     assert '.png' in slides['task_result']['slide_tokens']['1']['token']
+    assert slides['task_result']['slide_tokens']['1']['token_status']['active']
+    assert slides['task_result']['slide_tokens']['1']['token_status']['fingerprinted']
     assert len(slides['task_result']['slide_tokens']) > 5
 
     # Re-detecting slides, which should yield a cache hit this time
@@ -297,6 +302,8 @@ def test__video_extract_audio__extract_audio__integration(fixture_app, celery_wo
     assert audio_result['task_result']['fresh'] is True
     assert video_token in audio_result['task_result']['token']
     assert '.ogg' in audio_result['task_result']['token']
+    assert audio_result['task_result']['token_status']['active']
+    assert audio_result['task_result']['token_status']['fingerprinted']
     assert 450 < audio_result['task_result']['duration'] < 470
 
     audio_token = audio_result['task_result']['token']

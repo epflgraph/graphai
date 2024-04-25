@@ -4,7 +4,7 @@ from datetime import datetime
 from db_cache_manager.db import DBCachingManagerBase
 
 from graphai.core.common.common_utils import make_sure_path_exists, file_exists
-from graphai.core.common.config import config
+from graphai.core.interfaces.config import config
 
 ROOT_VIDEO_DIR = os.path.normpath(os.path.join(os.path.dirname(__file__), '../../../Storage/'))
 # Formats with a . in their name indicate single files, whereas formats without a . indicate folders (e.g. '_slides')
@@ -540,16 +540,16 @@ class FingerprintParameters:
         return self.min_similarity['video']
 
 
-def is_fingerprinted(token, db_manager):
-    values = db_manager.get_details(token, ['fingerprint'], using_most_similar=False)[0]
-    exists = values is not None
-    return exists, exists and values['fingerprint'] is not None
-
-
 def get_token_file_status(token, file_manager):
     if token is None:
         raise Exception("Token is null")
     return os.path.isfile(file_manager.generate_filepath(token))
+
+
+def is_fingerprinted(token, db_manager):
+    values = db_manager.get_details(token, ['fingerprint'], using_most_similar=False)[0]
+    exists = values is not None
+    return exists, exists and values['fingerprint'] is not None
 
 
 def get_video_token_status(token):

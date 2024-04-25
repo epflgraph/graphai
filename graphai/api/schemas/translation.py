@@ -4,30 +4,6 @@ from typing import Union, Literal, List
 from graphai.api.schemas.common import TaskStatusResponse
 
 
-class TextFingerprintRequest(BaseModel):
-    text: Union[str, List[str]] = Field(
-        title="Text",
-        description="Text to translate, can be one string or a list of strings."
-    )
-
-    source: Literal['en', 'fr', 'de', 'it'] = Field(
-        title="Source language",
-        description="Language of the provided text",
-        default='fr'
-    )
-
-    target: Literal['en', 'fr', 'de', 'it'] = Field(
-        title="Target language",
-        description="Language to translate the text into",
-        default='en'
-    )
-
-    force: bool = Field(
-        title="Force recomputation",
-        default=False
-    )
-
-
 class TextFingerprintTaskResponse(BaseModel):
     result: Union[str, None] = Field(
         title="Fingerprint",
@@ -37,13 +13,6 @@ class TextFingerprintTaskResponse(BaseModel):
     fresh: bool = Field(
         title="Freshness flag",
         description="Whether the result was computed freshly or an existing cached result was returned."
-    )
-
-    closest_token: Union[str, None] = Field(
-        title="Closest token",
-        description="The token of the most similar existing text that the fingerprint lookup was able to find. Equal "
-                    "to original token if the most similar existing text did not satisfy the minimum similarity "
-                    "threshold."
     )
 
     successful: bool = Field(

@@ -5,7 +5,7 @@ from celery import current_app as current_celery_app
 from celery.result import AsyncResult
 from kombu import Queue
 
-from graphai.core.common.config import config
+from graphai.core.interfaces.config import config
 
 DEFAULT_BROKER = "amqp://guest:guest@localhost:5672//"
 DEFAULT_BACKEND = "redis://localhost:6379/0"
@@ -41,6 +41,8 @@ class BaseConfig:
             # custom queues
             # Concept detection
             Queue("text_10", max_priority=10),
+            # Cache lookups
+            Queue("caching_6", max_priority=6),
             # Translation
             Queue("text_6", max_priority=6),
             # Video, voice, image

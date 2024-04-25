@@ -1,4 +1,4 @@
-from graphai.core.common.config import config
+from graphai.core.interfaces.config import config
 from db_cache_manager.db import DB
 from argparse import ArgumentParser
 import pandas as pd

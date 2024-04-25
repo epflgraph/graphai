@@ -11,8 +11,8 @@ from sklearn.decomposition import PCA
 from sklearn.metrics.pairwise import cosine_distances, euclidean_distances
 
 from graphai.core.common.common_utils import invert_dict
-from graphai.core.common.ontology_utils.data import (derive_col_to_col_graph, get_col_to_col_dict,
-                                                     create_graph_from_df, convert_to_csr_matrix)
+from graphai.core.ontology.data import (derive_col_to_col_graph, get_col_to_col_dict,
+                                        create_graph_from_df, convert_to_csr_matrix)
 
 DEFAULT_CLUSTERING_PARAMS = {
     "PCA": 100,

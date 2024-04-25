@@ -1,6 +1,6 @@
 from elasticsearch_interface.es import ES
 
-from graphai.core.common.config import config
+from graphai.core.interfaces.config import config
 
 from graphai.core.utils.time.date import now
 from graphai.core.utils.text.io import read_json

@@ -1,6 +1,5 @@
 from fastapi import APIRouter, Security
 from fastapi.responses import FileResponse
-from celery import group, chain
 
 from graphai.api.schemas.common import TaskIDResponse, FileRequest
 from graphai.api.schemas.video import (
@@ -14,33 +13,19 @@ from graphai.api.schemas.video import (
     VideoFingerprintResponse
 )
 
-from graphai.api.celery_tasks.common import format_api_results, ignore_fingerprint_results_callback_task, \
-    video_dummy_task
-from graphai.api.celery_tasks.video import (
-    retrieve_file_from_url_task,
-    retrieve_file_from_url_callback_task,
-    get_file_task,
-    extract_audio_task,
-    extract_audio_callback_task,
-    reextract_cached_audio_task,
-    extract_and_sample_frames_task,
-    compute_noise_level_parallel_task,
-    compute_noise_threshold_callback_task,
-    compute_slide_transitions_parallel_task,
-    compute_slide_transitions_callback_task,
-    detect_slides_callback_task,
-    reextract_cached_slides_task,
-    compute_video_fingerprint_task,
-    compute_video_fingerprint_callback_task,
-    video_fingerprint_find_closest_retrieve_from_db_task,
-    video_fingerprint_find_closest_parallel_task,
-    video_fingerprint_find_closest_callback_task,
-    retrieve_video_fingerprint_callback_task
+from graphai.api.celery_tasks.common import format_api_results
+
+from graphai.api.celery_jobs.video import (
+    retrieve_url_job,
+    fingerprint_job,
+    extract_audio_job,
+    detect_slides_job,
+    get_file_job
 )
+
 from graphai.api.routers.auth import get_current_active_user
 
 from graphai.core.interfaces.celery_config import get_task_info
-from graphai.core.common.caching import FingerprintParameters
 
 # Initialise video router
 router = APIRouter(
@@ -51,30 +36,6 @@ router = APIRouter(
 )
 
 
-def get_video_fingerprint_chain_list(token, force, min_similarity=None, n_jobs=8,
-                                     ignore_fp_results=False, results_to_return=None):
-    # Retrieve minimum similarity parameter for video fingerprints
-    if min_similarity is None:
-        fp_parameters = FingerprintParameters()
-        min_similarity = fp_parameters.get_min_sim_video()
-    # The list of tasks involve video fingerprinting and its callback, followed by fingerprint lookup (preprocess,
-    # parallel, callback).
-    task_list = [
-        compute_video_fingerprint_task.s(token, force),
-        compute_video_fingerprint_callback_task.s(),
-        video_fingerprint_find_closest_retrieve_from_db_task.s(),
-        group(video_fingerprint_find_closest_parallel_task.s(i, n_jobs, min_similarity)
-              for i in range(n_jobs)),
-        video_fingerprint_find_closest_callback_task.s()
-    ]
-    # If the fingerprinting is part of another endpoint, its results are ignored, otherwise they are returned.
-    if ignore_fp_results:
-        task_list += [ignore_fingerprint_results_callback_task.s(results_to_return)]
-    else:
-        task_list += [retrieve_video_fingerprint_callback_task.s()]
-    return task_list
-
-
 @router.post('/retrieve_url', response_model=TaskIDResponse)
 async def retrieve_file(data: RetrieveURLRequest):
     # The URL to be retrieved
@@ -82,17 +43,8 @@ async def retrieve_file(data: RetrieveURLRequest):
     force = data.force
     # This flag determines if the URL is that of an m3u8 playlist or a video file (like a .mp4)
     is_playlist = data.playlist
-    # Overriding the is_playlist flag if the url ends with m3u8 (playlist) or mp4/mkv/flv/avi/mov (video file)
-    if url.endswith('.m3u8'):
-        is_playlist = True
-    elif any([url.endswith(e) for e in ['.mp4', '.mkv', '.flv', '.avi', '.mov']]):
-        is_playlist = False
-    # First retrieve the file, and then do the database callback
-    task_list = [retrieve_file_from_url_task.s(url, is_playlist, force, None),
-                 retrieve_file_from_url_callback_task.s(url, force)]
-    task = chain(task_list)
-    task = task.apply_async(priority=2)
-    return {'task_id': task.id}
+    task_id = retrieve_url_job(url, force, is_playlist)
+    return {'task_id': task_id}
 
 
 # For each async endpoint, we also have a status endpoint since they have different response models.
@@ -118,12 +70,8 @@ async def get_retrieve_file_status(task_id):
 async def calculate_video_fingerprint(data: VideoFingerprintRequest):
     token = data.token
     force = data.force
-    # This is the fingerprinting endpoint, so ignore_fp_results is False
-    task_list = get_video_fingerprint_chain_list(token, force,
-                                                 ignore_fp_results=False)
-    task = chain(task_list)
-    task = task.apply_async(priority=6)
-    return {'task_id': task.id}
+    task_id = fingerprint_job(token, force)
+    return {'task_id': task_id}
 
 
 @router.get('/calculate_fingerprint/status/{task_id}', response_model=VideoFingerprintResponse)
@@ -146,7 +94,7 @@ async def calculate_video_fingerprint_status(task_id):
 @router.post('/get_file')
 async def get_file(data: FileRequest):
     token = data.token
-    return FileResponse(get_file_task.apply_async(args=[token], priority=2).get())
+    return FileResponse(get_file_job(token))
 
 
 @router.post('/extract_audio', response_model=TaskIDResponse)
@@ -154,19 +102,8 @@ async def extract_audio(data: ExtractAudioRequest):
     token = data.token
     force = data.force
     recalculate = data.recalculate_cached
-    # Fingerprinting is always performed but with force=False, regardless of the provided force flag.
-    task_list = get_video_fingerprint_chain_list(token, force=False,
-                                                 ignore_fp_results=True, results_to_return=token)
-    if not recalculate:
-        task_list += [
-            extract_audio_task.s(force),
-            extract_audio_callback_task.s(token, force)
-        ]
-    else:
-        task_list += [reextract_cached_audio_task.s()]
-    task = chain(task_list)
-    task = task.apply_async(priority=2)
-    return {'task_id': task.id}
+    task_id = extract_audio_job(token, force, recalculate)
+    return {'task_id': task_id}
 
 
 @router.get('/extract_audio/status/{task_id}', response_model=ExtractAudioResponse)
@@ -193,28 +130,8 @@ async def detect_slides(data: DetectSlidesRequest):
     force = data.force
     recalculate = data.recalculate_cached
     language = data.language
-    task_list = get_video_fingerprint_chain_list(token, force=False,
-                                                 ignore_fp_results=True, results_to_return=token)
-    if not recalculate:
-        n_jobs = 8
-        # This is the maximum similarity threshold used for image hashes when finding slide transitions.
-        hash_thresh = 0.95
-        # Fingerprinting is always performed but with force=False, regardless of the provided force flag.
-        # Task list involves extracting and sampling frames, parallel noise level comp and its callback, then a dummy task
-        # because of celery's need for an additional non-group task in the middle, then slide transition comp and its
-        # callback, followed by a final callback that inserts the results into the cache db.
-        task_list += [extract_and_sample_frames_task.s(force)]
-        task_list += [group(compute_noise_level_parallel_task.s(i, n_jobs, language) for i in range(n_jobs)),
-                      compute_noise_threshold_callback_task.s(hash_thresh),
-                      video_dummy_task.s(),
-                      group(compute_slide_transitions_parallel_task.s(i, n_jobs, language) for i in range(n_jobs)),
-                      compute_slide_transitions_callback_task.s(language),
-                      detect_slides_callback_task.s(token, force)]
-    else:
-        task_list += [reextract_cached_slides_task.s()]
-    task = chain(task_list)
-    task = task.apply_async(priority=2)
-    return {'task_id': task.id}
+    task_id = detect_slides_job(token, language, force, recalculate)
+    return {'task_id': task_id}
 
 
 @router.get('/detect_slides/status/{task_id}', response_model=DetectSlidesResponse)

@@ -22,7 +22,7 @@ from graphai.api.routers.auth import (
 )
 
 from graphai.api.celery_tasks.text import text_init_task
-from graphai.api.celery_tasks.video import video_init_task
+from graphai.api.celery_tasks.common import video_init_task
 
 
 # Define lifespan cycle of FastAPI app, i.e. what to do before startup and after shutdown

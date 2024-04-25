@@ -4,7 +4,7 @@ from db_cache_manager.db import DB
 from passlib.context import CryptContext
 from pydantic import BaseModel
 
-from graphai.core.common.config import config
+from graphai.core.interfaces.config import config
 
 import string
 import random

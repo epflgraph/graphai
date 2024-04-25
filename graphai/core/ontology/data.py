@@ -5,7 +5,7 @@ import random
 from scipy.sparse import csr_array, csr_matrix, vstack, spmatrix
 
 from graphai.core.common.common_utils import invert_dict
-from graphai.core.common.config import config
+from graphai.core.interfaces.config import config
 
 
 def db_results_to_pandas_df(results, cols):

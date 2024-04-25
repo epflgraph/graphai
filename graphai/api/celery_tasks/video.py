@@ -1,72 +1,90 @@
 import os
 import shutil
+from itertools import chain
 
 from celery import shared_task
 
-from graphai.api.common.video import file_management_config, local_ocr_nlp_models, \
-    transcription_model
-from graphai.api.common.ontology import ontology_data
-from graphai.api.common.translation import translation_models
-from graphai.core.common.video import retrieve_file_from_url, retrieve_file_from_kaltura, \
-    detect_audio_format_and_duration, extract_audio_from_video, extract_frames, generate_frame_sample_indices, \
-    compute_ocr_noise_level, compute_ocr_threshold, compute_video_ocr_transitions, check_ocr_and_hash_thresholds, \
-    generate_random_token, md5_video_or_audio, generate_symbolic_token, read_txt_gz_file, \
-    FRAME_FORMAT_PNG, TESSERACT_OCR_FORMAT, get_file_size
-from graphai.core.common.caching import (
+from graphai.core.video.video import (
+    retrieve_file_from_url,
+    create_filename_using_url_format,
+    extract_audio_from_video,
+    extract_frames,
+    generate_frame_sample_indices,
+    compute_ocr_noise_level,
+    compute_ocr_threshold,
+    compute_video_ocr_transitions,
+    check_ocr_and_hash_thresholds,
+    generate_random_token,
+    generate_symbolic_token,
+    read_txt_gz_file,
+    generate_audio_token,
+    FRAME_FORMAT_PNG,
+    TESSERACT_OCR_FORMAT,
+    get_file_size
+)
+from graphai.core.common.fingerprinting import md5_video_or_audio, perceptual_hash_audio, perceptual_hash_image
+from graphai.core.interfaces.caching import (
     AudioDBCachingManager,
     SlideDBCachingManager,
     VideoDBCachingManager,
-    TextDBCachingManager,
-    ScrapingDBCachingManager,
     get_video_token_status,
     get_image_token_status,
     get_audio_token_status
 )
-from graphai.core.common.common_utils import file_exists, get_current_datetime, strtobool, copy_file_within_folder
-from itertools import chain
-from graphai.api.celery_tasks.common import fingerprint_lookup_retrieve_from_db, \
-    fingerprint_lookup_parallel, fingerprint_lookup_callback
-from graphai.core.common.config import config
+from graphai.core.common.common_utils import (
+    get_current_datetime,
+    copy_file_within_folder
+)
+
+from graphai.api.common.video import (
+    file_management_config,
+    local_ocr_nlp_models
+)
+from graphai.api.celery_tasks.common import (
+    fingerprint_lookup_retrieve_from_db,
+    fingerprint_lookup_parallel,
+    fingerprint_lookup_callback, fingerprint_lookup_direct
+)
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
+             name='caching_6.cache_lookup_retrieve_url', ignore_result=False,
+             file_manager=file_management_config)
+def cache_lookup_retrieve_file_from_url_task(self, url):
+    db_manager = VideoDBCachingManager()
+    existing = db_manager.get_details_using_origin(url, [])
+
+    if existing is not None:
+        token = existing[0]['id_token']
+        return {
+            'token': token,
+            'fresh': False,
+            'token_status': get_video_token_status(token),
+            'token_size': get_file_size(self.file_manager.generate_filepath(token))
+        }
+
+    return None
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='video_2.retrieve_url', ignore_result=False,
              file_manager=file_management_config)
-def retrieve_file_from_url_task(self, url, is_kaltura=True, force=False, force_token=None):
-    db_manager = VideoDBCachingManager()
-    existing = db_manager.get_details_using_origin(url, [])
-    # force=True works as follows:
-    # If the url has never been retrieved before, it retrieves it normally.
-    # If, however, the url has been retrieved before, it re-downloads it under the *same* token.
-    # Effectively, the assumption is: one url <-> one token. This helps handle cases where the
-    # cache files reside on multiple servers and we want to call different endpoints on the same token
-    # in the two different servers and have all the results in one place in the end.
-    if not force:
-        if existing is not None:
-            return {
-                'token': existing[0]['id_token'],
-                'fresh': False,
-                'token_size': get_file_size(self.file_manager.generate_filepath(existing[0]['id_token']))
-            }
+def retrieve_file_from_url_task(self, url, is_kaltura=True, force_token=None):
     if force_token is not None:
         token = force_token
     else:
+        db_manager = VideoDBCachingManager()
+        existing = db_manager.get_details_using_origin(url, [])
         if existing is not None:
-            # If the cache row already exists and force=True, then we don't create a new token, but instead
+            # If the cache row already exists, then we don't create a new token, but instead
             # use the id_token of the existing row (we remove the file extension because it will be re-added soon)
             token = existing[0]['id_token'].split('.')[0]
         else:
             # Otherwise, we generate a random token
             token = generate_random_token()
-    file_format = url.split('.')[-1].lower()
-    if file_format not in ['mp4', 'mkv', 'flv', 'avi', 'mov']:
-        file_format = 'mp4'
-    filename = token + '.' + file_format
+    filename = create_filename_using_url_format(token, url)
     filename_with_path = self.file_manager.generate_filepath(filename)
-    if is_kaltura:
-        results = retrieve_file_from_kaltura(url, filename_with_path, filename)
-    else:
-        results = retrieve_file_from_url(url, filename_with_path, filename)
+    results = retrieve_file_from_url(url, filename_with_path, filename, is_kaltura)
     return {
         'token': results,
         'fresh': results is not None,
@@ -77,7 +95,7 @@ def retrieve_file_from_url_task(self, url, is_kaltura=True, force=False, force_t
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='video_2.retrieve_url_callback', ignore_result=False,
              file_manager=file_management_config)
-def retrieve_file_from_url_callback_task(self, results, url, force=False):
+def retrieve_file_from_url_callback_task(self, results, url):
     if results['fresh']:
         db_manager = VideoDBCachingManager()
         current_datetime = get_current_datetime()
@@ -93,31 +111,49 @@ def retrieve_file_from_url_callback_task(self, results, url, force=False):
                 }
             )
         db_manager.insert_or_update_details(results['token'], values_to_insert=values)
-    results['token_status'] = get_video_token_status(results['token'])
     return results
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='video_2.fingerprint_video', ignore_result=False,
+             name='caching_6.cache_lookup_fingerprint_video', ignore_result=False,
              file_manager=file_management_config)
-def compute_video_fingerprint_task(self, token, force=False):
+def cache_lookup_fingerprint_video_task(self, token):
     db_manager = VideoDBCachingManager()
     existing = db_manager.get_details(token, ['fingerprint'])[0]
-    # We don't fail the task if the video isn't already cached because some videos won't come from a URI.
-    if not force and existing is not None and existing['fingerprint'] is not None:
+    if existing is not None and existing['fingerprint'] is not None:
         return {
             'result': existing['fingerprint'],
             'fp_token': existing['id_token'],
             'perform_lookup': False,
             'fresh': False
         }
-    input_filename_with_path = self.file_manager.generate_filepath(token)
-    fp = md5_video_or_audio(input_filename_with_path, video=True)
+
+    return None
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
+             name='video_2.fingerprint_video', ignore_result=False,
+             file_manager=file_management_config)
+def compute_video_fingerprint_task(self, results):
+    token = results['token']
+    db_manager = VideoDBCachingManager()
+    existing = db_manager.get_details(token, ['fingerprint'])[0]
+    if existing is not None and existing['fingerprint'] is not None:
+        fp = existing['fingerprint']
+        fresh = False
+        perform_lookup = False
+        fp_token = None
+    else:
+        fp = md5_video_or_audio(self.file_manager.generate_filepath(token), video=True)
+        fresh = fp is not None
+        perform_lookup = fp is not None
+        fp_token = token if fp is not None else None
     return {
         'result': fp,
-        'fp_token': token if fp is not None else None,
-        'perform_lookup': fp is not None,
-        'fresh': fp is not None
+        'fp_token': fp_token,
+        'perform_lookup': perform_lookup,
+        'fresh': fresh,
+        'original_results': results
     }
 
 
@@ -179,6 +215,18 @@ def retrieve_video_fingerprint_callback_task(self, results):
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
+             name='video_2.ignore_video_fingerprint_results_callback', ignore_result=False)
+def ignore_video_fingerprint_results_callback_task(self, results):
+    # Ignoring the fingerprinting results and returning the results relevant to the task chain.
+    # Used in tasks like transcription and OCR, where fingerprinting is performed before the task itself, but where
+    # the results of the fingerprinting are not returned.
+
+    results_to_return = results['fp_results']['original_results']
+    results_to_return['token_status'] = get_video_token_status(results_to_return['token'])
+    return results_to_return
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='video_2.get_file', ignore_result=False,
              file_manager=file_management_config)
 def get_file_task(self, filename):
@@ -186,53 +234,48 @@ def get_file_task(self, filename):
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
+             name='caching_6.cache_lookup_extract_audio', ignore_result=False,
+             file_manager=file_management_config)
+def cache_lookup_extract_audio_task(self, token):
+    # Here, the caching logic is a bit complicated. The results of audio extraction are cached in the
+    # audio tables, whereas the closest-matching video is cached in the video tables. As a result, we
+    # need to look for the cached extracted audio of two videos: the provided token and its closest
+    # token.
+    video_db_manager = VideoDBCachingManager()
+    audio_db_manager = AudioDBCachingManager()
+    # Retrieving the closest match of the current video
+    closest_token = video_db_manager.get_closest_match(token)
+    # Looking up the cached audio result of the current video
+    existing_own = audio_db_manager.get_details_using_origin(token, cols=['duration'])
+    # Looking up the cached audio result of the closest match video (if it's not the same as the current video)
+    if closest_token is not None and closest_token != token:
+        existing_closest = audio_db_manager.get_details_using_origin(closest_token, cols=['duration'])
+    else:
+        existing_closest = None
+    # We first look at the video's own existing audio, then at that of the closest match because the video's
+    # own precomputed audio (if any) takes precedence.
+    all_existing = [existing_own, existing_closest]
+    for existing in all_existing:
+        if existing is not None:
+            print('Returning cached result')
+            return {
+                'token': existing[0]['id_token'],
+                'fresh': False,
+                'duration': existing[0]['duration'],
+                'token_status': get_audio_token_status(existing[0]['id_token'])
+            }
+
+    return None
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='video_2.extract_audio', ignore_result=False,
              file_manager=file_management_config)
-def extract_audio_task(self, token, force=False):
-    input_filename_with_path = self.file_manager.generate_filepath(token)
-    output_token, input_duration = detect_audio_format_and_duration(input_filename_with_path, token)
-    if output_token is None:
-        return {
-            'token': None,
-            'fresh': False,
-            'duration': 0.0
-        }
-
-    output_filename_with_path = self.file_manager.generate_filepath(output_token)
-
-    # Here, the existing row can be None because the row is inserted into the table
-    # only after extracting the audio from the video.
-    if not force:
-        # Here, the caching logic is a bit complicated. The results of audio extraction are cached in the
-        # audio tables, whereas the closest-matching video is cached in the video tables. As a result, we
-        # need to look for the cached extracted audio of two videos: the provided token and its closest
-        # token.
-        video_db_manager = VideoDBCachingManager()
-        audio_db_manager = AudioDBCachingManager()
-        # Retrieving the closest match of the current video
-        closest_token = video_db_manager.get_closest_match(token)
-        # Looking up the cached audio result of the current video
-        existing_own = audio_db_manager.get_details_using_origin(token, cols=['duration'])
-        # Looking up the cached audio result of the closest match video (if it's not the same as the current video)
-        if closest_token is not None and closest_token != token:
-            existing_closest = audio_db_manager.get_details_using_origin(closest_token, cols=['duration'])
-        else:
-            existing_closest = None
-        # We first look at the video's own existing audio, then at that of the closest match because the video's
-        # own precomputed audio (if any) takes precedence.
-        all_existing = [existing_own, existing_closest]
-        for existing in all_existing:
-            if existing is not None:
-                print('Returning cached result')
-                return {
-                    'token': existing[0]['id_token'],
-                    'fresh': False,
-                    'duration': existing[0]['duration']
-                }
-
-    results = extract_audio_from_video(input_filename_with_path,
-                                       output_filename_with_path,
-                                       output_token)
+def extract_audio_task(self, token):
+    output_token = generate_audio_token(token)
+    results, input_duration = extract_audio_from_video(self.file_manager.generate_filepath(token),
+                                                       self.file_manager.generate_filepath(output_token),
+                                                       output_token)
     if results is None:
         return {
             'token': None,
@@ -288,7 +331,6 @@ def extract_audio_callback_task(self, results, origin_token, force=False):
                 db_manager.insert_or_update_closest_match(results['token'], {
                     'most_similar_token': symbolic_token
                 })
-    results['token_status'] = get_audio_token_status(results['token'])
     return results
 
 
@@ -309,14 +351,13 @@ def reextract_cached_audio_task(self, token):
         return {
             'token': None,
             'fresh': False,
-            'duration': 0.0,
-            'token_status': None
+            'duration': 0.0
         }
     existing_audio = existing_audio_own if existing_audio_own is not None else existing_audio_closest
     token_to_use_as_name = existing_audio[0]['id_token']
     output_filename_with_path = self.file_manager.generate_filepath(token_to_use_as_name)
     input_filename_with_path = self.file_manager.generate_filepath(token)
-    output_filename = extract_audio_from_video(
+    output_filename, _ = extract_audio_from_video(
         input_filename_with_path, output_filename_with_path, token_to_use_as_name
     )
     # If there was an error of any kind (e.g. non-existing video file), the returned token will be None
@@ -324,23 +365,139 @@ def reextract_cached_audio_task(self, token):
         return {
             'token': None,
             'fresh': False,
-            'duration': 0.0,
-            'token_status': None
+            'duration': 0.0
         }
 
     return {
         'token': output_filename,
         'fresh': True,
-        'duration': existing_audio[0]['duration'],
-        'token_status': get_audio_token_status(output_filename)
+        'duration': existing_audio[0]['duration']
     }
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='video_2.extract_and_sample_frames', ignore_result=False,
+             name='video_2.audio_fingerprint', ignore_result=False,
              file_manager=file_management_config)
-def extract_and_sample_frames_task(self, token, force=False):
-    # Checking for existing cached results
+def compute_audio_fingerprint_task(self, results):
+    token = results['token']
+    # Making sure that the cache row for the audio file already exists.
+    # This cache row is created when the audio is extracted from its corresponding video, so it must exist!
+    # We also need this cache row later in order to be able to return the duration of the audio file.
+    db_manager = AudioDBCachingManager()
+    existing = db_manager.get_details(token, cols=['fingerprint', 'duration'],
+                                      using_most_similar=False)[0]
+    if existing is None:
+        return {
+            'result': None,
+            'fp_token': None,
+            'perform_lookup': False,
+            'fresh': False,
+            'duration': 0.0,
+            'original_results': results
+        }
+    if existing['fingerprint'] is not None:
+        fp = existing['fingerprint']
+        fresh = False
+        perform_lookup = False
+        fp_token = None
+    else:
+        fp = perceptual_hash_audio(self.file_manager.generate_filepath(token))
+        fresh = fp is not None
+        perform_lookup = fp is not None
+        fp_token = token if fp is not None else None
+    return {
+        'result': fp,
+        'fp_token': fp_token,
+        'perform_lookup': perform_lookup,
+        'fresh': fresh,
+        'duration': existing['duration'],
+        'original_results': results
+    }
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
+             name='video_2.audio_fingerprint_callback', ignore_result=False,
+             file_manager=file_management_config)
+def compute_audio_fingerprint_callback_task(self, results, force=False):
+    if results['fresh']:
+        token = results['fp_token']
+        db_manager = AudioDBCachingManager()
+        db_manager.insert_or_update_details(
+            token,
+            {
+                'fingerprint': results['result'],
+            }
+        )
+        if not force:
+            closest_token = db_manager.get_closest_match(token)
+            # If this token has a closest token, it means that their relationship comes from their parent videos,
+            # and that the closest token's fingerprint has not been calculated either (otherwise `fresh` wouldn't be True).
+            # In that case, we insert the computed fingerprint for the closest token as well, and then we will perform the
+            # fingerprint lookup for that token instead of the one we computed the fingerprint for.
+            if closest_token is not None and closest_token != token:
+                db_manager.insert_or_update_details(
+                    closest_token,
+                    {
+                        'fingerprint': results['result'],
+                    }
+                )
+                results['fp_token'] = closest_token
+    return results
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
+             name='video_2.audio_fingerprint_find_closest_retrieve_from_db', ignore_result=False)
+def audio_fingerprint_find_closest_retrieve_from_db_task(self, results):
+    db_manager = AudioDBCachingManager()
+    return fingerprint_lookup_retrieve_from_db(results, db_manager)
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
+             name='video_2.audio_fingerprint_find_closest_parallel', ignore_result=False)
+def audio_fingerprint_find_closest_parallel_task(self, input_dict, i, n_total, min_similarity=0.8):
+    db_manager = AudioDBCachingManager()
+    return fingerprint_lookup_parallel(input_dict, i, n_total, min_similarity, db_manager, data_type='audio')
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
+             name='video_2.audio_fingerprint_find_closest_callback', ignore_result=False)
+def audio_fingerprint_find_closest_callback_task(self, results_list):
+    db_manager = AudioDBCachingManager()
+    return fingerprint_lookup_callback(results_list, db_manager)
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
+             name='video_2.retrieve_audio_fingerprint_final_callback', ignore_result=False)
+def retrieve_audio_fingerprint_callback_task(self, results):
+    # Returning the fingerprinting results, which is the part of this task whose results are sent back to the user.
+    results_to_return = results['fp_results']
+    results_to_return['closest'] = results['closest']
+    db_manager = AudioDBCachingManager()
+
+    if results_to_return['closest'] is not None:
+        results_to_return['closest_origin'] = db_manager.get_origin(results_to_return['closest'])
+    else:
+        results_to_return['closest_origin'] = None
+
+    return results_to_return
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
+             name='video_2.ignore_audio_fingerprint_results_callback', ignore_result=False)
+def ignore_audio_fingerprint_results_callback_task(self, results):
+    # Ignoring the fingerprinting results and returning the results relevant to the task chain.
+    # Used in tasks like transcription and OCR, where fingerprinting is performed before the task itself, but where
+    # the results of the fingerprinting are not returned.
+
+    results_to_return = results['fp_results']['original_results']
+    results_to_return['token_status'] = get_audio_token_status(results_to_return['token'])
+    return results_to_return
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
+             name='caching_6.cache_lookup_detect_slides', ignore_result=False,
+             file_manager=file_management_config)
+def cache_lookup_detect_slides_task(self, token):
     video_db_manager = VideoDBCachingManager()
     # Retrieving the closest match of the current video
     closest_token = video_db_manager.get_closest_match(token)
@@ -353,69 +510,48 @@ def extract_and_sample_frames_task(self, token, force=False):
         existing_slides_closest = None
     # We first look at the video's own existing slides, then at those of the closest match because the video's
     # own precomputed slides (if any) take precedence.
-    input_filename_with_path = self.file_manager.generate_filepath(token)
     all_existing = [existing_slides_own, existing_slides_closest]
     for existing_slides in all_existing:
-        # If we have a cache hit
         if existing_slides is not None:
-            # If the force flag is off, we return the cache hit
-            if not force:
-                print('Returning cached result')
-                return {
-                    'result': None,
-                    'sample_indices': None,
-                    'fresh': False,
-                    'slide_tokens': {
-                        x['slide_number']: {
-                            'token': x['id_token'],
-                            'timestamp': int(x['timestamp'])
-                        }
-                        for x in existing_slides
+            print('Returning cached result')
+            return {
+                'fresh': False,
+                'slide_tokens': {
+                    x['slide_number']: {
+                        'token': x['id_token'],
+                        'timestamp': int(x['timestamp']),
+                        'token_status': get_image_token_status(x['id_token'])
                     }
+                    for x in existing_slides
                 }
-            else:
-                # If force==True, then we need to first delete the existing rows in case the results this time are
-                # different from what they were before, since unlike audio endpoints, there's multiple rows per
-                # video here (although the old files are not deleted because there may be symlinks to them).
-                # This will require a force-recomputation of every other property that pertains to the video
-                # whose slides have been force-recomputed, e.g. fingerprints and text OCRs.
-                # Obviously, this only applies to the video itself, and not the closest match found,
-                # hence the `if` below.
-                # In general, force is only there for debugging and testing.
-                if existing_slides[0]['origin_token'] == token:
-                    # If the file doesn't exist, we don't allow for a forced recomputation since it'd involve deleting
-                    # the existing cache rows, which can't be replaced (since the original video file is gone).
-                    if not file_exists(input_filename_with_path):
-                        return {
-                            'result': None,
-                            'sample_indices': None,
-                            'fresh': False,
-                            'slide_tokens': None
-                        }
-                    # If everything's fine, we delete the cache rows before continuing
-                    slide_db_manager.delete_cache_rows([x['id_token'] for x in existing_slides])
-                    # We break because we're done with the cache lookup
-                    break
+            }
+
+    return None
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
+             name='video_2.extract_and_sample_frames', ignore_result=False,
+             file_manager=file_management_config)
+def extract_and_sample_frames_task(self, token):
     # Extracting frames
     print('Extracting frames...')
     output_folder = token + '_all_frames'
-    output_folder_with_path = self.file_manager.generate_filepath(output_folder)
-    output_folder = extract_frames(input_filename_with_path, output_folder_with_path, output_folder)
+    output_folder = extract_frames(self.file_manager.generate_filepath(token),
+                                   self.file_manager.generate_filepath(output_folder),
+                                   output_folder)
     # If there was an error of any kind (e.g. non-existing video file), the returned token will be None
     if output_folder is None:
         return {
             'result': None,
             'sample_indices': None,
-            'fresh': False,
-            'slide_tokens': None
+            'fresh': False
         }
     # Generating frame sample indices
     frame_indices = generate_frame_sample_indices(self.file_manager.generate_filepath(output_folder))
     return {
         'result': output_folder,
         'sample_indices': frame_indices,
-        'fresh': True,
-        'slide_tokens': None
+        'fresh': True
     }
 
 
@@ -429,8 +565,7 @@ def compute_noise_level_parallel_task(self, results, i, n, language=None):
             'result': None,
             'sample_indices': None,
             'noise_level': None,
-            'fresh': False,
-            'slide_tokens': results['slide_tokens']
+            'fresh': False
         }
 
     all_sample_indices = results['sample_indices']
@@ -448,8 +583,7 @@ def compute_noise_level_parallel_task(self, results, i, n, language=None):
         'result': results['result'],
         'sample_indices': results['sample_indices'],
         'noise_level': noise_level_list,
-        'fresh': True,
-        'slide_tokens': None
+        'fresh': True
     }
 
 
@@ -461,8 +595,7 @@ def compute_noise_threshold_callback_task(self, results, hash_thresh=0.8):
             'result': None,
             'sample_indices': None,
             'threshold': None,
-            'fresh': False,
-            'slide_tokens': results[0]['slide_tokens']
+            'fresh': False
         }
 
     list_of_noise_value_lists = [x['noise_level'] for x in results]
@@ -474,8 +607,7 @@ def compute_noise_threshold_callback_task(self, results, hash_thresh=0.8):
         'sample_indices': results[0]['sample_indices'],
         'threshold': threshold,
         'hash_threshold': hash_thresh,
-        'fresh': True,
-        'slide_tokens': None
+        'fresh': True
     }
 
 
@@ -489,8 +621,7 @@ def compute_slide_transitions_parallel_task(self, results, i, n, language=None):
             'transitions': None,
             'threshold': None,
             'hash_threshold': None,
-            'fresh': False,
-            'slide_tokens': results['slide_tokens']
+            'fresh': False
         }
 
     all_sample_indices = results['sample_indices']
@@ -512,8 +643,7 @@ def compute_slide_transitions_parallel_task(self, results, i, n, language=None):
         'transitions': slide_transition_list,
         'threshold': results['threshold'],
         'hash_threshold': results['hash_threshold'],
-        'fresh': True,
-        'slide_tokens': None
+        'fresh': True
     }
 
 
@@ -525,8 +655,7 @@ def compute_slide_transitions_callback_task(self, results, language=None):
         return {
             'result': None,
             'slides': None,
-            'fresh': False,
-            'slide_tokens': results[0]['slide_tokens']
+            'fresh': False
         }
 
     # Cleaning up the slides in-between slices
@@ -555,8 +684,7 @@ def compute_slide_transitions_callback_task(self, results, language=None):
     return {
         'result': results[0]['result'],
         'slides': all_transitions,
-        'fresh': True,
-        'slide_tokens': None
+        'fresh': True
     }
 
 
@@ -564,7 +692,23 @@ def compute_slide_transitions_callback_task(self, results, language=None):
              name='video_2.detect_slides_callback', ignore_result=False,
              file_manager=file_management_config)
 def detect_slides_callback_task(self, results, token, force=False):
+    slide_tokens = None
     if results['fresh']:
+        db_manager = SlideDBCachingManager()
+        #####################################
+        # Deleting pre-existing cached slides
+        #####################################
+        if force:
+            # If force=True, then there's the possibility that the cache contains previously-extracted slides.
+            # Since the new slides and the old slides may not be 100% identical,
+            # the old cache rows need to be deleted first.
+            existing_slides_own = db_manager.get_details_using_origin(token, cols=[])
+            if existing_slides_own is not None:
+                db_manager.delete_cache_rows([x['id_token'] for x in existing_slides_own])
+
+        ###############################################
+        # Removing non-slide frames and leftover slides
+        ###############################################
         # Delete non-slide frames from the frames directory
         list_of_slides = [(FRAME_FORMAT_PNG) % (x) for x in results['slides']]
         list_of_ocr_results = [(TESSERACT_OCR_FORMAT) % (x) for x in results['slides']]
@@ -589,6 +733,10 @@ def detect_slides_callback_task(self, results, token, force=False):
         else:
             # If the _all_frames folder doesn't exist, assert that the slides folder does!
             assert os.path.exists(slides_folder_with_path)
+
+        ####################################
+        # Result formatting and DB insertion
+        ####################################
         slide_tokens = [os.path.join(slides_folder, s) for s in list_of_slides]
         ocr_tokens = [os.path.join(slides_folder, s) for s in list_of_ocr_results]
         slide_tokens = {i + 1: {'token': slide_tokens[i], 'timestamp': results['slides'][i]}
@@ -596,7 +744,6 @@ def detect_slides_callback_task(self, results, token, force=False):
         ocr_tokens = {i + 1: ocr_tokens[i] for i in range(len(ocr_tokens))}
         current_datetime = get_current_datetime()
         # Inserting fresh results into the database
-        db_manager = SlideDBCachingManager()
         for slide_number in slide_tokens:
             db_manager.insert_or_update_details(
                 slide_tokens[slide_number]['token'],
@@ -637,17 +784,11 @@ def detect_slides_callback_task(self, results, token, force=False):
                             'date_added': current_datetime
                         }
                     )
-                    # We make the symlink file the closest match of the main file (to make sure closest match refs flow in
-                    # the same direction).
+                    # We make the symlink file the closest match of the main file (to make sure
+                    # closest match refs flow in the same direction).
                     db_manager.insert_or_update_closest_match(current_token, {
                         'most_similar_token': symbolic_token
                     })
-    else:
-        # Getting cached or null results that have been passed along the chain of tasks
-        slide_tokens = results['slide_tokens']
-    if slide_tokens is not None:
-        for slide_number in slide_tokens:
-            slide_tokens[slide_number]['token_status'] = get_image_token_status(slide_tokens[slide_number]['token'])
     return {
         'slide_tokens': slide_tokens,
         'fresh': results['fresh']
@@ -676,8 +817,12 @@ def reextract_cached_slides_task(self, token):
     output_folder = existing_slides[0]['id_token'].split('/')[0]
     timestamps_to_keep = sorted([x['timestamp'] for x in existing_slides])
     output_folder_with_path = self.file_manager.generate_filepath(output_folder)
-    input_filename_with_path = self.file_manager.generate_filepath(token)
-    output_folder = extract_frames(input_filename_with_path, output_folder_with_path, output_folder)
+    # If the slides folder already exists, it needs to be deleted recursively
+    if os.path.exists(output_folder_with_path):
+        shutil.rmtree(output_folder_with_path)
+    output_folder = extract_frames(self.file_manager.generate_filepath(token),
+                                   output_folder_with_path,
+                                   output_folder)
     # If there was an error of any kind (e.g. non-existing video file), the returned token will be None
     if output_folder is None:
         return {
@@ -705,8 +850,6 @@ def reextract_cached_slides_task(self, token):
     slide_tokens = [os.path.join(output_folder, s) for s in slides_to_timestamps]
     slide_tokens = {i + 1: {'token': slide_tokens[i], 'timestamp': timestamps_to_keep[i]}
                     for i in range(len(slide_tokens))}
-    for slide_number in slide_tokens:
-        slide_tokens[slide_number]['token_status'] = get_image_token_status(slide_tokens[slide_number]['token'])
     return {
         'slide_tokens': slide_tokens,
         'fresh': True
@@ -714,42 +857,186 @@ def reextract_cached_slides_task(self, token):
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='video_2.init', ignore_result=False,
-             transcription_obj=transcription_model,
-             nlp_obj=local_ocr_nlp_models,
-             translation_obj=translation_models,
-             ontology_data_obj=ontology_data)
-def video_init_task(self):
-    # This task initialises the video celery worker by loading into memory the transcription and NLP models
-    print('Start video_init task')
+             name='video_2.slide_fingerprint', ignore_result=False,
+             file_manager=file_management_config)
+def compute_slide_fingerprint_task(self, token):
+    # Making sure the slide's cache row exists, because otherwise, the operation should be cancelled!
+    db_manager = SlideDBCachingManager()
+    existing_slide_list = db_manager.get_details(token, cols=[], using_most_similar=False)
+    if existing_slide_list[0] is None:
+        return {
+            'result': None,
+            'fp_token': None,
+            'perform_lookup': False,
+            'fresh': False
+        }
 
-    if strtobool(config['preload']['video']):
-        print('Loading transcription model...')
-        self.transcription_obj.load_model_whisper()
+    fingerprint = perceptual_hash_image(self.file_manager.generate_filepath(token))
+    if fingerprint is None:
+        return {
+            'result': None,
+            'fp_token': None,
+            'perform_lookup': False,
+            'fresh': False
+        }
 
-        print('Loading NLP models...')
-        self.nlp_obj.load_nlp_models()
+    return {
+        'result': fingerprint,
+        'fp_token': token,
+        'perform_lookup': True,
+        'fresh': True
+    }
 
-        print('Loading translation models...')
-        self.translation_obj.load_models()
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
+             name='video_2.slide_set_fingerprint', ignore_result=False,
+             file_manager=file_management_config)
+def compute_slide_set_fingerprint_task(self, results, origin_token):
+    # Making sure the cache rows exist, because otherwise, the operation should be cancelled!
+    db_manager = SlideDBCachingManager()
+    existing_slide_list = db_manager.get_details_using_origin(origin_token, cols=['fingerprint'])
+    if existing_slide_list is None:
+        return {
+            'result': None,
+            'fp_token': None,
+            'perform_lookup': False,
+            'fresh': False,
+            'original_results': results
+        }
+    if all(existing_slide['fingerprint'] is not None for existing_slide in existing_slide_list):
+        return {
+            'result': None,
+            'fp_token': None,
+            'perform_lookup': False,
+            'fresh': False,
+            'original_results': results
+        }
+    tokens = [existing_slide['id_token'] for existing_slide in existing_slide_list
+              if existing_slide['fingerprint'] is None]
+    fingerprints = [perceptual_hash_image(self.file_manager.generate_filepath(token)) for token in tokens]
+    if any(fp is None for fp in fingerprints):
+        return {
+            'result': None,
+            'fp_token': None,
+            'perform_lookup': False,
+            'fresh': False,
+            'original_results': results
+        }
+
+    return {
+        'result': fingerprints,
+        'fp_token': tokens,
+        'perform_lookup': True,
+        'fresh': True,
+        'original_results': results
+    }
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
+             name='video_2.slide_fingerprint_callback', ignore_result=False)
+def compute_slide_fingerprint_callback_task(self, results, force=False):
+    if results['fresh']:
+        tokens = results['fp_token']
+        fp_results = results['result']
+        if not isinstance(tokens, list):
+            tokens = [tokens]
+            fp_results = [fp_results]
+        fp_tokens_to_pass_on = list()
+        for i in range(len(tokens)):
+            token = tokens[i]
+            current_fp_result = fp_results[i]
+            db_manager = SlideDBCachingManager()
+            db_manager.insert_or_update_details(
+                token,
+                {
+                    'fingerprint': current_fp_result,
+                }
+            )
+            if not force:
+                closest_token = db_manager.get_closest_match(token)
+                # If this token has a closest token, it means that their relationship comes from their parent videos,
+                # and that the closest token's fingerprint has not been calculated either (otherwise `fresh` wouldn't be True).
+                # In that case, we insert the computed fingerprint for the closest token as well, and then we will perform the
+                # fingerprint lookup for that token instead of the one we computed the fingerprint for.
+                if closest_token is not None and closest_token != token:
+                    db_manager.insert_or_update_details(
+                        closest_token,
+                        {
+                            'fingerprint': current_fp_result,
+                        }
+                    )
+                    fp_tokens_to_pass_on.append(closest_token)
+                else:
+                    fp_tokens_to_pass_on.append(token)
+            else:
+                fp_tokens_to_pass_on.append(token)
+        # Now we add the correct fp tokens to pass to the fingerprint closest match lookups
+        if isinstance(results['fp_token'], list):
+            results['fp_token'] = fp_tokens_to_pass_on
+        else:
+            results['fp_token'] = fp_tokens_to_pass_on[0]
+    return results
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
+             name='video_2.slide_fingerprint_find_closest_retrieve_from_db', ignore_result=False)
+def slide_fingerprint_find_closest_retrieve_from_db_task(self, results):
+    db_manager = SlideDBCachingManager()
+    return fingerprint_lookup_retrieve_from_db(results, db_manager)
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
+             name='video_2.slide_fingerprint_find_closest_parallel', ignore_result=False)
+def slide_fingerprint_find_closest_parallel_task(self, input_dict, i, n_total, min_similarity=1):
+    db_manager = SlideDBCachingManager()
+    return fingerprint_lookup_parallel(input_dict, i, n_total, min_similarity, db_manager, data_type='image')
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
+             name='video_2.slide_fingerprint_find_closest_direct', ignore_result=False)
+def slide_fingerprint_find_closest_direct_task(self, results):
+    db_manager = SlideDBCachingManager()
+    return fingerprint_lookup_direct(results, db_manager)
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
+             name='video_2.slide_fingerprint_find_closest_callback', ignore_result=False)
+def slide_fingerprint_find_closest_callback_task(self, results_list):
+    db_manager = SlideDBCachingManager()
+    return fingerprint_lookup_callback(results_list, db_manager)
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
+             name='video_2.retrieve_slide_fingerprint_final_callback', ignore_result=False)
+def retrieve_slide_fingerprint_callback_task(self, results):
+    # Returning the fingerprinting results, which is the part of this task whose results are sent back to the user.
+    results_to_return = results['fp_results']
+    results_to_return['closest'] = results['closest']
+    db_manager = SlideDBCachingManager()
+
+    if results_to_return['closest'] is not None:
+        results_to_return['closest_origin'] = db_manager.get_origin(results_to_return['closest'])
     else:
-        print('Skipping preloading for video endpoints.')
+        results_to_return['closest_origin'] = None
 
-    if strtobool(config['preload']['ontology']):
-        print('Loading ontology data...')
-        self.ontology_data_obj.load_data()
-    else:
-        print('Skipping preloading for ontology endpoints.')
+    return results_to_return
 
-    print('All video processing objects loaded')
 
-    print('Initializing db caching managers...')
-    VideoDBCachingManager(initialize_database=True)
-    SlideDBCachingManager(initialize_database=True)
-    AudioDBCachingManager(initialize_database=True)
-    TextDBCachingManager(initialize_database=True)
-    ScrapingDBCachingManager(initialize_database=True)
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
+             name='video_2.ignore_slide_fingerprint_results_callback', ignore_result=False)
+def ignore_slide_fingerprint_results_callback_task(self, results):
+    # Ignoring the fingerprinting results and returning the results relevant to the task chain.
+    # Used in tasks like transcription and OCR, where fingerprinting is performed before the task itself, but where
+    # the results of the fingerprinting are not returned.
 
-    print('Caching managers and database tables initialized')
+    results_to_return = results['fp_results']['original_results']
+    slide_tokens = results_to_return['slide_tokens']
+    fresh = results_to_return['fresh']
+    if slide_tokens is not None:
+        for slide_number in slide_tokens:
+            slide_tokens[slide_number]['token_status'] = get_image_token_status(slide_tokens[slide_number]['token'])
 
-    return True
+    return {
+        'slide_tokens': slide_tokens,
+        'fresh': fresh
+    }

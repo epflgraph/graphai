@@ -6,7 +6,7 @@ from time import sleep
 
 from graphai.api.celery_tasks.scraping import initialize_url_and_get_sublinks_task
 
-from graphai.core.common.scraping import create_base_url_token
+from graphai.core.scraping.scraping import create_base_url_token
 
 ################################################################
 # /scraping/sublinks                                           #
@@ -18,7 +18,7 @@ from graphai.core.common.scraping import create_base_url_token
 @pytest.mark.usefixtures('test_url')
 def test__scraping_sublinks__initialize_url_and_get_sublinks_task__mock_task(mock_run, test_url):
     # Mock calling the task
-    initialize_url_and_get_sublinks_task.run(test_url)
+    initialize_url_and_get_sublinks_task.run('aaaaaa', test_url)
 
     # Assert that the task has been called
     assert initialize_url_and_get_sublinks_task.run.call_count == 1
@@ -30,7 +30,7 @@ def test__scraping_sublinks__initialize_url_and_get_sublinks_task__mock_task(moc
 @pytest.mark.usefixtures('test_url')
 def test__scraping_sublinks__initialize_url_and_get_sublinks_task__run_task(test_url):
     # Call the task
-    sublinks_results = initialize_url_and_get_sublinks_task.run(create_base_url_token(test_url), test_url, True)
+    sublinks_results = initialize_url_and_get_sublinks_task.run(create_base_url_token(test_url), test_url)
 
     # Assert that the results are correct
     assert isinstance(sublinks_results, dict)
@@ -53,7 +53,7 @@ def test__scraping_content__process_all_sublinks__integration(fixture_app, celer
     # PENDING.
     # First, we call the summary endpoint with force=True to test the full task pipeline working
     response = fixture_app.post('/scraping/content',
-                                data=json.dumps({"token": create_base_url_token(test_url_2), "url": test_url_2,
+                                data=json.dumps({"url": test_url_2,
                                                  "force": True, "remove_headers": False,
                                                  "remove_long_patterns": False}),
                                 timeout=timeout)
@@ -95,7 +95,7 @@ def test__scraping_content__process_all_sublinks__integration(fixture_app, celer
 
     # Now, we call the summary endpoint again with the same input to make sure the caching works correctly
     response = fixture_app.post('/scraping/content',
-                                data=json.dumps({"token": create_base_url_token(test_url_2), "url": test_url_2,
+                                data=json.dumps({"url": test_url_2,
                                                  "force": False, "remove_headers": False,
                                                  "remove_long_patterns": False}),
                                 timeout=timeout)
