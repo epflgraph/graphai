@@ -53,7 +53,7 @@ def test__scraping_content__process_all_sublinks__integration(fixture_app, celer
     # PENDING.
     # First, we call the summary endpoint with force=True to test the full task pipeline working
     response = fixture_app.post('/scraping/content',
-                                data=json.dumps({"token": create_base_url_token(test_url_2), "url": test_url_2,
+                                data=json.dumps({"url": test_url_2,
                                                  "force": True, "remove_headers": False,
                                                  "remove_long_patterns": False}),
                                 timeout=timeout)
@@ -95,7 +95,7 @@ def test__scraping_content__process_all_sublinks__integration(fixture_app, celer
 
     # Now, we call the summary endpoint again with the same input to make sure the caching works correctly
     response = fixture_app.post('/scraping/content',
-                                data=json.dumps({"token": create_base_url_token(test_url_2), "url": test_url_2,
+                                data=json.dumps({"url": test_url_2,
                                                  "force": False, "remove_headers": False,
                                                  "remove_long_patterns": False}),
                                 timeout=timeout)
