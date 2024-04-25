@@ -21,9 +21,11 @@ jobs:
           systemctl --user stop api-test
           systemctl --user stop celery-low-prio
           systemctl --user stop celery-mid-prio
+          systemctl --user stop celery-caching
           systemctl --user stop celery-high-prio
           ################
           systemctl --user start celery-high-prio
+          systemctl --user start celery-caching
           systemctl --user start celery-mid-prio
           systemctl --user start celery-low-prio
           systemctl --user start api-test
