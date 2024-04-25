@@ -60,10 +60,10 @@ def extract_content_job(url, force=False, headers=False, long_patterns=False):
     # 1. force=True
     # 2. There are no cached results
     task_list_with_sublink_extraction = [
-            initialize_url_and_get_sublinks_task.s(token, url),
-            scraping_sublinks_callback_task.s(),
-            scraping_dummy_task.s()
-        ]
+        initialize_url_and_get_sublinks_task.s(token, url),
+        scraping_sublinks_callback_task.s(),
+        scraping_dummy_task.s()
+    ]
     if force:
         task_list = task_list_with_sublink_extraction
     else:
