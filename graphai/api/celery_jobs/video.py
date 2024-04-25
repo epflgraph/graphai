@@ -50,7 +50,7 @@ from graphai.api.celery_jobs.common import direct_lookup_generic_job
 from graphai.core.interfaces.caching import FingerprintParameters
 
 
-def get_video_fingerprint_chain_list(token=None, min_similarity=None, n_jobs=8,
+def get_video_fingerprint_chain_list(token=None, force=False, min_similarity=None, n_jobs=8,
                                      ignore_fp_results=False):
     assert ignore_fp_results or token is not None
     # Retrieve minimum similarity parameter for video fingerprints
@@ -60,9 +60,9 @@ def get_video_fingerprint_chain_list(token=None, min_similarity=None, n_jobs=8,
     # The list of tasks involve video fingerprinting and its callback, followed by fingerprint lookup (preprocess,
     # parallel, callback).
     if ignore_fp_results:
-        task_list = [compute_video_fingerprint_task.s()]
+        task_list = [compute_video_fingerprint_task.s(force)]
     else:
-        task_list = [compute_video_fingerprint_task.s({'token': token})]
+        task_list = [compute_video_fingerprint_task.s({'token': token}, force)]
     task_list += [
         compute_video_fingerprint_callback_task.s(),
         video_fingerprint_find_closest_retrieve_from_db_task.s(),
@@ -86,9 +86,9 @@ def get_audio_fingerprint_chain_list(token=None, force=False, min_similarity=Non
         fp_parameters = FingerprintParameters()
         min_similarity = fp_parameters.get_min_sim_audio()
     if ignore_fp_results:
-        task_list = [compute_audio_fingerprint_task.s()]
+        task_list = [compute_audio_fingerprint_task.s(force)]
     else:
-        task_list = [compute_audio_fingerprint_task.s({'token': token})]
+        task_list = [compute_audio_fingerprint_task.s({'token': token}, force)]
     task_list += [compute_audio_fingerprint_callback_task.s(force),
                   audio_fingerprint_find_closest_retrieve_from_db_task.s(),
                   group(audio_fingerprint_find_closest_parallel_task.s(i, n_jobs, min_similarity) for i in range(n_jobs)),
@@ -169,7 +169,7 @@ def fingerprint_job(token, force):
     # Computation job
     #################
     # This is the fingerprinting job, so ignore_fp_results is False
-    task_list = get_video_fingerprint_chain_list(token, ignore_fp_results=False)
+    task_list = get_video_fingerprint_chain_list(token, ignore_fp_results=False, force=force)
     task = chain(task_list)
     task = task.apply_async(priority=2)
     return task.id
