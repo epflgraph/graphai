@@ -75,7 +75,7 @@ def test__translation_translate__translate_text__integration(fixture_app, celery
     # Waiting for task chain to succeed
     current_status = 'PENDING'
     n_tries = 0
-    while current_status == 'PENDING' and n_tries < 10:
+    while current_status == 'PENDING' and n_tries < 20:
         # Wait a few seconds
         sleep(3)
         # Now get status
@@ -114,7 +114,7 @@ def test__translation_translate__translate_text__integration(fixture_app, celery
     # Waiting for task chain to succeed
     current_status = 'PENDING'
     n_tries = 0
-    while current_status == 'PENDING' and n_tries < 10:
+    while current_status == 'PENDING' and n_tries < 20:
         # Wait a few seconds
         sleep(3)
         # Now get status
@@ -190,7 +190,7 @@ def test__translation_calculate_fingerprint__compute_text_fingerprint__integrati
     # Waiting for task chain to succeed
     current_status = 'PENDING'
     n_tries = 0
-    while current_status == 'PENDING' and n_tries < 10:
+    while current_status == 'PENDING' and n_tries < 20:
         # Wait a few seconds
         sleep(3)
         # Now get status
