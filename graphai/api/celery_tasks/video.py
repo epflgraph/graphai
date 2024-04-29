@@ -134,11 +134,11 @@ def cache_lookup_fingerprint_video_task(self, token):
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='video_2.fingerprint_video', ignore_result=False,
              file_manager=file_management_config)
-def compute_video_fingerprint_task(self, results):
+def compute_video_fingerprint_task(self, results, force=False):
     token = results['token']
     db_manager = VideoDBCachingManager()
     existing = db_manager.get_details(token, ['fingerprint'])[0]
-    if existing is not None and existing['fingerprint'] is not None:
+    if not force and existing is not None and existing['fingerprint'] is not None:
         fp = existing['fingerprint']
         fresh = False
         perform_lookup = False
@@ -378,7 +378,7 @@ def reextract_cached_audio_task(self, token):
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='video_2.audio_fingerprint', ignore_result=False,
              file_manager=file_management_config)
-def compute_audio_fingerprint_task(self, results):
+def compute_audio_fingerprint_task(self, results, force=False):
     token = results['token']
     # Making sure that the cache row for the audio file already exists.
     # This cache row is created when the audio is extracted from its corresponding video, so it must exist!
@@ -395,7 +395,7 @@ def compute_audio_fingerprint_task(self, results):
             'duration': 0.0,
             'original_results': results
         }
-    if existing['fingerprint'] is not None:
+    if not force and existing['fingerprint'] is not None:
         fp = existing['fingerprint']
         fresh = False
         perform_lookup = False
