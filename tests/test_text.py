@@ -182,7 +182,7 @@ def test__text_wikify__wikisearch__run_task():
     assert isinstance(results, pd.DataFrame)
     assert len(results) > 0
     assert not results.isna().values.any()
-    assert 33516 in results['concept_id'].values        # Wave wikipage
+    assert 5786179 in results['concept_id'].values        # Acoustic wave wikipage
     assert list(results.columns) == ['keywords', 'concept_id', 'concept_name', 'searchrank', 'search_score']
 
     ################
