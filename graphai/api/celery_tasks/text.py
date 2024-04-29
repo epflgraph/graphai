@@ -23,7 +23,7 @@ from graphai.core.text.draw import draw_ontology, draw_graph
 graph = ConceptsGraph()
 
 # Elasticsearch interface
-es = ES(config['elasticsearch'], index='aitor_concepts')
+es = ES(config['elasticsearch'], index=config['elasticsearch'].get('concept_detection_index', 'concept_detection'))
 
 
 ################################################################
