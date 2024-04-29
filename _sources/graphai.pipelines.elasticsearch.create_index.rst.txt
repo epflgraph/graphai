@@ -1,7 +1,0 @@
-graphai.pipelines.elasticsearch.create\_index module
-====================================================
-
-.. automodule:: graphai.pipelines.elasticsearch.create_index
-   :members:
-   :undoc-members:
-   :show-inheritance:

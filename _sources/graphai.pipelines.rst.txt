@@ -12,7 +12,6 @@ Subpackages
 .. toctree::
    :maxdepth: 1
 
-   graphai.pipelines.elasticsearch
    graphai.pipelines.investment
    graphai.pipelines.validation
    graphai.pipelines.visualisation

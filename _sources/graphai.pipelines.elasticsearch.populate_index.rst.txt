@@ -1,7 +1,0 @@
-graphai.pipelines.elasticsearch.populate\_index module
-======================================================
-
-.. automodule:: graphai.pipelines.elasticsearch.populate_index
-   :members:
-   :undoc-members:
-   :show-inheritance:
