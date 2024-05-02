@@ -1,5 +1,6 @@
-from fastapi import APIRouter, Security
+from fastapi import APIRouter, Security, Depends
 from fastapi.responses import FileResponse
+from fastapi_user_limiter.limiter import rate_limiter
 
 from graphai.api.schemas.common import TaskIDResponse, FileRequest
 from graphai.api.schemas.video import (
@@ -23,7 +24,7 @@ from graphai.api.celery_jobs.video import (
     get_file_job
 )
 
-from graphai.api.routers.auth import get_current_active_user
+from graphai.api.routers.auth import get_current_active_user, get_user_for_rate_limiter
 
 from graphai.core.interfaces.celery_config import get_task_info
 
@@ -36,7 +37,8 @@ router = APIRouter(
 )
 
 
-@router.post('/retrieve_url', response_model=TaskIDResponse)
+@router.post('/retrieve_url', response_model=TaskIDResponse,
+             dependencies=[Depends(rate_limiter(10, 10, user=get_user_for_rate_limiter))])
 async def retrieve_file(data: RetrieveURLRequest):
     # The URL to be retrieved
     url = data.url
@@ -97,7 +99,8 @@ async def get_file(data: FileRequest):
     return FileResponse(get_file_job(token))
 
 
-@router.post('/extract_audio', response_model=TaskIDResponse)
+@router.post('/extract_audio', response_model=TaskIDResponse,
+             dependencies=[Depends(rate_limiter(10, 10, user=get_user_for_rate_limiter))])
 async def extract_audio(data: ExtractAudioRequest):
     token = data.token
     force = data.force
@@ -124,7 +127,8 @@ async def extract_audio_status(task_id):
     return format_api_results(full_results['id'], full_results['name'], full_results['status'], task_results)
 
 
-@router.post('/detect_slides', response_model=TaskIDResponse)
+@router.post('/detect_slides', response_model=TaskIDResponse,
+             dependencies=[Depends(rate_limiter(10, 10, user=get_user_for_rate_limiter))])
 async def detect_slides(data: DetectSlidesRequest):
     token = data.token
     force = data.force

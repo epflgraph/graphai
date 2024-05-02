@@ -1,4 +1,5 @@
-from fastapi import APIRouter, Security
+from fastapi import APIRouter, Security, Depends
+from fastapi_user_limiter.limiter import rate_limiter
 
 from graphai.api.schemas.common import TaskIDResponse
 from graphai.api.schemas.translation import (
@@ -17,7 +18,7 @@ from graphai.api.celery_jobs.translation import (
 from graphai.api.celery_tasks.common import (
     format_api_results,
 )
-from graphai.api.routers.auth import get_current_active_user
+from graphai.api.routers.auth import get_current_active_user, get_user_for_rate_limiter
 
 from graphai.core.interfaces.celery_config import get_task_info
 
@@ -56,7 +57,8 @@ async def calculate_translation_text_fingerprint_status(task_id):
     return format_api_results(full_results['id'], full_results['name'], full_results['status'], task_results)
 
 
-@router.post('/translate', response_model=TaskIDResponse)
+@router.post('/translate', response_model=TaskIDResponse,
+             dependencies=[Depends(rate_limiter(10, 2, user=get_user_for_rate_limiter))])
 async def translate(data: TranslationRequest):
     text = data.text
     src = data.source
