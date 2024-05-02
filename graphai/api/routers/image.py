@@ -1,4 +1,5 @@
-from fastapi import APIRouter, Security
+from fastapi import APIRouter, Security, Depends
+from fastapi_user_limiter.limiter import rate_limiter
 
 from graphai.api.schemas.common import TaskIDResponse
 from graphai.api.schemas.image import (
@@ -16,7 +17,7 @@ from graphai.api.celery_jobs.image import (
     fingerprint_job,
     ocr_job
 )
-from graphai.api.routers.auth import get_current_active_user
+from graphai.api.routers.auth import get_current_active_user, get_user_for_rate_limiter
 
 from graphai.core.interfaces.celery_config import get_task_info
 
@@ -55,8 +56,10 @@ async def calculate_slide_fingerprint_status(task_id):
     return format_api_results(full_results['id'], full_results['name'], full_results['status'], task_results)
 
 
-@router.post('/extract_text', response_model=TaskIDResponse)
-@router.post('/detect_language', response_model=TaskIDResponse)
+@router.post('/extract_text', response_model=TaskIDResponse,
+             dependencies=[Depends(rate_limiter(20, 5, user=get_user_for_rate_limiter))])
+@router.post('/detect_language', response_model=TaskIDResponse,
+             dependencies=[Depends(rate_limiter(20, 5, user=get_user_for_rate_limiter))])
 async def extract_text(data: ExtractTextRequest):
     # Language detection requires OCR, so they have the same handler
     token = data.token
