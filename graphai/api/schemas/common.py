@@ -26,7 +26,7 @@ class TaskStatusResponse(BaseModel, abc.ABC):
         description="ID of the task created as a response to an API request"
     )
     task_name: Union[str, None] = Field(
-        title="Task name",
+        None, title="Task name",
         description="Name of the task"
     )
     task_status: str = Field(

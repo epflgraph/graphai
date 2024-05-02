@@ -24,7 +24,7 @@ class TreeResponseElem(BaseModel):
 
 class TreeResponse(BaseModel):
     child_to_parent: Union[List[TreeResponseElem], None] = Field(
-        title="Ontology tree results",
+        None, title="Ontology tree results",
         description="Child-parent relationships in the ontology's predefined tree."
     )
 
@@ -61,7 +61,7 @@ class CategoryInfoResponse(BaseModel):
 
 class CategoryParentResponse(BaseModel):
     parent: Union[str, None] = Field(
-        title="Parent category"
+        None, title="Parent category"
     )
 
 
@@ -77,11 +77,11 @@ class CategoryChildrenRequest(BaseModel):
 
 class TreeChildrenResponse(BaseModel):
     children: Union[List[str], None] = Field(
-        title="Children"
+        None, title="Children"
     )
 
     child_type: Union[Literal['category', 'cluster', 'concept'], None] = Field(
-        title="Type of children"
+        None, title="Type of children"
     )
 
 
@@ -120,13 +120,13 @@ class OneConceptResponseElement(BaseModel):
 
 class RecomputeClustersTaskResponse(BaseModel):
     results: Union[Dict[int, List[OneConceptResponseElement]], None] = Field(
-        title="Cluster recomputation results",
+        None, title="Cluster recomputation results",
         description="A mapping of each cluster number to the list of the cluster's concepts (each of which "
                     "is a dictionary with the 'name' and 'id' of the concept)."
     )
 
     category_assignments: Union[Dict[int, str], None] = Field(
-        title="Cluster to category assignments",
+        None, title="Cluster to category assignments",
         description="A mapping of each cluster to its category"
     )
 
@@ -170,7 +170,7 @@ class BreakUpClusterRequest(BaseModel):
 
 class BreakUpClustersClusterNumberResponse(BaseModel):
     clusters: Union[Dict[int, List[OneConceptResponseElement]], None] = Field(
-        title="Cluster recomputation results",
+        None, title="Cluster recomputation results",
         description="A mapping of each cluster number to the list of the cluster's concepts (each of which "
                     "is a dictionary with the 'name' and 'id' of the concept)."
     )
@@ -182,7 +182,7 @@ class BreakUpClustersClusterNumberResponse(BaseModel):
 
 class BreakUpClustersResponse(BaseModel):
     results: Union[List[BreakUpClustersClusterNumberResponse], None] = Field(
-        title="Cluster break-up results",
+        None, title="Cluster break-up results",
     )
 
 
@@ -218,7 +218,7 @@ class GraphDistanceRequest(BaseModel):
 
 class GraphDistanceResponse(BaseModel):
     sim: Union[None, float] = Field(
-        title="Node similarity"
+        None, title="Node similarity"
     )
 
 
@@ -301,17 +301,17 @@ class NearestCategoryElement(BaseModel):
 
 class NearestCategoryElementWithClusters(NearestCategoryElement):
     clusters: Optional[List[NearestClusterElement]] = Field(
-        title="Clusters"
+        None, title="Clusters"
     )
 
 
 class GraphConceptNearestCategoryResponse(BaseModel):
     scores: Union[None, List[NearestCategoryElementWithClusters]] = Field(
-        title="Closest matches"
+        None, title="Closest matches"
     )
 
     parent_category: Union[None, str] = Field(
-        title="Parent category",
+        None, title="Parent category",
         description="If the `top_down_search` flag was set, this field will contain the id of the closest "
                     "depth-3 category. In that case, the top few categories (as many as this depth-3 category "
                     "has children) will be children of this category. If the flag is not set, this value is null."
@@ -325,7 +325,7 @@ class GraphConceptNearestCategoryResponse(BaseModel):
     )
 
     existing_label: Union[str, None] = Field(
-        title="Existing category",
+        None, title="Existing category",
         description="If the requested concept already exists as part of the ontology, this value will reflect "
                     "its existing parent category."
     )
@@ -333,18 +333,18 @@ class GraphConceptNearestCategoryResponse(BaseModel):
 
 class GraphClusterNearestCategoryResponse(BaseModel):
     scores: Union[None, List[NearestCategoryElement]] = Field(
-        title="Closest matches"
+        None, title="Closest matches"
     )
 
     parent_category: Union[None, str] = Field(
-        title="Parent category",
+        None, title="Parent category",
         description="If the `top_down_search` flag was set, this field will contain the id of the closest "
                     "depth-3 category. In that case, the top few categories (as many as this depth-3 category "
                     "has children) will be children of this category. If the flag is not set, this value is null."
     )
 
     existing_label: Union[str, None] = Field(
-        title="Existing category",
+        None, title="Existing category",
         description="If the requested cluster already exists as part of the ontology, this value will reflect "
                     "its existing parent category."
     )
@@ -363,9 +363,9 @@ class GraphNearestConceptRequest(BaseModel):
 
 class GraphNearestConceptResponse(BaseModel):
     closest: Union[None, List[str]] = Field(
-        title="Closest matches"
+        None, title="Closest matches"
     )
 
     scores: Union[None, List[float]] = Field(
-        title="Scores"
+        None, title="Scores"
     )

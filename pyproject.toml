@@ -24,7 +24,7 @@ dependencies = [
     "fastapi>=0.95.0",
     "gunicorn",
     "uvicorn",
-    "pydantic>=1.7.4,<1.11.0",
+    "pydantic",
     "requests",
     "httpx",
     "wget",
@@ -75,7 +75,8 @@ dependencies = [
     "pybind11",
     "fasttext-wheel",
     "fasttext-reducer>=0.1.1",
-    "cachetools"
+    "cachetools",
+    "fastapi-user-limiter>=0.4.0"
 ]
 
 [tool.setuptools]

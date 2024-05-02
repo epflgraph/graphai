@@ -19,7 +19,7 @@ class ImageFingerprintRequest(BaseModel):
 
 class ImageFingerprintTaskResponse(BaseModel):
     result: Union[str, None] = Field(
-        title="Fingerprint",
+        None, title="Fingerprint",
         description="Fingerprint of the image file."
     )
 
@@ -29,14 +29,14 @@ class ImageFingerprintTaskResponse(BaseModel):
     )
 
     closest_token: Union[str, None] = Field(
-        title="Closest token",
+        None, title="Closest token",
         description="The token of the most similar existing image that the fingerprint lookup was able to find. Equal "
                     "to original token if the most similar existing image did not satisfy the minimum similarity "
                     "threshold."
     )
 
     closest_token_origin: Union[str, None] = Field(
-        title="Original token of the closest token",
+        None, title="Original token of the closest token",
         description="The token of video that the closest slide token originated from."
     )
 
@@ -86,12 +86,12 @@ class IndividualOCRResult(BaseModel):
 
 class ExtractTextTaskResponse(BaseModel):
     result: Union[List[IndividualOCRResult], None] = Field(
-        title="OCR results",
+        None, title="OCR results",
         description="List of OCR results"
     )
 
     language: Union[str, None] = Field(
-        title="Language",
+        None, title="Language",
         description="Language of the detected text"
     )
 
@@ -115,7 +115,7 @@ class ExtractTextResponse(TaskStatusResponse):
 
 class DetectOCRLanguageTaskResponse(BaseModel):
     language: Union[str, None] = Field(
-        title="Language",
+        None, title="Language",
         description="Language of the detected text"
     )
 
