@@ -19,7 +19,7 @@ class AudioFingerprintRequest(BaseModel):
 
 class AudioFingerprintTaskResponse(BaseModel):
     result: Union[str, None] = Field(
-        title="Fingerprint",
+        None, title="Fingerprint",
         description="The fingerprint of the requested audio file"
     )
 
@@ -29,14 +29,14 @@ class AudioFingerprintTaskResponse(BaseModel):
     )
 
     closest_token: Union[str, None] = Field(
-        title="Closest token",
+        None, title="Closest token",
         description="The token of the most similar existing audio that the fingerprint lookup was able to find. Equal "
                     "to original token if the most similar existing audio did not satisfy the minimum similarity "
                     "threshold."
     )
 
     closest_token_origin: Union[str, None] = Field(
-        title="Original token of the closest token",
+        None, title="Original token of the closest token",
         description="The token of video that the closest audio token originated from."
     )
 
@@ -75,7 +75,7 @@ class AudioDetectLanguageRequest(BaseModel):
 
 class AudioDetectLanguageTaskResponse(BaseModel):
     language: Union[str, None] = Field(
-        title="Language",
+        None, title="Language",
         description="Language of the audio file."
     )
 
@@ -122,17 +122,17 @@ class AudioTranscriptionRequest(BaseModel):
 
 class AudioTranscriptionTaskResponse(BaseModel):
     transcript_results: Union[str, None] = Field(
-        title="Transcript",
+        None, title="Transcript",
         description="The transcript of the requested audio file"
     )
 
     subtitle_results: Union[Json[Any], None] = Field(
-        title="Subtitles",
+        None, title="Subtitles",
         description="Timestamped transcript of the requested audio file."
     )
 
     language: Union[str, None] = Field(
-        title="Language",
+        None, title="Language",
         description="Language of the audio file."
     )
 
