@@ -1,6 +1,5 @@
 from datetime import timedelta, datetime, timezone
 from typing import Annotated, Union
-from graphai.core.interfaces.config import config
 
 from graphai.api.common.auth_utils import (
     Token,
@@ -24,6 +23,9 @@ from fastapi.security import (
 )
 from jose import ExpiredSignatureError, JWTError, jwt
 from pydantic import ValidationError
+from fastapi_user_limiter.limiter import rate_limiter
+
+from graphai.core.interfaces.config import config
 
 # to get a secret key run:
 # openssl rand -hex 32
@@ -59,6 +61,13 @@ def create_access_token(data: dict, expires_delta: Union[timedelta, None] = None
     return encoded_jwt
 
 
+async def extract_username_and_scopes(token):
+    payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+    username: str = payload.get("sub")
+    token_scopes = payload.get("scopes", [])
+    return username, token_scopes
+
+
 async def get_current_user(
     security_scopes: SecurityScopes, token: Annotated[str, Depends(oauth2_scheme)]
 ):
@@ -77,11 +86,9 @@ async def get_current_user(
         headers={"WWW-Authenticate": authenticate_value},
     )
     try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        username: str = payload.get("sub")
+        username, token_scopes = await extract_username_and_scopes(token)
         if username is None:
             raise credentials_exception
-        token_scopes = payload.get("scopes", [])
         token_data = TokenData(scopes=token_scopes, username=username)
     except ExpiredSignatureError:
         raise expired_exception
@@ -90,13 +97,14 @@ async def get_current_user(
     user = get_user(username=token_data.username)
     if user is None:
         raise credentials_exception
-    for scope in security_scopes.scopes:
-        if scope not in token_data.scopes:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Not enough permissions",
-                headers={"WWW-Authenticate": authenticate_value},
-            )
+    if security_scopes.scopes:
+        for scope in security_scopes.scopes:
+            if scope not in token_data.scopes:
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail="Not enough permissions",
+                    headers={"WWW-Authenticate": authenticate_value},
+                )
     return user
 
 
@@ -139,7 +147,37 @@ async def get_active_user_dummy():
 # in the handler's signature as one of the arguments.
 
 unauthenticated_router = APIRouter()
-authenticated_router = APIRouter()
+
+
+async def get_user_for_rate_limiter(headers):
+    # We get the token, from which we'll get the username
+    credentials_error = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": 'Bearer'},
+    )
+    token = headers.get('authorization', None)
+    # If there is no "Authorization" header, it's either an unauthorized request OR a test.
+    # The former case will be dealt with by the Security dependency, so here we can safely assume it's the latter
+    # and return a fake test token.
+    if token is None:
+        return '1!!!!@@test_unauth@@!!!!1'
+    try:
+        username, _ = await extract_username_and_scopes(token.replace('Bearer ', ''))
+    except (JWTError, ValidationError, ExpiredSignatureError) as e:
+        raise credentials_error
+    if username is None:
+        raise credentials_error
+    return username
+
+
+authenticated_router = APIRouter(
+    dependencies=[
+        Security(get_current_active_user),
+        Depends(rate_limiter(100, 1,
+                             user=get_user_for_rate_limiter, path='authenticated'))
+    ]
+)
 
 
 @unauthenticated_router.post("/token")
