@@ -18,17 +18,17 @@ class GetSublinksRequest(BaseModel):
 
 class GetSublinksTaskResponse(BaseModel):
     token: Union[str, None] = Field(
-        title="Token",
+        None, title="Token",
         description="The cleaned base URL which doubles as the token"
     )
 
     validated_url: Union[str, None] = Field(
-        title="Validated URL",
+        None, title="Validated URL",
         description="The validated base url"
     )
 
     sublinks: Union[List[str], None] = Field(
-        title="Sublinks",
+        None, title="Sublinks",
         description="List of page sublinks"
     )
 
@@ -71,7 +71,7 @@ class ExtractContentRequest(GetSublinksRequest):
 
 class ExtractContentTaskResponse(GetSublinksTaskResponse):
     data: Union[Dict[str, Dict[str, Union[str, None]]], None] = Field(
-        title="Extracted content",
+        None, title="Extracted content",
         description="Dictionary mapping each sublink to content extracted from that sublink"
     )
 

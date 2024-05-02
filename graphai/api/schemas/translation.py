@@ -6,7 +6,7 @@ from graphai.api.schemas.common import TaskStatusResponse
 
 class TextFingerprintTaskResponse(BaseModel):
     result: Union[str, None] = Field(
-        title="Fingerprint",
+        None, title="Fingerprint",
         description="Fingerprint of the provided text."
     )
 
@@ -54,7 +54,7 @@ class TranslationRequest(BaseModel):
 
 class TranslationTaskResponse(BaseModel):
     result: Union[str, List[str], None] = Field(
-        title="Translation results",
+        None, title="Translation results",
         description="Translated text"
     )
 
@@ -75,7 +75,7 @@ class TranslationTaskResponse(BaseModel):
     )
 
     device: Union[str, None] = Field(
-        title="Translation device",
+        None, title="Translation device",
         description="The device used ('cuda' or 'cpu') for the translation. `None` in case of cache hit or failure."
     )
 
@@ -96,7 +96,7 @@ class TextDetectLanguageRequest(BaseModel):
 
 class TextDetectLanguageTaskResponse(BaseModel):
     language: Union[str, None] = Field(
-        title="Language detection results",
+        None, title="Language detection results",
         description="Detected language"
     )
 
