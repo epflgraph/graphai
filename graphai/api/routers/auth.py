@@ -7,7 +7,8 @@ from graphai.api.common.auth_utils import (
     User,
     get_user,
     authenticate_user,
-    ALL_SCOPES
+    ALL_SCOPES,
+    RATE_LIMITS
 )
 from fastapi import (
     Depends,
@@ -174,7 +175,7 @@ async def get_user_for_rate_limiter(headers):
 authenticated_router = APIRouter(
     dependencies=[
         Security(get_current_active_user),
-        Depends(rate_limiter(100, 1,
+        Depends(rate_limiter(RATE_LIMITS['global']['max_requests'], RATE_LIMITS['global']['window'],
                              user=get_user_for_rate_limiter, path='authenticated'))
     ]
 )
