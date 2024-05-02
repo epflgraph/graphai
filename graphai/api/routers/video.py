@@ -25,6 +25,7 @@ from graphai.api.celery_jobs.video import (
 )
 
 from graphai.api.routers.auth import get_current_active_user, get_user_for_rate_limiter
+from graphai.api.common.auth_utils import RATE_LIMITS
 
 from graphai.core.interfaces.celery_config import get_task_info
 
@@ -38,7 +39,8 @@ router = APIRouter(
 
 
 @router.post('/retrieve_url', response_model=TaskIDResponse,
-             dependencies=[Depends(rate_limiter(10, 10, user=get_user_for_rate_limiter))])
+             dependencies=[Depends(rate_limiter(RATE_LIMITS['video']['max_requests'], RATE_LIMITS['video']['window'],
+                                                user=get_user_for_rate_limiter))])
 async def retrieve_file(data: RetrieveURLRequest):
     # The URL to be retrieved
     url = data.url
@@ -100,7 +102,8 @@ async def get_file(data: FileRequest):
 
 
 @router.post('/extract_audio', response_model=TaskIDResponse,
-             dependencies=[Depends(rate_limiter(10, 10, user=get_user_for_rate_limiter))])
+             dependencies=[Depends(rate_limiter(RATE_LIMITS['video']['max_requests'], RATE_LIMITS['video']['window'],
+                                                user=get_user_for_rate_limiter))])
 async def extract_audio(data: ExtractAudioRequest):
     token = data.token
     force = data.force
@@ -128,7 +131,8 @@ async def extract_audio_status(task_id):
 
 
 @router.post('/detect_slides', response_model=TaskIDResponse,
-             dependencies=[Depends(rate_limiter(10, 10, user=get_user_for_rate_limiter))])
+             dependencies=[Depends(rate_limiter(RATE_LIMITS['video']['max_requests'], RATE_LIMITS['video']['window'],
+                                                user=get_user_for_rate_limiter))])
 async def detect_slides(data: DetectSlidesRequest):
     token = data.token
     force = data.force

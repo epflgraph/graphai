@@ -12,6 +12,28 @@ import cachetools.func
 
 AUTH_SCHEMA = config['auth']['schema']
 ALL_SCOPES = ['user', 'voice', 'video', 'translation', 'text', 'scraping', 'ontology', 'image', 'completion']
+RATE_LIMITS = {
+    'global': {
+        'max_requests': 100,
+        'window': 1
+    },
+    'video': {
+        'max_requests': 10,
+        'window': 10
+    },
+    'image': {
+        'max_requests': 20,
+        'window': 10
+    },
+    'voice': {
+        'max_requests': 10,
+        'window': 10
+    },
+    'translation': {
+        'max_requests': 5,
+        'window': 1
+    },
+}
 
 
 class Token(BaseModel):
