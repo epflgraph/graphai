@@ -186,11 +186,11 @@ class TranslationModels:
             self.models['de-en']['segmenter'] = pysbd.Segmenter(language='de', clean=False)
             print('Loading IT-EN')
             self.models['it-en'] = dict()
-            self.models['it-en']['tokenizer'] = MarianTokenizer.from_pretrained(
-                "Helsinki-NLP/opus-mt-tc-big-it-en",
+            self.models['it-en']['tokenizer'] = AutoTokenizer.from_pretrained(
+                "Helsinki-NLP/opus-mt-it-en",
                 cache_dir=self.cache_dir)
-            self.models['it-en']['model'] = MarianMTModel.from_pretrained(
-                "Helsinki-NLP/opus-mt-tc-big-it-en",
+            self.models['it-en']['model'] = AutoModelForSeq2SeqLM.from_pretrained(
+                "Helsinki-NLP/opus-mt-it-en",
                 cache_dir=self.cache_dir).to(self.device)
             self.models['it-en']['segmenter'] = pysbd.Segmenter(language='it', clean=False)
 
