@@ -4,7 +4,7 @@ from itertools import chain
 import langdetect
 import numpy as np
 import pysbd
-from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
+from transformers import AutoTokenizer, AutoModelForSeq2SeqLM, MarianMTModel, MarianTokenizer
 import torch
 from sklearn.feature_extraction.text import TfidfVectorizer
 
@@ -159,35 +159,39 @@ class TranslationModels:
             self.models = dict()
             print('Loading EN-FR')
             self.models['en-fr'] = dict()
-            self.models['en-fr']['tokenizer'] = AutoTokenizer.from_pretrained("Helsinki-NLP/opus-mt-en-fr",
-                                                                              cache_dir=self.cache_dir)
-            self.models['en-fr']['model'] = AutoModelForSeq2SeqLM.from_pretrained("Helsinki-NLP/opus-mt-en-fr",
-                                                                                  cache_dir=self.cache_dir). \
-                to(self.device)
+            self.models['en-fr']['tokenizer'] = MarianTokenizer.from_pretrained(
+                "Helsinki-NLP/opus-mt-tc-big-en-fr",
+                cache_dir=self.cache_dir)
+            self.models['en-fr']['model'] = MarianMTModel.from_pretrained(
+                "Helsinki-NLP/opus-mt-tc-big-en-fr",
+                cache_dir=self.cache_dir).to(self.device)
             self.models['en-fr']['segmenter'] = pysbd.Segmenter(language='en', clean=False)
             print('Loading FR-EN')
             self.models['fr-en'] = dict()
-            self.models['fr-en']['tokenizer'] = AutoTokenizer.from_pretrained("Helsinki-NLP/opus-mt-fr-en",
-                                                                              cache_dir=self.cache_dir)
-            self.models['fr-en']['model'] = AutoModelForSeq2SeqLM.from_pretrained("Helsinki-NLP/opus-mt-fr-en",
-                                                                                  cache_dir=self.cache_dir). \
-                to(self.device)
+            self.models['fr-en']['tokenizer'] = MarianTokenizer.from_pretrained(
+                "Helsinki-NLP/opus-mt-tc-big-fr-en",
+                cache_dir=self.cache_dir)
+            self.models['fr-en']['model'] = MarianMTModel.from_pretrained(
+                "Helsinki-NLP/opus-mt-tc-big-fr-en",
+                cache_dir=self.cache_dir).to(self.device)
             self.models['fr-en']['segmenter'] = pysbd.Segmenter(language='fr', clean=False)
             print('Loading DE-EN')
             self.models['de-en'] = dict()
-            self.models['de-en']['tokenizer'] = AutoTokenizer.from_pretrained("Helsinki-NLP/opus-mt-de-en",
-                                                                              cache_dir=self.cache_dir)
-            self.models['de-en']['model'] = AutoModelForSeq2SeqLM.from_pretrained("Helsinki-NLP/opus-mt-de-en",
-                                                                                  cache_dir=self.cache_dir). \
-                to(self.device)
+            self.models['de-en']['tokenizer'] = AutoTokenizer.from_pretrained(
+                "Helsinki-NLP/opus-mt-de-en",
+                cache_dir=self.cache_dir)
+            self.models['de-en']['model'] = AutoModelForSeq2SeqLM.from_pretrained(
+                "Helsinki-NLP/opus-mt-de-en",
+                cache_dir=self.cache_dir).to(self.device)
             self.models['de-en']['segmenter'] = pysbd.Segmenter(language='de', clean=False)
             print('Loading IT-EN')
             self.models['it-en'] = dict()
-            self.models['it-en']['tokenizer'] = AutoTokenizer.from_pretrained("Helsinki-NLP/opus-mt-it-en",
-                                                                              cache_dir=self.cache_dir)
-            self.models['it-en']['model'] = AutoModelForSeq2SeqLM.from_pretrained("Helsinki-NLP/opus-mt-it-en",
-                                                                                  cache_dir=self.cache_dir). \
-                to(self.device)
+            self.models['it-en']['tokenizer'] = AutoTokenizer.from_pretrained(
+                "Helsinki-NLP/opus-mt-it-en",
+                cache_dir=self.cache_dir)
+            self.models['it-en']['model'] = AutoModelForSeq2SeqLM.from_pretrained(
+                "Helsinki-NLP/opus-mt-it-en",
+                cache_dir=self.cache_dir).to(self.device)
             self.models['it-en']['segmenter'] = pysbd.Segmenter(language='it', clean=False)
 
     def get_device(self):
@@ -206,7 +210,7 @@ class TranslationModels:
         """
         try:
             print(self.device)
-            input_ids = tokenizer.encode(sentence, return_tensors="pt")
+            input_ids = tokenizer.encode(sentence, return_tensors="pt", padding=True)
             if input_ids.shape[1] > HUGGINGFACE_MAX_TOKENS:
                 return None
             input_ids = input_ids.to(self.device)

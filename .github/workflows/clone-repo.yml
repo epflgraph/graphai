@@ -96,8 +96,8 @@ jobs:
           fasttext-reduce --root_dir ${{ vars.fasttext_path }} --lang en --dim ${{ vars.fasttext_dim }}
           fasttext-reduce --root_dir ${{ vars.fasttext_path }} --lang fr --dim ${{ vars.fasttext_dim }}
           python -c "import whisper; whisper.load_model('${{ vars.whisper_model_type }}', download_root='${{ vars.whisper_model_path }}');"
-          python -c "from transformers import AutoModelForSeq2SeqLM; AutoModelForSeq2SeqLM.from_pretrained('Helsinki-NLP/opus-mt-en-fr', cache_dir='${{ vars.huggingface_model_path }}')"
-          python -c "from transformers import AutoModelForSeq2SeqLM; AutoModelForSeq2SeqLM.from_pretrained('Helsinki-NLP/opus-mt-fr-en', cache_dir='${{ vars.huggingface_model_path }}')"
+          python -c "from transformers import AutoModelForSeq2SeqLM; AutoModelForSeq2SeqLM.from_pretrained('Helsinki-NLP/opus-mt-tc-big-en-fr', cache_dir='${{ vars.huggingface_model_path }}')"
+          python -c "from transformers import AutoModelForSeq2SeqLM; AutoModelForSeq2SeqLM.from_pretrained('Helsinki-NLP/opus-mt-tc-big-fr-en', cache_dir='${{ vars.huggingface_model_path }}')"
           python -c "from transformers import AutoModelForSeq2SeqLM; AutoModelForSeq2SeqLM.from_pretrained('Helsinki-NLP/opus-mt-de-en', cache_dir='${{ vars.huggingface_model_path }}')"
           python -c "from transformers import AutoModelForSeq2SeqLM; AutoModelForSeq2SeqLM.from_pretrained('Helsinki-NLP/opus-mt-it-en', cache_dir='${{ vars.huggingface_model_path }}')"
           opentelemetry-bootstrap --action=install

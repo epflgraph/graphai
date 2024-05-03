@@ -38,7 +38,7 @@ def test__translation_translate__translate_text__run_task(en_to_fr_text, fr_to_e
     assert 'result' in en_fr_translated
     assert en_fr_translated['successful'] is True
     assert 'salut les gars' in en_fr_translated['result'].lower()
-    assert 'comment ça va' in en_fr_translated['result'].lower()
+    assert 'comment ça' in en_fr_translated['result'].lower()
 
     #############################################################
 
@@ -96,7 +96,7 @@ def test__translation_translate__translate_text__integration(fixture_app, celery
     assert en_fr_translated['task_result']['successful'] is True
     assert en_fr_translated['task_result']['fresh'] is True
     assert 'salut les gars' in en_fr_translated['task_result']['result'].lower()
-    assert 'comment ça va' in en_fr_translated['task_result']['result'].lower()
+    assert 'comment ça' in en_fr_translated['task_result']['result'].lower()
     original_results = en_fr_translated['task_result']['result']
 
     ################################################
