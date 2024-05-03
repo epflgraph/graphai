@@ -1,3 +1,4 @@
+import json
 from typing import Union, List
 
 from db_cache_manager.db import DB
@@ -12,28 +13,75 @@ import cachetools.func
 
 AUTH_SCHEMA = config['auth']['schema']
 ALL_SCOPES = ['user', 'voice', 'video', 'translation', 'text', 'scraping', 'ontology', 'image', 'completion']
-RATE_LIMITS = {
-    'global': {
-        'max_requests': 100,
-        'window': 1
+DEFAULT_RATE_LIMIT_SCHEMA = 'unlimited'
+DEFAULT_RATE_LIMITS = {
+    'base': {
+        'global': {
+            'max_requests': 100,
+            'window': 1
+        },
+        'video': {
+            'max_requests': 10,
+            'window': 10
+        },
+        'image': {
+            'max_requests': 20,
+            'window': 10
+        },
+        'voice': {
+            'max_requests': 10,
+            'window': 10
+        },
+        'translation': {
+            'max_requests': 5,
+            'window': 1
+        }
     },
-    'video': {
-        'max_requests': 10,
-        'window': 10
-    },
-    'image': {
-        'max_requests': 20,
-        'window': 10
-    },
-    'voice': {
-        'max_requests': 10,
-        'window': 10
-    },
-    'translation': {
-        'max_requests': 5,
-        'window': 1
+    DEFAULT_RATE_LIMIT_SCHEMA: {
+        'global': {
+            'max_requests': None,
+            'window': None
+        },
+        'video': {
+            'max_requests': None,
+            'window': None
+        },
+        'image': {
+            'max_requests': None,
+            'window': None
+        },
+        'voice': {
+            'max_requests': None,
+            'window': None
+        },
+        'translation': {
+            'max_requests': None,
+            'window': None
+        }
     },
 }
+
+
+@cachetools.func.lru_cache(maxsize=512)
+def get_ratelimit_values():
+    # Load rate-limit dictionary
+    try:
+        with open(config.get('ratelimiting', {'custom_limits': ''}).get('custom_limits', ''), 'r') as f:
+            rate_limit_values = json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError):
+        rate_limit_values = DEFAULT_RATE_LIMITS
+    # Fill in the blanks of the rate-limit dictionary
+    for key in DEFAULT_RATE_LIMITS[DEFAULT_RATE_LIMIT_SCHEMA].keys():
+        if key not in rate_limit_values:
+            rate_limit_values[key] = DEFAULT_RATE_LIMITS[DEFAULT_RATE_LIMIT_SCHEMA][key]
+    # Load selected rate-limiting schema
+    limit_schema = config.get(
+        'ratelimiting', {'limit': DEFAULT_RATE_LIMIT_SCHEMA}
+    ).get('limit', DEFAULT_RATE_LIMIT_SCHEMA)
+    if limit_schema not in rate_limit_values.keys():
+        limit_schema = DEFAULT_RATE_LIMIT_SCHEMA \
+            if DEFAULT_RATE_LIMIT_SCHEMA in rate_limit_values.keys() else list(rate_limit_values.keys())[0]
+    return rate_limit_values[limit_schema]
 
 
 class Token(BaseModel):

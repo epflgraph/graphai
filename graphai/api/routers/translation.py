@@ -19,7 +19,7 @@ from graphai.api.celery_tasks.common import (
     format_api_results,
 )
 from graphai.api.routers.auth import get_current_active_user, get_user_for_rate_limiter
-from graphai.api.common.auth_utils import RATE_LIMITS
+from graphai.api.common.auth_utils import get_ratelimit_values
 
 from graphai.core.interfaces.celery_config import get_task_info
 
@@ -59,8 +59,8 @@ async def calculate_translation_text_fingerprint_status(task_id):
 
 
 @router.post('/translate', response_model=TaskIDResponse,
-             dependencies=[Depends(rate_limiter(RATE_LIMITS['translation']['max_requests'],
-                                                RATE_LIMITS['translation']['window'],
+             dependencies=[Depends(rate_limiter(get_ratelimit_values()['translation']['max_requests'],
+                                                get_ratelimit_values()['translation']['window'],
                                                 user=get_user_for_rate_limiter))])
 async def translate(data: TranslationRequest):
     text = data.text
