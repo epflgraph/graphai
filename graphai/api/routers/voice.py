@@ -16,7 +16,7 @@ from graphai.api.schemas.voice import (
     AudioDetectLanguageResponse,
 )
 from graphai.api.routers.auth import get_current_active_user, get_user_for_rate_limiter
-from graphai.api.common.auth_utils import RATE_LIMITS
+from graphai.api.common.auth_utils import get_ratelimit_values
 from graphai.api.celery_tasks.common import format_api_results
 
 from graphai.core.interfaces.celery_config import get_task_info
@@ -58,7 +58,8 @@ async def calculate_audio_fingerprint_status(task_id):
 
 
 @router.post('/transcribe', response_model=TaskIDResponse,
-             dependencies=[Depends(rate_limiter(RATE_LIMITS['voice']['max_requests'], RATE_LIMITS['voice']['window'],
+             dependencies=[Depends(rate_limiter(get_ratelimit_values()['voice']['max_requests'],
+                                                get_ratelimit_values()['voice']['window'],
                                                 user=get_user_for_rate_limiter))])
 async def transcribe(data: AudioTranscriptionRequest):
     token = data.token
@@ -87,7 +88,8 @@ async def transcribe_status(task_id):
 
 
 @router.post('/detect_language', response_model=TaskIDResponse,
-             dependencies=[Depends(rate_limiter(RATE_LIMITS['voice']['max_requests'], RATE_LIMITS['voice']['window'],
+             dependencies=[Depends(rate_limiter(get_ratelimit_values()['voice']['max_requests'],
+                                                get_ratelimit_values()['voice']['window'],
                                                 user=get_user_for_rate_limiter))])
 async def detect_language(data: AudioDetectLanguageRequest):
     print('Detecting language')
