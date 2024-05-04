@@ -123,7 +123,7 @@ def translate_text_task(self, text, src, tgt):
             large_warning_indices = [str(i) for i in range(len(all_large_warnings)) if all_large_warnings[i]]
             translated_text = (
                     LONG_TEXT_ERROR
-                    + f"This happened for inputs at indices {','.join(large_warning_indices)}."
+                    + f"This happened for inputs at indices {', '.join(large_warning_indices)}."
             )
     except NotImplementedError as e:
         print(e)
