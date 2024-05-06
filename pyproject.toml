@@ -76,7 +76,7 @@ dependencies = [
     "fasttext-wheel",
     "fasttext-reducer>=0.1.1",
     "cachetools",
-    "fastapi-user-limiter>=1.0.0"
+    "fastapi-user-limiter>=1.1.0"
 ]
 
 [tool.setuptools]

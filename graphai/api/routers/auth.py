@@ -150,7 +150,7 @@ async def get_active_user_dummy():
 unauthenticated_router = APIRouter()
 
 
-async def get_user_for_rate_limiter(headers):
+async def get_user_for_rate_limiter(headers, url):
     # We get the token, from which we'll get the username
     credentials_error = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
