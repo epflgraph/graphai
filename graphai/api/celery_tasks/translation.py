@@ -114,13 +114,17 @@ def translate_text_task(self, text, src, tgt):
 
     how = f"{src}-{tgt}"
     try:
-        translated_text, large_warning = self.translation_obj.translate(text, how=how)
-        if translated_text is not None:
+        translated_text, large_warning, all_large_warnings = self.translation_obj.translate(text, how=how)
+        if translated_text is not None and not large_warning:
             success = True
         else:
             success = False
         if large_warning:
-            translated_text = LONG_TEXT_ERROR
+            large_warning_indices = [str(i) for i in range(len(all_large_warnings)) if all_large_warnings[i]]
+            translated_text = (
+                LONG_TEXT_ERROR
+                + f"This happened for inputs at indices {', '.join(large_warning_indices)}."
+            )
     except NotImplementedError as e:
         print(e)
         translated_text = str(e)

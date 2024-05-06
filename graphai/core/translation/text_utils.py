@@ -271,4 +271,4 @@ class TranslationModels:
         segmenter = self.models[how]['segmenter']
         text = translation_text_back_to_list(text, return_list=True)
         results = [self._translate(current_text, tokenizer, model, segmenter) for current_text in text]
-        return translation_list_to_text([x[0] for x in results]), any([x[1] for x in results])
+        return translation_list_to_text([x[0] for x in results]), any([x[1] for x in results]), [x[1] for x in results]
