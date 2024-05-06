@@ -1,5 +1,6 @@
 from datetime import timedelta, datetime, timezone
 from typing import Annotated, Union
+from starlette.datastructures import Headers, URL
 
 from graphai.api.common.auth_utils import (
     Token,
@@ -150,7 +151,7 @@ async def get_active_user_dummy():
 unauthenticated_router = APIRouter()
 
 
-async def get_user_for_rate_limiter(headers, url):
+async def get_user_for_rate_limiter(headers: Headers, url: URL):
     # We get the token, from which we'll get the username
     credentials_error = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
@@ -175,7 +176,8 @@ async def get_user_for_rate_limiter(headers, url):
 authenticated_router = APIRouter(
     dependencies=[
         Security(get_current_active_user),
-        Depends(rate_limiter(get_ratelimit_values()['global']['max_requests'], get_ratelimit_values()['global']['window'],
+        Depends(rate_limiter(get_ratelimit_values()['global']['max_requests'],
+                             get_ratelimit_values()['global']['window'],
                              user=get_user_for_rate_limiter, path='authenticated'))
     ]
 )
