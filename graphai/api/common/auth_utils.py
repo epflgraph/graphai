@@ -68,6 +68,7 @@ def get_ratelimit_values():
     try:
         with open(config.get('ratelimiting', {'custom_limits': ''}).get('custom_limits', ''), 'r') as f:
             rate_limit_values = json.load(f)
+            rate_limit_values.update(DEFAULT_RATE_LIMITS)
     except (FileNotFoundError, json.JSONDecodeError):
         rate_limit_values = DEFAULT_RATE_LIMITS
     # Fill in the blanks of the rate-limit dictionary
