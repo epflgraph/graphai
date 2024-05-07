@@ -114,7 +114,7 @@ to set the `global` rate limit to 2000/second for the user `admin`, the row woul
 ```mysql
 INSERT INTO `auth_graphai`.`User_Rate_Limits`
 (`username`,
-`path`,
+`api_path`,
 `max_requests`,
 `window_size`)
 VALUES

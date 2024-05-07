@@ -153,7 +153,7 @@ def get_user_ratelimit_overrides(username: str, path: str):
     columns = ['username', 'max_requests', 'window_size']
     try:
         query = (f"SELECT {', '.join(columns)} FROM {AUTH_SCHEMA}.User_Rate_Limits "
-                 f"WHERE username=%s AND path=%s")
+                 f"WHERE username=%s AND api_path=%s")
         results = db_manager.execute_query(query, (username, path, ))
         if len(results) > 0:
             return {columns[i]: results[0][i] for i in range(len(columns))}

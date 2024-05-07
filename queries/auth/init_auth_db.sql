@@ -36,7 +36,7 @@ VALUES
 -- The table containing user-specific rate-limit overrides
 CREATE TABLE IF NOT EXISTS `auth_graphai`.`User_Rate_Limits` (
   `username` varchar(255) NOT NULL,
-  `path` varchar(255) NOT NULL,
+  `api_path` varchar(255) NOT NULL,
   `max_requests` int DEFAULT NULL,
   `window_size` int DEFAULT NULL,
   PRIMARY KEY (`username`, `path`)
@@ -51,7 +51,7 @@ CREATE TABLE IF NOT EXISTS `auth_graphai`.`User_Rate_Limits` (
 
 INSERT INTO `auth_graphai`.`User_Rate_Limits`
 (`username`,
-`path`,
+`api_path`,
 `max_requests`,
 `window_size`)
 VALUES
