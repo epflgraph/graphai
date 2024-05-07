@@ -89,6 +89,40 @@ The access token received from this endpoint can then be used as part of the hea
 -H 'Authorization: Bearer ACCESS_TOKEN_GOES_HERE'
 ```
 
+### Rate limiting
+The API has built-in hooks for rate-limiting users, since many endpoints are resource-intensive and the server could 
+get overloaded if too many requests are received. Rate limiting is disabled by default. In order to enable it, follow 
+these steps:
+1. Add a `[ratelimiting]` section to the `config.ini` file.
+2. Add a `limit` variable to this section, which selects your desired rate-limiting schema. Two schemas are available
+by default: `unlimited` (which is self-explanatory) and `base`, which uses a predefined set of sensible rate limits 
+for each endpoint group (plus one global rate limit that applies to the entire API).
+3. If you want to use custom rate-limiting schemas, create a JSON file whose structure mimics
+`graphai.api.common.auth_utils.DEFAULT_RATE_LIMITS`, but with your own custom values and custom names for the schemas. 
+Then add a `custom_limits` variable to your `config.ini` file and set its value to the absolute path of your custom
+JSON. By doing so, you will be able to set the `limit` variable to schema names included in your custom JSON,
+in addition to the default values.
+    1. Do not name your custom schemas `base` or `unlimited`, as they will be overwritten by the defaults.
+4. If you want to override rate-limit values for any given user and any given endpoint group (`global`, `video`, 
+`image`, `voice`, or `translation`), add a row to the table `User_Rate_Limits` (whose definition is found in 
+the SQL file `init_auth_db.sql`) with your desired `max_requests` and `window` values. For example, if you want 
+to set the `global` rate limit to 2000/second for the user `admin`, the row would look like this:
+```mysql
+INSERT INTO `auth_graphai`.`User_Rate_Limits`
+(`username`,
+`path`,
+`max_requests`,
+`window`)
+VALUES
+('admin',
+'global',
+2000,
+1);
+```
+   1. Setting either `max_requests` or `window` to `NULL` will disable rate limiting for the given user+path. If you 
+   want to disable rate limiting entirely for the user `'admin'`, set its `max_requests`/`window` values to `NULL` for 
+   every single one of the endpoint groups (plus `global`).
+
 ## Deployment
 To deploy the API, make sure the RabbitMQ and Redis services are running and accessible at the urls provided in the corresponding config file.
 
