@@ -109,22 +109,22 @@ in addition to the default values.
     1. Do not name your custom schemas `base` or `unlimited`, as they will be overwritten by the defaults.
 2. If you want to override rate-limit values for any given user and any given endpoint group (`global`, `video`, 
 `image`, `voice`, or `translation`), add a row to the table `User_Rate_Limits` (whose definition is found in 
-the SQL file `init_auth_db.sql`) with your desired `max_requests` and `window` values. For example, if you want 
+the SQL file `init_auth_db.sql`) with your desired `max_requests` and `window_size` values. For example, if you want 
 to set the `global` rate limit to 2000/second for the user `admin`, the row would look like this:
 ```mysql
 INSERT INTO `auth_graphai`.`User_Rate_Limits`
 (`username`,
 `path`,
 `max_requests`,
-`window`)
+`window_size`)
 VALUES
 ('admin',
 'global',
 2000,
 1);
 ```
-   1. Setting either `max_requests` or `window` to `NULL` will disable rate limiting for the given user+path. If you 
-   want to disable rate limiting entirely for the user `'admin'`, set its `max_requests`/`window` values to `NULL` for 
+   1. Setting either `max_requests` or `window_size` to `NULL` will disable rate limiting for the given user+path. If you 
+   want to disable rate limiting entirely for the user `'admin'`, set its `max_requests`/`window_size` values to `NULL` for 
    every single one of the endpoint groups (plus `global`).
 ## Deployment
 To deploy the API, make sure the RabbitMQ and Redis services are running and accessible at the urls provided in the corresponding config file.

@@ -150,7 +150,7 @@ def get_user(username: str):
 @cachetools.func.ttl_cache(maxsize=1024, ttl=12 * 3600)
 def get_user_ratelimit_overrides(username: str, path: str):
     db_manager = DB(config['database'])
-    columns = ['username', 'max_requests', 'window']
+    columns = ['username', 'max_requests', 'window_size']
     try:
         query = (f"SELECT {', '.join(columns)} FROM {AUTH_SCHEMA}.User_Rate_Limits "
                  f"WHERE username=%s AND path=%s")

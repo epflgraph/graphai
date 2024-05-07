@@ -38,7 +38,7 @@ CREATE TABLE IF NOT EXISTS `auth_graphai`.`User_Rate_Limits` (
   `username` varchar(255) NOT NULL,
   `path` varchar(255) NOT NULL,
   `max_requests` int DEFAULT NULL,
-  `window` int DEFAULT NULL,
+  `window_size` int DEFAULT NULL,
   PRIMARY KEY (`username`, `path`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
@@ -53,7 +53,7 @@ INSERT INTO `auth_graphai`.`User_Rate_Limits`
 (`username`,
 `path`,
 `max_requests`,
-`window`)
+`window_size`)
 VALUES
 ('admin',
 'global',

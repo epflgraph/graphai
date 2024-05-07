@@ -179,6 +179,10 @@ async def get_user_for_rate_limiter(headers: Headers, path: str):
     rate_limit_overrides = get_user_ratelimit_overrides(username, path)
     if rate_limit_overrides is None:
         return username
+    # Because the column in the MySQL table is called 'window_size' (as 'window' is a reserved word), we have to
+    # fix this manually.
+    if 'window_size' in rate_limit_overrides:
+        rate_limit_overrides['window'] = rate_limit_overrides['window_size']
     return rate_limit_overrides
 
 
