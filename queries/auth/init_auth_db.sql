@@ -46,3 +46,17 @@ CREATE TABLE IF NOT EXISTS `auth_graphai`.`User_Rate_Limits` (
 -- In order to disable rate limiting for a user for a given endpoint group, insert the username and path with
 -- max_requests and window set to NULL. Doing this for every endpoint group disables rate limiting for that user
 -- entirely.
+
+-- Example for the user 'admin' and for the global rate limit:
+-- Valid values for `path` can be found in graphai.api.common.auth_utils.DEFAULT_RATE_LIMITS (`global`, `video`, etc.).
+
+INSERT INTO `auth_graphai`.`User_Rate_Limits`
+(`username`,
+`path`,
+`max_requests`,
+`window`)
+VALUES
+('admin',
+'global',
+NULL,
+NULL);
