@@ -35,6 +35,10 @@ DEFAULT_RATE_LIMITS = {
         'translation': {
             'max_requests': 5,
             'window': 1
+        },
+        'scraping': {
+            'max_requests': 10,
+            'window': 10
         }
     },
     DEFAULT_RATE_LIMIT_SCHEMA: {
@@ -55,6 +59,10 @@ DEFAULT_RATE_LIMITS = {
             'window': None
         },
         'translation': {
+            'max_requests': None,
+            'window': None
+        },
+        'scraping': {
             'max_requests': None,
             'window': None
         }

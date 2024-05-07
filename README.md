@@ -96,7 +96,7 @@ these steps:
 1. Add a `[ratelimiting]` section to the `config.ini` file.
 2. Add a `limit` variable to this section, which selects your desired rate-limiting schema. Two schemas are available
 by default: `unlimited` (which is self-explanatory) and `base`, which uses a predefined set of sensible rate limits 
-for each endpoint group (plus one global rate limit that applies to the entire API).
+for each endpoint group (plus one "global" rate limit that applies to the entire API).
 
 If you need finer-grained control over the rate limits, read on.
 
