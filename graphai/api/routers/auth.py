@@ -1,6 +1,6 @@
 from datetime import timedelta, datetime, timezone
 from typing import Annotated, Union
-from starlette.datastructures import Headers, URL
+from starlette.datastructures import Headers
 
 from graphai.api.common.auth_utils import (
     Token,
@@ -9,7 +9,8 @@ from graphai.api.common.auth_utils import (
     get_user,
     authenticate_user,
     ALL_SCOPES,
-    get_ratelimit_values
+    get_ratelimit_values,
+    get_user_ratelimit_overrides
 )
 from fastapi import (
     Depends,
@@ -151,7 +152,7 @@ async def get_active_user_dummy():
 unauthenticated_router = APIRouter()
 
 
-async def get_user_for_rate_limiter(headers: Headers, url: URL):
+async def get_user_for_rate_limiter(headers: Headers, path: str):
     # We get the token, from which we'll get the username
     credentials_error = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
@@ -170,7 +171,15 @@ async def get_user_for_rate_limiter(headers: Headers, url: URL):
         raise credentials_error
     if username is None:
         raise credentials_error
-    return username
+
+    # If the first character is '/', this is an actual path and not a custom one.
+    # To get the endpoint group (which is the router's name), we need to extract the first section.
+    if path[0] == '/':
+        path = path[1:].split('/')[0]
+    rate_limit_overrides = get_user_ratelimit_overrides(username, path)
+    if rate_limit_overrides is None:
+        return username
+    return rate_limit_overrides
 
 
 authenticated_router = APIRouter(
@@ -178,7 +187,7 @@ authenticated_router = APIRouter(
         Security(get_current_active_user),
         Depends(rate_limiter(get_ratelimit_values()['global']['max_requests'],
                              get_ratelimit_values()['global']['window'],
-                             user=get_user_for_rate_limiter, path='authenticated'))
+                             user=get_user_for_rate_limiter, path='global'))
     ]
 )
 
