@@ -519,10 +519,10 @@
 </li>
       <li><a href="graphai.api.routers.scraping.html#graphai.api.routers.scraping.extract_page_content_status">extract_page_content_status() (in module graphai.api.routers.scraping)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="graphai.api.routers.scraping.html#graphai.api.routers.scraping.extract_sublinks">extract_sublinks() (in module graphai.api.routers.scraping)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="graphai.api.celery_jobs.scraping.html#graphai.api.celery_jobs.scraping.extract_sublinks_job">extract_sublinks_job() (in module graphai.api.celery_jobs.scraping)</a>
 </li>
       <li><a href="graphai.api.routers.scraping.html#graphai.api.routers.scraping.extract_sublinks_status">extract_sublinks_status() (in module graphai.api.routers.scraping)</a>
@@ -532,6 +532,8 @@
       <li><a href="graphai.core.scraping.scraping.html#graphai.core.scraping.scraping.extract_text_from_url">extract_text_from_url() (in module graphai.core.scraping.scraping)</a>
 </li>
       <li><a href="graphai.api.routers.image.html#graphai.api.routers.image.extract_text_status">extract_text_status() (in module graphai.api.routers.image)</a>
+</li>
+      <li><a href="graphai.api.routers.auth.html#graphai.api.routers.auth.extract_username_and_scopes">extract_username_and_scopes() (in module graphai.api.routers.auth)</a>
 </li>
       <li><a href="graphai.api.schemas.video.html#graphai.api.schemas.video.ExtractAudioRequest">ExtractAudioRequest (class in graphai.api.schemas.video)</a>
 </li>
@@ -841,6 +843,8 @@
 </li>
       <li><a href="graphai.api.common.auth_utils.html#graphai.api.common.auth_utils.get_password_hash">get_password_hash() (in module graphai.api.common.auth_utils)</a>
 </li>
+      <li><a href="graphai.api.common.auth_utils.html#graphai.api.common.auth_utils.get_ratelimit_values">get_ratelimit_values() (in module graphai.api.common.auth_utils)</a>
+</li>
       <li><a href="graphai.api.routers.video.html#graphai.api.routers.video.get_retrieve_file_status">get_retrieve_file_status() (in module graphai.api.routers.video)</a>
 </li>
       <li><a href="graphai.core.interfaces.caching.html#graphai.core.interfaces.caching.VideoConfig.get_root_dir">get_root_dir() (graphai.core.interfaces.caching.VideoConfig method)</a>
@@ -872,6 +876,10 @@
       <li><a href="graphai.api.celery_jobs.translation.html#graphai.api.celery_jobs.translation.get_translation_text_fingerprint_chain_list">get_translation_text_fingerprint_chain_list() (in module graphai.api.celery_jobs.translation)</a>
 </li>
       <li><a href="graphai.api.common.auth_utils.html#graphai.api.common.auth_utils.get_user">get_user() (in module graphai.api.common.auth_utils)</a>
+</li>
+      <li><a href="graphai.api.routers.auth.html#graphai.api.routers.auth.get_user_for_rate_limiter">get_user_for_rate_limiter() (in module graphai.api.routers.auth)</a>
+</li>
+      <li><a href="graphai.api.common.auth_utils.html#graphai.api.common.auth_utils.get_user_ratelimit_overrides">get_user_ratelimit_overrides() (in module graphai.api.common.auth_utils)</a>
 </li>
       <li><a href="graphai.core.interfaces.caching.html#graphai.core.interfaces.caching.VideoConfig.get_video_dir">get_video_dir() (graphai.core.interfaces.caching.VideoConfig method)</a>
 </li>
@@ -1080,6 +1088,8 @@
         <li><a href="graphai.api.common.video.html#module-graphai.api.common.video">module</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     graphai.api.main
 
@@ -1087,8 +1097,6 @@
         <li><a href="graphai.api.main.html#module-graphai.api.main">module</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     graphai.api.routers
 
@@ -1792,6 +1800,542 @@
 </li>
       <li><a href="graphai.core.utils.text.io.html#graphai.core.utils.text.io.mkdir">mkdir() (in module graphai.core.utils.text.io)</a>
 </li>
+      <li><a href="graphai.api.common.auth_utils.html#graphai.api.common.auth_utils.Token.model_computed_fields">model_computed_fields (graphai.api.common.auth_utils.Token attribute)</a>
+
+      <ul>
+        <li><a href="graphai.api.common.auth_utils.html#graphai.api.common.auth_utils.TokenData.model_computed_fields">(graphai.api.common.auth_utils.TokenData attribute)</a>
+</li>
+        <li><a href="graphai.api.common.auth_utils.html#graphai.api.common.auth_utils.User.model_computed_fields">(graphai.api.common.auth_utils.User attribute)</a>
+</li>
+        <li><a href="graphai.api.common.auth_utils.html#graphai.api.common.auth_utils.UserInDB.model_computed_fields">(graphai.api.common.auth_utils.UserInDB attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.common.html#graphai.api.schemas.common.FileRequest.model_computed_fields">(graphai.api.schemas.common.FileRequest attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.common.html#graphai.api.schemas.common.TaskIDResponse.model_computed_fields">(graphai.api.schemas.common.TaskIDResponse attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.common.html#graphai.api.schemas.common.TaskStatusResponse.model_computed_fields">(graphai.api.schemas.common.TaskStatusResponse attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.common.html#graphai.api.schemas.common.TokenStatus.model_computed_fields">(graphai.api.schemas.common.TokenStatus attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.completion.html#graphai.api.schemas.completion.SlideConceptsMap.model_computed_fields">(graphai.api.schemas.completion.SlideConceptsMap attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.completion.html#graphai.api.schemas.completion.SlideSubsetRequest.model_computed_fields">(graphai.api.schemas.completion.SlideSubsetRequest attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.completion.html#graphai.api.schemas.completion.SlideSubsetResponse.model_computed_fields">(graphai.api.schemas.completion.SlideSubsetResponse attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.image.html#graphai.api.schemas.image.DetectOCRLanguageResponse.model_computed_fields">(graphai.api.schemas.image.DetectOCRLanguageResponse attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.image.html#graphai.api.schemas.image.DetectOCRLanguageTaskResponse.model_computed_fields">(graphai.api.schemas.image.DetectOCRLanguageTaskResponse attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.image.html#graphai.api.schemas.image.ExtractTextRequest.model_computed_fields">(graphai.api.schemas.image.ExtractTextRequest attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.image.html#graphai.api.schemas.image.ExtractTextResponse.model_computed_fields">(graphai.api.schemas.image.ExtractTextResponse attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.image.html#graphai.api.schemas.image.ExtractTextTaskResponse.model_computed_fields">(graphai.api.schemas.image.ExtractTextTaskResponse attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.image.html#graphai.api.schemas.image.ImageFingerprintRequest.model_computed_fields">(graphai.api.schemas.image.ImageFingerprintRequest attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.image.html#graphai.api.schemas.image.ImageFingerprintResponse.model_computed_fields">(graphai.api.schemas.image.ImageFingerprintResponse attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.image.html#graphai.api.schemas.image.ImageFingerprintTaskResponse.model_computed_fields">(graphai.api.schemas.image.ImageFingerprintTaskResponse attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.image.html#graphai.api.schemas.image.IndividualOCRResult.model_computed_fields">(graphai.api.schemas.image.IndividualOCRResult attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.ontology.html#graphai.api.schemas.ontology.BreakUpClusterRequest.model_computed_fields">(graphai.api.schemas.ontology.BreakUpClusterRequest attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.ontology.html#graphai.api.schemas.ontology.BreakUpClustersClusterNumberResponse.model_computed_fields">(graphai.api.schemas.ontology.BreakUpClustersClusterNumberResponse attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.ontology.html#graphai.api.schemas.ontology.BreakUpClustersResponse.model_computed_fields">(graphai.api.schemas.ontology.BreakUpClustersResponse attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.ontology.html#graphai.api.schemas.ontology.CategoryChildrenRequest.model_computed_fields">(graphai.api.schemas.ontology.CategoryChildrenRequest attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.ontology.html#graphai.api.schemas.ontology.CategoryInfoRequest.model_computed_fields">(graphai.api.schemas.ontology.CategoryInfoRequest attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.ontology.html#graphai.api.schemas.ontology.CategoryInfoResponse.model_computed_fields">(graphai.api.schemas.ontology.CategoryInfoResponse attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.ontology.html#graphai.api.schemas.ontology.CategoryParentResponse.model_computed_fields">(graphai.api.schemas.ontology.CategoryParentResponse attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.ontology.html#graphai.api.schemas.ontology.ClusterInfoRequest.model_computed_fields">(graphai.api.schemas.ontology.ClusterInfoRequest attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.ontology.html#graphai.api.schemas.ontology.GraphClusterNearestCategoryRequest.model_computed_fields">(graphai.api.schemas.ontology.GraphClusterNearestCategoryRequest attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.ontology.html#graphai.api.schemas.ontology.GraphClusterNearestCategoryResponse.model_computed_fields">(graphai.api.schemas.ontology.GraphClusterNearestCategoryResponse attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.ontology.html#graphai.api.schemas.ontology.GraphConceptNearestCategoryRequest.model_computed_fields">(graphai.api.schemas.ontology.GraphConceptNearestCategoryRequest attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.ontology.html#graphai.api.schemas.ontology.GraphConceptNearestCategoryResponse.model_computed_fields">(graphai.api.schemas.ontology.GraphConceptNearestCategoryResponse attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.ontology.html#graphai.api.schemas.ontology.GraphDistanceRequest.model_computed_fields">(graphai.api.schemas.ontology.GraphDistanceRequest attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.ontology.html#graphai.api.schemas.ontology.GraphDistanceResponse.model_computed_fields">(graphai.api.schemas.ontology.GraphDistanceResponse attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.ontology.html#graphai.api.schemas.ontology.GraphNearestCategoryRequest.model_computed_fields">(graphai.api.schemas.ontology.GraphNearestCategoryRequest attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.ontology.html#graphai.api.schemas.ontology.GraphNearestConceptRequest.model_computed_fields">(graphai.api.schemas.ontology.GraphNearestConceptRequest attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.ontology.html#graphai.api.schemas.ontology.GraphNearestConceptResponse.model_computed_fields">(graphai.api.schemas.ontology.GraphNearestConceptResponse attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.ontology.html#graphai.api.schemas.ontology.NearestCategoryElement.model_computed_fields">(graphai.api.schemas.ontology.NearestCategoryElement attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.ontology.html#graphai.api.schemas.ontology.NearestCategoryElementWithClusters.model_computed_fields">(graphai.api.schemas.ontology.NearestCategoryElementWithClusters attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.ontology.html#graphai.api.schemas.ontology.NearestClusterElement.model_computed_fields">(graphai.api.schemas.ontology.NearestClusterElement attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.ontology.html#graphai.api.schemas.ontology.OneConceptResponseElement.model_computed_fields">(graphai.api.schemas.ontology.OneConceptResponseElement attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.ontology.html#graphai.api.schemas.ontology.RecomputeClustersRequest.model_computed_fields">(graphai.api.schemas.ontology.RecomputeClustersRequest attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.ontology.html#graphai.api.schemas.ontology.RecomputeClustersResponse.model_computed_fields">(graphai.api.schemas.ontology.RecomputeClustersResponse attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.ontology.html#graphai.api.schemas.ontology.RecomputeClustersTaskResponse.model_computed_fields">(graphai.api.schemas.ontology.RecomputeClustersTaskResponse attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.ontology.html#graphai.api.schemas.ontology.TreeChildrenResponse.model_computed_fields">(graphai.api.schemas.ontology.TreeChildrenResponse attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.ontology.html#graphai.api.schemas.ontology.TreeParentResponse.model_computed_fields">(graphai.api.schemas.ontology.TreeParentResponse attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.ontology.html#graphai.api.schemas.ontology.TreeResponse.model_computed_fields">(graphai.api.schemas.ontology.TreeResponse attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.ontology.html#graphai.api.schemas.ontology.TreeResponseElem.model_computed_fields">(graphai.api.schemas.ontology.TreeResponseElem attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.scraping.html#graphai.api.schemas.scraping.ExtractContentRequest.model_computed_fields">(graphai.api.schemas.scraping.ExtractContentRequest attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.scraping.html#graphai.api.schemas.scraping.ExtractContentResponse.model_computed_fields">(graphai.api.schemas.scraping.ExtractContentResponse attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.scraping.html#graphai.api.schemas.scraping.ExtractContentTaskResponse.model_computed_fields">(graphai.api.schemas.scraping.ExtractContentTaskResponse attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.scraping.html#graphai.api.schemas.scraping.GetSublinksRequest.model_computed_fields">(graphai.api.schemas.scraping.GetSublinksRequest attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.scraping.html#graphai.api.schemas.scraping.GetSublinksResponse.model_computed_fields">(graphai.api.schemas.scraping.GetSublinksResponse attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.scraping.html#graphai.api.schemas.scraping.GetSublinksTaskResponse.model_computed_fields">(graphai.api.schemas.scraping.GetSublinksTaskResponse attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.text.html#graphai.api.schemas.text.KeywordsRequest.model_computed_fields">(graphai.api.schemas.text.KeywordsRequest attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.text.html#graphai.api.schemas.text.WikifyFromKeywordsRequest.model_computed_fields">(graphai.api.schemas.text.WikifyFromKeywordsRequest attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.text.html#graphai.api.schemas.text.WikifyFromRawTextRequest.model_computed_fields">(graphai.api.schemas.text.WikifyFromRawTextRequest attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.text.html#graphai.api.schemas.text.WikifyResponseElem.model_computed_fields">(graphai.api.schemas.text.WikifyResponseElem attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.translation.html#graphai.api.schemas.translation.TextDetectLanguageRequest.model_computed_fields">(graphai.api.schemas.translation.TextDetectLanguageRequest attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.translation.html#graphai.api.schemas.translation.TextDetectLanguageResponse.model_computed_fields">(graphai.api.schemas.translation.TextDetectLanguageResponse attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.translation.html#graphai.api.schemas.translation.TextDetectLanguageTaskResponse.model_computed_fields">(graphai.api.schemas.translation.TextDetectLanguageTaskResponse attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.translation.html#graphai.api.schemas.translation.TextFingerprintResponse.model_computed_fields">(graphai.api.schemas.translation.TextFingerprintResponse attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.translation.html#graphai.api.schemas.translation.TextFingerprintTaskResponse.model_computed_fields">(graphai.api.schemas.translation.TextFingerprintTaskResponse attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.translation.html#graphai.api.schemas.translation.TranslationRequest.model_computed_fields">(graphai.api.schemas.translation.TranslationRequest attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.translation.html#graphai.api.schemas.translation.TranslationResponse.model_computed_fields">(graphai.api.schemas.translation.TranslationResponse attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.translation.html#graphai.api.schemas.translation.TranslationTaskResponse.model_computed_fields">(graphai.api.schemas.translation.TranslationTaskResponse attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.video.html#graphai.api.schemas.video.DetectSlidesRequest.model_computed_fields">(graphai.api.schemas.video.DetectSlidesRequest attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.video.html#graphai.api.schemas.video.DetectSlidesResponse.model_computed_fields">(graphai.api.schemas.video.DetectSlidesResponse attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.video.html#graphai.api.schemas.video.DetectSlidesTaskResponse.model_computed_fields">(graphai.api.schemas.video.DetectSlidesTaskResponse attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.video.html#graphai.api.schemas.video.ExtractAudioRequest.model_computed_fields">(graphai.api.schemas.video.ExtractAudioRequest attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.video.html#graphai.api.schemas.video.ExtractAudioResponse.model_computed_fields">(graphai.api.schemas.video.ExtractAudioResponse attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.video.html#graphai.api.schemas.video.ExtractAudioTaskResponse.model_computed_fields">(graphai.api.schemas.video.ExtractAudioTaskResponse attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.video.html#graphai.api.schemas.video.RetrieveURLRequest.model_computed_fields">(graphai.api.schemas.video.RetrieveURLRequest attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.video.html#graphai.api.schemas.video.RetrieveURLResponse.model_computed_fields">(graphai.api.schemas.video.RetrieveURLResponse attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.video.html#graphai.api.schemas.video.RetrieveURLResponseInner.model_computed_fields">(graphai.api.schemas.video.RetrieveURLResponseInner attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.video.html#graphai.api.schemas.video.SlideTokenAndTimeStamp.model_computed_fields">(graphai.api.schemas.video.SlideTokenAndTimeStamp attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.video.html#graphai.api.schemas.video.VideoFingerprintRequest.model_computed_fields">(graphai.api.schemas.video.VideoFingerprintRequest attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.video.html#graphai.api.schemas.video.VideoFingerprintResponse.model_computed_fields">(graphai.api.schemas.video.VideoFingerprintResponse attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.video.html#graphai.api.schemas.video.VideoFingerprintTaskResponse.model_computed_fields">(graphai.api.schemas.video.VideoFingerprintTaskResponse attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.voice.html#graphai.api.schemas.voice.AudioDetectLanguageRequest.model_computed_fields">(graphai.api.schemas.voice.AudioDetectLanguageRequest attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.voice.html#graphai.api.schemas.voice.AudioDetectLanguageResponse.model_computed_fields">(graphai.api.schemas.voice.AudioDetectLanguageResponse attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.voice.html#graphai.api.schemas.voice.AudioDetectLanguageTaskResponse.model_computed_fields">(graphai.api.schemas.voice.AudioDetectLanguageTaskResponse attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.voice.html#graphai.api.schemas.voice.AudioFingerprintRequest.model_computed_fields">(graphai.api.schemas.voice.AudioFingerprintRequest attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.voice.html#graphai.api.schemas.voice.AudioFingerprintResponse.model_computed_fields">(graphai.api.schemas.voice.AudioFingerprintResponse attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.voice.html#graphai.api.schemas.voice.AudioFingerprintTaskResponse.model_computed_fields">(graphai.api.schemas.voice.AudioFingerprintTaskResponse attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.voice.html#graphai.api.schemas.voice.AudioTranscriptionRequest.model_computed_fields">(graphai.api.schemas.voice.AudioTranscriptionRequest attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.voice.html#graphai.api.schemas.voice.AudioTranscriptionResponse.model_computed_fields">(graphai.api.schemas.voice.AudioTranscriptionResponse attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.voice.html#graphai.api.schemas.voice.AudioTranscriptionTaskResponse.model_computed_fields">(graphai.api.schemas.voice.AudioTranscriptionTaskResponse attribute)</a>
+</li>
+      </ul></li>
+      <li><a href="graphai.api.common.auth_utils.html#graphai.api.common.auth_utils.Token.model_config">model_config (graphai.api.common.auth_utils.Token attribute)</a>
+
+      <ul>
+        <li><a href="graphai.api.common.auth_utils.html#graphai.api.common.auth_utils.TokenData.model_config">(graphai.api.common.auth_utils.TokenData attribute)</a>
+</li>
+        <li><a href="graphai.api.common.auth_utils.html#graphai.api.common.auth_utils.User.model_config">(graphai.api.common.auth_utils.User attribute)</a>
+</li>
+        <li><a href="graphai.api.common.auth_utils.html#graphai.api.common.auth_utils.UserInDB.model_config">(graphai.api.common.auth_utils.UserInDB attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.common.html#graphai.api.schemas.common.FileRequest.model_config">(graphai.api.schemas.common.FileRequest attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.common.html#graphai.api.schemas.common.TaskIDResponse.model_config">(graphai.api.schemas.common.TaskIDResponse attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.common.html#graphai.api.schemas.common.TaskStatusResponse.model_config">(graphai.api.schemas.common.TaskStatusResponse attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.common.html#graphai.api.schemas.common.TokenStatus.model_config">(graphai.api.schemas.common.TokenStatus attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.completion.html#graphai.api.schemas.completion.SlideConceptsMap.model_config">(graphai.api.schemas.completion.SlideConceptsMap attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.completion.html#graphai.api.schemas.completion.SlideSubsetRequest.model_config">(graphai.api.schemas.completion.SlideSubsetRequest attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.completion.html#graphai.api.schemas.completion.SlideSubsetResponse.model_config">(graphai.api.schemas.completion.SlideSubsetResponse attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.image.html#graphai.api.schemas.image.DetectOCRLanguageResponse.model_config">(graphai.api.schemas.image.DetectOCRLanguageResponse attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.image.html#graphai.api.schemas.image.DetectOCRLanguageTaskResponse.model_config">(graphai.api.schemas.image.DetectOCRLanguageTaskResponse attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.image.html#graphai.api.schemas.image.ExtractTextRequest.model_config">(graphai.api.schemas.image.ExtractTextRequest attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.image.html#graphai.api.schemas.image.ExtractTextResponse.model_config">(graphai.api.schemas.image.ExtractTextResponse attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.image.html#graphai.api.schemas.image.ExtractTextTaskResponse.model_config">(graphai.api.schemas.image.ExtractTextTaskResponse attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.image.html#graphai.api.schemas.image.ImageFingerprintRequest.model_config">(graphai.api.schemas.image.ImageFingerprintRequest attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.image.html#graphai.api.schemas.image.ImageFingerprintResponse.model_config">(graphai.api.schemas.image.ImageFingerprintResponse attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.image.html#graphai.api.schemas.image.ImageFingerprintTaskResponse.model_config">(graphai.api.schemas.image.ImageFingerprintTaskResponse attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.image.html#graphai.api.schemas.image.IndividualOCRResult.model_config">(graphai.api.schemas.image.IndividualOCRResult attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.ontology.html#graphai.api.schemas.ontology.BreakUpClusterRequest.model_config">(graphai.api.schemas.ontology.BreakUpClusterRequest attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.ontology.html#graphai.api.schemas.ontology.BreakUpClustersClusterNumberResponse.model_config">(graphai.api.schemas.ontology.BreakUpClustersClusterNumberResponse attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.ontology.html#graphai.api.schemas.ontology.BreakUpClustersResponse.model_config">(graphai.api.schemas.ontology.BreakUpClustersResponse attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.ontology.html#graphai.api.schemas.ontology.CategoryChildrenRequest.model_config">(graphai.api.schemas.ontology.CategoryChildrenRequest attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.ontology.html#graphai.api.schemas.ontology.CategoryInfoRequest.model_config">(graphai.api.schemas.ontology.CategoryInfoRequest attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.ontology.html#graphai.api.schemas.ontology.CategoryInfoResponse.model_config">(graphai.api.schemas.ontology.CategoryInfoResponse attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.ontology.html#graphai.api.schemas.ontology.CategoryParentResponse.model_config">(graphai.api.schemas.ontology.CategoryParentResponse attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.ontology.html#graphai.api.schemas.ontology.ClusterInfoRequest.model_config">(graphai.api.schemas.ontology.ClusterInfoRequest attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.ontology.html#graphai.api.schemas.ontology.GraphClusterNearestCategoryRequest.model_config">(graphai.api.schemas.ontology.GraphClusterNearestCategoryRequest attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.ontology.html#graphai.api.schemas.ontology.GraphClusterNearestCategoryResponse.model_config">(graphai.api.schemas.ontology.GraphClusterNearestCategoryResponse attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.ontology.html#graphai.api.schemas.ontology.GraphConceptNearestCategoryRequest.model_config">(graphai.api.schemas.ontology.GraphConceptNearestCategoryRequest attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.ontology.html#graphai.api.schemas.ontology.GraphConceptNearestCategoryResponse.model_config">(graphai.api.schemas.ontology.GraphConceptNearestCategoryResponse attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.ontology.html#graphai.api.schemas.ontology.GraphDistanceRequest.model_config">(graphai.api.schemas.ontology.GraphDistanceRequest attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.ontology.html#graphai.api.schemas.ontology.GraphDistanceResponse.model_config">(graphai.api.schemas.ontology.GraphDistanceResponse attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.ontology.html#graphai.api.schemas.ontology.GraphNearestCategoryRequest.model_config">(graphai.api.schemas.ontology.GraphNearestCategoryRequest attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.ontology.html#graphai.api.schemas.ontology.GraphNearestConceptRequest.model_config">(graphai.api.schemas.ontology.GraphNearestConceptRequest attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.ontology.html#graphai.api.schemas.ontology.GraphNearestConceptResponse.model_config">(graphai.api.schemas.ontology.GraphNearestConceptResponse attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.ontology.html#graphai.api.schemas.ontology.NearestCategoryElement.model_config">(graphai.api.schemas.ontology.NearestCategoryElement attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.ontology.html#graphai.api.schemas.ontology.NearestCategoryElementWithClusters.model_config">(graphai.api.schemas.ontology.NearestCategoryElementWithClusters attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.ontology.html#graphai.api.schemas.ontology.NearestClusterElement.model_config">(graphai.api.schemas.ontology.NearestClusterElement attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.ontology.html#graphai.api.schemas.ontology.OneConceptResponseElement.model_config">(graphai.api.schemas.ontology.OneConceptResponseElement attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.ontology.html#graphai.api.schemas.ontology.RecomputeClustersRequest.model_config">(graphai.api.schemas.ontology.RecomputeClustersRequest attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.ontology.html#graphai.api.schemas.ontology.RecomputeClustersResponse.model_config">(graphai.api.schemas.ontology.RecomputeClustersResponse attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.ontology.html#graphai.api.schemas.ontology.RecomputeClustersTaskResponse.model_config">(graphai.api.schemas.ontology.RecomputeClustersTaskResponse attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.ontology.html#graphai.api.schemas.ontology.TreeChildrenResponse.model_config">(graphai.api.schemas.ontology.TreeChildrenResponse attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.ontology.html#graphai.api.schemas.ontology.TreeParentResponse.model_config">(graphai.api.schemas.ontology.TreeParentResponse attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.ontology.html#graphai.api.schemas.ontology.TreeResponse.model_config">(graphai.api.schemas.ontology.TreeResponse attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.ontology.html#graphai.api.schemas.ontology.TreeResponseElem.model_config">(graphai.api.schemas.ontology.TreeResponseElem attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.scraping.html#graphai.api.schemas.scraping.ExtractContentRequest.model_config">(graphai.api.schemas.scraping.ExtractContentRequest attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.scraping.html#graphai.api.schemas.scraping.ExtractContentResponse.model_config">(graphai.api.schemas.scraping.ExtractContentResponse attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.scraping.html#graphai.api.schemas.scraping.ExtractContentTaskResponse.model_config">(graphai.api.schemas.scraping.ExtractContentTaskResponse attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.scraping.html#graphai.api.schemas.scraping.GetSublinksRequest.model_config">(graphai.api.schemas.scraping.GetSublinksRequest attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.scraping.html#graphai.api.schemas.scraping.GetSublinksResponse.model_config">(graphai.api.schemas.scraping.GetSublinksResponse attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.scraping.html#graphai.api.schemas.scraping.GetSublinksTaskResponse.model_config">(graphai.api.schemas.scraping.GetSublinksTaskResponse attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.text.html#graphai.api.schemas.text.KeywordsRequest.model_config">(graphai.api.schemas.text.KeywordsRequest attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.text.html#graphai.api.schemas.text.WikifyFromKeywordsRequest.model_config">(graphai.api.schemas.text.WikifyFromKeywordsRequest attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.text.html#graphai.api.schemas.text.WikifyFromRawTextRequest.model_config">(graphai.api.schemas.text.WikifyFromRawTextRequest attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.text.html#graphai.api.schemas.text.WikifyResponseElem.model_config">(graphai.api.schemas.text.WikifyResponseElem attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.translation.html#graphai.api.schemas.translation.TextDetectLanguageRequest.model_config">(graphai.api.schemas.translation.TextDetectLanguageRequest attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.translation.html#graphai.api.schemas.translation.TextDetectLanguageResponse.model_config">(graphai.api.schemas.translation.TextDetectLanguageResponse attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.translation.html#graphai.api.schemas.translation.TextDetectLanguageTaskResponse.model_config">(graphai.api.schemas.translation.TextDetectLanguageTaskResponse attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.translation.html#graphai.api.schemas.translation.TextFingerprintResponse.model_config">(graphai.api.schemas.translation.TextFingerprintResponse attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.translation.html#graphai.api.schemas.translation.TextFingerprintTaskResponse.model_config">(graphai.api.schemas.translation.TextFingerprintTaskResponse attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.translation.html#graphai.api.schemas.translation.TranslationRequest.model_config">(graphai.api.schemas.translation.TranslationRequest attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.translation.html#graphai.api.schemas.translation.TranslationResponse.model_config">(graphai.api.schemas.translation.TranslationResponse attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.translation.html#graphai.api.schemas.translation.TranslationTaskResponse.model_config">(graphai.api.schemas.translation.TranslationTaskResponse attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.video.html#graphai.api.schemas.video.DetectSlidesRequest.model_config">(graphai.api.schemas.video.DetectSlidesRequest attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.video.html#graphai.api.schemas.video.DetectSlidesResponse.model_config">(graphai.api.schemas.video.DetectSlidesResponse attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.video.html#graphai.api.schemas.video.DetectSlidesTaskResponse.model_config">(graphai.api.schemas.video.DetectSlidesTaskResponse attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.video.html#graphai.api.schemas.video.ExtractAudioRequest.model_config">(graphai.api.schemas.video.ExtractAudioRequest attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.video.html#graphai.api.schemas.video.ExtractAudioResponse.model_config">(graphai.api.schemas.video.ExtractAudioResponse attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.video.html#graphai.api.schemas.video.ExtractAudioTaskResponse.model_config">(graphai.api.schemas.video.ExtractAudioTaskResponse attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.video.html#graphai.api.schemas.video.RetrieveURLRequest.model_config">(graphai.api.schemas.video.RetrieveURLRequest attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.video.html#graphai.api.schemas.video.RetrieveURLResponse.model_config">(graphai.api.schemas.video.RetrieveURLResponse attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.video.html#graphai.api.schemas.video.RetrieveURLResponseInner.model_config">(graphai.api.schemas.video.RetrieveURLResponseInner attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.video.html#graphai.api.schemas.video.SlideTokenAndTimeStamp.model_config">(graphai.api.schemas.video.SlideTokenAndTimeStamp attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.video.html#graphai.api.schemas.video.VideoFingerprintRequest.model_config">(graphai.api.schemas.video.VideoFingerprintRequest attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.video.html#graphai.api.schemas.video.VideoFingerprintResponse.model_config">(graphai.api.schemas.video.VideoFingerprintResponse attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.video.html#graphai.api.schemas.video.VideoFingerprintTaskResponse.model_config">(graphai.api.schemas.video.VideoFingerprintTaskResponse attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.voice.html#graphai.api.schemas.voice.AudioDetectLanguageRequest.model_config">(graphai.api.schemas.voice.AudioDetectLanguageRequest attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.voice.html#graphai.api.schemas.voice.AudioDetectLanguageResponse.model_config">(graphai.api.schemas.voice.AudioDetectLanguageResponse attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.voice.html#graphai.api.schemas.voice.AudioDetectLanguageTaskResponse.model_config">(graphai.api.schemas.voice.AudioDetectLanguageTaskResponse attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.voice.html#graphai.api.schemas.voice.AudioFingerprintRequest.model_config">(graphai.api.schemas.voice.AudioFingerprintRequest attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.voice.html#graphai.api.schemas.voice.AudioFingerprintResponse.model_config">(graphai.api.schemas.voice.AudioFingerprintResponse attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.voice.html#graphai.api.schemas.voice.AudioFingerprintTaskResponse.model_config">(graphai.api.schemas.voice.AudioFingerprintTaskResponse attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.voice.html#graphai.api.schemas.voice.AudioTranscriptionRequest.model_config">(graphai.api.schemas.voice.AudioTranscriptionRequest attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.voice.html#graphai.api.schemas.voice.AudioTranscriptionResponse.model_config">(graphai.api.schemas.voice.AudioTranscriptionResponse attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.voice.html#graphai.api.schemas.voice.AudioTranscriptionTaskResponse.model_config">(graphai.api.schemas.voice.AudioTranscriptionTaskResponse attribute)</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="graphai.api.common.auth_utils.html#graphai.api.common.auth_utils.Token.model_fields">model_fields (graphai.api.common.auth_utils.Token attribute)</a>
+
+      <ul>
+        <li><a href="graphai.api.common.auth_utils.html#graphai.api.common.auth_utils.TokenData.model_fields">(graphai.api.common.auth_utils.TokenData attribute)</a>
+</li>
+        <li><a href="graphai.api.common.auth_utils.html#graphai.api.common.auth_utils.User.model_fields">(graphai.api.common.auth_utils.User attribute)</a>
+</li>
+        <li><a href="graphai.api.common.auth_utils.html#graphai.api.common.auth_utils.UserInDB.model_fields">(graphai.api.common.auth_utils.UserInDB attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.common.html#graphai.api.schemas.common.FileRequest.model_fields">(graphai.api.schemas.common.FileRequest attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.common.html#graphai.api.schemas.common.TaskIDResponse.model_fields">(graphai.api.schemas.common.TaskIDResponse attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.common.html#graphai.api.schemas.common.TaskStatusResponse.model_fields">(graphai.api.schemas.common.TaskStatusResponse attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.common.html#graphai.api.schemas.common.TokenStatus.model_fields">(graphai.api.schemas.common.TokenStatus attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.completion.html#graphai.api.schemas.completion.SlideConceptsMap.model_fields">(graphai.api.schemas.completion.SlideConceptsMap attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.completion.html#graphai.api.schemas.completion.SlideSubsetRequest.model_fields">(graphai.api.schemas.completion.SlideSubsetRequest attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.completion.html#graphai.api.schemas.completion.SlideSubsetResponse.model_fields">(graphai.api.schemas.completion.SlideSubsetResponse attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.image.html#graphai.api.schemas.image.DetectOCRLanguageResponse.model_fields">(graphai.api.schemas.image.DetectOCRLanguageResponse attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.image.html#graphai.api.schemas.image.DetectOCRLanguageTaskResponse.model_fields">(graphai.api.schemas.image.DetectOCRLanguageTaskResponse attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.image.html#graphai.api.schemas.image.ExtractTextRequest.model_fields">(graphai.api.schemas.image.ExtractTextRequest attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.image.html#graphai.api.schemas.image.ExtractTextResponse.model_fields">(graphai.api.schemas.image.ExtractTextResponse attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.image.html#graphai.api.schemas.image.ExtractTextTaskResponse.model_fields">(graphai.api.schemas.image.ExtractTextTaskResponse attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.image.html#graphai.api.schemas.image.ImageFingerprintRequest.model_fields">(graphai.api.schemas.image.ImageFingerprintRequest attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.image.html#graphai.api.schemas.image.ImageFingerprintResponse.model_fields">(graphai.api.schemas.image.ImageFingerprintResponse attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.image.html#graphai.api.schemas.image.ImageFingerprintTaskResponse.model_fields">(graphai.api.schemas.image.ImageFingerprintTaskResponse attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.image.html#graphai.api.schemas.image.IndividualOCRResult.model_fields">(graphai.api.schemas.image.IndividualOCRResult attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.ontology.html#graphai.api.schemas.ontology.BreakUpClusterRequest.model_fields">(graphai.api.schemas.ontology.BreakUpClusterRequest attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.ontology.html#graphai.api.schemas.ontology.BreakUpClustersClusterNumberResponse.model_fields">(graphai.api.schemas.ontology.BreakUpClustersClusterNumberResponse attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.ontology.html#graphai.api.schemas.ontology.BreakUpClustersResponse.model_fields">(graphai.api.schemas.ontology.BreakUpClustersResponse attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.ontology.html#graphai.api.schemas.ontology.CategoryChildrenRequest.model_fields">(graphai.api.schemas.ontology.CategoryChildrenRequest attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.ontology.html#graphai.api.schemas.ontology.CategoryInfoRequest.model_fields">(graphai.api.schemas.ontology.CategoryInfoRequest attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.ontology.html#graphai.api.schemas.ontology.CategoryInfoResponse.model_fields">(graphai.api.schemas.ontology.CategoryInfoResponse attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.ontology.html#graphai.api.schemas.ontology.CategoryParentResponse.model_fields">(graphai.api.schemas.ontology.CategoryParentResponse attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.ontology.html#graphai.api.schemas.ontology.ClusterInfoRequest.model_fields">(graphai.api.schemas.ontology.ClusterInfoRequest attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.ontology.html#graphai.api.schemas.ontology.GraphClusterNearestCategoryRequest.model_fields">(graphai.api.schemas.ontology.GraphClusterNearestCategoryRequest attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.ontology.html#graphai.api.schemas.ontology.GraphClusterNearestCategoryResponse.model_fields">(graphai.api.schemas.ontology.GraphClusterNearestCategoryResponse attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.ontology.html#graphai.api.schemas.ontology.GraphConceptNearestCategoryRequest.model_fields">(graphai.api.schemas.ontology.GraphConceptNearestCategoryRequest attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.ontology.html#graphai.api.schemas.ontology.GraphConceptNearestCategoryResponse.model_fields">(graphai.api.schemas.ontology.GraphConceptNearestCategoryResponse attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.ontology.html#graphai.api.schemas.ontology.GraphDistanceRequest.model_fields">(graphai.api.schemas.ontology.GraphDistanceRequest attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.ontology.html#graphai.api.schemas.ontology.GraphDistanceResponse.model_fields">(graphai.api.schemas.ontology.GraphDistanceResponse attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.ontology.html#graphai.api.schemas.ontology.GraphNearestCategoryRequest.model_fields">(graphai.api.schemas.ontology.GraphNearestCategoryRequest attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.ontology.html#graphai.api.schemas.ontology.GraphNearestConceptRequest.model_fields">(graphai.api.schemas.ontology.GraphNearestConceptRequest attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.ontology.html#graphai.api.schemas.ontology.GraphNearestConceptResponse.model_fields">(graphai.api.schemas.ontology.GraphNearestConceptResponse attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.ontology.html#graphai.api.schemas.ontology.NearestCategoryElement.model_fields">(graphai.api.schemas.ontology.NearestCategoryElement attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.ontology.html#graphai.api.schemas.ontology.NearestCategoryElementWithClusters.model_fields">(graphai.api.schemas.ontology.NearestCategoryElementWithClusters attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.ontology.html#graphai.api.schemas.ontology.NearestClusterElement.model_fields">(graphai.api.schemas.ontology.NearestClusterElement attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.ontology.html#graphai.api.schemas.ontology.OneConceptResponseElement.model_fields">(graphai.api.schemas.ontology.OneConceptResponseElement attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.ontology.html#graphai.api.schemas.ontology.RecomputeClustersRequest.model_fields">(graphai.api.schemas.ontology.RecomputeClustersRequest attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.ontology.html#graphai.api.schemas.ontology.RecomputeClustersResponse.model_fields">(graphai.api.schemas.ontology.RecomputeClustersResponse attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.ontology.html#graphai.api.schemas.ontology.RecomputeClustersTaskResponse.model_fields">(graphai.api.schemas.ontology.RecomputeClustersTaskResponse attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.ontology.html#graphai.api.schemas.ontology.TreeChildrenResponse.model_fields">(graphai.api.schemas.ontology.TreeChildrenResponse attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.ontology.html#graphai.api.schemas.ontology.TreeParentResponse.model_fields">(graphai.api.schemas.ontology.TreeParentResponse attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.ontology.html#graphai.api.schemas.ontology.TreeResponse.model_fields">(graphai.api.schemas.ontology.TreeResponse attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.ontology.html#graphai.api.schemas.ontology.TreeResponseElem.model_fields">(graphai.api.schemas.ontology.TreeResponseElem attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.scraping.html#graphai.api.schemas.scraping.ExtractContentRequest.model_fields">(graphai.api.schemas.scraping.ExtractContentRequest attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.scraping.html#graphai.api.schemas.scraping.ExtractContentResponse.model_fields">(graphai.api.schemas.scraping.ExtractContentResponse attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.scraping.html#graphai.api.schemas.scraping.ExtractContentTaskResponse.model_fields">(graphai.api.schemas.scraping.ExtractContentTaskResponse attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.scraping.html#graphai.api.schemas.scraping.GetSublinksRequest.model_fields">(graphai.api.schemas.scraping.GetSublinksRequest attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.scraping.html#graphai.api.schemas.scraping.GetSublinksResponse.model_fields">(graphai.api.schemas.scraping.GetSublinksResponse attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.scraping.html#graphai.api.schemas.scraping.GetSublinksTaskResponse.model_fields">(graphai.api.schemas.scraping.GetSublinksTaskResponse attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.text.html#graphai.api.schemas.text.KeywordsRequest.model_fields">(graphai.api.schemas.text.KeywordsRequest attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.text.html#graphai.api.schemas.text.WikifyFromKeywordsRequest.model_fields">(graphai.api.schemas.text.WikifyFromKeywordsRequest attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.text.html#graphai.api.schemas.text.WikifyFromRawTextRequest.model_fields">(graphai.api.schemas.text.WikifyFromRawTextRequest attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.text.html#graphai.api.schemas.text.WikifyResponseElem.model_fields">(graphai.api.schemas.text.WikifyResponseElem attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.translation.html#graphai.api.schemas.translation.TextDetectLanguageRequest.model_fields">(graphai.api.schemas.translation.TextDetectLanguageRequest attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.translation.html#graphai.api.schemas.translation.TextDetectLanguageResponse.model_fields">(graphai.api.schemas.translation.TextDetectLanguageResponse attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.translation.html#graphai.api.schemas.translation.TextDetectLanguageTaskResponse.model_fields">(graphai.api.schemas.translation.TextDetectLanguageTaskResponse attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.translation.html#graphai.api.schemas.translation.TextFingerprintResponse.model_fields">(graphai.api.schemas.translation.TextFingerprintResponse attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.translation.html#graphai.api.schemas.translation.TextFingerprintTaskResponse.model_fields">(graphai.api.schemas.translation.TextFingerprintTaskResponse attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.translation.html#graphai.api.schemas.translation.TranslationRequest.model_fields">(graphai.api.schemas.translation.TranslationRequest attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.translation.html#graphai.api.schemas.translation.TranslationResponse.model_fields">(graphai.api.schemas.translation.TranslationResponse attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.translation.html#graphai.api.schemas.translation.TranslationTaskResponse.model_fields">(graphai.api.schemas.translation.TranslationTaskResponse attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.video.html#graphai.api.schemas.video.DetectSlidesRequest.model_fields">(graphai.api.schemas.video.DetectSlidesRequest attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.video.html#graphai.api.schemas.video.DetectSlidesResponse.model_fields">(graphai.api.schemas.video.DetectSlidesResponse attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.video.html#graphai.api.schemas.video.DetectSlidesTaskResponse.model_fields">(graphai.api.schemas.video.DetectSlidesTaskResponse attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.video.html#graphai.api.schemas.video.ExtractAudioRequest.model_fields">(graphai.api.schemas.video.ExtractAudioRequest attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.video.html#graphai.api.schemas.video.ExtractAudioResponse.model_fields">(graphai.api.schemas.video.ExtractAudioResponse attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.video.html#graphai.api.schemas.video.ExtractAudioTaskResponse.model_fields">(graphai.api.schemas.video.ExtractAudioTaskResponse attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.video.html#graphai.api.schemas.video.RetrieveURLRequest.model_fields">(graphai.api.schemas.video.RetrieveURLRequest attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.video.html#graphai.api.schemas.video.RetrieveURLResponse.model_fields">(graphai.api.schemas.video.RetrieveURLResponse attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.video.html#graphai.api.schemas.video.RetrieveURLResponseInner.model_fields">(graphai.api.schemas.video.RetrieveURLResponseInner attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.video.html#graphai.api.schemas.video.SlideTokenAndTimeStamp.model_fields">(graphai.api.schemas.video.SlideTokenAndTimeStamp attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.video.html#graphai.api.schemas.video.VideoFingerprintRequest.model_fields">(graphai.api.schemas.video.VideoFingerprintRequest attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.video.html#graphai.api.schemas.video.VideoFingerprintResponse.model_fields">(graphai.api.schemas.video.VideoFingerprintResponse attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.video.html#graphai.api.schemas.video.VideoFingerprintTaskResponse.model_fields">(graphai.api.schemas.video.VideoFingerprintTaskResponse attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.voice.html#graphai.api.schemas.voice.AudioDetectLanguageRequest.model_fields">(graphai.api.schemas.voice.AudioDetectLanguageRequest attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.voice.html#graphai.api.schemas.voice.AudioDetectLanguageResponse.model_fields">(graphai.api.schemas.voice.AudioDetectLanguageResponse attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.voice.html#graphai.api.schemas.voice.AudioDetectLanguageTaskResponse.model_fields">(graphai.api.schemas.voice.AudioDetectLanguageTaskResponse attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.voice.html#graphai.api.schemas.voice.AudioFingerprintRequest.model_fields">(graphai.api.schemas.voice.AudioFingerprintRequest attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.voice.html#graphai.api.schemas.voice.AudioFingerprintResponse.model_fields">(graphai.api.schemas.voice.AudioFingerprintResponse attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.voice.html#graphai.api.schemas.voice.AudioFingerprintTaskResponse.model_fields">(graphai.api.schemas.voice.AudioFingerprintTaskResponse attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.voice.html#graphai.api.schemas.voice.AudioTranscriptionRequest.model_fields">(graphai.api.schemas.voice.AudioTranscriptionRequest attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.voice.html#graphai.api.schemas.voice.AudioTranscriptionResponse.model_fields">(graphai.api.schemas.voice.AudioTranscriptionResponse attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.voice.html#graphai.api.schemas.voice.AudioTranscriptionTaskResponse.model_fields">(graphai.api.schemas.voice.AudioTranscriptionTaskResponse attribute)</a>
+</li>
+      </ul></li>
       <li>
     module
 
@@ -2261,8 +2805,6 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="graphai.core.utils.text.io.html#graphai.core.utils.text.io.save_json">save_json() (in module graphai.core.utils.text.io)</a>
 </li>
-      <li><a href="graphai.api.schemas.text.html#graphai.api.schemas.text.WikifyResponseElem.Config.schema_extra">schema_extra (graphai.api.schemas.text.WikifyResponseElem.Config attribute)</a>
-</li>
       <li><a href="graphai.api.common.auth_utils.html#graphai.api.common.auth_utils.TokenData.scopes">scopes (graphai.api.common.auth_utils.TokenData attribute)</a>
 
       <ul>
@@ -2319,8 +2861,6 @@
 </li>
       <li><a href="graphai.core.ontology.clustering.html#graphai.core.ontology.clustering.spec_embed_on_laplacian">spec_embed_on_laplacian() (in module graphai.core.ontology.clustering)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="graphai.api.schemas.ontology.html#graphai.api.schemas.ontology.GraphClusterNearestCategoryRequest.src">src (graphai.api.schemas.ontology.GraphClusterNearestCategoryRequest attribute)</a>
 
       <ul>
@@ -2331,6 +2871,8 @@
         <li><a href="graphai.api.schemas.ontology.html#graphai.api.schemas.ontology.GraphNearestConceptRequest.src">(graphai.api.schemas.ontology.GraphNearestConceptRequest attribute)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="graphai.api.schemas.ontology.html#graphai.api.schemas.ontology.GraphDistanceRequest.src_type">src_type (graphai.api.schemas.ontology.GraphDistanceRequest attribute)</a>
 </li>
       <li><a href="graphai.api.schemas.scraping.html#graphai.api.schemas.scraping.GetSublinksTaskResponse.status_msg">status_msg (graphai.api.schemas.scraping.GetSublinksTaskResponse attribute)</a>
@@ -2655,13 +3197,11 @@
 </li>
       <li><a href="graphai.api.schemas.text.html#graphai.api.schemas.text.WikifyFromKeywordsRequest">WikifyFromKeywordsRequest (class in graphai.api.schemas.text)</a>
 </li>
-      <li><a href="graphai.api.schemas.text.html#graphai.api.schemas.text.WikifyFromRawTextRequest">WikifyFromRawTextRequest (class in graphai.api.schemas.text)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="graphai.api.schemas.text.html#graphai.api.schemas.text.WikifyResponseElem">WikifyResponseElem (class in graphai.api.schemas.text)</a>
+      <li><a href="graphai.api.schemas.text.html#graphai.api.schemas.text.WikifyFromRawTextRequest">WikifyFromRawTextRequest (class in graphai.api.schemas.text)</a>
 </li>
-      <li><a href="graphai.api.schemas.text.html#graphai.api.schemas.text.WikifyResponseElem.Config">WikifyResponseElem.Config (class in graphai.api.schemas.text)</a>
+      <li><a href="graphai.api.schemas.text.html#graphai.api.schemas.text.WikifyResponseElem">WikifyResponseElem (class in graphai.api.schemas.text)</a>
 </li>
       <li><a href="graphai.core.text.wikisearch.html#graphai.core.text.wikisearch.wikisearch">wikisearch() (in module graphai.core.text.wikisearch)</a>
 </li>
