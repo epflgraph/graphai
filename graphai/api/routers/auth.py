@@ -167,7 +167,7 @@ async def get_user_for_rate_limiter(headers: Headers, path: str):
         return '1!!!!@@test_unauth@@!!!!1'
     try:
         username, _ = await extract_username_and_scopes(token.replace('Bearer ', ''))
-    except (JWTError, ValidationError, ExpiredSignatureError) as e:
+    except (JWTError, ValidationError, ExpiredSignatureError):
         raise credentials_error
     if username is None:
         raise credentials_error
