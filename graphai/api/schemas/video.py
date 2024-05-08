@@ -29,7 +29,7 @@ class RetrieveURLRequest(BaseModel):
 
 class RetrieveURLResponseInner(BaseModel):
     token: Union[str, None] = Field(
-        title="Token",
+        None, title="Token",
         description="Result token, null if task has failed"
     )
 
@@ -78,7 +78,7 @@ class VideoFingerprintRequest(BaseModel):
 
 class VideoFingerprintTaskResponse(BaseModel):
     result: Union[str, None] = Field(
-        title="Fingerprint",
+        None, title="Fingerprint",
         description="Fingerprint of the provided video."
     )
 
@@ -88,7 +88,7 @@ class VideoFingerprintTaskResponse(BaseModel):
     )
 
     closest_token: Union[str, None] = Field(
-        title="Closest token",
+        None, title="Closest token",
         description="The token of the most similar existing video that the fingerprint lookup was able to find. Equal "
                     "to original token if the most similar existing video did not satisfy the minimum similarity "
                     "threshold."
@@ -131,7 +131,7 @@ class ExtractAudioRequest(BaseModel):
 
 class ExtractAudioTaskResponse(BaseModel):
     token: Union[str, None] = Field(
-        title="Token",
+        None, title="Token",
         description="Result token, null if task has failed"
     )
 
@@ -214,7 +214,7 @@ class SlideTokenAndTimeStamp(BaseModel):
 
 class DetectSlidesTaskResponse(BaseModel):
     slide_tokens: Union[Dict[int, SlideTokenAndTimeStamp], None] = Field(
-        title="Slide tokens",
+        None, title="Slide tokens",
         description="Tokens of the detected slides and their timestamps"
     )
 

@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "graphai"
-version = "0.3.0"
+version = "0.9.0"
 authors = [
   { name="Aitor Pérez", email="aitor.perez@epfl.ch" },
   { name="Ramtin Yazdanian", email="ramtin.yazdanian@epfl.ch" }
@@ -24,7 +24,7 @@ dependencies = [
     "fastapi>=0.95.0",
     "gunicorn",
     "uvicorn",
-    "pydantic>=1.7.4,<1.11.0",
+    "pydantic",
     "requests",
     "httpx",
     "wget",
@@ -75,7 +75,8 @@ dependencies = [
     "pybind11",
     "fasttext-wheel",
     "fasttext-reducer>=0.1.1",
-    "cachetools"
+    "cachetools",
+    "fastapi-user-limiter>=1.3.0"
 ]
 
 [tool.setuptools]

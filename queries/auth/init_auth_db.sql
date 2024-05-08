@@ -1,5 +1,6 @@
 CREATE SCHEMA IF NOT EXISTS `auth_graphai` ;
 
+-- The table containing user information
 CREATE TABLE IF NOT EXISTS `auth_graphai`.`Users` (
   `username` varchar(255) NOT NULL,
   `full_name` varchar(255) NOT NULL,
@@ -30,3 +31,31 @@ VALUES
 'yourbcrypthashedpassword',
 0,
 'user,voice,video,translation,text,scraping,ontology,image,completion');
+
+
+-- The table containing user-specific rate-limit overrides
+CREATE TABLE IF NOT EXISTS `auth_graphai`.`User_Rate_Limits` (
+  `username` varchar(255) NOT NULL,
+  `api_path` varchar(255) NOT NULL,
+  `max_requests` int DEFAULT NULL,
+  `window_size` int DEFAULT NULL,
+  PRIMARY KEY (`username`, `path`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- In order to disable rate limiting for a user for a given endpoint group, insert the username and path with
+-- max_requests and window set to NULL. Doing this for every endpoint group disables rate limiting for that user
+-- entirely.
+
+-- Example for the user 'admin' and for the global rate limit:
+-- Valid values for `path` can be found in graphai.api.common.auth_utils.DEFAULT_RATE_LIMITS (`global`, `video`, etc.).
+
+INSERT INTO `auth_graphai`.`User_Rate_Limits`
+(`username`,
+`api_path`,
+`max_requests`,
+`window_size`)
+VALUES
+('admin',
+'global',
+NULL,
+NULL);

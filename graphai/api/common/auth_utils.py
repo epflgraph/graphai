@@ -1,3 +1,4 @@
+import json
 from typing import Union, List
 
 from db_cache_manager.db import DB
@@ -12,6 +13,84 @@ import cachetools.func
 
 AUTH_SCHEMA = config['auth']['schema']
 ALL_SCOPES = ['user', 'voice', 'video', 'translation', 'text', 'scraping', 'ontology', 'image', 'completion']
+DEFAULT_RATE_LIMIT_SCHEMA = 'unlimited'
+DEFAULT_RATE_LIMITS = {
+    'base': {
+        'global': {
+            'max_requests': 100,
+            'window': 1
+        },
+        'video': {
+            'max_requests': 10,
+            'window': 10
+        },
+        'image': {
+            'max_requests': 20,
+            'window': 10
+        },
+        'voice': {
+            'max_requests': 10,
+            'window': 10
+        },
+        'translation': {
+            'max_requests': 5,
+            'window': 1
+        },
+        'scraping': {
+            'max_requests': 10,
+            'window': 10
+        }
+    },
+    DEFAULT_RATE_LIMIT_SCHEMA: {
+        'global': {
+            'max_requests': None,
+            'window': None
+        },
+        'video': {
+            'max_requests': None,
+            'window': None
+        },
+        'image': {
+            'max_requests': None,
+            'window': None
+        },
+        'voice': {
+            'max_requests': None,
+            'window': None
+        },
+        'translation': {
+            'max_requests': None,
+            'window': None
+        },
+        'scraping': {
+            'max_requests': None,
+            'window': None
+        }
+    },
+}
+
+
+@cachetools.func.lru_cache(maxsize=512)
+def get_ratelimit_values():
+    # Load rate-limit dictionary
+    try:
+        with open(config.get('ratelimiting', {'custom_limits': ''}).get('custom_limits', ''), 'r') as f:
+            rate_limit_values = json.load(f)
+            rate_limit_values.update(DEFAULT_RATE_LIMITS)
+    except (FileNotFoundError, json.JSONDecodeError):
+        rate_limit_values = DEFAULT_RATE_LIMITS
+    # Fill in the blanks of the rate-limit dictionary
+    for key in DEFAULT_RATE_LIMITS[DEFAULT_RATE_LIMIT_SCHEMA].keys():
+        if key not in rate_limit_values:
+            rate_limit_values[key] = DEFAULT_RATE_LIMITS[DEFAULT_RATE_LIMIT_SCHEMA][key]
+    # Load selected rate-limiting schema
+    limit_schema = config.get(
+        'ratelimiting', {'limit': DEFAULT_RATE_LIMIT_SCHEMA}
+    ).get('limit', DEFAULT_RATE_LIMIT_SCHEMA)
+    if limit_schema not in rate_limit_values.keys():
+        limit_schema = DEFAULT_RATE_LIMIT_SCHEMA \
+            if DEFAULT_RATE_LIMIT_SCHEMA in rate_limit_values.keys() else list(rate_limit_values.keys())[0]
+    return rate_limit_values[limit_schema]
 
 
 class Token(BaseModel):
@@ -66,6 +145,22 @@ def get_user(username: str):
         else:
             user_dict['scopes'] = list()
         return UserInDB(**user_dict)
+
+
+@cachetools.func.ttl_cache(maxsize=1024, ttl=12 * 3600)
+def get_user_ratelimit_overrides(username: str, path: str):
+    db_manager = DB(config['database'])
+    columns = ['username', 'max_requests', 'window_size']
+    try:
+        query = (f"SELECT {', '.join(columns)} FROM {AUTH_SCHEMA}.User_Rate_Limits "
+                 f"WHERE username=%s AND api_path=%s")
+        results = db_manager.execute_query(query, (username, path, ))
+        if len(results) > 0:
+            return {columns[i]: results[0][i] for i in range(len(columns))}
+        else:
+            return None
+    except Exception:
+        return None
 
 
 def authenticate_user(username: str, password: str):

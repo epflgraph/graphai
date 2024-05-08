@@ -82,6 +82,11 @@ jobs:
           echo "text: ${{ vars.preload_text }}" >> config.ini
           echo "ontology: ${{ vars.preload_ontology }}" >> config.ini
           echo "" >> config.ini
+          
+          echo "[ratelimiting]" >> config.ini
+          echo "limit: ${{ vars.ratelimit_schema }}" >> config.ini
+          echo "" >> config.ini
+          
 
       - name: Install python package in editable mode
         run: |

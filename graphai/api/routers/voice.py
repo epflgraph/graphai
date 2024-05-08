@@ -1,4 +1,5 @@
-from fastapi import APIRouter, Security
+from fastapi import APIRouter, Security, Depends
+from fastapi_user_limiter.limiter import rate_limiter
 
 from graphai.api.celery_jobs.voice import (
     fingerprint_job,
@@ -14,7 +15,8 @@ from graphai.api.schemas.voice import (
     AudioDetectLanguageRequest,
     AudioDetectLanguageResponse,
 )
-from graphai.api.routers.auth import get_current_active_user
+from graphai.api.routers.auth import get_current_active_user, get_user_for_rate_limiter
+from graphai.api.common.auth_utils import get_ratelimit_values
 from graphai.api.celery_tasks.common import format_api_results
 
 from graphai.core.interfaces.celery_config import get_task_info
@@ -55,7 +57,10 @@ async def calculate_audio_fingerprint_status(task_id):
     return format_api_results(full_results['id'], full_results['name'], full_results['status'], task_results)
 
 
-@router.post('/transcribe', response_model=TaskIDResponse)
+@router.post('/transcribe', response_model=TaskIDResponse,
+             dependencies=[Depends(rate_limiter(get_ratelimit_values()['voice']['max_requests'],
+                                                get_ratelimit_values()['voice']['window'],
+                                                user=get_user_for_rate_limiter))])
 async def transcribe(data: AudioTranscriptionRequest):
     token = data.token
     force = data.force
@@ -82,7 +87,10 @@ async def transcribe_status(task_id):
     return format_api_results(full_results['id'], full_results['name'], full_results['status'], task_results)
 
 
-@router.post('/detect_language', response_model=TaskIDResponse)
+@router.post('/detect_language', response_model=TaskIDResponse,
+             dependencies=[Depends(rate_limiter(get_ratelimit_values()['voice']['max_requests'],
+                                                get_ratelimit_values()['voice']['window'],
+                                                user=get_user_for_rate_limiter))])
 async def detect_language(data: AudioDetectLanguageRequest):
     print('Detecting language')
     token = data.token

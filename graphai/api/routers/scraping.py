@@ -1,4 +1,5 @@
-from fastapi import APIRouter, Security
+from fastapi import APIRouter, Security, Depends
+from fastapi_user_limiter.limiter import rate_limiter
 
 from graphai.api.schemas.common import TaskIDResponse
 
@@ -17,7 +18,8 @@ from graphai.api.celery_jobs.scraping import (
     extract_sublinks_job,
     extract_content_job
 )
-from graphai.api.routers.auth import get_current_active_user
+from graphai.api.routers.auth import get_current_active_user, get_user_for_rate_limiter
+from graphai.api.common.auth_utils import get_ratelimit_values
 
 from graphai.core.interfaces.celery_config import get_task_info
 
@@ -29,7 +31,11 @@ router = APIRouter(
 )
 
 
-@router.post('/sublinks', response_model=TaskIDResponse)
+@router.post('/sublinks', response_model=TaskIDResponse,
+             dependencies=[Depends(rate_limiter(get_ratelimit_values()['scraping']['max_requests'],
+                                                get_ratelimit_values()['scraping']['window'],
+                                                user=get_user_for_rate_limiter))]
+             )
 async def extract_sublinks(data: GetSublinksRequest):
     url = data.url
     force = data.force
@@ -56,7 +62,11 @@ async def extract_sublinks_status(task_id):
     return format_api_results(full_results['id'], full_results['name'], full_results['status'], task_results)
 
 
-@router.post('/content', response_model=TaskIDResponse)
+@router.post('/content', response_model=TaskIDResponse,
+             dependencies=[Depends(rate_limiter(get_ratelimit_values()['scraping']['max_requests'],
+                                                get_ratelimit_values()['scraping']['window'],
+                                                user=get_user_for_rate_limiter))]
+             )
 async def extract_page_content(data: ExtractContentRequest):
     url = data.url
     force = data.force
