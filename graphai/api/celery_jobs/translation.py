@@ -11,7 +11,7 @@ from graphai.api.celery_tasks.translation import (
     cache_lookup_translation_text_using_fingerprint_task
 )
 
-from graphai.api.celery_jobs.common import direct_lookup_generic_job
+from graphai.api.celery_jobs.common import direct_lookup_generic_job, DEFAULT_TIMEOUT
 
 from graphai.core.translation.text_utils import (
     generate_translation_text_token,
@@ -30,7 +30,7 @@ def get_translation_text_fingerprint_chain_list(token, text, src, tgt):
 
 def fingerprint_lookup_job(token, return_results=False):
     return direct_lookup_generic_job(cache_lookup_translation_text_fingerprint_task, token,
-                                     return_results)
+                                     return_results, DEFAULT_TIMEOUT)
 
 
 def fingerprint_compute_job(token, text, src, tgt, asynchronous=True):
@@ -75,7 +75,8 @@ def translation_job(text, src, tgt, force):
     ##########################
     if not force:
         direct_lookup_task_id = direct_lookup_generic_job(cache_lookup_translate_text_task, token,
-                                                          False, return_list)
+                                                          False, DEFAULT_TIMEOUT,
+                                                          return_list)
         if direct_lookup_task_id is not None:
             return direct_lookup_task_id
 
@@ -94,7 +95,7 @@ def translation_job(text, src, tgt, force):
     # Fingerprint-based lookup
     if not force and current_fingerprint is not None:
         fp_based_lookup_task_id = direct_lookup_generic_job(cache_lookup_translation_text_using_fingerprint_task,
-                                                            token, False,
+                                                            token, False, DEFAULT_TIMEOUT,
                                                             current_fingerprint, src, tgt, return_list)
         if fp_based_lookup_task_id is not None:
             return fp_based_lookup_task_id
