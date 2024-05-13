@@ -97,11 +97,12 @@
 <span id="graphai-api-celery-jobs-common-module"></span><h1>graphai.api.celery_jobs.common module<a class="headerlink" href="#module-graphai.api.celery_jobs.common" title="Link to this heading"></a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="graphai.api.celery_jobs.common.direct_lookup_generic_job">
-<span class="sig-prename descclassname"><span class="pre">graphai.api.celery_jobs.common.</span></span><span class="sig-name descname"><span class="pre">direct_lookup_generic_job</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">task_fn</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">token</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_results</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.api.celery_jobs.common.direct_lookup_generic_job" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">graphai.api.celery_jobs.common.</span></span><span class="sig-name descname"><span class="pre">direct_lookup_generic_job</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">task_fn</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">token</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_results</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">40</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.api.celery_jobs.common.direct_lookup_generic_job" title="Link to this definition"></a></dt>
 <dd><p>Launches a direct cache lookup job
 :param task_fn: The task function of the cache lookup
 :param token: The token to look up in the cache
-:param return_results: If True, the full results are returned instead of just the task id</p>
+:param return_results: If True, the full results are returned instead of just the task id
+:param timeout: Timeout of cache lookup, in seconds</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>The id of the cache lookup task in case of a cache hit, None in case of a miss</p>
