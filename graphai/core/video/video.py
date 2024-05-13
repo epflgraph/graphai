@@ -599,7 +599,7 @@ def compute_ocr_noise_level(input_folder_with_path, frame_sample_indices, nlp_mo
     return distance_list
 
 
-def compute_ocr_threshold(distance_list, default_threshold=0.1):
+def compute_ocr_threshold(distance_list, default_threshold=0.05):
     """
     Computes the OCR noise threshold using a list of subsequent frame distances
     Args:
