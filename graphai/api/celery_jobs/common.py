@@ -1,4 +1,4 @@
-DEFAULT_TIMEOUT=40
+DEFAULT_TIMEOUT = 40
 
 
 def direct_lookup_generic_job(task_fn, token, return_results=False, timeout=DEFAULT_TIMEOUT, *args):
