@@ -515,7 +515,7 @@ class NLPModels:
 
 
 def get_cosine_sim(v1, v2):
-    return np.dot(v1, v2) / (np.linalg.norm(v1) * np.linalg.norm(v2))
+    return np.dot(np.array(v1).flatten(), np.array(v2).flatten()) / (np.linalg.norm(v1) * np.linalg.norm(v2))
 
 
 def frame_ocr_distance(input_folder_with_path, k1, k2, nlp_models: NLPModels, language=None):
@@ -544,14 +544,16 @@ def frame_ocr_distance(input_folder_with_path, k1, k2, nlp_models: NLPModels, la
 
     # Calculate distance score
     if np.max([len(nlp_1), len(nlp_2)]) < 16:
-        text_dif = 0
+        text_dif = 0.0
     elif np.min([len(nlp_1), len(nlp_2)]) < 4 and np.max([len(nlp_1), len(nlp_2)]) >= 16:
-        text_dif = 1
+        text_dif = 1.0
     else:
         text_sim = get_cosine_sim(nlp_models.get_text_word_vector(extracted_text1, language),
                                   nlp_models.get_text_word_vector(extracted_text2, language))
         text_dif = 1 - text_sim
+        assert isinstance(text_dif, float)
         text_dif = text_dif * (1 - np.exp(-np.mean([len(nlp_1), len(nlp_2)]) / 16))
+        assert isinstance(text_dif, float)
 
     # Return distance score
     return text_dif
@@ -618,9 +620,11 @@ def compute_ocr_threshold(distance_list, default_threshold=0.05):
 def check_ocr_and_hash_thresholds(input_folder_with_path, k_l, k_r,
                                   ocr_dist_threshold, hash_similarity_threshold, nlp_models,
                                   language=None):
-    d = frame_ocr_distance(input_folder_with_path, k_l, k_r, nlp_models, language)
-    s_hash = frame_hash_similarity(input_folder_with_path, k_l, k_r)
-    return (d > ocr_dist_threshold and s_hash < hash_similarity_threshold), d, s_hash
+    d = float(frame_ocr_distance(input_folder_with_path, k_l, k_r, nlp_models, language))
+    s_hash = float(frame_hash_similarity(input_folder_with_path, k_l, k_r))
+    ocr_dist_pass = d > ocr_dist_threshold
+    hash_sim_pass = s_hash < hash_similarity_threshold
+    return (ocr_dist_pass and hash_sim_pass), d, s_hash
 
 
 def frame_ocr_transition(input_folder_with_path, k_l, k_r, ocr_dist_threshold, hash_similarity_threshold, nlp_models,
