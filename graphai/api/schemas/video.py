@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from typing import Union, Literal, Dict
+from typing import Union, Literal, Dict, List
 
 from graphai.api.schemas.common import (
     TaskStatusResponse,
@@ -27,13 +27,20 @@ class RetrieveURLRequest(BaseModel):
     )
 
 
+class VideoTokenStatus(TokenStatus):
+    streams: Union[List[Literal['video', 'audio']], None] = Field(
+        default=None, title="Available streams",
+        description="List of streams available in the video token, allowed values are 'video' and 'audio'"
+    )
+
+
 class RetrieveURLResponseInner(BaseModel):
     token: Union[str, None] = Field(
         None, title="Token",
         description="Result token, null if task has failed"
     )
 
-    token_status: Union[TokenStatus, None] = Field(
+    token_status: Union[VideoTokenStatus, None] = Field(
         title="Token status",
         description="Status of the returned token",
         default=None

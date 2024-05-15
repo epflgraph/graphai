@@ -20,16 +20,16 @@ from graphai.core.video.video import (
     generate_audio_token,
     FRAME_FORMAT_PNG,
     TESSERACT_OCR_FORMAT,
-    get_file_size
+    get_file_size,
+    get_video_token_status,
+    get_image_token_status,
+    get_audio_token_status
 )
 from graphai.core.common.fingerprinting import md5_video_or_audio, perceptual_hash_audio, perceptual_hash_image
 from graphai.core.interfaces.caching import (
     AudioDBCachingManager,
     SlideDBCachingManager,
-    VideoDBCachingManager,
-    get_video_token_status,
-    get_image_token_status,
-    get_audio_token_status
+    VideoDBCachingManager
 )
 from graphai.core.common.common_utils import (
     get_current_datetime,

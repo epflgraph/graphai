@@ -24,6 +24,8 @@ import pytesseract
 import fasttext
 from fasttext_reducer.reduce_fasttext_models import generate_target_path
 
+from graphai.core.interfaces.caching import VideoConfig, VideoDBCachingManager, get_token_file_status, is_fingerprinted, \
+    SlideDBCachingManager, AudioDBCachingManager
 from graphai.core.interfaces.config import config
 from graphai.core.common.common_utils import (
     make_sure_path_exists,
@@ -186,6 +188,11 @@ def perform_probe(input_filename_with_path):
     if not file_exists(input_filename_with_path):
         raise Exception(f'ffmpeg error: File {input_filename_with_path} does not exist')
     return ffmpeg.probe(input_filename_with_path, cmd='ffprobe')
+
+
+def get_available_streams(input_filename_with_path):
+    results = perform_probe(input_filename_with_path)
+    return [x['codec_type'] for x in results['streams']]
 
 
 def perform_slow_audio_probe(input_filename_with_path):
@@ -724,3 +731,55 @@ def get_ocr_colnames(method):
         return ['ocr_tesseract_results']
     else:
         return ['ocr_google_1_results', 'ocr_google_2_results']
+
+
+def get_video_token_status(token):
+    video_config = VideoConfig()
+    video_db_manager = VideoDBCachingManager()
+    try:
+        active = get_token_file_status(token, video_config)
+    except Exception:
+        return None
+
+    exists, has_fingerprint = is_fingerprinted(token, video_db_manager)
+    fully_active = active and exists
+    if fully_active:
+        streams = get_available_streams(video_config.generate_filepath(token))
+        streams = [x for x in streams if x == 'audio' or x == 'video']
+    else:
+        streams = None
+    return {
+        'active': fully_active,
+        'fingerprinted': has_fingerprint,
+        'streams': streams
+    }
+
+
+def get_image_token_status(token):
+    video_config = VideoConfig()
+    image_db_manager = SlideDBCachingManager()
+    try:
+        active = get_token_file_status(token, video_config)
+    except Exception:
+        return None
+
+    exists, has_fingerprint = is_fingerprinted(token, image_db_manager)
+    return {
+        'active': active and exists,
+        'fingerprinted': has_fingerprint
+    }
+
+
+def get_audio_token_status(token):
+    video_config = VideoConfig()
+    audio_db_manager = AudioDBCachingManager()
+    try:
+        active = get_token_file_status(token, video_config)
+    except Exception:
+        return None
+
+    exists, has_fingerprint = is_fingerprinted(token, audio_db_manager)
+    return {
+        'active': active and exists,
+        'fingerprinted': has_fingerprint
+    }
