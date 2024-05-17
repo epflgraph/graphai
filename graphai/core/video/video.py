@@ -192,7 +192,7 @@ def perform_probe(input_filename_with_path):
 
 def get_available_streams(input_filename_with_path):
     results = perform_probe(input_filename_with_path)
-    return [x['codec_type'] for x in results['streams']]
+    return [(x['codec_type'], x['codec_name']) for x in results['streams']]
 
 
 def perform_slow_audio_probe(input_filename_with_path):
@@ -340,13 +340,22 @@ def extract_frames(input_filename_with_path, output_folder_with_path, output_fol
     try:
         print('Creating the path...')
         make_sure_path_exists(output_folder_with_path)
+        streams = get_available_streams(input_filename_with_path)
+        video_stream_name = [x for x in streams if x[0] == 'video'][0][1]
         # DO NOT CHANGE r=1 HERE
         # This parameter ensures that one frame is extracted per second, and the whole logic of the algorithm
         # relies on timestamp being identical to frame number.
         print('Starting ffmpeg slide extraction...')
-        err = ffmpeg.input(input_filename_with_path).video. \
-            filter("fps", 1).output(os.path.join(output_folder_with_path, FRAME_FORMAT_PNG)). \
-            overwrite_output().run(capture_stdout=True)
+        if video_stream_name != 'png':
+            # If the video stream is NOT a single picture, we have to apply the "fps" filter to get one frame/second.
+            err = ffmpeg.input(input_filename_with_path).video. \
+                filter("fps", 1).output(os.path.join(output_folder_with_path, FRAME_FORMAT_PNG)). \
+                overwrite_output().run(capture_stdout=True)
+        else:
+            # If the video stream is just an image, the fps filter would fail (and it'd be unneeded), so it's skipped.
+            err = ffmpeg.input(input_filename_with_path).video. \
+                output(os.path.join(output_folder_with_path, FRAME_FORMAT_PNG)). \
+                overwrite_output().run(capture_stdout=True)
     except Exception as e:
         print(e, file=sys.stderr)
         err = str(e)
@@ -745,6 +754,8 @@ def get_video_token_status(token):
     fully_active = active and exists
     if fully_active:
         streams = get_available_streams(video_config.generate_filepath(token))
+        # Here we only care about codec types (audio/video), not codec names (e.g. h264, aac, png)
+        streams = [x[0] for x in streams]
         streams = [x for x in streams if x == 'audio' or x == 'video']
     else:
         streams = None
