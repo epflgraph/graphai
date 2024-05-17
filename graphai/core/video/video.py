@@ -342,12 +342,11 @@ def extract_frames(input_filename_with_path, output_folder_with_path, output_fol
         make_sure_path_exists(output_folder_with_path)
         streams = get_available_streams(input_filename_with_path)
         video_stream_name = [x for x in streams if x[0] == 'video'][0][1]
-        # DO NOT CHANGE r=1 HERE
-        # This parameter ensures that one frame is extracted per second, and the whole logic of the algorithm
-        # relies on timestamp being identical to frame number.
         print('Starting ffmpeg slide extraction...')
         if video_stream_name != 'png':
             # If the video stream is NOT a single picture, we have to apply the "fps" filter to get one frame/second.
+            # One frame per second is a fundamental assumption of the pipeline, so this value (1) should never
+            # be changed (the algorithm assumes that timestamp == frame number).
             err = ffmpeg.input(input_filename_with_path).video. \
                 filter("fps", 1).output(os.path.join(output_folder_with_path, FRAME_FORMAT_PNG)). \
                 overwrite_output().run(capture_stdout=True)
