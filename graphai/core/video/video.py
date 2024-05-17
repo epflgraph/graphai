@@ -473,10 +473,10 @@ def generate_img_and_ocr_paths_and_perform_tesseract_ocr(input_folder_with_path,
 
 class NLPModels:
     def __init__(self):
-        n_dims = config['fasttext']['dim']
-        base_dir = config['fasttext']['path']
+        self.n_dims = int(config['fasttext']['dim'])
+        self.base_dir = config['fasttext']['path']
         self.model_paths = {
-            lang: generate_target_path(base_dir, lang, n_dims)
+            lang: generate_target_path(self.base_dir, lang, self.n_dims)
             for lang in ['en', 'fr']
         }
         self.nlp_models = None
@@ -515,8 +515,12 @@ class NLPModels:
 
     def get_text_word_vector(self, text, lang='en', valid_only=True):
         self.load_nlp_models()
+        if len(text) == 0:
+            return np.zeros((self.n_dims, ))
         current_model = self.nlp_models[lang]
         all_valid_words = self.get_words(text, lang, valid_only=valid_only)
+        if len(all_valid_words) == 0:
+            return np.zeros((self.n_dims, ))
 
         result_vector = sum(current_model.get_word_vector(w) for w in all_valid_words)
         return result_vector
@@ -524,6 +528,8 @@ class NLPModels:
     def get_text_word_vector_using_words(self, words, lang='en'):
         self.load_nlp_models()
         current_model = self.nlp_models[lang]
+        if len(words) == 0:
+            return np.zeros((self.n_dims, ))
 
         result_vector = sum(current_model.get_word_vector(w) for w in words)
         return result_vector
