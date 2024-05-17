@@ -502,6 +502,8 @@ class NLPModels:
 
     def get_words(self, text, lang='en', valid_only=False):
         self.load_nlp_models()
+        if len(text) == 0:
+            return []
         current_tokenizer = self.tokenizers[lang]
         current_stopwords = self.stopwords[lang]
         all_words = current_tokenizer.tokenize(text, return_str=False, escape=False)
@@ -515,22 +517,18 @@ class NLPModels:
 
     def get_text_word_vector(self, text, lang='en', valid_only=True):
         self.load_nlp_models()
-        if len(text) == 0:
-            return np.zeros((self.n_dims, ))
-        current_model = self.nlp_models[lang]
         all_valid_words = self.get_words(text, lang, valid_only=valid_only)
-        if len(all_valid_words) == 0:
-            return np.zeros((self.n_dims, ))
-
-        result_vector = sum(current_model.get_word_vector(w) for w in all_valid_words)
-        return result_vector
+        return self._word_list_to_word_vector(all_valid_words, lang)
 
     def get_text_word_vector_using_words(self, words, lang='en'):
         self.load_nlp_models()
-        current_model = self.nlp_models[lang]
+        return self._word_list_to_word_vector(words, lang)
+
+    def _word_list_to_word_vector(self, words, lang='en'):
         if len(words) == 0:
             return np.zeros((self.n_dims, ))
 
+        current_model = self.nlp_models[lang]
         result_vector = sum(current_model.get_word_vector(w) for w in words)
         return result_vector
 
