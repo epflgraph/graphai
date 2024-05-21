@@ -202,6 +202,7 @@ class OntologyData:
         self.loaded = False
         self.db_config = None
         self.ontology_concept_names = None
+        self.ontology_concept_to_name_dict = None
         self.ontology_categories = None
         self.category_depth_dict = None
         self.non_ontology_concept_names = None
@@ -256,6 +257,7 @@ class OntologyData:
             "SELECT id, name FROM graph_ontology.Nodes_N_Concept WHERE is_ontology_concept=1"),
             ['id', 'name']
         )
+        self.ontology_concept_to_name_dict = get_col_to_col_dict(self.ontology_concept_names, 'id', 'name')
 
     def load_ontology_categories(self):
         db_manager = DB(self.db_config)
@@ -1127,6 +1129,10 @@ class OntologyData:
         self.load_data()
         return self.cluster_concept_dict.get(cluster_id, [])
 
+    def get_concept_name(self, concept_id):
+        self.load_data()
+        return self.ontology_concept_to_name_dict.get(concept_id, None)
+
     def get_test_concept_names(self):
         self.load_data()
         return self.test_concept_names
@@ -1154,3 +1160,19 @@ class OntologyData:
             'key': start,
             'children': list(chain.from_iterable([self.generate_tree_structure(x) for x in children]))
         }]
+
+    def generate_category_concept_dict(self):
+        results = {}
+        for category_id in self.category_cluster_dict:
+            clusters = self.get_category_cluster_list(category_id)
+            if clusters is None:
+                continue
+            current_results = list()
+            for cluster_id in clusters:
+                concepts = self.get_cluster_concept_list(cluster_id)
+                if concepts is None:
+                    continue
+                concepts = [self.get_concept_name(concept) for concept in concepts]
+                current_results.append({'cluster_id': cluster_id, 'concepts': concepts})
+            results[category_id] = current_results
+        return results
