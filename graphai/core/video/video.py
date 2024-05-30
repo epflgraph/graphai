@@ -192,7 +192,7 @@ def perform_probe(input_filename_with_path):
 
 def get_available_streams(input_filename_with_path):
     results = perform_probe(input_filename_with_path)
-    return [(x['codec_type'], x['codec_name']) for x in results['streams']]
+    return [(x['codec_type'], x.get('codec_name', None)) for x in results['streams']]
 
 
 def perform_slow_audio_probe(input_filename_with_path):
