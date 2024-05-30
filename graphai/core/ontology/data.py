@@ -3,6 +3,7 @@ from db_cache_manager.db import DB
 import pandas as pd
 import random
 from scipy.sparse import csr_array, csr_matrix, vstack, spmatrix
+from itertools import chain
 
 from graphai.core.common.common_utils import invert_dict
 from graphai.core.interfaces.config import config
@@ -201,6 +202,7 @@ class OntologyData:
         self.loaded = False
         self.db_config = None
         self.ontology_concept_names = None
+        self.ontology_concept_to_name_dict = None
         self.ontology_categories = None
         self.category_depth_dict = None
         self.non_ontology_concept_names = None
@@ -255,6 +257,7 @@ class OntologyData:
             "SELECT id, name FROM graph_ontology.Nodes_N_Concept WHERE is_ontology_concept=1"),
             ['id', 'name']
         )
+        self.ontology_concept_to_name_dict = get_col_to_col_dict(self.ontology_concept_names, 'id', 'name')
 
     def load_ontology_categories(self):
         db_manager = DB(self.db_config)
@@ -298,7 +301,7 @@ class OntologyData:
         )
         category_category_agg = self.category_category.assign(
             id=self.category_category.from_id.apply(lambda x: [x])
-        )[['to_id', 'id']].groupby('to_id').agg(sum).reset_index()
+        )[['to_id', 'id']].groupby('to_id').agg("sum").reset_index()
         self.category_category_dict = get_col_to_col_dict(category_category_agg, 'to_id', 'id')
 
     def load_category_concept(self):
@@ -365,17 +368,17 @@ class OntologyData:
 
         category_concept_agg = self.category_concept.assign(
             id=self.category_concept.to_id.apply(lambda x: [x])
-        )[['from_id', 'id']].groupby('from_id').agg(sum).reset_index()
+        )[['from_id', 'id']].groupby('from_id').agg("sum").reset_index()
         self.category_concept_dict = get_col_to_col_dict(category_concept_agg, 'from_id', 'id')
 
         cluster_concept_agg = self.cluster_concept.assign(
             id=self.cluster_concept.to_id.apply(lambda x: [x])
-        )[['from_id', 'id']].groupby('from_id').agg(sum).reset_index()
+        )[['from_id', 'id']].groupby('from_id').agg("sum").reset_index()
         self.cluster_concept_dict = get_col_to_col_dict(cluster_concept_agg, 'from_id', 'id')
 
         category_cluster_agg = self.category_cluster.assign(
             id=self.category_cluster.to_id.apply(lambda x: [x])
-        )[['from_id', 'id']].groupby('from_id').agg(sum).reset_index()
+        )[['from_id', 'id']].groupby('from_id').agg("sum").reset_index()
         self.category_cluster_dict = get_col_to_col_dict(category_cluster_agg, 'from_id', 'id')
 
     def load_anchor_page_dict(self):
@@ -392,7 +395,7 @@ class OntologyData:
         ), ['from_id', 'to_id'])
         # Aggregate the direct anchors of each category into a list
         base_anchors['to_id'] = base_anchors['to_id'].apply(lambda x: [x])
-        base_anchors = base_anchors.groupby('from_id').agg(sum).reset_index().rename(columns={
+        base_anchors = base_anchors.groupby('from_id').agg("sum").reset_index().rename(columns={
             'from_id': 'category_id', 'to_id': 'anchor_ids'
         })
         # Add the depth of the category to the dataframe
@@ -422,7 +425,7 @@ class OntologyData:
             )
             # Aggregate everything
             all_new_anchors = (current_relationships[['category_id', 'anchor_ids']].
-                               groupby('category_id').agg(sum).reset_index())
+                               groupby('category_id').agg("sum").reset_index())
             all_new_anchors['depth'] = depth
             anchors = pd.concat([anchors, all_new_anchors], axis=0)
         # Remove duplicates in each of the entries
@@ -453,7 +456,7 @@ class OntologyData:
                 lambda x: x if isinstance(x, list) else []
             )
             new_anchors = (current_relationships[['category_id', 'anchor_ids']].
-                           groupby('category_id').agg(sum).reset_index())
+                           groupby('category_id').agg("sum").reset_index())
             base_anchors = current_cat_df.assign(anchor_ids=current_cat_df['id'].apply(lambda x: [x]))
             all_new_anchors = pd.merge(new_anchors, base_anchors, on='category_id', suffixes=('_children', '_base'))
             all_new_anchors['anchor_ids'] = all_new_anchors.apply(
@@ -1126,6 +1129,10 @@ class OntologyData:
         self.load_data()
         return self.cluster_concept_dict.get(cluster_id, [])
 
+    def get_concept_name(self, concept_id):
+        self.load_data()
+        return self.ontology_concept_to_name_dict.get(concept_id, None)
+
     def get_test_concept_names(self):
         self.load_data()
         return self.test_concept_names
@@ -1137,3 +1144,35 @@ class OntologyData:
     def get_test_cluster_concept(self):
         self.load_data()
         return self.test_cluster_concept
+
+    def get_root_category(self):
+        self.load_data()
+        return self.ontology_categories.loc[self.ontology_categories.depth == 0, 'category_id'].values.tolist()[0]
+
+    def generate_tree_structure(self, start=None):
+        if start is None:
+            start = self.get_root_category()
+        children = self.get_category_children(start)
+        if children is None:
+            children = list()
+        return [{
+            'name': start,
+            'id': start,
+            'children': list(chain.from_iterable([self.generate_tree_structure(x) for x in children]))
+        }]
+
+    def generate_category_concept_dict(self):
+        results = {}
+        for category_id in self.category_cluster_dict:
+            clusters = self.get_category_cluster_list(category_id)
+            if clusters is None:
+                continue
+            current_results = list()
+            for cluster_id in clusters:
+                concepts = self.get_cluster_concept_list(cluster_id)
+                if concepts is None:
+                    continue
+                concepts = [self.get_concept_name(concept) for concept in concepts]
+                current_results.append({'cluster_id': cluster_id, 'concepts': concepts})
+            results[category_id] = current_results
+        return results
