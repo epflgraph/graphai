@@ -1156,8 +1156,8 @@ class OntologyData:
         if children is None:
             children = list()
         return [{
-            'title': start,
-            'key': start,
+            'name': start,
+            'id': start,
             'children': list(chain.from_iterable([self.generate_tree_structure(x) for x in children]))
         }]
 
