@@ -454,7 +454,7 @@ def audio_fingerprint_find_closest_retrieve_from_db_task(self, results):
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='video_2.audio_fingerprint_find_closest_parallel', ignore_result=False)
-def audio_fingerprint_find_closest_parallel_task(self, input_dict, i, n_total, min_similarity=0.8):
+def audio_fingerprint_find_closest_parallel_task(self, input_dict, i, n_total, min_similarity=1):
     db_manager = AudioDBCachingManager()
     return fingerprint_lookup_parallel(input_dict, i, n_total, min_similarity, db_manager, data_type='audio')
 
