@@ -347,6 +347,7 @@ def fingerprint_lookup_callback(results_list, db_manager):
             current_closest_token = [x[0] for x in current_results if x[3] == current_max_score][0]
             current_closest_token = db_manager.get_closest_match(current_closest_token)
         # Whether the closest token is itself or another token, we store the result in the database.
+        print(current_closest_token)
         db_manager.insert_or_update_closest_match(
             current_original_token,
             {

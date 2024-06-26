@@ -460,6 +460,13 @@ def audio_fingerprint_find_closest_parallel_task(self, input_dict, i, n_total, m
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
+             name='video_2.audio_fingerprint_find_closest_direct', ignore_result=False)
+def audio_fingerprint_find_closest_direct_task(self, results):
+    db_manager = AudioDBCachingManager()
+    return fingerprint_lookup_direct(results, db_manager)
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='video_2.audio_fingerprint_find_closest_callback', ignore_result=False)
 def audio_fingerprint_find_closest_callback_task(self, results_list):
     db_manager = AudioDBCachingManager()
