@@ -14,10 +14,11 @@ def get_all_problematic_pairs():
         'id', 'fp', 'date_added', 'duration', 'origin_token'
     ]
     query = """
-    SELECT a.id_token AS most_similar_id, a.fingerprint AS most_similar_fp, a.date_added AS most_similar_date_added, 
+    SELECT a.id_token AS most_similar_id, a.fingerprint AS most_similar_fp, a.date_added AS most_similar_date_added,
     a.duration AS most_similar_duration,
-    b.id_token AS id, b.fingerprint AS fp, b.date_added AS date_added, b.duration AS duration, b.origin_token AS origin_token
-    FROM cache_graphai.Audio_Main b 
+    b.id_token AS id, b.fingerprint AS fp, b.date_added AS date_added, b.duration AS duration,
+    b.origin_token AS origin_token
+    FROM cache_graphai.Audio_Main b
     INNER JOIN cache_graphai.Audio_Most_Similar c ON b.id_token=c.id_token
     INNER JOIN cache_graphai.Audio_Main a ON a.id_token=c.most_similar_token
     WHERE a.fingerprint != b.fingerprint OR b.date_added < a.date_added
