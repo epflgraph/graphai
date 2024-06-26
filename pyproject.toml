@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "graphai"
-version = "0.9.0"
+version = "0.9.1"
 authors = [
   { name="Aitor Pérez", email="aitor.perez@epfl.ch" },
   { name="Ramtin Yazdanian", email="ramtin.yazdanian@epfl.ch" }
@@ -61,7 +61,7 @@ dependencies = [
     "sphinx-material",
     "sphinx-rtd-theme",
     "pytest-celery",
-    "db-cache-manager>=0.2.0",
+    "db-cache-manager>=0.2.2",
     "elasticsearch-interface",
     "scikit-learn",
     "opentelemetry-distro==0.40b0",
