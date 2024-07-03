@@ -13,6 +13,7 @@ import graphai.api.routers.text as text_router
 import graphai.api.routers.video as video_router
 import graphai.api.routers.voice as voice_router
 import graphai.api.routers.translation as translation_router
+import graphai.api.routers.embedding as embedding_router
 import graphai.api.routers.completion as summarization_router
 import graphai.api.routers.scraping as scraping_router
 
@@ -88,6 +89,7 @@ authenticated_router.include_router(text_router.router)
 authenticated_router.include_router(video_router.router)
 authenticated_router.include_router(voice_router.router)
 authenticated_router.include_router(translation_router.router)
+authenticated_router.include_router(embedding_router.router)
 authenticated_router.include_router(summarization_router.router)
 authenticated_router.include_router(scraping_router.router)
 
