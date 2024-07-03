@@ -126,13 +126,13 @@ class TranslationModels:
         self.models = None
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
         try:
-            print("Reading huggingface model path from config")
+            print("Reading HuggingFace model path from config")
             self.cache_dir = config['huggingface']['model_path']
             if self.cache_dir == '':
                 self.cache_dir = None
         except Exception:
             print(
-                "The huggingface dl path could not be found in the config file, using default (~/.cache/huggingface). "
+                "The HuggingFace dl path could not be found in the config file, using default (~/.cache/huggingface). "
                 "To use a different one, make sure to add a [huggingface] section with the model_path parameter."
             )
             self.cache_dir = None
