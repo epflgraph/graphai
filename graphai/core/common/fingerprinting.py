@@ -1,3 +1,4 @@
+import hashlib
 from bisect import bisect
 
 import acoustid
@@ -242,3 +243,15 @@ def find_closest_text_fingerprint_from_list(target_fp, fp_list, token_list, date
     """
     return find_closest_fingerprint_for_list_from_list(target_fp, fp_list, token_list, date_list, min_similarity,
                                                        decoder_func=imagehash.hex_to_hash, strip_underscores=True)
+
+
+def md5_text(s):
+    """
+    Computes the md5 hash of a string
+    Args:
+        s: The string
+
+    Returns:
+        MD5 hash
+    """
+    return hashlib.md5(s.encode('utf8')).hexdigest()

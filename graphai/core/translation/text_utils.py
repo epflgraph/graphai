@@ -1,4 +1,3 @@
-import hashlib
 from itertools import chain
 
 import langdetect
@@ -8,6 +7,7 @@ from transformers import AutoTokenizer, AutoModelForSeq2SeqLM, MarianMTModel, Ma
 import torch
 from sklearn.feature_extraction.text import TfidfVectorizer
 
+from graphai.core.common.fingerprinting import md5_text
 from graphai.core.interfaces.config import config
 
 TRANSLATION_LIST_SEPARATOR = ' [{[!!SEP!!]}] '
@@ -26,18 +26,6 @@ def translation_text_back_to_list(s, return_list=False):
     if len(results) == 1 and not return_list:
         return results[0]
     return results
-
-
-def md5_text(s):
-    """
-    Computes the md5 hash of a string
-    Args:
-        s: The string
-
-    Returns:
-        MD5 hash
-    """
-    return hashlib.md5(s.encode('utf8')).hexdigest()
 
 
 def generate_src_tgt_dict(src, tgt):

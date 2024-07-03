@@ -1,6 +1,26 @@
 from sentence_transformers import SentenceTransformer
 from graphai.core.interfaces.config import config
+from graphai.core.common.fingerprinting import md5_text
 import torch
+
+
+MODEL_TYPES = {
+    'light': 'sentence-transformers/all-MiniLM-L12-v2',
+}
+
+
+def generate_embedding_text_token(s, model_type):
+    """
+    Generates an md5-based token for a string
+    Args:
+        s: The string
+        model_type: Type of embedding model
+
+    Returns:
+        Token
+    """
+    assert isinstance(s, str)
+    return md5_text(s) + '_' + model_type
 
 
 class EmbeddingModels:
@@ -30,7 +50,7 @@ class EmbeddingModels:
         """
         if self.models is None:
             self.models = dict()
-            self.models['light'] = SentenceTransformer('sentence-transformers/all-MiniLM-L12-v2',
+            self.models['light'] = SentenceTransformer(MODEL_TYPES['light'],
                                                        device=self.device,
                                                        cache_folder=self.cache_dir)
 
