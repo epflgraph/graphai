@@ -441,7 +441,7 @@ class EmbeddingDBCachingManager(DBCachingManagerBase):
               `fingerprint` VARCHAR(255) DEFAULT NULL,
               `source` LONGTEXT DEFAULT NULL,
               `model_type` VARCHAR(255) DEFAULT NULL,
-              `embedding` BLOB DEFAULT NULL,
+              `embedding` LONGTEXT DEFAULT NULL,
               `date_added` DATETIME DEFAULT NULL,
               PRIMARY KEY id_token (id_token)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;

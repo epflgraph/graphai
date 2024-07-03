@@ -5,8 +5,6 @@ from graphai.core.common.fingerprinting import perceptual_hash_text
 from graphai.core.common.common_utils import get_current_datetime
 from graphai.core.interfaces.caching import EmbeddingDBCachingManager
 from graphai.core.embedding.embedding import (
-    embedding_from_blob,
-    embedding_to_blob,
     embedding_to_json
 )
 
@@ -67,12 +65,12 @@ def cache_lookup_embedding_text_using_fingerprint_task(self, token, fp, model_ty
                                                                         })
     if closest_embedding is not None:
         all_keys = list(closest_embedding.keys())
-        embedding_blob = closest_embedding[all_keys[0]]['embedding']
+        embedding_json = closest_embedding[all_keys[0]]['embedding']
         db_manager.insert_or_update_details(token, {
-            'embedding': embedding_blob,
+            'embedding': embedding_json,
         })
         return {
-            'result': embedding_to_json(embedding_from_blob(embedding_blob)),
+            'result': embedding_json,
             'successful': True,
             'fresh': False,
             'device': None
@@ -88,7 +86,7 @@ def cache_lookup_embedding_text_task(self, token):
     if existing is not None and existing['embedding'] is not None:
         print('Returning cached result')
         return {
-            'result': embedding_to_json(embedding_from_blob(existing['embedding'])),
+            'result': existing['embedding'],
             'successful': True,
             'fresh': False,
             'device': None
@@ -125,7 +123,7 @@ def embed_text_callback_task(self, results, token, text, model_type, force=False
     if results['fresh']:
         values_dict = {
             'source': text,
-            'embedding': embedding_to_blob(results['result']),
+            'embedding': embedding_to_json(results['result']),
             'model_type': model_type
         }
         existing = db_manager.get_details(token, ['date_added'], using_most_similar=False)[0]

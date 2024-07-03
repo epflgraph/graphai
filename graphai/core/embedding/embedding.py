@@ -17,7 +17,7 @@ def embedding_to_blob(v):
 
 
 def embedding_from_blob(b):
-    return pickle.loads(b)
+    return pickle.loads(eval(b.decode()))
 
 
 def embedding_to_json(v):

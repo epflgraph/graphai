@@ -1,4 +1,5 @@
 import json
+import numpy as np
 
 import pytest
 from unittest.mock import patch
@@ -6,8 +7,8 @@ from time import sleep
 
 from graphai.api.celery_tasks.embedding import (
     embed_text_task,
-    compute_embedding_text_fingerprint_task,
 )
+from graphai.core.interfaces.caching import EmbeddingDBCachingManager
 
 
 ################################################################
@@ -37,8 +38,8 @@ def test__translation_translate__translate_text__run_task(example_word):
     assert isinstance(embedding, dict)
     assert 'result' in embedding
     assert embedding['successful'] is True
-    assert len(json.loads(embedding['result'])) == 384
-    assert isinstance(json.loads(embedding['result'])[0], float)
+    assert embedding['result'].shape[0] == 384
+    assert 0.999 < np.dot(embedding['result'], embedding['result']) < 1.001
 
 
 @pytest.mark.celery(accept_content=['pickle', 'json'], result_serializer='pickle', task_serializer='pickle')
@@ -46,6 +47,9 @@ def test__translation_translate__translate_text__run_task(example_word):
 def test__translation_translate__translate_text__integration(fixture_app, celery_worker, example_word, timeout=30):
     # The celery_worker object is necessary for async tasks, otherwise the status will be permanently stuck on
     # PENDING.
+
+    # This line ensures the initialization of the database in case this is the first deployment
+    EmbeddingDBCachingManager(initialize_database=True)
 
     # First, we call the translate endpoint with force=True to test the full task pipeline working
     response = fixture_app.post('/embedding/embed',

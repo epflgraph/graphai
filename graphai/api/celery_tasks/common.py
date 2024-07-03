@@ -14,7 +14,8 @@ from graphai.core.interfaces.caching import (
     AudioDBCachingManager,
     SlideDBCachingManager,
     TextDBCachingManager,
-    ScrapingDBCachingManager
+    ScrapingDBCachingManager,
+    EmbeddingDBCachingManager
 )
 
 from graphai.core.common.fingerprinting import find_closest_audio_fingerprint_from_list, \
@@ -424,6 +425,7 @@ def video_init_task(self):
     AudioDBCachingManager(initialize_database=True)
     TextDBCachingManager(initialize_database=True)
     ScrapingDBCachingManager(initialize_database=True)
+    EmbeddingDBCachingManager(initialize_database=True)
 
     print('Caching managers and database tables initialized')
 
