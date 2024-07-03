@@ -63,7 +63,7 @@ def fingerprint_job(text, model_type, force):
     return fingerprint_compute_job(token, text, model_type, asynchronous=True)
 
 
-def translation_job(text, model_type, force):
+def embedding_job(text, model_type, force):
     token = generate_embedding_text_token(text, model_type)
     ########################
     # Embedding cache lookup
