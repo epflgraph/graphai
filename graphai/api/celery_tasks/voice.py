@@ -236,7 +236,7 @@ def transcribe_task(self, input_dict, strict_silence=False):
 
     transcript_results = result_dict['text']
     subtitle_results = result_dict['segments']
-    subtitle_results = json.dumps(subtitle_results)
+    subtitle_results = json.dumps(subtitle_results, ensure_ascii=False)
     language_result = result_dict['language']
 
     return {

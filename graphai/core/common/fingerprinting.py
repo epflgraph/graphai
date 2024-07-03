@@ -155,7 +155,7 @@ def compare_encoded_fingerprints(f1, f2=None, decoder_func=imagehash.hex_to_hash
                                         decoder_func(f2.encode('utf8')))
 
 
-def find_closest_fingerprint_from_list(target_fp, fp_list, token_list, date_list, min_similarity=0.8,
+def find_closest_fingerprint_from_list(target_fp, fp_list, token_list, date_list, min_similarity=1,
                                        decoder_func=imagehash.hex_to_hash, strip_underscores=True):
     """
     Given a target fingerprint and a list of candidate fingerprints, finds the one with the highest similarity
@@ -197,7 +197,7 @@ def find_closest_fingerprint_from_list(target_fp, fp_list, token_list, date_list
         return None, None, None, None
 
 
-def find_closest_fingerprint_for_list_from_list(target_fp, fp_list, token_list, date_list, min_similarity=0.8,
+def find_closest_fingerprint_for_list_from_list(target_fp, fp_list, token_list, date_list, min_similarity=1,
                                                 decoder_func=imagehash.hex_to_hash, strip_underscores=True):
     if isinstance(target_fp, str):
         return find_closest_fingerprint_from_list(target_fp, fp_list, token_list, date_list, min_similarity,
@@ -219,7 +219,7 @@ def find_closest_fingerprint_for_list_from_list(target_fp, fp_list, token_list, 
         return closest_token_list, closest_fp_list, best_date_list, score_list
 
 
-def find_closest_audio_fingerprint_from_list(target_fp, fp_list, token_list, date_list, min_similarity=0.8):
+def find_closest_audio_fingerprint_from_list(target_fp, fp_list, token_list, date_list, min_similarity=1):
     """
     Finds closest audio fingerprint from list
     """
@@ -227,7 +227,7 @@ def find_closest_audio_fingerprint_from_list(target_fp, fp_list, token_list, dat
                                                        decoder_func=imagehash.hex_to_hash)
 
 
-def find_closest_image_fingerprint_from_list(target_fp, fp_list, token_list, date_list, min_similarity=0.8):
+def find_closest_image_fingerprint_from_list(target_fp, fp_list, token_list, date_list, min_similarity=1):
     """
     Finds closest image fingerprint from list
     """
@@ -236,7 +236,7 @@ def find_closest_image_fingerprint_from_list(target_fp, fp_list, token_list, dat
                                                        decoder_func=imagehash.hex_to_hash)
 
 
-def find_closest_text_fingerprint_from_list(target_fp, fp_list, token_list, date_list, min_similarity=0.8):
+def find_closest_text_fingerprint_from_list(target_fp, fp_list, token_list, date_list, min_similarity=1):
     """
     Finds closest image fingerprint from list
     """

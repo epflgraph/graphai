@@ -33,6 +33,7 @@ from graphai.api.celery_tasks.video import (
     compute_audio_fingerprint_callback_task,
     audio_fingerprint_find_closest_retrieve_from_db_task,
     audio_fingerprint_find_closest_parallel_task,
+    audio_fingerprint_find_closest_direct_task,
     audio_fingerprint_find_closest_callback_task,
     retrieve_audio_fingerprint_callback_task,
     ignore_audio_fingerprint_results_callback_task,
@@ -91,10 +92,15 @@ def get_audio_fingerprint_chain_list(token=None, force=False, min_similarity=Non
         task_list = [compute_audio_fingerprint_task.s(force)]
     else:
         task_list = [compute_audio_fingerprint_task.s({'token': token}, force)]
-    task_list += [compute_audio_fingerprint_callback_task.s(force),
-                  audio_fingerprint_find_closest_retrieve_from_db_task.s(),
-                  group(audio_fingerprint_find_closest_parallel_task.s(i, n_jobs, min_similarity) for i in range(n_jobs)),
-                  audio_fingerprint_find_closest_callback_task.s()]
+    task_list += [compute_audio_fingerprint_callback_task.s(force)]
+    if min_similarity == 1:
+        task_list += [audio_fingerprint_find_closest_direct_task.s()]
+    else:
+        task_list += [audio_fingerprint_find_closest_retrieve_from_db_task.s(),
+                      group(audio_fingerprint_find_closest_parallel_task.s(i, n_jobs, min_similarity) for i in
+                            range(n_jobs))
+                      ]
+    task_list += [audio_fingerprint_find_closest_callback_task.s()]
     if ignore_fp_results:
         task_list += [ignore_audio_fingerprint_results_callback_task.s()]
     else:
