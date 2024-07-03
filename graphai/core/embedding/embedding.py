@@ -24,6 +24,10 @@ def embedding_to_json(v):
     return json.dumps(v.tolist())
 
 
+def embedding_from_json(s):
+    return np.array(json.loads(s))
+
+
 def generate_embedding_text_token(s, model_type):
     """
     Generates an md5-based token for a string
