@@ -1,3 +1,6 @@
+import numpy as np
+import pickle
+import json
 from sentence_transformers import SentenceTransformer
 from graphai.core.interfaces.config import config
 from graphai.core.common.fingerprinting import md5_text
@@ -7,6 +10,18 @@ import torch
 MODEL_TYPES = {
     'light': 'sentence-transformers/all-MiniLM-L12-v2',
 }
+
+
+def embedding_to_blob(v):
+    return np.ndarray.dumps(v)
+
+
+def embedding_from_blob(b):
+    return pickle.loads(b)
+
+
+def embedding_to_json(v):
+    return json.dumps(v.tolist())
 
 
 def generate_embedding_text_token(s, model_type):
