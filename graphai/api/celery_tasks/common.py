@@ -2,6 +2,7 @@ from celery import shared_task
 
 from graphai.api.common.ontology import ontology_data
 from graphai.api.common.translation import translation_models
+from graphai.api.common.embedding import embedding_models
 from graphai.api.common.video import (
     transcription_model,
     local_ocr_nlp_models
@@ -385,12 +386,13 @@ def video_dummy_task(self, results):
              transcription_obj=transcription_model,
              nlp_obj=local_ocr_nlp_models,
              translation_obj=translation_models,
-             ontology_data_obj=ontology_data)
+             ontology_data_obj=ontology_data,
+             embedding_obj=embedding_models)
 def video_init_task(self):
     # This task initialises the video celery worker by loading into memory the transcription and NLP models
     print('Start video_init task')
 
-    if strtobool(config['preload']['video']):
+    if strtobool(config['preload'].get('video', 'no')):
         print('Loading transcription model...')
         self.transcription_obj.load_model_whisper()
 
@@ -402,7 +404,13 @@ def video_init_task(self):
     else:
         print('Skipping preloading for video endpoints.')
 
-    if strtobool(config['preload']['ontology']):
+    if strtobool(config['preload'].get('embedding', 'no')):
+        print('Loading embedding models...')
+        self.embedding_obj.load_models()
+    else:
+        print('Skipping preloading for embedding models.')
+
+    if strtobool(config['preload'].get('ontology', 'no')):
         print('Loading ontology data...')
         self.ontology_data_obj.load_data()
     else:
