@@ -1,4 +1,3 @@
-import hashlib
 from itertools import chain
 
 import langdetect
@@ -8,6 +7,7 @@ from transformers import AutoTokenizer, AutoModelForSeq2SeqLM, MarianMTModel, Ma
 import torch
 from sklearn.feature_extraction.text import TfidfVectorizer
 
+from graphai.core.common.fingerprinting import md5_text
 from graphai.core.interfaces.config import config
 
 TRANSLATION_LIST_SEPARATOR = ' [{[!!SEP!!]}] '
@@ -26,18 +26,6 @@ def translation_text_back_to_list(s, return_list=False):
     if len(results) == 1 and not return_list:
         return results[0]
     return results
-
-
-def md5_text(s):
-    """
-    Computes the md5 hash of a string
-    Args:
-        s: The string
-
-    Returns:
-        MD5 hash
-    """
-    return hashlib.md5(s.encode('utf8')).hexdigest()
 
 
 def generate_src_tgt_dict(src, tgt):
@@ -138,13 +126,13 @@ class TranslationModels:
         self.models = None
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
         try:
-            print("Reading huggingface model path from config")
+            print("Reading HuggingFace model path from config")
             self.cache_dir = config['huggingface']['model_path']
             if self.cache_dir == '':
                 self.cache_dir = None
         except Exception:
             print(
-                "The huggingface dl path could not be found in the config file, using default (~/.cache/huggingface). "
+                "The HuggingFace dl path could not be found in the config file, using default (~/.cache/huggingface). "
                 "To use a different one, make sure to add a [huggingface] section with the model_path parameter."
             )
             self.cache_dir = None

@@ -84,7 +84,7 @@ def cache_lookup_translation_text_using_fingerprint_task(self, token, fp, src, t
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='caching_6.cache_lookup_translate_text', translation_obj=translation_models, ignore_result=False)
+             name='caching_6.cache_lookup_translate_text', ignore_result=False)
 def cache_lookup_translate_text_task(self, token, return_list=False):
     db_manager = TextDBCachingManager()
     existing = db_manager.get_details(token, ['target'], using_most_similar=False)[0]
@@ -141,7 +141,7 @@ def translate_text_task(self, text, src, tgt):
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='text_6.translate_text_callback', translation_obj=translation_models, ignore_result=False)
+             name='text_6.translate_text_callback', ignore_result=False)
 def translate_text_callback_task(self, results, token, text, src, tgt, force=False, return_list=False):
     db_manager = TextDBCachingManager()
     if results['fresh']:

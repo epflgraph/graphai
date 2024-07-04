@@ -105,5 +105,6 @@ jobs:
           python -c "from transformers import AutoModelForSeq2SeqLM; AutoModelForSeq2SeqLM.from_pretrained('Helsinki-NLP/opus-mt-tc-big-fr-en', cache_dir='${{ vars.huggingface_model_path }}')"
           python -c "from transformers import AutoModelForSeq2SeqLM; AutoModelForSeq2SeqLM.from_pretrained('Helsinki-NLP/opus-mt-de-en', cache_dir='${{ vars.huggingface_model_path }}')"
           python -c "from transformers import AutoModelForSeq2SeqLM; AutoModelForSeq2SeqLM.from_pretrained('Helsinki-NLP/opus-mt-it-en', cache_dir='${{ vars.huggingface_model_path }}')"
+          python -c "from sentence_transformers import SentenceTransformer; SentenceTransformer('sentence-transformers/all-MiniLM-L12-v2', cache_folder='${{ vars.huggingface_model_path }}')"
           opentelemetry-bootstrap --action=install
 

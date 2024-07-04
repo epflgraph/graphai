@@ -19,7 +19,7 @@ from graphai.api.celery_tasks.translation import (
 @pytest.mark.usefixtures('en_to_fr_text')
 def test__translation_translate__translate_text__mock_task(mock_run, en_to_fr_text):
     # Mock calling the task
-    translate_text_task.run(en_to_fr_text)
+    translate_text_task.run(en_to_fr_text, 'en', 'fr')
 
     # Assert that the task has been called
     assert translate_text_task.run.call_count == 1

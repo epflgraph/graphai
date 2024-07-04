@@ -6,7 +6,8 @@ from graphai.api.schemas.common import TaskStatusResponse
 
 class TextFingerprintTaskResponse(BaseModel):
     result: Union[str, None] = Field(
-        None, title="Fingerprint",
+        None,
+        title="Fingerprint",
         description="Fingerprint of the provided text."
     )
 
