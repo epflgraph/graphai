@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>graphai.api.routers.completion module &mdash; EPFL Graph AI</title>
+  <title>graphai.api.routers.embedding module &mdash; EPFL Graph AI</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
 
@@ -21,8 +21,8 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="graphai.api.routers.embedding module" href="graphai.api.routers.embedding.html" />
-    <link rel="prev" title="graphai.api.routers.auth module" href="graphai.api.routers.auth.html" /> 
+    <link rel="next" title="graphai.api.routers.image module" href="graphai.api.routers.image.html" />
+    <link rel="prev" title="graphai.api.routers.completion module" href="graphai.api.routers.completion.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -83,9 +83,9 @@
       <li><a href="graphai.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="graphai.api.html">graphai.api package</a></li>
           <li class="breadcrumb-item"><a href="graphai.api.routers.html">graphai.api.routers package</a></li>
-      <li class="breadcrumb-item active">graphai.api.routers.completion module</li>
+      <li class="breadcrumb-item active">graphai.api.routers.embedding module</li>
       <li class="wy-breadcrumbs-aside">
-            <a href="_sources/graphai.api.routers.completion.rst.txt" rel="nofollow"> View page source</a>
+            <a href="_sources/graphai.api.routers.embedding.rst.txt" rel="nofollow"> View page source</a>
       </li>
   </ul>
   <hr/>
@@ -93,11 +93,26 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="module-graphai.api.routers.completion">
-<span id="graphai-api-routers-completion-module"></span><h1>graphai.api.routers.completion module<a class="headerlink" href="#module-graphai.api.routers.completion" title="Link to this heading"></a></h1>
+  <section id="module-graphai.api.routers.embedding">
+<span id="graphai-api-routers-embedding-module"></span><h1>graphai.api.routers.embedding module<a class="headerlink" href="#module-graphai.api.routers.embedding" title="Link to this heading"></a></h1>
 <dl class="py function">
-<dt class="sig sig-object py" id="graphai.api.routers.completion.choose_best_subset">
-<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">graphai.api.routers.completion.</span></span><span class="sig-name descname"><span class="pre">choose_best_subset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="graphai.api.schemas.completion.html#graphai.api.schemas.completion.SlideSubsetRequest" title="graphai.api.schemas.completion.SlideSubsetRequest"><span class="pre">SlideSubsetRequest</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.api.routers.completion.choose_best_subset" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="graphai.api.routers.embedding.calculate_embedding_text_fingerprint">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">graphai.api.routers.embedding.</span></span><span class="sig-name descname"><span class="pre">calculate_embedding_text_fingerprint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="graphai.api.schemas.embedding.html#graphai.api.schemas.embedding.EmbeddingRequest" title="graphai.api.schemas.embedding.EmbeddingRequest"><span class="pre">EmbeddingRequest</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.api.routers.embedding.calculate_embedding_text_fingerprint" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.api.routers.embedding.calculate_embedding_text_fingerprint_status">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">graphai.api.routers.embedding.</span></span><span class="sig-name descname"><span class="pre">calculate_embedding_text_fingerprint_status</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">task_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.api.routers.embedding.calculate_embedding_text_fingerprint_status" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.api.routers.embedding.embed_text">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">graphai.api.routers.embedding.</span></span><span class="sig-name descname"><span class="pre">embed_text</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="graphai.api.schemas.embedding.html#graphai.api.schemas.embedding.EmbeddingRequest" title="graphai.api.schemas.embedding.EmbeddingRequest"><span class="pre">EmbeddingRequest</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.api.routers.embedding.embed_text" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.api.routers.embedding.embed_text_status">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">graphai.api.routers.embedding.</span></span><span class="sig-name descname"><span class="pre">embed_text_status</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">task_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.api.routers.embedding.embed_text_status" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </section>
@@ -106,8 +121,8 @@
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="graphai.api.routers.auth.html" class="btn btn-neutral float-left" title="graphai.api.routers.auth module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="graphai.api.routers.embedding.html" class="btn btn-neutral float-right" title="graphai.api.routers.embedding module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="graphai.api.routers.completion.html" class="btn btn-neutral float-left" title="graphai.api.routers.completion module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="graphai.api.routers.image.html" class="btn btn-neutral float-right" title="graphai.api.routers.image module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

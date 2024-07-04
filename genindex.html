@@ -195,6 +195,10 @@
 </li>
       <li><a href="graphai.api.routers.voice.html#graphai.api.routers.voice.calculate_audio_fingerprint_status">calculate_audio_fingerprint_status() (in module graphai.api.routers.voice)</a>
 </li>
+      <li><a href="graphai.api.routers.embedding.html#graphai.api.routers.embedding.calculate_embedding_text_fingerprint">calculate_embedding_text_fingerprint() (in module graphai.api.routers.embedding)</a>
+</li>
+      <li><a href="graphai.api.routers.embedding.html#graphai.api.routers.embedding.calculate_embedding_text_fingerprint_status">calculate_embedding_text_fingerprint_status() (in module graphai.api.routers.embedding)</a>
+</li>
       <li><a href="graphai.api.routers.image.html#graphai.api.routers.image.calculate_slide_fingerprint">calculate_slide_fingerprint() (in module graphai.api.routers.image)</a>
 </li>
       <li><a href="graphai.api.routers.image.html#graphai.api.routers.image.calculate_slide_fingerprint_status">calculate_slide_fingerprint_status() (in module graphai.api.routers.image)</a>
@@ -299,10 +303,10 @@
         <li><a href="graphai.api.schemas.ontology.html#graphai.api.schemas.ontology.NearestCategoryElementWithClusters.clusters">(graphai.api.schemas.ontology.NearestCategoryElementWithClusters attribute)</a>
 </li>
       </ul></li>
-      <li><a href="graphai.core.utils.text.io.html#graphai.core.utils.text.io.Colors.codes">codes (graphai.core.utils.text.io.Colors attribute)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="graphai.core.utils.text.io.html#graphai.core.utils.text.io.Colors.codes">codes (graphai.core.utils.text.io.Colors attribute)</a>
+</li>
       <li><a href="graphai.api.schemas.ontology.html#graphai.api.schemas.ontology.GraphDistanceRequest.coeffs">coeffs (graphai.api.schemas.ontology.GraphDistanceRequest attribute)</a>
 
       <ul>
@@ -445,10 +449,10 @@
 </li>
       <li><a href="graphai.api.routers.video.html#graphai.api.routers.video.detect_slides">detect_slides() (in module graphai.api.routers.video)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="graphai.api.celery_jobs.video.html#graphai.api.celery_jobs.video.detect_slides_job">detect_slides_job() (in module graphai.api.celery_jobs.video)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="graphai.api.routers.video.html#graphai.api.routers.video.detect_slides_status">detect_slides_status() (in module graphai.api.routers.video)</a>
 </li>
       <li><a href="graphai.core.translation.text_utils.html#graphai.core.translation.text_utils.detect_text_language">detect_text_language() (in module graphai.core.translation.text_utils)</a>
@@ -467,8 +471,12 @@
 </li>
       <li><a href="graphai.core.interfaces.celery_config.html#graphai.core.interfaces.celery_config.DevelopmentConfig">DevelopmentConfig (class in graphai.core.interfaces.celery_config)</a>
 </li>
-      <li><a href="graphai.api.schemas.translation.html#graphai.api.schemas.translation.TranslationTaskResponse.device">device (graphai.api.schemas.translation.TranslationTaskResponse attribute)</a>
+      <li><a href="graphai.api.schemas.embedding.html#graphai.api.schemas.embedding.EmbeddingTaskResponse.device">device (graphai.api.schemas.embedding.EmbeddingTaskResponse attribute)</a>
+
+      <ul>
+        <li><a href="graphai.api.schemas.translation.html#graphai.api.schemas.translation.TranslationTaskResponse.device">(graphai.api.schemas.translation.TranslationTaskResponse attribute)</a>
 </li>
+      </ul></li>
       <li><a href="graphai.api.celery_jobs.common.html#graphai.api.celery_jobs.common.direct_lookup_generic_job">direct_lookup_generic_job() (in module graphai.api.celery_jobs.common)</a>
 </li>
       <li><a href="graphai.api.common.auth_utils.html#graphai.api.common.auth_utils.User.disabled">disabled (graphai.api.common.auth_utils.User attribute)</a>
@@ -491,6 +499,32 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="graphai.api.common.auth_utils.html#graphai.api.common.auth_utils.User.email">email (graphai.api.common.auth_utils.User attribute)</a>
 </li>
+      <li><a href="graphai.core.embedding.embedding.html#graphai.core.embedding.embedding.EmbeddingModels.embed">embed() (graphai.core.embedding.embedding.EmbeddingModels method)</a>
+</li>
+      <li><a href="graphai.api.routers.embedding.html#graphai.api.routers.embedding.embed_text">embed_text() (in module graphai.api.routers.embedding)</a>
+</li>
+      <li><a href="graphai.api.routers.embedding.html#graphai.api.routers.embedding.embed_text_status">embed_text_status() (in module graphai.api.routers.embedding)</a>
+</li>
+      <li><a href="graphai.core.embedding.embedding.html#graphai.core.embedding.embedding.embedding_from_blob">embedding_from_blob() (in module graphai.core.embedding.embedding)</a>
+</li>
+      <li><a href="graphai.core.embedding.embedding.html#graphai.core.embedding.embedding.embedding_from_json">embedding_from_json() (in module graphai.core.embedding.embedding)</a>
+</li>
+      <li><a href="graphai.api.celery_jobs.embedding.html#graphai.api.celery_jobs.embedding.embedding_job">embedding_job() (in module graphai.api.celery_jobs.embedding)</a>
+</li>
+      <li><a href="graphai.core.embedding.embedding.html#graphai.core.embedding.embedding.embedding_to_blob">embedding_to_blob() (in module graphai.core.embedding.embedding)</a>
+</li>
+      <li><a href="graphai.core.embedding.embedding.html#graphai.core.embedding.embedding.embedding_to_json">embedding_to_json() (in module graphai.core.embedding.embedding)</a>
+</li>
+      <li><a href="graphai.core.interfaces.caching.html#graphai.core.interfaces.caching.EmbeddingDBCachingManager">EmbeddingDBCachingManager (class in graphai.core.interfaces.caching)</a>
+</li>
+      <li><a href="graphai.core.embedding.embedding.html#graphai.core.embedding.embedding.EmbeddingModels">EmbeddingModels (class in graphai.core.embedding.embedding)</a>
+</li>
+      <li><a href="graphai.api.schemas.embedding.html#graphai.api.schemas.embedding.EmbeddingRequest">EmbeddingRequest (class in graphai.api.schemas.embedding)</a>
+</li>
+      <li><a href="graphai.api.schemas.embedding.html#graphai.api.schemas.embedding.EmbeddingResponse">EmbeddingResponse (class in graphai.api.schemas.embedding)</a>
+</li>
+      <li><a href="graphai.api.schemas.embedding.html#graphai.api.schemas.embedding.EmbeddingTaskResponse">EmbeddingTaskResponse (class in graphai.api.schemas.embedding)</a>
+</li>
       <li><a href="graphai.core.video.ocr.html#graphai.core.video.ocr.GoogleOCRModel.establish_connection">establish_connection() (graphai.core.video.ocr.GoogleOCRModel method)</a>
 </li>
       <li><a href="graphai.api.schemas.ontology.html#graphai.api.schemas.ontology.GraphClusterNearestCategoryResponse.existing_label">existing_label (graphai.api.schemas.ontology.GraphClusterNearestCategoryResponse attribute)</a>
@@ -507,6 +541,8 @@
 </li>
       <li><a href="graphai.api.routers.video.html#graphai.api.routers.video.extract_audio_status">extract_audio_status() (in module graphai.api.routers.video)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="graphai.api.celery_jobs.scraping.html#graphai.api.celery_jobs.scraping.extract_content_job">extract_content_job() (in module graphai.api.celery_jobs.scraping)</a>
 </li>
       <li><a href="graphai.core.video.video.html#graphai.core.video.video.extract_frames">extract_frames() (in module graphai.core.video.video)</a>
@@ -521,8 +557,6 @@
 </li>
       <li><a href="graphai.api.routers.scraping.html#graphai.api.routers.scraping.extract_sublinks">extract_sublinks() (in module graphai.api.routers.scraping)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="graphai.api.celery_jobs.scraping.html#graphai.api.celery_jobs.scraping.extract_sublinks_job">extract_sublinks_job() (in module graphai.api.celery_jobs.scraping)</a>
 </li>
       <li><a href="graphai.api.routers.scraping.html#graphai.api.routers.scraping.extract_sublinks_status">extract_sublinks_status() (in module graphai.api.routers.scraping)</a>
@@ -587,11 +621,17 @@
 </li>
       <li><a href="graphai.core.scraping.scraping.html#graphai.core.scraping.scraping.find_spaces">find_spaces() (in module graphai.core.scraping.scraping)</a>
 </li>
-      <li><a href="graphai.api.celery_jobs.translation.html#graphai.api.celery_jobs.translation.fingerprint_compute_job">fingerprint_compute_job() (in module graphai.api.celery_jobs.translation)</a>
-</li>
-      <li><a href="graphai.api.celery_jobs.image.html#graphai.api.celery_jobs.image.fingerprint_job">fingerprint_job() (in module graphai.api.celery_jobs.image)</a>
+      <li><a href="graphai.api.celery_jobs.embedding.html#graphai.api.celery_jobs.embedding.fingerprint_compute_job">fingerprint_compute_job() (in module graphai.api.celery_jobs.embedding)</a>
 
       <ul>
+        <li><a href="graphai.api.celery_jobs.translation.html#graphai.api.celery_jobs.translation.fingerprint_compute_job">(in module graphai.api.celery_jobs.translation)</a>
+</li>
+      </ul></li>
+      <li><a href="graphai.api.celery_jobs.embedding.html#graphai.api.celery_jobs.embedding.fingerprint_job">fingerprint_job() (in module graphai.api.celery_jobs.embedding)</a>
+
+      <ul>
+        <li><a href="graphai.api.celery_jobs.image.html#graphai.api.celery_jobs.image.fingerprint_job">(in module graphai.api.celery_jobs.image)</a>
+</li>
         <li><a href="graphai.api.celery_jobs.translation.html#graphai.api.celery_jobs.translation.fingerprint_job">(in module graphai.api.celery_jobs.translation)</a>
 </li>
         <li><a href="graphai.api.celery_jobs.video.html#graphai.api.celery_jobs.video.fingerprint_job">(in module graphai.api.celery_jobs.video)</a>
@@ -603,9 +643,11 @@
 </li>
       <li><a href="graphai.api.celery_tasks.common.html#graphai.api.celery_tasks.common.fingerprint_lookup_direct">fingerprint_lookup_direct() (in module graphai.api.celery_tasks.common)</a>
 </li>
-      <li><a href="graphai.api.celery_jobs.image.html#graphai.api.celery_jobs.image.fingerprint_lookup_job">fingerprint_lookup_job() (in module graphai.api.celery_jobs.image)</a>
+      <li><a href="graphai.api.celery_jobs.embedding.html#graphai.api.celery_jobs.embedding.fingerprint_lookup_job">fingerprint_lookup_job() (in module graphai.api.celery_jobs.embedding)</a>
 
       <ul>
+        <li><a href="graphai.api.celery_jobs.image.html#graphai.api.celery_jobs.image.fingerprint_lookup_job">(in module graphai.api.celery_jobs.image)</a>
+</li>
         <li><a href="graphai.api.celery_jobs.translation.html#graphai.api.celery_jobs.translation.fingerprint_lookup_job">(in module graphai.api.celery_jobs.translation)</a>
 </li>
         <li><a href="graphai.api.celery_jobs.video.html#graphai.api.celery_jobs.video.fingerprint_lookup_job">(in module graphai.api.celery_jobs.video)</a>
@@ -621,9 +663,13 @@
 </li>
       <li><a href="graphai.core.interfaces.caching.html#graphai.core.interfaces.caching.FingerprintParameters">FingerprintParameters (class in graphai.core.interfaces.caching)</a>
 </li>
-      <li><a href="graphai.api.schemas.image.html#graphai.api.schemas.image.ExtractTextRequest.force">force (graphai.api.schemas.image.ExtractTextRequest attribute)</a>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="graphai.api.schemas.embedding.html#graphai.api.schemas.embedding.EmbeddingRequest.force">force (graphai.api.schemas.embedding.EmbeddingRequest attribute)</a>
 
       <ul>
+        <li><a href="graphai.api.schemas.image.html#graphai.api.schemas.image.ExtractTextRequest.force">(graphai.api.schemas.image.ExtractTextRequest attribute)</a>
+</li>
         <li><a href="graphai.api.schemas.image.html#graphai.api.schemas.image.ImageFingerprintRequest.force">(graphai.api.schemas.image.ImageFingerprintRequest attribute)</a>
 </li>
         <li><a href="graphai.api.schemas.scraping.html#graphai.api.schemas.scraping.GetSublinksRequest.force">(graphai.api.schemas.scraping.GetSublinksRequest attribute)</a>
@@ -645,8 +691,6 @@
         <li><a href="graphai.api.schemas.voice.html#graphai.api.schemas.voice.AudioTranscriptionRequest.force">(graphai.api.schemas.voice.AudioTranscriptionRequest attribute)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="graphai.api.schemas.voice.html#graphai.api.schemas.voice.AudioTranscriptionRequest.force_lang">force_lang (graphai.api.schemas.voice.AudioTranscriptionRequest attribute)</a>
 </li>
       <li><a href="graphai.api.celery_tasks.common.html#graphai.api.celery_tasks.common.format_api_results">format_api_results() (in module graphai.api.celery_tasks.common)</a>
@@ -659,9 +703,11 @@
 </li>
       <li><a href="graphai.core.video.video.html#graphai.core.video.video.frame_ocr_transition">frame_ocr_transition() (in module graphai.core.video.video)</a>
 </li>
-      <li><a href="graphai.api.schemas.image.html#graphai.api.schemas.image.DetectOCRLanguageTaskResponse.fresh">fresh (graphai.api.schemas.image.DetectOCRLanguageTaskResponse attribute)</a>
+      <li><a href="graphai.api.schemas.embedding.html#graphai.api.schemas.embedding.EmbeddingTaskResponse.fresh">fresh (graphai.api.schemas.embedding.EmbeddingTaskResponse attribute)</a>
 
       <ul>
+        <li><a href="graphai.api.schemas.image.html#graphai.api.schemas.image.DetectOCRLanguageTaskResponse.fresh">(graphai.api.schemas.image.DetectOCRLanguageTaskResponse attribute)</a>
+</li>
         <li><a href="graphai.api.schemas.image.html#graphai.api.schemas.image.ExtractTextTaskResponse.fresh">(graphai.api.schemas.image.ExtractTextTaskResponse attribute)</a>
 </li>
         <li><a href="graphai.api.schemas.image.html#graphai.api.schemas.image.ImageFingerprintTaskResponse.fresh">(graphai.api.schemas.image.ImageFingerprintTaskResponse attribute)</a>
@@ -698,6 +744,8 @@
       <li><a href="graphai.core.video.video.html#graphai.core.video.video.generate_audio_token">generate_audio_token() (in module graphai.core.video.video)</a>
 </li>
       <li><a href="graphai.core.ontology.data.html#graphai.core.ontology.data.OntologyData.generate_category_concept_dict">generate_category_concept_dict() (graphai.core.ontology.data.OntologyData method)</a>
+</li>
+      <li><a href="graphai.core.embedding.embedding.html#graphai.core.embedding.embedding.generate_embedding_text_token">generate_embedding_text_token() (in module graphai.core.embedding.embedding)</a>
 </li>
       <li><a href="graphai.core.interfaces.caching.html#graphai.core.interfaces.caching.VideoConfig.generate_filepath">generate_filepath() (graphai.core.interfaces.caching.VideoConfig method)</a>
 </li>
@@ -803,7 +851,13 @@
 </li>
       <li><a href="graphai.core.interfaces.caching.html#graphai.core.interfaces.caching.ScrapingDBCachingManager.get_details_using_origin">get_details_using_origin() (graphai.core.interfaces.caching.ScrapingDBCachingManager method)</a>
 </li>
-      <li><a href="graphai.core.translation.text_utils.html#graphai.core.translation.text_utils.TranslationModels.get_device">get_device() (graphai.core.translation.text_utils.TranslationModels method)</a>
+      <li><a href="graphai.core.embedding.embedding.html#graphai.core.embedding.embedding.EmbeddingModels.get_device">get_device() (graphai.core.embedding.embedding.EmbeddingModels method)</a>
+
+      <ul>
+        <li><a href="graphai.core.translation.text_utils.html#graphai.core.translation.text_utils.TranslationModels.get_device">(graphai.core.translation.text_utils.TranslationModels method)</a>
+</li>
+      </ul></li>
+      <li><a href="graphai.api.celery_jobs.embedding.html#graphai.api.celery_jobs.embedding.get_embedding_text_fingerprint_chain_list">get_embedding_text_fingerprint_chain_list() (in module graphai.api.celery_jobs.embedding)</a>
 </li>
       <li><a href="graphai.api.routers.video.html#graphai.api.routers.video.get_file">get_file() (in module graphai.api.routers.video)</a>
 </li>
@@ -938,6 +992,13 @@
 </li>
       </ul></li>
       <li>
+    graphai.api.celery_jobs.embedding
+
+      <ul>
+        <li><a href="graphai.api.celery_jobs.embedding.html#module-graphai.api.celery_jobs.embedding">module</a>
+</li>
+      </ul></li>
+      <li>
     graphai.api.celery_jobs.image
 
       <ul>
@@ -998,6 +1059,13 @@
 
       <ul>
         <li><a href="graphai.api.celery_tasks.completion.html#module-graphai.api.celery_tasks.completion">module</a>
+</li>
+      </ul></li>
+      <li>
+    graphai.api.celery_tasks.embedding
+
+      <ul>
+        <li><a href="graphai.api.celery_tasks.embedding.html#module-graphai.api.celery_tasks.embedding">module</a>
 </li>
       </ul></li>
       <li>
@@ -1071,6 +1139,13 @@
 </li>
       </ul></li>
       <li>
+    graphai.api.common.embedding
+
+      <ul>
+        <li><a href="graphai.api.common.embedding.html#module-graphai.api.common.embedding">module</a>
+</li>
+      </ul></li>
+      <li>
     graphai.api.common.log
 
       <ul>
@@ -1084,6 +1159,8 @@
         <li><a href="graphai.api.common.ontology.html#module-graphai.api.common.ontology">module</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     graphai.api.common.translation
 
@@ -1091,8 +1168,6 @@
         <li><a href="graphai.api.common.translation.html#module-graphai.api.common.translation">module</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     graphai.api.common.video
 
@@ -1126,6 +1201,13 @@
 
       <ul>
         <li><a href="graphai.api.routers.completion.html#module-graphai.api.routers.completion">module</a>
+</li>
+      </ul></li>
+      <li>
+    graphai.api.routers.embedding
+
+      <ul>
+        <li><a href="graphai.api.routers.embedding.html#module-graphai.api.routers.embedding">module</a>
 </li>
       </ul></li>
       <li>
@@ -1196,6 +1278,13 @@
 
       <ul>
         <li><a href="graphai.api.schemas.completion.html#module-graphai.api.schemas.completion">module</a>
+</li>
+      </ul></li>
+      <li>
+    graphai.api.schemas.embedding
+
+      <ul>
+        <li><a href="graphai.api.schemas.embedding.html#module-graphai.api.schemas.embedding">module</a>
 </li>
       </ul></li>
       <li>
@@ -1273,6 +1362,20 @@
 
       <ul>
         <li><a href="graphai.core.common.fingerprinting.html#module-graphai.core.common.fingerprinting">module</a>
+</li>
+      </ul></li>
+      <li>
+    graphai.core.embedding
+
+      <ul>
+        <li><a href="graphai.core.embedding.html#module-graphai.core.embedding">module</a>
+</li>
+      </ul></li>
+      <li>
+    graphai.core.embedding.embedding
+
+      <ul>
+        <li><a href="graphai.core.embedding.embedding.html#module-graphai.core.embedding.embedding">module</a>
 </li>
       </ul></li>
       <li>
@@ -1675,6 +1778,8 @@
       <li><a href="graphai.core.interfaces.caching.html#graphai.core.interfaces.caching.AudioDBCachingManager.init_db">init_db() (graphai.core.interfaces.caching.AudioDBCachingManager method)</a>
 
       <ul>
+        <li><a href="graphai.core.interfaces.caching.html#graphai.core.interfaces.caching.EmbeddingDBCachingManager.init_db">(graphai.core.interfaces.caching.EmbeddingDBCachingManager method)</a>
+</li>
         <li><a href="graphai.core.interfaces.caching.html#graphai.core.interfaces.caching.ScrapingDBCachingManager.init_db">(graphai.core.interfaces.caching.ScrapingDBCachingManager method)</a>
 </li>
         <li><a href="graphai.core.interfaces.caching.html#graphai.core.interfaces.caching.SlideDBCachingManager.init_db">(graphai.core.interfaces.caching.SlideDBCachingManager method)</a>
@@ -1742,16 +1847,20 @@
 </li>
       <li><a href="graphai.core.ontology.data.html#graphai.core.ontology.data.OntologyData.load_concept_concept_graphscore">load_concept_concept_graphscore() (graphai.core.ontology.data.OntologyData method)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="graphai.core.ontology.data.html#graphai.core.ontology.data.OntologyData.load_data">load_data() (graphai.core.ontology.data.OntologyData method)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="graphai.core.text.graph.html#graphai.core.text.graph.ConceptsGraph.load_from_db">load_from_db() (graphai.core.text.graph.ConceptsGraph method)</a>
 </li>
       <li><a href="graphai.core.video.transcribe.html#graphai.core.video.transcribe.WhisperTranscriptionModel.load_model_whisper">load_model_whisper() (graphai.core.video.transcribe.WhisperTranscriptionModel method)</a>
 </li>
-      <li><a href="graphai.core.translation.text_utils.html#graphai.core.translation.text_utils.TranslationModels.load_models">load_models() (graphai.core.translation.text_utils.TranslationModels method)</a>
+      <li><a href="graphai.core.embedding.embedding.html#graphai.core.embedding.embedding.EmbeddingModels.load_models">load_models() (graphai.core.embedding.embedding.EmbeddingModels method)</a>
+
+      <ul>
+        <li><a href="graphai.core.translation.text_utils.html#graphai.core.translation.text_utils.TranslationModels.load_models">(graphai.core.translation.text_utils.TranslationModels method)</a>
 </li>
+      </ul></li>
       <li><a href="graphai.core.video.video.html#graphai.core.video.video.NLPModels.load_nlp_models">load_nlp_models() (graphai.core.video.video.NLPModels method)</a>
 </li>
       <li><a href="graphai.core.ontology.data.html#graphai.core.ontology.data.OntologyData.load_non_ontology_concept_names">load_non_ontology_concept_names() (graphai.core.ontology.data.OntologyData method)</a>
@@ -1790,7 +1899,7 @@
 </li>
       <li><a href="graphai.core.common.common_utils.html#graphai.core.common.common_utils.make_sure_path_exists">make_sure_path_exists() (in module graphai.core.common.common_utils)</a>
 </li>
-      <li><a href="graphai.core.translation.text_utils.html#graphai.core.translation.text_utils.md5_text">md5_text() (in module graphai.core.translation.text_utils)</a>
+      <li><a href="graphai.core.common.fingerprinting.html#graphai.core.common.fingerprinting.md5_text">md5_text() (in module graphai.core.common.fingerprinting)</a>
 </li>
       <li><a href="graphai.core.common.fingerprinting.html#graphai.core.common.fingerprinting.md5_video_or_audio">md5_video_or_audio() (in module graphai.core.common.fingerprinting)</a>
 </li>
@@ -1832,6 +1941,12 @@
         <li><a href="graphai.api.schemas.completion.html#graphai.api.schemas.completion.SlideSubsetRequest.model_computed_fields">(graphai.api.schemas.completion.SlideSubsetRequest attribute)</a>
 </li>
         <li><a href="graphai.api.schemas.completion.html#graphai.api.schemas.completion.SlideSubsetResponse.model_computed_fields">(graphai.api.schemas.completion.SlideSubsetResponse attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.embedding.html#graphai.api.schemas.embedding.EmbeddingRequest.model_computed_fields">(graphai.api.schemas.embedding.EmbeddingRequest attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.embedding.html#graphai.api.schemas.embedding.EmbeddingResponse.model_computed_fields">(graphai.api.schemas.embedding.EmbeddingResponse attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.embedding.html#graphai.api.schemas.embedding.EmbeddingTaskResponse.model_computed_fields">(graphai.api.schemas.embedding.EmbeddingTaskResponse attribute)</a>
 </li>
         <li><a href="graphai.api.schemas.image.html#graphai.api.schemas.image.DetectOCRLanguageResponse.model_computed_fields">(graphai.api.schemas.image.DetectOCRLanguageResponse attribute)</a>
 </li>
@@ -2013,6 +2128,12 @@
 </li>
         <li><a href="graphai.api.schemas.completion.html#graphai.api.schemas.completion.SlideSubsetResponse.model_config">(graphai.api.schemas.completion.SlideSubsetResponse attribute)</a>
 </li>
+        <li><a href="graphai.api.schemas.embedding.html#graphai.api.schemas.embedding.EmbeddingRequest.model_config">(graphai.api.schemas.embedding.EmbeddingRequest attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.embedding.html#graphai.api.schemas.embedding.EmbeddingResponse.model_config">(graphai.api.schemas.embedding.EmbeddingResponse attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.embedding.html#graphai.api.schemas.embedding.EmbeddingTaskResponse.model_config">(graphai.api.schemas.embedding.EmbeddingTaskResponse attribute)</a>
+</li>
         <li><a href="graphai.api.schemas.image.html#graphai.api.schemas.image.DetectOCRLanguageResponse.model_config">(graphai.api.schemas.image.DetectOCRLanguageResponse attribute)</a>
 </li>
         <li><a href="graphai.api.schemas.image.html#graphai.api.schemas.image.DetectOCRLanguageTaskResponse.model_config">(graphai.api.schemas.image.DetectOCRLanguageTaskResponse attribute)</a>
@@ -2170,8 +2291,6 @@
         <li><a href="graphai.api.schemas.voice.html#graphai.api.schemas.voice.AudioTranscriptionTaskResponse.model_config">(graphai.api.schemas.voice.AudioTranscriptionTaskResponse attribute)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="graphai.api.common.auth_utils.html#graphai.api.common.auth_utils.Token.model_fields">model_fields (graphai.api.common.auth_utils.Token attribute)</a>
 
       <ul>
@@ -2194,6 +2313,12 @@
         <li><a href="graphai.api.schemas.completion.html#graphai.api.schemas.completion.SlideSubsetRequest.model_fields">(graphai.api.schemas.completion.SlideSubsetRequest attribute)</a>
 </li>
         <li><a href="graphai.api.schemas.completion.html#graphai.api.schemas.completion.SlideSubsetResponse.model_fields">(graphai.api.schemas.completion.SlideSubsetResponse attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.embedding.html#graphai.api.schemas.embedding.EmbeddingRequest.model_fields">(graphai.api.schemas.embedding.EmbeddingRequest attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.embedding.html#graphai.api.schemas.embedding.EmbeddingResponse.model_fields">(graphai.api.schemas.embedding.EmbeddingResponse attribute)</a>
+</li>
+        <li><a href="graphai.api.schemas.embedding.html#graphai.api.schemas.embedding.EmbeddingTaskResponse.model_fields">(graphai.api.schemas.embedding.EmbeddingTaskResponse attribute)</a>
 </li>
         <li><a href="graphai.api.schemas.image.html#graphai.api.schemas.image.DetectOCRLanguageResponse.model_fields">(graphai.api.schemas.image.DetectOCRLanguageResponse attribute)</a>
 </li>
@@ -2352,6 +2477,10 @@
         <li><a href="graphai.api.schemas.voice.html#graphai.api.schemas.voice.AudioTranscriptionTaskResponse.model_fields">(graphai.api.schemas.voice.AudioTranscriptionTaskResponse attribute)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="graphai.api.schemas.embedding.html#graphai.api.schemas.embedding.EmbeddingRequest.model_type">model_type (graphai.api.schemas.embedding.EmbeddingRequest attribute)</a>
+</li>
       <li>
     module
 
@@ -2363,6 +2492,8 @@
         <li><a href="graphai.api.celery_jobs.html#module-graphai.api.celery_jobs">graphai.api.celery_jobs</a>
 </li>
         <li><a href="graphai.api.celery_jobs.common.html#module-graphai.api.celery_jobs.common">graphai.api.celery_jobs.common</a>
+</li>
+        <li><a href="graphai.api.celery_jobs.embedding.html#module-graphai.api.celery_jobs.embedding">graphai.api.celery_jobs.embedding</a>
 </li>
         <li><a href="graphai.api.celery_jobs.image.html#module-graphai.api.celery_jobs.image">graphai.api.celery_jobs.image</a>
 </li>
@@ -2381,6 +2512,8 @@
         <li><a href="graphai.api.celery_tasks.common.html#module-graphai.api.celery_tasks.common">graphai.api.celery_tasks.common</a>
 </li>
         <li><a href="graphai.api.celery_tasks.completion.html#module-graphai.api.celery_tasks.completion">graphai.api.celery_tasks.completion</a>
+</li>
+        <li><a href="graphai.api.celery_tasks.embedding.html#module-graphai.api.celery_tasks.embedding">graphai.api.celery_tasks.embedding</a>
 </li>
         <li><a href="graphai.api.celery_tasks.image.html#module-graphai.api.celery_tasks.image">graphai.api.celery_tasks.image</a>
 </li>
@@ -2402,6 +2535,8 @@
 </li>
         <li><a href="graphai.api.common.celery_tools.html#module-graphai.api.common.celery_tools">graphai.api.common.celery_tools</a>
 </li>
+        <li><a href="graphai.api.common.embedding.html#module-graphai.api.common.embedding">graphai.api.common.embedding</a>
+</li>
         <li><a href="graphai.api.common.log.html#module-graphai.api.common.log">graphai.api.common.log</a>
 </li>
         <li><a href="graphai.api.common.ontology.html#module-graphai.api.common.ontology">graphai.api.common.ontology</a>
@@ -2417,6 +2552,8 @@
         <li><a href="graphai.api.routers.auth.html#module-graphai.api.routers.auth">graphai.api.routers.auth</a>
 </li>
         <li><a href="graphai.api.routers.completion.html#module-graphai.api.routers.completion">graphai.api.routers.completion</a>
+</li>
+        <li><a href="graphai.api.routers.embedding.html#module-graphai.api.routers.embedding">graphai.api.routers.embedding</a>
 </li>
         <li><a href="graphai.api.routers.image.html#module-graphai.api.routers.image">graphai.api.routers.image</a>
 </li>
@@ -2437,6 +2574,8 @@
         <li><a href="graphai.api.schemas.common.html#module-graphai.api.schemas.common">graphai.api.schemas.common</a>
 </li>
         <li><a href="graphai.api.schemas.completion.html#module-graphai.api.schemas.completion">graphai.api.schemas.completion</a>
+</li>
+        <li><a href="graphai.api.schemas.embedding.html#module-graphai.api.schemas.embedding">graphai.api.schemas.embedding</a>
 </li>
         <li><a href="graphai.api.schemas.image.html#module-graphai.api.schemas.image">graphai.api.schemas.image</a>
 </li>
@@ -2459,6 +2598,10 @@
         <li><a href="graphai.core.common.common_utils.html#module-graphai.core.common.common_utils">graphai.core.common.common_utils</a>
 </li>
         <li><a href="graphai.core.common.fingerprinting.html#module-graphai.core.common.fingerprinting">graphai.core.common.fingerprinting</a>
+</li>
+        <li><a href="graphai.core.embedding.html#module-graphai.core.embedding">graphai.core.embedding</a>
+</li>
+        <li><a href="graphai.core.embedding.embedding.html#module-graphai.core.embedding.embedding">graphai.core.embedding.embedding</a>
 </li>
         <li><a href="graphai.core.interfaces.html#module-graphai.core.interfaces">graphai.core.interfaces</a>
 </li>
@@ -2747,10 +2890,10 @@
 </li>
       <li><a href="graphai.api.schemas.scraping.html#graphai.api.schemas.scraping.ExtractContentRequest.remove_long_patterns">remove_long_patterns (graphai.api.schemas.scraping.ExtractContentRequest attribute)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="graphai.core.scraping.scraping.html#graphai.core.scraping.scraping.remove_long_patterns">remove_long_patterns() (in module graphai.core.scraping.scraping)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="graphai.core.utils.breadcrumb.html#graphai.core.utils.breadcrumb.Breadcrumb.report">report() (graphai.core.utils.breadcrumb.Breadcrumb method)</a>
 
       <ul>
@@ -2769,9 +2912,11 @@
         <li><a href="graphai.core.utils.time.stopwatch.html#graphai.core.utils.time.stopwatch.Stopwatch.reset">(graphai.core.utils.time.stopwatch.Stopwatch method)</a>
 </li>
       </ul></li>
-      <li><a href="graphai.api.schemas.image.html#graphai.api.schemas.image.ExtractTextTaskResponse.result">result (graphai.api.schemas.image.ExtractTextTaskResponse attribute)</a>
+      <li><a href="graphai.api.schemas.embedding.html#graphai.api.schemas.embedding.EmbeddingTaskResponse.result">result (graphai.api.schemas.embedding.EmbeddingTaskResponse attribute)</a>
 
       <ul>
+        <li><a href="graphai.api.schemas.image.html#graphai.api.schemas.image.ExtractTextTaskResponse.result">(graphai.api.schemas.image.ExtractTextTaskResponse attribute)</a>
+</li>
         <li><a href="graphai.api.schemas.image.html#graphai.api.schemas.image.ImageFingerprintTaskResponse.result">(graphai.api.schemas.image.ImageFingerprintTaskResponse attribute)</a>
 </li>
         <li><a href="graphai.api.schemas.translation.html#graphai.api.schemas.translation.TextFingerprintTaskResponse.result">(graphai.api.schemas.translation.TextFingerprintTaskResponse attribute)</a>
@@ -2911,9 +3056,11 @@
 </li>
       <li><a href="graphai.api.schemas.voice.html#graphai.api.schemas.voice.AudioTranscriptionTaskResponse.subtitle_results">subtitle_results (graphai.api.schemas.voice.AudioTranscriptionTaskResponse attribute)</a>
 </li>
-      <li><a href="graphai.api.schemas.image.html#graphai.api.schemas.image.DetectOCRLanguageTaskResponse.successful">successful (graphai.api.schemas.image.DetectOCRLanguageTaskResponse attribute)</a>
+      <li><a href="graphai.api.schemas.embedding.html#graphai.api.schemas.embedding.EmbeddingTaskResponse.successful">successful (graphai.api.schemas.embedding.EmbeddingTaskResponse attribute)</a>
 
       <ul>
+        <li><a href="graphai.api.schemas.image.html#graphai.api.schemas.image.DetectOCRLanguageTaskResponse.successful">(graphai.api.schemas.image.DetectOCRLanguageTaskResponse attribute)</a>
+</li>
         <li><a href="graphai.api.schemas.image.html#graphai.api.schemas.image.ExtractTextTaskResponse.successful">(graphai.api.schemas.image.ExtractTextTaskResponse attribute)</a>
 </li>
         <li><a href="graphai.api.schemas.image.html#graphai.api.schemas.image.ImageFingerprintTaskResponse.successful">(graphai.api.schemas.image.ImageFingerprintTaskResponse attribute)</a>
@@ -2960,6 +3107,8 @@
       <li><a href="graphai.api.schemas.common.html#graphai.api.schemas.common.TaskStatusResponse.task_result">task_result (graphai.api.schemas.common.TaskStatusResponse attribute)</a>
 
       <ul>
+        <li><a href="graphai.api.schemas.embedding.html#graphai.api.schemas.embedding.EmbeddingResponse.task_result">(graphai.api.schemas.embedding.EmbeddingResponse attribute)</a>
+</li>
         <li><a href="graphai.api.schemas.image.html#graphai.api.schemas.image.DetectOCRLanguageResponse.task_result">(graphai.api.schemas.image.DetectOCRLanguageResponse attribute)</a>
 </li>
         <li><a href="graphai.api.schemas.image.html#graphai.api.schemas.image.ExtractTextResponse.task_result">(graphai.api.schemas.image.ExtractTextResponse attribute)</a>
@@ -3003,9 +3152,11 @@
 </li>
       <li><a href="graphai.core.video.video.html#graphai.core.video.video.tesseract_ocr_or_get_cached">tesseract_ocr_or_get_cached() (in module graphai.core.video.video)</a>
 </li>
-      <li><a href="graphai.api.schemas.image.html#graphai.api.schemas.image.IndividualOCRResult.text">text (graphai.api.schemas.image.IndividualOCRResult attribute)</a>
+      <li><a href="graphai.api.schemas.embedding.html#graphai.api.schemas.embedding.EmbeddingRequest.text">text (graphai.api.schemas.embedding.EmbeddingRequest attribute)</a>
 
       <ul>
+        <li><a href="graphai.api.schemas.image.html#graphai.api.schemas.image.IndividualOCRResult.text">(graphai.api.schemas.image.IndividualOCRResult attribute)</a>
+</li>
         <li><a href="graphai.api.schemas.translation.html#graphai.api.schemas.translation.TextDetectLanguageRequest.text">(graphai.api.schemas.translation.TextDetectLanguageRequest attribute)</a>
 </li>
         <li><a href="graphai.api.schemas.translation.html#graphai.api.schemas.translation.TranslationRequest.text">(graphai.api.schemas.translation.TranslationRequest attribute)</a>
@@ -3043,10 +3194,10 @@
 </li>
       <li><a href="graphai.core.ontology.data.html#graphai.core.ontology.data.to_ndarray_and_flatten">to_ndarray_and_flatten() (in module graphai.core.ontology.data)</a>
 </li>
-      <li><a href="graphai.api.common.auth_utils.html#graphai.api.common.auth_utils.Token">Token (class in graphai.api.common.auth_utils)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="graphai.api.common.auth_utils.html#graphai.api.common.auth_utils.Token">Token (class in graphai.api.common.auth_utils)</a>
+</li>
       <li><a href="graphai.api.schemas.common.html#graphai.api.schemas.common.FileRequest.token">token (graphai.api.schemas.common.FileRequest attribute)</a>
 
       <ul>

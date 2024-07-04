@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>graphai.core.scraping package &mdash; EPFL Graph AI</title>
+  <title>graphai.api.celery_tasks.embedding module &mdash; EPFL Graph AI</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
 
@@ -21,8 +21,8 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="graphai.core.scraping.scraping module" href="graphai.core.scraping.scraping.html" />
-    <link rel="prev" title="graphai.core.ontology.data module" href="graphai.core.ontology.data.html" /> 
+    <link rel="next" title="graphai.api.celery_tasks.image module" href="graphai.api.celery_tasks.image.html" />
+    <link rel="prev" title="graphai.api.celery_tasks.completion module" href="graphai.api.celery_tasks.completion.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -45,25 +45,22 @@
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="graphai.api.html">graphai.api package</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="graphai.core.html">graphai.core package</a><ul class="current">
-<li class="toctree-l2 current"><a class="reference internal" href="graphai.core.html#subpackages">Subpackages</a><ul class="current">
-<li class="toctree-l3"><a class="reference internal" href="graphai.core.common.html">graphai.core.common package</a></li>
-<li class="toctree-l3"><a class="reference internal" href="graphai.core.embedding.html">graphai.core.embedding package</a></li>
-<li class="toctree-l3"><a class="reference internal" href="graphai.core.interfaces.html">graphai.core.interfaces package</a></li>
-<li class="toctree-l3"><a class="reference internal" href="graphai.core.ontology.html">graphai.core.ontology package</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">graphai.core.scraping package</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#submodules">Submodules</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="graphai.api.html">graphai.api package</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="graphai.api.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="graphai.api.celery_jobs.html">graphai.api.celery_jobs package</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="graphai.api.celery_tasks.html">graphai.api.celery_tasks package</a><ul class="current">
+<li class="toctree-l4 current"><a class="reference internal" href="graphai.api.celery_tasks.html#submodules">Submodules</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="graphai.core.text.html">graphai.core.text package</a></li>
-<li class="toctree-l3"><a class="reference internal" href="graphai.core.translation.html">graphai.core.translation package</a></li>
-<li class="toctree-l3"><a class="reference internal" href="graphai.core.utils.html">graphai.core.utils package</a></li>
-<li class="toctree-l3"><a class="reference internal" href="graphai.core.video.html">graphai.core.video package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="graphai.api.common.html">graphai.api.common package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="graphai.api.routers.html">graphai.api.routers package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="graphai.api.schemas.html">graphai.api.schemas package</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="graphai.api.html#submodules">Submodules</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="graphai.core.html">graphai.core package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="graphai.pipelines.html">graphai.pipelines package</a></li>
 </ul>
 <ul>
@@ -84,10 +81,11 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="graphai.html" class="icon icon-home" aria-label="Home"></a></li>
-          <li class="breadcrumb-item"><a href="graphai.core.html">graphai.core package</a></li>
-      <li class="breadcrumb-item active">graphai.core.scraping package</li>
+          <li class="breadcrumb-item"><a href="graphai.api.html">graphai.api package</a></li>
+          <li class="breadcrumb-item"><a href="graphai.api.celery_tasks.html">graphai.api.celery_tasks package</a></li>
+      <li class="breadcrumb-item active">graphai.api.celery_tasks.embedding module</li>
       <li class="wy-breadcrumbs-aside">
-            <a href="_sources/graphai.core.scraping.rst.txt" rel="nofollow"> View page source</a>
+            <a href="_sources/graphai.api.celery_tasks.embedding.rst.txt" rel="nofollow"> View page source</a>
       </li>
   </ul>
   <hr/>
@@ -95,24 +93,16 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="module-graphai.core.scraping">
-<span id="graphai-core-scraping-package"></span><h1>graphai.core.scraping package<a class="headerlink" href="#module-graphai.core.scraping" title="Link to this heading"></a></h1>
-<section id="submodules">
-<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading"></a></h2>
-<div class="toctree-wrapper compound">
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="graphai.core.scraping.scraping.html">graphai.core.scraping.scraping module</a></li>
-</ul>
-</div>
-</section>
+  <section id="module-graphai.api.celery_tasks.embedding">
+<span id="graphai-api-celery-tasks-embedding-module"></span><h1>graphai.api.celery_tasks.embedding module<a class="headerlink" href="#module-graphai.api.celery_tasks.embedding" title="Link to this heading"></a></h1>
 </section>
 
 
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="graphai.core.ontology.data.html" class="btn btn-neutral float-left" title="graphai.core.ontology.data module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="graphai.core.scraping.scraping.html" class="btn btn-neutral float-right" title="graphai.core.scraping.scraping module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="graphai.api.celery_tasks.completion.html" class="btn btn-neutral float-left" title="graphai.api.celery_tasks.completion module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="graphai.api.celery_tasks.image.html" class="btn btn-neutral float-right" title="graphai.api.celery_tasks.image module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

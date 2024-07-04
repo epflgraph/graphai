@@ -1,0 +1,15 @@
+graphai.core.embedding package
+==============================
+
+.. automodule:: graphai.core.embedding
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 1
+
+   graphai.core.embedding.embedding

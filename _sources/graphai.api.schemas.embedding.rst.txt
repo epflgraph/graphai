@@ -1,0 +1,7 @@
+graphai.api.schemas.embedding module
+====================================
+
+.. automodule:: graphai.api.schemas.embedding
+   :members:
+   :undoc-members:
+   :show-inheritance:

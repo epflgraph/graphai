@@ -14,6 +14,7 @@ Submodules
 
    graphai.api.celery_tasks.common
    graphai.api.celery_tasks.completion
+   graphai.api.celery_tasks.embedding
    graphai.api.celery_tasks.image
    graphai.api.celery_tasks.ontology
    graphai.api.celery_tasks.scraping

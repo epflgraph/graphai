@@ -13,6 +13,7 @@ Submodules
    :maxdepth: 1
 
    graphai.api.celery_jobs.common
+   graphai.api.celery_jobs.embedding
    graphai.api.celery_jobs.image
    graphai.api.celery_jobs.ontology
    graphai.api.celery_jobs.scraping

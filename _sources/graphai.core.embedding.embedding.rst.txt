@@ -1,0 +1,7 @@
+graphai.core.embedding.embedding module
+=======================================
+
+.. automodule:: graphai.core.embedding.embedding
+   :members:
+   :undoc-members:
+   :show-inheritance:

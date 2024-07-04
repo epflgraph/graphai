@@ -14,6 +14,7 @@ Submodules
 
    graphai.api.common.auth_utils
    graphai.api.common.celery_tools
+   graphai.api.common.embedding
    graphai.api.common.log
    graphai.api.common.ontology
    graphai.api.common.translation
