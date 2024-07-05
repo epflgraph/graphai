@@ -1,6 +1,7 @@
 from itertools import chain
 
 import langdetect
+from ftfy import fix_encoding
 import numpy as np
 import pysbd
 from transformers import AutoTokenizer, AutoModelForSeq2SeqLM, MarianMTModel, MarianTokenizer
@@ -237,7 +238,7 @@ class TranslationModels:
                 return None, True
             full_result += ' ' + decoded
 
-        return full_result, False
+        return fix_encoding(full_result), False
 
     def translate(self, text, how='en-fr'):
         """
