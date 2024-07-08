@@ -10,10 +10,10 @@ class EmbeddingRequest(BaseModel):
         description="Text to embed."
     )
 
-    model_type: Literal['light'] = Field(
+    model_type: Literal['all-MiniLM-L12-v2'] = Field(
         title="Model type",
-        description="Language of the provided text",
-        default='light'
+        description="Type of model to use",
+        default='all-MiniLM-L12-v2'
     )
 
     force: bool = Field(
@@ -43,6 +43,12 @@ class EmbeddingTaskResponse(BaseModel):
         None,
         title="Device",
         description="The device used ('cuda' or 'cpu') for the embedding. `None` in case of cache hit or failure."
+    )
+
+    model_type: Literal['all-MiniLM-L12-v2'] = Field(
+        title="Model type",
+        description="Type of model that was used",
+        default='all-MiniLM-L12-v2'
     )
 
 

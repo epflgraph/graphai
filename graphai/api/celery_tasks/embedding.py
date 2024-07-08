@@ -59,7 +59,7 @@ def compute_embedding_text_fingerprint_callback_task(self, results, text, model_
 def cache_lookup_embedding_text_using_fingerprint_task(self, token, fp, model_type):
     db_manager = EmbeddingDBCachingManager()
     # Super quick fingerprint lookup
-    closest_embedding = db_manager.get_all_details(['embedding'], allow_nulls=False,
+    closest_embedding = db_manager.get_all_details(['embedding', 'model_type'], allow_nulls=False,
                                                    equality_conditions={'fingerprint': fp,
                                                                         'model_type': model_type
                                                                         })
@@ -67,12 +67,13 @@ def cache_lookup_embedding_text_using_fingerprint_task(self, token, fp, model_ty
         all_keys = list(closest_embedding.keys())
         embedding_json = closest_embedding[all_keys[0]]['embedding']
         db_manager.insert_or_update_details(token, {
-            'embedding': embedding_json,
+            'embedding': embedding_json
         })
         return {
             'result': embedding_json,
             'successful': True,
             'fresh': False,
+            'model_type': model_type,
             'device': None
         }
     return None
@@ -82,13 +83,14 @@ def cache_lookup_embedding_text_using_fingerprint_task(self, token, fp, model_ty
              name='caching_6.cache_lookup_embedding_text', ignore_result=False)
 def cache_lookup_embedding_text_task(self, token):
     db_manager = EmbeddingDBCachingManager()
-    existing = db_manager.get_details(token, ['embedding'], using_most_similar=False)[0]
+    existing = db_manager.get_details(token, ['embedding', 'model_type'], using_most_similar=False)[0]
     if existing is not None and existing['embedding'] is not None:
         print('Returning cached result')
         return {
             'result': existing['embedding'],
             'successful': True,
             'fresh': False,
+            'model_type': existing['model_type'],
             'device': None
         }
     return None
@@ -112,6 +114,7 @@ def embed_text_task(self, text, model_type):
         'result': embedding,
         'successful': success,
         'fresh': success,
+        'model_type': model_type,
         'device': self.embedding_obj.get_device()
     }
 

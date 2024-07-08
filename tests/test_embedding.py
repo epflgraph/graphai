@@ -20,7 +20,7 @@ from graphai.core.interfaces.caching import EmbeddingDBCachingManager
 @pytest.mark.usefixtures('example_word')
 def test__embedding_embed__translate_text__mock_task(mock_run, example_word):
     # Mock calling the task
-    embed_text_task.run(example_word, 'light')
+    embed_text_task.run(example_word, 'all-MiniLM-L12-v2')
 
     # Assert that the task has been called
     assert embed_text_task.run.call_count == 1
@@ -32,7 +32,7 @@ def test__embedding_embed__translate_text__mock_task(mock_run, example_word):
 @pytest.mark.usefixtures('example_word')
 def test__translation_translate__translate_text__run_task(example_word):
     # Call the task
-    embedding = embed_text_task.run(example_word, "light")
+    embedding = embed_text_task.run(example_word, "all-MiniLM-L12-v2")
 
     # Assert that the results are correct
     assert isinstance(embedding, dict)
@@ -53,7 +53,7 @@ def test__translation_translate__translate_text__integration(fixture_app, celery
 
     # First, we call the translate endpoint with force=True to test the full task pipeline working
     response = fixture_app.post('/embedding/embed',
-                                data=json.dumps({"text": example_word, "model_type": "light",
+                                data=json.dumps({"text": example_word, "model_type": "all-MiniLM-L12-v2",
                                                  "force": True}),
                                 timeout=timeout)
     # Check status code is successful
@@ -93,7 +93,7 @@ def test__translation_translate__translate_text__integration(fixture_app, celery
 
     # Now, we call the translate endpoint again with the same input to make sure the caching works correctly
     response = fixture_app.post('/embedding/embed',
-                                data=json.dumps({"text": example_word, "model_type": "light",
+                                data=json.dumps({"text": example_word, "model_type": "all-MiniLM-L12-v2",
                                                  "force": False}),
                                 timeout=timeout)
     # Check status code is successful
