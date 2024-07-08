@@ -1,5 +1,4 @@
 import numpy as np
-import pickle
 import json
 from sentence_transformers import SentenceTransformer
 from graphai.core.interfaces.config import config
