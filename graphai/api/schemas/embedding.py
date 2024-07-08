@@ -10,10 +10,10 @@ class EmbeddingRequest(BaseModel):
         description="Text to embed."
     )
 
-    model_type: Literal['light'] = Field(
+    model_type: Literal['all-MiniLM-L12-v2'] = Field(
         title="Model type",
-        description="Language of the provided text",
-        default='light'
+        description="Type of model to use",
+        default='all-MiniLM-L12-v2'
     )
 
     force: bool = Field(

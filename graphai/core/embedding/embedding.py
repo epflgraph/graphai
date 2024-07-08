@@ -8,20 +8,14 @@ import torch
 
 
 MODEL_TYPES = {
-    'light': 'sentence-transformers/all-MiniLM-L12-v2',
+    'all-MiniLM-L12-v2': 'sentence-transformers/all-MiniLM-L12-v2',
 }
 
 
-def embedding_to_blob(v):
-    return np.ndarray.dumps(v)
-
-
-def embedding_from_blob(b):
-    return pickle.loads(eval(b.decode()))
-
-
 def embedding_to_json(v):
-    return json.dumps(v.tolist())
+    v_list = v.tolist()
+    v_list = [round(x, 9) for x in v_list]
+    return json.dumps(v_list)
 
 
 def embedding_from_json(s):
@@ -69,11 +63,11 @@ class EmbeddingModels:
         """
         if self.models is None:
             self.models = dict()
-            self.models['light'] = SentenceTransformer(MODEL_TYPES['light'],
-                                                       device=self.device,
-                                                       cache_folder=self.cache_dir)
+            self.models['all-MiniLM-L12-v2'] = SentenceTransformer(MODEL_TYPES['all-MiniLM-L12-v2'],
+                                                                   device=self.device,
+                                                                   cache_folder=self.cache_dir)
 
-    def embed(self, text, model_type='light'):
+    def embed(self, text, model_type='all-MiniLM-L12-v2'):
         self.load_models()
         if model_type not in self.models.keys():
             raise NotImplementedError("Selected model type not implemented")
