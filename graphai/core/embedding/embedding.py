@@ -8,6 +8,7 @@ import torch
 
 MODEL_TYPES = {
     'all-MiniLM-L12-v2': 'sentence-transformers/all-MiniLM-L12-v2',
+    'Solon-embeddings-large-0.1': 'OrdalieTech/Solon-embeddings-large-0.1'
 }
 
 
@@ -35,6 +36,10 @@ def generate_embedding_text_token(s, model_type):
     return md5_text(s) + '_' + model_type
 
 
+def get_model_max_tokens(model):
+    return model.max_seq_length
+
+
 class EmbeddingModels:
     def __init__(self):
         self.models = None
@@ -54,7 +59,7 @@ class EmbeddingModels:
     def get_device(self):
         return self.device
 
-    def load_models(self):
+    def load_models(self, load_heavies=True):
         """
         Loads sentence transformers model
         Returns:
@@ -62,14 +67,51 @@ class EmbeddingModels:
         """
         if self.models is None:
             self.models = dict()
-            self.models['all-MiniLM-L12-v2'] = SentenceTransformer(MODEL_TYPES['all-MiniLM-L12-v2'],
-                                                                   device=self.device,
-                                                                   cache_folder=self.cache_dir)
+            self.models['all-MiniLM-L12-v2'] = SentenceTransformer(
+                MODEL_TYPES['all-MiniLM-L12-v2'],
+                device=self.device,
+                cache_folder=self.cache_dir
+            )
+        if load_heavies:
+            self.models['Solon-embeddings-large-0.1'] = SentenceTransformer(
+                MODEL_TYPES['Solon-embeddings-large-0.1'],
+                device=self.device,
+                cache_folder=self.cache_dir
+            )
+
+    def unload_heavy_models(self):
+        heavy_model_keys = set(MODEL_TYPES.keys()).difference({'all-MiniLM-L12-v2'})
+        for key in heavy_model_keys:
+            del self.models[key]
+
+    def _get_model_output(self, model, text):
+        try:
+            print(self.device)
+            model_tokenizer = model[0]
+            model_max_tokens = get_model_max_tokens(model)
+            input_ids = model_tokenizer.tokenizer(
+                text, return_attention_mask=False, return_token_type_ids=False
+            )['input_ids']
+            if len(input_ids) > model_max_tokens:
+                return None
+            return model.encode(text)
+        except IndexError as e:
+            print(e)
+            return None
+
+    def _embed(self, model, text):
+        text_too_large = False
+        result = self._get_model_output(model, text)
+        if result is None:
+            text_too_large = True
+        return result, text_too_large
 
     def embed(self, text, model_type='all-MiniLM-L12-v2'):
-        self.load_models()
-        if model_type not in self.models.keys():
-            raise NotImplementedError("Selected model type not implemented")
         if text is None or len(text) == 0:
             return None
-        return self.models[model_type].encode(text)
+        load_heavies = model_type != 'all-MiniLM-L12-v2'
+        self.load_models(load_heavies=load_heavies)
+        if model_type not in self.models.keys():
+            raise NotImplementedError("Selected model type not implemented")
+        results, text_too_large = self._embed(self.models[model_type], text)
+        return results, text_too_large, get_model_max_tokens(self.models[model_type])

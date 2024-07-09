@@ -10,7 +10,7 @@ class EmbeddingRequest(BaseModel):
         description="Text to embed."
     )
 
-    model_type: Literal['all-MiniLM-L12-v2'] = Field(
+    model_type: Literal['all-MiniLM-L12-v2', 'Solon-embeddings-large-0.1'] = Field(
         title="Model type",
         description="Type of model to use",
         default='all-MiniLM-L12-v2'
@@ -27,6 +27,12 @@ class EmbeddingTaskResponse(BaseModel):
         None,
         title="Embedding results",
         description="Embedding text"
+    )
+
+    text_too_large: bool = Field(
+        title="Text too large",
+        description="This boolean flag is true if the text provided for embedding is too long "
+                    "(depends on model, the limit for the default model is 128 tokens)."
     )
 
     successful: bool = Field(

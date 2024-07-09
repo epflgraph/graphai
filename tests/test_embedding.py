@@ -29,8 +29,8 @@ def test__embedding_embed__translate_text__mock_task(mock_run, example_word):
 ################################################################
 
 
-@pytest.mark.usefixtures('example_word')
-def test__translation_translate__translate_text__run_task(example_word):
+@pytest.mark.usefixtures('example_word', 'very_long_text')
+def test__translation_translate__translate_text__run_task(example_word, very_long_text):
     # Call the task
     embedding = embed_text_task.run(example_word, "all-MiniLM-L12-v2")
 
@@ -38,8 +38,19 @@ def test__translation_translate__translate_text__run_task(example_word):
     assert isinstance(embedding, dict)
     assert 'result' in embedding
     assert embedding['successful'] is True
+    assert embedding['text_too_large'] is False
     assert embedding['result'].shape[0] == 384
     assert 0.999 < np.dot(embedding['result'], embedding['result']) < 1.001
+
+    # Call the task
+    embedding = embed_text_task.run(very_long_text, "all-MiniLM-L12-v2")
+
+    # Assert that the results are correct
+    assert isinstance(embedding, dict)
+    assert 'result' in embedding
+    assert embedding['successful'] is False
+    assert embedding['text_too_large'] is True
+    assert embedding['result'] == "Text over token limit for selected model (128)."
 
 
 @pytest.mark.celery(accept_content=['pickle', 'json'], result_serializer='pickle', task_serializer='pickle')
@@ -83,6 +94,7 @@ def test__translation_translate__translate_text__integration(fixture_app, celery
     assert 'task_result' in embedding
     assert embedding['task_status'] == 'SUCCESS'
     assert embedding['task_result']['successful'] is True
+    assert embedding['task_result']['text_too_large'] is False
     assert embedding['task_result']['fresh'] is True
     assert len(json.loads(embedding['task_result']['result'])) == 384
     assert isinstance(json.loads(embedding['task_result']['result'])[0], float)
@@ -123,5 +135,6 @@ def test__translation_translate__translate_text__integration(fixture_app, celery
     # results must be successful but not fresh, since they were already cached
     assert embedding['task_status'] == 'SUCCESS'
     assert embedding['task_result']['successful'] is True
+    assert embedding['task_result']['text_too_large'] is False
     assert embedding['task_result']['fresh'] is False
     assert embedding['task_result']['result'] == original_results
