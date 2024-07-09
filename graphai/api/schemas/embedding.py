@@ -29,6 +29,12 @@ class EmbeddingTaskResponse(BaseModel):
         description="Embedding text"
     )
 
+    text_too_large: bool = Field(
+        title="Text too large",
+        description="This boolean flag is true if the text provided for embedding is too long "
+                    "(depends on model, the limit for the default model is 128 tokens)."
+    )
+
     successful: bool = Field(
         title="Success flag",
         description="Whether or not the embedding was successful"

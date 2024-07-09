@@ -9,6 +9,9 @@ from graphai.core.embedding.embedding import (
 )
 
 
+LONG_TEXT_ERROR = "Text over token limit for selected model (%d)."
+
+
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='caching_6.cache_lookup_fingerprint_embedding_text', ignore_result=False)
 def cache_lookup_embedding_text_fingerprint_task(self, token):
@@ -72,6 +75,7 @@ def cache_lookup_embedding_text_using_fingerprint_task(self, token, fp, model_ty
         return {
             'result': embedding_json,
             'successful': True,
+            'text_too_large': False,
             'fresh': False,
             'model_type': model_type,
             'device': None
@@ -89,6 +93,7 @@ def cache_lookup_embedding_text_task(self, token):
         return {
             'result': existing['embedding'],
             'successful': True,
+            'text_too_large': False,
             'fresh': False,
             'model_type': existing['model_type'],
             'device': None
@@ -100,19 +105,20 @@ def cache_lookup_embedding_text_task(self, token):
              name='text_6.embed_text', embedding_obj=embedding_models, ignore_result=False)
 def embed_text_task(self, text, model_type):
     try:
-        embedding = self.embedding_obj.embed(text, model_type)
-        if embedding is not None:
-            success = True
-        else:
-            success = False
+        embedding, text_too_large, model_max_tokens = self.embedding_obj.embed(text, model_type)
+        success = embedding is not None
+        if text_too_large:
+            embedding = LONG_TEXT_ERROR % model_max_tokens
     except NotImplementedError as e:
         print(e)
         embedding = str(e)
         success = False
+        text_too_large = False
 
     return {
         'result': embedding,
         'successful': success,
+        'text_too_large': text_too_large,
         'fresh': success,
         'model_type': model_type,
         'device': self.embedding_obj.get_device()
