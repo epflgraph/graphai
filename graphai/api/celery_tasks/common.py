@@ -407,7 +407,7 @@ def video_init_task(self):
 
     if strtobool(config['preload'].get('embedding', 'no')):
         print('Loading embedding models...')
-        self.embedding_obj.load_models()
+        self.embedding_obj.load_models(load_heavies=False)
     else:
         print('Skipping preloading for embedding models.')
 

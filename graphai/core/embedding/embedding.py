@@ -8,6 +8,7 @@ import torch
 
 MODEL_TYPES = {
     'all-MiniLM-L12-v2': 'sentence-transformers/all-MiniLM-L12-v2',
+    'Solon-embeddings-large-0.1': 'OrdalieTech/Solon-embeddings-large-0.1'
 }
 
 
@@ -54,7 +55,7 @@ class EmbeddingModels:
     def get_device(self):
         return self.device
 
-    def load_models(self):
+    def load_models(self, load_heavies=True):
         """
         Loads sentence transformers model
         Returns:
@@ -62,14 +63,23 @@ class EmbeddingModels:
         """
         if self.models is None:
             self.models = dict()
-            self.models['all-MiniLM-L12-v2'] = SentenceTransformer(MODEL_TYPES['all-MiniLM-L12-v2'],
-                                                                   device=self.device,
-                                                                   cache_folder=self.cache_dir)
+            self.models['all-MiniLM-L12-v2'] = SentenceTransformer(
+                MODEL_TYPES['all-MiniLM-L12-v2'],
+                device=self.device,
+                cache_folder=self.cache_dir
+            )
+        if load_heavies:
+            self.models['Solon-embeddings-large-0.1'] = SentenceTransformer(
+                MODEL_TYPES['Solon-embeddings-large-0.1'],
+                device=self.device,
+                cache_folder=self.cache_dir
+            )
 
     def embed(self, text, model_type='all-MiniLM-L12-v2'):
-        self.load_models()
-        if model_type not in self.models.keys():
-            raise NotImplementedError("Selected model type not implemented")
         if text is None or len(text) == 0:
             return None
+        load_heavies = model_type != 'all-MiniLM-L12-v2'
+        self.load_models(load_heavies=load_heavies)
+        if model_type not in self.models.keys():
+            raise NotImplementedError("Selected model type not implemented")
         return self.models[model_type].encode(text)

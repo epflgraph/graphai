@@ -10,7 +10,7 @@ class EmbeddingRequest(BaseModel):
         description="Text to embed."
     )
 
-    model_type: Literal['all-MiniLM-L12-v2'] = Field(
+    model_type: Literal['all-MiniLM-L12-v2', 'Solon-embeddings-large-0.1'] = Field(
         title="Model type",
         description="Type of model to use",
         default='all-MiniLM-L12-v2'
