@@ -75,6 +75,11 @@ class EmbeddingModels:
                 cache_folder=self.cache_dir
             )
 
+    def unload_heavy_models(self):
+        heavy_model_keys = set(MODEL_TYPES.keys()).difference({'all-MiniLM-L12-v2'})
+        for key in heavy_model_keys:
+            del self.models[key]
+
     def embed(self, text, model_type='all-MiniLM-L12-v2'):
         if text is None or len(text) == 0:
             return None
