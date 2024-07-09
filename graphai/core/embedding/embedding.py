@@ -36,6 +36,10 @@ def generate_embedding_text_token(s, model_type):
     return md5_text(s) + '_' + model_type
 
 
+def get_model_max_tokens(model):
+    return model.max_seq_length
+
+
 class EmbeddingModels:
     def __init__(self):
         self.models = None
@@ -80,6 +84,28 @@ class EmbeddingModels:
         for key in heavy_model_keys:
             del self.models[key]
 
+    def _get_model_output(self, model, text):
+        try:
+            print(self.device)
+            model_tokenizer = model[0]
+            model_max_tokens = get_model_max_tokens(model)
+            input_ids = model_tokenizer.tokenizer(
+                text, return_attention_mask=False, return_token_type_ids=False
+            )['input_ids']
+            if len(input_ids) > model_max_tokens:
+                return None
+            return model.encode(text)
+        except IndexError as e:
+            print(e)
+            return None
+
+    def _embed(self, model, text):
+        text_too_large = False
+        result = self._get_model_output(model, text)
+        if result is None:
+            text_too_large = True
+        return result, text_too_large
+
     def embed(self, text, model_type='all-MiniLM-L12-v2'):
         if text is None or len(text) == 0:
             return None
@@ -87,4 +113,5 @@ class EmbeddingModels:
         self.load_models(load_heavies=load_heavies)
         if model_type not in self.models.keys():
             raise NotImplementedError("Selected model type not implemented")
-        return self.models[model_type].encode(text)
+        results, text_too_large = self._embed(self.models[model_type], text)
+        return results, text_too_large, get_model_max_tokens(self.models[model_type])
