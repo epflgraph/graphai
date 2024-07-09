@@ -121,6 +121,11 @@
 </dl>
 </dd></dl>
 
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.core.embedding.embedding.get_model_max_tokens">
+<span class="sig-prename descclassname"><span class="pre">graphai.core.embedding.embedding.</span></span><span class="sig-name descname"><span class="pre">get_model_max_tokens</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.embedding.embedding.get_model_max_tokens" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 <dl class="py class">
 <dt class="sig sig-object py" id="graphai.core.embedding.embedding.EmbeddingModels">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">graphai.core.embedding.embedding.</span></span><span class="sig-name descname"><span class="pre">EmbeddingModels</span></span><a class="headerlink" href="#graphai.core.embedding.embedding.EmbeddingModels" title="Link to this definition"></a></dt>
@@ -132,10 +137,15 @@
 
 <dl class="py method">
 <dt class="sig sig-object py" id="graphai.core.embedding.embedding.EmbeddingModels.load_models">
-<span class="sig-name descname"><span class="pre">load_models</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.embedding.embedding.EmbeddingModels.load_models" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">load_models</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">load_heavies</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.embedding.embedding.EmbeddingModels.load_models" title="Link to this definition"></a></dt>
 <dd><p>Loads sentence transformers model
 :returns: None</p>
 </dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="graphai.core.embedding.embedding.EmbeddingModels.unload_heavy_models">
+<span class="sig-name descname"><span class="pre">unload_heavy_models</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.embedding.embedding.EmbeddingModels.unload_heavy_models" title="Link to this definition"></a></dt>
+<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="graphai.core.embedding.embedding.EmbeddingModels.embed">
