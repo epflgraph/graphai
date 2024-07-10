@@ -1,5 +1,6 @@
 from celery import shared_task
 import time
+import gc
 
 from graphai.api.common.embedding import embedding_models
 
@@ -169,6 +170,9 @@ def embed_text_callback_task(self, results, token, text, model_type, force=False
 def cleanup_large_embedding_objects_task(self):
     last_heavy_model_use = self.embedding_obj.get_last_usage()
     current_time = time.time()
+    result = None
     if current_time - last_heavy_model_use > UNLOAD_WAITING_PERIOD:
-        self.embedding_obj.unload_heavy_models()
-    return True
+        result = self.embedding_obj.unload_heavy_models()
+        if len(result) > 0:
+            gc.collect()
+    return result
