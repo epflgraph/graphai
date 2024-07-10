@@ -13,7 +13,8 @@ from graphai.core.embedding.embedding import (
 
 
 LONG_TEXT_ERROR = "Text over token limit for selected model (%d)."
-UNLOAD_WAITING_PERIOD = 60
+# 3 hours
+UNLOAD_WAITING_PERIOD = 3 * 3600.0
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
