@@ -78,6 +78,7 @@ async def embed_text_status(task_id):
                 'result': task_results['result'],
                 'successful': task_results['successful'],
                 'text_too_large': task_results['text_too_large'],
+                'model_type': task_results['model_type'],
                 'fresh': task_results['fresh'],
                 'device': task_results['device']
             }
