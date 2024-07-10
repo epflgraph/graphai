@@ -2,6 +2,7 @@ import os
 from functools import lru_cache
 
 from celery import current_app as current_celery_app
+from celery.schedules import crontab
 from celery.result import AsyncResult
 from kombu import Queue
 
@@ -94,6 +95,13 @@ def create_celery():
     celery_app.conf.update(worker_send_task_events=False)
     celery_app.conf.update(worker_prefetch_multiplier=1)
     celery_app.conf.update(broker_transport_options={'visibility_timeout': 9999999})
+    celery_app.conf.update(beat_schedule={
+        'cleanup-every-monday-morning': {
+            'task': 'text_6.clean_up_large_objects',
+            'schedule': 120.0
+                # crontab(hour='6', minute='30')
+        },
+    })
 
     return celery_app
 
