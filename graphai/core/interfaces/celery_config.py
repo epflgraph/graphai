@@ -97,7 +97,7 @@ def create_celery():
     celery_app.conf.update(broker_transport_options={'visibility_timeout': 9999999})
     celery_app.conf.update(beat_schedule={
         'cleanup-embedding-model-every-twelve-hours': {
-            'task': 'text_6.clean_up_large_objects',
+            'task': 'text_6.clean_up_large_embedding_objects',
             'schedule': 6 * 3600.0
             # Every 6 hours
         },

@@ -167,7 +167,7 @@ def embed_text_callback_task(self, results, token, text, model_type, force=False
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='text_6.clean_up_large_objects', embedding_obj=embedding_models, ignore_result=False)
+             name='text_6.clean_up_large_embedding_objects', embedding_obj=embedding_models, ignore_result=False)
 def cleanup_large_embedding_objects_task(self):
     last_heavy_model_use = self.embedding_obj.get_last_usage()
     current_time = time.time()
