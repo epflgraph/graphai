@@ -88,9 +88,15 @@ class EmbeddingModels:
         return self.last_heavy_model_use
 
     def unload_heavy_models(self):
+        deleted_models = list()
+        if self.models is None:
+            return deleted_models
         heavy_model_keys = set(MODEL_TYPES.keys()).difference({'all-MiniLM-L12-v2'})
         for key in heavy_model_keys:
-            del self.models[key]
+            if key in self.models:
+                deleted_models.append(key)
+                del self.models[key]
+        return deleted_models
 
     def _get_model_output(self, model, text):
         try:
