@@ -1,3 +1,5 @@
+import time
+
 import numpy as np
 import json
 from sentence_transformers import SentenceTransformer
@@ -44,6 +46,7 @@ class EmbeddingModels:
     def __init__(self):
         self.models = None
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
+        self.last_heavy_model_use = 0
         try:
             print("Reading HuggingFace model path from config")
             self.cache_dir = config['huggingface']['model_path']
@@ -73,11 +76,16 @@ class EmbeddingModels:
                 cache_folder=self.cache_dir
             )
         if load_heavies:
-            self.models['Solon-embeddings-large-0.1'] = SentenceTransformer(
-                MODEL_TYPES['Solon-embeddings-large-0.1'],
-                device=self.device,
-                cache_folder=self.cache_dir
-            )
+            if 'Solon-embeddings-large-0.1' not in self.models:
+                self.models['Solon-embeddings-large-0.1'] = SentenceTransformer(
+                    MODEL_TYPES['Solon-embeddings-large-0.1'],
+                    device=self.device,
+                    cache_folder=self.cache_dir
+                )
+            self.last_heavy_model_use = time.time()
+
+    def get_last_usage(self):
+        return self.last_heavy_model_use
 
     def unload_heavy_models(self):
         heavy_model_keys = set(MODEL_TYPES.keys()).difference({'all-MiniLM-L12-v2'})
