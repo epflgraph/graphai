@@ -51,7 +51,7 @@ class EmbeddingTaskResponse(BaseModel):
         description="The device used ('cuda' or 'cpu') for the embedding. `None` in case of cache hit or failure."
     )
 
-    model_type: Literal['all-MiniLM-L12-v2'] = Field(
+    model_type: Literal['all-MiniLM-L12-v2', 'Solon-embeddings-large-0.1'] = Field(
         title="Model type",
         description="Type of model that was used",
         default='all-MiniLM-L12-v2'

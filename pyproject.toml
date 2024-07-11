@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "graphai"
-version = "0.9.1"
+version = "0.9.7"
 authors = [
   { name="Aitor Pérez", email="aitor.perez@epfl.ch" },
   { name="Ramtin Yazdanian", email="ramtin.yazdanian@epfl.ch" }
