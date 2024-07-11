@@ -2,7 +2,6 @@ import os
 from functools import lru_cache
 
 from celery import current_app as current_celery_app
-from celery.schedules import crontab
 from celery.result import AsyncResult
 from kombu import Queue
 
