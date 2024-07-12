@@ -111,7 +111,7 @@ def embed_text(models, text, model_type):
             embedding = LONG_TEXT_ERROR % model_max_tokens
     except NotImplementedError as e:
         print(e)
-        embedding = str(e) + f': {model_type}'
+        embedding = str(e)
         success = False
         text_too_large = False
 
