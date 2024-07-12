@@ -3,6 +3,7 @@ from fastapi_user_limiter.limiter import rate_limiter
 
 from graphai.api.schemas.common import TaskIDResponse
 from graphai.api.schemas.embedding import (
+    EmbeddingFingerprintRequest,
     EmbeddingRequest,
     EmbeddingResponse,
 )
@@ -32,7 +33,7 @@ router = APIRouter(
 
 
 @router.post('/calculate_fingerprint', response_model=TaskIDResponse)
-async def calculate_embedding_text_fingerprint(data: EmbeddingRequest):
+async def calculate_embedding_text_fingerprint(data: EmbeddingFingerprintRequest):
     text = data.text
     model_type = data.model_type
     force = data.force

@@ -4,12 +4,7 @@ from typing import Union, Literal, List
 from graphai.api.schemas.common import TaskStatusResponse
 
 
-class EmbeddingRequest(BaseModel):
-    text: str = Field(
-        title="Text",
-        description="Text to embed."
-    )
-
+class EmbeddingRequestBase(BaseModel):
     model_type: Literal['all-MiniLM-L12-v2', 'Solon-embeddings-large-0.1'] = Field(
         title="Model type",
         description="Type of model to use",
@@ -19,6 +14,20 @@ class EmbeddingRequest(BaseModel):
     force: bool = Field(
         title="Force recomputation",
         default=False
+    )
+
+
+class EmbeddingFingerprintRequest(EmbeddingRequestBase):
+    text: str = Field(
+        title="Text",
+        description="String to embed"
+    )
+
+
+class EmbeddingRequest(EmbeddingRequestBase):
+    text: Union[List[str], str] = Field(
+        title="Text",
+        description="String or list of strings to embed."
     )
 
 
