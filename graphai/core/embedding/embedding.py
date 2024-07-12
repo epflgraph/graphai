@@ -35,11 +35,8 @@ def generate_embedding_text_token(s, model_type):
     Returns:
         Token
     """
-    assert isinstance(s, str) or isinstance(s, list)
-    if isinstance(s, str):
-        return md5_text(s) + '_' + model_type
-    else:
-        return md5_text(convert_list_to_text(s)) + '_' + model_type
+    assert isinstance(s, str)
+    return md5_text(s) + '_' + model_type
 
 
 def get_model_max_tokens(model):
