@@ -8,25 +8,11 @@ from transformers import AutoTokenizer, AutoModelForSeq2SeqLM, MarianMTModel, Ma
 import torch
 from sklearn.feature_extraction.text import TfidfVectorizer
 
+from graphai.core.common.common_utils import convert_list_to_text, convert_text_back_to_list
 from graphai.core.common.fingerprinting import md5_text
 from graphai.core.interfaces.config import config
 
-TRANSLATION_LIST_SEPARATOR = ' [{[!!SEP!!]}] '
 HUGGINGFACE_MAX_TOKENS = 512
-
-
-def translation_list_to_text(str_or_list):
-    if not isinstance(str_or_list, list):
-        return str_or_list
-    str_or_list = [x if x is not None else '' for x in str_or_list]
-    return TRANSLATION_LIST_SEPARATOR.join(str_or_list)
-
-
-def translation_text_back_to_list(s, return_list=False):
-    results = s.split(TRANSLATION_LIST_SEPARATOR)
-    if len(results) == 1 and not return_list:
-        return results[0]
-    return results
 
 
 def generate_src_tgt_dict(src, tgt):
@@ -57,7 +43,7 @@ def generate_translation_text_token(s, src, tgt):
     if isinstance(s, str):
         return md5_text(s) + '_' + src + '_' + tgt
     else:
-        return md5_text(translation_list_to_text(s)) + '_' + src + '_' + tgt
+        return md5_text(convert_list_to_text(s)) + '_' + src + '_' + tgt
 
 
 def detect_text_language(s):
@@ -258,6 +244,6 @@ class TranslationModels:
         tokenizer = self.models[how]['tokenizer']
         model = self.models[how]['model']
         segmenter = self.models[how]['segmenter']
-        text = translation_text_back_to_list(text, return_list=True)
+        text = convert_text_back_to_list(text, return_list=True)
         results = [self._translate(current_text, tokenizer, model, segmenter) for current_text in text]
-        return translation_list_to_text([x[0] for x in results]), any([x[1] for x in results]), [x[1] for x in results]
+        return convert_list_to_text([x[0] for x in results]), any([x[1] for x in results]), [x[1] for x in results]

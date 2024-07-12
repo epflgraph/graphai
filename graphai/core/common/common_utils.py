@@ -137,3 +137,20 @@ def strtobool(val):
 
 def copy_file_within_folder(folder_name, src_file, dest_file):
     shutil.copyfile(os.path.join(folder_name, src_file), os.path.join(folder_name, dest_file))
+
+
+TEXT_LIST_TO_STRING_SEPARATOR = ' [{[!!SEP!!]}] '
+
+
+def convert_list_to_text(str_or_list):
+    if not isinstance(str_or_list, list):
+        return str_or_list
+    str_or_list = [x if x is not None else '' for x in str_or_list]
+    return TEXT_LIST_TO_STRING_SEPARATOR.join(str_or_list)
+
+
+def convert_text_back_to_list(s, return_list=False):
+    results = s.split(TEXT_LIST_TO_STRING_SEPARATOR)
+    if len(results) == 1 and not return_list:
+        return results[0]
+    return results

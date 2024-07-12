@@ -14,9 +14,9 @@ from graphai.api.celery_tasks.translation import (
 from graphai.api.celery_jobs.common import direct_lookup_generic_job, DEFAULT_TIMEOUT
 
 from graphai.core.translation.text_utils import (
-    generate_translation_text_token,
-    translation_list_to_text
+    generate_translation_text_token
 )
+from graphai.core.common.common_utils import convert_list_to_text
 
 
 def get_translation_text_fingerprint_chain_list(token, text, src, tgt):
@@ -62,14 +62,14 @@ def fingerprint_job(text, src, tgt, force):
     #################
     # Computation job
     #################
-    text = translation_list_to_text(text)
+    text = convert_list_to_text(text)
     return fingerprint_compute_job(token, text, src, tgt, asynchronous=True)
 
 
 def translation_job(text, src, tgt, force):
     token = generate_translation_text_token(text, src, tgt)
     return_list = isinstance(text, list)
-    text = translation_list_to_text(text)
+    text = convert_list_to_text(text)
     ##########################
     # Translation cache lookup
     ##########################
@@ -113,7 +113,7 @@ def translation_job(text, src, tgt, force):
 
 
 def detect_text_language_job(text):
-    text = translation_list_to_text(text)
+    text = convert_list_to_text(text)
     # The only task is language detection because this task does not go through the caching logic
     task = (detect_text_language_task.s(text)).apply_async(priority=6)
     return task.id
