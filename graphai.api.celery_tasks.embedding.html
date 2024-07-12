@@ -95,6 +95,26 @@
              
   <section id="module-graphai.api.celery_tasks.embedding">
 <span id="graphai-api-celery-tasks-embedding-module"></span><h1>graphai.api.celery_tasks.embedding module<a class="headerlink" href="#module-graphai.api.celery_tasks.embedding" title="Link to this heading"></a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.api.celery_tasks.embedding.token_based_embedding_lookup">
+<span class="sig-prename descclassname"><span class="pre">graphai.api.celery_tasks.embedding.</span></span><span class="sig-name descname"><span class="pre">token_based_embedding_lookup</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">token</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_type</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.api.celery_tasks.embedding.token_based_embedding_lookup" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.api.celery_tasks.embedding.fingerprint_based_embedding_lookup">
+<span class="sig-prename descclassname"><span class="pre">graphai.api.celery_tasks.embedding.</span></span><span class="sig-name descname"><span class="pre">fingerprint_based_embedding_lookup</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">token</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_type</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.api.celery_tasks.embedding.fingerprint_based_embedding_lookup" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.api.celery_tasks.embedding.embed_text">
+<span class="sig-prename descclassname"><span class="pre">graphai.api.celery_tasks.embedding.</span></span><span class="sig-name descname"><span class="pre">embed_text</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">models</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">text</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_type</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.api.celery_tasks.embedding.embed_text" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.api.celery_tasks.embedding.insert_embedding_into_db">
+<span class="sig-prename descclassname"><span class="pre">graphai.api.celery_tasks.embedding.</span></span><span class="sig-name descname"><span class="pre">insert_embedding_into_db</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">results</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">token</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">text</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">force</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.api.celery_tasks.embedding.insert_embedding_into_db" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 </section>
 
 
