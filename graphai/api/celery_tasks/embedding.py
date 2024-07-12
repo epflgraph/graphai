@@ -111,7 +111,7 @@ def embed_text(models, text, model_type):
             embedding = LONG_TEXT_ERROR % model_max_tokens
     except NotImplementedError as e:
         print(e)
-        embedding = str(e)
+        embedding = str(e) + f': {model_type}'
         success = False
         text_too_large = False
 
@@ -271,7 +271,7 @@ def embedding_text_list_embed_callback_task(self, results, model_type, force=Fal
         del new_result['id_token']
         del new_result['source']
         new_results.append(new_result)
-    return results
+    return new_results
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
