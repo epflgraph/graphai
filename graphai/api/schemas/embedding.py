@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from typing import Union, Literal
+from typing import Union, Literal, List
 
 from graphai.api.schemas.common import TaskStatusResponse
 
@@ -59,7 +59,7 @@ class EmbeddingTaskResponse(BaseModel):
 
 
 class EmbeddingResponse(TaskStatusResponse):
-    task_result: Union[EmbeddingTaskResponse, None] = Field(
+    task_result: Union[EmbeddingTaskResponse, List[EmbeddingTaskResponse], None] = Field(
         title="Embedding response",
         description="A dict containing the resulting embedding of the original text and a success flag."
     )
