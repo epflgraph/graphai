@@ -74,7 +74,7 @@ async def embed_text_status(task_id):
     full_results = get_task_info(task_id)
     task_results = full_results['results']
     if task_results is not None:
-        if 'result' in task_results:
+        if isinstance(task_results, dict):
             task_results = {
                 'result': task_results['result'],
                 'successful': task_results['successful'],
@@ -83,6 +83,15 @@ async def embed_text_status(task_id):
                 'fresh': task_results['fresh'],
                 'device': task_results['device']
             }
+        elif isinstance(task_results, list):
+            task_results = [{
+                'result': tr['result'],
+                'successful': tr['successful'],
+                'text_too_large': tr['text_too_large'],
+                'model_type': tr['model_type'],
+                'fresh': tr['fresh'],
+                'device': tr['device']
+            } for tr in task_results]
         else:
             task_results = None
     return format_api_results(full_results['id'], full_results['name'], full_results['status'], task_results)
