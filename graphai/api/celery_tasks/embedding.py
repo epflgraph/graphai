@@ -149,13 +149,16 @@ def insert_embedding_into_db(results, token, text, model_type, force=False):
                 db_manager.insert_or_update_details(
                     closest, values_dict
                 )
+        # If the computation is fresh, we need to JSONify the resulting numpy array.
+        # Non-fresh successful computation results come from cache hits, and those are already in JSON.
+        # Non-successful computation results are normal strings.
+        results['result'] = embedding_to_json(results['result'])
     elif not results['successful']:
         # in case we fingerprinted something and then failed to embed it, we delete its cache row
         db_manager.delete_cache_rows([token])
 
-    # If the computation was successful, we need to JSONify the resulting numpy array.
     if results['successful']:
-        results['result'] = embedding_to_json(results['result'])
+
     return results
 
 
