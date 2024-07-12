@@ -156,9 +156,6 @@ def insert_embedding_into_db(results, token, text, model_type, force=False):
     elif not results['successful']:
         # in case we fingerprinted something and then failed to embed it, we delete its cache row
         db_manager.delete_cache_rows([token])
-
-    if results['successful']:
-
     return results
 
 
