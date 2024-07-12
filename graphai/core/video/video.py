@@ -8,6 +8,7 @@ import json
 import time
 from datetime import timedelta
 import gzip
+from multiprocessing import Lock
 
 from sacremoses.tokenize import MosesTokenizer
 import wget
@@ -482,6 +483,7 @@ class NLPModels:
         self.nlp_models = None
         self.tokenizers = None
         self.stopwords = None
+        self.load_lock = Lock()
 
     def load_nlp_models(self):
         """
@@ -489,16 +491,17 @@ class NLPModels:
         Returns:
             The NLP model dict
         """
-        if self.nlp_models is None:
-            self.nlp_models = {
-                lang: fasttext.load_model(self.model_paths[lang])
-                for lang in self.model_paths
-            }
-            self.tokenizers = {
-                lang: MosesTokenizer(lang)
-                for lang in self.nlp_models
-            }
-            self.stopwords = STOPWORDS
+        with self.load_lock:
+            if self.nlp_models is None:
+                self.nlp_models = {
+                    lang: fasttext.load_model(self.model_paths[lang])
+                    for lang in self.model_paths
+                }
+                self.tokenizers = {
+                    lang: MosesTokenizer(lang)
+                    for lang in self.nlp_models
+                }
+                self.stopwords = STOPWORDS
 
     def get_words(self, text, lang='en', valid_only=False):
         self.load_nlp_models()

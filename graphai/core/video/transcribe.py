@@ -1,6 +1,6 @@
 import sys
-
 import whisper
+from multiprocessing import Lock
 
 from graphai.core.common.common_utils import file_exists
 from graphai.core.interfaces.config import config
@@ -33,21 +33,22 @@ class WhisperTranscriptionModel:
 
         # The actual Whisper model is lazy loaded in order not to load it twice (celery *and* gunicorn)
         self.model = None
+        self.load_lock = Lock()
 
     def load_model_whisper(self):
         """
         Lazy-loads a Whisper model into memory
         Args:
             model_type: Type of model, see Whisper docs for details
-
         Returns:
             Model object
         """
-        # device=None ensures that the model will use CUDA if available and switch to CPUs otherwise.
-        if self.model is None:
-            print('Actually loading Whisper model...')
-            self.model = whisper.load_model(self.model_type, device=None, in_memory=True,
-                                            download_root=self.download_root)
+        with self.load_lock:
+            # device=None ensures that the model will use CUDA if available and switch to CPUs otherwise.
+            if self.model is None:
+                print('Actually loading Whisper model...')
+                self.model = whisper.load_model(self.model_type, device=None, in_memory=True,
+                                                download_root=self.download_root)
 
     def get_silence_thresholds(self, strict_silence=False):
         if strict_silence:
