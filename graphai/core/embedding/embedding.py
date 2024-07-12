@@ -5,6 +5,7 @@ import json
 from sentence_transformers import SentenceTransformer
 from graphai.core.interfaces.config import config
 from graphai.core.common.fingerprinting import md5_text
+from graphai.core.common.common_utils import convert_list_to_text, convert_text_back_to_list
 import torch
 
 
@@ -34,8 +35,11 @@ def generate_embedding_text_token(s, model_type):
     Returns:
         Token
     """
-    assert isinstance(s, str)
-    return md5_text(s) + '_' + model_type
+    assert isinstance(s, str) or isinstance(s, list)
+    if isinstance(s, str):
+        return md5_text(s) + '_' + model_type
+    else:
+        return md5_text(convert_list_to_text(s)) + '_' + model_type
 
 
 def get_model_max_tokens(model):
