@@ -4,6 +4,7 @@ import pandas as pd
 import random
 from scipy.sparse import csr_array, csr_matrix, vstack, spmatrix
 from itertools import chain
+from multiprocessing import Lock
 
 from graphai.core.common.common_utils import invert_dict
 from graphai.core.interfaces.config import config
@@ -231,25 +232,27 @@ class OntologyData:
         self.test_concept_names = None
         self.test_category_concept = None
         self.test_cluster_concept = None
+        self.load_lock = Lock()
 
     def load_data(self):
-        if not self.loaded:
-            self.db_config = config['database']
-            # First loading concepts: ontology concepts, anchor concepts, and ontology-neighborhood concepts
-            self.load_ontology_concept_names()
-            self.load_ontology_categories()
-            self.load_non_ontology_concept_names()
-            # Now loading category-category and category-concept tables
-            self.load_category_category()
-            self.load_category_concept()
-            # Now loading the concept-concept table and the matrix from neighborhood to ontology/anchors
-            self.load_concept_concept_graphscore()
-            self.compute_symmetric_concept_concept_matrix()
-            # Now loading aggregated anchor concept lists for each category
-            self.load_anchor_page_dict()
-            # Finally, we compute aggregated matrices that map each concept to each category
-            self.compute_precalculated_similarity_matrices()
-            self.loaded = True
+        with self.load_lock:
+            if not self.loaded:
+                self.db_config = config['database']
+                # First loading concepts: ontology concepts, anchor concepts, and ontology-neighborhood concepts
+                self.load_ontology_concept_names()
+                self.load_ontology_categories()
+                self.load_non_ontology_concept_names()
+                # Now loading category-category and category-concept tables
+                self.load_category_category()
+                self.load_category_concept()
+                # Now loading the concept-concept table and the matrix from neighborhood to ontology/anchors
+                self.load_concept_concept_graphscore()
+                self.compute_symmetric_concept_concept_matrix()
+                # Now loading aggregated anchor concept lists for each category
+                self.load_anchor_page_dict()
+                # Finally, we compute aggregated matrices that map each concept to each category
+                self.compute_precalculated_similarity_matrices()
+                self.loaded = True
 
     def load_ontology_concept_names(self):
         db_manager = DB(self.db_config)

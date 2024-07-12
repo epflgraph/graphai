@@ -6,6 +6,7 @@ from sentence_transformers import SentenceTransformer
 from graphai.core.interfaces.config import config
 from graphai.core.common.fingerprinting import md5_text
 import torch
+from multiprocessing import Lock
 
 
 MODEL_TYPES = {
@@ -45,6 +46,7 @@ def get_model_max_tokens(model):
 class EmbeddingModels:
     def __init__(self):
         self.models = None
+        self.load_lock = Lock()
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
         self.last_heavy_model_use = 0
         try:
@@ -68,21 +70,22 @@ class EmbeddingModels:
         Returns:
             None
         """
-        if self.models is None:
-            self.models = dict()
-            self.models['all-MiniLM-L12-v2'] = SentenceTransformer(
-                MODEL_TYPES['all-MiniLM-L12-v2'],
-                device=self.device,
-                cache_folder=self.cache_dir
-            )
-        if load_heavies:
-            if 'Solon-embeddings-large-0.1' not in self.models:
-                self.models['Solon-embeddings-large-0.1'] = SentenceTransformer(
-                    MODEL_TYPES['Solon-embeddings-large-0.1'],
+        with self.load_lock:
+            if self.models is None:
+                self.models = dict()
+                self.models['all-MiniLM-L12-v2'] = SentenceTransformer(
+                    MODEL_TYPES['all-MiniLM-L12-v2'],
                     device=self.device,
                     cache_folder=self.cache_dir
                 )
-            self.last_heavy_model_use = time.time()
+            if load_heavies:
+                if 'Solon-embeddings-large-0.1' not in self.models:
+                    self.models['Solon-embeddings-large-0.1'] = SentenceTransformer(
+                        MODEL_TYPES['Solon-embeddings-large-0.1'],
+                        device=self.device,
+                        cache_folder=self.cache_dir
+                    )
+                self.last_heavy_model_use = time.time()
 
     def get_last_usage(self):
         return self.last_heavy_model_use
@@ -126,6 +129,6 @@ class EmbeddingModels:
         load_heavies = model_type != 'all-MiniLM-L12-v2'
         self.load_models(load_heavies=load_heavies)
         if model_type not in self.models.keys():
-            raise NotImplementedError("Selected model type not implemented")
+            raise NotImplementedError(f"Selected model type not implemented: {model_type}")
         results, text_too_large = self._embed(self.models[model_type], text)
         return results, text_too_large, get_model_max_tokens(self.models[model_type])

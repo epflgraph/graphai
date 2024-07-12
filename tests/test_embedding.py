@@ -54,15 +54,16 @@ def test__translation_translate__translate_text__run_task(example_word, very_lon
 
 
 @pytest.mark.celery(accept_content=['pickle', 'json'], result_serializer='pickle', task_serializer='pickle')
-@pytest.mark.usefixtures('example_word')
-def test__translation_translate__translate_text__integration(fixture_app, celery_worker, example_word, timeout=30):
+@pytest.mark.usefixtures('example_word', 'very_long_text')
+def test__translation_translate__translate_text__integration(fixture_app, celery_worker,
+                                                             example_word, very_long_text, timeout=30):
     # The celery_worker object is necessary for async tasks, otherwise the status will be permanently stuck on
     # PENDING.
 
     # This line ensures the initialization of the database in case this is the first deployment
     EmbeddingDBCachingManager(initialize_database=True)
 
-    # First, we call the translate endpoint with force=True to test the full task pipeline working
+    # First, we call the embedding endpoint with force=True to test the full task pipeline working
     response = fixture_app.post('/embedding/embed',
                                 data=json.dumps({"text": example_word, "model_type": "all-MiniLM-L12-v2",
                                                  "force": True}),
@@ -138,3 +139,39 @@ def test__translation_translate__translate_text__integration(fixture_app, celery
     assert embedding['task_result']['text_too_large'] is False
     assert embedding['task_result']['fresh'] is False
     assert embedding['task_result']['result'] == original_results
+
+    response = fixture_app.post('/embedding/embed',
+                                data=json.dumps({"text": [example_word, very_long_text],
+                                                 "model_type": "all-MiniLM-L12-v2",
+                                                 "force": True}),
+                                timeout=timeout)
+    # Check status code is successful
+    assert response.status_code == 200
+    # Parse resulting task id
+    task_id = response.json()['task_id']
+
+    # Waiting for task chain to succeed
+    current_status = 'PENDING'
+    n_tries = 0
+    while current_status == 'PENDING' and n_tries < 20:
+        # Wait a few seconds
+        sleep(3)
+        # Now get status
+        response = fixture_app.get(f'/embedding/embed/status/{task_id}',
+                                   timeout=timeout)
+        current_status = response.json()['task_status']
+        n_tries += 1
+
+    # Now get status
+    response = fixture_app.get(f'/embedding/embed/status/{task_id}',
+                               timeout=timeout)
+    # Parse result
+    embedding = response.json()
+    # Check returned value
+    assert isinstance(embedding, dict)
+    assert embedding['task_status'] == 'SUCCESS'
+    assert len(embedding['task_result']) == 2
+    assert embedding['task_result'][0]['successful'] is True
+    assert embedding['task_result'][0]['result'] == original_results
+    assert embedding['task_result'][1]['successful'] is False
+    assert embedding['task_result'][1]['result'] == "Text over token limit for selected model (128)."

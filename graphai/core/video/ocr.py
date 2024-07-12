@@ -1,6 +1,6 @@
 import io
 import time
-
+from multiprocessing import Lock
 from google.cloud import vision
 
 from graphai.core.common.common_utils import file_exists
@@ -24,6 +24,7 @@ class GoogleOCRModel:
 
         # The actual Google model is lazy loaded in order not to load it twice (celery *and* gunicorn)
         self.model = None
+        self.load_lock = Lock()
 
     def establish_connection(self):
         """
@@ -31,20 +32,21 @@ class GoogleOCRModel:
         Returns:
             True if a connection already exists or if a new connection is successfully established, False otherwise
         """
-        if self.model is None:
-            if self.api_key is not None:
-                print('Establishing Google API connection...')
-                try:
-                    self.model = vision.ImageAnnotatorClient(client_options={"api_key": self.api_key})
-                    return True
-                except Exception:
-                    print('Failed to connect to Google API!')
+        with self.load_lock:
+            if self.model is None:
+                if self.api_key is not None:
+                    print('Establishing Google API connection...')
+                    try:
+                        self.model = vision.ImageAnnotatorClient(client_options={"api_key": self.api_key})
+                        return True
+                    except Exception:
+                        print('Failed to connect to Google API!')
+                        return False
+                else:
+                    print('No API key provided!')
                     return False
             else:
-                print('No API key provided!')
-                return False
-        else:
-            return True
+                return True
 
     def perform_ocr(self, input_filename_with_path):
         """

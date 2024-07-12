@@ -1,11 +1,10 @@
 from celery import shared_task
 from graphai.api.common.translation import translation_models
 from graphai.core.translation.text_utils import (
-    detect_text_language,
-    translation_text_back_to_list
+    detect_text_language
 )
 from graphai.core.common.fingerprinting import perceptual_hash_text
-from graphai.core.common.common_utils import get_current_datetime
+from graphai.core.common.common_utils import get_current_datetime, convert_text_back_to_list
 from graphai.core.interfaces.caching import TextDBCachingManager
 
 LONG_TEXT_ERROR = "Unpunctuated text too long (over 512 tokens), " \
@@ -74,7 +73,7 @@ def cache_lookup_translation_text_using_fingerprint_task(self, token, fp, src, t
             'target': translation,
         })
         return {
-            'result': translation_text_back_to_list(translation, return_list=return_list),
+            'result': convert_text_back_to_list(translation, return_list=return_list),
             'text_too_large': False,
             'successful': True,
             'fresh': False,
@@ -91,7 +90,7 @@ def cache_lookup_translate_text_task(self, token, return_list=False):
     if existing is not None and existing['target'] is not None:
         print('Returning cached result')
         return {
-            'result': translation_text_back_to_list(existing['target'], return_list=return_list),
+            'result': convert_text_back_to_list(existing['target'], return_list=return_list),
             'text_too_large': False,
             'successful': True,
             'fresh': False,
@@ -174,7 +173,7 @@ def translate_text_callback_task(self, results, token, text, src, tgt, force=Fal
     # If the computation was successful and return_list is True, we want to convert the text results
     # back to a list (because this flag means that the original input was a list of strings)
     if results['successful']:
-        results['result'] = translation_text_back_to_list(results['result'], return_list=return_list)
+        results['result'] = convert_text_back_to_list(results['result'], return_list=return_list)
     return results
 
 
