@@ -39,7 +39,7 @@ class WhisperTranscriptionModel:
         # The actual Whisper model is lazy loaded in order not to load it twice (celery *and* gunicorn)
         self.model = None
         self.load_lock = Lock()
-        self.last_model_use = 0
+        self.last_model_use = time.time()
 
     def load_model_whisper(self):
         """

@@ -51,7 +51,7 @@ class EmbeddingModels:
         self.models = None
         self.load_lock = Lock()
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
-        self.last_heavy_model_use = 0
+        self.last_heavy_model_use = time.time()
         try:
             print("Reading HuggingFace model path from config")
             self.cache_dir = config['huggingface']['model_path']
@@ -93,7 +93,7 @@ class EmbeddingModels:
     def get_last_usage(self):
         return self.last_heavy_model_use
 
-    def unload_heavy_models(self, unload_period=EMBEDDING_UNLOAD_WAITING_PERIOD):
+    def unload_model(self, unload_period=EMBEDDING_UNLOAD_WAITING_PERIOD):
         """
         Unloads all models except the light, default model.
         Args:

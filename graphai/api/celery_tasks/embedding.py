@@ -274,4 +274,4 @@ def embedding_text_list_embed_callback_task(self, results, model_type, force=Fal
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='text_6.clean_up_large_embedding_objects', embedding_obj=embedding_models, ignore_result=False)
 def cleanup_large_embedding_objects_task(self):
-    return self.embedding_obj.unload_heavy_models(EMBEDDING_UNLOAD_WAITING_PERIOD)
+    return self.embedding_obj.unload_model(EMBEDDING_UNLOAD_WAITING_PERIOD)
