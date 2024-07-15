@@ -1,9 +1,14 @@
+import gc
 import sys
 import whisper
+import time
 from multiprocessing import Lock
 
 from graphai.core.common.common_utils import file_exists
 from graphai.core.interfaces.config import config
+
+# 12 hours
+WHISPER_UNLOAD_WAITING_PERIOD = 12 * 3600.0
 
 
 class WhisperTranscriptionModel:
@@ -34,14 +39,11 @@ class WhisperTranscriptionModel:
         # The actual Whisper model is lazy loaded in order not to load it twice (celery *and* gunicorn)
         self.model = None
         self.load_lock = Lock()
+        self.last_model_use = 0
 
     def load_model_whisper(self):
         """
         Lazy-loads a Whisper model into memory
-        Args:
-            model_type: Type of model, see Whisper docs for details
-        Returns:
-            Model object
         """
         with self.load_lock:
             # device=None ensures that the model will use CUDA if available and switch to CPUs otherwise.
@@ -49,6 +51,22 @@ class WhisperTranscriptionModel:
                 print('Actually loading Whisper model...')
                 self.model = whisper.load_model(self.model_type, device=None, in_memory=True,
                                                 download_root=self.download_root)
+            self.last_model_use = time.time()
+
+    def get_last_usage(self):
+        return self.last_model_use
+
+    def unload_model(self, unload_period=WHISPER_UNLOAD_WAITING_PERIOD):
+        deleted_models = None
+        with self.load_lock:
+            if time.time() - self.get_last_usage() > unload_period:
+                if self.model is None:
+                    deleted_models = list()
+                else:
+                    self.model = None
+                    gc.collect()
+                    deleted_models = [self.model_type]
+        return deleted_models
 
     def get_silence_thresholds(self, strict_silence=False):
         if strict_silence:
