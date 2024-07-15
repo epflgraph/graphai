@@ -100,6 +100,11 @@ def create_celery():
             'schedule': 6 * 3600.0
             # Every 6 hours
         },
+        'cleanup-translation-model-every-six-hours': {
+            'task': 'text_6.clean_up_translation_object',
+            'schedule': 6 * 3600.0
+            # Every 6 hours
+        },
         'cleanup-whisper-model-every-twentyfour-hours': {
             'task': 'video_2.clean_up_transcription_object',
             'schedule': 24 * 3600.0
