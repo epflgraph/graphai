@@ -1,4 +1,5 @@
 import time
+import gc
 
 import numpy as np
 import json
@@ -13,6 +14,8 @@ MODEL_TYPES = {
     'all-MiniLM-L12-v2': 'sentence-transformers/all-MiniLM-L12-v2',
     'Solon-embeddings-large-0.1': 'OrdalieTech/Solon-embeddings-large-0.1'
 }
+# 3 hours
+EMBEDDING_UNLOAD_WAITING_PERIOD = 3 * 3600.0
 
 
 def embedding_to_json(v):
@@ -90,15 +93,29 @@ class EmbeddingModels:
     def get_last_usage(self):
         return self.last_heavy_model_use
 
-    def unload_heavy_models(self):
-        deleted_models = list()
-        if self.models is None:
-            return deleted_models
-        heavy_model_keys = set(MODEL_TYPES.keys()).difference({'all-MiniLM-L12-v2'})
-        for key in heavy_model_keys:
-            if key in self.models:
-                deleted_models.append(key)
-                del self.models[key]
+    def unload_heavy_models(self, unload_period=EMBEDDING_UNLOAD_WAITING_PERIOD):
+        """
+        Unloads all models except the light, default model.
+        Args:
+            unload_period: Minimum time that needs to have passed since last use of heavy model to qualify it for
+            unloading. If set to 0, forces an unloading.
+
+        Returns:
+            None if not enough time has passed since last use, a list of unloaded models otherwise.
+        """
+        deleted_models = None
+        with self.load_lock:
+            if time.time() - self.get_last_usage() > unload_period:
+                deleted_models = list()
+                if self.models is None:
+                    return deleted_models
+                heavy_model_keys = set(MODEL_TYPES.keys()).difference({'all-MiniLM-L12-v2'})
+                for key in heavy_model_keys:
+                    if key in self.models:
+                        deleted_models.append(key)
+                        del self.models[key]
+                if len(deleted_models) > 0:
+                    gc.collect()
         return deleted_models
 
     def _get_model_output(self, model, text):
@@ -130,5 +147,7 @@ class EmbeddingModels:
         self.load_models(load_heavies=load_heavies)
         if model_type not in self.models.keys():
             raise NotImplementedError(f"Selected model type not implemented: {model_type}")
-        results, text_too_large = self._embed(self.models[model_type], text)
-        return results, text_too_large, get_model_max_tokens(self.models[model_type])
+        model_to_use = self.models[model_type]
+        max_tokens = get_model_max_tokens(model_to_use)
+        results, text_too_large = self._embed(model_to_use, text)
+        return results, text_too_large, max_tokens

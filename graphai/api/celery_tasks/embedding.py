@@ -1,6 +1,4 @@
 from celery import shared_task
-import time
-import gc
 from itertools import chain
 
 from graphai.api.common.embedding import embedding_models
@@ -9,13 +7,12 @@ from graphai.core.common.fingerprinting import perceptual_hash_text
 from graphai.core.common.common_utils import get_current_datetime
 from graphai.core.interfaces.caching import EmbeddingDBCachingManager
 from graphai.core.embedding.embedding import (
-    embedding_to_json
+    embedding_to_json,
+    EMBEDDING_UNLOAD_WAITING_PERIOD
 )
 
 
 LONG_TEXT_ERROR = "Text over token limit for selected model (%d)."
-# 3 hours
-UNLOAD_WAITING_PERIOD = 3 * 3600.0
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
@@ -277,11 +274,4 @@ def embedding_text_list_embed_callback_task(self, results, model_type, force=Fal
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='text_6.clean_up_large_embedding_objects', embedding_obj=embedding_models, ignore_result=False)
 def cleanup_large_embedding_objects_task(self):
-    last_heavy_model_use = self.embedding_obj.get_last_usage()
-    current_time = time.time()
-    result = None
-    if current_time - last_heavy_model_use > UNLOAD_WAITING_PERIOD:
-        result = self.embedding_obj.unload_heavy_models()
-        if len(result) > 0:
-            gc.collect()
-    return result
+    return self.embedding_obj.unload_heavy_models(EMBEDDING_UNLOAD_WAITING_PERIOD)
