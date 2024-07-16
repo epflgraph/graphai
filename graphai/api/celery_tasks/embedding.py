@@ -181,7 +181,7 @@ def embed_text_callback_task(self, results, token, text, model_type, force=False
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='caching_6.embedding_text_list_fingerprint_parallel', ignore_result=False)
+             name='text_6.embedding_text_list_fingerprint_parallel', ignore_result=False)
 def embedding_text_list_fingerprint_parallel_task(self, tokens, text_list, i, n):
     start_index = int(i * len(tokens) / n)
     end_index = int((i + 1) * len(tokens) / n)
@@ -215,7 +215,7 @@ def embedding_text_list_fingerprint_parallel_task(self, tokens, text_list, i, n)
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='caching_6.embedding_text_list_fingerprint_callback', ignore_result=False)
+             name='text_6.embedding_text_list_fingerprint_callback', ignore_result=False)
 def embedding_text_list_fingerprint_callback_task(self, results, model_type):
     db_manager = EmbeddingDBCachingManager()
     all_results = list(chain.from_iterable(results))
@@ -233,7 +233,7 @@ def embedding_text_list_fingerprint_callback_task(self, results, model_type):
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='caching_6.embedding_text_list_embed_parallel', embedding_obj=embedding_models, ignore_result=False)
+             name='text_6.embedding_text_list_embed_parallel', embedding_obj=embedding_models, ignore_result=False)
 def embedding_text_list_embed_parallel_task(self, input_list, model_type, i, n, force=False):
     start_index = int(i * len(input_list) / n)
     end_index = int((i + 1) * len(input_list) / n)
@@ -293,7 +293,7 @@ def embedding_text_list_embed_parallel_task(self, input_list, model_type, i, n, 
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='caching_6.embedding_text_list_embed_callback', ignore_result=False)
+             name='text_6.embedding_text_list_embed_callback', ignore_result=False)
 def embedding_text_list_embed_callback_task(self, results, model_type, force=False):
     all_results = list(chain.from_iterable(results))
     new_results = list()
