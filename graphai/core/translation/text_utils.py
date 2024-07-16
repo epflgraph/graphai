@@ -8,12 +8,16 @@ from transformers import AutoTokenizer, AutoModelForSeq2SeqLM, MarianMTModel, Ma
 import torch
 from sklearn.feature_extraction.text import TfidfVectorizer
 from multiprocessing import Lock
+import time
+import gc
 
 from graphai.core.common.common_utils import convert_list_to_text, convert_text_back_to_list
 from graphai.core.common.fingerprinting import md5_text
 from graphai.core.interfaces.config import config
 
 HUGGINGFACE_MAX_TOKENS = 512
+# 3 hours
+HUGGINGFACE_UNLOAD_WAITING_PERIOD = 3 * 3600.0
 
 
 def generate_src_tgt_dict(src, tgt):
@@ -113,6 +117,7 @@ class TranslationModels:
     def __init__(self):
         self.models = None
         self.load_lock = Lock()
+        self.last_model_use = time.time()
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
         try:
             print("Reading HuggingFace model path from config")
@@ -171,9 +176,25 @@ class TranslationModels:
                     "Helsinki-NLP/opus-mt-it-en",
                     cache_dir=self.cache_dir).to(self.device)
                 self.models['it-en']['segmenter'] = pysbd.Segmenter(language='it', clean=False)
+            self.last_model_use = time.time()
 
     def get_device(self):
         return self.device
+
+    def get_last_usage(self):
+        return self.last_model_use
+
+    def unload_model(self, unload_period=HUGGINGFACE_UNLOAD_WAITING_PERIOD):
+        deleted_models = None
+        with self.load_lock:
+            if time.time() - self.get_last_usage() > unload_period:
+                if self.models is None:
+                    deleted_models = list()
+                else:
+                    deleted_models = list(self.models.keys())
+                    self.models = None
+                    gc.collect()
+        return deleted_models
 
     def _tokenize_and_get_model_output(self, sentence, tokenizer, model):
         """

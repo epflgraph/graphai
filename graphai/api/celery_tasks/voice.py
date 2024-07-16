@@ -10,6 +10,7 @@ from graphai.api.common.video import (
 from graphai.core.video.video import (
     extract_media_segment
 )
+from graphai.core.video.transcribe import WHISPER_UNLOAD_WAITING_PERIOD
 from graphai.core.interfaces.caching import (
     TEMP_SUBFOLDER,
     AudioDBCachingManager
@@ -278,3 +279,9 @@ def transcribe_callback_task(self, results, token, force=False):
                     closest, values_dict
                 )
     return results
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
+             name='video_2.clean_up_transcription_object', model=transcription_model, ignore_result=False)
+def cleanup_transcription_object_task(self):
+    return self.model.unload_model(WHISPER_UNLOAD_WAITING_PERIOD)

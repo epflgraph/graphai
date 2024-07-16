@@ -1,7 +1,8 @@
 from celery import shared_task
 from graphai.api.common.translation import translation_models
 from graphai.core.translation.text_utils import (
-    detect_text_language
+    detect_text_language,
+    HUGGINGFACE_UNLOAD_WAITING_PERIOD
 )
 from graphai.core.common.fingerprinting import perceptual_hash_text
 from graphai.core.common.common_utils import get_current_datetime, convert_text_back_to_list
@@ -185,3 +186,9 @@ def detect_text_language_task(self, text):
         'language': result,
         'successful': result is not None
     }
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
+             name='text_6.clean_up_translation_object', model=translation_models, ignore_result=False)
+def cleanup_translation_object_task(self):
+    return self.model.unload_model(HUGGINGFACE_UNLOAD_WAITING_PERIOD)

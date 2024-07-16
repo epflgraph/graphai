@@ -54,9 +54,10 @@ def test__translation_translate__translate_text__run_task(example_word, very_lon
 
 
 @pytest.mark.celery(accept_content=['pickle', 'json'], result_serializer='pickle', task_serializer='pickle')
-@pytest.mark.usefixtures('example_word', 'very_long_text')
+@pytest.mark.usefixtures('example_word', 'very_long_text', 'example_word_list')
 def test__translation_translate__translate_text__integration(fixture_app, celery_worker,
-                                                             example_word, very_long_text, timeout=30):
+                                                             example_word, very_long_text, example_word_list,
+                                                             timeout=30):
     # The celery_worker object is necessary for async tasks, otherwise the status will be permanently stuck on
     # PENDING.
 
@@ -141,7 +142,7 @@ def test__translation_translate__translate_text__integration(fixture_app, celery
     assert embedding['task_result']['result'] == original_results
 
     response = fixture_app.post('/embedding/embed',
-                                data=json.dumps({"text": [example_word, very_long_text],
+                                data=json.dumps({"text": [example_word, very_long_text] + example_word_list,
                                                  "model_type": "all-MiniLM-L12-v2",
                                                  "force": True}),
                                 timeout=timeout)
@@ -170,8 +171,11 @@ def test__translation_translate__translate_text__integration(fixture_app, celery
     # Check returned value
     assert isinstance(embedding, dict)
     assert embedding['task_status'] == 'SUCCESS'
-    assert len(embedding['task_result']) == 2
+    assert len(embedding['task_result']) == 2 + len(example_word_list)
     assert embedding['task_result'][0]['successful'] is True
     assert embedding['task_result'][0]['result'] == original_results
     assert embedding['task_result'][1]['successful'] is False
     assert embedding['task_result'][1]['result'] == "Text over token limit for selected model (128)."
+    # All except one must have been successful
+    assert sum([1 if embedding['task_result'][i]['successful'] else 0
+                for i in range(len(embedding['task_result']))]) == len(embedding['task_result']) - 1

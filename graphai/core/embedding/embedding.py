@@ -1,4 +1,5 @@
 import time
+import gc
 
 import numpy as np
 import json
@@ -13,6 +14,8 @@ MODEL_TYPES = {
     'all-MiniLM-L12-v2': 'sentence-transformers/all-MiniLM-L12-v2',
     'Solon-embeddings-large-0.1': 'OrdalieTech/Solon-embeddings-large-0.1'
 }
+# 3 hours
+EMBEDDING_UNLOAD_WAITING_PERIOD = 3 * 3600.0
 
 
 def embedding_to_json(v):
@@ -39,16 +42,12 @@ def generate_embedding_text_token(s, model_type):
     return md5_text(s) + '_' + model_type
 
 
-def get_model_max_tokens(model):
-    return model.max_seq_length
-
-
 class EmbeddingModels:
     def __init__(self):
         self.models = None
         self.load_lock = Lock()
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
-        self.last_heavy_model_use = 0
+        self.last_heavy_model_use = time.time()
         try:
             print("Reading HuggingFace model path from config")
             self.cache_dir = config['huggingface']['model_path']
@@ -90,26 +89,70 @@ class EmbeddingModels:
     def get_last_usage(self):
         return self.last_heavy_model_use
 
-    def unload_heavy_models(self):
-        deleted_models = list()
-        if self.models is None:
-            return deleted_models
-        heavy_model_keys = set(MODEL_TYPES.keys()).difference({'all-MiniLM-L12-v2'})
-        for key in heavy_model_keys:
-            if key in self.models:
-                deleted_models.append(key)
-                del self.models[key]
+    def unload_model(self, unload_period=EMBEDDING_UNLOAD_WAITING_PERIOD):
+        """
+        Unloads all models except the light, default model.
+        Args:
+            unload_period: Minimum time that needs to have passed since last use of heavy model to qualify it for
+            unloading. If set to 0, forces an unloading.
+
+        Returns:
+            None if not enough time has passed since last use, a list of unloaded models otherwise.
+        """
+        deleted_models = None
+        with self.load_lock:
+            if time.time() - self.get_last_usage() > unload_period:
+                deleted_models = list()
+                if self.models is None:
+                    return deleted_models
+                heavy_model_keys = set(MODEL_TYPES.keys()).difference({'all-MiniLM-L12-v2'})
+                for key in heavy_model_keys:
+                    if key in self.models:
+                        deleted_models.append(key)
+                        del self.models[key]
+                if len(deleted_models) > 0:
+                    gc.collect()
         return deleted_models
+
+    @staticmethod
+    def _get_token_count(model, text):
+        model_tokenizer = model[0]
+        input_ids = model_tokenizer.tokenizer(
+            text, return_attention_mask=False, return_token_type_ids=False
+        )['input_ids']
+        if isinstance(text, str):
+            return len(input_ids)
+        else:
+            return sum([len(x) for x in input_ids])
+
+    @staticmethod
+    def _get_model_max_tokens(model):
+        return model.max_seq_length
+
+    def get_token_count(self, text, model_type):
+        if text is None or len(text) == 0:
+            return 0
+        load_heavies = model_type != 'all-MiniLM-L12-v2'
+        self.load_models(load_heavies=load_heavies)
+        if model_type not in self.models.keys():
+            raise NotImplementedError(f"Selected model type not implemented: {model_type}")
+        model_to_use = self.models[model_type]
+        return self._get_token_count(model_to_use, text)
+
+    def get_max_tokens(self, model_type):
+        load_heavies = model_type != 'all-MiniLM-L12-v2'
+        self.load_models(load_heavies=load_heavies)
+        if model_type not in self.models.keys():
+            raise NotImplementedError(f"Selected model type not implemented: {model_type}")
+        model_to_use = self.models[model_type]
+        return self._get_model_max_tokens(model_to_use)
 
     def _get_model_output(self, model, text):
         try:
             print(self.device)
-            model_tokenizer = model[0]
-            model_max_tokens = get_model_max_tokens(model)
-            input_ids = model_tokenizer.tokenizer(
-                text, return_attention_mask=False, return_token_type_ids=False
-            )['input_ids']
-            if len(input_ids) > model_max_tokens:
+            model_max_tokens = self._get_model_max_tokens(model)
+            n_tokens = self._get_token_count(model, text)
+            if n_tokens > model_max_tokens:
                 return None
             return model.encode(text)
         except IndexError as e:
@@ -130,5 +173,7 @@ class EmbeddingModels:
         self.load_models(load_heavies=load_heavies)
         if model_type not in self.models.keys():
             raise NotImplementedError(f"Selected model type not implemented: {model_type}")
-        results, text_too_large = self._embed(self.models[model_type], text)
-        return results, text_too_large, get_model_max_tokens(self.models[model_type])
+        model = self.models[model_type]
+        max_tokens = self._get_model_max_tokens(model)
+        results, text_too_large = self._embed(model, text)
+        return results, text_too_large, max_tokens
