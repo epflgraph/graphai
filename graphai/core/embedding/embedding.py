@@ -42,10 +42,6 @@ def generate_embedding_text_token(s, model_type):
     return md5_text(s) + '_' + model_type
 
 
-def get_model_max_tokens(model):
-    return model.max_seq_length
-
-
 class EmbeddingModels:
     def __init__(self):
         self.models = None
@@ -118,15 +114,45 @@ class EmbeddingModels:
                     gc.collect()
         return deleted_models
 
+    @staticmethod
+    def _get_token_count(model, text):
+        model_tokenizer = model[0]
+        input_ids = model_tokenizer.tokenizer(
+            text, return_attention_mask=False, return_token_type_ids=False
+        )['input_ids']
+        if isinstance(text, str):
+            return len(input_ids)
+        else:
+            return sum([len(x) for x in input_ids])
+
+    @staticmethod
+    def _get_model_max_tokens(model):
+        return model.max_seq_length
+
+    def get_token_count(self, text, model_type):
+        if text is None or len(text) == 0:
+            return 0
+        load_heavies = model_type != 'all-MiniLM-L12-v2'
+        self.load_models(load_heavies=load_heavies)
+        if model_type not in self.models.keys():
+            raise NotImplementedError(f"Selected model type not implemented: {model_type}")
+        model_to_use = self.models[model_type]
+        return self._get_token_count(model_to_use, text)
+
+    def get_max_tokens(self, model_type):
+        load_heavies = model_type != 'all-MiniLM-L12-v2'
+        self.load_models(load_heavies=load_heavies)
+        if model_type not in self.models.keys():
+            raise NotImplementedError(f"Selected model type not implemented: {model_type}")
+        model_to_use = self.models[model_type]
+        return self._get_model_max_tokens(model_to_use)
+
     def _get_model_output(self, model, text):
         try:
             print(self.device)
-            model_tokenizer = model[0]
-            model_max_tokens = get_model_max_tokens(model)
-            input_ids = model_tokenizer.tokenizer(
-                text, return_attention_mask=False, return_token_type_ids=False
-            )['input_ids']
-            if len(input_ids) > model_max_tokens:
+            model_max_tokens = self._get_model_max_tokens(model)
+            n_tokens = self._get_token_count(model, text)
+            if n_tokens > model_max_tokens:
                 return None
             return model.encode(text)
         except IndexError as e:
@@ -147,7 +173,7 @@ class EmbeddingModels:
         self.load_models(load_heavies=load_heavies)
         if model_type not in self.models.keys():
             raise NotImplementedError(f"Selected model type not implemented: {model_type}")
-        model_to_use = self.models[model_type]
-        max_tokens = get_model_max_tokens(model_to_use)
-        results, text_too_large = self._embed(model_to_use, text)
+        model = self.models[model_type]
+        max_tokens = self._get_model_max_tokens(model)
+        results, text_too_large = self._embed(model, text)
         return results, text_too_large, max_tokens

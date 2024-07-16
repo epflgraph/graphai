@@ -240,22 +240,56 @@ def embedding_text_list_embed_parallel_task(self, input_list, model_type, i, n, 
     if start_index == end_index:
         return []
     input_list = input_list[start_index:end_index]
-
-    results = list()
-    for current_dict in input_list:
-        current_results = None
-        if not force:
+    input_list = dict(enumerate(input_list))
+    results_dict = dict()
+    if not force:
+        for ind in input_list:
+            current_dict = input_list[ind]
             current_results = token_based_embedding_lookup(current_dict['token'], model_type)
             if current_results is None:
                 current_results = fingerprint_based_embedding_lookup(
                     current_dict['token'], current_dict['fp'], model_type
                 )
-        if current_results is None:
-            current_results = embed_text(self.embedding_obj, current_dict['text'], model_type)
-        current_results['id_token'] = current_dict['token']
-        current_results['source'] = current_dict['text']
-        results.append(current_results)
-    return results
+            if current_results is not None:
+                current_results['id_token'] = current_dict['token']
+                current_results['source'] = current_dict['text']
+                results_dict[ind] = current_results
+    remaining_indices = list(set(input_list.keys()).difference(set(results_dict.keys())))
+    if len(remaining_indices) > 0:
+        token_counts = [self.embedding_obj.get_token_count(input_list[ind]['text'], model_type)
+                        for ind in remaining_indices]
+        model_max_tokens = self.embedding_obj.get_max_tokens(model_type)
+        i = 0
+        while i < len(remaining_indices):
+            current_token_count_sum = token_counts[i]
+            j = i + 1
+            while current_token_count_sum < model_max_tokens and j < len(remaining_indices):
+                current_token_count_sum += token_counts[j]
+                j += 1
+            if current_token_count_sum >= model_max_tokens:
+                j -= 1
+            if j == i:
+                j = i + 1
+            current_results_list = embed_text(self.embedding_obj,
+                                              [input_list[remaining_indices[k]]['text'] for k in range(i, j)],
+                                              model_type)
+            for k in range(i, j):
+                current_results = {
+                    'result': current_results_list['result'][k - i]
+                    if not isinstance(current_results_list['result'], str)
+                    else current_results_list['result'],
+                    'successful': current_results_list['successful'],
+                    'text_too_large': current_results_list['text_too_large'],
+                    'fresh': current_results_list['fresh'],
+                    'model_type': current_results_list['model_type'],
+                    'device': current_results_list['device'],
+                    'id_token': input_list[remaining_indices[k]]['token'],
+                    'source': input_list[remaining_indices[k]]['text']
+                }
+                results_dict[remaining_indices[k]] = current_results
+            i = j
+    sorted_indices = sorted(results_dict.keys())
+    return [results_dict[i] for i in sorted_indices]
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
