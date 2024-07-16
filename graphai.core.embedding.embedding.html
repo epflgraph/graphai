@@ -121,11 +121,6 @@
 </dl>
 </dd></dl>
 
-<dl class="py function">
-<dt class="sig sig-object py" id="graphai.core.embedding.embedding.get_model_max_tokens">
-<span class="sig-prename descclassname"><span class="pre">graphai.core.embedding.embedding.</span></span><span class="sig-name descname"><span class="pre">get_model_max_tokens</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.embedding.embedding.get_model_max_tokens" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
 <dl class="py class">
 <dt class="sig sig-object py" id="graphai.core.embedding.embedding.EmbeddingModels">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">graphai.core.embedding.embedding.</span></span><span class="sig-name descname"><span class="pre">EmbeddingModels</span></span><a class="headerlink" href="#graphai.core.embedding.embedding.EmbeddingModels" title="Link to this definition"></a></dt>
@@ -148,8 +143,27 @@
 <dd></dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="graphai.core.embedding.embedding.EmbeddingModels.unload_heavy_models">
-<span class="sig-name descname"><span class="pre">unload_heavy_models</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.embedding.embedding.EmbeddingModels.unload_heavy_models" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="graphai.core.embedding.embedding.EmbeddingModels.unload_model">
+<span class="sig-name descname"><span class="pre">unload_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">unload_period</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10800.0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.embedding.embedding.EmbeddingModels.unload_model" title="Link to this definition"></a></dt>
+<dd><p>Unloads all models except the light, default model.
+:param unload_period: Minimum time that needs to have passed since last use of heavy model to qualify it for
+:param unloading. If set to 0:
+:param forces an unloading.:</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None if not enough time has passed since last use, a list of unloaded models otherwise.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="graphai.core.embedding.embedding.EmbeddingModels.get_token_count">
+<span class="sig-name descname"><span class="pre">get_token_count</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_type</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.embedding.embedding.EmbeddingModels.get_token_count" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="graphai.core.embedding.embedding.EmbeddingModels.get_max_tokens">
+<span class="sig-name descname"><span class="pre">get_max_tokens</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_type</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.embedding.embedding.EmbeddingModels.get_max_tokens" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
