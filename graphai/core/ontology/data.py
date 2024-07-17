@@ -260,6 +260,7 @@ class OntologyData:
             "SELECT id, name FROM graph_ontology.Nodes_N_Concept WHERE is_ontology_concept=1"),
             ['id', 'name']
         )
+        self.ontology_concept_names['id'] = self.ontology_concept_names['id'].astype(str)
         self.ontology_concept_to_name_dict = get_col_to_col_dict(self.ontology_concept_names, 'id', 'name')
 
     def load_ontology_categories(self):
@@ -271,6 +272,7 @@ class OntologyData:
             "WHERE b.is_ontology_category=1;"),
             ['category_id', 'depth', 'id', 'name']
         )
+        self.ontology_categories['id'] = self.ontology_categories['id'].astype(str)
         cat_ids = self.ontology_categories.category_id.values.tolist()
         depths = self.ontology_categories.depth.values.tolist()
         self.category_depth_dict = {cat_ids[i]: depths[i] for i in range(len(cat_ids))}
@@ -281,6 +283,7 @@ class OntologyData:
             "SELECT id, name FROM graph_ontology.Nodes_N_Concept WHERE is_ontology_neighbour=1"),
             ['id', 'name']
         )
+        self.non_ontology_concept_names['id'] = self.non_ontology_concept_names['id'].astype(str)
 
     def load_concept_concept_graphscore(self):
         db_manager = DB(self.db_config)
