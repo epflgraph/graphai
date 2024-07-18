@@ -42,6 +42,16 @@ def generate_embedding_text_token(s, model_type):
     return md5_text(s) + '_' + model_type
 
 
+def get_text_token_count_using_model(model_tokenizer, text):
+    input_ids = model_tokenizer.tokenizer(
+        text, return_attention_mask=False, return_token_type_ids=False
+    )['input_ids']
+    if isinstance(text, str):
+        return len(input_ids)
+    else:
+        return sum([len(x) for x in input_ids])
+
+
 class EmbeddingModels:
     def __init__(self):
         self.models = None
@@ -86,6 +96,41 @@ class EmbeddingModels:
                     )
                 self.last_heavy_model_use = time.time()
 
+    def load_model(self, model_type):
+        if model_type not in MODEL_TYPES.keys():
+            return False
+        with self.load_lock:
+            if self.models is None:
+                self.models = dict()
+            if model_type not in self.models.keys():
+                self.models[model_type] = SentenceTransformer(
+                    MODEL_TYPES[model_type],
+                    device=self.device,
+                    cache_folder=self.cache_dir
+                )
+            if model_type != 'all-MiniLM-L12-v2':
+                self.last_heavy_model_use = time.time()
+        return True
+
+    def model_loaded(self, model_type):
+        return self.models is not None and model_type in self.models.keys()
+
+    def _get_tokenizer(self, model_type):
+        return self.models[model_type][0]
+
+    def get_tokenizer(self, model_type):
+        loaded = self.load_model(model_type)
+        if not loaded:
+            return None
+        return self._get_tokenizer(model_type)
+
+    def set_tokenizer(self, model_type, tokenizer):
+        loaded = self.load_model(model_type)
+        if not loaded:
+            return False
+        self.models[model_type][0] = tokenizer
+        return True
+
     def get_last_usage(self):
         return self.last_heavy_model_use
 
@@ -117,13 +162,7 @@ class EmbeddingModels:
     @staticmethod
     def _get_token_count(model, text):
         model_tokenizer = model[0]
-        input_ids = model_tokenizer.tokenizer(
-            text, return_attention_mask=False, return_token_type_ids=False
-        )['input_ids']
-        if isinstance(text, str):
-            return len(input_ids)
-        else:
-            return sum([len(x) for x in input_ids])
+        return get_text_token_count_using_model(model_tokenizer, text)
 
     @staticmethod
     def _get_model_max_tokens(model):
@@ -132,16 +171,14 @@ class EmbeddingModels:
     def get_token_count(self, text, model_type):
         if text is None or len(text) == 0:
             return 0
-        load_heavies = model_type != 'all-MiniLM-L12-v2'
-        self.load_models(load_heavies=load_heavies)
+        self.load_model(model_type)
         if model_type not in self.models.keys():
             raise NotImplementedError(f"Selected model type not implemented: {model_type}")
         model_to_use = self.models[model_type]
         return self._get_token_count(model_to_use, text)
 
     def get_max_tokens(self, model_type):
-        load_heavies = model_type != 'all-MiniLM-L12-v2'
-        self.load_models(load_heavies=load_heavies)
+        self.load_model(model_type)
         if model_type not in self.models.keys():
             raise NotImplementedError(f"Selected model type not implemented: {model_type}")
         model_to_use = self.models[model_type]
@@ -169,8 +206,7 @@ class EmbeddingModels:
     def embed(self, text, model_type='all-MiniLM-L12-v2'):
         if text is None or len(text) == 0:
             return None
-        load_heavies = model_type != 'all-MiniLM-L12-v2'
-        self.load_models(load_heavies=load_heavies)
+        self.load_model(model_type)
         if model_type not in self.models.keys():
             raise NotImplementedError(f"Selected model type not implemented: {model_type}")
         model = self.models[model_type]
