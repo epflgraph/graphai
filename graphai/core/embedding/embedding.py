@@ -124,6 +124,13 @@ class EmbeddingModels:
             return None
         return self._get_tokenizer(model_type)
 
+    def set_tokenizer(self, model_type, tokenizer):
+        loaded = self.load_model(model_type)
+        if not loaded:
+            return False
+        self.models[model_type][0] = tokenizer
+        return True
+
     def get_last_usage(self):
         return self.last_heavy_model_use
 
