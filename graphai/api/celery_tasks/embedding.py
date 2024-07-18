@@ -236,7 +236,7 @@ def embedding_text_list_fingerprint_callback_task(self, results, model_type):
 
 
 @shared_task(bind=True, autoretry_for=(RuntimeError,), retry_backoff=True,
-             retry_kwargs={"max_retries": 3, "countdown": 2.0},
+             retry_kwargs={"max_retries": 3, "countdown": 3.0},
              name='text_6.embedding_text_list_embed_parallel', embedding_obj=embedding_models, ignore_result=False)
 def embedding_text_list_embed_parallel_task(self, input_list, model_type, i, n, force=False):
     start_index = int(i * len(input_list) / n)
