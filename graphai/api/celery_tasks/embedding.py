@@ -263,10 +263,12 @@ def embedding_text_list_embed_parallel_task(self, input_list, model_type, i, n, 
         tokenizer = self.embedding_obj.get_tokenizer(model_type)
         if tokenizer is None:
             raise NotImplementedError(f"Model type {model_type} cannot be found!")
+        current_embedding_obj = copy.copy(self.embedding_obj)
+        current_embedding_obj.set_tokenizer(model_type, copy.deepcopy(tokenizer))
         tokenizer = copy.deepcopy(tokenizer)
         token_counts = [get_text_token_count_using_model(tokenizer, input_list[ind]['text'])
                         for ind in remaining_indices]
-        model_max_tokens = self.embedding_obj.get_max_tokens(model_type)
+        model_max_tokens = current_embedding_obj.get_max_tokens(model_type)
         i = 0
         while i < len(remaining_indices):
             current_token_count_sum = token_counts[i]
@@ -278,7 +280,7 @@ def embedding_text_list_embed_parallel_task(self, input_list, model_type, i, n, 
                 j -= 1
             if j == i:
                 j = i + 1
-            current_results_list = embed_text(self.embedding_obj,
+            current_results_list = embed_text(current_embedding_obj,
                                               [input_list[remaining_indices[k]]['text'] for k in range(i, j)],
                                               model_type)
             for k in range(i, j):
@@ -297,6 +299,8 @@ def embedding_text_list_embed_parallel_task(self, input_list, model_type, i, n, 
                 results_dict[remaining_indices[k]] = current_results
             i = j
     sorted_indices = sorted(results_dict.keys())
+    current_embedding_obj = None
+    tokenizer = None
     return [results_dict[i] for i in sorted_indices]
 
 
