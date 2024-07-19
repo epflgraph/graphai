@@ -1,4 +1,5 @@
 import copy
+import gc
 
 from celery import shared_task
 from itertools import chain
@@ -314,6 +315,7 @@ def embedding_text_list_embed_callback_task(self, results, model_type, force=Fal
         del new_result['id_token']
         del new_result['source']
         new_results.append(new_result)
+    gc.collect()
     return new_results
 
 

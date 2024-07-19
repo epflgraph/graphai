@@ -128,7 +128,13 @@ class EmbeddingModels:
         loaded = self.load_model(model_type)
         if not loaded:
             return False
-        self.models[model_type][0] = tokenizer
+        new_models = {
+            m: self.models[m] for m in self.models if m != model_type
+        }
+        new_models[model_type] = SentenceTransformer(
+            modules=[tokenizer, self.models[model_type][1], self.models[model_type][2]]
+        )
+        self.models = new_models
         return True
 
     def get_last_usage(self):
