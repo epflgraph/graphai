@@ -156,7 +156,7 @@ def retrieve_file_from_youtube(url, output_filename_with_path, output_token):
     if file_exists(output_filename_with_path) and result_code.returncode == 0:
         return output_token
     else:
-        return None
+        return str(result_code)
 
 
 def retrieve_file_from_url(url, output_filename_with_path, output_token, is_kaltura=False):
