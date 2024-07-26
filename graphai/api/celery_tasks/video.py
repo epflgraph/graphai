@@ -87,7 +87,7 @@ def retrieve_file_from_url_task(self, url, is_kaltura=True, force_token=None):
     results = retrieve_file_from_url(url, filename_with_path, filename, is_kaltura)
     return {
         'token': results,
-        'fresh': results is not None,
+        'fresh': results == filename,
         'token_size': get_file_size(filename_with_path)
     }
 
@@ -137,7 +137,7 @@ def cache_lookup_fingerprint_video_task(self, token):
 def compute_video_fingerprint_task(self, results, force=False):
     token = results['token']
     db_manager = VideoDBCachingManager()
-    if token is None:
+    if token is None or not results.get('fresh', True):
         fp = None
         fresh = False
         perform_lookup = False
