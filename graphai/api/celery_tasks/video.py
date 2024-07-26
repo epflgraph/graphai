@@ -137,17 +137,23 @@ def cache_lookup_fingerprint_video_task(self, token):
 def compute_video_fingerprint_task(self, results, force=False):
     token = results['token']
     db_manager = VideoDBCachingManager()
-    existing = db_manager.get_details(token, ['fingerprint'])[0]
-    if not force and existing is not None and existing['fingerprint'] is not None:
-        fp = existing['fingerprint']
+    if token is None:
+        fp = None
         fresh = False
         perform_lookup = False
         fp_token = None
     else:
-        fp = md5_video_or_audio(self.file_manager.generate_filepath(token), video=True)
-        fresh = fp is not None
-        perform_lookup = fp is not None
-        fp_token = token if fp is not None else None
+        existing = db_manager.get_details(token, ['fingerprint'])[0]
+        if not force and existing is not None and existing['fingerprint'] is not None:
+            fp = existing['fingerprint']
+            fresh = False
+            perform_lookup = False
+            fp_token = None
+        else:
+            fp = md5_video_or_audio(self.file_manager.generate_filepath(token), video=True)
+            fresh = fp is not None
+            perform_lookup = fp is not None
+            fp_token = token if fp is not None else None
     return {
         'result': fp,
         'fp_token': fp_token,
