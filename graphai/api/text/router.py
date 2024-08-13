@@ -1,27 +1,20 @@
 from fastapi import APIRouter, Security
 from fastapi.responses import FileResponse
 
-from celery import chain, group
 from typing import Optional, Union
 
 import pandas as pd
 
-from graphai.api.schemas.text import (
+from graphai.api.routers.auth import get_current_active_user
+from graphai.api.text.schemas import (
     KeywordsRequest,
     KeywordsResponse,
     WikifyFromRawTextRequest,
     WikifyFromKeywordsRequest,
     WikifyResponse,
 )
-from graphai.api.celery_tasks.text import (
-    extract_keywords_task,
-    wikisearch_task,
-    compute_scores_task,
-    draw_ontology_task,
-    draw_graph_task,
-    text_test_task,
-)
-from graphai.api.routers.auth import get_current_active_user
+import graphai.celery.text.jobs as jobs
+
 
 pd.set_option('display.max_rows', 400)
 pd.set_option('display.max_columns', 500)
@@ -47,11 +40,7 @@ async def keywords(data: KeywordsRequest, use_nltk: Optional[bool] = False):
     if not data.raw_text:
         return []
 
-    # Set job and run it
-    job = chain(extract_keywords_task.s(data.raw_text, use_nltk=use_nltk))
-    keyword_list = job.apply_async(priority=10).get(timeout=10)
-
-    return keyword_list
+    return jobs.keywords(data.raw_text, use_nltk)
 
 
 @router.post('/wikify', response_model=WikifyResponse)
@@ -68,6 +57,7 @@ async def wikify(
     refresh_scores: Optional[bool] = True,
 ):
     """
+    TODO: Update this
     Processes raw text (e.g. from an abstract of a publication, a course description or a lecture slide) and returns a
     list of concepts (Wikipedia pages) that are relevant to the text, each with a set of scores in [0, 1]
     quantifying their relevance. This is done as follows:
@@ -82,57 +72,43 @@ async def wikify(
         to keep only the most relevant results.
     """
 
-    # Extract keywords if input is raw text
     if isinstance(data, WikifyFromRawTextRequest):
         # Return if no input
         if not data.raw_text:
             return []
 
-        # Set job and run it
-        job = chain(extract_keywords_task.s(data.raw_text))
-        keyword_list = job.apply_async(priority=10).get(timeout=300)
-    else:
-        keyword_list = data.keywords
-
-    # Return if no keywords
-    if not keyword_list:
-        return []
-
-    # Do wikisearch in parallel and then gather all results, compute scores, aggregate and filter
-    n = 16
-    job = chain(
-        group(wikisearch_task.s(keyword_list, fraction=(i / n, (i + 1) / n), method=method) for i in range(n)),
-        compute_scores_task.s(
-            restrict_to_ontology=restrict_to_ontology,
-            graph_score_smoothing=graph_score_smoothing,
-            ontology_score_smoothing=ontology_score_smoothing,
-            keywords_score_smoothing=keywords_score_smoothing,
-            aggregation_coef=aggregation_coef,
-            filtering_threshold=filtering_threshold,
-            filtering_min_votes=filtering_min_votes,
-            refresh_scores=refresh_scores,
+        return jobs.wikify_text(
+            data.raw_text,
+            method,
+            restrict_to_ontology,
+            graph_score_smoothing,
+            ontology_score_smoothing,
+            keywords_score_smoothing,
+            aggregation_coef,
+            filtering_threshold,
+            filtering_min_votes,
+            refresh_scores,
         )
-    )
-    results = job.apply_async(priority=10).get(timeout=300)
 
-    # FIXME delete this and go ahead with the new lowercased keys
-    # Replace column names not to break compatibility
-    columns_map = {
-        'keywords': 'Keywords',
-        'concept_id': 'PageID',
-        'concept_name': 'PageTitle',
-        'searchrank': 'Searchrank',
-        'search_score': 'SearchScore',
-        'levenshtein_score': 'LevenshteinScore',
-        'graph_score': 'GraphScore',
-        'ontology_local_score': 'OntologyLocalScore',
-        'ontology_global_score': 'OntologyGlobalScore',
-        'keywords_score': 'KeywordsScore',
-        'mixed_score': 'MixedScore',
-    }
-    results = results.rename(columns=columns_map)
+    if isinstance(data, WikifyFromKeywordsRequest):
+        # Return if no input
+        if not data.keywords:
+            return []
 
-    return results.to_dict(orient='records')
+        return jobs.wikify_keywords(
+            data.keywords,
+            method,
+            restrict_to_ontology,
+            graph_score_smoothing,
+            ontology_score_smoothing,
+            keywords_score_smoothing,
+            aggregation_coef,
+            filtering_threshold,
+            filtering_min_votes,
+            refresh_scores,
+        )
+
+    return []
 
 
 @router.post('/wikify_ontology_svg')
@@ -151,11 +127,10 @@ async def wikify_ontology_svg(
     if level not in [1, 2, 3, 4, 5]:
         level = 2
 
-    # Set job and run it
-    job = draw_ontology_task.s(results, level=level)
-    job.apply_async(priority=10).get(timeout=10)
+    # Run job that will create svg file in tmp location
+    jobs.wikify_ontology_svg(results, level)
 
-    # Return file
+    # Return svg file
     return FileResponse('/tmp/file.svg')
 
 
@@ -173,16 +148,8 @@ async def wikify_graph_svg(
     # Convert WikifyResponseElems into dictionaries
     results = [vars(result) for result in results]
 
-    # Set job and run it
-    job = draw_graph_task.s(results, concept_score_threshold=concept_score_threshold, edge_threshold=edge_threshold, min_component_size=min_component_size)
-    job.apply_async(priority=10).get(timeout=10)
+    # Run job that will create svg file in tmp location
+    jobs.wikify_graph_svg(results, concept_score_threshold, edge_threshold, min_component_size)
 
-    # Return file
+    # Return svg file
     return FileResponse('/tmp/file.svg')
-
-
-@router.post('/priority_test')
-async def priority_test_text():
-    print('the dummy that matters is being launched')
-    task = group(text_test_task.s() for _ in range(8)).apply_async(priority=10)
-    return {'id': task.id}

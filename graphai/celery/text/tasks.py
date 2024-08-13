@@ -1,5 +1,4 @@
 import pandas as pd
-from time import sleep
 
 from celery import shared_task
 
@@ -74,10 +73,3 @@ def draw_ontology_task(self, results, **kwargs):
 @shared_task(bind=True, name='text_10.draw_graph', graph=graph)
 def draw_graph_task(self, results, **kwargs):
     return draw_graph(results, graph=self.graph, **kwargs)
-
-
-@shared_task(bind=True, name='text_10.sleeper')
-def text_test_task(self):
-    sleep(15)
-    print('It worked')
-    return 0
