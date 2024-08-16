@@ -33,6 +33,12 @@ def compute_embedding_scores(results):
     n_concepts = len(concept_ids)
     # print(n_concepts)
 
+    # If there is only one concept, its embedding local and global scores are 1, and we return directly
+    if n_concepts == 1:
+        results['embedding_local_score'] = 1
+        results['embedding_global_score'] = 1
+        return results
+
     # FIXME Get actual data instead of dummy vectors
     # Fetch their embedding vectors as a matrix of size n_dims x n_concepts
     # Each column of the matrix represents the vector of a concept
@@ -52,11 +58,20 @@ def compute_embedding_scores(results):
     embedding_local_scores = pd.DataFrame()
     for name, group in results.groupby('keywords'):
         # print(name)
+        print(group)
 
         # Extract concept_ids in the given keywords group and filter out the scalar_product_matrix with it
         group_concept_ids = list(group['concept_id'])
         # print(group_concept_ids)
         n_group_concepts = len(group_concept_ids)
+
+        # If there is only one concept in the group, its embedding local score is directly 1, and we skip to the next group
+        if n_group_concepts == 1:
+            group_embedding_local_scores = pd.DataFrame({'keywords': name, 'concept_id': group_concept_ids, 'embedding_local_score': 1})
+            embedding_local_scores = pd.concat([embedding_local_scores, group_embedding_local_scores], ignore_index=True)
+            continue
+
+        # There are more than one concept, we proceed using the scalar products within the concepts of that keyword
         indices = [concept_id in group_concept_ids for concept_id in concept_ids]
         group_scalar_products = scalar_products[indices, :][:, indices]
 
@@ -67,7 +82,7 @@ def compute_embedding_scores(results):
         #   We use it as weights for the weighted average per row.
         #   Then we derive the score between 0 and 1 by mapping the cos to [0, 1] and clipping
         weights = np.ones((n_group_concepts, n_group_concepts)) - np.identity(n_group_concepts)
-        # print(weights)
+        print(weights)
         group_mean_scalar_products = np.average(group_scalar_products, axis=0, weights=weights)
         # print(group_mean_scalar_products)
         mean_scores = np.clip((group_mean_scalar_products + 1)/2, a_min=0, a_max=1)
