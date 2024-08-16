@@ -1,3 +1,4 @@
+import numpy as np
 import pandas as pd
 
 import Levenshtein
@@ -16,6 +17,82 @@ def compute_levenshtein_score(results):
     def f(x):
         return 1 / (1 + ((1 - x) / x) ** 2)
     results['levenshtein_score'] = f(results['levenshtein_score'])
+
+    return results
+
+
+def compute_embedding_scores(results):
+    # FIXME Remove this stub
+    # results = pd.DataFrame({
+    #     'keywords': ['a'] * 4 + ['b'] * 3 + ['c'] * 3,
+    #     'concept_id': ['1', '2', '3', '4'] + ['1', '2', '5'] + ['1', '3', '5']
+    # })
+
+    # Extract ids of all concepts in the DataFrame
+    concept_ids = list(results['concept_id'].drop_duplicates())
+    n_concepts = len(concept_ids)
+    # print(n_concepts)
+
+    # FIXME Get actual data instead of dummy vectors
+    # Fetch their embedding vectors as a matrix of size n_dims x n_concepts
+    # Each column of the matrix represents the vector of a concept
+    # The order of the concept vectors in the matrix is the same as the order of the concept ids in concept_ids
+    # n_dims = 384
+    n_dims = 12
+    vector_matrix = np.random.rand(n_dims, n_concepts)
+    # vector_matrix = np.tril(np.ones((n_dims, n_concepts)))
+    vector_matrix = vector_matrix / np.linalg.norm(vector_matrix, axis=0)
+    # print(vector_matrix)
+
+    # Compute the scalar product of all vectors pairwise
+    scalar_products = vector_matrix.T @ vector_matrix
+    # print(scalar_products)
+
+    # Embedding local score is the mean scalar product among concepts with the same keywords
+    embedding_local_scores = pd.DataFrame()
+    for name, group in results.groupby('keywords'):
+        # print(name)
+
+        # Extract concept_ids in the given keywords group and filter out the scalar_product_matrix with it
+        group_concept_ids = list(group['concept_id'])
+        # print(group_concept_ids)
+        n_group_concepts = len(group_concept_ids)
+        indices = [concept_id in group_concept_ids for concept_id in concept_ids]
+        group_scalar_products = scalar_products[indices, :][:, indices]
+
+        # print(group_scalar_products)
+
+        # Embedding local score is now the mean scalar product for this new matrix excluding the diagonal
+        #   We create a n_group_concepts x n_group_concepts matrix with zeros in the diagonal and ones elsewhere.
+        #   We use it as weights for the weighted average per row.
+        #   Then we derive the score between 0 and 1 by mapping the cos to [0, 1] and clipping
+        weights = np.ones((n_group_concepts, n_group_concepts)) - np.identity(n_group_concepts)
+        # print(weights)
+        group_mean_scalar_products = np.average(group_scalar_products, axis=0, weights=weights)
+        # print(group_mean_scalar_products)
+        mean_scores = np.clip((group_mean_scalar_products + 1)/2, a_min=0, a_max=1)
+        # print(mean_scores)
+        group_embedding_local_scores = pd.DataFrame({'keywords': name, 'concept_id': [concept_id for concept_id in concept_ids if concept_id in group_concept_ids], 'embedding_local_score': mean_scores})
+        embedding_local_scores = pd.concat([embedding_local_scores, group_embedding_local_scores], ignore_index=True)
+
+    print(embedding_local_scores)
+
+    # Embedding global score is the mean scalar product excluding the diagonal
+    #   We create a n_concepts x n_concepts matrix with zeros in the diagonal and ones elsewhere.
+    #   We use it as weights for the weighted average per row.
+    #   Then we derive the score between 0 and 1 by mapping the cos to [0, 1] and clipping
+    weights = np.ones((n_concepts, n_concepts)) - np.identity(n_concepts)
+    mean_scalar_products = np.average(scalar_products, axis=0, weights=weights)
+    mean_scores = np.clip((mean_scalar_products + 1)/2, a_min=0, a_max=1)
+    embedding_global_scores = pd.DataFrame({'concept_id': concept_ids, 'embedding_global_score': mean_scores})
+
+    print(embedding_global_scores)
+
+    # Add the scores to the results DataFrame
+    results = pd.merge(results, embedding_local_scores, how='inner', on=['keywords', 'concept_id'])
+    results = pd.merge(results, embedding_global_scores, how='inner', on='concept_id')
+
+    print(results)
 
     return results
 
@@ -239,6 +316,9 @@ def compute_scores(
 
     # Compute levenshtein score
     results = compute_levenshtein_score(results)
+
+    # Compute embeddings (local and global) scores
+    results = compute_embedding_scores(results)
 
     # Compute graph score
     results = graph.add_graph_score(results, smoothing=graph_score_smoothing)
