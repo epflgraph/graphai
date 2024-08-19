@@ -7,11 +7,14 @@ from elasticsearch_interface.es import ES
 from graphai.core.interfaces.config import config
 from graphai.core.common.common_utils import strtobool
 
-from graphai.core.text.graph import ConceptsGraph
-from graphai.core.text.keywords import extract_keywords
-from graphai.core.text.wikisearch import wikisearch
-from graphai.core.text.scores import compute_scores
-from graphai.core.text.draw import draw_ontology, draw_graph
+from graphai.core.text import (
+    ConceptsGraph,
+    extract_keywords,
+    wikisearch,
+    compute_scores,
+    draw_ontology,
+    draw_graph,
+)
 
 
 ################################################################
