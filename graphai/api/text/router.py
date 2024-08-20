@@ -53,23 +53,39 @@ async def wikify(
     keywords_score_smoothing: Optional[bool] = True,
     aggregation_coef: Optional[float] = 0.5,
     filtering_threshold: Optional[float] = 0.1,
-    filtering_min_votes: Optional[int] = 5,
+    filtering_min_agreement_fraction: Optional[float] = 0.8,
     refresh_scores: Optional[bool] = True,
 ):
     """
-    TODO: Update this
     Processes raw text (e.g. from an abstract of a publication, a course description or a lecture slide) and returns a
     list of concepts (Wikipedia pages) that are relevant to the text, each with a set of scores in [0, 1]
     quantifying their relevance. This is done as follows:
 
-    1. Keyword extraction: Automatic extraction of keywords from the text. Omitted if keyword_list is provided as
-        input instead of raw_text.
+    1. Keyword extraction: Automatic extraction of keywords from the text. Omitted if a list of strings is provided as input
+        under "keywords" instead of "raw_text".
     2. Wikisearch: For each set of keywords, a set of at most 10 concepts (Wikipedia pages) is retrieved. This can be
         done through requests to the Wikipedia API or through elasticsearch requests.
-    3. Scores: For each pair of keywords and concept, several scores are derived, taking into account the concepts graph and
-        the ontology, among others.
+    3. Scores: For each pair of keywords and concept, several scores are derived, taking into account the concepts graph,
+        the ontology and embedding vectors, among others.
     4. Aggregation and filter: For each concept, their scores are aggregated and filtered according to some rules,
         to keep only the most relevant results.
+
+    Several arguments can be passed to have a more precise control:
+    * method (str): Method to retrieve the concepts (Wikipedia pages). It can be either 'wikipedia-api', to use the
+    Wikipedia API, or one of {'es-base', 'es-score'}, to use elasticsearch. Default: 'es-base'.
+    * restrict_to_ontology (bool): Whether to filter concepts that are not in the ontology. Default: False.
+    * graph_score_smoothing (bool): Whether to apply a transformation to the graph scores that bumps scores to avoid
+    a pronounced negative exponential shape. Default: True.
+    * ontology_score_smoothing (bool): Whether to apply a transformation to the ontology scores that pushes scores away from 0.5. Default: True.
+    * keywords_score_smoothing (bool): Whether to apply a transformation to the keywords scores that bumps scores to avoid
+    a pronounced negative exponential shape. Default: True.
+    * aggregation_coef (float): A number in [0, 1] that controls how the scores of the aggregated pages are computed.
+    A value of 0 takes the sum of scores over Keywords, then normalises in [0, 1]. A value of 1 takes the max of scores over Keywords.
+    Any value in between linearly interpolates those two approaches. Default: 0.5.
+    * filtering_threshold (float): A number in [0, 1] that is used as a threshold for all the scores to decide whether the page is good enough
+    from that score's perspective. Default: 0.1.
+    * filtering_min_agreement_fraction (float): A number between 0 and 1. A page will be kept iff it is good enough for at least this fraction of scores. Default: 0.8.
+    * refresh_scores (bool): Whether to recompute scores after filtering. Default: True.
     """
 
     if isinstance(data, WikifyFromRawTextRequest):
@@ -86,7 +102,7 @@ async def wikify(
             keywords_score_smoothing,
             aggregation_coef,
             filtering_threshold,
-            filtering_min_votes,
+            filtering_min_agreement_fraction,
             refresh_scores,
         )
 
@@ -104,7 +120,7 @@ async def wikify(
             keywords_score_smoothing,
             aggregation_coef,
             filtering_threshold,
-            filtering_min_votes,
+            filtering_min_agreement_fraction,
             refresh_scores,
         )
 

@@ -9,8 +9,8 @@ from graphai.celery.text.tasks import (
 )
 
 
-def keywords(data, use_nltk):
-    job = chain(extract_keywords_task.s(data.raw_text, use_nltk=use_nltk))
+def keywords(raw_text, use_nltk):
+    job = chain(extract_keywords_task.s(raw_text, use_nltk=use_nltk))
     return job.apply_async(priority=10).get(timeout=10)
 
 
@@ -23,7 +23,7 @@ def wikify_text(
     keywords_score_smoothing,
     aggregation_coef,
     filtering_threshold,
-    filtering_min_votes,
+    filtering_min_agreement_fraction,
     refresh_scores,
 ):
     n = 16
@@ -37,7 +37,7 @@ def wikify_text(
             keywords_score_smoothing=keywords_score_smoothing,
             aggregation_coef=aggregation_coef,
             filtering_threshold=filtering_threshold,
-            filtering_min_votes=filtering_min_votes,
+            filtering_min_agreement_fraction=filtering_min_agreement_fraction,
             refresh_scores=refresh_scores,
         )
     )
@@ -55,7 +55,7 @@ def wikify_keywords(
     keywords_score_smoothing,
     aggregation_coef,
     filtering_threshold,
-    filtering_min_votes,
+    filtering_min_agreement_fraction,
     refresh_scores,
 ):
     n = 16
@@ -68,7 +68,7 @@ def wikify_keywords(
             keywords_score_smoothing=keywords_score_smoothing,
             aggregation_coef=aggregation_coef,
             filtering_threshold=filtering_threshold,
-            filtering_min_votes=filtering_min_votes,
+            filtering_min_agreement_fraction=filtering_min_agreement_fraction,
             refresh_scores=refresh_scores,
         )
     )
