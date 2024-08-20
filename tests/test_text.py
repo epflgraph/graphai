@@ -5,7 +5,7 @@ from unittest.mock import patch
 
 import pandas as pd
 
-from graphai.api.celery_tasks.text import (
+from graphai.celery.text.tasks import (
     extract_keywords_task,
     wikisearch_task,
     compute_scores_task,
@@ -18,7 +18,7 @@ from graphai.api.celery_tasks.text import (
 ################################################################
 
 
-@patch('graphai.api.celery_tasks.text.extract_keywords_task.run')
+@patch('graphai.celery.text.tasks.extract_keywords_task.run')
 @pytest.mark.usefixtures('sultans')
 def test__text_keywords__extract_keywords__mock_task(mock_run, sultans):
     # Mock calling the task
@@ -144,7 +144,7 @@ def test__text_keywords__integration(fixture_app, celery_worker, sultans, wave_f
 ################################################################
 
 
-@patch('graphai.api.celery_tasks.text.wikisearch_task.run')
+@patch('graphai.celery.text.tasks.wikisearch_task.run')
 @pytest.mark.usefixtures('sultans')
 def test__text_wikify__wikisearch__mock_task(mock_run, sultans):
     # Mock calling the task
@@ -154,7 +154,7 @@ def test__text_wikify__wikisearch__mock_task(mock_run, sultans):
     assert wikisearch_task.run.call_count == 1
 
 
-@patch('graphai.api.celery_tasks.text.compute_scores_task.run')
+@patch('graphai.celery.text.tasks.compute_scores_task.run')
 def test__text_wikify__compute_scores__mock_task(mock_run):
     # Mock calling the task
     compute_scores_task.run()
@@ -208,7 +208,7 @@ def test__text_wikify__compute_scores__run_task(wave_fields_wikisearch_df):
     assert len(results) > 0
     assert not results.isna().values.any()
     assert '33516' in results['concept_id'].values        # Wave wikipage
-    assert list(results.columns) == ['concept_id', 'concept_name', 'search_score', 'levenshtein_score', 'graph_score', 'ontology_local_score', 'ontology_global_score', 'keywords_score', 'mixed_score']
+    assert list(results.columns) == ['concept_id', 'concept_name', 'search_score', 'levenshtein_score', 'embedding_local_score', 'embedding_global_score', 'graph_score', 'ontology_local_score', 'ontology_global_score', 'embedding_keywords_score', 'graph_keywords_score', 'ontology_keywords_score', 'mixed_score']
 
 ################################################################
 
@@ -243,8 +243,8 @@ def test__text_wikify__integration(fixture_app, celery_worker, euclid, wave_fiel
     # Check returned value
     assert isinstance(results, pd.DataFrame)
     assert len(results) > 0
-    assert 1196 in results['PageID'].values        # Angle wikipage
-    assert list(results.columns) == ['PageID', 'PageTitle', 'SearchScore', 'LevenshteinScore', 'GraphScore', 'OntologyLocalScore', 'OntologyGlobalScore', 'KeywordsScore', 'MixedScore']
+    assert 1196 in results['concept_id'].values        # Angle wikipage
+    assert list(results.columns) == ['concept_id', 'concept_name', 'search_score', 'levenshtein_score', 'embedding_local_score', 'embedding_global_score', 'graph_score', 'ontology_local_score', 'ontology_global_score', 'embedding_keywords_score', 'graph_keywords_score', 'ontology_keywords_score', 'mixed_score']
 
 
     ################
@@ -261,8 +261,8 @@ def test__text_wikify__integration(fixture_app, celery_worker, euclid, wave_fiel
     # Check returned value
     assert isinstance(results, pd.DataFrame)
     assert len(results) > 0
-    assert 33516 in results['PageID'].values        # Wave wikipage
-    assert list(results.columns) == ['PageID', 'PageTitle', 'SearchScore', 'LevenshteinScore', 'GraphScore', 'OntologyLocalScore', 'OntologyGlobalScore', 'KeywordsScore', 'MixedScore']
+    assert 33516 in results['concept_id'].values        # Wave wikipage
+    assert list(results.columns) == ['concept_id', 'concept_name', 'search_score', 'levenshtein_score', 'embedding_local_score', 'embedding_global_score', 'graph_score', 'ontology_local_score', 'ontology_global_score', 'embedding_keywords_score', 'graph_keywords_score', 'ontology_keywords_score', 'mixed_score']
 
 
     ################
@@ -279,8 +279,8 @@ def test__text_wikify__integration(fixture_app, celery_worker, euclid, wave_fiel
     # Check returned value
     assert isinstance(results, pd.DataFrame)
     assert len(results) > 0
-    assert 358277 in results['PageID'].values        # Cayley graph wikipage
-    assert list(results.columns) == ['PageID', 'PageTitle', 'SearchScore', 'LevenshteinScore', 'GraphScore', 'OntologyLocalScore', 'OntologyGlobalScore', 'KeywordsScore', 'MixedScore']
+    assert 358277 in results['concept_id'].values        # Cayley graph wikipage
+    assert list(results.columns) == ['concept_id', 'concept_name', 'search_score', 'levenshtein_score', 'embedding_local_score', 'embedding_global_score', 'graph_score', 'ontology_local_score', 'ontology_global_score', 'embedding_keywords_score', 'graph_keywords_score', 'ontology_keywords_score', 'mixed_score']
 
 
 ################################################################
@@ -288,7 +288,7 @@ def test__text_wikify__integration(fixture_app, celery_worker, euclid, wave_fiel
 ################################################################
 
 
-@patch('graphai.api.celery_tasks.text.draw_ontology_task.run')
+@patch('graphai.celery.text.tasks.draw_ontology_task.run')
 @pytest.mark.usefixtures('wave_fields_wikified_json')
 def test__text_wikify_ontology_svg__draw_ontology__mock_task(mock_run, wave_fields_wikified_json):
     # Mock calling the task
@@ -349,7 +349,7 @@ def test__text_wikify_ontology_svg__integration(fixture_app, celery_worker, wave
 ################################################################
 
 
-@patch('graphai.api.celery_tasks.text.draw_graph_task.run')
+@patch('graphai.celery.text.tasks.draw_graph_task.run')
 @pytest.mark.usefixtures('wave_fields_wikified_json')
 def test__text_wikify_graph_svg__draw_graph__mock_task(mock_run, wave_fields_wikified_json):
     # Mock calling the task
