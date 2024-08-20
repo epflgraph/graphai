@@ -168,6 +168,9 @@ def compute_mixed_score(results):
     })
     results['mixed_score'] = results[coefficients.columns] @ coefficients.transpose()
 
+    # Sort descendingly by mixed_score
+    results = results.sort_values(by='mixed_score', ascending=False)
+
     return results
 
 
