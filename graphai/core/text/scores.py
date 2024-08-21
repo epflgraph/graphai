@@ -85,7 +85,7 @@ def compute_embedding_scores(results):
         # print(weights)
         group_mean_scalar_products = np.average(group_scalar_products, axis=0, weights=weights)
         # print(group_mean_scalar_products)
-        mean_scores = np.clip((group_mean_scalar_products + 1)/2, a_min=0, a_max=1)
+        mean_scores = np.clip((group_mean_scalar_products + 1) / 2, a_min=0, a_max=1)
         # print(mean_scores)
         group_embedding_local_scores = pd.DataFrame({'keywords': name, 'concept_id': [concept_id for concept_id in concept_ids if concept_id in group_concept_ids], 'embedding_local_score': mean_scores})
         embedding_local_scores = pd.concat([embedding_local_scores, group_embedding_local_scores], ignore_index=True)
@@ -98,7 +98,7 @@ def compute_embedding_scores(results):
     #   Then we derive the score between 0 and 1 by mapping the cos to [0, 1] and clipping
     weights = np.ones((n_concepts, n_concepts)) - np.identity(n_concepts)
     mean_scalar_products = np.average(scalar_products, axis=0, weights=weights)
-    mean_scores = np.clip((mean_scalar_products + 1)/2, a_min=0, a_max=1)
+    mean_scores = np.clip((mean_scalar_products + 1) / 2, a_min=0, a_max=1)
     embedding_global_scores = pd.DataFrame({'concept_id': concept_ids, 'embedding_global_score': mean_scores})
 
     # print(embedding_global_scores)
