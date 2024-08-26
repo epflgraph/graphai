@@ -4,7 +4,6 @@ from multiprocessing import Lock
 from google.cloud import vision
 
 from graphai.core.common.common_utils import file_exists
-from graphai.core.interfaces.config import config
 
 
 class GoogleOCRModel:
