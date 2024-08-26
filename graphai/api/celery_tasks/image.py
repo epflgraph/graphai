@@ -87,7 +87,7 @@ def cache_lookup_extract_slide_text_task(self, token, method='tesseract'):
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='video_2.extract_slide_text', ignore_result=False,
              file_manager=file_management_config)
-def extract_slide_text_task(self, token, method='tesseract'):
+def extract_slide_text_task(self, token, method='tesseract', api_token=None):
     ocr_colnames = get_ocr_colnames(method)
 
     if method == 'tesseract':
@@ -104,24 +104,28 @@ def extract_slide_text_task(self, token, method='tesseract'):
                 }
             ]
     else:
-        ocr_model = GoogleOCRModel()
-        ocr_model.establish_connection()
-        res1, res2 = ocr_model.perform_ocr(self.file_manager.generate_filepath(token))
-
-        if res1 is None or res2 is None:
+        if api_token is None:
             results = None
             language = None
         else:
-            # Since DTD usually performs better, method #1 is our point of reference for langdetect
-            language = detect_text_language(res1)
-            res_list = [res1, res2]
-            results = [
-                {
-                    'method': ocr_colnames[i],
-                    'text': res_list[i]
-                }
-                for i in range(len(res_list))
-            ]
+            ocr_model = GoogleOCRModel(api_token)
+            ocr_model.establish_connection()
+            res1, res2 = ocr_model.perform_ocr(self.file_manager.generate_filepath(token))
+
+            if res1 is None or res2 is None:
+                results = None
+                language = None
+            else:
+                # Since DTD usually performs better, method #1 is our point of reference for langdetect
+                language = detect_text_language(res1)
+                res_list = [res1, res2]
+                results = [
+                    {
+                        'method': ocr_colnames[i],
+                        'text': res_list[i]
+                    }
+                    for i in range(len(res_list))
+                ]
 
     return {
         'results': results,
