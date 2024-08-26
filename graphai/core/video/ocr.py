@@ -8,21 +8,14 @@ from graphai.core.interfaces.config import config
 
 
 class GoogleOCRModel:
-    def __init__(self):
-        try:
-            print("Reading Google API key from config")
-            self.api_key = config['google']['api_key']
-        except Exception:
-            self.api_key = None
+    def __init__(self, api_key):
+        self.api_key = api_key
 
         if self.api_key is None:
             print(
-                "The Google API key could not be found in the config file. "
-                "Make sure to add a [google] section with the api_key parameter. "
+                "No Google API key was provided. "
                 "Google API endpoints cannot be used as there is no default API key."
             )
-
-        # The actual Google model is lazy loaded in order not to load it twice (celery *and* gunicorn)
         self.model = None
         self.load_lock = Lock()
 
