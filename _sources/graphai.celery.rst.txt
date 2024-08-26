@@ -1,0 +1,15 @@
+graphai.celery package
+======================
+
+.. automodule:: graphai.celery
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Subpackages
+-----------
+
+.. toctree::
+   :maxdepth: 1
+
+   graphai.celery.text

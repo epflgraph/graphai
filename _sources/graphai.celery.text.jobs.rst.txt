@@ -1,7 +1,7 @@
-graphai.api.routers.text module
+graphai.celery.text.jobs module
 ===============================
 
-.. automodule:: graphai.api.routers.text
+.. automodule:: graphai.celery.text.jobs
    :members:
    :undoc-members:
    :show-inheritance:

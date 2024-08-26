@@ -1,0 +1,16 @@
+graphai.api.text package
+========================
+
+.. automodule:: graphai.api.text
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 1
+
+   graphai.api.text.router
+   graphai.api.text.schemas

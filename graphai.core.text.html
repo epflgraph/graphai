@@ -46,6 +46,7 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="graphai.api.html">graphai.api package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="graphai.celery.html">graphai.celery package</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="graphai.core.html">graphai.core package</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="graphai.core.html#subpackages">Subpackages</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="graphai.core.common.html">graphai.core.common package</a></li>
@@ -54,6 +55,12 @@
 <li class="toctree-l3"><a class="reference internal" href="graphai.core.ontology.html">graphai.core.ontology package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="graphai.core.scraping.html">graphai.core.scraping package</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">graphai.core.text package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#graphai.core.text.ConceptsGraph"><code class="docutils literal notranslate"><span class="pre">ConceptsGraph</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#graphai.core.text.extract_keywords"><code class="docutils literal notranslate"><span class="pre">extract_keywords()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#graphai.core.text.wikisearch"><code class="docutils literal notranslate"><span class="pre">wikisearch()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#graphai.core.text.compute_scores"><code class="docutils literal notranslate"><span class="pre">compute_scores()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#graphai.core.text.draw_ontology"><code class="docutils literal notranslate"><span class="pre">draw_ontology()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#graphai.core.text.draw_graph"><code class="docutils literal notranslate"><span class="pre">draw_graph()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#submodules">Submodules</a></li>
 </ul>
 </li>
@@ -97,6 +104,206 @@
              
   <section id="module-graphai.core.text">
 <span id="graphai-core-text-package"></span><h1>graphai.core.text package<a class="headerlink" href="#module-graphai.core.text" title="Link to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="graphai.core.text.ConceptsGraph">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">graphai.core.text.</span></span><span class="sig-name descname"><span class="pre">ConceptsGraph</span></span><a class="headerlink" href="#graphai.core.text.ConceptsGraph" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="graphai.core.text.ConceptsGraph.load_from_db">
+<span class="sig-name descname"><span class="pre">load_from_db</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.text.ConceptsGraph.load_from_db" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="graphai.core.text.ConceptsGraph.get_ontology_concepts">
+<span class="sig-name descname"><span class="pre">get_ontology_concepts</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.text.ConceptsGraph.get_ontology_concepts" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="graphai.core.text.ConceptsGraph.add_graph_score">
+<span class="sig-name descname"><span class="pre">add_graph_score</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">results</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">smoothing</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.text.ConceptsGraph.add_graph_score" title="Link to this definition"></a></dt>
+<dd><p>Computes <cite>graph_score</cite> for the provided DataFrame containing concepts.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>results</strong> (<em>pd.DataFrame</em>) – A pandas DataFrame including the column [‘concept_id’].</p></li>
+<li><p><strong>smoothing</strong> (<em>bool</em>) – Whether to apply a transformation to the <cite>graph_score</cite> that bumps scores to avoid</p></li>
+<li><p><strong>Default</strong> (<em>a negative exponential shape.</em>) – True.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A pandas DataFrame with the original columns plus [‘graph_score’].</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="graphai.core.text.ConceptsGraph.add_ontology_scores">
+<span class="sig-name descname"><span class="pre">add_ontology_scores</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">results</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">smoothing</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.text.ConceptsGraph.add_ontology_scores" title="Link to this definition"></a></dt>
+<dd><p>Computes <cite>ontology_local_score</cite> and <cite>ontology_global_score</cite> for the provided DataFrame containing keywords and concepts.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>results</strong> (<em>pd.DataFrame</em>) – A pandas DataFrame including the columns [‘keywords’, ‘concept_id’].</p></li>
+<li><p><strong>smoothing</strong> (<em>bool</em>) – Whether to apply a transformation to the ontology scores that pushes scores away from 0.5. Default: True.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A pandas DataFrame with the original columns plus [‘ontology_local_score’, ‘ontology_global_score’].</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.core.text.extract_keywords">
+<span class="sig-prename descclassname"><span class="pre">graphai.core.text.</span></span><span class="sig-name descname"><span class="pre">extract_keywords</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_nltk</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.text.extract_keywords" title="Link to this definition"></a></dt>
+<dd><p>Extracts keywords from the given text, after normalising it (solving encoding problems, stripping HTML, lowercasing, etc.).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>text</strong> (<em>str</em>) – Text to extract keywords from.</p></li>
+<li><p><strong>use_nltk</strong> (<em>bool</em>) – Whether to use nltk-rake for keyword extraction, otherwise python-rake is used. Default: False.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A list containing the keywords extracted from the text.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list[str]</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">text</span> <span class="o">=</span> <span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="s2">&quot;&lt;p&gt;&quot;</span><span class="p">,</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="s2">&quot;Then a crowd a young boys they&#39;re a foolin&#39; around in the corner&quot;</span><span class="p">,</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="s2">&quot;Drunk and dressed in their best brown baggies and their platform soles&quot;</span><span class="p">,</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="s2">&quot;They don&#39;t give a damn about any trumpet playin&#39; band&quot;</span><span class="p">,</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="s2">&quot;It ain&#39;t what they call &#39;rock and roll&#39;&quot;</span><span class="p">,</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="s2">&quot;&lt;/p&gt;&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">extract_keywords</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+<span class="go">[&#39;brown baggies&#39;, &#39;young boys&#39;, &#39;trumpet playin&#39;, &#39;corner drunk&#39;, &#39;platform soles&#39;]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.core.text.wikisearch">
+<span class="sig-prename descclassname"><span class="pre">graphai.core.text.</span></span><span class="sig-name descname"><span class="pre">wikisearch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">keywords_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">es</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fraction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(0,</span> <span class="pre">1)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'es-base'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.text.wikisearch" title="Link to this definition"></a></dt>
+<dd><p>Finds 10 relevant concepts (Wikipedia pages) for each set of keywords in a list.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>keywords_list</strong> (<em>list</em><em>(</em><em>str</em><em>)</em>) – List containing the sets of keywords for which to search concepts.</p></li>
+<li><p><strong>es</strong> (<em>ES</em>) – Elasticsearch interface.</p></li>
+<li><p><strong>fraction</strong> (<em>tuple</em><em>(</em><em>int</em><em>, </em><em>int</em><em>)</em>) – Portion of the keywords_list to be processed, e.g. (1/3, 2/3) means only</p></li>
+<li><p><strong>considered.</strong> (<em>the middle third</em><em> of </em><em>the list is</em>) – </p></li>
+<li><p><strong>method</strong> (<em>str</em>) – Method to retrieve the concepts (Wikipedia pages). It can be either “wikipedia-api”, to use the</p></li>
+<li><p><strong>API</strong> (<em>Wikipedia</em>) – </p></li>
+<li><p><strong>{&quot;es-base&quot;</strong> (<em>or one of</em>) – </p></li>
+<li><p><strong>&quot;es-score&quot;}</strong> – </p></li>
+<li><p><strong>elasticsearch.</strong> (<em>to use</em>) – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A pandas DataFrame with columns [‘keywords’, ‘concept_id’, ‘concept_name’, ‘searchrank’, ‘search_score’],
+unique by (‘keywords’, ‘concept_id’). The searchrank is the position of the concept in the list of results for that set of keywords,
+starting with 1. The search score is the elasticsearch score for method “es-score” or 1 - (searchrank - 1)/n
+for the other methods. Default: ‘es-base’. Fallback: ‘wikipedia-api’.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.core.text.compute_scores">
+<span class="sig-prename descclassname"><span class="pre">graphai.core.text.</span></span><span class="sig-name descname"><span class="pre">compute_scores</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">results</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">graph</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">restrict_to_ontology</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">graph_score_smoothing</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ontology_score_smoothing</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keywords_score_smoothing</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">aggregation_coef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filtering_threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filtering_min_agreement_fraction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.8</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">refresh_scores</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.text.compute_scores" title="Link to this definition"></a></dt>
+<dd><p>Gathers wikisearch results, computes several scores for them, and finally aggregates and filters them.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>results</strong> (<em>pd.DataFrame</em>) – A pandas DataFrame with columns [‘keywords’, ‘concept_id’, ‘concept_name’, ‘searchrank’, ‘search_score’].</p></li>
+<li><p><strong>graph</strong> (<a class="reference internal" href="#graphai.core.text.ConceptsGraph" title="graphai.core.text.ConceptsGraph"><em>ConceptsGraph</em></a>) – The concepts graph and ontology object.</p></li>
+<li><p><strong>restrict_to_ontology</strong> (<em>bool</em>) – Whether to filter concepts that are not in the ontology. Default: False.</p></li>
+<li><p><strong>graph_score_smoothing</strong> (<em>bool</em>) – Whether to apply a transformation to the graph scores that bumps scores to avoid</p></li>
+<li><p><strong>Default</strong> (<em>from that score's perspective.</em>) – True.</p></li>
+<li><p><strong>ontology_score_smoothing</strong> (<em>bool</em>) – Whether to apply a transformation to the ontology scores that pushes scores away from 0.5. Default: True.</p></li>
+<li><p><strong>keywords_score_smoothing</strong> (<em>bool</em>) – Whether to apply a transformation to the keywords scores that bumps scores to avoid</p></li>
+<li><p><strong>Default</strong> – True.</p></li>
+<li><p><strong>aggregation_coef</strong> (<em>float</em>) – A number in [0, 1] that controls how the scores of the aggregated pages are computed.</p></li>
+<li><p><strong>Keywords</strong> (<em>A value</em><em> of </em><em>0 takes the sum</em><em> of </em><em>scores over</em>) – </p></li>
+<li><p><strong>[</strong><strong>0</strong> (<em>then normalises in</em>) – </p></li>
+<li><p><strong>Keywords.</strong> (<em>1</em><em>]</em><em>. A value</em><em> of </em><em>1 takes the max</em><em> of </em><em>scores over</em>) – </p></li>
+<li><p><strong>Default</strong> – 0.5.</p></li>
+<li><p><strong>filtering_threshold</strong> (<em>float</em>) – A number in [0, 1] that is used as a threshold for all the scores to decide whether the page is good enough</p></li>
+<li><p><strong>Default</strong> – 0.1.</p></li>
+<li><p><strong>filtering_min_agreement_fraction</strong> (<em>float</em>) – A number between 0 and 1. A page will be kept iff it is good enough for at least this fraction of scores. Default: 0.8.</p></li>
+<li><p><strong>refresh_scores</strong> (<em>bool</em>) – Whether to recompute scores after filtering. Default: True.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A pandas DataFrame with columns [‘concept_id’, ‘concept_name’] and a column ‘x_score’ for each score,
+including a ‘mixed_score’ with a weighted average of the other scores.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.core.text.draw_ontology">
+<span class="sig-prename descclassname"><span class="pre">graphai.core.text.</span></span><span class="sig-name descname"><span class="pre">draw_ontology</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">results</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">graph</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">level</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.text.draw_ontology" title="Link to this definition"></a></dt>
+<dd><p>Draws the ontology neighbourhood induced by the given set of wikify results. The resulting svg is not returned but stored in /tmp/file.svg.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>results</strong> (<em>pd.DataFrame</em>) – A pandas DataFrame with columns [‘concept_id’, ‘concept_name’, ‘search_score’,</p></li>
+<li><p><strong>'levenshtein_score'</strong> – </p></li>
+<li><p><strong>'graph_score'</strong> – </p></li>
+<li><p><strong>'ontology_local_score'</strong> – </p></li>
+<li><p><strong>'ontology_global_score'</strong> – </p></li>
+<li><p><strong>'keywords_score'</strong> – </p></li>
+<li><p><strong>'mixed_score'</strong><strong>]</strong><strong>.</strong> – </p></li>
+<li><p><strong>graph</strong> (<a class="reference internal" href="#graphai.core.text.ConceptsGraph" title="graphai.core.text.ConceptsGraph"><em>ConceptsGraph</em></a>) – The concepts graph and ontology object.</p></li>
+<li><p><strong>level</strong> (<em>int</em>) – Level up to which the visualisation considers categories. Default: 3.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.core.text.draw_graph">
+<span class="sig-prename descclassname"><span class="pre">graphai.core.text.</span></span><span class="sig-name descname"><span class="pre">draw_graph</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">results</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">graph</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">concept_score_threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">edge_threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_component_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.text.draw_graph" title="Link to this definition"></a></dt>
+<dd><p>Draws the concept graph neighbourhood induced by the given set of wikify results. The resulting svg is not returned but stored in /tmp/file.svg.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>results</strong> (<em>pd.DataFrame</em>) – A pandas DataFrame with columns [‘concept_id’, ‘concept_name’, ‘search_score’,</p></li>
+<li><p><strong>'levenshtein_score'</strong> – </p></li>
+<li><p><strong>'graph_score'</strong> – </p></li>
+<li><p><strong>'ontology_local_score'</strong> – </p></li>
+<li><p><strong>'ontology_global_score'</strong> – </p></li>
+<li><p><strong>'keywords_score'</strong> – </p></li>
+<li><p><strong>'mixed_score'</strong><strong>]</strong><strong>.</strong> – </p></li>
+<li><p><strong>graph</strong> (<a class="reference internal" href="#graphai.core.text.ConceptsGraph" title="graphai.core.text.ConceptsGraph"><em>ConceptsGraph</em></a>) – The concepts graph and ontology object.</p></li>
+<li><p><strong>concept_score_threshold</strong> (<em>float</em>) – Score threshold below which concepts are filtered out. Default: 0.3.</p></li>
+<li><p><strong>edge_threshold</strong> (<em>float</em>) – Score threshold below which edges are filtered out. Default: 0.3.</p></li>
+<li><p><strong>min_component_size</strong> (<em>int</em>) – Size threshold below which connected components are filtered out. Default: 3.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
 <section id="submodules">
 <h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading"></a></h2>
 <div class="toctree-wrapper compound">

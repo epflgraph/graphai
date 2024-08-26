@@ -17,6 +17,7 @@ Subpackages
    graphai.api.common
    graphai.api.routers
    graphai.api.schemas
+   graphai.api.text
 
 Submodules
 ----------

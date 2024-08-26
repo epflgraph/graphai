@@ -18,7 +18,6 @@ Submodules
    graphai.api.celery_tasks.image
    graphai.api.celery_tasks.ontology
    graphai.api.celery_tasks.scraping
-   graphai.api.celery_tasks.text
    graphai.api.celery_tasks.translation
    graphai.api.celery_tasks.video
    graphai.api.celery_tasks.voice

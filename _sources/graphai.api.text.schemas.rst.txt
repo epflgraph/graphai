@@ -1,7 +1,7 @@
-graphai.api.schemas.text module
+graphai.api.text.schemas module
 ===============================
 
-.. automodule:: graphai.api.schemas.text
+.. automodule:: graphai.api.text.schemas
    :members:
    :undoc-members:
    :show-inheritance:

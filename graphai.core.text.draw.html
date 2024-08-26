@@ -46,6 +46,7 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="graphai.api.html">graphai.api package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="graphai.celery.html">graphai.celery package</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="graphai.core.html">graphai.core package</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="graphai.core.html#subpackages">Subpackages</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="graphai.core.common.html">graphai.core.common package</a></li>
@@ -54,6 +55,12 @@
 <li class="toctree-l3"><a class="reference internal" href="graphai.core.ontology.html">graphai.core.ontology package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="graphai.core.scraping.html">graphai.core.scraping package</a></li>
 <li class="toctree-l3 current"><a class="reference internal" href="graphai.core.text.html">graphai.core.text package</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="graphai.core.text.html#graphai.core.text.ConceptsGraph"><code class="docutils literal notranslate"><span class="pre">ConceptsGraph</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="graphai.core.text.html#graphai.core.text.extract_keywords"><code class="docutils literal notranslate"><span class="pre">extract_keywords()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="graphai.core.text.html#graphai.core.text.wikisearch"><code class="docutils literal notranslate"><span class="pre">wikisearch()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="graphai.core.text.html#graphai.core.text.compute_scores"><code class="docutils literal notranslate"><span class="pre">compute_scores()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="graphai.core.text.html#graphai.core.text.draw_ontology"><code class="docutils literal notranslate"><span class="pre">draw_ontology()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="graphai.core.text.html#graphai.core.text.draw_graph"><code class="docutils literal notranslate"><span class="pre">draw_graph()</span></code></a></li>
 <li class="toctree-l4 current"><a class="reference internal" href="graphai.core.text.html#submodules">Submodules</a></li>
 </ul>
 </li>
@@ -112,7 +119,7 @@
 <li><p><strong>'ontology_global_score'</strong> – </p></li>
 <li><p><strong>'keywords_score'</strong> – </p></li>
 <li><p><strong>'mixed_score'</strong><strong>]</strong><strong>.</strong> – </p></li>
-<li><p><strong>graph</strong> (<a class="reference internal" href="graphai.core.text.graph.html#graphai.core.text.graph.ConceptsGraph" title="graphai.core.text.graph.ConceptsGraph"><em>ConceptsGraph</em></a>) – The concepts graph and ontology object.</p></li>
+<li><p><strong>graph</strong> (<a class="reference internal" href="graphai.core.text.html#graphai.core.text.ConceptsGraph" title="graphai.core.text.ConceptsGraph"><em>ConceptsGraph</em></a>) – The concepts graph and ontology object.</p></li>
 <li><p><strong>level</strong> (<em>int</em>) – Level up to which the visualisation considers categories. Default: 3.</p></li>
 </ul>
 </dd>
@@ -133,7 +140,7 @@
 <li><p><strong>'ontology_global_score'</strong> – </p></li>
 <li><p><strong>'keywords_score'</strong> – </p></li>
 <li><p><strong>'mixed_score'</strong><strong>]</strong><strong>.</strong> – </p></li>
-<li><p><strong>graph</strong> (<a class="reference internal" href="graphai.core.text.graph.html#graphai.core.text.graph.ConceptsGraph" title="graphai.core.text.graph.ConceptsGraph"><em>ConceptsGraph</em></a>) – The concepts graph and ontology object.</p></li>
+<li><p><strong>graph</strong> (<a class="reference internal" href="graphai.core.text.html#graphai.core.text.ConceptsGraph" title="graphai.core.text.ConceptsGraph"><em>ConceptsGraph</em></a>) – The concepts graph and ontology object.</p></li>
 <li><p><strong>concept_score_threshold</strong> (<em>float</em>) – Score threshold below which concepts are filtered out. Default: 0.3.</p></li>
 <li><p><strong>edge_threshold</strong> (<em>float</em>) – Score threshold below which edges are filtered out. Default: 0.3.</p></li>
 <li><p><strong>min_component_size</strong> (<em>int</em>) – Size threshold below which connected components are filtered out. Default: 3.</p></li>
