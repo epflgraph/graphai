@@ -1,5 +1,4 @@
 import pandas as pd
-from time import sleep
 
 from celery import shared_task
 
@@ -8,11 +7,14 @@ from elasticsearch_interface.es import ES
 from graphai.core.interfaces.config import config
 from graphai.core.common.common_utils import strtobool
 
-from graphai.core.text.graph import ConceptsGraph
-from graphai.core.text.keywords import extract_keywords
-from graphai.core.text.wikisearch import wikisearch
-from graphai.core.text.scores import compute_scores
-from graphai.core.text.draw import draw_ontology, draw_graph
+from graphai.core.text import (
+    ConceptsGraph,
+    extract_keywords,
+    wikisearch,
+    compute_scores,
+    draw_ontology,
+    draw_graph,
+)
 
 
 ################################################################
@@ -74,10 +76,3 @@ def draw_ontology_task(self, results, **kwargs):
 @shared_task(bind=True, name='text_10.draw_graph', graph=graph)
 def draw_graph_task(self, results, **kwargs):
     return draw_graph(results, graph=self.graph, **kwargs)
-
-
-@shared_task(bind=True, name='text_10.sleeper')
-def text_test_task(self):
-    sleep(15)
-    print('It worked')
-    return 0

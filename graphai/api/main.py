@@ -9,7 +9,7 @@ from graphai.api.common.log import log
 
 import graphai.api.routers.image as image_router
 import graphai.api.routers.ontology as ontology_router
-import graphai.api.routers.text as text_router
+import graphai.api.text.router as text_router
 import graphai.api.routers.video as video_router
 import graphai.api.routers.voice as voice_router
 import graphai.api.routers.translation as translation_router
@@ -22,7 +22,7 @@ from graphai.api.routers.auth import (
     authenticated_router
 )
 
-from graphai.api.celery_tasks.text import text_init_task
+from graphai.celery.text.tasks import text_init_task
 from graphai.api.celery_tasks.common import video_init_task
 
 

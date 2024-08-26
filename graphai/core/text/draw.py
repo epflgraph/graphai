@@ -34,8 +34,10 @@ def draw_ontology(results, graph, level=3):
     ################################################################
 
     # Add categories to results
+    results = pd.DataFrame(results)
+    results['concept_id'] = results['concept_id'].astype(str)
     results = pd.merge(
-        pd.DataFrame(results),
+        results,
         graph.concepts_categories.rename(columns={'category_id': 'level_4_category_id'}),
         how='inner',
         on='concept_id'
@@ -52,7 +54,8 @@ def draw_ontology(results, graph, level=3):
     ################################################################
 
     # Create node lists with node attributes in networkx format
-    concept_nodes = results[['concept_id', 'concept_name', 'search_score', 'levenshtein_score', 'graph_score', 'ontology_local_score', 'ontology_global_score', 'keywords_score', 'mixed_score']].to_dict(orient='records')
+    columns = ['concept_id', 'concept_name'] + [c for c in results.columns if '_score' in c]
+    concept_nodes = results[columns].to_dict(orient='records')
     concept_nodes = [(d['concept_name'], {**d, 'type': 'concept'}) for d in concept_nodes]
 
     category_nodes = []
@@ -179,6 +182,7 @@ def draw_graph(results, graph, concept_score_threshold=0.3, edge_threshold=0.3, 
 
     # Filter results depending on score
     results = pd.DataFrame(results)
+    results['concept_id'] = results['concept_id'].astype(str)
     results = results[results['mixed_score'] >= concept_score_threshold]
 
     ################################################################
@@ -207,7 +211,8 @@ def draw_graph(results, graph, concept_score_threshold=0.3, edge_threshold=0.3, 
     #################################################################
 
     # Create node lists with node attributes in networkx format
-    nodes = results[['concept_id', 'concept_name', 'search_score', 'levenshtein_score', 'graph_score', 'ontology_local_score', 'ontology_global_score', 'keywords_score', 'mixed_score']].to_dict(orient='records')
+    columns = ['concept_id', 'concept_name'] + [c for c in results.columns if '_score' in c]
+    nodes = results[columns].to_dict(orient='records')
     nodes = [(d['concept_name'], d) for d in nodes]
 
     # Create edge lists in networkx format

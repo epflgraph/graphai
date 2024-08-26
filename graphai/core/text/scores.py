@@ -1,3 +1,4 @@
+import numpy as np
 import pandas as pd
 
 import Levenshtein
@@ -20,21 +21,132 @@ def compute_levenshtein_score(results):
     return results
 
 
-def compute_keywords_score(results, smoothing):
-    # Compute keywords score aggregating ontology_global_score over keywords as an indicator for low-quality keywords
+def compute_embedding_scores(results):
+    # FIXME Remove this stub
+    # results = pd.DataFrame({
+    #     'keywords': ['a'] * 4 + ['b'] * 3 + ['c'] * 3,
+    #     'concept_id': ['1', '2', '3', '4'] + ['1', '2', '5'] + ['1', '3', '5']
+    # })
+
+    # Extract ids of all concepts in the DataFrame
+    concept_ids = list(results['concept_id'].drop_duplicates())
+    n_concepts = len(concept_ids)
+    # print(n_concepts)
+
+    # If there is only one concept, its embedding local and global scores are 1, and we return directly
+    if n_concepts == 1:
+        results['embedding_local_score'] = 1
+        results['embedding_global_score'] = 1
+        return results
+
+    # FIXME Get actual data instead of dummy vectors
+    # Fetch their embedding vectors as a matrix of size n_dims x n_concepts
+    # Each column of the matrix represents the vector of a concept
+    # The order of the concept vectors in the matrix is the same as the order of the concept ids in concept_ids
+    # n_dims = 384
+    n_dims = 12
+    vector_matrix = np.random.rand(n_dims, n_concepts)
+    # vector_matrix = np.tril(np.ones((n_dims, n_concepts)))
+    vector_matrix = vector_matrix / np.linalg.norm(vector_matrix, axis=0)
+    # print(vector_matrix)
+
+    # Compute the scalar product of all vectors pairwise
+    scalar_products = vector_matrix.T @ vector_matrix
+    # print(scalar_products)
+
+    # Embedding local score is the mean scalar product among concepts with the same keywords
+    embedding_local_scores = pd.DataFrame()
+    for name, group in results.groupby('keywords'):
+        # print(name)
+        # print(group)
+
+        # Extract concept_ids in the given keywords group and filter out the scalar_product_matrix with it
+        group_concept_ids = list(group['concept_id'])
+        # print(group_concept_ids)
+        n_group_concepts = len(group_concept_ids)
+
+        # If there is only one concept in the group, its embedding local score is directly 1, and we skip to the next group
+        if n_group_concepts == 1:
+            group_embedding_local_scores = pd.DataFrame({'keywords': name, 'concept_id': group_concept_ids, 'embedding_local_score': 1})
+            embedding_local_scores = pd.concat([embedding_local_scores, group_embedding_local_scores], ignore_index=True)
+            continue
+
+        # There are more than one concept, we proceed using the scalar products within the concepts of that keyword
+        indices = [concept_id in group_concept_ids for concept_id in concept_ids]
+        group_scalar_products = scalar_products[indices, :][:, indices]
+
+        # print(group_scalar_products)
+
+        # Embedding local score is now the mean scalar product for this new matrix excluding the diagonal
+        #   We create a n_group_concepts x n_group_concepts matrix with zeros in the diagonal and ones elsewhere.
+        #   We use it as weights for the weighted average per row.
+        #   Then we derive the score between 0 and 1 by mapping the cos to [0, 1] and clipping
+        weights = np.ones((n_group_concepts, n_group_concepts)) - np.identity(n_group_concepts)
+        # print(weights)
+        group_mean_scalar_products = np.average(group_scalar_products, axis=0, weights=weights)
+        # print(group_mean_scalar_products)
+        mean_scores = np.clip((group_mean_scalar_products + 1) / 2, a_min=0, a_max=1)
+        # print(mean_scores)
+        group_embedding_local_scores = pd.DataFrame({'keywords': name, 'concept_id': [concept_id for concept_id in concept_ids if concept_id in group_concept_ids], 'embedding_local_score': mean_scores})
+        embedding_local_scores = pd.concat([embedding_local_scores, group_embedding_local_scores], ignore_index=True)
+
+    # print(embedding_local_scores)
+
+    # Embedding global score is the mean scalar product excluding the diagonal
+    #   We create a n_concepts x n_concepts matrix with zeros in the diagonal and ones elsewhere.
+    #   We use it as weights for the weighted average per row.
+    #   Then we derive the score between 0 and 1 by mapping the cos to [0, 1] and clipping
+    weights = np.ones((n_concepts, n_concepts)) - np.identity(n_concepts)
+    mean_scalar_products = np.average(scalar_products, axis=0, weights=weights)
+    mean_scores = np.clip((mean_scalar_products + 1) / 2, a_min=0, a_max=1)
+    embedding_global_scores = pd.DataFrame({'concept_id': concept_ids, 'embedding_global_score': mean_scores})
+
+    # print(embedding_global_scores)
+
+    # Add the scores to the results DataFrame
+    results = pd.merge(results, embedding_local_scores, how='inner', on=['keywords', 'concept_id'])
+    results = pd.merge(results, embedding_global_scores, how='inner', on='concept_id')
+
+    # print(results)
+
+    return results
+
+
+def compute_keywords_scores(results, smoothing):
+    # Compute keywords scores aggregating other scores over keywords as an indicator for low-quality keywords
+    # We compute three keywords scores: embedding_keywords_score (new), graph_keywords_score (new) and ontology_keywords_score (classical).
+
     results = pd.merge(
         results,
-        results.groupby(by=['keywords']).aggregate(keywords_score=('ontology_global_score', 'sum')).reset_index(),
+        results.groupby(by=['keywords']).aggregate(embedding_keywords_score=('embedding_global_score', 'sum')).reset_index(),
         how='left',
         on=['keywords']
     )
 
-    # Normalise the keywords scores to [0, 1]
-    results['keywords_score'] = results['keywords_score'] / results['keywords_score'].max()
+    results = pd.merge(
+        results,
+        results.groupby(by=['keywords']).aggregate(graph_keywords_score=('graph_score', 'sum')).reset_index(),
+        how='left',
+        on=['keywords']
+    )
 
-    # Smooth score if needed using the function f(x) = (2 - x) * x, bumping lower values to avoid very low scores
+    results = pd.merge(
+        results,
+        results.groupby(by=['keywords']).aggregate(ontology_keywords_score=('ontology_global_score', 'sum')).reset_index(),
+        how='left',
+        on=['keywords']
+    )
+
+    # Normalise all three keywords scores to [0, 1]
+    results['embedding_keywords_score'] = results['embedding_keywords_score'] / results['embedding_keywords_score'].max()
+    results['graph_keywords_score'] = results['graph_keywords_score'] / results['graph_keywords_score'].max()
+    results['ontology_keywords_score'] = results['ontology_keywords_score'] / results['ontology_keywords_score'].max()
+
+    # Smooth scores if needed using the function f(x) = (2 - x) * x, bumping lower values to avoid very low scores
     if smoothing:
-        results['keywords_score'] = (2 - results['keywords_score']) * results['keywords_score']
+        results['embedding_keywords_score'] = (2 - results['embedding_keywords_score']) * results['embedding_keywords_score']
+        results['graph_keywords_score'] = (2 - results['graph_keywords_score']) * results['graph_keywords_score']
+        results['ontology_keywords_score'] = (2 - results['ontology_keywords_score']) * results['ontology_keywords_score']
 
     return results
 
@@ -45,12 +157,19 @@ def compute_mixed_score(results):
     coefficients = pd.DataFrame({
         'search_score': [0.2],
         'levenshtein_score': [0.15],
+        'embedding_local_score': [0],
+        'embedding_global_score': [0],
         'graph_score': [0.1],
         'ontology_local_score': [0.15],
         'ontology_global_score': [0.1],
-        'keywords_score': [0.3]
+        'embedding_keywords_score': [0],
+        'graph_keywords_score': [0],
+        'ontology_keywords_score': [0.3],
     })
     results['mixed_score'] = results[coefficients.columns] @ coefficients.transpose()
+
+    # Sort descendingly by mixed_score
+    results = results.sort_values(by='mixed_score', ascending=False)
 
     return results
 
@@ -61,15 +180,13 @@ def aggregate_results(results, coef=0.5):
     i.e. unique by concept_id.
 
     Args:
-        results (pd.DataFrame): A pandas DataFrame with columns ['keywords', 'concept_id', 'concept_name', 'search_score', 'levenshtein_score', 'graph_score',
-        'ontology_local_score', 'ontology_global_score', 'keywords_score'].
+        results (pd.DataFrame): A pandas DataFrame with columns ['keywords', 'concept_id', 'concept_name'] and a column 'x_score' for each score.
         coef (float): A number in [0, 1] that controls how the scores of the aggregated concepts are computed.
         A value of 0 takes the sum of scores over keywords, then normalises in [0, 1]. A value of 1 takes the max of scores over keywords.
         Any value in between linearly interpolates those two approaches. Default: 0.5.
 
     Returns:
-        pd.DataFrame: A pandas DataFrame with columns ['concept_id', 'concept_name', 'search_score', 'levenshtein_score', 'graph_score',
-        'ontology_local_score', 'ontology_global_score', 'keywords_score'].
+        pd.DataFrame: A pandas DataFrame with columns ['concept_id', 'concept_name'] and a column 'x_score' for each score.
     """
 
     ################################################################
@@ -125,20 +242,39 @@ def aggregate_results(results, coef=0.5):
         search_score_max=('search_score', 'max'),
         levenshtein_score_sum=('levenshtein_score', 'sum'),
         levenshtein_score_max=('levenshtein_score', 'max'),
+        embedding_local_score_sum=('embedding_local_score', 'sum'),
+        embedding_local_score_max=('embedding_local_score', 'max'),
+        embedding_global_score_sum=('embedding_global_score', 'sum'),
+        embedding_global_score_max=('embedding_global_score', 'max'),
         graph_score_sum=('graph_score', 'sum'),
         graph_score_max=('graph_score', 'max'),
         ontology_local_score_sum=('ontology_local_score', 'sum'),
         ontology_local_score_max=('ontology_local_score', 'max'),
         ontology_global_score_sum=('ontology_global_score', 'sum'),
         ontology_global_score_max=('ontology_global_score', 'max'),
-        keywords_score_sum=('keywords_score', 'sum'),
-        keywords_score_max=('keywords_score', 'max')
+        embedding_keywords_score_sum=('embedding_keywords_score', 'sum'),
+        embedding_keywords_score_max=('embedding_keywords_score', 'max'),
+        graph_keywords_score_sum=('graph_keywords_score', 'sum'),
+        graph_keywords_score_max=('graph_keywords_score', 'max'),
+        ontology_keywords_score_sum=('ontology_keywords_score', 'sum'),
+        ontology_keywords_score_max=('ontology_keywords_score', 'max'),
     ).reset_index()
 
     # Recover names after grouping
     results = pd.merge(results, names, how='left', on='concept_id')
 
-    score_columns = ['search_score', 'levenshtein_score', 'graph_score', 'ontology_local_score', 'ontology_global_score', 'keywords_score']
+    score_columns = [
+        "search_score",
+        "levenshtein_score",
+        "embedding_local_score",
+        "embedding_global_score",
+        "graph_score",
+        "ontology_local_score",
+        "ontology_global_score",
+        "embedding_keywords_score",
+        "graph_keywords_score",
+        "ontology_keywords_score",
+    ]
 
     # Normalise sum scores to [0, 1]
     for column in score_columns:
@@ -156,34 +292,43 @@ def aggregate_results(results, coef=0.5):
     return results
 
 
-def filter_results(results, epsilon=0.1, min_votes=5):
+def filter_results(results, epsilon=0.1, min_agreement_fraction=0.8):
     """
     Filters a DataFrame of concept results depending on their scores, based on some criteria specified in the parameters.
 
     Args:
-        results (pd.DataFrame): A pandas DataFrame with columns ['concept_id', 'concept_name', 'search_score', 'levenshtein_score', 'graph_score',
-        'ontology_local_score', 'ontology_global_score', 'keywords_score'].
+        results (pd.DataFrame): A pandas DataFrame with columns ['concept_id', 'concept_name'] and a column 'x_score' for each score.
         epsilon (float): A number in [0, 1] that is used as a threshold for all the scores to decide whether the concept is good enough
         from that score's perspective. Default: 0.1.
-        min_votes (int): A number between 0 and the number of scores. A concept will be kept iff it is good enough
-        for at least this amount of scores. Default: 5.
+        min_agreement_fraction (float): A number between 0 and 1. A concept will be kept iff it is good enough for at least this fraction of scores. Default: 0.8.
 
     Returns:
-        pd.DataFrame: A pandas DataFrame with columns ['concept_id', 'concept_name', 'search_score', 'levenshtein_score', 'graph_score',
-        'ontology_local_score', 'ontology_global_score', 'keywords_score'], which is a subset of results.
+        pd.DataFrame: A pandas DataFrame with columns ['concept_id', 'concept_name'] and a column 'x_score' for each score, which is a subset of results.
     """
 
     # Filter results with low scores through a majority vote among all scores
-    # To be kept, we require a concept to have at least min_votes out of 6 scores to be significant (>= epsilon)
-    assert 0 <= epsilon <= 1, f'Filtering threshold {epsilon} is not in [0, 1]'
-    assert 0 <= min_votes <= 6, f'Filtering minimum number of votes {min_votes} is not in [0, 6]'
+    # To be kept, we require a concept to have at least a proportion of at least `min_agreement_fraction` scores to be significant (>= epsilon)
+    assert 0 <= epsilon <= 1, f"Filtering threshold {epsilon} is not in [0, 1]"
+    assert 0 <= min_agreement_fraction <= 1, f"Filtering minimum agreement fraction {min_agreement_fraction} is not in [0, 1]"
+
+    score_columns = [
+        "search_score",
+        "levenshtein_score",
+        "embedding_local_score",
+        "embedding_global_score",
+        "graph_score",
+        "ontology_local_score",
+        "ontology_global_score",
+        "embedding_keywords_score",
+        "graph_keywords_score",
+        "ontology_keywords_score",
+    ]
 
     votes = pd.DataFrame()
-    score_columns = ['search_score', 'levenshtein_score', 'graph_score', 'ontology_local_score', 'ontology_global_score', 'keywords_score']
     for column in score_columns:
         votes[column] = (results[column] >= epsilon).astype(int)
-    votes = votes.sum(axis=1)
-    results = results[votes >= min_votes]
+    votes = votes.mean(axis=1)
+    results = results[votes >= min_agreement_fraction]
 
     return results
 
@@ -197,7 +342,7 @@ def compute_scores(
     keywords_score_smoothing=True,
     aggregation_coef=0.5,
     filtering_threshold=0.1,
-    filtering_min_votes=5,
+    filtering_min_agreement_fraction=0.8,
     refresh_scores=True,
 ):
     """
@@ -217,13 +362,12 @@ def compute_scores(
         Any value in between linearly interpolates those two approaches. Default: 0.5.
         filtering_threshold (float): A number in [0, 1] that is used as a threshold for all the scores to decide whether the page is good enough
         from that score's perspective. Default: 0.1.
-        filtering_min_votes (int): A number between 0 and the number of scores (excluding MixedScore). A page will be kept iff it is good enough
-        for at least this amount of scores. Default: 5.
+        filtering_min_agreement_fraction (float): A number between 0 and 1. A page will be kept iff it is good enough for at least this fraction of scores. Default: 0.8.
         refresh_scores (bool): Whether to recompute scores after filtering. Default: True.
 
     Returns:
-        pd.DataFrame: A pandas DataFrame with columns ['concept_id', 'concept_name', 'search_score', 'levenshtein_score', 'graph_score',
-        'ontology_local_score', 'ontology_global_score', 'keywords_score', 'mixed_score'].
+        pd.DataFrame: A pandas DataFrame with columns ['concept_id', 'concept_name'] and a column 'x_score' for each score,
+        including a 'mixed_score' with a weighted average of the other scores.
     """
 
     # Return if there are no results
@@ -240,6 +384,9 @@ def compute_scores(
     # Compute levenshtein score
     results = compute_levenshtein_score(results)
 
+    # Compute embeddings (local and global) scores
+    results = compute_embedding_scores(results)
+
     # Compute graph score
     results = graph.add_graph_score(results, smoothing=graph_score_smoothing)
 
@@ -247,7 +394,7 @@ def compute_scores(
     results = graph.add_ontology_scores(results, smoothing=ontology_score_smoothing)
 
     # Compute keywords score
-    results = compute_keywords_score(results, smoothing=keywords_score_smoothing)
+    results = compute_keywords_scores(results, keywords_score_smoothing)
 
     # Return if there are no results
     if len(results) == 0:
@@ -257,7 +404,7 @@ def compute_scores(
     aggregated_results = aggregate_results(results, coef=aggregation_coef)
 
     # Filter results
-    aggregated_results = filter_results(aggregated_results, epsilon=filtering_threshold, min_votes=filtering_min_votes)
+    aggregated_results = filter_results(aggregated_results, epsilon=filtering_threshold, min_agreement_fraction=filtering_min_agreement_fraction)
 
     # Return if there are no results
     if len(aggregated_results) == 0:
@@ -281,6 +428,6 @@ def compute_scores(
         keywords_score_smoothing=keywords_score_smoothing,
         aggregation_coef=aggregation_coef,
         filtering_threshold=0,
-        filtering_min_votes=0,
+        filtering_min_agreement_fraction=0,
         refresh_scores=False,
     )
