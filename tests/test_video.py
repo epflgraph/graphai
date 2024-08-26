@@ -208,7 +208,7 @@ def test__video_detect_slides__detect_slides__integration(fixture_app, celery_wo
     google_api_key = config['google']['api_key']
     response = fixture_app.post('/image/extract_text',
                                 data=json.dumps({"token": first_slide, "method": "google", "force": False,
-                                                 "api_token": google_api_key}),
+                                                 "google_api_token": google_api_key}),
                                 timeout=timeout)
 
     assert response.status_code == 200

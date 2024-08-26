@@ -71,7 +71,7 @@ class ExtractTextRequest(BaseModel):
         default=False
     )
 
-    api_token: str = Field(
+    google_api_token: str = Field(
         title="Google API token",
         description="Token that authenticates the user on the Google OCR API."
                     "Without a valid token, Google OCR will fail. Not required for Tesseract.",

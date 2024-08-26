@@ -70,7 +70,7 @@ async def extract_text(data: ExtractTextRequest):
     token = data.token
     method = data.method
     force = data.force
-    api_token = data.api_token
+    api_token = data.google_api_token
     assert method in ['google', 'tesseract']
     assert api_token is not None or method != 'google'
     task_id = ocr_job(token, force, method, api_token)
