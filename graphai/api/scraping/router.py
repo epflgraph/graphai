@@ -3,7 +3,7 @@ from fastapi_user_limiter.limiter import rate_limiter
 
 from graphai.api.schemas.common import TaskIDResponse
 
-from graphai.api.schemas.scraping import (
+from graphai.api.scraping.schemas import (
     GetSublinksRequest,
     GetSublinksResponse,
     ExtractContentRequest,
