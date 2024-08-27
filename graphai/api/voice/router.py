@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Security, Depends
 from fastapi_user_limiter.limiter import rate_limiter
 
-from graphai.celery.celery_jobs.voice import (
+from graphai.celery.voice.jobs import (
     fingerprint_job,
     detect_language_job,
     transcribe_job

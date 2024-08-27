@@ -1,7 +1,7 @@
 from celery import group, chain
 
 from graphai.celery.video.jobs import get_audio_fingerprint_chain_list
-from graphai.celery.celery_tasks.voice import (
+from graphai.celery.voice.tasks import (
     cache_lookup_audio_fingerprint_task,
     cache_lookup_audio_language_task,
     detect_language_retrieve_from_db_and_split_task,
