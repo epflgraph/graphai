@@ -26,7 +26,7 @@ from graphai.api.common.schemas import TaskIDResponse
 
 from graphai.celery.celery_tasks.common import format_api_results
 
-from graphai.celery.celery_jobs.ontology import (
+from graphai.celery.ontology.jobs import (
     tree_job,
     category_info_job,
     category_parent_job,
