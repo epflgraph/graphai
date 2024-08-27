@@ -1,6 +1,6 @@
 from celery import chain
 
-from graphai.celery.celery_tasks.translation import (
+from graphai.celery.translation.tasks import (
     translate_text_task,
     translate_text_callback_task,
     detect_text_language_task,

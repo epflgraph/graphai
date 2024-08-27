@@ -10,7 +10,7 @@ from graphai.api.translation.schemas import (
     TextFingerprintResponse,
 )
 
-from graphai.celery.celery_jobs.translation import (
+from graphai.celery.translation.jobs import (
     fingerprint_job,
     translation_job,
     detect_text_language_job

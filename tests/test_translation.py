@@ -4,7 +4,7 @@ import pytest
 from unittest.mock import patch
 from time import sleep
 
-from graphai.celery.celery_tasks.translation import (
+from graphai.celery.translation.tasks import (
     translate_text_task,
     compute_translation_text_fingerprint_task,
 )
