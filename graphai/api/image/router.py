@@ -2,7 +2,7 @@ from fastapi import APIRouter, Security, Depends
 from fastapi_user_limiter.limiter import rate_limiter
 
 from graphai.api.schemas.common import TaskIDResponse
-from graphai.api.schemas.image import (
+from graphai.api.image.schemas import (
     ImageFingerprintRequest,
     ImageFingerprintResponse,
     ExtractTextRequest,

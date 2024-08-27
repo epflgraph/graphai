@@ -7,7 +7,7 @@ from graphai.api.common.celery_tools import celery_instance
 
 from graphai.api.common.log import log
 
-import graphai.api.routers.image as image_router
+import graphai.api.image.router as image_router
 import graphai.api.routers.ontology as ontology_router
 import graphai.api.text.router as text_router
 import graphai.api.video.router as video_router
