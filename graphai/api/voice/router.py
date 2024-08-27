@@ -7,7 +7,7 @@ from graphai.api.celery_jobs.voice import (
     transcribe_job
 )
 from graphai.api.schemas.common import TaskIDResponse
-from graphai.api.schemas.voice import (
+from graphai.api.voice.schemas import (
     AudioFingerprintRequest,
     AudioFingerprintResponse,
     AudioTranscriptionRequest,

@@ -11,7 +11,7 @@ import graphai.api.image.router as image_router
 import graphai.api.routers.ontology as ontology_router
 import graphai.api.text.router as text_router
 import graphai.api.video.router as video_router
-import graphai.api.routers.voice as voice_router
+import graphai.api.voice.router as voice_router
 import graphai.api.routers.translation as translation_router
 import graphai.api.embedding.router as embedding_router
 import graphai.api.routers.completion as summarization_router
