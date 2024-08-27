@@ -3,7 +3,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.responses import RedirectResponse
 
-from graphai.celery.common import celery_instance
+from graphai.celery.common.celery_tools import celery_instance
 
 from graphai.celery.common.log import log
 
