@@ -23,28 +23,51 @@ from graphai.core.video.video import (
     get_file_size,
     get_video_token_status,
     get_image_token_status,
-    get_audio_token_status
+    get_audio_token_status, NLPModels
 )
 from graphai.core.common.fingerprinting import md5_video_or_audio, perceptual_hash_audio, perceptual_hash_image
 from graphai.core.interfaces.caching import (
     AudioDBCachingManager,
     SlideDBCachingManager,
-    VideoDBCachingManager
+    VideoDBCachingManager,
+    VideoConfig
 )
 from graphai.core.common.common_utils import (
     get_current_datetime,
     copy_file_within_folder
 )
 
-from graphai.celery.common.video import (
-    file_management_config,
-    local_ocr_nlp_models
-)
 from graphai.celery.common.tasks import (
     fingerprint_lookup_retrieve_from_db,
     fingerprint_lookup_parallel,
     fingerprint_lookup_callback, fingerprint_lookup_direct
 )
+from graphai.core.interfaces.config import config
+from graphai.core.common.common_utils import strtobool
+
+file_management_config = VideoConfig()
+
+local_ocr_nlp_models = NLPModels()
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
+             name='video_2.init_slide_detection', ignore_result=False,
+             nlp_obj=local_ocr_nlp_models)
+def slide_detection_init_task(self):
+    # This task initialises the video celery worker by loading into memory the transcription and NLP models
+    print('Start init_slide_detection task')
+
+    if strtobool(config['preload'].get('video', 'no')):
+        print('Loading NLP models...')
+        self.nlp_obj.load_nlp_models()
+    else:
+        print('Skipping preloading for slide detection endpoint')
+
+    print('Initializing db caching managers...')
+    VideoDBCachingManager(initialize_database=True)
+    SlideDBCachingManager(initialize_database=True)
+
+    return True
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},

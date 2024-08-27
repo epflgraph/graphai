@@ -3,18 +3,39 @@ from collections import Counter
 
 from celery import shared_task
 
-from graphai.celery.common.video import (
-    file_management_config,
-    transcription_model
-)
 from graphai.core.video.video import (
     extract_media_segment
 )
-from graphai.core.video.transcribe import WHISPER_UNLOAD_WAITING_PERIOD
+from graphai.core.video.transcribe import WHISPER_UNLOAD_WAITING_PERIOD, WhisperTranscriptionModel
 from graphai.core.interfaces.caching import (
     TEMP_SUBFOLDER,
-    AudioDBCachingManager
+    AudioDBCachingManager,
+    VideoConfig
 )
+from graphai.core.interfaces.config import config
+from graphai.core.common.common_utils import strtobool
+
+file_management_config = VideoConfig()
+
+transcription_model = WhisperTranscriptionModel()
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
+             name='video_2.init_transcription', ignore_result=False,
+             transcription_obj=transcription_model)
+def transcript_init_task(self):
+    print('Start init_transcription task')
+
+    if strtobool(config['preload'].get('video', 'no')):
+        print('Loading transcription model...')
+        self.transcription_obj.load_model_whisper()
+    else:
+        print('Skipping preloading for voice endpoints')
+
+    print('Initializing db caching managers...')
+    AudioDBCachingManager(initialize_database=True)
+
+    return True
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},

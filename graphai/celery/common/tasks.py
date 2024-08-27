@@ -3,16 +3,9 @@ from celery import shared_task
 from graphai.celery.common.ontology import ontology_data
 from graphai.celery.common.translation import translation_models
 from graphai.celery.common.embedding import embedding_models
-from graphai.celery.common.video import (
-    transcription_model,
-    local_ocr_nlp_models
-)
 from graphai.core.common.common_utils import strtobool
 from graphai.core.interfaces.config import config
 from graphai.core.interfaces.caching import (
-    VideoDBCachingManager,
-    AudioDBCachingManager,
-    SlideDBCachingManager,
     TextDBCachingManager,
     ScrapingDBCachingManager,
     EmbeddingDBCachingManager
@@ -384,8 +377,6 @@ def video_dummy_task(self, results):
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='video_2.init', ignore_result=False,
-             transcription_obj=transcription_model,
-             nlp_obj=local_ocr_nlp_models,
              translation_obj=translation_models,
              ontology_data_obj=ontology_data,
              embedding_obj=embedding_models)
@@ -394,12 +385,6 @@ def video_init_task(self):
     print('Start video_init task')
 
     if strtobool(config['preload'].get('video', 'no')):
-        print('Loading transcription model...')
-        self.transcription_obj.load_model_whisper()
-
-        print('Loading NLP models...')
-        self.nlp_obj.load_nlp_models()
-
         print('Loading translation models...')
         self.translation_obj.load_models()
     else:
@@ -420,9 +405,6 @@ def video_init_task(self):
     print('All video processing objects loaded')
 
     print('Initializing db caching managers...')
-    VideoDBCachingManager(initialize_database=True)
-    SlideDBCachingManager(initialize_database=True)
-    AudioDBCachingManager(initialize_database=True)
     TextDBCachingManager(initialize_database=True)
     ScrapingDBCachingManager(initialize_database=True)
     EmbeddingDBCachingManager(initialize_database=True)

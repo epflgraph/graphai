@@ -1,13 +1,14 @@
 from celery import shared_task
 
-from graphai.celery.common.video import file_management_config
 from graphai.core.video.video import (
     perform_tesseract_ocr,
     get_ocr_colnames
 )
 from graphai.core.video.ocr import GoogleOCRModel
 from graphai.core.translation.text_utils import detect_text_language
-from graphai.core.interfaces.caching import SlideDBCachingManager
+from graphai.core.interfaces.caching import SlideDBCachingManager, VideoConfig
+
+file_management_config = VideoConfig()
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
