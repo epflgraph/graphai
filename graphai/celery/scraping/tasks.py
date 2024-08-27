@@ -12,7 +12,7 @@ from graphai.core.interfaces.caching import ScrapingDBCachingManager
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='text_6.init_scraping', ignore_result=False)
+             name='scraping_6.init_scraping', ignore_result=False)
 def scraping_init_task(self):
     print('Initializing db caching managers...')
     ScrapingDBCachingManager(initialize_database=True)
