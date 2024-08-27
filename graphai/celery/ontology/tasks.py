@@ -14,7 +14,7 @@ ontology_data = OntologyData()
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='text_6.init_ontology', ignore_result=False,
+             name='ontology_6.init_ontology', ignore_result=False,
              ontology_data_obj=ontology_data)
 def ontology_init_task(self):
     # This task initialises the video celery worker by loading into memory the transcription and NLP models
