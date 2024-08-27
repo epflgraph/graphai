@@ -8,7 +8,7 @@ from graphai.api.embedding.schemas import (
     EmbeddingRequest,
     EmbeddingResponse,
 )
-from graphai.api.schemas.translation import (
+from graphai.api.translation.schemas import (
     TextFingerprintResponse
 )
 
