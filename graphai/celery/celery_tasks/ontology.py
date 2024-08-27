@@ -1,5 +1,5 @@
 from celery import shared_task
-from graphai.api.common.ontology import ontology_data
+from graphai.celery.common.ontology import ontology_data
 from graphai.core.ontology.clustering import (
     compute_all_graphs_from_scratch,
     assign_to_categories_using_existing,

@@ -1,7 +1,7 @@
 from pydantic import BaseModel, Field
 from typing import Union, Dict, List
 
-from graphai.api.schemas.common import TaskStatusResponse
+from graphai.api.common.schemas import TaskStatusResponse
 
 
 class GetSublinksRequest(BaseModel):

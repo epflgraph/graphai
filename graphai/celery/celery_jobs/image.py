@@ -1,14 +1,14 @@
 from celery import chain
 
-from graphai.api.celery_jobs.video import get_slide_fingerprint_chain_list
-from graphai.api.celery_tasks.image import (
+from graphai.celery.celery_jobs.video import get_slide_fingerprint_chain_list
+from graphai.celery.celery_tasks.image import (
     cache_lookup_slide_fingerprint_task,
     cache_lookup_extract_slide_text_task,
     extract_slide_text_task,
     extract_slide_text_callback_task
 )
 
-from graphai.api.celery_jobs.common import direct_lookup_generic_job, DEFAULT_TIMEOUT
+from graphai.celery.celery_jobs.common import direct_lookup_generic_job, DEFAULT_TIMEOUT
 
 
 def fingerprint_lookup_job(token):

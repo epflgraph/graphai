@@ -2,7 +2,7 @@ from fastapi import APIRouter, Security, Depends
 from fastapi.responses import FileResponse
 from fastapi_user_limiter.limiter import rate_limiter
 
-from graphai.api.schemas.common import TaskIDResponse, FileRequest
+from graphai.api.common.schemas import TaskIDResponse, FileRequest
 from graphai.api.video.schemas import (
     RetrieveURLRequest,
     RetrieveURLResponse,
@@ -14,9 +14,9 @@ from graphai.api.video.schemas import (
     VideoFingerprintResponse
 )
 
-from graphai.api.celery_tasks.common import format_api_results
+from graphai.celery.celery_tasks.common import format_api_results
 
-from graphai.api.celery_jobs.video import (
+from graphai.celery.celery_jobs.video import (
     retrieve_url_job,
     fingerprint_job,
     extract_audio_job,

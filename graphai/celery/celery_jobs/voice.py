@@ -1,7 +1,7 @@
 from celery import group, chain
 
-from graphai.api.celery_jobs.video import get_audio_fingerprint_chain_list
-from graphai.api.celery_tasks.voice import (
+from graphai.celery.celery_jobs.video import get_audio_fingerprint_chain_list
+from graphai.celery.celery_tasks.voice import (
     cache_lookup_audio_fingerprint_task,
     cache_lookup_audio_language_task,
     detect_language_retrieve_from_db_and_split_task,
@@ -11,7 +11,7 @@ from graphai.api.celery_tasks.voice import (
     transcribe_task,
     transcribe_callback_task
 )
-from graphai.api.celery_jobs.common import direct_lookup_generic_job, DEFAULT_TIMEOUT
+from graphai.celery.celery_jobs.common import direct_lookup_generic_job, DEFAULT_TIMEOUT
 
 DEFAULT_TRANSCRIPT_TIMEOUT = 60
 

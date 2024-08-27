@@ -1,6 +1,6 @@
 from celery import chain, group
 
-from graphai.api.celery_tasks.embedding import (
+from graphai.celery.celery_tasks.embedding import (
     cache_lookup_embedding_text_fingerprint_task,
     compute_embedding_text_fingerprint_task,
     compute_embedding_text_fingerprint_callback_task,
@@ -14,9 +14,9 @@ from graphai.api.celery_tasks.embedding import (
     embedding_text_list_embed_callback_task
 )
 
-from graphai.api.celery_tasks.common import text_dummy_task
+from graphai.celery.celery_tasks.common import text_dummy_task
 
-from graphai.api.celery_jobs.common import direct_lookup_generic_job, DEFAULT_TIMEOUT
+from graphai.celery.celery_jobs.common import direct_lookup_generic_job, DEFAULT_TIMEOUT
 
 from graphai.core.embedding.embedding import (
     generate_embedding_text_token

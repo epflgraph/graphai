@@ -166,7 +166,7 @@ To add an endpoint to an existing router:
 4. Populate the function with the needed logic.
 
 To add an endpoint to a new router:
-1. Create an empty schema file (e.g. [graphai/api/schemas/new.py](graphai/api/schemas/new.py)).
+1. Create an empty schema file (e.g. [graphai/api/schemas/new.py](graphai/api/common/new.py)).
 2. Create a router file (e.g. [graphai/api/routers/new.py](graphai/api/routers/new.py)), instantiating a fastapi ``APIRouter`` as follows
     ```
     router = APIRouter(

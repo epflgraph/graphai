@@ -1,4 +1,4 @@
-from graphai.api.celery_tasks.ontology import (
+from graphai.celery.celery_tasks.ontology import (
     get_ontology_tree_task,
     get_category_info_task,
     get_category_parent_task,

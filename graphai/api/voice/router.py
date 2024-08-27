@@ -1,12 +1,12 @@
 from fastapi import APIRouter, Security, Depends
 from fastapi_user_limiter.limiter import rate_limiter
 
-from graphai.api.celery_jobs.voice import (
+from graphai.celery.celery_jobs.voice import (
     fingerprint_job,
     detect_language_job,
     transcribe_job
 )
-from graphai.api.schemas.common import TaskIDResponse
+from graphai.api.common.schemas import TaskIDResponse
 from graphai.api.voice.schemas import (
     AudioFingerprintRequest,
     AudioFingerprintResponse,
@@ -17,7 +17,7 @@ from graphai.api.voice.schemas import (
 )
 from graphai.api.auth.router import get_current_active_user, get_user_for_rate_limiter
 from graphai.api.auth.auth_utils import get_ratelimit_values
-from graphai.api.celery_tasks.common import format_api_results
+from graphai.celery.celery_tasks.common import format_api_results
 
 from graphai.core.interfaces.celery_config import get_task_info
 

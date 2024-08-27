@@ -1,6 +1,6 @@
 from celery import chain
 
-from graphai.api.celery_tasks.translation import (
+from graphai.celery.celery_tasks.translation import (
     translate_text_task,
     translate_text_callback_task,
     detect_text_language_task,
@@ -11,7 +11,7 @@ from graphai.api.celery_tasks.translation import (
     cache_lookup_translation_text_using_fingerprint_task
 )
 
-from graphai.api.celery_jobs.common import direct_lookup_generic_job, DEFAULT_TIMEOUT
+from graphai.celery.celery_jobs.common import direct_lookup_generic_job, DEFAULT_TIMEOUT
 
 from graphai.core.translation.text_utils import (
     generate_translation_text_token

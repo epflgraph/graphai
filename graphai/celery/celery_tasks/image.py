@@ -1,6 +1,6 @@
 from celery import shared_task
 
-from graphai.api.common.video import file_management_config
+from graphai.celery.common.video import file_management_config
 from graphai.core.video.video import (
     perform_tesseract_ocr,
     get_ocr_colnames

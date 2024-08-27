@@ -2,7 +2,7 @@ from fastapi import APIRouter, Security, Depends
 from fastapi_user_limiter.limiter import rate_limiter
 import json
 
-from graphai.api.schemas.common import TaskIDResponse
+from graphai.api.common.schemas import TaskIDResponse
 from graphai.api.embedding.schemas import (
     EmbeddingFingerprintRequest,
     EmbeddingRequest,
@@ -12,11 +12,11 @@ from graphai.api.translation.schemas import (
     TextFingerprintResponse
 )
 
-from graphai.api.celery_jobs.embedding import (
+from graphai.celery.celery_jobs.embedding import (
     fingerprint_job,
     embedding_job
 )
-from graphai.api.celery_tasks.common import (
+from graphai.celery.celery_tasks.common import (
     format_api_results,
 )
 from graphai.api.auth.router import get_current_active_user, get_user_for_rate_limiter

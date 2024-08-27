@@ -4,7 +4,7 @@ import gc
 from celery import shared_task
 from itertools import chain
 
-from graphai.api.common.embedding import embedding_models
+from graphai.celery.common.embedding import embedding_models
 
 from graphai.core.common.fingerprinting import perceptual_hash_text
 from graphai.core.common.common_utils import get_current_datetime

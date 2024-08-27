@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Security, Depends
 from fastapi_user_limiter.limiter import rate_limiter
 
-from graphai.api.schemas.common import TaskIDResponse
+from graphai.api.common.schemas import TaskIDResponse
 from graphai.api.image.schemas import (
     ImageFingerprintRequest,
     ImageFingerprintResponse,
@@ -9,11 +9,11 @@ from graphai.api.image.schemas import (
     ExtractTextResponse,
     DetectOCRLanguageResponse,
 )
-from graphai.api.celery_tasks.common import (
+from graphai.celery.celery_tasks.common import (
     format_api_results,
 )
 
-from graphai.api.celery_jobs.image import (
+from graphai.celery.celery_jobs.image import (
     fingerprint_job,
     ocr_job
 )

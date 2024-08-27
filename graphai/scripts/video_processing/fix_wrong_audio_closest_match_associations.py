@@ -1,5 +1,5 @@
 from graphai.core.interfaces.caching import AudioDBCachingManager
-from graphai.api.celery_tasks.common import (
+from graphai.celery.celery_tasks.common import (
     fingerprint_lookup_direct,
     fingerprint_lookup_callback
 )

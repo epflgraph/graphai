@@ -1,7 +1,7 @@
 from pydantic import BaseModel, Field
 from typing import Union, Literal, Dict, List
 
-from graphai.api.schemas.common import (
+from graphai.api.common.schemas import (
     TaskStatusResponse,
     TokenStatus
 )

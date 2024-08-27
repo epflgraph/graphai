@@ -1,9 +1,9 @@
 from celery import shared_task
 
-from graphai.api.common.ontology import ontology_data
-from graphai.api.common.translation import translation_models
-from graphai.api.common.embedding import embedding_models
-from graphai.api.common.video import (
+from graphai.celery.common.ontology import ontology_data
+from graphai.celery.common.translation import translation_models
+from graphai.celery.common.embedding import embedding_models
+from graphai.celery.common.video import (
     transcription_model,
     local_ocr_nlp_models
 )

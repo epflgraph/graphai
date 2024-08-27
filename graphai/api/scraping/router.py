@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Security, Depends
 from fastapi_user_limiter.limiter import rate_limiter
 
-from graphai.api.schemas.common import TaskIDResponse
+from graphai.api.common.schemas import TaskIDResponse
 
 from graphai.api.scraping.schemas import (
     GetSublinksRequest,
@@ -10,11 +10,11 @@ from graphai.api.scraping.schemas import (
     ExtractContentResponse
 )
 
-from graphai.api.celery_tasks.common import (
+from graphai.celery.celery_tasks.common import (
     format_api_results,
 )
 
-from graphai.api.celery_jobs.scraping import (
+from graphai.celery.celery_jobs.scraping import (
     extract_sublinks_job,
     extract_content_job
 )

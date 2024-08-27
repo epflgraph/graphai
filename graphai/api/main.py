@@ -3,9 +3,9 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.responses import RedirectResponse
 
-from graphai.api.common.celery_tools import celery_instance
+from graphai.celery.common import celery_instance
 
-from graphai.api.common.log import log
+from graphai.celery.common.log import log
 
 import graphai.api.image.router as image_router
 import graphai.api.ontology.router as ontology_router
@@ -22,7 +22,7 @@ from graphai.api.auth.router import (
 )
 
 from graphai.celery.text.tasks import text_init_task
-from graphai.api.celery_tasks.common import video_init_task
+from graphai.celery.celery_tasks.common import video_init_task
 
 
 # Define lifespan cycle of FastAPI app, i.e. what to do before startup and after shutdown

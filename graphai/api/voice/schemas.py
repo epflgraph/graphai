@@ -1,7 +1,7 @@
 from pydantic import BaseModel, Field, Json
 from typing import Union, Any
 
-from graphai.api.schemas.common import TaskStatusResponse
+from graphai.api.common.schemas import TaskStatusResponse
 
 
 class AudioFingerprintRequest(BaseModel):

@@ -22,11 +22,11 @@ from graphai.api.ontology.schemas import (
     BreakUpClusterRequest,
     BreakUpClustersResponse,
 )
-from graphai.api.schemas.common import TaskIDResponse
+from graphai.api.common.schemas import TaskIDResponse
 
-from graphai.api.celery_tasks.common import format_api_results
+from graphai.celery.celery_tasks.common import format_api_results
 
-from graphai.api.celery_jobs.ontology import (
+from graphai.celery.celery_jobs.ontology import (
     tree_job,
     category_info_job,
     category_parent_job,

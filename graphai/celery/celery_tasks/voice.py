@@ -3,7 +3,7 @@ from collections import Counter
 
 from celery import shared_task
 
-from graphai.api.common.video import (
+from graphai.celery.common.video import (
     file_management_config,
     transcription_model
 )
