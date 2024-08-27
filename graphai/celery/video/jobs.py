@@ -4,7 +4,7 @@ from celery import (
 )
 
 
-from graphai.celery.celery_tasks.common import video_dummy_task
+from graphai.celery.common.tasks import video_dummy_task
 from graphai.celery.video.tasks import (
     cache_lookup_retrieve_file_from_url_task,
     retrieve_file_from_url_task,
@@ -47,7 +47,7 @@ from graphai.celery.video.tasks import (
     retrieve_slide_fingerprint_callback_task,
     ignore_slide_fingerprint_results_callback_task
 )
-from graphai.celery.celery_jobs.common import direct_lookup_generic_job, DEFAULT_TIMEOUT
+from graphai.celery.common.jobs import direct_lookup_generic_job, DEFAULT_TIMEOUT
 from graphai.core.interfaces.caching import FingerprintParameters
 
 DEFAULT_SLIDE_TIMEOUT = 90

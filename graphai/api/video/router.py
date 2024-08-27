@@ -14,7 +14,7 @@ from graphai.api.video.schemas import (
     VideoFingerprintResponse
 )
 
-from graphai.celery.celery_tasks.common import format_api_results
+from graphai.celery.common.tasks import format_api_results
 
 from graphai.celery.video.jobs import (
     retrieve_url_job,

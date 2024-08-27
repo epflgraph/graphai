@@ -15,7 +15,7 @@ from graphai.celery.translation.jobs import (
     translation_job,
     detect_text_language_job
 )
-from graphai.celery.celery_tasks.common import (
+from graphai.celery.common.tasks import (
     format_api_results,
 )
 from graphai.api.auth.router import get_current_active_user, get_user_for_rate_limiter

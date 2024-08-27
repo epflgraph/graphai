@@ -40,7 +40,7 @@ from graphai.celery.common.video import (
     file_management_config,
     local_ocr_nlp_models
 )
-from graphai.celery.celery_tasks.common import (
+from graphai.celery.common.tasks import (
     fingerprint_lookup_retrieve_from_db,
     fingerprint_lookup_parallel,
     fingerprint_lookup_callback, fingerprint_lookup_direct
