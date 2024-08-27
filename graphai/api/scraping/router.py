@@ -14,7 +14,7 @@ from graphai.celery.celery_tasks.common import (
     format_api_results,
 )
 
-from graphai.celery.celery_jobs.scraping import (
+from graphai.celery.scraping.jobs import (
     extract_sublinks_job,
     extract_content_job
 )

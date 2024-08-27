@@ -1,6 +1,6 @@
 from celery import group, chain
 
-from graphai.celery.celery_tasks.scraping import (
+from graphai.celery.scraping.tasks import (
     cache_lookup_get_sublinks_task,
     initialize_url_and_get_sublinks_task,
     scraping_sublinks_callback_task,
