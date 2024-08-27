@@ -3,7 +3,7 @@ from fastapi_user_limiter.limiter import rate_limiter
 import json
 
 from graphai.api.schemas.common import TaskIDResponse
-from graphai.api.schemas.embedding import (
+from graphai.api.embedding.schemas import (
     EmbeddingFingerprintRequest,
     EmbeddingRequest,
     EmbeddingResponse,

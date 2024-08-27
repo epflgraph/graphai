@@ -13,7 +13,7 @@ import graphai.api.text.router as text_router
 import graphai.api.routers.video as video_router
 import graphai.api.routers.voice as voice_router
 import graphai.api.routers.translation as translation_router
-import graphai.api.routers.embedding as embedding_router
+import graphai.api.embedding.router as embedding_router
 import graphai.api.routers.completion as summarization_router
 import graphai.api.routers.scraping as scraping_router
 
