@@ -1,6 +1,6 @@
 from celery import chain, group
 
-from graphai.celery.celery_tasks.embedding import (
+from graphai.celery.embedding.tasks import (
     cache_lookup_embedding_text_fingerprint_task,
     compute_embedding_text_fingerprint_task,
     compute_embedding_text_fingerprint_callback_task,

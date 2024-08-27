@@ -12,7 +12,7 @@ from graphai.api.translation.schemas import (
     TextFingerprintResponse
 )
 
-from graphai.celery.celery_jobs.embedding import (
+from graphai.celery.embedding.jobs import (
     fingerprint_job,
     embedding_job
 )

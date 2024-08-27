@@ -5,7 +5,7 @@ import pytest
 from unittest.mock import patch
 from time import sleep
 
-from graphai.celery.celery_tasks.embedding import (
+from graphai.celery.embedding.tasks import (
     embed_text_task,
 )
 from graphai.core.interfaces.caching import EmbeddingDBCachingManager
