@@ -10,7 +10,7 @@ from graphai.api.common.log import log
 import graphai.api.routers.image as image_router
 import graphai.api.routers.ontology as ontology_router
 import graphai.api.text.router as text_router
-import graphai.api.routers.video as video_router
+import graphai.api.video.router as video_router
 import graphai.api.routers.voice as voice_router
 import graphai.api.routers.translation as translation_router
 import graphai.api.embedding.router as embedding_router

@@ -160,8 +160,8 @@ The app will be listening on `0.0.0.0:28800` by default. You can change both the
 New endpoints can be added either to an existing router or to a new one.
 
 To add an endpoint to an existing router:
-1. Create an async function in the corresponding router file (e.g. [graphai/api/routers/video.py](graphai/api/routers/video.py)), decorated with FastAPI's decorator specifying the HTTP method and endpoint name.
-2. Create also input and output schemas as classes in the corresponding schema file (e.g. [graphai/api/schemas/video.py](graphai/api/schemas/video.py)). These classes should inherit from [pydantic](https://docs.pydantic.dev/)'s ``BaseModel``, and be named by convention like ``NewEndpointRequest`` and either ``NewEndpointResponse`` or ``NewEndpointResponseElem`` with ``NewEndpointResponse = List[NewEndpointResponseElem]``.
+1. Create an async function in the corresponding router file (e.g. [graphai/api/routers/video.py](graphai/api/video/video.py)), decorated with FastAPI's decorator specifying the HTTP method and endpoint name.
+2. Create also input and output schemas as classes in the corresponding schema file (e.g. [graphai/api/schemas/video.py](graphai/api/video/video.py)). These classes should inherit from [pydantic](https://docs.pydantic.dev/)'s ``BaseModel``, and be named by convention like ``NewEndpointRequest`` and either ``NewEndpointResponse`` or ``NewEndpointResponseElem`` with ``NewEndpointResponse = List[NewEndpointResponseElem]``.
 3. Specify these classes as input and output schemas in the function definition in the router.
 4. Populate the function with the needed logic.
 

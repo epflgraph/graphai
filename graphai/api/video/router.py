@@ -3,7 +3,7 @@ from fastapi.responses import FileResponse
 from fastapi_user_limiter.limiter import rate_limiter
 
 from graphai.api.schemas.common import TaskIDResponse, FileRequest
-from graphai.api.schemas.video import (
+from graphai.api.video.schemas import (
     RetrieveURLRequest,
     RetrieveURLResponse,
     ExtractAudioRequest,
