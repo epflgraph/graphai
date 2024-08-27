@@ -5,7 +5,7 @@ from typing import Optional, Union
 
 import pandas as pd
 
-from graphai.api.routers.auth import get_current_active_user
+from graphai.api.auth.router import get_current_active_user
 from graphai.api.text.schemas import (
     KeywordsRequest,
     KeywordsResponse,

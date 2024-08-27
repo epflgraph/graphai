@@ -1,7 +1,7 @@
 import pytest
 from fastapi.testclient import TestClient
 
-from graphai.api.routers.auth import (
+from graphai.api.auth.router import (
     get_current_active_user,
     get_active_user_dummy
 )

@@ -2,7 +2,7 @@ from datetime import timedelta, datetime, timezone
 from typing import Annotated, Union
 from starlette.datastructures import Headers
 
-from graphai.api.common.auth_utils import (
+from graphai.api.auth.auth_utils import (
     Token,
     TokenData,
     User,

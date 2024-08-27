@@ -40,7 +40,7 @@ from graphai.api.celery_jobs.ontology import (
     concept_nearest_concept_job,
     breakup_cluster_job
 )
-from graphai.api.routers.auth import get_current_active_user
+from graphai.api.auth.router import get_current_active_user
 
 from graphai.core.interfaces.celery_config import get_task_info
 

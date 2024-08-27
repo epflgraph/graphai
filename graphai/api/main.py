@@ -16,7 +16,7 @@ import graphai.api.translation.router as translation_router
 import graphai.api.embedding.router as embedding_router
 import graphai.api.scraping.router as scraping_router
 
-from graphai.api.routers.auth import (
+from graphai.api.auth.router import (
     unauthenticated_router,
     authenticated_router
 )
