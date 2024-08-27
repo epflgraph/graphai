@@ -8,13 +8,12 @@ from graphai.api.common.celery_tools import celery_instance
 from graphai.api.common.log import log
 
 import graphai.api.image.router as image_router
-import graphai.api.routers.ontology as ontology_router
+import graphai.api.ontology.router as ontology_router
 import graphai.api.text.router as text_router
 import graphai.api.video.router as video_router
 import graphai.api.voice.router as voice_router
 import graphai.api.translation.router as translation_router
 import graphai.api.embedding.router as embedding_router
-import graphai.api.routers.completion as summarization_router
 import graphai.api.scraping.router as scraping_router
 
 from graphai.api.routers.auth import (
@@ -90,7 +89,6 @@ authenticated_router.include_router(video_router.router)
 authenticated_router.include_router(voice_router.router)
 authenticated_router.include_router(translation_router.router)
 authenticated_router.include_router(embedding_router.router)
-authenticated_router.include_router(summarization_router.router)
 authenticated_router.include_router(scraping_router.router)
 
 

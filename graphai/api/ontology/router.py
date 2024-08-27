@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Security
 from typing import Union
 
-from graphai.api.schemas.ontology import (
+from graphai.api.ontology.schemas import (
     TreeResponse,
     CategoryInfoRequest,
     CategoryInfoResponse,
