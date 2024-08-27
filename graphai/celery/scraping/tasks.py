@@ -12,6 +12,15 @@ from graphai.core.interfaces.caching import ScrapingDBCachingManager
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
+             name='text_6.init_scraping', ignore_result=False)
+def scraping_init_task(self):
+    print('Initializing db caching managers...')
+    ScrapingDBCachingManager(initialize_database=True)
+
+    return True
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='caching_6.cache_lookup_get_sublinks', ignore_result=False)
 def cache_lookup_get_sublinks_task(self, token):
     db_manager = ScrapingDBCachingManager()

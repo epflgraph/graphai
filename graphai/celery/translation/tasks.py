@@ -1,15 +1,37 @@
 from celery import shared_task
-from graphai.celery.common.translation import translation_models
 from graphai.core.translation.text_utils import (
     detect_text_language,
-    HUGGINGFACE_UNLOAD_WAITING_PERIOD
+    HUGGINGFACE_UNLOAD_WAITING_PERIOD, TranslationModels
 )
 from graphai.core.common.fingerprinting import perceptual_hash_text
 from graphai.core.common.common_utils import get_current_datetime, convert_text_back_to_list
 from graphai.core.interfaces.caching import TextDBCachingManager
+from graphai.core.interfaces.config import config
+from graphai.core.common.common_utils import strtobool
 
 LONG_TEXT_ERROR = "Unpunctuated text too long (over 512 tokens), " \
                   "try adding punctuation or providing a smaller chunk of text."
+
+translation_models = TranslationModels()
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
+             name='text_6.init_translation', ignore_result=False,
+             translation_obj=translation_models)
+def translation_init_task(self):
+    # This task initialises the video celery worker by loading into memory the transcription and NLP models
+    print('Start init_translation task')
+
+    if strtobool(config['preload'].get('video', 'no')):
+        print('Loading translation models...')
+        self.translation_obj.load_models()
+    else:
+        print('Skipping preloading for video endpoints.')
+
+    print('Initializing db caching managers...')
+    TextDBCachingManager(initialize_database=True)
+
+    return True
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},

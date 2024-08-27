@@ -1,5 +1,4 @@
 from celery import shared_task
-from graphai.celery.common.ontology import ontology_data
 from graphai.core.ontology.clustering import (
     compute_all_graphs_from_scratch,
     assign_to_categories_using_existing,
@@ -7,6 +6,27 @@ from graphai.core.ontology.clustering import (
     cluster_and_reassign_outliers,
     convert_cluster_labels_to_dict
 )
+from graphai.core.interfaces.config import config
+from graphai.core.common.common_utils import strtobool
+from graphai.core.ontology.data import OntologyData
+
+ontology_data = OntologyData()
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
+             name='text_6.init_ontology', ignore_result=False,
+             ontology_data_obj=ontology_data)
+def ontology_init_task(self):
+    # This task initialises the video celery worker by loading into memory the transcription and NLP models
+    print('Start init_ontology task')
+
+    if strtobool(config['preload'].get('ontology', 'no')):
+        print('Loading ontology data...')
+        self.ontology_data_obj.load_data()
+    else:
+        print('Skipping preloading for ontology endpoints.')
+
+    return True
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 5},

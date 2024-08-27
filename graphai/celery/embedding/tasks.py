@@ -4,19 +4,39 @@ import gc
 from celery import shared_task
 from itertools import chain
 
-from graphai.celery.common.embedding import embedding_models
-
 from graphai.core.common.fingerprinting import perceptual_hash_text
 from graphai.core.common.common_utils import get_current_datetime
 from graphai.core.interfaces.caching import EmbeddingDBCachingManager
 from graphai.core.embedding.embedding import (
     embedding_to_json,
     get_text_token_count_using_model,
-    EMBEDDING_UNLOAD_WAITING_PERIOD
+    EMBEDDING_UNLOAD_WAITING_PERIOD, EmbeddingModels
 )
+from graphai.core.interfaces.config import config
+from graphai.core.common.common_utils import strtobool
 
 
 LONG_TEXT_ERROR = "Text over token limit for selected model (%d)."
+
+embedding_models = EmbeddingModels()
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
+             name='text_6.init_embedding', ignore_result=False,
+             embedding_obj=embedding_models)
+def embedding_init_task(self):
+    print('Start init_embedding task')
+
+    if strtobool(config['preload'].get('embedding', 'no')):
+        print('Loading embedding models...')
+        self.embedding_obj.load_models(load_heavies=False)
+    else:
+        print('Skipping preloading for embedding models.')
+
+    print('Initializing db caching managers...')
+    EmbeddingDBCachingManager(initialize_database=True)
+
+    return True
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},

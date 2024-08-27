@@ -24,6 +24,10 @@ from graphai.api.auth.router import (
 from graphai.celery.text.tasks import text_init_task
 from graphai.celery.video.tasks import slide_detection_init_task
 from graphai.celery.voice.tasks import transcript_init_task
+from graphai.celery.embedding.tasks import embedding_init_task
+from graphai.celery.translation.tasks import translation_init_task
+from graphai.celery.ontology.tasks import ontology_init_task
+from graphai.celery.scraping.tasks import scraping_init_task
 
 
 # Define lifespan cycle of FastAPI app, i.e. what to do before startup and after shutdown
@@ -47,11 +51,19 @@ async def lifespan(app: FastAPI):
     text_job = text_init_task.apply_async(priority=10)
     video_job = slide_detection_init_task.apply_async(priority=2)
     voice_job = transcript_init_task.apply_async(priority=2)
+    embedding_job = embedding_init_task.apply_async(priority=6)
+    translation_job = translation_init_task.apply_async(priority=6)
+    ontology_job = ontology_init_task.apply_async(priority=6)
+    scraping_job = scraping_init_task.apply_async(priority=6)
 
     # Wait for results
     text_ok = text_job.get()
     video_ok = video_job.get()
     voice_ok = voice_job.get()
+    embedding_ok = embedding_job.get()
+    translation_ok = translation_job.get()
+    ontology_ok = ontology_job.get()
+    scraping_ok = scraping_job.get()
 
     # Print status message
     if text_ok and video_ok:

@@ -1,16 +1,5 @@
 from celery import shared_task
 
-from graphai.celery.common.ontology import ontology_data
-from graphai.celery.common.translation import translation_models
-from graphai.celery.common.embedding import embedding_models
-from graphai.core.common.common_utils import strtobool
-from graphai.core.interfaces.config import config
-from graphai.core.interfaces.caching import (
-    TextDBCachingManager,
-    ScrapingDBCachingManager,
-    EmbeddingDBCachingManager
-)
-
 from graphai.core.common.fingerprinting import find_closest_audio_fingerprint_from_list, \
     find_closest_image_fingerprint_from_list, find_closest_text_fingerprint_from_list
 
@@ -373,42 +362,3 @@ def video_dummy_task(self, results):
     # Whenever there are two groups in one chain of tasks, there need to be at least
     # TWO tasks between them, and this dummy task is simply an f(x)=x function.
     return results
-
-
-@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='video_2.init', ignore_result=False,
-             translation_obj=translation_models,
-             ontology_data_obj=ontology_data,
-             embedding_obj=embedding_models)
-def video_init_task(self):
-    # This task initialises the video celery worker by loading into memory the transcription and NLP models
-    print('Start video_init task')
-
-    if strtobool(config['preload'].get('video', 'no')):
-        print('Loading translation models...')
-        self.translation_obj.load_models()
-    else:
-        print('Skipping preloading for video endpoints.')
-
-    if strtobool(config['preload'].get('embedding', 'no')):
-        print('Loading embedding models...')
-        self.embedding_obj.load_models(load_heavies=False)
-    else:
-        print('Skipping preloading for embedding models.')
-
-    if strtobool(config['preload'].get('ontology', 'no')):
-        print('Loading ontology data...')
-        self.ontology_data_obj.load_data()
-    else:
-        print('Skipping preloading for ontology endpoints.')
-
-    print('All video processing objects loaded')
-
-    print('Initializing db caching managers...')
-    TextDBCachingManager(initialize_database=True)
-    ScrapingDBCachingManager(initialize_database=True)
-    EmbeddingDBCachingManager(initialize_database=True)
-
-    print('Caching managers and database tables initialized')
-
-    return True
