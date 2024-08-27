@@ -5,7 +5,7 @@ from celery import (
 
 
 from graphai.celery.celery_tasks.common import video_dummy_task
-from graphai.celery.celery_tasks.video import (
+from graphai.celery.video.tasks import (
     cache_lookup_retrieve_file_from_url_task,
     retrieve_file_from_url_task,
     retrieve_file_from_url_callback_task,

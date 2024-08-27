@@ -3,7 +3,7 @@ import json
 import pytest
 from time import sleep
 
-from graphai.celery.celery_tasks.video import (
+from graphai.celery.video.tasks import (
     retrieve_file_from_url_task,
     extract_and_sample_frames_task,
     extract_audio_task,

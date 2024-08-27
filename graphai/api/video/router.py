@@ -16,7 +16,7 @@ from graphai.api.video.schemas import (
 
 from graphai.celery.celery_tasks.common import format_api_results
 
-from graphai.celery.celery_jobs.video import (
+from graphai.celery.video.jobs import (
     retrieve_url_job,
     fingerprint_job,
     extract_audio_job,

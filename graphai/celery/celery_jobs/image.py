@@ -1,6 +1,6 @@
 from celery import chain
 
-from graphai.celery.celery_jobs.video import get_slide_fingerprint_chain_list
+from graphai.celery.video.jobs import get_slide_fingerprint_chain_list
 from graphai.celery.celery_tasks.image import (
     cache_lookup_slide_fingerprint_task,
     cache_lookup_extract_slide_text_task,
