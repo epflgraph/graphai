@@ -10,6 +10,8 @@ from graphai.api.celery_tasks.video import (
     compute_video_fingerprint_task,
 )
 
+from graphai.core.interfaces.config import config
+
 ################################################################
 ################################################################
 # Unit tests                                                   #
@@ -203,8 +205,10 @@ def test__video_detect_slides__detect_slides__integration(fixture_app, celery_wo
 
     # Finally, performing OCR on the first slide
     # setting force to False in order to require a fingerprint lookup
+    google_api_key = config['google']['api_key']
     response = fixture_app.post('/image/extract_text',
-                                data=json.dumps({"token": first_slide, "method": "google", "force": False}),
+                                data=json.dumps({"token": first_slide, "method": "google", "force": False,
+                                                 "google_api_token": google_api_key}),
                                 timeout=timeout)
 
     assert response.status_code == 200

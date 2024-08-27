@@ -34,7 +34,7 @@ def fingerprint_job(token, force):
     return task.id
 
 
-def ocr_job(token, force=False, method='google'):
+def ocr_job(token, force=False, method='google', api_token=None):
     ##################
     # OCR cache lookup
     ##################
@@ -48,7 +48,7 @@ def ocr_job(token, force=False, method='google'):
     # OCR computation job
     #####################
     task_list = [
-        extract_slide_text_task.s(token, method),
+        extract_slide_text_task.s(token, method, api_token),
         extract_slide_text_callback_task.s(token, force)
     ]
     task = chain(task_list)
