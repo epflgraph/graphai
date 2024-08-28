@@ -1,11 +1,18 @@
 import gc
 import sys
+from collections import Counter
 
 import ffmpeg
 import whisper
 import time
+import json
 from multiprocessing import Lock
 
+from graphai.core.common.caching import (
+    AudioDBCachingManager,
+    cache_lookup_generic,
+    TEMP_SUBFOLDER, database_callback_generic
+)
 from graphai.core.common.common_utils import file_exists
 from graphai.core.common.config import config
 
@@ -184,3 +191,140 @@ def extract_media_segment(input_filename_with_path, output_filename_with_path, o
         return output_token
     else:
         return None
+
+
+def detect_language_retrieve_from_db_and_split(input_dict, file_manager, n_divs=5, segment_length=30):
+    token = input_dict['token']
+    db_manager = AudioDBCachingManager()
+    existing = db_manager.get_details(token, ['duration'],
+                                      using_most_similar=True)[0]
+    if existing is None or existing['duration'] is None:
+        # We need the duration of the file from the cache, so the task fails if the cache row doesn't exist
+        return {
+            'temp_tokens': None,
+            'lang': None,
+            'fresh': False
+        }
+
+    duration = existing['duration']
+    input_filename_with_path = file_manager.generate_filepath(token)
+    result_tokens = list()
+
+    # Creating `n_divs` segments (of duration `length` each) of the audio file and saving them to the temp subfolder
+    for i in range(n_divs):
+        current_output_token = token + '_' + str(i) + '_temp.ogg'
+        current_output_token_with_path = file_manager.generate_filepath(current_output_token,
+                                                                        force_dir=TEMP_SUBFOLDER)
+        current_result = extract_media_segment(
+            input_filename_with_path, current_output_token_with_path, current_output_token,
+            start=duration * i / n_divs, length=segment_length)
+        if current_result is None:
+            print('Unspecified error while creating temp files')
+            return {
+                'lang': None,
+                'temp_tokens': None,
+                'fresh': False
+            }
+
+        result_tokens.append(current_result)
+
+    return {
+        'lang': None,
+        'temp_tokens': result_tokens,
+        'fresh': True
+    }
+
+
+def detect_language_parallel(tokens_dict, i, model, file_manager):
+    if not tokens_dict['fresh']:
+        return {
+            'lang': None,
+            'fresh': False
+        }
+
+    current_token = tokens_dict['temp_tokens'][i]
+    try:
+        language = model.detect_audio_segment_lang_whisper(
+            file_manager.generate_filepath(current_token, force_dir=TEMP_SUBFOLDER)
+        )
+    except Exception:
+        return {
+            'lang': None,
+            'fresh': False
+        }
+
+    return {
+        'lang': language,
+        'fresh': True
+    }
+
+
+def detect_language_callback(token, results_list, force):
+    if all([x['lang'] is not None for x in results_list]):
+        # This indicates success (regardless of freshness)
+        languages = [x['lang'] for x in results_list]
+        most_common_lang = Counter(languages).most_common(1)[0][0]
+        values_dict = {'language': most_common_lang}
+        database_callback_generic(token, AudioDBCachingManager(), values_dict, force, use_closest_match=True)
+        return {
+            'token': token,
+            'language': most_common_lang,
+            'fresh': True
+        }
+    return {
+        'token': None,
+        'language': None,
+        'fresh': False
+    }
+
+
+def transcribe_audio_to_text(input_dict, model, file_manager, strict_silence=False):
+    token = input_dict['token']
+    lang = input_dict['language']
+
+    # If the token is null, it means that some error happened in the previous step (e.g. the file didn't exist
+    # in language detection)
+    if token is None:
+        return {
+            'transcript_results': None,
+            'subtitle_results': None,
+            'language': None,
+            'fresh': False
+        }
+
+    result_dict = model.transcribe_audio_whisper(file_manager.generate_filepath(token),
+                                                 force_lang=lang, verbose=True,
+                                                 strict_silence=strict_silence)
+
+    if result_dict is None:
+        return {
+            'transcript_results': None,
+            'subtitle_results': None,
+            'language': None,
+            'fresh': False
+        }
+
+    transcript_results = result_dict['text']
+    subtitle_results = result_dict['segments']
+    subtitle_results = json.dumps(subtitle_results, ensure_ascii=False)
+    language_result = result_dict['language']
+
+    return {
+        'transcript_results': transcript_results,
+        'subtitle_results': subtitle_results,
+        'language': language_result,
+        'fresh': True
+    }
+
+
+def transcribe_callback(token, results, force):
+    if results['fresh']:
+        values_dict = {
+            'transcript_results': results['transcript_results'],
+            'subtitle_results': results['subtitle_results'],
+            'language': results['language']
+        }
+        # use_closest_match is True because we need to insert the same values for closest token
+        # if different from original token
+        database_callback_generic(token, AudioDBCachingManager(), values_dict, force, use_closest_match=True)
+    return results

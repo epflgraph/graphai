@@ -657,6 +657,36 @@ def fingerprint_cache_lookup_with_most_similar(token, db_manager, extra_cols=Non
     return None
 
 
+def cache_lookup_generic(token, db_manager, cols):
+    existing_list = db_manager.get_details(token, cols,
+                                           using_most_similar=True)
+    for existing in existing_list:
+        if existing is None:
+            continue
+        if all(existing[key] is not None for key in cols):
+            print('Returning cached result')
+            result = {
+                'token': token,
+                'fresh': False
+            }
+            for col in cols:
+                result[col] = existing[col]
+            return result
+    return None
+
+
+def database_callback_generic(token, db_manager, values_dict, force, use_closest_match=False):
+    db_manager.insert_or_update_details(
+        token, values_dict
+    )
+    if use_closest_match and not force:
+        closest = db_manager.get_closest_match(token)
+        if closest is not None and closest != token:
+            db_manager.insert_or_update_details(
+                closest, values_dict
+            )
+
+
 def token_based_text_lookup(token, db_manager, main_col, modify_result_func=None, modify_result_args=None, **kwargs):
     existing = db_manager.get_details(token, [main_col], using_most_similar=False)[0]
     if existing is not None and existing[main_col] is not None:
