@@ -25,7 +25,12 @@ from graphai.core.video.video import (
     get_image_token_status,
     get_audio_token_status, NLPModels
 )
-from graphai.core.common.fingerprinting import md5_video_or_audio, perceptual_hash_audio, perceptual_hash_image
+from graphai.core.common.fingerprinting import (
+    fingerprint_cache_lookup,
+    md5_video_or_audio,
+    perceptual_hash_audio,
+    perceptual_hash_image
+)
 from graphai.core.interfaces.caching import (
     AudioDBCachingManager,
     SlideDBCachingManager,
@@ -141,17 +146,7 @@ def retrieve_file_from_url_callback_task(self, results, url):
              name='caching_6.cache_lookup_fingerprint_video', ignore_result=False,
              file_manager=file_management_config)
 def cache_lookup_fingerprint_video_task(self, token):
-    db_manager = VideoDBCachingManager()
-    existing = db_manager.get_details(token, ['fingerprint'])[0]
-    if existing is not None and existing['fingerprint'] is not None:
-        return {
-            'result': existing['fingerprint'],
-            'fp_token': existing['id_token'],
-            'perform_lookup': False,
-            'fresh': False
-        }
-
-    return None
+    return fingerprint_cache_lookup(token, VideoDBCachingManager())
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},

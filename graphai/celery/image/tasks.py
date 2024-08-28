@@ -4,6 +4,7 @@ from graphai.core.video.video import (
     perform_tesseract_ocr,
     get_ocr_colnames
 )
+from graphai.core.common.fingerprinting import fingerprint_cache_lookup_with_most_similar
 from graphai.core.video.ocr import GoogleOCRModel
 from graphai.core.translation.text_utils import detect_text_language
 from graphai.core.interfaces.caching import SlideDBCachingManager, VideoConfig
@@ -14,30 +15,7 @@ file_management_config = VideoConfig()
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='caching_6.cache_lookup_fingerprint_slide', ignore_result=False)
 def cache_lookup_slide_fingerprint_task(self, token):
-    db_manager = SlideDBCachingManager()
-    existing_list = db_manager.get_details(token, cols=['fingerprint'],
-                                           using_most_similar=True)
-    for existing in existing_list:
-        if existing is None:
-            continue
-        if existing['fingerprint'] is not None:
-            # We have a cache hit, now we gather all the results that should be returned
-            # The closest match
-            existing_closest = db_manager.get_closest_match(token)
-            if existing_closest is not None:
-                # If the closest match exists, we also want to return its origin token
-                existing_closest_origin = db_manager.get_origin(existing_closest)
-            else:
-                existing_closest_origin = None
-            print('Returning cached result')
-            return {
-                'result': existing['fingerprint'],
-                'fresh': False,
-                'closest': existing_closest,
-                'closest_origin': existing_closest_origin
-            }
-
-    return None
+    return fingerprint_cache_lookup_with_most_similar(token, SlideDBCachingManager(), None)
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},

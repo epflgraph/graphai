@@ -12,6 +12,7 @@ from graphai.core.interfaces.caching import (
     AudioDBCachingManager,
     VideoConfig
 )
+from graphai.core.common.fingerprinting import fingerprint_cache_lookup_with_most_similar
 from graphai.core.interfaces.config import config
 from graphai.core.common.common_utils import strtobool
 
@@ -41,32 +42,7 @@ def transcript_init_task(self):
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='caching_6.cache_lookup_fingerprint_audio', ignore_result=False)
 def cache_lookup_audio_fingerprint_task(self, token):
-    db_manager = AudioDBCachingManager()
-    existing_list = db_manager.get_details(token, cols=['fingerprint', 'duration'],
-                                           using_most_similar=True)
-
-    for existing in existing_list:
-        if existing is None:
-            continue
-        if existing['fingerprint'] is not None:
-            # We have a cache hit, now we gather all the results that should be returned
-            # The closest match
-            existing_closest = db_manager.get_closest_match(token)
-            if existing_closest is not None:
-                # If the closest match exists, we also want to return its origin token
-                existing_closest_origin = db_manager.get_origin(existing_closest)
-            else:
-                existing_closest_origin = None
-            print('Returning cached result')
-            return {
-                'result': existing['fingerprint'],
-                'fresh': False,
-                'closest': existing_closest,
-                'closest_origin': existing_closest_origin,
-                'duration': existing['duration']
-            }
-
-    return None
+    return fingerprint_cache_lookup_with_most_similar(token, AudioDBCachingManager(), ['duration'])
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},

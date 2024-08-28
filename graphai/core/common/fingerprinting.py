@@ -255,3 +255,50 @@ def md5_text(s):
         MD5 hash
     """
     return hashlib.md5(s.encode('utf8')).hexdigest()
+
+
+def fingerprint_cache_lookup(token, db_manager):
+    existing = db_manager.get_details(token, cols=['fingerprint'])[0]
+    if existing is not None and existing['fingerprint'] is not None:
+        existing_closest = db_manager.get_closest_match(token)
+        return {
+            'result': existing['fingerprint'],
+            'closest': existing_closest,
+            'fp_token': existing['id_token'],
+            'perform_lookup': False,
+            'fresh': False
+        }
+    return None
+
+
+def fingerprint_cache_lookup_with_most_similar(token, db_manager, extra_cols=None):
+    cols = ['fingerprint']
+    if extra_cols is not None:
+        cols = cols + extra_cols
+    existing_list = db_manager.get_details(token, cols=cols,
+                                           using_most_similar=True)
+    for existing in existing_list:
+        if existing is None:
+            continue
+        if existing['fingerprint'] is not None:
+            # We have a cache hit, now we gather all the results that should be returned
+            # The closest match
+            existing_closest = db_manager.get_closest_match(token)
+            if existing_closest is not None:
+                # If the closest match exists, we also want to return its origin token
+                existing_closest_origin = db_manager.get_origin(existing_closest)
+            else:
+                existing_closest_origin = None
+            print('Returning cached result')
+            final_result = {
+                'result': existing['fingerprint'],
+                'fresh': False,
+                'closest': existing_closest,
+                'closest_origin': existing_closest_origin
+            }
+            if extra_cols is not None:
+                for extra_col in extra_cols:
+                    final_result[extra_col] = existing[extra_col]
+            return final_result
+
+    return None

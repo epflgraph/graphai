@@ -3,7 +3,7 @@ from graphai.core.translation.text_utils import (
     detect_text_language,
     HUGGINGFACE_UNLOAD_WAITING_PERIOD, TranslationModels
 )
-from graphai.core.common.fingerprinting import perceptual_hash_text
+from graphai.core.common.fingerprinting import perceptual_hash_text, fingerprint_cache_lookup
 from graphai.core.common.common_utils import get_current_datetime, convert_text_back_to_list
 from graphai.core.interfaces.caching import TextDBCachingManager
 from graphai.core.interfaces.config import config
@@ -37,16 +37,7 @@ def translation_init_task(self):
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='caching_6.cache_lookup_fingerprint_translation_text', ignore_result=False)
 def cache_lookup_translation_text_fingerprint_task(self, token):
-    db_manager = TextDBCachingManager()
-    existing = db_manager.get_details(token, cols=['fingerprint'])[0]
-    if existing is not None and existing['fingerprint'] is not None:
-        existing_closest = db_manager.get_closest_match(token)
-        return {
-            'result': existing['fingerprint'],
-            'closest': existing_closest,
-            'fresh': False
-        }
-    return None
+    return fingerprint_cache_lookup(token, TextDBCachingManager())
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
