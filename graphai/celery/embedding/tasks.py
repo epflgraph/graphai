@@ -9,11 +9,17 @@ from graphai.core.common.fingerprinting import (
     compute_text_fingerprint
 )
 from graphai.core.common.common_utils import get_current_datetime
-from graphai.core.common.caching import EmbeddingDBCachingManager, fingerprint_cache_lookup
+from graphai.core.common.caching import (
+    EmbeddingDBCachingManager,
+    fingerprint_cache_lookup,
+    token_based_text_lookup,
+    fingerprint_based_text_lookup
+)
 from graphai.core.embedding.embedding import (
     embedding_to_json,
     get_text_token_count_using_model,
-    EMBEDDING_UNLOAD_WAITING_PERIOD, EmbeddingModels
+    EMBEDDING_UNLOAD_WAITING_PERIOD,
+    EmbeddingModels
 )
 from graphai.core.common.config import config
 from graphai.core.common.common_utils import strtobool
@@ -73,43 +79,14 @@ def compute_embedding_text_fingerprint_callback_task(self, results, text, model_
 
 
 def token_based_embedding_lookup(token, model_type):
-    db_manager = EmbeddingDBCachingManager()
-    existing = db_manager.get_details(token, ['embedding'], using_most_similar=False)[0]
-    if existing is not None and existing['embedding'] is not None:
-        print('Returning cached result')
-        return {
-            'result': existing['embedding'],
-            'successful': True,
-            'text_too_large': False,
-            'fresh': False,
-            'model_type': model_type,
-            'device': None
-        }
-    return None
+    return token_based_text_lookup(token, EmbeddingDBCachingManager(), 'embedding', model_type=model_type)
 
 
 def fingerprint_based_embedding_lookup(token, fp, model_type):
-    db_manager = EmbeddingDBCachingManager()
-    # Super quick fingerprint lookup
-    closest_embedding = db_manager.get_all_details(['embedding', 'model_type'], allow_nulls=False,
-                                                   equality_conditions={'fingerprint': fp,
-                                                                        'model_type': model_type
-                                                                        })
-    if closest_embedding is not None:
-        all_keys = list(closest_embedding.keys())
-        embedding_json = closest_embedding[all_keys[0]]['embedding']
-        db_manager.insert_or_update_details(token, {
-            'embedding': embedding_json
-        })
-        return {
-            'result': embedding_json,
-            'successful': True,
-            'text_too_large': False,
-            'fresh': False,
-            'model_type': model_type,
-            'device': None
-        }
-    return None
+    return fingerprint_based_text_lookup(token, fp, EmbeddingDBCachingManager(),
+                                         main_col='embedding', extra_cols=['model_type'],
+                                         equality_conditions={'model_type': model_type},
+                                         model_type=model_type)
 
 
 def embed_text(models, text, model_type):

@@ -655,3 +655,51 @@ def fingerprint_cache_lookup_with_most_similar(token, db_manager, extra_cols=Non
             return final_result
 
     return None
+
+
+def token_based_text_lookup(token, db_manager, main_col, modify_result_func=None, modify_result_args=None, **kwargs):
+    existing = db_manager.get_details(token, [main_col], using_most_similar=False)[0]
+    if existing is not None and existing[main_col] is not None:
+        print('Returning cached result')
+        final_result = {
+            'result': existing[main_col],
+            'successful': True,
+            'text_too_large': False,
+            'fresh': False,
+            'device': None
+        }
+        if modify_result_func is not None and modify_result_args is not None:
+            final_result['result'] = modify_result_func(final_result['result'], **modify_result_args)
+        if len(kwargs) > 0:
+            for key in kwargs:
+                final_result[key] = kwargs[key]
+        return final_result
+    return None
+
+
+def fingerprint_based_text_lookup(token, fp, db_manager, main_col, extra_cols, equality_conditions,
+                                  modify_result_func=None, modify_result_args=None,
+                                  **kwargs):
+    equality_conditions['fingerprint'] = fp
+    closest_match = db_manager.get_all_details([main_col] + extra_cols, allow_nulls=False,
+                                               equality_conditions=equality_conditions)
+    if closest_match is not None:
+        all_keys = list(closest_match.keys())
+        cached_result = closest_match[all_keys[0]][main_col]
+        db_manager.insert_or_update_details(token, {
+            main_col: cached_result
+        })
+        final_result = {
+            'result': cached_result,
+            'successful': True,
+            'text_too_large': False,
+            'fresh': False,
+            'device': None
+        }
+        if modify_result_func is not None and modify_result_args is not None:
+            final_result['result'] = modify_result_func(final_result['result'], **modify_result_args)
+        if len(kwargs) > 0:
+            for key in kwargs:
+                final_result[key] = kwargs[key]
+        return final_result
+    return None

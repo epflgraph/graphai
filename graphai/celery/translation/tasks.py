@@ -1,13 +1,22 @@
 from celery import shared_task
 from graphai.core.translation.text_utils import (
     detect_text_language,
-    HUGGINGFACE_UNLOAD_WAITING_PERIOD, TranslationModels
+    HUGGINGFACE_UNLOAD_WAITING_PERIOD,
+    TranslationModels
 )
 from graphai.core.common.fingerprinting import compute_text_fingerprint
-from graphai.core.common.common_utils import get_current_datetime, convert_text_back_to_list
-from graphai.core.common.caching import TextDBCachingManager, fingerprint_cache_lookup
+from graphai.core.common.common_utils import (
+    get_current_datetime,
+    convert_text_back_to_list,
+    strtobool
+)
+from graphai.core.common.caching import (
+    TextDBCachingManager,
+    fingerprint_cache_lookup,
+    token_based_text_lookup,
+    fingerprint_based_text_lookup
+)
 from graphai.core.common.config import config
-from graphai.core.common.common_utils import strtobool
 
 LONG_TEXT_ERROR = "Unpunctuated text too long (over 512 tokens), " \
                   "try adding punctuation or providing a smaller chunk of text."
@@ -68,43 +77,20 @@ def compute_translation_text_fingerprint_callback_task(self, results, text, src,
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='caching_6.translation_text_lookup_using_fingerprint', ignore_result=False)
 def cache_lookup_translation_text_using_fingerprint_task(self, token, fp, src, tgt, return_list=False):
-    db_manager = TextDBCachingManager()
-    # Super quick fingerprint lookup
-    closest_text = db_manager.get_all_details(['target'], allow_nulls=False,
-                                              equality_conditions={'fingerprint': fp,
-                                                                   'source_lang': src,
-                                                                   'target_lang': tgt})
-    if closest_text is not None:
-        all_keys = list(closest_text.keys())
-        translation = closest_text[all_keys[0]]['target']
-        db_manager.insert_or_update_details(token, {
-            'target': translation,
-        })
-        return {
-            'result': convert_text_back_to_list(translation, return_list=return_list),
-            'text_too_large': False,
-            'successful': True,
-            'fresh': False,
-            'device': None
-        }
-    return None
+    return fingerprint_based_text_lookup(
+        token, fp, TextDBCachingManager(), main_col='target', extra_cols=[],
+        equality_conditions={'source_lang': src, 'target_lang': tgt},
+        modify_result_func=convert_text_back_to_list,
+        modify_result_args={'return_list': return_list}
+    )
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='caching_6.cache_lookup_translate_text', ignore_result=False)
 def cache_lookup_translate_text_task(self, token, return_list=False):
-    db_manager = TextDBCachingManager()
-    existing = db_manager.get_details(token, ['target'], using_most_similar=False)[0]
-    if existing is not None and existing['target'] is not None:
-        print('Returning cached result')
-        return {
-            'result': convert_text_back_to_list(existing['target'], return_list=return_list),
-            'text_too_large': False,
-            'successful': True,
-            'fresh': False,
-            'device': None
-        }
-    return None
+    return token_based_text_lookup(token, TextDBCachingManager(), 'target',
+                                   modify_result_func=convert_text_back_to_list,
+                                   modify_result_args={'return_list': return_list})
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
