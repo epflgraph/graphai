@@ -1,13 +1,18 @@
 from celery import shared_task
 
 from graphai.core.video.video import (
-    perform_tesseract_ocr,
+    perform_tesseract_ocr
+)
+from graphai.core.image.ocr import (
+    GoogleOCRModel,
     get_ocr_colnames
 )
-from graphai.core.video.ocr import GoogleOCRModel
 from graphai.core.translation.text_utils import detect_text_language
-from graphai.core.common.caching import SlideDBCachingManager, VideoConfig, \
+from graphai.core.common.caching import (
+    SlideDBCachingManager,
+    VideoConfig,
     fingerprint_cache_lookup_with_most_similar
+)
 
 file_management_config = VideoConfig()
 
@@ -66,7 +71,7 @@ def cache_lookup_extract_slide_text_task(self, token, method='tesseract'):
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='video_2.extract_slide_text', ignore_result=False,
              file_manager=file_management_config)
-def extract_slide_text_task(self, token, method='tesseract', api_token=None):
+def extract_slide_text_task(self, token, method='google', api_token=None):
     ocr_colnames = get_ocr_colnames(method)
 
     if method == 'tesseract':

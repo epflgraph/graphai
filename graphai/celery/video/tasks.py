@@ -38,7 +38,8 @@ from graphai.core.common.caching import (
 )
 from graphai.core.common.common_utils import (
     get_current_datetime,
-    copy_file_within_folder
+    copy_file_within_folder,
+    strtobool
 )
 
 from graphai.celery.common.tasks import (
@@ -47,7 +48,6 @@ from graphai.celery.common.tasks import (
     fingerprint_lookup_callback, fingerprint_lookup_direct
 )
 from graphai.core.common.config import config
-from graphai.core.common.common_utils import strtobool
 
 file_management_config = VideoConfig()
 
@@ -209,23 +209,20 @@ def compute_video_fingerprint_callback_task(self, results):
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='video_2.video_fingerprint_find_closest_retrieve_from_db', ignore_result=False)
 def video_fingerprint_find_closest_retrieve_from_db_task(self, results):
-    db_manager = VideoDBCachingManager()
-    return fingerprint_lookup_retrieve_from_db(results, db_manager)
+    return fingerprint_lookup_retrieve_from_db(results, VideoDBCachingManager())
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='video_2.video_fingerprint_find_closest_parallel', ignore_result=False)
 def video_fingerprint_find_closest_parallel_task(self, input_dict, i, n_total,
                                                  min_similarity=1):
-    db_manager = VideoDBCachingManager()
-    return fingerprint_lookup_parallel(input_dict, i, n_total, min_similarity, db_manager, data_type='video')
+    return fingerprint_lookup_parallel(input_dict, i, n_total, min_similarity, VideoDBCachingManager(), data_type='video')
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='video_2.video_fingerprint_find_closest_callback', ignore_result=False)
 def video_fingerprint_find_closest_callback_task(self, results_list):
-    db_manager = VideoDBCachingManager()
-    return fingerprint_lookup_callback(results_list, db_manager)
+    return fingerprint_lookup_callback(results_list, VideoDBCachingManager())
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
@@ -471,29 +468,25 @@ def compute_audio_fingerprint_callback_task(self, results, force=False):
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='video_2.audio_fingerprint_find_closest_retrieve_from_db', ignore_result=False)
 def audio_fingerprint_find_closest_retrieve_from_db_task(self, results):
-    db_manager = AudioDBCachingManager()
-    return fingerprint_lookup_retrieve_from_db(results, db_manager)
+    return fingerprint_lookup_retrieve_from_db(results, AudioDBCachingManager())
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='video_2.audio_fingerprint_find_closest_parallel', ignore_result=False)
 def audio_fingerprint_find_closest_parallel_task(self, input_dict, i, n_total, min_similarity=1):
-    db_manager = AudioDBCachingManager()
-    return fingerprint_lookup_parallel(input_dict, i, n_total, min_similarity, db_manager, data_type='audio')
+    return fingerprint_lookup_parallel(input_dict, i, n_total, min_similarity, AudioDBCachingManager(), data_type='audio')
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='video_2.audio_fingerprint_find_closest_direct', ignore_result=False)
 def audio_fingerprint_find_closest_direct_task(self, results):
-    db_manager = AudioDBCachingManager()
-    return fingerprint_lookup_direct(results, db_manager)
+    return fingerprint_lookup_direct(results, AudioDBCachingManager())
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='video_2.audio_fingerprint_find_closest_callback', ignore_result=False)
 def audio_fingerprint_find_closest_callback_task(self, results_list):
-    db_manager = AudioDBCachingManager()
-    return fingerprint_lookup_callback(results_list, db_manager)
+    return fingerprint_lookup_callback(results_list, AudioDBCachingManager())
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},

@@ -1,5 +1,7 @@
 import gc
 import sys
+
+import ffmpeg
 import whisper
 import time
 from multiprocessing import Lock
@@ -152,3 +154,33 @@ class WhisperTranscriptionModel:
         except Exception as e:
             print(e, file=sys.stderr)
             return None
+
+
+def extract_media_segment(input_filename_with_path, output_filename_with_path, output_token, start, length):
+    """
+    Extracts a segment of a given video or audio file indicated by the starting time and the length
+    Args:
+        input_filename_with_path: Full path of input file
+        output_filename_with_path: Full path of output file
+        output_token: Output token
+        start: Starting timestamp
+        length: Length of segment
+
+    Returns:
+        The output token if successful, None otherwise
+    """
+    if not file_exists(input_filename_with_path):
+        print(f'ffmpeg error: File {input_filename_with_path} does not exist')
+        return None
+    try:
+        err = ffmpeg.input(input_filename_with_path). \
+            output(output_filename_with_path, c='copy', ss=start, t=length). \
+            overwrite_output().run(capture_stdout=True)
+    except Exception as e:
+        print(e, file=sys.stderr)
+        err = str(e)
+
+    if file_exists(output_filename_with_path) and ('ffmpeg error' not in err):
+        return output_token
+    else:
+        return None

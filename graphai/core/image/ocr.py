@@ -90,3 +90,10 @@ class GoogleOCRModel:
         if results is not None:
             results = results.full_text_annotation.text
         return results
+
+
+def get_ocr_colnames(method):
+    if method == 'tesseract':
+        return ['ocr_tesseract_results']
+    else:
+        return ['ocr_google_1_results', 'ocr_google_2_results']

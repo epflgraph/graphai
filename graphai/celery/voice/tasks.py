@@ -3,10 +3,11 @@ from collections import Counter
 
 from celery import shared_task
 
-from graphai.core.video.video import (
+from graphai.core.voice.transcribe import (
+    WHISPER_UNLOAD_WAITING_PERIOD,
+    WhisperTranscriptionModel,
     extract_media_segment
 )
-from graphai.core.video.transcribe import WHISPER_UNLOAD_WAITING_PERIOD, WhisperTranscriptionModel
 from graphai.core.common.caching import (
     TEMP_SUBFOLDER,
     AudioDBCachingManager,
