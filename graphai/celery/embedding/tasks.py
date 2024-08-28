@@ -4,7 +4,11 @@ import gc
 from celery import shared_task
 from itertools import chain
 
-from graphai.core.common.fingerprinting import perceptual_hash_text, fingerprint_cache_lookup
+from graphai.core.common.fingerprinting import (
+    perceptual_hash_text,
+    compute_text_fingerprint,
+    fingerprint_cache_lookup
+)
 from graphai.core.common.common_utils import get_current_datetime
 from graphai.core.interfaces.caching import EmbeddingDBCachingManager
 from graphai.core.embedding.embedding import (
@@ -48,13 +52,7 @@ def cache_lookup_embedding_text_fingerprint_task(self, token):
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='text_6.fingerprint_embedding_text', ignore_result=False)
 def compute_embedding_text_fingerprint_task(self, token, text):
-    fp = perceptual_hash_text(text)
-
-    return {
-        'result': fp,
-        'token': token,
-        'fresh': True
-    }
+    return compute_text_fingerprint(token, text)
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},

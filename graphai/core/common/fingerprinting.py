@@ -302,3 +302,13 @@ def fingerprint_cache_lookup_with_most_similar(token, db_manager, extra_cols=Non
             return final_result
 
     return None
+
+
+def compute_text_fingerprint(token, text):
+    fp = perceptual_hash_text(text)
+
+    return {
+        'result': fp,
+        'token': token,
+        'fresh': True
+    }
