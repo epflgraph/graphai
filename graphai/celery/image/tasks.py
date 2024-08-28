@@ -4,10 +4,10 @@ from graphai.core.video.video import (
     perform_tesseract_ocr,
     get_ocr_colnames
 )
-from graphai.core.common.fingerprinting import fingerprint_cache_lookup_with_most_similar
 from graphai.core.video.ocr import GoogleOCRModel
 from graphai.core.translation.text_utils import detect_text_language
-from graphai.core.interfaces.caching import SlideDBCachingManager, VideoConfig
+from graphai.core.interfaces.caching import SlideDBCachingManager, VideoConfig, \
+    fingerprint_cache_lookup_with_most_similar
 
 file_management_config = VideoConfig()
 

@@ -10,9 +10,8 @@ from graphai.core.video.transcribe import WHISPER_UNLOAD_WAITING_PERIOD, Whisper
 from graphai.core.interfaces.caching import (
     TEMP_SUBFOLDER,
     AudioDBCachingManager,
-    VideoConfig
+    VideoConfig, fingerprint_cache_lookup_with_most_similar
 )
-from graphai.core.common.fingerprinting import fingerprint_cache_lookup_with_most_similar
 from graphai.core.interfaces.config import config
 from graphai.core.common.common_utils import strtobool
 

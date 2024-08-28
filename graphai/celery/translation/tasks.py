@@ -3,9 +3,9 @@ from graphai.core.translation.text_utils import (
     detect_text_language,
     HUGGINGFACE_UNLOAD_WAITING_PERIOD, TranslationModels
 )
-from graphai.core.common.fingerprinting import compute_text_fingerprint, fingerprint_cache_lookup
+from graphai.core.common.fingerprinting import compute_text_fingerprint
 from graphai.core.common.common_utils import get_current_datetime, convert_text_back_to_list
-from graphai.core.interfaces.caching import TextDBCachingManager
+from graphai.core.interfaces.caching import TextDBCachingManager, fingerprint_cache_lookup
 from graphai.core.interfaces.config import config
 from graphai.core.common.common_utils import strtobool
 

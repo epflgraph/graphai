@@ -26,7 +26,6 @@ from graphai.core.video.video import (
     get_audio_token_status, NLPModels
 )
 from graphai.core.common.fingerprinting import (
-    fingerprint_cache_lookup,
     md5_video_or_audio,
     perceptual_hash_audio,
     perceptual_hash_image
@@ -35,7 +34,7 @@ from graphai.core.interfaces.caching import (
     AudioDBCachingManager,
     SlideDBCachingManager,
     VideoDBCachingManager,
-    VideoConfig
+    VideoConfig, fingerprint_cache_lookup
 )
 from graphai.core.common.common_utils import (
     get_current_datetime,

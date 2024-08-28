@@ -6,11 +6,10 @@ from itertools import chain
 
 from graphai.core.common.fingerprinting import (
     perceptual_hash_text,
-    compute_text_fingerprint,
-    fingerprint_cache_lookup
+    compute_text_fingerprint
 )
 from graphai.core.common.common_utils import get_current_datetime
-from graphai.core.interfaces.caching import EmbeddingDBCachingManager
+from graphai.core.interfaces.caching import EmbeddingDBCachingManager, fingerprint_cache_lookup
 from graphai.core.embedding.embedding import (
     embedding_to_json,
     get_text_token_count_using_model,
