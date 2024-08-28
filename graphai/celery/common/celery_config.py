@@ -5,7 +5,7 @@ from celery import current_app as current_celery_app
 from celery.result import AsyncResult
 from kombu import Queue
 
-from graphai.core.interfaces.config import config
+from graphai.core.common.config import config
 
 DEFAULT_BROKER = "amqp://guest:guest@localhost:5672//"
 DEFAULT_BACKEND = "redis://localhost:6379/0"

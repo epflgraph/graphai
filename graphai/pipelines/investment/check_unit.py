@@ -4,7 +4,7 @@ import numpy as np
 
 from db_cache_manager.db import DB
 
-from graphai.core.interfaces.config import config
+from graphai.core.common.config import config
 from graphai.core.utils.text.io import cprint
 
 

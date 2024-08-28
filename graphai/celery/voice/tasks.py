@@ -7,12 +7,12 @@ from graphai.core.video.video import (
     extract_media_segment
 )
 from graphai.core.video.transcribe import WHISPER_UNLOAD_WAITING_PERIOD, WhisperTranscriptionModel
-from graphai.core.interfaces.caching import (
+from graphai.core.common.caching import (
     TEMP_SUBFOLDER,
     AudioDBCachingManager,
     VideoConfig, fingerprint_cache_lookup_with_most_similar
 )
-from graphai.core.interfaces.config import config
+from graphai.core.common.config import config
 from graphai.core.common.common_utils import strtobool
 
 file_management_config = VideoConfig()

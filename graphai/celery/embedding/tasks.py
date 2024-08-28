@@ -9,13 +9,13 @@ from graphai.core.common.fingerprinting import (
     compute_text_fingerprint
 )
 from graphai.core.common.common_utils import get_current_datetime
-from graphai.core.interfaces.caching import EmbeddingDBCachingManager, fingerprint_cache_lookup
+from graphai.core.common.caching import EmbeddingDBCachingManager, fingerprint_cache_lookup
 from graphai.core.embedding.embedding import (
     embedding_to_json,
     get_text_token_count_using_model,
     EMBEDDING_UNLOAD_WAITING_PERIOD, EmbeddingModels
 )
-from graphai.core.interfaces.config import config
+from graphai.core.common.config import config
 from graphai.core.common.common_utils import strtobool
 
 

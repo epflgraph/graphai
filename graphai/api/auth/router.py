@@ -28,7 +28,7 @@ from jose import ExpiredSignatureError, JWTError, jwt
 from pydantic import ValidationError
 from fastapi_user_limiter.limiter import rate_limiter
 
-from graphai.core.interfaces.config import config
+from graphai.core.common.config import config
 
 # to get a secret key run:
 # openssl rand -hex 32

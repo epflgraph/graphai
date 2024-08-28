@@ -4,7 +4,7 @@ import gc
 import numpy as np
 import json
 from sentence_transformers import SentenceTransformer
-from graphai.core.interfaces.config import config
+from graphai.core.common.config import config
 from graphai.core.common.fingerprinting import md5_text
 import torch
 from multiprocessing import Lock

@@ -8,7 +8,7 @@ from time import sleep
 from graphai.celery.embedding.tasks import (
     embed_text_task,
 )
-from graphai.core.interfaces.caching import EmbeddingDBCachingManager
+from graphai.core.common.caching import EmbeddingDBCachingManager
 
 
 ################################################################

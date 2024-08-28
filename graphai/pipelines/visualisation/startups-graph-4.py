@@ -3,7 +3,7 @@ import networkx as nx
 
 from db_cache_manager.db import DB
 
-from graphai.core.interfaces.config import config
+from graphai.core.common.config import config
 from graphai.core.utils.breadcrumb import Breadcrumb
 
 

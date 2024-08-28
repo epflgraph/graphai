@@ -13,7 +13,7 @@ import gc
 
 from graphai.core.common.common_utils import convert_list_to_text, convert_text_back_to_list
 from graphai.core.common.fingerprinting import md5_text
-from graphai.core.interfaces.config import config
+from graphai.core.common.config import config
 
 HUGGINGFACE_MAX_TOKENS = 512
 # 3 hours

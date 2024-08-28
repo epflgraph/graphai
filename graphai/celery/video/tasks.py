@@ -30,7 +30,7 @@ from graphai.core.common.fingerprinting import (
     perceptual_hash_audio,
     perceptual_hash_image
 )
-from graphai.core.interfaces.caching import (
+from graphai.core.common.caching import (
     AudioDBCachingManager,
     SlideDBCachingManager,
     VideoDBCachingManager,
@@ -46,7 +46,7 @@ from graphai.celery.common.tasks import (
     fingerprint_lookup_parallel,
     fingerprint_lookup_callback, fingerprint_lookup_direct
 )
-from graphai.core.interfaces.config import config
+from graphai.core.common.config import config
 from graphai.core.common.common_utils import strtobool
 
 file_management_config = VideoConfig()

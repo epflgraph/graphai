@@ -3,7 +3,7 @@ import numpy as np
 
 from db_cache_manager.db import DB
 
-from graphai.core.interfaces.config import config
+from graphai.core.common.config import config
 from graphai.core.utils.breadcrumb import Breadcrumb
 from graphai.pipelines.investment.concept_configuration import compute_affinities
 

@@ -2,7 +2,7 @@ import pandas as pd
 
 from db_cache_manager.db import DB
 
-from graphai.core.interfaces.config import config
+from graphai.core.common.config import config
 from graphai.core.utils.breadcrumb import Breadcrumb
 from graphai.core.utils.time.date import rescale
 

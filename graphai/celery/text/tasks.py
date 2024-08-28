@@ -4,7 +4,7 @@ from celery import shared_task
 
 from elasticsearch_interface.es import ES
 
-from graphai.core.interfaces.config import config
+from graphai.core.common.config import config
 from graphai.core.common.common_utils import strtobool
 
 from graphai.core.text import (

@@ -6,7 +6,7 @@ from graphai.core.ontology.clustering import (
     cluster_and_reassign_outliers,
     convert_cluster_labels_to_dict
 )
-from graphai.core.interfaces.config import config
+from graphai.core.common.config import config
 from graphai.core.common.common_utils import strtobool
 from graphai.core.ontology.data import OntologyData
 

@@ -48,7 +48,7 @@ from graphai.celery.video.tasks import (
     ignore_slide_fingerprint_results_callback_task
 )
 from graphai.celery.common.jobs import direct_lookup_generic_job, DEFAULT_TIMEOUT
-from graphai.core.interfaces.caching import FingerprintParameters
+from graphai.core.common.caching import FingerprintParameters
 
 DEFAULT_SLIDE_TIMEOUT = 90
 

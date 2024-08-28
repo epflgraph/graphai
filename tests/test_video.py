@@ -10,7 +10,7 @@ from graphai.celery.video.tasks import (
     compute_video_fingerprint_task,
 )
 
-from graphai.core.interfaces.config import config
+from graphai.core.common.config import config
 
 ################################################################
 ################################################################

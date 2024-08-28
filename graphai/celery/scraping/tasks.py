@@ -8,7 +8,7 @@ from graphai.core.scraping.scraping import (
     reconstruct_data_dict
 )
 from graphai.core.common.common_utils import get_current_datetime
-from graphai.core.interfaces.caching import ScrapingDBCachingManager
+from graphai.core.common.caching import ScrapingDBCachingManager
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},

@@ -25,9 +25,9 @@ import pytesseract
 import fasttext
 from fasttext_reducer.reduce_fasttext_models import generate_target_path
 
-from graphai.core.interfaces.caching import VideoConfig, VideoDBCachingManager, get_token_file_status, is_fingerprinted, \
+from graphai.core.common.caching import VideoConfig, VideoDBCachingManager, get_token_file_status, is_fingerprinted, \
     SlideDBCachingManager, AudioDBCachingManager
-from graphai.core.interfaces.config import config
+from graphai.core.common.config import config
 from graphai.core.common.common_utils import (
     make_sure_path_exists,
     file_exists

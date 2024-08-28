@@ -5,7 +5,7 @@ import time
 from multiprocessing import Lock
 
 from graphai.core.common.common_utils import file_exists
-from graphai.core.interfaces.config import config
+from graphai.core.common.config import config
 
 # 12 hours
 WHISPER_UNLOAD_WAITING_PERIOD = 12 * 3600.0
