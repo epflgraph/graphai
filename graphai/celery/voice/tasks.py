@@ -3,10 +3,14 @@ from celery import shared_task
 from graphai.core.voice.transcribe import (
     WHISPER_UNLOAD_WAITING_PERIOD,
     WhisperTranscriptionModel,
+    cache_lookup_audio_fingerprint,
+    cache_lookup_audio_transcript,
+    cache_lookup_audio_language,
     detect_language_parallel,
     detect_language_retrieve_from_db_and_split,
     detect_language_callback,
-    transcribe_audio_to_text, transcribe_callback
+    transcribe_audio_to_text,
+    transcribe_callback
 )
 from graphai.core.common.caching import (
     cache_lookup_generic,
@@ -43,13 +47,13 @@ def transcript_init_task(self):
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='caching_6.cache_lookup_fingerprint_audio', ignore_result=False)
 def cache_lookup_audio_fingerprint_task(self, token):
-    return fingerprint_cache_lookup_with_most_similar(token, AudioDBCachingManager(), ['duration'])
+    return cache_lookup_audio_fingerprint(token)
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='caching_6.cache_lookup_detect_language_audio', ignore_result=False)
 def cache_lookup_audio_language_task(self, token):
-    return cache_lookup_generic(token, AudioDBCachingManager(), ['language'])
+    return cache_lookup_audio_language(token)
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True,
@@ -78,8 +82,7 @@ def detect_language_callback_task(self, results_list, token, force=False):
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='caching_6.cache_lookup_transcribe_audio', ignore_result=False)
 def cache_lookup_audio_transcript_task(self, token):
-    return cache_lookup_generic(token, AudioDBCachingManager(),
-                                ['transcript_results', 'subtitle_results', 'language'])
+    return cache_lookup_audio_transcript(token)
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True,

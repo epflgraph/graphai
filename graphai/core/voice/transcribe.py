@@ -11,6 +11,7 @@ from multiprocessing import Lock
 from graphai.core.common.caching import (
     AudioDBCachingManager,
     cache_lookup_generic,
+    fingerprint_cache_lookup_with_most_similar,
     TEMP_SUBFOLDER, database_callback_generic
 )
 from graphai.core.common.common_utils import file_exists
@@ -328,3 +329,16 @@ def transcribe_callback(token, results, force):
         # if different from original token
         database_callback_generic(token, AudioDBCachingManager(), values_dict, force, use_closest_match=True)
     return results
+
+
+def cache_lookup_audio_transcript(token):
+    return cache_lookup_generic(token, AudioDBCachingManager(),
+                                ['transcript_results', 'subtitle_results', 'language'])
+
+
+def cache_lookup_audio_fingerprint(token):
+    return fingerprint_cache_lookup_with_most_similar(token, AudioDBCachingManager(), ['duration'])
+
+
+def cache_lookup_audio_language(token):
+    return cache_lookup_generic(token, AudioDBCachingManager(), ['language'])
