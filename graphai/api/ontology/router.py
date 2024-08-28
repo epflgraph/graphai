@@ -42,7 +42,7 @@ from graphai.celery.ontology.jobs import (
 )
 from graphai.api.auth.router import get_current_active_user
 
-from graphai.core.interfaces.celery_config import get_task_info
+from graphai.celery.common.celery_config import get_task_info
 
 # Initialise ontology router
 router = APIRouter(

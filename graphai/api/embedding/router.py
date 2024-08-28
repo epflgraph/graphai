@@ -22,7 +22,7 @@ from graphai.celery.common.tasks import (
 from graphai.api.auth.router import get_current_active_user, get_user_for_rate_limiter
 from graphai.api.auth.auth_utils import get_ratelimit_values
 
-from graphai.core.interfaces.celery_config import get_task_info
+from graphai.celery.common.celery_config import get_task_info
 
 
 router = APIRouter(

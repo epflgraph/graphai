@@ -19,7 +19,7 @@ from graphai.api.auth.router import get_current_active_user, get_user_for_rate_l
 from graphai.api.auth.auth_utils import get_ratelimit_values
 from graphai.celery.common.tasks import format_api_results
 
-from graphai.core.interfaces.celery_config import get_task_info
+from graphai.celery.common.celery_config import get_task_info
 
 # Initialise video router
 router = APIRouter(
