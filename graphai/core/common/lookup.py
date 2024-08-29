@@ -325,3 +325,24 @@ def fingerprint_lookup_callback(results_list, db_manager):
         closest_token = closest_token[0]
         max_score = max_score[0]
     return {'closest': closest_token, 'score': max_score, 'fp_results': fp_results}
+
+
+def retrieve_fingerprint_callback(results, db_manager, has_origin=True):
+    # Returning the fingerprinting results, which is the part of this task whose results are sent back to the user.
+    results_to_return = results['fp_results']
+    results_to_return['closest'] = results['closest']
+    if has_origin:
+        if results_to_return['closest'] is not None:
+            results_to_return['closest_origin'] = db_manager.get_origin(results_to_return['closest'])
+        else:
+            results_to_return['closest_origin'] = None
+    return results_to_return
+
+
+def ignore_fingerprint_results_callback(results, token_status_func):
+    # Ignoring the fingerprinting results and returning the results relevant to the task chain.
+    # Used in tasks like transcription and OCR, where fingerprinting is performed before the task itself, but where
+    # the results of the fingerprinting are not returned.
+    results_to_return = results['fp_results']['original_results']
+    results_to_return['token_status'] = token_status_func(results_to_return['token'])
+    return results_to_return

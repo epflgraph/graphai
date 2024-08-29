@@ -40,12 +40,18 @@ from graphai.core.common.config import config
 from graphai.core.common.common_utils import (
     make_sure_path_exists,
     file_exists,
-    get_current_datetime, copy_file_within_folder
+    get_current_datetime,
+    copy_file_within_folder
 )
 from graphai.core.common.fingerprinting import (
     perceptual_hash_image,
     md5_video_or_audio,
-    compare_encoded_fingerprints, perceptual_hash_audio
+    compare_encoded_fingerprints,
+    perceptual_hash_audio
+)
+from graphai.core.common.lookup import (
+    retrieve_fingerprint_callback,
+    ignore_fingerprint_results_callback
 )
 
 FRAME_FORMAT_PNG = 'frame-%06d.png'
@@ -1474,3 +1480,39 @@ def compute_slide_fingerprint_callback(results, force=False):
         else:
             results['fp_token'] = fp_tokens_to_pass_on[0]
     return results
+
+
+def retrieve_slide_fingerprint_callback(results):
+    return retrieve_fingerprint_callback(results, SlideDBCachingManager(), True)
+
+
+def ignore_slide_fingerprint_results_callback(results):
+    # Ignoring the fingerprinting results and returning the results relevant to the task chain.
+    # Used in tasks like transcription and OCR, where fingerprinting is performed before the task itself, but where
+    # the results of the fingerprinting are not returned.
+    results_to_return = results['fp_results']['original_results']
+    slide_tokens = results_to_return['slide_tokens']
+    fresh = results_to_return['fresh']
+    if slide_tokens is not None:
+        for slide_number in slide_tokens:
+            slide_tokens[slide_number]['token_status'] = get_image_token_status(slide_tokens[slide_number]['token'])
+    return {
+        'slide_tokens': slide_tokens,
+        'fresh': fresh
+    }
+
+
+def ignore_audio_fingerprint_results_callback(results):
+    return ignore_fingerprint_results_callback(results, get_audio_token_status)
+
+
+def retrieve_audio_fingerprint_callback(results):
+    return retrieve_fingerprint_callback(results, AudioDBCachingManager(), True)
+
+
+def retrieve_video_fingerprint_callback(results):
+    return retrieve_fingerprint_callback(results, VideoDBCachingManager(), False)
+
+
+def ignore_video_fingerprint_results_callback(results):
+    return ignore_fingerprint_results_callback(results, get_video_token_status)

@@ -1,9 +1,6 @@
 from celery import shared_task
 
 from graphai.core.video.video import (
-    get_video_token_status,
-    get_image_token_status,
-    get_audio_token_status,
     NLPModels,
     retrieve_file_from_url,
     retrieve_file_from_url_callback,
@@ -26,7 +23,13 @@ from graphai.core.video.video import (
     reextract_cached_slides,
     compute_slide_fingerprint,
     compute_slide_set_fingerprint,
-    compute_slide_fingerprint_callback
+    compute_slide_fingerprint_callback,
+    retrieve_slide_fingerprint_callback,
+    ignore_slide_fingerprint_results_callback,
+    ignore_audio_fingerprint_results_callback,
+    retrieve_audio_fingerprint_callback,
+    retrieve_video_fingerprint_callback,
+    ignore_video_fingerprint_results_callback
 )
 from graphai.core.common.caching import (
     AudioDBCachingManager,
@@ -132,22 +135,13 @@ def video_fingerprint_find_closest_callback_task(self, results_list):
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='video_2.retrieve_video_fingerprint_final_callback', ignore_result=False)
 def retrieve_video_fingerprint_callback_task(self, results):
-    # Returning the fingerprinting results, which is the part of this task whose results are sent back to the user.
-    results_to_return = results['fp_results']
-    results_to_return['closest'] = results['closest']
-    return results_to_return
+    return retrieve_video_fingerprint_callback(results)
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='video_2.ignore_video_fingerprint_results_callback', ignore_result=False)
 def ignore_video_fingerprint_results_callback_task(self, results):
-    # Ignoring the fingerprinting results and returning the results relevant to the task chain.
-    # Used in tasks like transcription and OCR, where fingerprinting is performed before the task itself, but where
-    # the results of the fingerprinting are not returned.
-
-    results_to_return = results['fp_results']['original_results']
-    results_to_return['token_status'] = get_video_token_status(results_to_return['token'])
-    return results_to_return
+    return ignore_video_fingerprint_results_callback(results)
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
@@ -224,29 +218,13 @@ def audio_fingerprint_find_closest_callback_task(self, results_list):
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='video_2.retrieve_audio_fingerprint_final_callback', ignore_result=False)
 def retrieve_audio_fingerprint_callback_task(self, results):
-    # Returning the fingerprinting results, which is the part of this task whose results are sent back to the user.
-    results_to_return = results['fp_results']
-    results_to_return['closest'] = results['closest']
-    db_manager = AudioDBCachingManager()
-
-    if results_to_return['closest'] is not None:
-        results_to_return['closest_origin'] = db_manager.get_origin(results_to_return['closest'])
-    else:
-        results_to_return['closest_origin'] = None
-
-    return results_to_return
+    return retrieve_audio_fingerprint_callback(results)
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='video_2.ignore_audio_fingerprint_results_callback', ignore_result=False)
 def ignore_audio_fingerprint_results_callback_task(self, results):
-    # Ignoring the fingerprinting results and returning the results relevant to the task chain.
-    # Used in tasks like transcription and OCR, where fingerprinting is performed before the task itself, but where
-    # the results of the fingerprinting are not returned.
-
-    results_to_return = results['fp_results']['original_results']
-    results_to_return['token_status'] = get_audio_token_status(results_to_return['token'])
-    return results_to_return
+    return ignore_audio_fingerprint_results_callback(results)
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
@@ -328,62 +306,34 @@ def compute_slide_fingerprint_callback_task(self, results, force=False):
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='video_2.slide_fingerprint_find_closest_retrieve_from_db', ignore_result=False)
 def slide_fingerprint_find_closest_retrieve_from_db_task(self, results):
-    db_manager = SlideDBCachingManager()
-    return fingerprint_lookup_retrieve_from_db(results, db_manager)
+    return fingerprint_lookup_retrieve_from_db(results, SlideDBCachingManager())
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='video_2.slide_fingerprint_find_closest_parallel', ignore_result=False)
 def slide_fingerprint_find_closest_parallel_task(self, input_dict, i, n_total, min_similarity=1):
-    db_manager = SlideDBCachingManager()
-    return fingerprint_lookup_parallel(input_dict, i, n_total, min_similarity, db_manager, data_type='image')
+    return fingerprint_lookup_parallel(input_dict, i, n_total, min_similarity, SlideDBCachingManager(), data_type='image')
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='video_2.slide_fingerprint_find_closest_direct', ignore_result=False)
 def slide_fingerprint_find_closest_direct_task(self, results):
-    db_manager = SlideDBCachingManager()
-    return fingerprint_lookup_direct(results, db_manager)
+    return fingerprint_lookup_direct(results, SlideDBCachingManager())
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='video_2.slide_fingerprint_find_closest_callback', ignore_result=False)
 def slide_fingerprint_find_closest_callback_task(self, results_list):
-    db_manager = SlideDBCachingManager()
-    return fingerprint_lookup_callback(results_list, db_manager)
+    return fingerprint_lookup_callback(results_list, SlideDBCachingManager())
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='video_2.retrieve_slide_fingerprint_final_callback', ignore_result=False)
 def retrieve_slide_fingerprint_callback_task(self, results):
-    # Returning the fingerprinting results, which is the part of this task whose results are sent back to the user.
-    results_to_return = results['fp_results']
-    results_to_return['closest'] = results['closest']
-    db_manager = SlideDBCachingManager()
-
-    if results_to_return['closest'] is not None:
-        results_to_return['closest_origin'] = db_manager.get_origin(results_to_return['closest'])
-    else:
-        results_to_return['closest_origin'] = None
-
-    return results_to_return
+    return retrieve_slide_fingerprint_callback(results)
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='video_2.ignore_slide_fingerprint_results_callback', ignore_result=False)
 def ignore_slide_fingerprint_results_callback_task(self, results):
-    # Ignoring the fingerprinting results and returning the results relevant to the task chain.
-    # Used in tasks like transcription and OCR, where fingerprinting is performed before the task itself, but where
-    # the results of the fingerprinting are not returned.
-
-    results_to_return = results['fp_results']['original_results']
-    slide_tokens = results_to_return['slide_tokens']
-    fresh = results_to_return['fresh']
-    if slide_tokens is not None:
-        for slide_number in slide_tokens:
-            slide_tokens[slide_number]['token_status'] = get_image_token_status(slide_tokens[slide_number]['token'])
-
-    return {
-        'slide_tokens': slide_tokens,
-        'fresh': fresh
-    }
+    return ignore_slide_fingerprint_results_callback(results)
