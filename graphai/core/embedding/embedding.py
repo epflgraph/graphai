@@ -1,5 +1,6 @@
 import time
 import gc
+import copy
 
 import numpy as np
 import json
@@ -219,3 +220,13 @@ class EmbeddingModels:
         max_tokens = self._get_model_max_tokens(model)
         results, text_too_large = self._embed(model, text)
         return results, text_too_large, max_tokens
+
+
+def copy_embedding_object(embedding_obj, model_type):
+    tokenizer = embedding_obj.get_tokenizer(model_type)
+    if tokenizer is None:
+        raise NotImplementedError(f"Model type {model_type} cannot be found!")
+    current_embedding_obj = copy.copy(embedding_obj)
+    current_tokenizer = copy.deepcopy(tokenizer)
+    current_embedding_obj.set_tokenizer(model_type, current_tokenizer)
+    return current_embedding_obj, current_tokenizer

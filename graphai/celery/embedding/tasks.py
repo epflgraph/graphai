@@ -17,6 +17,7 @@ from graphai.core.common.caching import (
 )
 from graphai.core.embedding.embedding import (
     embedding_to_json,
+    copy_embedding_object,
     get_text_token_count_using_model,
     EMBEDDING_UNLOAD_WAITING_PERIOD,
     EmbeddingModels
@@ -160,7 +161,8 @@ def cache_lookup_embedding_text_task(self, token, model_type):
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='text_6.embed_text', embedding_obj=embedding_models, ignore_result=False)
 def embed_text_task(self, text, model_type):
-    return embed_text(self.embedding_obj, text, model_type)
+    current_embedding_obj, _ = copy_embedding_object(self.embedding_obj, model_type)
+    return embed_text(current_embedding_obj, text, model_type)
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
@@ -246,12 +248,7 @@ def embedding_text_list_embed_parallel_task(self, input_list, model_type, i, n, 
                 results_dict[ind] = current_results
     remaining_indices = list(set(input_list.keys()).difference(set(results_dict.keys())))
     if len(remaining_indices) > 0:
-        tokenizer = self.embedding_obj.get_tokenizer(model_type)
-        if tokenizer is None:
-            raise NotImplementedError(f"Model type {model_type} cannot be found!")
-        current_embedding_obj = copy.copy(self.embedding_obj)
-        current_embedding_obj.set_tokenizer(model_type, copy.deepcopy(tokenizer))
-        tokenizer = copy.deepcopy(tokenizer)
+        current_embedding_obj, tokenizer = copy_embedding_object(self.embedding_obj, model_type)
         token_counts = [get_text_token_count_using_model(tokenizer, input_list[ind]['text'])
                         for ind in remaining_indices]
         model_max_tokens = current_embedding_obj.get_max_tokens(model_type)
