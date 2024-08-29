@@ -5,7 +5,6 @@ from itertools import chain
 from celery import shared_task
 
 from graphai.core.video.video import (
-    extract_audio_from_video,
     extract_frames,
     generate_frame_sample_indices,
     compute_ocr_noise_level,
@@ -14,7 +13,6 @@ from graphai.core.video.video import (
     check_ocr_and_hash_thresholds,
     generate_symbolic_token,
     read_txt_gz_file,
-    generate_audio_token,
     FRAME_FORMAT_PNG,
     TESSERACT_OCR_FORMAT,
     get_video_token_status,
@@ -23,10 +21,17 @@ from graphai.core.video.video import (
     NLPModels,
     retrieve_file_from_url,
     retrieve_file_from_url_callback,
-    compute_video_fingerprint, compute_video_fingerprint_callback, cache_lookup_retrieve_file_from_url
+    compute_video_fingerprint,
+    compute_video_fingerprint_callback,
+    cache_lookup_retrieve_file_from_url,
+    cache_lookup_extract_audio,
+    extract_audio,
+    extract_audio_callback,
+    reextract_cached_audio,
+    compute_audio_fingerprint,
+    compute_audio_fingerprint_callback
 )
 from graphai.core.common.fingerprinting import (
-    perceptual_hash_audio,
     perceptual_hash_image
 )
 from graphai.core.common.caching import (
@@ -45,7 +50,8 @@ from graphai.core.common.common_utils import (
 from graphai.celery.common.tasks import (
     fingerprint_lookup_retrieve_from_db,
     fingerprint_lookup_parallel,
-    fingerprint_lookup_callback, fingerprint_lookup_direct
+    fingerprint_lookup_callback,
+    fingerprint_lookup_direct
 )
 from graphai.core.common.config import config
 
@@ -164,215 +170,43 @@ def get_file_task(self, filename):
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='caching_6.cache_lookup_extract_audio', ignore_result=False,
-             file_manager=file_management_config)
+             name='caching_6.cache_lookup_extract_audio', ignore_result=False)
 def cache_lookup_extract_audio_task(self, token):
-    # Here, the caching logic is a bit complicated. The results of audio extraction are cached in the
-    # audio tables, whereas the closest-matching video is cached in the video tables. As a result, we
-    # need to look for the cached extracted audio of two videos: the provided token and its closest
-    # token.
-    video_db_manager = VideoDBCachingManager()
-    audio_db_manager = AudioDBCachingManager()
-    # Retrieving the closest match of the current video
-    closest_token = video_db_manager.get_closest_match(token)
-    # Looking up the cached audio result of the current video
-    existing_own = audio_db_manager.get_details_using_origin(token, cols=['duration'])
-    # Looking up the cached audio result of the closest match video (if it's not the same as the current video)
-    if closest_token is not None and closest_token != token:
-        existing_closest = audio_db_manager.get_details_using_origin(closest_token, cols=['duration'])
-    else:
-        existing_closest = None
-    # We first look at the video's own existing audio, then at that of the closest match because the video's
-    # own precomputed audio (if any) takes precedence.
-    all_existing = [existing_own, existing_closest]
-    for existing in all_existing:
-        if existing is not None:
-            print('Returning cached result')
-            return {
-                'token': existing[0]['id_token'],
-                'fresh': False,
-                'duration': existing[0]['duration'],
-                'token_status': get_audio_token_status(existing[0]['id_token'])
-            }
-
-    return None
+    return cache_lookup_extract_audio(token)
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='video_2.extract_audio', ignore_result=False,
              file_manager=file_management_config)
 def extract_audio_task(self, token):
-    output_token = generate_audio_token(token)
-    results, input_duration = extract_audio_from_video(self.file_manager.generate_filepath(token),
-                                                       self.file_manager.generate_filepath(output_token),
-                                                       output_token)
-    if results is None:
-        return {
-            'token': None,
-            'fresh': False,
-            'duration': 0.0
-        }
-
-    return {
-        'token': results,
-        'fresh': True,
-        'duration': input_duration
-    }
+    return extract_audio(token, self.file_manager)
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='video_2.extract_audio_callback', ignore_result=False,
              file_manager=file_management_config)
 def extract_audio_callback_task(self, results, origin_token, force=False):
-    if results['fresh']:
-        current_datetime = get_current_datetime()
-        db_manager = AudioDBCachingManager()
-        db_manager.insert_or_update_details(
-            results['token'],
-            {
-                'duration': results['duration'],
-                'origin_token': origin_token,
-                'date_added': current_datetime
-            }
-        )
-        if not force:
-            # If the force flag is False, we may need to propagate the results of this computation to its closest match.
-            # The propagation happens if:
-            # 1. The token has a closest match (that isn't itself)
-            # 2. The closest match does NOT have cached slide results
-            video_db_manager = VideoDBCachingManager()
-            closest_video_match = video_db_manager.get_closest_match(origin_token)
-            if (closest_video_match is not None and closest_video_match != origin_token
-                    and db_manager.get_details_using_origin(closest_video_match, []) is None):
-                symbolic_token = generate_symbolic_token(closest_video_match, results['token'])
-                self.file_manager.create_symlink(self.file_manager.generate_filepath(results['token']), symbolic_token)
-                # Everything is the same aside from the id_token, which is the symbolic token, and the origin_token,
-                # which is the closest video match.
-                db_manager.insert_or_update_details(
-                    symbolic_token,
-                    {
-                        'duration': results['duration'],
-                        'origin_token': closest_video_match,
-                        'date_added': current_datetime
-                    }
-                )
-                # We make the symlink file the closest match of the main file (to make sure closest match refs flow in
-                # the same direction).
-                db_manager.insert_or_update_closest_match(results['token'], {
-                    'most_similar_token': symbolic_token
-                })
-    return results
+    return extract_audio_callback(results, origin_token, self.file_manager, force)
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='video_2.reextract_cached_audio', ignore_result=False,
              file_manager=file_management_config)
 def reextract_cached_audio_task(self, token):
-    video_db_manager = VideoDBCachingManager()
-    closest_token = video_db_manager.get_closest_match(token)
-    audio_db_manager = AudioDBCachingManager()
-    existing_audio_own = audio_db_manager.get_details_using_origin(token, cols=['duration'])
-    if closest_token is not None and closest_token != token:
-        existing_audio_closest = audio_db_manager.get_details_using_origin(closest_token,
-                                                                           cols=['duration'])
-    else:
-        existing_audio_closest = None
-    if existing_audio_own is None and existing_audio_closest is None:
-        return {
-            'token': None,
-            'fresh': False,
-            'duration': 0.0
-        }
-    existing_audio = existing_audio_own if existing_audio_own is not None else existing_audio_closest
-    token_to_use_as_name = existing_audio[0]['id_token']
-    output_filename_with_path = self.file_manager.generate_filepath(token_to_use_as_name)
-    input_filename_with_path = self.file_manager.generate_filepath(token)
-    output_filename, _ = extract_audio_from_video(
-        input_filename_with_path, output_filename_with_path, token_to_use_as_name
-    )
-    # If there was an error of any kind (e.g. non-existing video file), the returned token will be None
-    if output_filename is None:
-        return {
-            'token': None,
-            'fresh': False,
-            'duration': 0.0
-        }
-
-    return {
-        'token': output_filename,
-        'fresh': True,
-        'duration': existing_audio[0]['duration']
-    }
+    return reextract_cached_audio(token, self.file_manager)
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='video_2.audio_fingerprint', ignore_result=False,
              file_manager=file_management_config)
 def compute_audio_fingerprint_task(self, results, force=False):
-    token = results['token']
-    # Making sure that the cache row for the audio file already exists.
-    # This cache row is created when the audio is extracted from its corresponding video, so it must exist!
-    # We also need this cache row later in order to be able to return the duration of the audio file.
-    db_manager = AudioDBCachingManager()
-    existing = db_manager.get_details(token, cols=['fingerprint', 'duration'],
-                                      using_most_similar=False)[0]
-    if existing is None:
-        return {
-            'result': None,
-            'fp_token': None,
-            'perform_lookup': False,
-            'fresh': False,
-            'duration': 0.0,
-            'original_results': results
-        }
-    if not force and existing['fingerprint'] is not None:
-        fp = existing['fingerprint']
-        fresh = False
-        perform_lookup = False
-        fp_token = None
-    else:
-        fp = perceptual_hash_audio(self.file_manager.generate_filepath(token))
-        fresh = fp is not None
-        perform_lookup = fp is not None
-        fp_token = token if fp is not None else None
-    return {
-        'result': fp,
-        'fp_token': fp_token,
-        'perform_lookup': perform_lookup,
-        'fresh': fresh,
-        'duration': existing['duration'],
-        'original_results': results
-    }
+    return compute_audio_fingerprint(results, self.file_manager, force)
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='video_2.audio_fingerprint_callback', ignore_result=False,
-             file_manager=file_management_config)
+             name='video_2.audio_fingerprint_callback', ignore_result=False)
 def compute_audio_fingerprint_callback_task(self, results, force=False):
-    if results['fresh']:
-        token = results['fp_token']
-        db_manager = AudioDBCachingManager()
-        db_manager.insert_or_update_details(
-            token,
-            {
-                'fingerprint': results['result'],
-            }
-        )
-        if not force:
-            closest_token = db_manager.get_closest_match(token)
-            # If this token has a closest token, it means that their relationship comes from their parent videos,
-            # and that the closest token's fingerprint has not been calculated either (otherwise `fresh` wouldn't be True).
-            # In that case, we insert the computed fingerprint for the closest token as well, and then we will perform the
-            # fingerprint lookup for that token instead of the one we computed the fingerprint for.
-            if closest_token is not None and closest_token != token:
-                db_manager.insert_or_update_details(
-                    closest_token,
-                    {
-                        'fingerprint': results['result'],
-                    }
-                )
-                results['fp_token'] = closest_token
-    return results
+    return compute_audio_fingerprint_callback(results, force)
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
