@@ -675,7 +675,7 @@ def cache_lookup_generic(token, db_manager, cols):
     return None
 
 
-def database_callback_generic(token, db_manager, values_dict, force, use_closest_match=False):
+def database_callback_generic(token, db_manager, values_dict, force=False, use_closest_match=False):
     db_manager.insert_or_update_details(
         token, values_dict
     )
