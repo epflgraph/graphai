@@ -10,9 +10,7 @@ from graphai.api.scraping.schemas import (
     ExtractContentResponse
 )
 
-from graphai.celery.common.tasks import (
-    format_api_results,
-)
+from graphai.api.common.utils import format_api_results
 
 from graphai.celery.scraping.jobs import (
     extract_sublinks_job,

@@ -39,12 +39,8 @@ from graphai.core.common.common_utils import (
     strtobool
 )
 
-from graphai.celery.common.tasks import (
-    fingerprint_lookup_retrieve_from_db,
-    fingerprint_lookup_parallel,
-    fingerprint_lookup_callback,
-    fingerprint_lookup_direct
-)
+from graphai.core.common.lookup import fingerprint_lookup_retrieve_from_db, fingerprint_lookup_parallel, \
+    fingerprint_lookup_direct, fingerprint_lookup_callback
 from graphai.core.common.config import config
 
 file_management_config = VideoConfig()

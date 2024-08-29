@@ -9,9 +9,7 @@ from graphai.api.image.schemas import (
     ExtractTextResponse,
     DetectOCRLanguageResponse,
 )
-from graphai.celery.common.tasks import (
-    format_api_results,
-)
+from graphai.api.common.utils import format_api_results
 
 from graphai.celery.image.jobs import (
     fingerprint_job,

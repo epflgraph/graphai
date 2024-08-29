@@ -24,7 +24,7 @@ from graphai.api.ontology.schemas import (
 )
 from graphai.api.common.schemas import TaskIDResponse
 
-from graphai.celery.common.tasks import format_api_results
+from graphai.api.common.utils import format_api_results
 
 from graphai.celery.ontology.jobs import (
     tree_job,
