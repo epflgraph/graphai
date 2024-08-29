@@ -25,15 +25,24 @@ import pytesseract
 import fasttext
 from fasttext_reducer.reduce_fasttext_models import generate_target_path
 
-from graphai.core.common.caching import VideoConfig, VideoDBCachingManager, get_token_file_status, is_fingerprinted, \
-    SlideDBCachingManager, AudioDBCachingManager
+from graphai.core.common.caching import (
+    VideoConfig,
+    VideoDBCachingManager,
+    get_token_file_status,
+    is_fingerprinted,
+    SlideDBCachingManager,
+    AudioDBCachingManager,
+    database_callback_generic
+)
 from graphai.core.common.config import config
 from graphai.core.common.common_utils import (
     make_sure_path_exists,
-    file_exists
+    file_exists,
+    get_current_datetime
 )
 from graphai.core.common.fingerprinting import (
     perceptual_hash_image,
+    md5_video_or_audio,
     compare_encoded_fingerprints
 )
 
@@ -159,7 +168,7 @@ def retrieve_file_from_youtube(url, output_filename_with_path, output_token):
         return str(result_code)
 
 
-def retrieve_file_from_url(url, output_filename_with_path, output_token, is_kaltura=False):
+def retrieve_file_from_any_source(url, output_filename_with_path, output_token, is_kaltura=False):
     if is_kaltura:
         return retrieve_file_from_kaltura(url, output_filename_with_path, output_token)
     else:
@@ -763,3 +772,103 @@ def get_audio_token_status(token):
         'active': active and exists,
         'fingerprinted': has_fingerprint
     }
+
+
+def retrieve_file_from_url(url, file_manager, is_kaltura=True, force_token=None):
+    if force_token is not None:
+        token = force_token
+    else:
+        db_manager = VideoDBCachingManager()
+        existing = db_manager.get_details_using_origin(url, [])
+        if existing is not None:
+            # If the cache row already exists, then we don't create a new token, but instead
+            # use the id_token of the existing row (we remove the file extension because it will be re-added soon)
+            token = existing[0]['id_token'].split('.')[0]
+        else:
+            # Otherwise, we generate a random token
+            token = generate_random_token()
+    filename = create_filename_using_url_format(token, url)
+    filename_with_path = file_manager.generate_filepath(filename)
+    results = retrieve_file_from_any_source(url, filename_with_path, filename, is_kaltura)
+    return {
+        'token': results,
+        'fresh': results == filename,
+        'token_size': get_file_size(filename_with_path)
+    }
+
+
+def retrieve_file_from_url_callback(results, url):
+    if results['fresh']:
+        db_manager = VideoDBCachingManager()
+        current_datetime = get_current_datetime()
+        values = {
+            'date_modified': current_datetime,
+            'origin_token': url
+        }
+        if db_manager.get_details(results['token'], [], using_most_similar=False)[0] is None:
+            # If the row doesn't already exist in the database, we also set its date_added value
+            values.update(
+                {
+                    'date_added': current_datetime
+                }
+            )
+        database_callback_generic(results['token'], db_manager, values, use_closest_match=False)
+    return results
+
+
+def compute_video_fingerprint(results, file_manager, force=False):
+    token = results['token']
+    db_manager = VideoDBCachingManager()
+    if token is None or not results.get('fresh', True):
+        fp = None
+        fresh = False
+        perform_lookup = False
+        fp_token = None
+    else:
+        existing = db_manager.get_details(token, ['fingerprint'])[0]
+        if not force and existing is not None and existing['fingerprint'] is not None:
+            fp = existing['fingerprint']
+            fresh = False
+            perform_lookup = False
+            fp_token = None
+        else:
+            fp = md5_video_or_audio(file_manager.generate_filepath(token), video=True)
+            fresh = fp is not None
+            perform_lookup = fp is not None
+            fp_token = token if fp is not None else None
+    return {
+        'result': fp,
+        'fp_token': fp_token,
+        'perform_lookup': perform_lookup,
+        'fresh': fresh,
+        'original_results': results
+    }
+
+
+def compute_video_fingerprint_callback(results):
+    if results['fresh']:
+        token = results['fp_token']
+        values_dict = {
+            'fingerprint': results['result']
+        }
+        db_manager = VideoDBCachingManager()
+        # The video might already have a row in the cache, or may be nonexistent there because it was not
+        # retrieved from a URI. If the latter is the case, we add the current datetime to the cache row.
+        if db_manager.get_details(token, [])[0] is None:
+            values_dict['date_added'] = get_current_datetime()
+        database_callback_generic(token, db_manager, values_dict, force=False, use_closest_match=False)
+    return results
+
+
+def cache_lookup_retrieve_file_from_url(url, file_manager):
+    db_manager = VideoDBCachingManager()
+    existing = db_manager.get_details_using_origin(url, [])
+    if existing is not None:
+        token = existing[0]['id_token']
+        return {
+            'token': token,
+            'fresh': False,
+            'token_status': get_video_token_status(token),
+            'token_size': get_file_size(file_manager.generate_filepath(token))
+        }
+    return None
