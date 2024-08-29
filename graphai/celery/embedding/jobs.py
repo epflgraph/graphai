@@ -115,7 +115,8 @@ def embedding_job(text, model_type, force):
             embedding_text_list_fingerprint_callback_task.s(model_type),
             text_dummy_task.s(),
             group(embedding_text_list_embed_parallel_task.s(model_type, i, 8, force) for i in range(8)),
-            embedding_text_list_embed_callback_task.s(model_type, force)
+            embedding_text_list_embed_callback_task.s(model_type, force),
+            text_dummy_task.s()
         ]
     task = chain(task_list)
     task = task.apply_async(priority=6)
