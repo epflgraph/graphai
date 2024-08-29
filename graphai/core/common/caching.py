@@ -685,6 +685,8 @@ def database_callback_generic(token, db_manager, values_dict, force=False, use_c
             db_manager.insert_or_update_details(
                 closest, values_dict
             )
+            return closest
+    return ''
 
 
 def token_based_text_lookup(token, db_manager, main_col, modify_result_func=None, modify_result_args=None, **kwargs):
