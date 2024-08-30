@@ -1,9 +1,14 @@
 from graphai.core.common.caching import (
     TextDBCachingManager,
-    database_callback_generic, fingerprint_based_text_lookup, token_based_text_lookup
+    database_callback_generic,
+    fingerprint_based_text_lookup,
+    token_based_text_lookup
 )
-from graphai.core.translation.text_utils import convert_text_back_to_list, detect_text_language
-from graphai.core.common.common_utils import get_current_datetime, convert_text_back_to_list
+from graphai.core.translation.text_utils import detect_text_language
+from graphai.core.common.common_utils import (
+    get_current_datetime,
+    convert_text_back_to_list
+)
 
 LONG_TEXT_ERROR = "Unpunctuated text too long (over 512 tokens), " \
                   "try adding punctuation or providing a smaller chunk of text."
