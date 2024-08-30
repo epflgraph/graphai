@@ -65,15 +65,15 @@ async def lifespan(app: FastAPI):
     ontology_ok = ontology_job.get()
     scraping_ok = scraping_job.get()
 
-    # Print status message
-    if text_ok and video_ok:
-        log("Tasks text_init and video_init both finished successfully")
-    elif text_ok and not video_ok:
-        log("[ERROR] Task video_init failed, check celery logs")
-    elif not text_ok and video_ok:
-        log("[ERROR] Task text_init failed, check celery logs")
+    task_names = ['text', 'video', 'voice', 'embedding', 'translation', 'ontology', 'scraping']
+    ok_list = [text_ok, video_ok, voice_ok, embedding_ok, translation_ok, ontology_ok, scraping_ok]
+
+    if all(ok_list):
+        log("All init tasks finished successfully")
     else:
-        log("[ERROR] Both text_init and video_init tasks failed, check celery logs")
+        unsuccessful_indices = [i for i, x in enumerate(ok_list) if not x]
+        unsuccessful_tasks = [task_names[i] for i in unsuccessful_indices]
+        log(f"[ERROR] Init tasks for {', '.join(unsuccessful_tasks)} failed, check celery logs")
 
     ################################################################
     # Yield execution to API                                       #

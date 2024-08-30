@@ -130,7 +130,7 @@ VALUES
 To deploy the API, make sure the RabbitMQ and Redis services are running and accessible at the urls provided in the corresponding config file.
 
 ### Deploy Celery
-To deploy Celery, run the [deploy_celery.sh](graphai/api/deploy_celery.sh) script from the [graphai/api](graphai/api) folder:
+To deploy Celery, run the [deploy_celery.sh](graphai/api/main/deploy_celery.sh) script from the [graphai/api](graphai/api) folder:
 ```
 cd /path/to/project/graphai/api
 ./deploy_celery.sh
@@ -146,7 +146,7 @@ cd /path/to/project/graphai/api
 > ℹ️ The `deploy_celery.sh` script launches workers in detached mode. You can monitor them using the Flower API, which resides at `localhost:5555` by default. In order to terminate them all, use the `cleanup_celery_workers.sh` script. See more [here](https://docs.celeryq.dev/en/stable/userguide/workers.html#stopping-the-worker).
 
 ### Deploy the API
-Once the Celery workers are running, to deploy the API, run the [deploy.sh](graphai/api/deploy.sh) script from the [graphai/api](graphai/api) folder:
+Once the Celery workers are running, to deploy the API, run the [deploy.sh](graphai/api/main/deploy.sh) script from the [graphai/api](graphai/api) folder:
 ```
 cd /path/to/project/graphai/api
 ./deploy.sh
@@ -175,7 +175,7 @@ To add an endpoint to a new router:
         responses={404: {'description': 'Not found'}}
     )
     ```
-3. Register the router in the fastapi application by adding to the [graphai/api/main.py](graphai/api/main.py) file the lines
+3. Register the router in the fastapi application by adding to the [graphai/api/main.py](graphai/api/main/main.py) file the lines
     ```
     import graphai.api.routers.new as new_router
 
