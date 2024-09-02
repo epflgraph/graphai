@@ -5,7 +5,7 @@ from unittest.mock import patch
 from time import sleep
 
 from graphai.celery.translation.tasks import (
-    translate_text,
+    translate_text_task,
     compute_translation_text_fingerprint_task,
 )
 
@@ -19,10 +19,10 @@ from graphai.celery.translation.tasks import (
 @pytest.mark.usefixtures('en_to_fr_text')
 def test__translation_translate__translate_text__mock_task(mock_run, en_to_fr_text):
     # Mock calling the task
-    translate_text.run(en_to_fr_text, 'en', 'fr')
+    translate_text_task.run(en_to_fr_text, 'en', 'fr')
 
     # Assert that the task has been called
-    assert translate_text.run.call_count == 1
+    assert translate_text_task.run.call_count == 1
 
 
 ################################################################
@@ -31,7 +31,7 @@ def test__translation_translate__translate_text__mock_task(mock_run, en_to_fr_te
 @pytest.mark.usefixtures('en_to_fr_text', 'fr_to_en_text')
 def test__translation_translate__translate_text__run_task(en_to_fr_text, fr_to_en_text):
     # Call the task
-    en_fr_translated = translate_text.run(en_to_fr_text, "en", "fr")
+    en_fr_translated = translate_text_task.run(en_to_fr_text, "en", "fr")
 
     # Assert that the results are correct
     assert isinstance(en_fr_translated, dict)
@@ -43,7 +43,7 @@ def test__translation_translate__translate_text__run_task(en_to_fr_text, fr_to_e
     #############################################################
 
     # Call the task
-    fr_en_translated = translate_text.run(fr_to_en_text, "fr", "en")
+    fr_en_translated = translate_text_task.run(fr_to_en_text, "fr", "en")
 
     # Assert that the results are correct
     assert isinstance(fr_en_translated, dict)

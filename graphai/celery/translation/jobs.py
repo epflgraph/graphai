@@ -1,7 +1,7 @@
 from celery import chain
 
 from graphai.celery.translation.tasks import (
-    translate_text,
+    translate_text_task,
     translate_text_callback_task,
     detect_text_language_task,
     cache_lookup_translation_text_fingerprint_task,
@@ -104,7 +104,7 @@ def translation_job(text, src, tgt, force):
     # Computation job
     #################
     task_list = [
-        translate_text.s(text, src, tgt),
+        translate_text_task.s(text, src, tgt),
         translate_text_callback_task.s(token, text, src, tgt, force, return_list)
     ]
     task = chain(task_list)
