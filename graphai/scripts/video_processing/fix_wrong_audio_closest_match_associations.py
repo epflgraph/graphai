@@ -1,10 +1,7 @@
-from graphai.core.interfaces.caching import AudioDBCachingManager
-from graphai.api.celery_tasks.common import (
-    fingerprint_lookup_direct,
-    fingerprint_lookup_callback
-)
+from graphai.core.common.caching import AudioDBCachingManager
+from graphai.core.common.lookup import fingerprint_lookup_direct, fingerprint_lookup_callback
 from db_cache_manager.db import DB
-from graphai.core.interfaces.config import config
+from graphai.core.common.config import config
 
 
 def get_all_problematic_pairs():

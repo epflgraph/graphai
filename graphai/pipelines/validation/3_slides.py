@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 
 from db_cache_manager.db import DB
 
-from graphai.core.interfaces.config import config
+from graphai.core.common.config import config
 
 pd.set_option('display.max_rows', 500)
 pd.set_option('display.max_columns', 500)

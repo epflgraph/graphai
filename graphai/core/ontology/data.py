@@ -7,7 +7,7 @@ from itertools import chain
 from multiprocessing import Lock
 
 from graphai.core.common.common_utils import invert_dict
-from graphai.core.interfaces.config import config
+from graphai.core.common.config import config
 
 
 def db_results_to_pandas_df(results, cols):

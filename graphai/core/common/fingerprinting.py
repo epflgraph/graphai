@@ -255,3 +255,13 @@ def md5_text(s):
         MD5 hash
     """
     return hashlib.md5(s.encode('utf8')).hexdigest()
+
+
+def compute_text_fingerprint(token, text):
+    fp = perceptual_hash_text(text)
+
+    return {
+        'result': fp,
+        'token': token,
+        'fresh': True
+    }

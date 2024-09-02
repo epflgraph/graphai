@@ -72,7 +72,7 @@ Generate your own and do NOT use the secret key included in the example config f
 2. Modify and run the SQL file `init_auth_db.sql`, found in the `queries/auth` folder in the root directory of the repo in 
 order to create your users table and add the first user.
    1. Be sure to fill in the details of the user. Using your desired password, you can generate the value for
-   `hashed_password` using the function `graphai.core.common.auth_utils.get_password_hash`, which uses 
+   `hashed_password` using the function `graphai.api.auth.auth_utils.get_password_hash`, which uses 
    bcrypt encryption and is used by the API itself.
    2. Make sure that the name of the schema matches the one indicated in the `[auth]` section of `config.ini`. These 
    two are set to `auth_graphai` by default.
@@ -102,7 +102,7 @@ If you need finer-grained control over the rate limits, read on.
 
 #### Advanced rate limiting
 1. If you would like to use custom rate-limiting schemas, create a JSON file whose structure mimics
-`graphai.api.common.auth_utils.DEFAULT_RATE_LIMITS`, but with your own custom values and custom names for the schemas. 
+`graphai.api.auth.auth_utils.DEFAULT_RATE_LIMITS`, but with your own custom values and custom names for the schemas. 
 Then add a `custom_limits` variable to your `config.ini` file and set its value to the absolute path of your custom
 JSON. By doing so, you will be able to set the `limit` variable to schema names included in your custom JSON,
 in addition to the default values.
@@ -130,15 +130,16 @@ VALUES
 To deploy the API, make sure the RabbitMQ and Redis services are running and accessible at the urls provided in the corresponding config file.
 
 ### Deploy Celery
-To deploy Celery, run the [deploy_celery.sh](graphai/api/deploy_celery.sh) script from the [graphai/api](graphai/api) folder:
+To deploy Celery, run the [deploy_celery.sh](graphai/api/main/deploy_celery.sh) script from the [graphai/api/main](graphai/api/main) folder:
 ```
-cd /path/to/project/graphai/api
+cd /path/to/project/graphai/api/main
 ./deploy_celery.sh
 ```
  
 > ℹ️ Celery can run jobs using **threads** or **processes**. Because of the [Global Interpreter Lock (GIL)](https://docs.celeryq.dev/projects/celery-enhancement-proposals/en/latest/glossary.html#term-GIL) in Python, running using threads will mostly reduce your tasks from true parallelism to concurrency (although this is only true when running Python bytecode, as opposed to e.g. C libraries underneath or I/O calls, which *are* truly run in parallel). However, using processes means that you will have one copy of your read-only (potentially large) objects *per process*.
 > 
-> The `deploy_celery.sh` script launches three workers, two of which use threads. Out of those two, one is designed to handle time-critical tasks, and another is designed to handle long-running tasks. When writing new tasks and jobs, be mindful of their overall priority and assign them to the appropriate worker (either using the existing queues or by adding a new queue to `core/interfaces/celery_config.py` and `deploy_celery.sh`).
+> The `deploy_celery.sh` script launches multiple workers. Some of these use threads and some use processes (prefork). The workers with higher values of the prefetch multiplier are designed for short, high-volume tasks, while a smaller prefetch multiplier is better suited to long-running tasks.
+> When writing new tasks and jobs, be mindful of their overall priority and assign them to the appropriate worker (either using the existing queues or by adding a new queue or even a new worker to `celery.common.celery_config` and `deploy_celery.sh`).
 > If your tasks do not use any large objects but need to run fast, you can use the `prefork` pool in order to use true parallelism.
 > * Launching multiple workers also allows you to set the niceness value of each worker process, thus giving you more control over priorities.
 > * For more optimization tips, particularly regarding the `--prefetch-multiplier` flag, see [here](https://docs.celeryq.dev/en/stable/userguide/optimizing.html#optimizing-prefetch-limit).
@@ -146,9 +147,9 @@ cd /path/to/project/graphai/api
 > ℹ️ The `deploy_celery.sh` script launches workers in detached mode. You can monitor them using the Flower API, which resides at `localhost:5555` by default. In order to terminate them all, use the `cleanup_celery_workers.sh` script. See more [here](https://docs.celeryq.dev/en/stable/userguide/workers.html#stopping-the-worker).
 
 ### Deploy the API
-Once the Celery workers are running, to deploy the API, run the [deploy.sh](graphai/api/deploy.sh) script from the [graphai/api](graphai/api) folder:
+Once the Celery workers are running, to deploy the API, run the [deploy.sh](graphai/api/main/deploy.sh) script from the [graphai/api/main](graphai/api/main) folder:
 ```
-cd /path/to/project/graphai/api
+cd /path/to/project/graphai/api/main
 ./deploy.sh
 ```
 The app will be listening on `0.0.0.0:28800` by default. You can change both the host and the port with the `-h` and `-p` options:
@@ -160,14 +161,15 @@ The app will be listening on `0.0.0.0:28800` by default. You can change both the
 New endpoints can be added either to an existing router or to a new one.
 
 To add an endpoint to an existing router:
-1. Create an async function in the corresponding router file (e.g. [graphai/api/routers/video.py](graphai/api/routers/video.py)), decorated with FastAPI's decorator specifying the HTTP method and endpoint name.
-2. Create also input and output schemas as classes in the corresponding schema file (e.g. [graphai/api/schemas/video.py](graphai/api/schemas/video.py)). These classes should inherit from [pydantic](https://docs.pydantic.dev/)'s ``BaseModel``, and be named by convention like ``NewEndpointRequest`` and either ``NewEndpointResponse`` or ``NewEndpointResponseElem`` with ``NewEndpointResponse = List[NewEndpointResponseElem]``.
+1. Create an async function in the corresponding router file (e.g. [graphai/api/video/router.py](graphai/api/video/router.py)), decorated with FastAPI's decorator specifying the HTTP method and endpoint name.
+2. Create also input and output schemas as classes in the corresponding schema file (e.g. [graphai/api/video/schemas.py](graphai/api/video/schemas.py)). These classes should inherit from [pydantic](https://docs.pydantic.dev/)'s ``BaseModel``, and be named by convention like ``NewEndpointRequest`` and either ``NewEndpointResponse`` or ``NewEndpointResponseElem`` with ``NewEndpointResponse = List[NewEndpointResponseElem]``.
 3. Specify these classes as input and output schemas in the function definition in the router.
 4. Populate the function with the needed logic.
 
 To add an endpoint to a new router:
-1. Create an empty schema file (e.g. [graphai/api/schemas/new.py](graphai/api/schemas/new.py)).
-2. Create a router file (e.g. [graphai/api/routers/new.py](graphai/api/routers/new.py)), instantiating a fastapi ``APIRouter`` as follows
+1. Create an empty subpackage in the `api` subpackage. (e.g. `graphai/api/new`). Be sure to create an init file.
+2. Create a schemas file: `graphai/api/new/schemas.py`, and add the Pydantic schemas there.
+3. Create a router file: `graphai/api/new/router.py`, instantiating a fastapi ``APIRouter`` as follows
     ```
     router = APIRouter(
         prefix='/new',
@@ -175,15 +177,15 @@ To add an endpoint to a new router:
         responses={404: {'description': 'Not found'}}
     )
     ```
-3. Register the router in the fastapi application by adding to the [graphai/api/main.py](graphai/api/main.py) file the lines
+4. Register the router in the fastapi application by adding to the [graphai/api/main/main.py](graphai/api/main/main.py) file the lines
     ```
-    import graphai.api.routers.new as new_router
+    import graphai.api.new.router as new_router
 
     [...]
 
     app.include_router(new_router.router)
     ```
-4. At this point, the new router is already created. Create and endpoint on the new router by following the instructions above. Endpoints on this router are available under the ``/new`` prefix.
+5. At this point, the new router is already created. Create and endpoint on the new router by following the instructions above. Endpoints on this router are available under the ``/new`` prefix.
 
 > ℹ️ New functionalities should be developed in the [graphai/core](graphai/core) submodule, to make them modular and reusable. API endpoints should be limited to the management of input and output and the orchestration of the different Celery tasks, and should generally rely on functions from that submodule for the actual computation of results.
 

@@ -5,10 +5,10 @@ import pytest
 from unittest.mock import patch
 from time import sleep
 
-from graphai.api.celery_tasks.embedding import (
+from graphai.celery.embedding.tasks import (
     embed_text_task,
 )
-from graphai.core.interfaces.caching import EmbeddingDBCachingManager
+from graphai.core.common.caching import EmbeddingDBCachingManager
 
 
 ################################################################
@@ -16,7 +16,7 @@ from graphai.core.interfaces.caching import EmbeddingDBCachingManager
 ################################################################
 
 
-@patch('graphai.api.celery_tasks.embedding.embed_text_task.run')
+@patch('graphai.celery.embedding.tasks.embed_text_task.run')
 @pytest.mark.usefixtures('example_word')
 def test__embedding_embed__translate_text__mock_task(mock_run, example_word):
     # Mock calling the task

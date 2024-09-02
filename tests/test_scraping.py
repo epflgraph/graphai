@@ -4,7 +4,7 @@ import pytest
 from unittest.mock import patch
 from time import sleep
 
-from graphai.api.celery_tasks.scraping import initialize_url_and_get_sublinks_task
+from graphai.celery.scraping.tasks import initialize_url_and_get_sublinks_task
 
 from graphai.core.scraping.scraping import create_base_url_token
 
@@ -14,7 +14,7 @@ from graphai.core.scraping.scraping import create_base_url_token
 ################################################################
 
 
-@patch('graphai.api.celery_tasks.scraping.initialize_url_and_get_sublinks_task.run')
+@patch('graphai.celery.scraping.tasks.initialize_url_and_get_sublinks_task.run')
 @pytest.mark.usefixtures('test_url')
 def test__scraping_sublinks__initialize_url_and_get_sublinks_task__mock_task(mock_run, test_url):
     # Mock calling the task
