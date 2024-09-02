@@ -36,8 +36,8 @@ def recompute_clusters(ontology_data_obj, n_clusters, min_n):
 def get_concept_category_closest(ontology_data_obj, concept_id, avg, coeffs, top_n, use_depth_3, return_clusters):
     closest, scores, d3_cat, best_clusters = (
         ontology_data_obj.get_concept_closest_category(concept_id, avg, coeffs, top_n,
-                                                            use_depth_3=use_depth_3,
-                                                            return_clusters=return_clusters)
+                                                       use_depth_3=use_depth_3,
+                                                       return_clusters=return_clusters)
     )
     if closest is None:
         return {
@@ -79,13 +79,13 @@ def get_cluster_category_closest(ontology_data_obj, cluster_id, avg, coeffs, top
         # If it's a list, it's assumed to be a list of concepts (i.e. a "custom" cluster)
         closest, scores, d3_cat = (
             ontology_data_obj.get_custom_cluster_closest_category(cluster_id, avg, coeffs, top_n,
-                                                                       use_depth_3=use_depth_3)
+                                                                  use_depth_3=use_depth_3)
         )
     else:
         # Otherwise, it's a single string, and represents an existing cluster
         closest, scores, d3_cat = (
             ontology_data_obj.get_cluster_closest_category(cluster_id, avg, coeffs, top_n,
-                                                                use_depth_3=use_depth_3)
+                                                           use_depth_3=use_depth_3)
         )
     if closest is None:
         return {

@@ -16,7 +16,6 @@ from graphai.core.common.caching import (
     AudioDBCachingManager,
     VideoConfig
 )
-from graphai.core.common.lookup import fingerprint_cache_lookup_with_most_similar, cache_lookup_generic
 from graphai.core.common.config import config
 from graphai.core.common.common_utils import strtobool
 
