@@ -16,11 +16,12 @@ from graphai.celery.embedding.tasks import (
 
 from graphai.celery.common.tasks import text_dummy_task
 
-from graphai.celery.common.jobs import direct_lookup_generic_job, DEFAULT_TIMEOUT
-
-from graphai.core.embedding.embedding import (
-    generate_embedding_text_token
+from graphai.celery.common.jobs import (
+    direct_lookup_generic_job,
+    DEFAULT_TIMEOUT
 )
+
+from graphai.core.embedding.embedding import generate_embedding_text_token
 
 
 def get_embedding_text_fingerprint_chain_list(token, text, model_type):

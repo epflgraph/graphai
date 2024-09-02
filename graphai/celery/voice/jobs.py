@@ -11,7 +11,10 @@ from graphai.celery.voice.tasks import (
     transcribe_task,
     transcribe_callback_task
 )
-from graphai.celery.common.jobs import direct_lookup_generic_job, DEFAULT_TIMEOUT
+from graphai.celery.common.jobs import (
+    direct_lookup_generic_job,
+    DEFAULT_TIMEOUT
+)
 
 DEFAULT_TRANSCRIPT_TIMEOUT = 60
 

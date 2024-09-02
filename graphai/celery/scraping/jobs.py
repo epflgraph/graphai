@@ -12,7 +12,10 @@ from graphai.celery.scraping.tasks import (
     scraping_dummy_task
 )
 
-from graphai.celery.common.jobs import direct_lookup_generic_job, DEFAULT_TIMEOUT
+from graphai.celery.common.jobs import (
+    direct_lookup_generic_job,
+    DEFAULT_TIMEOUT
+)
 
 from graphai.core.scraping.scraping import create_base_url_token
 
