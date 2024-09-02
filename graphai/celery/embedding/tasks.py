@@ -24,9 +24,6 @@ from graphai.core.embedding.embedding import (
 from graphai.core.common.config import config
 from graphai.core.common.common_utils import strtobool
 
-
-LONG_TEXT_ERROR = "Text over token limit for selected model (%d)."
-
 embedding_models = EmbeddingModels()
 
 

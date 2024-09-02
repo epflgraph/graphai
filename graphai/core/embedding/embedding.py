@@ -7,7 +7,6 @@ import numpy as np
 import json
 from sentence_transformers import SentenceTransformer
 
-from graphai.celery.embedding.tasks import LONG_TEXT_ERROR
 from graphai.core.common.caching import (
     EmbeddingDBCachingManager,
     token_based_text_lookup,
@@ -30,6 +29,7 @@ MODEL_TYPES = {
 }
 # 3 hours
 EMBEDDING_UNLOAD_WAITING_PERIOD = 3 * 3600.0
+LONG_TEXT_ERROR = "Text over token limit for selected model (%d)."
 
 
 def embedding_to_json(v):
