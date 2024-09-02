@@ -1,7 +1,0 @@
-graphai.api.celery\_jobs.ontology module
-========================================
-
-.. automodule:: graphai.api.celery_jobs.ontology
-   :members:
-   :undoc-members:
-   :show-inheritance:

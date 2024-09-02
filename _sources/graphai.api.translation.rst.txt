@@ -1,0 +1,16 @@
+graphai.api.translation package
+===============================
+
+.. automodule:: graphai.api.translation
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 1
+
+   graphai.api.translation.router
+   graphai.api.translation.schemas

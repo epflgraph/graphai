@@ -1,7 +1,0 @@
-graphai.api.routers.completion module
-=====================================
-
-.. automodule:: graphai.api.routers.completion
-   :members:
-   :undoc-members:
-   :show-inheritance:

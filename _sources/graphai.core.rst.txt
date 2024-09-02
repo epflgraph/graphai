@@ -14,10 +14,11 @@ Subpackages
 
    graphai.core.common
    graphai.core.embedding
-   graphai.core.interfaces
+   graphai.core.image
    graphai.core.ontology
    graphai.core.scraping
    graphai.core.text
    graphai.core.translation
    graphai.core.utils
    graphai.core.video
+   graphai.core.voice

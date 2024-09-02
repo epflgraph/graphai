@@ -1,0 +1,7 @@
+graphai.celery.translation.tasks module
+=======================================
+
+.. automodule:: graphai.celery.translation.tasks
+   :members:
+   :undoc-members:
+   :show-inheritance:

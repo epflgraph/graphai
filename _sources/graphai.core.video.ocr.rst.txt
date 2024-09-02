@@ -1,7 +1,0 @@
-graphai.core.video.ocr module
-=============================
-
-.. automodule:: graphai.core.video.ocr
-   :members:
-   :undoc-members:
-   :show-inheritance:

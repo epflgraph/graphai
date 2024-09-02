@@ -1,7 +1,0 @@
-graphai.api.celery\_tasks.embedding module
-==========================================
-
-.. automodule:: graphai.api.celery_tasks.embedding
-   :members:
-   :undoc-members:
-   :show-inheritance:

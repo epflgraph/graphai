@@ -1,0 +1,16 @@
+graphai.api.embedding package
+=============================
+
+.. automodule:: graphai.api.embedding
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 1
+
+   graphai.api.embedding.router
+   graphai.api.embedding.schemas

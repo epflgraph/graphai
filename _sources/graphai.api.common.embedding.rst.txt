@@ -1,7 +1,0 @@
-graphai.api.common.embedding module
-===================================
-
-.. automodule:: graphai.api.common.embedding
-   :members:
-   :undoc-members:
-   :show-inheritance:

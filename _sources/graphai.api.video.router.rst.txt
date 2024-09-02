@@ -1,0 +1,7 @@
+graphai.api.video.router module
+===============================
+
+.. automodule:: graphai.api.video.router
+   :members:
+   :undoc-members:
+   :show-inheritance:

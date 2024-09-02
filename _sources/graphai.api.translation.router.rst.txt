@@ -1,0 +1,7 @@
+graphai.api.translation.router module
+=====================================
+
+.. automodule:: graphai.api.translation.router
+   :members:
+   :undoc-members:
+   :show-inheritance:

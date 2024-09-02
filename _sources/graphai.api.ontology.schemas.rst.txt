@@ -1,0 +1,7 @@
+graphai.api.ontology.schemas module
+===================================
+
+.. automodule:: graphai.api.ontology.schemas
+   :members:
+   :undoc-members:
+   :show-inheritance:

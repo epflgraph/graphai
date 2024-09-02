@@ -1,0 +1,16 @@
+graphai.celery.video package
+============================
+
+.. automodule:: graphai.celery.video
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 1
+
+   graphai.celery.video.jobs
+   graphai.celery.video.tasks

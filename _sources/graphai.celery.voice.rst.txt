@@ -1,0 +1,16 @@
+graphai.celery.voice package
+============================
+
+.. automodule:: graphai.celery.voice
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 1
+
+   graphai.celery.voice.jobs
+   graphai.celery.voice.tasks

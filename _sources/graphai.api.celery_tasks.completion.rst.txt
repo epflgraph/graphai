@@ -1,7 +1,0 @@
-graphai.api.celery\_tasks.completion module
-===========================================
-
-.. automodule:: graphai.api.celery_tasks.completion
-   :members:
-   :undoc-members:
-   :show-inheritance:

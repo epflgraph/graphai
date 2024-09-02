@@ -1,0 +1,7 @@
+graphai.api.embedding.router module
+===================================
+
+.. automodule:: graphai.api.embedding.router
+   :members:
+   :undoc-members:
+   :show-inheritance:

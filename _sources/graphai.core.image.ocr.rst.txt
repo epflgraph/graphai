@@ -1,0 +1,7 @@
+graphai.core.image.ocr module
+=============================
+
+.. automodule:: graphai.core.image.ocr
+   :members:
+   :undoc-members:
+   :show-inheritance:

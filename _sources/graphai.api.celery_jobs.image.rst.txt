@@ -1,7 +1,0 @@
-graphai.api.celery\_jobs.image module
-=====================================
-
-.. automodule:: graphai.api.celery_jobs.image
-   :members:
-   :undoc-members:
-   :show-inheritance:

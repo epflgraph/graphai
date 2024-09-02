@@ -21,7 +21,7 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="graphai.core.utils package" href="graphai.core.utils.html" />
+    <link rel="next" title="graphai.core.translation.translation module" href="graphai.core.translation.translation.html" />
     <link rel="prev" title="graphai.core.translation package" href="graphai.core.translation.html" /> 
 </head>
 
@@ -51,7 +51,7 @@
 <li class="toctree-l2 current"><a class="reference internal" href="graphai.core.html#subpackages">Subpackages</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="graphai.core.common.html">graphai.core.common package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="graphai.core.embedding.html">graphai.core.embedding package</a></li>
-<li class="toctree-l3"><a class="reference internal" href="graphai.core.interfaces.html">graphai.core.interfaces package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="graphai.core.image.html">graphai.core.image package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="graphai.core.ontology.html">graphai.core.ontology package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="graphai.core.scraping.html">graphai.core.scraping package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="graphai.core.text.html">graphai.core.text package</a></li>
@@ -61,6 +61,7 @@
 </li>
 <li class="toctree-l3"><a class="reference internal" href="graphai.core.utils.html">graphai.core.utils package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="graphai.core.video.html">graphai.core.video package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="graphai.core.voice.html">graphai.core.voice package</a></li>
 </ul>
 </li>
 </ul>
@@ -181,10 +182,11 @@
 
 <dl class="py method">
 <dt class="sig sig-object py" id="graphai.core.translation.text_utils.TranslationModels.translate">
-<span class="sig-name descname"><span class="pre">translate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">how</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'en-fr'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.translation.text_utils.TranslationModels.translate" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">translate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">how</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'en-fr'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skip_sentence_segmentation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.translation.text_utils.TranslationModels.translate" title="Link to this definition"></a></dt>
 <dd><p>Translates provided text
 :param text: Text to translate
-:param how: source-target language</p>
+:param how: source-target language
+:param skip_sentence_segmentation: If True, skips segmentation</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Translated text and ‘unpunctuated text too long’ flag</p>
@@ -201,7 +203,7 @@
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="graphai.core.translation.html" class="btn btn-neutral float-left" title="graphai.core.translation package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="graphai.core.utils.html" class="btn btn-neutral float-right" title="graphai.core.utils package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="graphai.core.translation.translation.html" class="btn btn-neutral float-right" title="graphai.core.translation.translation module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

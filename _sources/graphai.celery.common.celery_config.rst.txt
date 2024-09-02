@@ -1,0 +1,7 @@
+graphai.celery.common.celery\_config module
+===========================================
+
+.. automodule:: graphai.celery.common.celery_config
+   :members:
+   :undoc-members:
+   :show-inheritance:

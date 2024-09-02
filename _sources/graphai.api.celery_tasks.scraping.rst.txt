@@ -1,7 +1,0 @@
-graphai.api.celery\_tasks.scraping module
-=========================================
-
-.. automodule:: graphai.api.celery_tasks.scraping
-   :members:
-   :undoc-members:
-   :show-inheritance:

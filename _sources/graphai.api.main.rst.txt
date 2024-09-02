@@ -1,7 +1,15 @@
-graphai.api.main module
-=======================
+graphai.api.main package
+========================
 
 .. automodule:: graphai.api.main
    :members:
    :undoc-members:
    :show-inheritance:
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 1
+
+   graphai.api.main.main

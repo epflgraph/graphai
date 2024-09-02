@@ -1,0 +1,7 @@
+graphai.core.voice.transcribe module
+====================================
+
+.. automodule:: graphai.core.voice.transcribe
+   :members:
+   :undoc-members:
+   :show-inheritance:

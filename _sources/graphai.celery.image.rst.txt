@@ -1,0 +1,16 @@
+graphai.celery.image package
+============================
+
+.. automodule:: graphai.celery.image
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 1
+
+   graphai.celery.image.jobs
+   graphai.celery.image.tasks

@@ -21,7 +21,7 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="graphai.core.interfaces package" href="graphai.core.interfaces.html" />
+    <link rel="next" title="graphai.core.image package" href="graphai.core.image.html" />
     <link rel="prev" title="graphai.core.embedding package" href="graphai.core.embedding.html" /> 
 </head>
 
@@ -54,13 +54,14 @@
 <li class="toctree-l4 current"><a class="reference internal" href="graphai.core.embedding.html#submodules">Submodules</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="graphai.core.interfaces.html">graphai.core.interfaces package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="graphai.core.image.html">graphai.core.image package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="graphai.core.ontology.html">graphai.core.ontology package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="graphai.core.scraping.html">graphai.core.scraping package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="graphai.core.text.html">graphai.core.text package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="graphai.core.translation.html">graphai.core.translation package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="graphai.core.utils.html">graphai.core.utils package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="graphai.core.video.html">graphai.core.video package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="graphai.core.voice.html">graphai.core.voice package</a></li>
 </ul>
 </li>
 </ul>
@@ -199,6 +200,56 @@
 
 </dd></dl>
 
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.core.embedding.embedding.copy_embedding_object">
+<span class="sig-prename descclassname"><span class="pre">graphai.core.embedding.embedding.</span></span><span class="sig-name descname"><span class="pre">copy_embedding_object</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">embedding_obj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_type</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.embedding.embedding.copy_embedding_object" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.core.embedding.embedding.compute_embedding_text_fingerprint_callback">
+<span class="sig-prename descclassname"><span class="pre">graphai.core.embedding.embedding.</span></span><span class="sig-name descname"><span class="pre">compute_embedding_text_fingerprint_callback</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">results</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">text</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_type</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.embedding.embedding.compute_embedding_text_fingerprint_callback" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.core.embedding.embedding.token_based_embedding_lookup">
+<span class="sig-prename descclassname"><span class="pre">graphai.core.embedding.embedding.</span></span><span class="sig-name descname"><span class="pre">token_based_embedding_lookup</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">token</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_type</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.embedding.embedding.token_based_embedding_lookup" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.core.embedding.embedding.fingerprint_based_embedding_lookup">
+<span class="sig-prename descclassname"><span class="pre">graphai.core.embedding.embedding.</span></span><span class="sig-name descname"><span class="pre">fingerprint_based_embedding_lookup</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">token</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_type</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.embedding.embedding.fingerprint_based_embedding_lookup" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.core.embedding.embedding.embed_text">
+<span class="sig-prename descclassname"><span class="pre">graphai.core.embedding.embedding.</span></span><span class="sig-name descname"><span class="pre">embed_text</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">models</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">text</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_type</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.embedding.embedding.embed_text" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.core.embedding.embedding.insert_embedding_into_db">
+<span class="sig-prename descclassname"><span class="pre">graphai.core.embedding.embedding.</span></span><span class="sig-name descname"><span class="pre">insert_embedding_into_db</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">results</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">token</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">text</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">force</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.embedding.embedding.insert_embedding_into_db" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.core.embedding.embedding.embedding_text_list_fingerprint_parallel">
+<span class="sig-prename descclassname"><span class="pre">graphai.core.embedding.embedding.</span></span><span class="sig-name descname"><span class="pre">embedding_text_list_fingerprint_parallel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tokens</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">text_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">i</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.embedding.embedding.embedding_text_list_fingerprint_parallel" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.core.embedding.embedding.embedding_text_list_fingerprint_callback">
+<span class="sig-prename descclassname"><span class="pre">graphai.core.embedding.embedding.</span></span><span class="sig-name descname"><span class="pre">embedding_text_list_fingerprint_callback</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">results</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_type</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.embedding.embedding.embedding_text_list_fingerprint_callback" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.core.embedding.embedding.embedding_text_list_embed_parallel">
+<span class="sig-prename descclassname"><span class="pre">graphai.core.embedding.embedding.</span></span><span class="sig-name descname"><span class="pre">embedding_text_list_embed_parallel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">embedding_obj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">i</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">force</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.embedding.embedding.embedding_text_list_embed_parallel" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.core.embedding.embedding.embedding_text_list_embed_callback">
+<span class="sig-prename descclassname"><span class="pre">graphai.core.embedding.embedding.</span></span><span class="sig-name descname"><span class="pre">embedding_text_list_embed_callback</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">results</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">force</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.embedding.embedding.embedding_text_list_embed_callback" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 </section>
 
 
@@ -206,7 +257,7 @@
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="graphai.core.embedding.html" class="btn btn-neutral float-left" title="graphai.core.embedding package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="graphai.core.interfaces.html" class="btn btn-neutral float-right" title="graphai.core.interfaces package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="graphai.core.image.html" class="btn btn-neutral float-right" title="graphai.core.image package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

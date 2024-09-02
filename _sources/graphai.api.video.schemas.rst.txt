@@ -1,0 +1,7 @@
+graphai.api.video.schemas module
+================================
+
+.. automodule:: graphai.api.video.schemas
+   :members:
+   :undoc-members:
+   :show-inheritance:

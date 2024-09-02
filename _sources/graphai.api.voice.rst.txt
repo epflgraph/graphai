@@ -1,0 +1,16 @@
+graphai.api.voice package
+=========================
+
+.. automodule:: graphai.api.voice
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 1
+
+   graphai.api.voice.router
+   graphai.api.voice.schemas

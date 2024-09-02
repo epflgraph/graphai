@@ -13,3 +13,4 @@ Submodules
    :maxdepth: 1
 
    graphai.core.translation.text_utils
+   graphai.core.translation.translation

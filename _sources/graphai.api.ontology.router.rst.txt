@@ -1,0 +1,7 @@
+graphai.api.ontology.router module
+==================================
+
+.. automodule:: graphai.api.ontology.router
+   :members:
+   :undoc-members:
+   :show-inheritance:

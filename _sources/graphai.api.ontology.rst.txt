@@ -1,0 +1,16 @@
+graphai.api.ontology package
+============================
+
+.. automodule:: graphai.api.ontology
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 1
+
+   graphai.api.ontology.router
+   graphai.api.ontology.schemas

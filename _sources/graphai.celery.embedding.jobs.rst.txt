@@ -1,0 +1,7 @@
+graphai.celery.embedding.jobs module
+====================================
+
+.. automodule:: graphai.celery.embedding.jobs
+   :members:
+   :undoc-members:
+   :show-inheritance:

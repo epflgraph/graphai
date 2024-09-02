@@ -12,6 +12,4 @@ Submodules
 .. toctree::
    :maxdepth: 1
 
-   graphai.core.video.ocr
-   graphai.core.video.transcribe
    graphai.core.video.video

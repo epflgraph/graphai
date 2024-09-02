@@ -1,7 +1,0 @@
-graphai.api.routers.voice module
-================================
-
-.. automodule:: graphai.api.routers.voice
-   :members:
-   :undoc-members:
-   :show-inheritance:

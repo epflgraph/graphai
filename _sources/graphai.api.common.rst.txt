@@ -12,10 +12,5 @@ Submodules
 .. toctree::
    :maxdepth: 1
 
-   graphai.api.common.auth_utils
-   graphai.api.common.celery_tools
-   graphai.api.common.embedding
-   graphai.api.common.log
-   graphai.api.common.ontology
-   graphai.api.common.translation
-   graphai.api.common.video
+   graphai.api.common.schemas
+   graphai.api.common.utils

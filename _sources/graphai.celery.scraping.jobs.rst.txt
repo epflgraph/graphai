@@ -1,0 +1,7 @@
+graphai.celery.scraping.jobs module
+===================================
+
+.. automodule:: graphai.celery.scraping.jobs
+   :members:
+   :undoc-members:
+   :show-inheritance:

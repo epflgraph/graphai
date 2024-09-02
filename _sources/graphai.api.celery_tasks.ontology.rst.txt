@@ -1,7 +1,0 @@
-graphai.api.celery\_tasks.ontology module
-=========================================
-
-.. automodule:: graphai.api.celery_tasks.ontology
-   :members:
-   :undoc-members:
-   :show-inheritance:

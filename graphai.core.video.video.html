@@ -21,8 +21,8 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="graphai.pipelines package" href="graphai.pipelines.html" />
-    <link rel="prev" title="graphai.core.video.transcribe module" href="graphai.core.video.transcribe.html" /> 
+    <link rel="next" title="graphai.core.voice package" href="graphai.core.voice.html" />
+    <link rel="prev" title="graphai.core.video package" href="graphai.core.video.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -51,7 +51,7 @@
 <li class="toctree-l2 current"><a class="reference internal" href="graphai.core.html#subpackages">Subpackages</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="graphai.core.common.html">graphai.core.common package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="graphai.core.embedding.html">graphai.core.embedding package</a></li>
-<li class="toctree-l3"><a class="reference internal" href="graphai.core.interfaces.html">graphai.core.interfaces package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="graphai.core.image.html">graphai.core.image package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="graphai.core.ontology.html">graphai.core.ontology package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="graphai.core.scraping.html">graphai.core.scraping package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="graphai.core.text.html">graphai.core.text package</a></li>
@@ -61,6 +61,7 @@
 <li class="toctree-l4 current"><a class="reference internal" href="graphai.core.video.html#submodules">Submodules</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="graphai.core.voice.html">graphai.core.voice package</a></li>
 </ul>
 </li>
 </ul>
@@ -154,8 +155,8 @@
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="graphai.core.video.video.retrieve_file_from_url">
-<span class="sig-prename descclassname"><span class="pre">graphai.core.video.video.</span></span><span class="sig-name descname"><span class="pre">retrieve_file_from_url</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">url</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_filename_with_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_token</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_kaltura</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.video.video.retrieve_file_from_url" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="graphai.core.video.video.retrieve_file_from_any_source">
+<span class="sig-prename descclassname"><span class="pre">graphai.core.video.video.</span></span><span class="sig-name descname"><span class="pre">retrieve_file_from_any_source</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">url</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_filename_with_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_token</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_kaltura</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.video.video.retrieve_file_from_any_source" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
@@ -233,22 +234,6 @@
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Output token and duration of audio if successful, None if not.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="graphai.core.video.video.extract_media_segment">
-<span class="sig-prename descclassname"><span class="pre">graphai.core.video.video.</span></span><span class="sig-name descname"><span class="pre">extract_media_segment</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_filename_with_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_filename_with_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_token</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.video.video.extract_media_segment" title="Link to this definition"></a></dt>
-<dd><p>Extracts a segment of a given video or audio file indicated by the starting time and the length
-:param input_filename_with_path: Full path of input file
-:param output_filename_with_path: Full path of output file
-:param output_token: Output token
-:param start: Starting timestamp
-:param length: Length of segment</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>The output token if successful, None otherwise</p>
 </dd>
 </dl>
 </dd></dl>
@@ -482,11 +467,6 @@
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="graphai.core.video.video.get_ocr_colnames">
-<span class="sig-prename descclassname"><span class="pre">graphai.core.video.video.</span></span><span class="sig-name descname"><span class="pre">get_ocr_colnames</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">method</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.video.video.get_ocr_colnames" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
 <dt class="sig sig-object py" id="graphai.core.video.video.get_video_token_status">
 <span class="sig-prename descclassname"><span class="pre">graphai.core.video.video.</span></span><span class="sig-name descname"><span class="pre">get_video_token_status</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">token</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.video.video.get_video_token_status" title="Link to this definition"></a></dt>
 <dd></dd></dl>
@@ -501,14 +481,154 @@
 <span class="sig-prename descclassname"><span class="pre">graphai.core.video.video.</span></span><span class="sig-name descname"><span class="pre">get_audio_token_status</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">token</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.video.video.get_audio_token_status" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.core.video.video.retrieve_file_from_url">
+<span class="sig-prename descclassname"><span class="pre">graphai.core.video.video.</span></span><span class="sig-name descname"><span class="pre">retrieve_file_from_url</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">url</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_manager</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_kaltura</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">force_token</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.video.video.retrieve_file_from_url" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.core.video.video.retrieve_file_from_url_callback">
+<span class="sig-prename descclassname"><span class="pre">graphai.core.video.video.</span></span><span class="sig-name descname"><span class="pre">retrieve_file_from_url_callback</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">results</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">url</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.video.video.retrieve_file_from_url_callback" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.core.video.video.compute_video_fingerprint">
+<span class="sig-prename descclassname"><span class="pre">graphai.core.video.video.</span></span><span class="sig-name descname"><span class="pre">compute_video_fingerprint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">results</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_manager</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">force</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.video.video.compute_video_fingerprint" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.core.video.video.compute_video_fingerprint_callback">
+<span class="sig-prename descclassname"><span class="pre">graphai.core.video.video.</span></span><span class="sig-name descname"><span class="pre">compute_video_fingerprint_callback</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">results</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.video.video.compute_video_fingerprint_callback" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.core.video.video.cache_lookup_retrieve_file_from_url">
+<span class="sig-prename descclassname"><span class="pre">graphai.core.video.video.</span></span><span class="sig-name descname"><span class="pre">cache_lookup_retrieve_file_from_url</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">url</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_manager</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.video.video.cache_lookup_retrieve_file_from_url" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.core.video.video.cache_lookup_extract_audio">
+<span class="sig-prename descclassname"><span class="pre">graphai.core.video.video.</span></span><span class="sig-name descname"><span class="pre">cache_lookup_extract_audio</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">token</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.video.video.cache_lookup_extract_audio" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.core.video.video.extract_audio">
+<span class="sig-prename descclassname"><span class="pre">graphai.core.video.video.</span></span><span class="sig-name descname"><span class="pre">extract_audio</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">token</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_manager</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.video.video.extract_audio" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.core.video.video.extract_audio_callback">
+<span class="sig-prename descclassname"><span class="pre">graphai.core.video.video.</span></span><span class="sig-name descname"><span class="pre">extract_audio_callback</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">results</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">origin_token</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_manager</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">force</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.video.video.extract_audio_callback" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.core.video.video.reextract_cached_audio">
+<span class="sig-prename descclassname"><span class="pre">graphai.core.video.video.</span></span><span class="sig-name descname"><span class="pre">reextract_cached_audio</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">token</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_manager</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.video.video.reextract_cached_audio" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.core.video.video.compute_audio_fingerprint">
+<span class="sig-prename descclassname"><span class="pre">graphai.core.video.video.</span></span><span class="sig-name descname"><span class="pre">compute_audio_fingerprint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">results</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_manager</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">force</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.video.video.compute_audio_fingerprint" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.core.video.video.compute_audio_fingerprint_callback">
+<span class="sig-prename descclassname"><span class="pre">graphai.core.video.video.</span></span><span class="sig-name descname"><span class="pre">compute_audio_fingerprint_callback</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">results</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">force</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.video.video.compute_audio_fingerprint_callback" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.core.video.video.cache_lookup_detect_slides">
+<span class="sig-prename descclassname"><span class="pre">graphai.core.video.video.</span></span><span class="sig-name descname"><span class="pre">cache_lookup_detect_slides</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">token</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.video.video.cache_lookup_detect_slides" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.core.video.video.extract_and_sample_frames">
+<span class="sig-prename descclassname"><span class="pre">graphai.core.video.video.</span></span><span class="sig-name descname"><span class="pre">extract_and_sample_frames</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">token</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_manager</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.video.video.extract_and_sample_frames" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.core.video.video.compute_noise_level_parallel">
+<span class="sig-prename descclassname"><span class="pre">graphai.core.video.video.</span></span><span class="sig-name descname"><span class="pre">compute_noise_level_parallel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">results</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">i</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">language</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_manager</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nlp_model</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.video.video.compute_noise_level_parallel" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.core.video.video.compute_noise_threshold_callback">
+<span class="sig-prename descclassname"><span class="pre">graphai.core.video.video.</span></span><span class="sig-name descname"><span class="pre">compute_noise_threshold_callback</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">results</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hash_thresh</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.video.video.compute_noise_threshold_callback" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.core.video.video.compute_slide_transitions_parallel">
+<span class="sig-prename descclassname"><span class="pre">graphai.core.video.video.</span></span><span class="sig-name descname"><span class="pre">compute_slide_transitions_parallel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">results</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">i</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">language</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_manager</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nlp_model</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.video.video.compute_slide_transitions_parallel" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.core.video.video.compute_slide_transitions_callback">
+<span class="sig-prename descclassname"><span class="pre">graphai.core.video.video.</span></span><span class="sig-name descname"><span class="pre">compute_slide_transitions_callback</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">results</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">language</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_manager</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nlp_model</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.video.video.compute_slide_transitions_callback" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.core.video.video.detect_slides_callback">
+<span class="sig-prename descclassname"><span class="pre">graphai.core.video.video.</span></span><span class="sig-name descname"><span class="pre">detect_slides_callback</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">results</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">token</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_manager</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">force</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attempt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.video.video.detect_slides_callback" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.core.video.video.reextract_cached_slides">
+<span class="sig-prename descclassname"><span class="pre">graphai.core.video.video.</span></span><span class="sig-name descname"><span class="pre">reextract_cached_slides</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">token</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_manager</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.video.video.reextract_cached_slides" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.core.video.video.compute_slide_fingerprint">
+<span class="sig-prename descclassname"><span class="pre">graphai.core.video.video.</span></span><span class="sig-name descname"><span class="pre">compute_slide_fingerprint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">token</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_manager</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.video.video.compute_slide_fingerprint" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.core.video.video.compute_slide_set_fingerprint">
+<span class="sig-prename descclassname"><span class="pre">graphai.core.video.video.</span></span><span class="sig-name descname"><span class="pre">compute_slide_set_fingerprint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">results</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">origin_token</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_manager</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.video.video.compute_slide_set_fingerprint" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.core.video.video.compute_slide_fingerprint_callback">
+<span class="sig-prename descclassname"><span class="pre">graphai.core.video.video.</span></span><span class="sig-name descname"><span class="pre">compute_slide_fingerprint_callback</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">results</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">force</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.video.video.compute_slide_fingerprint_callback" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.core.video.video.retrieve_slide_fingerprint_callback">
+<span class="sig-prename descclassname"><span class="pre">graphai.core.video.video.</span></span><span class="sig-name descname"><span class="pre">retrieve_slide_fingerprint_callback</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">results</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.video.video.retrieve_slide_fingerprint_callback" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.core.video.video.ignore_slide_fingerprint_results_callback">
+<span class="sig-prename descclassname"><span class="pre">graphai.core.video.video.</span></span><span class="sig-name descname"><span class="pre">ignore_slide_fingerprint_results_callback</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">results</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.video.video.ignore_slide_fingerprint_results_callback" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.core.video.video.ignore_audio_fingerprint_results_callback">
+<span class="sig-prename descclassname"><span class="pre">graphai.core.video.video.</span></span><span class="sig-name descname"><span class="pre">ignore_audio_fingerprint_results_callback</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">results</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.video.video.ignore_audio_fingerprint_results_callback" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.core.video.video.retrieve_audio_fingerprint_callback">
+<span class="sig-prename descclassname"><span class="pre">graphai.core.video.video.</span></span><span class="sig-name descname"><span class="pre">retrieve_audio_fingerprint_callback</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">results</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.video.video.retrieve_audio_fingerprint_callback" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.core.video.video.retrieve_video_fingerprint_callback">
+<span class="sig-prename descclassname"><span class="pre">graphai.core.video.video.</span></span><span class="sig-name descname"><span class="pre">retrieve_video_fingerprint_callback</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">results</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.video.video.retrieve_video_fingerprint_callback" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.core.video.video.ignore_video_fingerprint_results_callback">
+<span class="sig-prename descclassname"><span class="pre">graphai.core.video.video.</span></span><span class="sig-name descname"><span class="pre">ignore_video_fingerprint_results_callback</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">results</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.video.video.ignore_video_fingerprint_results_callback" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 </section>
 
 
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="graphai.core.video.transcribe.html" class="btn btn-neutral float-left" title="graphai.core.video.transcribe module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="graphai.pipelines.html" class="btn btn-neutral float-right" title="graphai.pipelines package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="graphai.core.video.html" class="btn btn-neutral float-left" title="graphai.core.video package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="graphai.core.voice.html" class="btn btn-neutral float-right" title="graphai.core.voice package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

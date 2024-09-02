@@ -1,0 +1,16 @@
+graphai.core.image package
+==========================
+
+.. automodule:: graphai.core.image
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 1
+
+   graphai.core.image.image
+   graphai.core.image.ocr

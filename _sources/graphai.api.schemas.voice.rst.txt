@@ -1,7 +1,0 @@
-graphai.api.schemas.voice module
-================================
-
-.. automodule:: graphai.api.schemas.voice
-   :members:
-   :undoc-members:
-   :show-inheritance:

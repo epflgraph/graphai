@@ -1,7 +1,0 @@
-graphai.api.routers.video module
-================================
-
-.. automodule:: graphai.api.routers.video
-   :members:
-   :undoc-members:
-   :show-inheritance:

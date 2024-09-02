@@ -1,0 +1,7 @@
+graphai.api.translation.schemas module
+======================================
+
+.. automodule:: graphai.api.translation.schemas
+   :members:
+   :undoc-members:
+   :show-inheritance:

@@ -1,7 +1,0 @@
-graphai.api.celery\_tasks.voice module
-======================================
-
-.. automodule:: graphai.api.celery_tasks.voice
-   :members:
-   :undoc-members:
-   :show-inheritance:

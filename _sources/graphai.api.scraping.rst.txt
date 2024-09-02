@@ -1,0 +1,16 @@
+graphai.api.scraping package
+============================
+
+.. automodule:: graphai.api.scraping
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 1
+
+   graphai.api.scraping.router
+   graphai.api.scraping.schemas

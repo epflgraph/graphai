@@ -12,17 +12,14 @@ Subpackages
 .. toctree::
    :maxdepth: 1
 
-   graphai.api.celery_jobs
-   graphai.api.celery_tasks
+   graphai.api.auth
    graphai.api.common
-   graphai.api.routers
-   graphai.api.schemas
-   graphai.api.text
-
-Submodules
-----------
-
-.. toctree::
-   :maxdepth: 1
-
+   graphai.api.embedding
+   graphai.api.image
    graphai.api.main
+   graphai.api.ontology
+   graphai.api.scraping
+   graphai.api.text
+   graphai.api.translation
+   graphai.api.video
+   graphai.api.voice

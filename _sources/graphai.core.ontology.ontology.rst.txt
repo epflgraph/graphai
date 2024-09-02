@@ -1,0 +1,7 @@
+graphai.core.ontology.ontology module
+=====================================
+
+.. automodule:: graphai.core.ontology.ontology
+   :members:
+   :undoc-members:
+   :show-inheritance:

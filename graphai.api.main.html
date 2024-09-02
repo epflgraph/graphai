@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>graphai.api.main module &mdash; EPFL Graph AI</title>
+  <title>graphai.api.main package &mdash; EPFL Graph AI</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
 
@@ -21,8 +21,8 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="graphai.celery package" href="graphai.celery.html" />
-    <link rel="prev" title="graphai.api.text.schemas module" href="graphai.api.text.schemas.html" /> 
+    <link rel="next" title="graphai.api.main.main module" href="graphai.api.main.main.html" />
+    <link rel="prev" title="graphai.api.image.schemas module" href="graphai.api.image.schemas.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -46,13 +46,21 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1 current"><a class="reference internal" href="graphai.api.html">graphai.api package</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="graphai.api.html#subpackages">Subpackages</a></li>
-<li class="toctree-l2 current"><a class="reference internal" href="graphai.api.html#submodules">Submodules</a><ul class="current">
-<li class="toctree-l3 current"><a class="current reference internal" href="#">graphai.api.main module</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#graphai.api.main.lifespan"><code class="docutils literal notranslate"><span class="pre">lifespan()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#graphai.api.main.redirect_docs"><code class="docutils literal notranslate"><span class="pre">redirect_docs()</span></code></a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="graphai.api.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="graphai.api.auth.html">graphai.api.auth package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="graphai.api.common.html">graphai.api.common package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="graphai.api.embedding.html">graphai.api.embedding package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="graphai.api.image.html">graphai.api.image package</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">graphai.api.main package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#submodules">Submodules</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="graphai.api.ontology.html">graphai.api.ontology package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="graphai.api.scraping.html">graphai.api.scraping package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="graphai.api.text.html">graphai.api.text package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="graphai.api.translation.html">graphai.api.translation package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="graphai.api.video.html">graphai.api.video package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="graphai.api.voice.html">graphai.api.voice package</a></li>
 </ul>
 </li>
 </ul>
@@ -80,7 +88,7 @@
   <ul class="wy-breadcrumbs">
       <li><a href="graphai.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="graphai.api.html">graphai.api package</a></li>
-      <li class="breadcrumb-item active">graphai.api.main module</li>
+      <li class="breadcrumb-item active">graphai.api.main package</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/graphai.api.main.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -91,33 +99,23 @@
            <div itemprop="articleBody">
              
   <section id="module-graphai.api.main">
-<span id="graphai-api-main-module"></span><h1>graphai.api.main module<a class="headerlink" href="#module-graphai.api.main" title="Link to this heading"></a></h1>
-<dl class="py function">
-<dt class="sig sig-object py" id="graphai.api.main.lifespan">
-<span class="sig-prename descclassname"><span class="pre">graphai.api.main.</span></span><span class="sig-name descname"><span class="pre">lifespan</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">app</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">FastAPI</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.api.main.lifespan" title="Link to this definition"></a></dt>
-<dd><dl class="simple">
-<dt>This function has three parts:</dt><dd><ul class="simple">
-<li><p>Before startup: Logic executed right before starting the API. Here we might want to load big objects into memory, etc.</p></li>
-<li><p>Yield: This is the standard way of passing the execution to the FastAPI app, so it can normally boot and serve requests.</p></li>
-<li><p>After shutdown: Logic executed right after shutting down the API. Here we might want to free some memory, do some cleanup, etc.</p></li>
+<span id="graphai-api-main-package"></span><h1>graphai.api.main package<a class="headerlink" href="#module-graphai.api.main" title="Link to this heading"></a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading"></a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="graphai.api.main.main.html">graphai.api.main.main module</a></li>
 </ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="graphai.api.main.redirect_docs">
-<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">graphai.api.main.</span></span><span class="sig-name descname"><span class="pre">redirect_docs</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#graphai.api.main.redirect_docs" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
+</div>
+</section>
 </section>
 
 
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="graphai.api.text.schemas.html" class="btn btn-neutral float-left" title="graphai.api.text.schemas module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="graphai.celery.html" class="btn btn-neutral float-right" title="graphai.celery package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="graphai.api.image.schemas.html" class="btn btn-neutral float-left" title="graphai.api.image.schemas module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="graphai.api.main.main.html" class="btn btn-neutral float-right" title="graphai.api.main.main module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

@@ -12,4 +12,12 @@ Subpackages
 .. toctree::
    :maxdepth: 1
 
+   graphai.celery.common
+   graphai.celery.embedding
+   graphai.celery.image
+   graphai.celery.ontology
+   graphai.celery.scraping
    graphai.celery.text
+   graphai.celery.translation
+   graphai.celery.video
+   graphai.celery.voice

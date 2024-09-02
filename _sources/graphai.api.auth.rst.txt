@@ -1,0 +1,16 @@
+graphai.api.auth package
+========================
+
+.. automodule:: graphai.api.auth
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 1
+
+   graphai.api.auth.auth_utils
+   graphai.api.auth.router

@@ -1,0 +1,7 @@
+graphai.api.auth.router module
+==============================
+
+.. automodule:: graphai.api.auth.router
+   :members:
+   :undoc-members:
+   :show-inheritance:

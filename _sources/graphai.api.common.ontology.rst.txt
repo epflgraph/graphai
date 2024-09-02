@@ -1,7 +1,0 @@
-graphai.api.common.ontology module
-==================================
-
-.. automodule:: graphai.api.common.ontology
-   :members:
-   :undoc-members:
-   :show-inheritance:

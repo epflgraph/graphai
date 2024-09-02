@@ -1,0 +1,16 @@
+graphai.celery.scraping package
+===============================
+
+.. automodule:: graphai.celery.scraping
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 1
+
+   graphai.celery.scraping.jobs
+   graphai.celery.scraping.tasks

@@ -1,0 +1,7 @@
+graphai.celery.video.tasks module
+=================================
+
+.. automodule:: graphai.celery.video.tasks
+   :members:
+   :undoc-members:
+   :show-inheritance:

@@ -1,7 +1,0 @@
-graphai.api.celery\_jobs.voice module
-=====================================
-
-.. automodule:: graphai.api.celery_jobs.voice
-   :members:
-   :undoc-members:
-   :show-inheritance:
