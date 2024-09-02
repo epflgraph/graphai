@@ -8,8 +8,6 @@ from fixtures.embedding import *
 
 from fixtures.video import *
 
-from fixtures.completion import *
-
 from fixtures.scraping import *
 
 # from fixtures.ontology import *
