@@ -10,10 +10,10 @@ from multiprocessing import Lock
 
 from graphai.core.common.caching import (
     AudioDBCachingManager,
-    cache_lookup_generic,
-    fingerprint_cache_lookup_with_most_similar,
-    TEMP_SUBFOLDER, database_callback_generic
+    TEMP_SUBFOLDER
 )
+from graphai.core.common.lookup import fingerprint_cache_lookup_with_most_similar, cache_lookup_generic, \
+    database_callback_generic
 from graphai.core.common.common_utils import file_exists
 from graphai.core.common.config import config
 

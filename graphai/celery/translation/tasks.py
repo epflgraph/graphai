@@ -8,9 +8,9 @@ from graphai.core.common.common_utils import (
     strtobool
 )
 from graphai.core.common.caching import (
-    TextDBCachingManager,
-    fingerprint_cache_lookup
+    TextDBCachingManager
 )
+from graphai.core.common.lookup import fingerprint_cache_lookup
 from graphai.core.common.config import config
 from graphai.core.translation.translation import (
     translate_text,

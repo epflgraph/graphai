@@ -346,3 +346,136 @@ def ignore_fingerprint_results_callback(results, token_status_func):
     results_to_return = results['fp_results']['original_results']
     results_to_return['token_status'] = token_status_func(results_to_return['token'])
     return results_to_return
+
+
+def is_fingerprinted(token, db_manager):
+    values = db_manager.get_details(token, ['fingerprint'], using_most_similar=False)[0]
+    exists = values is not None
+    return exists, exists and values['fingerprint'] is not None
+
+
+def fingerprint_cache_lookup(token, db_manager):
+    existing = db_manager.get_details(token, cols=['fingerprint'])[0]
+    if existing is not None and existing['fingerprint'] is not None:
+        existing_closest = db_manager.get_closest_match(token)
+        return {
+            'result': existing['fingerprint'],
+            'closest': existing_closest,
+            'fp_token': existing['id_token'],
+            'perform_lookup': False,
+            'fresh': False
+        }
+    return None
+
+
+def fingerprint_cache_lookup_with_most_similar(token, db_manager, extra_cols=None):
+    cols = ['fingerprint']
+    if extra_cols is not None:
+        cols = cols + extra_cols
+    existing_list = db_manager.get_details(token, cols=cols,
+                                           using_most_similar=True)
+    for existing in existing_list:
+        if existing is None:
+            continue
+        if existing['fingerprint'] is not None:
+            # We have a cache hit, now we gather all the results that should be returned
+            # The closest match
+            existing_closest = db_manager.get_closest_match(token)
+            if existing_closest is not None:
+                # If the closest match exists, we also want to return its origin token
+                existing_closest_origin = db_manager.get_origin(existing_closest)
+            else:
+                existing_closest_origin = None
+            print('Returning cached result')
+            final_result = {
+                'result': existing['fingerprint'],
+                'fresh': False,
+                'closest': existing_closest,
+                'closest_origin': existing_closest_origin
+            }
+            if extra_cols is not None:
+                for extra_col in extra_cols:
+                    final_result[extra_col] = existing[extra_col]
+            return final_result
+
+    return None
+
+
+def cache_lookup_generic(token, db_manager, cols):
+    existing_list = db_manager.get_details(token, cols,
+                                           using_most_similar=True)
+    for existing in existing_list:
+        if existing is None:
+            continue
+        if all(existing[key] is not None for key in cols):
+            print('Returning cached result')
+            result = {
+                'token': token,
+                'fresh': False
+            }
+            for col in cols:
+                result[col] = existing[col]
+            return result
+    return None
+
+
+def database_callback_generic(token, db_manager, values_dict, force=False, use_closest_match=False):
+    db_manager.insert_or_update_details(
+        token, values_dict
+    )
+    if use_closest_match and not force:
+        closest = db_manager.get_closest_match(token)
+        if closest is not None and closest != token:
+            db_manager.insert_or_update_details(
+                closest, values_dict
+            )
+            return closest
+    return token
+
+
+def token_based_text_lookup(token, db_manager, main_col, modify_result_func=None, modify_result_args=None, **kwargs):
+    existing = db_manager.get_details(token, [main_col], using_most_similar=False)[0]
+    if existing is not None and existing[main_col] is not None:
+        print('Returning cached result')
+        final_result = {
+            'result': existing[main_col],
+            'successful': True,
+            'text_too_large': False,
+            'fresh': False,
+            'device': None
+        }
+        if modify_result_func is not None and modify_result_args is not None:
+            final_result['result'] = modify_result_func(final_result['result'], **modify_result_args)
+        if len(kwargs) > 0:
+            for key in kwargs:
+                final_result[key] = kwargs[key]
+        return final_result
+    return None
+
+
+def fingerprint_based_text_lookup(token, fp, db_manager, main_col, extra_cols, equality_conditions,
+                                  modify_result_func=None, modify_result_args=None,
+                                  **kwargs):
+    equality_conditions['fingerprint'] = fp
+    closest_match = db_manager.get_all_details([main_col] + extra_cols, allow_nulls=False,
+                                               equality_conditions=equality_conditions)
+    if closest_match is not None:
+        all_keys = list(closest_match.keys())
+        cached_result = closest_match[all_keys[0]][main_col]
+        db_manager.insert_or_update_details(token, {
+            main_col: cached_result
+        })
+        final_result = {
+            'result': cached_result,
+            'successful': True,
+            'text_too_large': False,
+            'fresh': False,
+            'device': None
+        }
+        if modify_result_func is not None and modify_result_args is not None:
+            final_result['result'] = modify_result_func(final_result['result'], **modify_result_args)
+        if len(kwargs) > 0:
+            for key in kwargs:
+                final_result[key] = kwargs[key]
+        return final_result
+    return None

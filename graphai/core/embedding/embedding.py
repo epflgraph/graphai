@@ -8,11 +8,9 @@ import json
 from sentence_transformers import SentenceTransformer
 
 from graphai.core.common.caching import (
-    EmbeddingDBCachingManager,
-    token_based_text_lookup,
-    fingerprint_based_text_lookup,
-    database_callback_generic
+    EmbeddingDBCachingManager
 )
+from graphai.core.common.lookup import database_callback_generic, token_based_text_lookup, fingerprint_based_text_lookup
 from graphai.core.common.common_utils import get_current_datetime
 from graphai.core.common.config import config
 from graphai.core.common.fingerprinting import (

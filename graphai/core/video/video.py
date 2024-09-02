@@ -31,10 +31,8 @@ from graphai.core.common.caching import (
     VideoConfig,
     VideoDBCachingManager,
     get_token_file_status,
-    is_fingerprinted,
     SlideDBCachingManager,
-    AudioDBCachingManager,
-    database_callback_generic
+    AudioDBCachingManager
 )
 from graphai.core.common.config import config
 from graphai.core.common.common_utils import (
@@ -51,7 +49,7 @@ from graphai.core.common.fingerprinting import (
 )
 from graphai.core.common.lookup import (
     retrieve_fingerprint_callback,
-    ignore_fingerprint_results_callback
+    ignore_fingerprint_results_callback, is_fingerprinted, database_callback_generic
 )
 
 FRAME_FORMAT_PNG = 'frame-%06d.png'

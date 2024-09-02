@@ -7,9 +7,9 @@ from graphai.core.image.image import (
 )
 from graphai.core.common.caching import (
     SlideDBCachingManager,
-    VideoConfig,
-    fingerprint_cache_lookup_with_most_similar
+    VideoConfig
 )
+from graphai.core.common.lookup import fingerprint_cache_lookup_with_most_similar
 
 file_management_config = VideoConfig()
 

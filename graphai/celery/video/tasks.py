@@ -35,15 +35,14 @@ from graphai.core.common.caching import (
     AudioDBCachingManager,
     SlideDBCachingManager,
     VideoDBCachingManager,
-    VideoConfig,
-    fingerprint_cache_lookup
+    VideoConfig
 )
 from graphai.core.common.common_utils import (
     strtobool
 )
 
 from graphai.core.common.lookup import fingerprint_lookup_retrieve_from_db, fingerprint_lookup_parallel, \
-    fingerprint_lookup_direct, fingerprint_lookup_callback
+    fingerprint_lookup_direct, fingerprint_lookup_callback, fingerprint_cache_lookup
 from graphai.core.common.config import config
 
 file_management_config = VideoConfig()

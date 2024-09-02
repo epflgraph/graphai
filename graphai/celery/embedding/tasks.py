@@ -4,9 +4,9 @@ from graphai.core.common.fingerprinting import (
     compute_text_fingerprint
 )
 from graphai.core.common.caching import (
-    EmbeddingDBCachingManager,
-    fingerprint_cache_lookup
+    EmbeddingDBCachingManager
 )
+from graphai.core.common.lookup import fingerprint_cache_lookup
 from graphai.core.embedding.embedding import (
     copy_embedding_object,
     embedding_text_list_embed_parallel,

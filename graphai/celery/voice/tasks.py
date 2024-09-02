@@ -13,11 +13,10 @@ from graphai.core.voice.transcribe import (
     transcribe_callback
 )
 from graphai.core.common.caching import (
-    cache_lookup_generic,
     AudioDBCachingManager,
-    VideoConfig,
-    fingerprint_cache_lookup_with_most_similar
+    VideoConfig
 )
+from graphai.core.common.lookup import fingerprint_cache_lookup_with_most_similar, cache_lookup_generic
 from graphai.core.common.config import config
 from graphai.core.common.common_utils import strtobool
 
