@@ -12,7 +12,7 @@ LONG_TEXT_ERROR = "Unpunctuated text too long (over 512 tokens), " \
                   "try adding punctuation or providing a smaller chunk of text."
 
 
-def translate_text(text, src, tgt, translation_obj):
+def translate_text(text, src, tgt, translation_obj, skip_sentence_segmentation=False):
     if src == tgt:
         return {
             'result': "'source' and 'target' languages must be different!",
@@ -24,7 +24,9 @@ def translate_text(text, src, tgt, translation_obj):
 
     how = f"{src}-{tgt}"
     try:
-        translated_text, large_warning, all_large_warnings = translation_obj.translate(text, how=how)
+        translated_text, large_warning, all_large_warnings = translation_obj.translate(
+            text, how=how, skip_sentence_segmentation=skip_sentence_segmentation
+        )
         if translated_text is not None and not large_warning:
             success = True
         else:

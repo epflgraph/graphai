@@ -52,6 +52,14 @@ class TranslationRequest(BaseModel):
         default=False
     )
 
+    skip_segmentation: bool = Field(
+        title="Skip sentence segmentation",
+        description="If set to true, passes the entire text directly to the translation model without "
+                    "sentence segmentation (i.e. breaking the text up on full stops). Increases the risk of "
+                    "'text too large' errors.",
+        default=False
+    )
+
 
 class TranslationTaskResponse(BaseModel):
     result: Union[str, List[str], None] = Field(

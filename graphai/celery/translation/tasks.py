@@ -75,8 +75,8 @@ def cache_lookup_translate_text_task(self, token, return_list=False):
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='text_6.translate_text', translation_obj=translation_models, ignore_result=False)
-def translate_text_task(self, text, src, tgt):
-    return translate_text(text, src, tgt, self.translation_obj)
+def translate_text_task(self, text, src, tgt, skip_sentence_segmentation=False):
+    return translate_text(text, src, tgt, self.translation_obj, skip_sentence_segmentation)
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},

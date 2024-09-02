@@ -67,7 +67,7 @@ def fingerprint_job(text, src, tgt, force):
     return fingerprint_compute_job(token, text, src, tgt, asynchronous=True)
 
 
-def translation_job(text, src, tgt, force):
+def translation_job(text, src, tgt, force, skip_sentence_segmentation=False):
     token = generate_translation_text_token(text, src, tgt)
     return_list = isinstance(text, list)
     text = convert_list_to_text(text)
@@ -105,7 +105,7 @@ def translation_job(text, src, tgt, force):
     # Computation job
     #################
     task_list = [
-        translate_text_task.s(text, src, tgt),
+        translate_text_task.s(text, src, tgt, skip_sentence_segmentation),
         translate_text_callback_task.s(token, text, src, tgt, force, return_list)
     ]
     task = chain(task_list)

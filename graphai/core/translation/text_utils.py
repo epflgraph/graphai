@@ -225,14 +225,18 @@ class TranslationModels:
         Internal method. Translates entire text, sentence by sentence.
         Args:
             text: Text to translate
-            tokenizer: Tokenizer model
+            tokenizer: Tokenizer
             model: Translation model
             segmenter: Sentence segmenter
 
         Returns:
             Translated text, plus a flag denoting whether any of the sentences was too long and unpunctuated
         """
-        sentences = segmenter.segment(text.replace('\n', '. '))
+        text = text.replace('\n', '. ')
+        if segmenter is not None:
+            sentences = segmenter.segment(text)
+        else:
+            sentences = [text]
         sentences = [sentence.strip() for sentence in sentences]
         full_result = ''
         for sentence in sentences:
@@ -250,12 +254,13 @@ class TranslationModels:
 
         return fix_encoding(full_result), False
 
-    def translate(self, text, how='en-fr'):
+    def translate(self, text, how='en-fr', skip_sentence_segmentation=False):
         """
         Translates provided text
         Args:
             text: Text to translate
             how: source-target language
+            skip_sentence_segmentation: If True, skips segmentation
 
         Returns:
             Translated text and 'unpunctuated text too long' flag
@@ -267,7 +272,7 @@ class TranslationModels:
             return None, False
         tokenizer = self.models[how]['tokenizer']
         model = self.models[how]['model']
-        segmenter = self.models[how]['segmenter']
+        segmenter = self.models[how]['segmenter'] if not skip_sentence_segmentation else None
         text = convert_text_back_to_list(text, return_list=True)
         results = [self._translate(current_text, tokenizer, model, segmenter) for current_text in text]
         return convert_list_to_text([x[0] for x in results]), any([x[1] for x in results]), [x[1] for x in results]
