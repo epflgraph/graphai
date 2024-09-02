@@ -35,7 +35,7 @@ from graphai.core.common.config import config
 # and then put it in the config file
 SECRET_KEY = config['auth']['secret_key']
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 720
+ACCESS_TOKEN_EXPIRE_MINUTES = 30 * 1440
 
 oauth2_scheme = OAuth2PasswordBearer(
     tokenUrl="token",
