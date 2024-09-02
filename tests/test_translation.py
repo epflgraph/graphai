@@ -15,7 +15,7 @@ from graphai.celery.translation.tasks import (
 ################################################################
 
 
-@patch('graphai.api.celery_tasks.translation.translate_text_task.run')
+@patch('graphai.celery.translation.tasks.translate_text_task.run')
 @pytest.mark.usefixtures('en_to_fr_text')
 def test__translation_translate__translate_text__mock_task(mock_run, en_to_fr_text):
     # Mock calling the task
