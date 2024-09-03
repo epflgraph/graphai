@@ -208,7 +208,17 @@ def perform_probe(input_filename_with_path):
 
 def get_available_streams(input_filename_with_path):
     results = perform_probe(input_filename_with_path)
-    return [(x['codec_type'], x.get('codec_name', None)) for x in results['streams']]
+    return [
+        {
+            'codec_type': x['codec_type'],
+            'codec_name': x.get('codec_name', None),
+            'duration': float(x['duration']) if 'duration' in x else None,
+            'bit_rate': int(x['bit_rate']) if 'bit_rate' in x else None,
+            'sample_rate': int(x['sample_rate']) if 'sample_rate' in x else None,
+            'resolution': f"{x.get('width', '')}*{x.get('height', '')}" if x['codec_type'] == 'video' else None
+        }
+        for x in results['streams']
+    ]
 
 
 def perform_slow_audio_probe(input_filename_with_path):
@@ -327,7 +337,7 @@ def extract_frames(input_filename_with_path, output_folder_with_path, output_fol
         print('Creating the path...')
         make_sure_path_exists(output_folder_with_path)
         streams = get_available_streams(input_filename_with_path)
-        video_stream_name = [x for x in streams if x[0] == 'video'][0][1]
+        video_stream_name = [x for x in streams if x['codec_type'] == 'video'][0]['codec_name']
         print('Starting ffmpeg slide extraction...')
         if video_stream_name != 'png':
             # If the video stream is NOT a single picture, we have to apply the "fps" filter to get one frame/second.
@@ -738,9 +748,7 @@ def get_video_token_status(token):
     fully_active = active and exists
     if fully_active:
         streams = get_available_streams(video_config.generate_filepath(token))
-        # Here we only care about codec types (audio/video), not codec names (e.g. h264, aac, png)
-        streams = [x[0] for x in streams]
-        streams = [x for x in streams if x == 'audio' or x == 'video']
+        streams = [x for x in streams if x['codec_type'] == 'audio' or x['codec_type'] == 'video']
     else:
         streams = None
     return {
