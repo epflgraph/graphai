@@ -27,10 +27,39 @@ class RetrieveURLRequest(BaseModel):
     )
 
 
+class VideoStreamInfo(BaseModel):
+    codec_type: Literal['video', 'audio'] = Field(
+        title="Codec type",
+        description="Allowed values are 'video' and 'audio'"
+    )
+
+    codec_name: Union[str, None] = Field(
+        title="Codec name"
+    )
+
+    duration: Union[float, None] = Field(
+        title="Duration"
+    )
+
+    bit_rate: Union[int, None] = Field(
+        title="Bit rate"
+    )
+
+    sample_rate: Union[int, None] = Field(
+        title="Sample rate"
+    )
+
+    resolution: Union[str, None] = Field(
+        title="Resolution",
+        description="For video streams only"
+    )
+
+
 class VideoTokenStatus(TokenStatus):
-    streams: Union[List[Literal['video', 'audio']], None] = Field(
+    streams: Union[List[VideoStreamInfo], None] = Field(
         default=None, title="Available streams",
-        description="List of streams available in the video token, allowed values are 'video' and 'audio'"
+        description="List of streams available in the video token, including their duration, "
+                    "bitrate, resolution, codec type and name."
     )
 
 

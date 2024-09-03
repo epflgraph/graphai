@@ -127,8 +127,9 @@ def test__video_detect_slides__detect_slides__integration(fixture_app, celery_wo
     assert video_token_response['task_result']['token'] is not None
     assert video_token_response['task_result']['token_status']['active']
     assert video_token_response['task_result']['token_status']['fingerprinted']
-    assert 'video' in video_token_response['task_result']['token_status']['streams']
-    assert 'audio' in video_token_response['task_result']['token_status']['streams']
+    returned_codec_types = [x['codec_type'] for x in video_token_response['task_result']['token_status']['streams']]
+    assert 'video' in returned_codec_types
+    assert 'audio' in returned_codec_types
     assert video_token_response['task_result']['token_size'] > 0
 
     video_token = video_token_response['task_result']['token']
