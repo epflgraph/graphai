@@ -111,8 +111,11 @@ async def wikify(
         if not data.keywords:
             return []
 
+        # Remove duplicate keywords
+        keyword_list = list(set(data.keywords))
+
         return jobs.wikify_keywords(
-            data.keywords,
+            keyword_list,
             method,
             restrict_to_ontology,
             graph_score_smoothing,

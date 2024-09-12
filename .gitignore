@@ -7,6 +7,9 @@
 # Pycache
 __pycache__
 
+# Celery scheduler database file
+**/celerybeat-schedule.db
+
 # Data files (typically large)
 data
 
