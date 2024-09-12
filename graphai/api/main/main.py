@@ -89,9 +89,12 @@ async def lifespan(app: FastAPI):
 # Initialise FastAPI
 app = FastAPI(
     title="EPFL Graph AI API",
-    description="This API offers several tools related with AI in the context of the EPFL Graph project, "
-                "such as automatized concept detection from a given text.",
-    version="0.2.1",
+    description="This API, as part of the EPFLGraph project, offers several AI-related tools, "
+                "such as automatic concept detection in text, audio and slide extraction from videos, "
+                "text extraction from slides and audio transcription, text translation and embeddings, "
+                "and much more.\nIf you would like to gain access to the API or are a user "
+                "and require technical support, send an email to [ramtin dot yazdanian at epfl dot ch].",
+    version="0.10.1",
     lifespan=lifespan
 )
 
