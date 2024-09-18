@@ -524,3 +524,30 @@ class KeywordsRequest(BaseModel):
 
 
 KeywordsResponse = List[str]
+
+
+class LectureExerciseRequest(BaseModel):
+    """
+    Object containing the input to generate with an LLM a lecture-aware exercise.
+    """
+
+    lecture_id: str = Field(
+        ...,
+        title="lecture_id",
+        description="ID of the lecture for which to generate an exercise with an LLM.",
+        examples=["0_92916guq"]
+    )
+
+    description: str = Field(
+        ...,
+        title="description",
+        description="A description in plain language, that will be sent to the LLM, of what the exercise should be about.",
+        examples=[r"An exercise to compute the volume of a sphere cap of angle $\alpha$ using spherical coordinates."]
+    )
+
+    include_solution: bool = Field(
+        ...,
+        title="include_solution",
+        description="Whether to ask the LLM to return a solution along with the exercise.",
+        examples=[True]
+    )
