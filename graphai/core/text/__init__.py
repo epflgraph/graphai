@@ -3,6 +3,7 @@ from graphai.core.text.keywords import extract_keywords
 from graphai.core.text.wikisearch import wikisearch
 from graphai.core.text.scores import compute_scores
 from graphai.core.text.draw import draw_ontology, draw_graph
+from graphai.core.text.exercises import generate_lecture_exercise
 
 __all__ = [
     'ConceptsGraph',
@@ -11,4 +12,5 @@ __all__ = [
     'compute_scores',
     'draw_ontology',
     'draw_graph',
+    'generate_lecture_exercise',
 ]

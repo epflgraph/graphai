@@ -14,7 +14,7 @@ from graphai.core.text import (
     compute_scores,
     draw_ontology,
     draw_graph,
-    exercises,
+    generate_lecture_exercise,
 )
 
 
