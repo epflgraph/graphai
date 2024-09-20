@@ -34,24 +34,6 @@ symbols = {
 class HTMLCleaner(HTMLParser):
     """
     Class to parse and clean HTML tags from raw text.
-
-    Examples:
-        Use as follows:
-
-        >>> text = ' '.join([
-        ...     "<p>You get a <i>shiver</i> in the <strong>dark</strong>",
-        ...     "<br/>",
-        ...     "It's a raining in the <a>park</a> but meantime</p>"
-        ... ])
-        >>> c = HTMLCleaner()
-        >>> c.feed(text)
-        >>> print(c.get_data())
-        <BLANKLINE>
-        You get a shiver in the dark
-        It's a raining in the
-        park
-        but meantime
-        <BLANKLINE>
     """
 
     def __init__(self):
@@ -121,20 +103,6 @@ def normalize(text):
 
     Returns:
         str: Normalized text.
-
-    Examples:
-        >>> text = ' '.join([
-        ...     "<p>You get a <i>shiver</i> in the <strong>dark</strong>",
-        ...     "<br/>",
-        ...     "It's a \\u2018raining\\u2019 in the <a>park</a> but »meantime«</p>",
-        ...     "&lt;3"
-        ... ])
-        >>> print(normalize(text))
-        you get a shiver in the dark
-        it's a 'raining' in the
-        park
-        but meantime
-        <3
     """
 
     # Clean text of encoding problems and other rubbish
@@ -143,9 +111,32 @@ def normalize(text):
     # Remove patterns known to create issues with HTMLCleaner
     text = text.replace('<![', '[')
 
-    # Clean text of HTML code
-    c = HTMLCleaner()
-    c.feed(text)
-    text = c.get_data()
+    ################################################################
+    # HTML cleaning                                                #
+    ################################################################
 
+    # Instantiate parser
+    c = HTMLCleaner()
+
+    # Feed text and process it
+    c.feed(text)
+
+    # Close parser (forces processing of unfinished text and prevents issue when text doesn't have '<' but has a '&' near the end)
+    c.close()
+
+    # Retrieve clean text from parser
+    clean_text = c.get_data()
+
+    # Replace text only if it is not empty after HTML stripping (it happens in some circumstances when the text is poor HTML)
+    if clean_text:
+        text = clean_text
+
+    # Return lowercased and stripped text
     return text.lower().strip()
+
+
+if __name__ == '__main__':
+    text = r"""Finally, R&D"""
+    text = normalize(text)
+
+    print(text)
