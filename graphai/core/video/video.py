@@ -861,12 +861,15 @@ def compute_video_fingerprint(results, file_manager, force=False):
             fp_token = None
         else:
             fp = md5_video_or_audio(file_manager.generate_filepath(token), video=True)
-            streams = get_available_streams(file_manager.generate_filepath(token))
-            audio_duration = [x for x in streams if x['codec_type'] == 'audio'][0]['duration']
-            if audio_duration is None:
-                audio_duration = [x for x in streams if x['codec_type'] == 'video'][0]['duration']
-            if audio_duration is not None:
-                id_and_duration_fp = results['fp_id'] + '___' + '{0:.2f}'.format(audio_duration)
+            if results.get('fp_id', None) is not None:
+                streams = get_available_streams(file_manager.generate_filepath(token))
+                audio_duration = [x for x in streams if x['codec_type'] == 'audio'][0]['duration']
+                if audio_duration is None:
+                    audio_duration = [x for x in streams if x['codec_type'] == 'video'][0]['duration']
+                if audio_duration is not None:
+                    id_and_duration_fp = results['fp_id'] + '___' + '{0:.2f}'.format(audio_duration)
+                else:
+                    id_and_duration_fp = None
             else:
                 id_and_duration_fp = None
             fresh = fp is not None
@@ -886,9 +889,10 @@ def compute_video_fingerprint_callback(results):
     if results['fresh']:
         token = results['fp_token']
         values_dict = {
-            'fingerprint': results['result'],
-            'id_and_duration': results['id_and_duration']
+            'fingerprint': results['result']
         }
+        if results['id_and_duration'] is not None:
+            values_dict['id_and_duration'] = results['id_and_duration']
         db_manager = VideoDBCachingManager()
         # The video might already have a row in the cache, or may be nonexistent there because it was not
         # retrieved from a URI. If the latter is the case, we add the current datetime to the cache row.
