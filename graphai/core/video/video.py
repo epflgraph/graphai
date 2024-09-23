@@ -844,23 +844,34 @@ def compute_video_fingerprint(results, file_manager, force=False):
     db_manager = VideoDBCachingManager()
     if token is None or not results.get('fresh', True):
         fp = None
+        id_and_duration_fp = None
         fresh = False
         perform_lookup = False
         fp_token = None
     else:
-        existing = db_manager.get_details(token, ['fingerprint'])[0]
+        existing = db_manager.get_details(token, ['fingerprint', 'id_and_duration'])[0]
         if not force and existing is not None and existing['fingerprint'] is not None:
             fp = existing['fingerprint']
+            id_and_duration_fp = existing['id_and_duration']
             fresh = False
             perform_lookup = False
             fp_token = None
         else:
             fp = md5_video_or_audio(file_manager.generate_filepath(token), video=True)
+            streams = get_available_streams(file_manager.generate_filepath(token))
+            audio_duration = [x for x in streams if x['codec_type'] == 'audio'][0]['duration']
+            if audio_duration is None:
+                audio_duration = [x for x in streams if x['codec_type'] == 'video'][0]['duration']
+            if audio_duration is not None:
+                id_and_duration_fp = results['fp_id'] + '___' + '{0:.2f}'.format(audio_duration)
+            else:
+                id_and_duration_fp = None
             fresh = fp is not None
             perform_lookup = fp is not None
             fp_token = token if fp is not None else None
     return {
         'result': fp,
+        'id_and_duration': id_and_duration_fp,
         'fp_token': fp_token,
         'perform_lookup': perform_lookup,
         'fresh': fresh,
@@ -872,7 +883,8 @@ def compute_video_fingerprint_callback(results):
     if results['fresh']:
         token = results['fp_token']
         values_dict = {
-            'fingerprint': results['result']
+            'fingerprint': results['result'],
+            'id_and_duration': results['id_and_duration']
         }
         db_manager = VideoDBCachingManager()
         # The video might already have a row in the cache, or may be nonexistent there because it was not
