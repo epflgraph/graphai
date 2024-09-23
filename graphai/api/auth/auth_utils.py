@@ -21,19 +21,19 @@ DEFAULT_RATE_LIMITS = {
             'window': 1
         },
         'video': {
-            'max_requests': 10,
-            'window': 10
-        },
-        'image': {
             'max_requests': 20,
             'window': 10
         },
+        'image': {
+            'max_requests': 30,
+            'window': 10
+        },
         'voice': {
-            'max_requests': 10,
+            'max_requests': 20,
             'window': 10
         },
         'translation': {
-            'max_requests': 5,
+            'max_requests': 10,
             'window': 1
         },
         'scraping': {
