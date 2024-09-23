@@ -49,7 +49,10 @@ from graphai.core.common.fingerprinting import (
 )
 from graphai.core.common.lookup import (
     retrieve_fingerprint_callback,
-    ignore_fingerprint_results_callback, is_fingerprinted, database_callback_generic
+    ignore_fingerprint_results_callback,
+    is_fingerprinted,
+    database_callback_generic,
+    lookup_latest_allowed_date
 )
 
 FRAME_FORMAT_PNG = 'frame-%06d.png'
@@ -892,6 +895,25 @@ def compute_video_fingerprint_callback(results):
         if db_manager.get_details(token, [])[0] is None:
             values_dict['date_added'] = get_current_datetime()
         database_callback_generic(token, db_manager, values_dict, force=False, use_closest_match=False)
+    return results
+
+
+def video_id_and_duration_fp_lookup(results):
+    if results['fresh'] and results['perform_lookup'] and results['id_and_duration'] is not None:
+        fp_token = results['fp_token']
+        db_manager = VideoDBCachingManager()
+        id_and_duration = results['id_and_duration']
+        latest_allowed_date = lookup_latest_allowed_date(fp_token, db_manager)
+        closest_match = db_manager.get_all_details(['id_and_duration', 'date_added'],
+                                                   exclude_token=fp_token,
+                                                   allow_nulls=False,
+                                                   equality_conditions={'id_and_duration': id_and_duration},
+                                                   latest_date=latest_allowed_date)
+        if closest_match is not None and len(closest_match) > 0:
+            closest_match_token = list(closest_match.keys())[0]
+            db_manager.insert_or_update_closest_match(fp_token,
+                                                      {'most_similar_token': closest_match_token})
+            results['perform_lookup'] = False
     return results
 
 
