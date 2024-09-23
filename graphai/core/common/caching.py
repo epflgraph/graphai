@@ -100,6 +100,16 @@ class VideoDBCachingManager(DBCachingManagerBase):
         except Exception:
             pass
 
+        # Creating an id_and_duration index (since it's LONGTEXT, we need to specify index length)
+        try:
+            self.db.execute_query(
+                f"""
+                CREATE INDEX `video_main_id_and_duration_index` ON `{self.schema}`.`{self.cache_table}` (`id_and_duration`(512));
+                """
+            )
+        except Exception:
+            pass
+
         # Creating the closest match table
         self.db.execute_query(
             f"""
