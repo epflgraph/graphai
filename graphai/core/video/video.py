@@ -123,9 +123,9 @@ def retrieve_file_from_generic_url(url, output_filename_with_path, output_token)
         print(e, file=sys.stderr)
         return None
     if file_exists(output_filename_with_path):
-        return output_token
+        return output_token, url
     else:
-        return None
+        return None, None
 
 
 def retrieve_file_from_kaltura(url, output_filename_with_path, output_token):
@@ -150,9 +150,13 @@ def retrieve_file_from_kaltura(url, output_filename_with_path, output_token):
         err = str(e)
     # If the file exists and there were no errors, the download has been successful
     if file_exists(output_filename_with_path) and ('ffmpeg error' not in err.lower()):
-        return output_token
+        if '/entryId/' in url:
+            entry_id = url.split('/')[url.split('/').index('entryId') + 1]
+        else:
+            entry_id = url
+        return output_token, entry_id
     else:
-        return None
+        return None, None
 
 
 def retrieve_file_from_youtube(url, output_filename_with_path, output_token):
@@ -169,9 +173,13 @@ def retrieve_file_from_youtube(url, output_filename_with_path, output_token):
     cmd_str = f"yt-dlp -o '{output_filename_with_path}' -f '[ext=mp4]' {url}"
     result_code = subprocess.run(cmd_str, shell=True)
     if file_exists(output_filename_with_path) and result_code.returncode == 0:
-        return output_token
+        if 'watch?v=' in url:
+            vid_id = url.split('?v=')[1]
+        else:
+            vid_id = url
+        return output_token, vid_id
     else:
-        return str(result_code)
+        return str(result_code), None
 
 
 def retrieve_file_from_any_source(url, output_filename_with_path, output_token, is_kaltura=False):
@@ -803,11 +811,12 @@ def retrieve_file_from_url(url, file_manager, is_kaltura=True, force_token=None)
             token = generate_random_token()
     filename = create_filename_using_url_format(token, url)
     filename_with_path = file_manager.generate_filepath(filename)
-    results = retrieve_file_from_any_source(url, filename_with_path, filename, is_kaltura)
+    results, id_fp = retrieve_file_from_any_source(url, filename_with_path, filename, is_kaltura)
     return {
         'token': results,
         'fresh': results == filename,
-        'token_size': get_file_size(filename_with_path)
+        'token_size': get_file_size(filename_with_path),
+        'id_fp': id_fp
     }
 
 
