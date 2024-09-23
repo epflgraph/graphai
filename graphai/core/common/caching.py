@@ -84,6 +84,7 @@ class VideoDBCachingManager(DBCachingManagerBase):
               `fingerprint` VARCHAR(255) DEFAULT NULL,
               `date_added` DATETIME DEFAULT NULL,
               `date_modified` DATETIME DEFAULT NULL,
+              `id_and_duration` VARCHAR(1024) DEFAULT NULL,
               PRIMARY KEY id_token (id_token)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
             """
