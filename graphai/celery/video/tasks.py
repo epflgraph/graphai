@@ -6,6 +6,7 @@ from graphai.core.video.video import (
     retrieve_file_from_url_callback,
     compute_video_fingerprint,
     compute_video_fingerprint_callback,
+    video_id_and_duration_fp_lookup,
     cache_lookup_retrieve_file_from_url,
     cache_lookup_extract_audio,
     extract_audio,
@@ -41,8 +42,13 @@ from graphai.core.common.common_utils import (
     strtobool
 )
 
-from graphai.core.common.lookup import fingerprint_lookup_retrieve_from_db, fingerprint_lookup_parallel, \
-    fingerprint_lookup_direct, fingerprint_lookup_callback, fingerprint_cache_lookup
+from graphai.core.common.lookup import (
+    fingerprint_lookup_retrieve_from_db,
+    fingerprint_lookup_parallel,
+    fingerprint_lookup_direct,
+    fingerprint_lookup_callback,
+    fingerprint_cache_lookup
+)
 from graphai.core.common.config import config
 
 file_management_config = VideoConfig()
@@ -110,6 +116,13 @@ def compute_video_fingerprint_task(self, results, force=False):
              file_manager=file_management_config)
 def compute_video_fingerprint_callback_task(self, results):
     return compute_video_fingerprint_callback(results)
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
+             name='video_2.video_id_and_duration_fp_lookup', ignore_result=False,
+             file_manager=file_management_config)
+def video_id_and_duration_fp_lookup_task(self, results):
+    return video_id_and_duration_fp_lookup(results)
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
