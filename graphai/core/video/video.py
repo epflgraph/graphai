@@ -818,12 +818,12 @@ def retrieve_file_from_url(url, file_manager, is_kaltura=True, force_token=None)
             token = generate_random_token()
     filename = create_filename_using_url_format(token, url)
     filename_with_path = file_manager.generate_filepath(filename)
-    results, id_fp = retrieve_file_from_any_source(url, filename_with_path, filename, is_kaltura)
+    results, fp_id = retrieve_file_from_any_source(url, filename_with_path, filename, is_kaltura)
     return {
         'token': results,
         'fresh': results == filename,
         'token_size': get_file_size(filename_with_path),
-        'id_fp': id_fp
+        'fp_id': fp_id
     }
 
 
