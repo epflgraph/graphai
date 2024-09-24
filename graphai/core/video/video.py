@@ -126,7 +126,11 @@ def retrieve_file_from_generic_url(url, output_filename_with_path, output_token)
         print(e, file=sys.stderr)
         return None
     if file_exists(output_filename_with_path):
-        return output_token, url
+        if '/entryId/' in url:
+            entry_id = url.split('/')[url.split('/').index('entryId') + 1]
+        else:
+            entry_id = url
+        return output_token, entry_id
     else:
         return None, None
 
