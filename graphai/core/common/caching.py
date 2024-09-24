@@ -84,6 +84,7 @@ class VideoDBCachingManager(DBCachingManagerBase):
               `fingerprint` VARCHAR(255) DEFAULT NULL,
               `date_added` DATETIME DEFAULT NULL,
               `date_modified` DATETIME DEFAULT NULL,
+              `id_and_duration` VARCHAR(1024) DEFAULT NULL,
               PRIMARY KEY id_token (id_token)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
             """
@@ -94,6 +95,16 @@ class VideoDBCachingManager(DBCachingManagerBase):
             self.db.execute_query(
                 f"""
                 CREATE INDEX `video_main_origin_token_index` ON `{self.schema}`.`{self.cache_table}` (`origin_token`(512));
+                """
+            )
+        except Exception:
+            pass
+
+        # Creating an id_and_duration index (since it's LONGTEXT, we need to specify index length)
+        try:
+            self.db.execute_query(
+                f"""
+                CREATE INDEX `video_main_id_and_duration_index` ON `{self.schema}`.`{self.cache_table}` (`id_and_duration`(512));
                 """
             )
         except Exception:

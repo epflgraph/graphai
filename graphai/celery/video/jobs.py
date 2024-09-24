@@ -12,6 +12,7 @@ from graphai.celery.video.tasks import (
     cache_lookup_fingerprint_video_task,
     compute_video_fingerprint_task,
     compute_video_fingerprint_callback_task,
+    video_id_and_duration_fp_lookup_task,
     video_fingerprint_find_closest_retrieve_from_db_task,
     video_fingerprint_find_closest_parallel_task,
     video_fingerprint_find_closest_callback_task,
@@ -69,8 +70,10 @@ def get_video_fingerprint_chain_list(token=None, force=False, min_similarity=Non
         task_list = [compute_video_fingerprint_task.s(force)]
     else:
         task_list = [compute_video_fingerprint_task.s({'token': token}, force)]
+    task_list += [compute_video_fingerprint_callback_task.s()]
+    if ignore_fp_results:
+        task_list += [video_id_and_duration_fp_lookup_task.s()]
     task_list += [
-        compute_video_fingerprint_callback_task.s(),
         video_fingerprint_find_closest_retrieve_from_db_task.s(),
         group(video_fingerprint_find_closest_parallel_task.s(i, n_jobs, min_similarity)
               for i in range(n_jobs)),

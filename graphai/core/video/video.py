@@ -49,7 +49,10 @@ from graphai.core.common.fingerprinting import (
 )
 from graphai.core.common.lookup import (
     retrieve_fingerprint_callback,
-    ignore_fingerprint_results_callback, is_fingerprinted, database_callback_generic
+    ignore_fingerprint_results_callback,
+    is_fingerprinted,
+    database_callback_generic,
+    lookup_latest_allowed_date
 )
 
 FRAME_FORMAT_PNG = 'frame-%06d.png'
@@ -123,9 +126,13 @@ def retrieve_file_from_generic_url(url, output_filename_with_path, output_token)
         print(e, file=sys.stderr)
         return None
     if file_exists(output_filename_with_path):
-        return output_token
+        if '/entryId/' in url:
+            entry_id = url.split('/')[url.split('/').index('entryId') + 1]
+        else:
+            entry_id = url
+        return output_token, entry_id
     else:
-        return None
+        return None, None
 
 
 def retrieve_file_from_kaltura(url, output_filename_with_path, output_token):
@@ -150,9 +157,13 @@ def retrieve_file_from_kaltura(url, output_filename_with_path, output_token):
         err = str(e)
     # If the file exists and there were no errors, the download has been successful
     if file_exists(output_filename_with_path) and ('ffmpeg error' not in err.lower()):
-        return output_token
+        if '/entryId/' in url:
+            entry_id = url.split('/')[url.split('/').index('entryId') + 1]
+        else:
+            entry_id = url
+        return output_token, entry_id
     else:
-        return None
+        return None, None
 
 
 def retrieve_file_from_youtube(url, output_filename_with_path, output_token):
@@ -169,9 +180,13 @@ def retrieve_file_from_youtube(url, output_filename_with_path, output_token):
     cmd_str = f"yt-dlp -o '{output_filename_with_path}' -f '[ext=mp4]' {url}"
     result_code = subprocess.run(cmd_str, shell=True)
     if file_exists(output_filename_with_path) and result_code.returncode == 0:
-        return output_token
+        if 'watch?v=' in url:
+            vid_id = url.split('?v=')[1]
+        else:
+            vid_id = url
+        return output_token, vid_id
     else:
-        return str(result_code)
+        return str(result_code), None
 
 
 def retrieve_file_from_any_source(url, output_filename_with_path, output_token, is_kaltura=False):
@@ -803,11 +818,12 @@ def retrieve_file_from_url(url, file_manager, is_kaltura=True, force_token=None)
             token = generate_random_token()
     filename = create_filename_using_url_format(token, url)
     filename_with_path = file_manager.generate_filepath(filename)
-    results = retrieve_file_from_any_source(url, filename_with_path, filename, is_kaltura)
+    results, fp_id = retrieve_file_from_any_source(url, filename_with_path, filename, is_kaltura)
     return {
         'token': results,
         'fresh': results == filename,
-        'token_size': get_file_size(filename_with_path)
+        'token_size': get_file_size(filename_with_path),
+        'fp_id': fp_id
     }
 
 
@@ -835,23 +851,37 @@ def compute_video_fingerprint(results, file_manager, force=False):
     db_manager = VideoDBCachingManager()
     if token is None or not results.get('fresh', True):
         fp = None
+        id_and_duration_fp = None
         fresh = False
         perform_lookup = False
         fp_token = None
     else:
-        existing = db_manager.get_details(token, ['fingerprint'])[0]
+        existing = db_manager.get_details(token, ['fingerprint', 'id_and_duration'])[0]
         if not force and existing is not None and existing['fingerprint'] is not None:
             fp = existing['fingerprint']
+            id_and_duration_fp = existing['id_and_duration']
             fresh = False
             perform_lookup = False
             fp_token = None
         else:
             fp = md5_video_or_audio(file_manager.generate_filepath(token), video=True)
+            if results.get('fp_id', None) is not None:
+                streams = get_available_streams(file_manager.generate_filepath(token))
+                audio_duration = [x for x in streams if x['codec_type'] == 'audio'][0]['duration']
+                if audio_duration is None:
+                    audio_duration = [x for x in streams if x['codec_type'] == 'video'][0]['duration']
+                if audio_duration is not None:
+                    id_and_duration_fp = results['fp_id'] + '___' + '{0:.2f}'.format(audio_duration)
+                else:
+                    id_and_duration_fp = None
+            else:
+                id_and_duration_fp = None
             fresh = fp is not None
             perform_lookup = fp is not None
             fp_token = token if fp is not None else None
     return {
         'result': fp,
+        'id_and_duration': id_and_duration_fp,
         'fp_token': fp_token,
         'perform_lookup': perform_lookup,
         'fresh': fresh,
@@ -865,12 +895,33 @@ def compute_video_fingerprint_callback(results):
         values_dict = {
             'fingerprint': results['result']
         }
+        if results['id_and_duration'] is not None:
+            values_dict['id_and_duration'] = results['id_and_duration']
         db_manager = VideoDBCachingManager()
         # The video might already have a row in the cache, or may be nonexistent there because it was not
         # retrieved from a URI. If the latter is the case, we add the current datetime to the cache row.
         if db_manager.get_details(token, [])[0] is None:
             values_dict['date_added'] = get_current_datetime()
         database_callback_generic(token, db_manager, values_dict, force=False, use_closest_match=False)
+    return results
+
+
+def video_id_and_duration_fp_lookup(results):
+    if results['fresh'] and results['perform_lookup'] and results['id_and_duration'] is not None:
+        fp_token = results['fp_token']
+        db_manager = VideoDBCachingManager()
+        id_and_duration = results['id_and_duration']
+        latest_allowed_date = lookup_latest_allowed_date(fp_token, db_manager)
+        closest_match = db_manager.get_all_details(['id_and_duration', 'date_added'],
+                                                   exclude_token=fp_token,
+                                                   allow_nulls=False,
+                                                   equality_conditions={'id_and_duration': id_and_duration},
+                                                   latest_date=latest_allowed_date)
+        if closest_match is not None and len(closest_match) > 0:
+            closest_match_token = list(closest_match.keys())[0]
+            db_manager.insert_or_update_closest_match(fp_token,
+                                                      {'most_similar_token': closest_match_token})
+            results['perform_lookup'] = False
     return results
 
 
