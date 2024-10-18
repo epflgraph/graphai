@@ -1,47 +1,13 @@
-from fastapi import APIRouter, Security
 from typing import Union
 
-from graphai.api.ontology.schemas import (
-    TreeResponse,
-    CategoryInfoRequest,
-    CategoryInfoResponse,
-    CategoryParentResponse,
-    CategoryChildrenRequest,
-    TreeChildrenResponse,
-    ClusterInfoRequest,
-    RecomputeClustersRequest,
-    RecomputeClustersResponse,
-    GraphDistanceRequest,
-    GraphDistanceResponse,
-    GraphConceptNearestCategoryRequest,
-    GraphConceptNearestCategoryResponse,
-    GraphClusterNearestCategoryRequest,
-    GraphClusterNearestCategoryResponse,
-    GraphNearestConceptRequest,
-    GraphNearestConceptResponse,
-    BreakUpClusterRequest,
-    BreakUpClustersResponse,
-)
-from graphai.api.common.schemas import TaskIDResponse
+from fastapi import APIRouter, Security
 
+from graphai.api.auth.router import get_current_active_user
+import graphai.api.ontology.schemas as schemas
+from graphai.api.common.schemas import TaskIDResponse
 from graphai.api.common.utils import format_api_results
 
-from graphai.celery.ontology.jobs import (
-    tree_job,
-    category_info_job,
-    category_parent_job,
-    category_children_job,
-    cluster_parent_job,
-    cluster_children_job,
-    recompute_clusters_job,
-    graph_distance_job,
-    concept_nearest_category_job,
-    cluster_nearest_category_job,
-    concept_nearest_concept_job,
-    breakup_cluster_job
-)
-from graphai.api.auth.router import get_current_active_user
-
+import graphai.celery.ontology.jobs as jobs
 from graphai.celery.common.celery_config import get_task_info
 
 # Initialise ontology router
@@ -53,51 +19,61 @@ router = APIRouter(
 )
 
 
-@router.get('/tree', response_model=TreeResponse)
+@router.get('/tree', response_model=schemas.TreeResponse)
 async def tree():
-    return tree_job()
+    return jobs.tree_job()
 
 
-@router.post('/tree/category/info', response_model=Union[CategoryInfoResponse, None])
-async def cat_info(data: CategoryInfoRequest):
+@router.post('/tree/category/info', response_model=Union[schemas.CategoryInfoResponse, None])
+async def cat_info(data: schemas.CategoryInfoRequest):
     category_id = data.category_id
-    return category_info_job(category_id)
+    return jobs.category_info_job(category_id)
 
 
-@router.post('/tree/category/parent', response_model=CategoryParentResponse)
-async def cat_parent(data: CategoryInfoRequest):
+@router.post('/tree/category/parent', response_model=schemas.CategoryParentResponse)
+async def cat_parent(data: schemas.CategoryInfoRequest):
     category_id = data.category_id
-    return category_parent_job(category_id)
+    return jobs.category_parent_job(category_id)
 
 
-@router.post('/tree/category/children', response_model=TreeChildrenResponse)
-async def cat_children(data: CategoryChildrenRequest):
+@router.post('/tree/category/children', response_model=schemas.TreeChildrenResponse)
+async def cat_children(data: schemas.CategoryChildrenRequest):
     category_id = data.category_id
     dest_type = data.tgt_type
-    return category_children_job(category_id, dest_type)
+    return jobs.category_children_job(category_id, dest_type)
 
 
-@router.post('/tree/cluster/parent', response_model=CategoryParentResponse)
-async def cluster_parent(data: ClusterInfoRequest):
+@router.post('/tree/cluster/parent', response_model=schemas.CategoryParentResponse)
+async def cluster_parent(data: schemas.ClusterInfoRequest):
     cluster_id = data.cluster_id
-    return cluster_parent_job(cluster_id)
+    return jobs.cluster_parent_job(cluster_id)
 
 
-@router.post('/tree/cluster/children', response_model=TreeChildrenResponse)
-async def cluster_children(data: ClusterInfoRequest):
+@router.post('/tree/cluster/children', response_model=schemas.TreeChildrenResponse)
+async def cluster_children(data: schemas.ClusterInfoRequest):
     cluster_id = data.cluster_id
-    return cluster_children_job(cluster_id)
+    return jobs.cluster_children_job(cluster_id)
+
+
+@router.get('/openalex/category/{category_id}/nearest_topics', response_model=schemas.OpenalexCategoryNearestTopicsResponse)
+async def openalex_category_nearest_topics(category_id):
+    return jobs.openalex_category_nearest_topics_job(category_id)
+
+
+@router.get('/openalex/topic/{topic_id}/nearest_categories', response_model=schemas.OpenalexTopicNearestCategoriesResponse)
+async def openalex_topic_nearest_categories(topic_id):
+    return jobs.openalex_topic_nearest_categories_job(topic_id)
 
 
 @router.post('/recompute_clusters', response_model=TaskIDResponse)
-async def recompute_clusters(data: RecomputeClustersRequest):
+async def recompute_clusters(data: schemas.RecomputeClustersRequest):
     n_clusters = data.n_clusters
     min_n = data.min_n
-    task_id = recompute_clusters_job(n_clusters, min_n)
+    task_id = jobs.recompute_clusters_job(n_clusters, min_n)
     return {'task_id': task_id}
 
 
-@router.get('/recompute_clusters/status/{task_id}', response_model=RecomputeClustersResponse)
+@router.get('/recompute_clusters/status/{task_id}', response_model=schemas.RecomputeClustersResponse)
 async def recompute_clusters_status(task_id):
     full_results = get_task_info(task_id)
     task_results = full_results['results']
@@ -115,47 +91,47 @@ async def recompute_clusters_status(task_id):
     return format_api_results(full_results['id'], full_results['name'], full_results['status'], task_results)
 
 
-@router.post('/graph_distance', response_model=GraphDistanceResponse)
-async def compute_graph_distance(data: GraphDistanceRequest):
+@router.post('/graph_distance', response_model=schemas.GraphDistanceResponse)
+async def compute_graph_distance(data: schemas.GraphDistanceRequest):
     src = data.src
     tgt = data.tgt
     src_type = data.src_type
     tgt_type = data.tgt_type
     avg = data.avg
     coeffs = data.coeffs
-    return graph_distance_job(src, tgt, src_type, tgt_type, avg, coeffs)
+    return jobs.graph_distance_job(src, tgt, src_type, tgt_type, avg, coeffs)
 
 
-@router.post('/nearest_neighbor/concept/category', response_model=GraphConceptNearestCategoryResponse)
-async def compute_graph_concept_nearest_category(data: GraphConceptNearestCategoryRequest):
+@router.post('/nearest_neighbor/concept/category', response_model=schemas.GraphConceptNearestCategoryResponse)
+async def compute_graph_concept_nearest_category(data: schemas.GraphConceptNearestCategoryRequest):
     src = data.src
     avg = data.avg
     coeffs = data.coeffs
     top_n = data.top_n
     use_depth_3 = data.top_down_search
     return_clusters = data.return_clusters
-    return concept_nearest_category_job(src, avg, coeffs, top_n, use_depth_3, return_clusters)
+    return jobs.concept_nearest_category_job(src, avg, coeffs, top_n, use_depth_3, return_clusters)
 
 
-@router.post('/nearest_neighbor/cluster/category', response_model=GraphClusterNearestCategoryResponse)
-async def compute_graph_cluster_nearest_category(data: GraphClusterNearestCategoryRequest):
+@router.post('/nearest_neighbor/cluster/category', response_model=schemas.GraphClusterNearestCategoryResponse)
+async def compute_graph_cluster_nearest_category(data: schemas.GraphClusterNearestCategoryRequest):
     src = data.src
     avg = data.avg
     coeffs = data.coeffs
     top_n = data.top_n
     use_depth_3 = data.top_down_search
-    return cluster_nearest_category_job(src, avg, coeffs, top_n, use_depth_3)
+    return jobs.cluster_nearest_category_job(src, avg, coeffs, top_n, use_depth_3)
 
 
-@router.post('/nearest_neighbor/concept/concept', response_model=GraphNearestConceptResponse)
-async def compute_graph_nearest_concept(data: GraphNearestConceptRequest):
+@router.post('/nearest_neighbor/concept/concept', response_model=schemas.GraphNearestConceptResponse)
+async def compute_graph_nearest_concept(data: schemas.GraphNearestConceptRequest):
     src = data.src
     top_n = data.top_n
-    return concept_nearest_concept_job(src, top_n)
+    return jobs.concept_nearest_concept_job(src, top_n)
 
 
-@router.post('/break_up_cluster', response_model=BreakUpClustersResponse)
-async def break_up_cluster(data: BreakUpClusterRequest):
+@router.post('/break_up_cluster', response_model=schemas.BreakUpClustersResponse)
+async def break_up_cluster(data: schemas.BreakUpClusterRequest):
     cluster_id = data.cluster_id
     n_clusters = data.n_clusters
-    return breakup_cluster_job(cluster_id, n_clusters)
+    return jobs.breakup_cluster_job(cluster_id, n_clusters)
