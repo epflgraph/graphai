@@ -1,9 +1,16 @@
 from celery import shared_task
+
 from graphai.core.common.config import config
 from graphai.core.common.common_utils import strtobool
-from graphai.core.ontology.data import OntologyData
-from graphai.core.ontology.ontology import recompute_clusters, get_concept_category_closest, \
-    get_cluster_category_closest, get_concept_concept_closest, break_up_cluster
+from graphai.core.ontology import (
+    OntologyData,
+    recompute_clusters,
+    get_concept_category_closest,
+    get_cluster_category_closest,
+    get_concept_concept_closest,
+    break_up_cluster,
+    get_openalex_nearest,
+)
 
 ontology_data = OntologyData()
 
@@ -70,6 +77,18 @@ def get_cluster_parent_task(self, child_id):
              name='ontology_6.cluster_children', ignore_result=False, ontology_obj=ontology_data)
 def get_cluster_children_task(self, parent_id):
     return {'children': self.ontology_obj.get_cluster_children(parent_id)}
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 5},
+             name='ontology_6.openalex_category_nearest_topics', ignore_result=False)
+def get_openalex_category_nearest_topics_task(self, category_id):
+    return get_openalex_nearest(category_id=category_id)
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 5},
+             name='ontology_6.openalex_topic_nearest_categories', ignore_result=False)
+def get_openalex_topic_nearest_categories_task(self, topic_id):
+    return get_openalex_nearest(topic_id=topic_id)
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 5},
