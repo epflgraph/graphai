@@ -1,0 +1,7 @@
+graphai.core.ontology.openalex module
+=====================================
+
+.. automodule:: graphai.core.ontology.openalex
+   :members:
+   :undoc-members:
+   :show-inheritance:
