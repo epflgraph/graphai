@@ -92,6 +92,22 @@ class TreeParentResponse(TaskStatusResponse):
     )
 
 
+class OpenalexCategoryNearestTopicsResponseElem(BaseModel):
+    category_id: str = Field(title="Category ID")
+    category_name: str = Field(title="Category name")
+    topic_id: str = Field(title="Topic ID")
+    topic_name: str = Field(title="Topic name")
+    embedding_score: float = Field(title="Embedding score")
+    wikipedia_score: float = Field(title="Wikipedia score")
+    score: float = Field(title="Score")
+
+
+OpenalexCategoryNearestTopicsResponse = List[OpenalexCategoryNearestTopicsResponseElem]
+
+OpenalexTopicNearestCategoriesResponseElem = OpenalexCategoryNearestTopicsResponseElem
+OpenalexTopicNearestCategoriesResponse = List[OpenalexTopicNearestCategoriesResponseElem]
+
+
 class RecomputeClustersRequest(BaseModel):
     n_clusters: int = Field(
         title="# of clusters",

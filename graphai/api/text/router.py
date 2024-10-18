@@ -1,20 +1,13 @@
+from typing import Optional, Union
+
 from fastapi import APIRouter, Security
 from fastapi.responses import FileResponse
-
-from typing import Optional, Union
 
 import pandas as pd
 
 from graphai.api.auth.router import get_current_active_user
-from graphai.api.text.schemas import (
-    KeywordsRequest,
-    KeywordsResponse,
-    WikifyFromRawTextRequest,
-    WikifyFromKeywordsRequest,
-    WikifyResponse,
-)
+import graphai.api.text.schemas as schemas
 import graphai.celery.text.jobs as jobs
-
 
 pd.set_option('display.max_rows', 400)
 pd.set_option('display.max_columns', 500)
@@ -29,8 +22,8 @@ router = APIRouter(
 )
 
 
-@router.post('/keywords', response_model=KeywordsResponse)
-async def keywords(data: KeywordsRequest, use_nltk: Optional[bool] = False):
+@router.post('/keywords', response_model=schemas.KeywordsResponse)
+async def keywords(data: schemas.KeywordsRequest, use_nltk: Optional[bool] = False):
     """
     Processes raw text (e.g. from an abstract of a publication, a course description or a lecture slide) and returns a
     list of keywords from the text.
@@ -43,9 +36,9 @@ async def keywords(data: KeywordsRequest, use_nltk: Optional[bool] = False):
     return jobs.keywords(data.raw_text, use_nltk)
 
 
-@router.post('/wikify', response_model=WikifyResponse)
+@router.post('/wikify', response_model=schemas.WikifyResponse)
 async def wikify(
-    data: Union[WikifyFromRawTextRequest, WikifyFromKeywordsRequest],
+    data: Union[schemas.WikifyFromRawTextRequest, schemas.WikifyFromKeywordsRequest],
     method: Optional[str] = 'es-base',
     restrict_to_ontology: Optional[bool] = False,
     graph_score_smoothing: Optional[bool] = True,
@@ -88,7 +81,7 @@ async def wikify(
     * refresh_scores (bool): Whether to recompute scores after filtering. Default: True.
     """
 
-    if isinstance(data, WikifyFromRawTextRequest):
+    if isinstance(data, schemas.WikifyFromRawTextRequest):
         # Return if no input
         if not data.raw_text:
             return []
@@ -106,7 +99,7 @@ async def wikify(
             refresh_scores,
         )
 
-    if isinstance(data, WikifyFromKeywordsRequest):
+    if isinstance(data, schemas.WikifyFromKeywordsRequest):
         # Return if no input
         if not data.keywords:
             return []
@@ -132,7 +125,7 @@ async def wikify(
 
 @router.post('/wikify_ontology_svg')
 async def wikify_ontology_svg(
-    results: WikifyResponse,
+    results: schemas.WikifyResponse,
     level: Optional[int] = 2
 ):
     """
@@ -155,7 +148,7 @@ async def wikify_ontology_svg(
 
 @router.post('/wikify_graph_svg')
 async def wikify_graph_svg(
-    results: WikifyResponse,
+    results: schemas.WikifyResponse,
     concept_score_threshold: Optional[float] = 0.3,
     edge_threshold: Optional[float] = 0.3,
     min_component_size: Optional[int] = 3
