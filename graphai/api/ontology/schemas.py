@@ -29,18 +29,6 @@ class TreeResponse(BaseModel):
     )
 
 
-class CategoryInfoRequest(BaseModel):
-    category_id: str = Field(
-        title="Category ID"
-    )
-
-
-class ClusterInfoRequest(BaseModel):
-    cluster_id: str = Field(
-        title="Cluster ID"
-    )
-
-
 class CategoryInfoResponse(BaseModel):
     category_id: str = Field(
         title="Category ID"
@@ -59,36 +47,37 @@ class CategoryInfoResponse(BaseModel):
     )
 
 
-class CategoryParentResponse(BaseModel):
+class CategoryDetailsResponse(BaseModel):
+    info: CategoryInfoResponse = Field(
+        title="Category info"
+    )
+
+    parent_category: Union[str, None] = Field(
+        title="Parent category"
+    )
+
+    child_categories: Union[List[str], None] = Field(
+        title="Child categories"
+    )
+
+    clusters: Union[List[str], None] = Field(
+        title="Clusters",
+        description="Depth 4 only, clusters attached to this category"
+    )
+
+    concepts: Union[List[str], None] = Field(
+        title="Concepts",
+        description="Depth 4 only, concepts attached to this category"
+    )
+
+
+class ClusterDetailsResponse(BaseModel):
     parent: Union[str, None] = Field(
-        None, title="Parent category"
+        title="Parent category"
     )
-
-
-class CategoryChildrenRequest(BaseModel):
-    category_id: str = Field(
-        title="Category ID"
-    )
-
-    tgt_type: Literal['concept', 'category', 'cluster'] = Field(
-        title="Target type"
-    )
-
-
-class TreeChildrenResponse(BaseModel):
-    children: Union[List[str], None] = Field(
-        None, title="Children"
-    )
-
-    child_type: Union[Literal['category', 'cluster', 'concept'], None] = Field(
-        None, title="Type of children"
-    )
-
-
-class TreeParentResponse(TaskStatusResponse):
-    task_result: Union[List[TreeResponseElem], None] = Field(
-        title="Ontology tree results",
-        description="Child-parent relationships in the ontology's predefined tree as a list of dicts."
+    concepts: Union[List[str], None] = Field(
+        title="Concepts",
+        description="Concepts under this cluster"
     )
 
 
