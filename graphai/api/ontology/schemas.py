@@ -47,6 +47,16 @@ class CategoryInfoResponse(BaseModel):
     )
 
 
+class ConceptDetails(BaseModel):
+    id: str = Field(
+        title="Concept ID"
+    )
+
+    name: str = Field(
+        title="Concept name"
+    )
+
+
 class CategoryDetailsResponse(BaseModel):
     info: CategoryInfoResponse = Field(
         title="Category info"
@@ -65,7 +75,7 @@ class CategoryDetailsResponse(BaseModel):
         description="Depth 4 only, clusters attached to this category"
     )
 
-    concepts: Union[List[str], None] = Field(
+    concepts: Union[List[ConceptDetails], None] = Field(
         title="Concepts",
         description="Depth 4 only, concepts attached to this category"
     )
@@ -75,7 +85,7 @@ class ClusterDetailsResponse(BaseModel):
     parent: Union[str, None] = Field(
         title="Parent category"
     )
-    concepts: Union[List[str], None] = Field(
+    concepts: Union[List[ConceptDetails], None] = Field(
         title="Concepts",
         description="Concepts under this cluster"
     )

@@ -45,6 +45,8 @@ def get_category_info_task(self, cat_id):
     child_categories = self.ontology_obj.get_category_children(cat_id)
     clusters = self.ontology_obj.get_category_cluster_list(cat_id)
     concepts = self.ontology_obj.get_category_concept_list(cat_id)
+    if concepts is not None:
+        concepts = self.ontology_obj.get_concept_names_list(concepts)
     return {
         'info': info,
         'parent_category': parent,
@@ -59,6 +61,8 @@ def get_category_info_task(self, cat_id):
 def get_cluster_info_task(self, cluster_id):
     parent = self.ontology_obj.get_cluster_parent(cluster_id)
     concepts = self.ontology_obj.get_cluster_concept_list(cluster_id)
+    if concepts is not None:
+        concepts = self.ontology_obj.get_concept_names_list(concepts)
     return {
         'parent': parent,
         'concepts': concepts
