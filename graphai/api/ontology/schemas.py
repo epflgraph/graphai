@@ -58,7 +58,7 @@ class ConceptDetails(BaseModel):
 
 
 class CategoryDetailsResponse(BaseModel):
-    info: CategoryInfoResponse = Field(
+    info: Union[CategoryInfoResponse, None] = Field(
         title="Category info"
     )
 
