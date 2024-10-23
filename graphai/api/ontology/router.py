@@ -24,35 +24,14 @@ async def tree():
     return jobs.tree_job()
 
 
-@router.post('/tree/category/info', response_model=Union[schemas.CategoryInfoResponse, None])
-async def cat_info(data: schemas.CategoryInfoRequest):
-    category_id = data.category_id
+@router.get('/tree/category/{category_id}/info', response_model=Union[schemas.CategoryDetailsResponse, None])
+async def cat_info(category_id):
     return jobs.category_info_job(category_id)
 
 
-@router.post('/tree/category/parent', response_model=schemas.CategoryParentResponse)
-async def cat_parent(data: schemas.CategoryInfoRequest):
-    category_id = data.category_id
-    return jobs.category_parent_job(category_id)
-
-
-@router.post('/tree/category/children', response_model=schemas.TreeChildrenResponse)
-async def cat_children(data: schemas.CategoryChildrenRequest):
-    category_id = data.category_id
-    dest_type = data.tgt_type
-    return jobs.category_children_job(category_id, dest_type)
-
-
-@router.post('/tree/cluster/parent', response_model=schemas.CategoryParentResponse)
-async def cluster_parent(data: schemas.ClusterInfoRequest):
-    cluster_id = data.cluster_id
-    return jobs.cluster_parent_job(cluster_id)
-
-
-@router.post('/tree/cluster/children', response_model=schemas.TreeChildrenResponse)
-async def cluster_children(data: schemas.ClusterInfoRequest):
-    cluster_id = data.cluster_id
-    return jobs.cluster_children_job(cluster_id)
+@router.get('/tree/cluster/{cluster_id}/info', response_model=schemas.ClusterDetailsResponse)
+async def cluster_info(cluster_id):
+    return jobs.cluster_info_job(cluster_id)
 
 
 @router.get('/openalex/category/{category_id}/nearest_topics', response_model=schemas.OpenalexCategoryNearestTopicsResponse)

@@ -582,10 +582,8 @@ def frame_ocr_distance(input_folder_with_path, k1, k2, nlp_models: NLPModels, la
     else:
         text_sim = get_cosine_sim(nlp_models.get_text_word_vector(extracted_text1, language),
                                   nlp_models.get_text_word_vector(extracted_text2, language))
-        text_dif = 1 - text_sim
-        assert isinstance(text_dif, float)
+        text_dif = 1.0 - text_sim
         text_dif = text_dif * (1 - np.exp(-np.mean([len(nlp_1), len(nlp_2)]) / 16))
-        assert isinstance(text_dif, float)
 
     # Return distance score
     return text_dif

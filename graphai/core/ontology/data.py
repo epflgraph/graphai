@@ -1139,6 +1139,13 @@ class OntologyData:
         self.load_data()
         return self.ontology_concept_to_name_dict.get(concept_id, None)
 
+    def get_concept_names_list(self, concept_ids):
+        self.load_data()
+        return [
+            {'id': concept_id, 'name': self.ontology_concept_to_name_dict.get(concept_id, None)}
+            for concept_id in concept_ids
+        ]
+
     def get_test_concept_names(self):
         self.load_data()
         return self.test_concept_names

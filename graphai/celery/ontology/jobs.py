@@ -12,31 +12,8 @@ def category_info_job(category_id):
     return results
 
 
-def category_parent_job(category_id):
-    results = tasks.get_category_parent_task.s(category_id).apply_async(priority=6).get(timeout=10)
-    return results
-
-
-def category_children_job(category_id, dest_type):
-    if dest_type == 'category':
-        task = tasks.get_category_children_task.s(category_id)
-    elif dest_type == 'concept':
-        task = tasks.get_category_concepts_task.s(category_id)
-    else:
-        task = tasks.get_category_clusters_task.s(category_id)
-    results = task.apply_async(priority=6).get(timeout=10)
-    results['child_type'] = dest_type
-    return results
-
-
-def cluster_parent_job(cluster_id):
-    results = tasks.get_cluster_parent_task.s(cluster_id).apply_async(priority=6).get(timeout=10)
-    return results
-
-
-def cluster_children_job(cluster_id):
-    results = tasks.get_cluster_children_task.s(cluster_id).apply_async(priority=6).get(timeout=10)
-    results['child_type'] = 'concept'
+def cluster_info_job(cluster_id):
+    results = tasks.get_cluster_info_task.s(cluster_id).apply_async(priority=6).get(timeout=10)
     return results
 
 

@@ -40,43 +40,33 @@ def get_ontology_tree_task(self):
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 5},
              name='ontology_6.category_info', ignore_result=False, ontology_obj=ontology_data)
 def get_category_info_task(self, cat_id):
-    return self.ontology_obj.get_ontology_category_info(cat_id)
-
-
-@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 5},
-             name='ontology_6.category_parent', ignore_result=False, ontology_obj=ontology_data)
-def get_category_parent_task(self, child_id):
-    return {'parent': self.ontology_obj.get_category_parent(child_id)}
-
-
-@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 5},
-             name='ontology_6.category_children', ignore_result=False, ontology_obj=ontology_data)
-def get_category_children_task(self, parent_id):
-    return {'children': self.ontology_obj.get_category_children(parent_id)}
-
-
-@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 5},
-             name='ontology_6.category_concepts', ignore_result=False, ontology_obj=ontology_data)
-def get_category_concepts_task(self, parent_id):
-    return {'children': self.ontology_obj.get_category_concept_list(parent_id)}
-
-
-@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 5},
-             name='ontology_6.category_clusters', ignore_result=False, ontology_obj=ontology_data)
-def get_category_clusters_task(self, parent_id):
-    return {'children': self.ontology_obj.get_category_cluster_list(parent_id)}
+    info = self.ontology_obj.get_ontology_category_info(cat_id)
+    parent = self.ontology_obj.get_category_parent(cat_id)
+    child_categories = self.ontology_obj.get_category_children(cat_id)
+    clusters = self.ontology_obj.get_category_cluster_list(cat_id)
+    concepts = self.ontology_obj.get_category_concept_list(cat_id)
+    if concepts is not None:
+        concepts = self.ontology_obj.get_concept_names_list(concepts)
+    return {
+        'info': info,
+        'parent_category': parent,
+        'child_categories': child_categories,
+        'clusters': clusters,
+        'concepts': concepts
+    }
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 5},
              name='ontology_6.cluster_parent', ignore_result=False, ontology_obj=ontology_data)
-def get_cluster_parent_task(self, child_id):
-    return {'parent': self.ontology_obj.get_cluster_parent(child_id)}
-
-
-@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 5},
-             name='ontology_6.cluster_children', ignore_result=False, ontology_obj=ontology_data)
-def get_cluster_children_task(self, parent_id):
-    return {'children': self.ontology_obj.get_cluster_children(parent_id)}
+def get_cluster_info_task(self, cluster_id):
+    parent = self.ontology_obj.get_cluster_parent(cluster_id)
+    concepts = self.ontology_obj.get_cluster_concept_list(cluster_id)
+    if concepts is not None:
+        concepts = self.ontology_obj.get_concept_names_list(concepts)
+    return {
+        'parent': parent,
+        'concepts': concepts
+    }
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 5},
