@@ -218,7 +218,10 @@ def perform_probe(input_filename_with_path):
     """
     if not file_exists(input_filename_with_path):
         raise Exception(f'ffmpeg error: File {input_filename_with_path} does not exist')
-    return ffmpeg.probe(input_filename_with_path, cmd='ffprobe')
+    try:
+        return ffmpeg.probe(input_filename_with_path, cmd='ffprobe')
+    except Exception as e:
+        raise e
 
 
 def get_available_streams(input_filename_with_path):
@@ -345,6 +348,7 @@ def extract_frames(input_filename_with_path, output_folder_with_path, output_fol
     Returns:
         The return token if successful, None otherwise
     """
+    error_occurred = False
     if not file_exists(input_filename_with_path):
         print(f'ffmpeg error: File {input_filename_with_path} does not exist')
         return None
@@ -369,8 +373,13 @@ def extract_frames(input_filename_with_path, output_folder_with_path, output_fol
     except Exception as e:
         print(e, file=sys.stderr)
         err = str(e)
+        error_occurred = True
 
-    if file_exists(os.path.join(output_folder_with_path, (FRAME_FORMAT_PNG) % (1))) and ('ffmpeg error' not in err):
+    if (
+            file_exists(os.path.join(output_folder_with_path, (FRAME_FORMAT_PNG) % (1)))
+            and ('ffmpeg error' not in err)
+            and not error_occurred
+    ):
         return output_folder
     else:
         return None
@@ -760,7 +769,15 @@ def get_video_token_status(token):
     exists, has_fingerprint = is_fingerprinted(token, video_db_manager)
     fully_active = active and exists
     if fully_active:
-        streams = get_available_streams(video_config.generate_filepath(token))
+        try:
+            streams = get_available_streams(video_config.generate_filepath(token))
+        except Exception as e:
+            print(e, file=sys.stderr)
+            return {
+                'active': False,
+                'fingerprinted': False,
+                'streams': None
+            }
         streams = [x for x in streams if x['codec_type'] == 'audio' or x['codec_type'] == 'video']
     else:
         streams = None
@@ -864,7 +881,18 @@ def compute_video_fingerprint(results, file_manager, force=False):
         else:
             fp = md5_video_or_audio(file_manager.generate_filepath(token), video=True)
             if results.get('fp_id', None) is not None:
-                streams = get_available_streams(file_manager.generate_filepath(token))
+                try:
+                    streams = get_available_streams(file_manager.generate_filepath(token))
+                except Exception as e:
+                    print(e, file=sys.stderr)
+                    return {
+                        'result': None,
+                        'id_and_duration': None,
+                        'fp_token': None,
+                        'perform_lookup': False,
+                        'fresh': False,
+                        'original_results': results
+                    }
                 audio_duration = [x for x in streams if x['codec_type'] == 'audio'][0]['duration']
                 if audio_duration is None:
                     audio_duration = [x for x in streams if x['codec_type'] == 'video'][0]['duration']
