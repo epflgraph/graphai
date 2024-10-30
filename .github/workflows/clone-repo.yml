@@ -81,6 +81,7 @@ jobs:
           echo "video: ${{ vars.preload_video }}" >> config.ini
           echo "text: ${{ vars.preload_text }}" >> config.ini
           echo "ontology: ${{ vars.preload_ontology }}" >> config.ini
+          echo "embedding: ${{ vars.preload_embedding }}" >> config.ini
           echo "" >> config.ini
           
           echo "[ratelimiting]" >> config.ini
