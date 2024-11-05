@@ -1,0 +1,7 @@
+graphai.core.text.embeddings module
+===================================
+
+.. automodule:: graphai.core.text.embeddings
+   :members:
+   :undoc-members:
+   :show-inheritance:

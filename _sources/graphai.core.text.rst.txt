@@ -13,6 +13,7 @@ Submodules
    :maxdepth: 1
 
    graphai.core.text.draw
+   graphai.core.text.embeddings
    graphai.core.text.graph
    graphai.core.text.keywords
    graphai.core.text.scores
