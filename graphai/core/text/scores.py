@@ -1,7 +1,8 @@
-import numpy as np
 import pandas as pd
 
 import Levenshtein
+
+from graphai.core.text.embeddings import compute_embedding_scores
 
 
 def compute_levenshtein_score(results):
@@ -17,97 +18,6 @@ def compute_levenshtein_score(results):
     def f(x):
         return 1 / (1 + ((1 - x) / x) ** 2)
     results['levenshtein_score'] = f(results['levenshtein_score'])
-
-    return results
-
-
-def compute_embedding_scores(results):
-    # FIXME Remove this stub
-    # results = pd.DataFrame({
-    #     'keywords': ['a'] * 4 + ['b'] * 3 + ['c'] * 3,
-    #     'concept_id': ['1', '2', '3', '4'] + ['1', '2', '5'] + ['1', '3', '5']
-    # })
-
-    # Extract ids of all concepts in the DataFrame
-    concept_ids = list(results['concept_id'].drop_duplicates())
-    n_concepts = len(concept_ids)
-    # print(n_concepts)
-
-    # If there is only one concept, its embedding local and global scores are 1, and we return directly
-    if n_concepts == 1:
-        results['embedding_local_score'] = 1
-        results['embedding_global_score'] = 1
-        return results
-
-    # FIXME Get actual data instead of dummy vectors
-    # Fetch their embedding vectors as a matrix of size n_dims x n_concepts
-    # Each column of the matrix represents the vector of a concept
-    # The order of the concept vectors in the matrix is the same as the order of the concept ids in concept_ids
-    # n_dims = 384
-    n_dims = 12
-    vector_matrix = np.random.rand(n_dims, n_concepts)
-    # vector_matrix = np.tril(np.ones((n_dims, n_concepts)))
-    vector_matrix = vector_matrix / np.linalg.norm(vector_matrix, axis=0)
-    # print(vector_matrix)
-
-    # Compute the scalar product of all vectors pairwise
-    scalar_products = vector_matrix.T @ vector_matrix
-    # print(scalar_products)
-
-    # Embedding local score is the mean scalar product among concepts with the same keywords
-    embedding_local_scores = pd.DataFrame()
-    for name, group in results.groupby('keywords'):
-        # print(name)
-        # print(group)
-
-        # Extract concept_ids in the given keywords group and filter out the scalar_product_matrix with it
-        group_concept_ids = list(group['concept_id'])
-        # print(group_concept_ids)
-        n_group_concepts = len(group_concept_ids)
-
-        # If there is only one concept in the group, its embedding local score is directly 1, and we skip to the next group
-        if n_group_concepts == 1:
-            group_embedding_local_scores = pd.DataFrame({'keywords': name, 'concept_id': group_concept_ids, 'embedding_local_score': 1})
-            embedding_local_scores = pd.concat([embedding_local_scores, group_embedding_local_scores], ignore_index=True)
-            continue
-
-        # There are more than one concept, we proceed using the scalar products within the concepts of that keyword
-        indices = [concept_id in group_concept_ids for concept_id in concept_ids]
-        group_scalar_products = scalar_products[indices, :][:, indices]
-
-        # print(group_scalar_products)
-
-        # Embedding local score is now the mean scalar product for this new matrix excluding the diagonal
-        #   We create a n_group_concepts x n_group_concepts matrix with zeros in the diagonal and ones elsewhere.
-        #   We use it as weights for the weighted average per row.
-        #   Then we derive the score between 0 and 1 by mapping the cos to [0, 1] and clipping
-        weights = np.ones((n_group_concepts, n_group_concepts)) - np.identity(n_group_concepts)
-        # print(weights)
-        group_mean_scalar_products = np.average(group_scalar_products, axis=0, weights=weights)
-        # print(group_mean_scalar_products)
-        mean_scores = np.clip((group_mean_scalar_products + 1) / 2, a_min=0, a_max=1)
-        # print(mean_scores)
-        group_embedding_local_scores = pd.DataFrame({'keywords': name, 'concept_id': [concept_id for concept_id in concept_ids if concept_id in group_concept_ids], 'embedding_local_score': mean_scores})
-        embedding_local_scores = pd.concat([embedding_local_scores, group_embedding_local_scores], ignore_index=True)
-
-    # print(embedding_local_scores)
-
-    # Embedding global score is the mean scalar product excluding the diagonal
-    #   We create a n_concepts x n_concepts matrix with zeros in the diagonal and ones elsewhere.
-    #   We use it as weights for the weighted average per row.
-    #   Then we derive the score between 0 and 1 by mapping the cos to [0, 1] and clipping
-    weights = np.ones((n_concepts, n_concepts)) - np.identity(n_concepts)
-    mean_scalar_products = np.average(scalar_products, axis=0, weights=weights)
-    mean_scores = np.clip((mean_scalar_products + 1) / 2, a_min=0, a_max=1)
-    embedding_global_scores = pd.DataFrame({'concept_id': concept_ids, 'embedding_global_score': mean_scores})
-
-    # print(embedding_global_scores)
-
-    # Add the scores to the results DataFrame
-    results = pd.merge(results, embedding_local_scores, how='inner', on=['keywords', 'concept_id'])
-    results = pd.merge(results, embedding_global_scores, how='inner', on='concept_id')
-
-    # print(results)
 
     return results
 
@@ -431,3 +341,29 @@ def compute_scores(
         filtering_min_agreement_fraction=0,
         refresh_scores=False,
     )
+
+
+if __name__ == '__main__':
+    from elasticsearch_interface.es import ES
+
+    from graphai.core.common.config import config
+
+    from graphai.core.text.keywords import extract_keywords
+    from graphai.core.text.wikisearch import wikisearch
+    from graphai.core.text.graph import ConceptsGraph
+
+    pd.set_option('display.max_rows', 500)
+    pd.set_option('display.max_columns', 500)
+    pd.set_option('display.width', 1000)
+
+    es = ES(config['elasticsearch'], index=config['elasticsearch'].get('concept_detection_index', 'concepts_detection'))
+    graph = ConceptsGraph()
+
+    raw_text = """Consider a nonparametric representation of acoustic wave fields that consists of observing the sound pressure along a straight line or a smooth contour L defined in space. The observed data contains implicit information of the surrounding acoustic scene, both in terms of spatial arrangement of the sources and their respective temporal evolution. We show that such data can be effectively analyzed and processed in what we call the space-time-frequency representation space, consisting of a Gabor representation across the spatio-temporal manifold defined by the spatial axis L and the temporal axis t. In the presence of a source, the spectral patterns generated at L have a characteristic triangular shape that changes according to certain parameters, such as the source distance and direction, the number of sources, the concavity of L, and the analysis window size. Yet, in general, the wave fronts can be expressed as a function of elementary directional components-most notably, plane waves and far-field components. Furthermore, we address the problem of processing the wave field in discrete space and time, i.e., sampled along L and t, where a Gabor representation implies that the wave fronts are processed in a block-wise fashion. The key challenge is how to chose and customize a spatio-temporal filter bank such that it exploits the physical properties of the wave field while satisfying strict requirements such as perfect reconstruction, critical sampling, and computational efficiency. We discuss the architecture of such filter banks, and demonstrate their applicability in the context of real applications, such as spatial filtering, deconvolution, and wave field coding."""
+    keyword_list = extract_keywords(raw_text)
+    results = wikisearch(keyword_list, es)
+    results['concept_id'] = results['concept_id'].astype(str)
+    print(results)
+
+    results = compute_scores(results, graph)
+    print(results)

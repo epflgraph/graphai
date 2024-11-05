@@ -126,3 +126,14 @@ def wikisearch(keywords_list, es, fraction=(0, 1), method='es-base'):
         all_results = pd.concat([all_results, results], ignore_index=True)
 
     return all_results
+
+
+if __name__ == '__main__':
+    from elasticsearch_interface.es import ES
+
+    from graphai.core.common.config import config
+
+    es = ES(config['elasticsearch'], index=config['elasticsearch'].get('concept_detection_index', 'concepts_detection'))
+
+    results = wikisearch(['Cayley graph', 'Lebesgue measure', 'graph spectra', 'spectral gap'], es)
+    print(results)
