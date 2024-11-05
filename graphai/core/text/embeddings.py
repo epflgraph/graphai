@@ -104,7 +104,7 @@ def compute_embedding_scores(results):
         x = min(1, max(0, x))
 
         if x <= a:
-            return np.power(x, n) / np.power(a, n-1)
+            return np.power(x, n) / np.power(a, n - 1)
         else:
             return 1 - np.power(1 - x, n) / np.power(1 - a, n - 1)
 
@@ -159,8 +159,6 @@ def compute_embedding_scores(results):
 
 if __name__ == '__main__':
     from elasticsearch_interface.es import ES
-
-    from graphai.core.common.config import config
 
     from graphai.core.text.keywords import extract_keywords
     from graphai.core.text.wikisearch import wikisearch
