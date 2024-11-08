@@ -10,7 +10,7 @@ from graphai.api.auth.auth_utils import (
     authenticate_user,
     ALL_SCOPES,
     get_ratelimit_values,
-    get_user_ratelimit_overrides
+    get_user_ratelimit_overrides, SECRET_KEY, ALGORITHM, extract_username_and_scopes
 )
 from fastapi import (
     Depends,
@@ -28,13 +28,9 @@ from jose import ExpiredSignatureError, JWTError, jwt
 from pydantic import ValidationError
 from fastapi_user_limiter.limiter import rate_limiter
 
-from graphai.core.common.config import config
-
 # to get a secret key run:
 # openssl rand -hex 32
 # and then put it in the config file
-SECRET_KEY = config['auth']['secret_key']
-ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30 * 1440
 
 oauth2_scheme = OAuth2PasswordBearer(
@@ -62,13 +58,6 @@ def create_access_token(data: dict, expires_delta: Union[timedelta, None] = None
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
-
-
-async def extract_username_and_scopes(token):
-    payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-    username: str = payload.get("sub")
-    token_scopes = payload.get("scopes", [])
-    return username, token_scopes
 
 
 async def get_current_user(

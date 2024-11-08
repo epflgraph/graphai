@@ -2,6 +2,7 @@ import json
 from typing import Union, List
 
 from db_cache_manager.db import DB
+from jose import jwt
 from passlib.context import CryptContext
 from pydantic import BaseModel
 
@@ -170,3 +171,14 @@ def authenticate_user(username: str, password: str):
     if not verify_password(password, user.hashed_password):
         return False
     return user
+
+
+SECRET_KEY = config['auth']['secret_key']
+ALGORITHM = "HS256"
+
+
+async def extract_username_and_scopes(token):
+    payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+    username: str = payload.get("sub")
+    token_scopes = payload.get("scopes", [])
+    return username, token_scopes
