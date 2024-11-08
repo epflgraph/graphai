@@ -182,3 +182,12 @@ async def extract_username_and_scopes(token):
     username: str = payload.get("sub")
     token_scopes = payload.get("scopes", [])
     return username, token_scopes
+
+
+def extract_username_sync(token):
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        username: str = payload.get("sub")
+        return username
+    except Exception:
+        return '__UNAUTHENTICATED___USER__'
