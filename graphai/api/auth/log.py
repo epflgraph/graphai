@@ -11,7 +11,7 @@ from starlette.types import ASGIApp
 from graphai.api.auth.auth_utils import extract_username_sync
 
 
-logger = logging.getLogger("api_analytics")
+logger = logging.getLogger("graphai_logger")
 logger.setLevel(logging.DEBUG)
 
 
@@ -26,6 +26,7 @@ def get_user_agent(request: Request) -> Union[str, None]:
 def log_request(request_data: Dict):
     # TODO this is currently a dummy
     logger.debug(f"Logging request: {request_data}")
+    print(request_data)
     return
 
 
