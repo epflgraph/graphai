@@ -20,6 +20,7 @@ from graphai.api.auth.router import (
     unauthenticated_router,
     authenticated_router
 )
+from graphai.api.auth.log import LoggerMiddleware
 
 from graphai.celery.text.tasks import text_init_task
 from graphai.celery.video.tasks import slide_detection_init_task
@@ -97,6 +98,7 @@ app = FastAPI(
     version="0.10.1",
     lifespan=lifespan
 )
+app.add_middleware(LoggerMiddleware)
 
 
 # Include all routers in the app
