@@ -88,6 +88,10 @@ jobs:
           echo "limit: ${{ vars.ratelimit_schema }}" >> config.ini
           echo "" >> config.ini
           
+          echo "[logging]" >> config.ini
+          echo "path: ${{ vars.logging_path }}" >> config.ini
+          echo "" >> config.ini
+          
 
       - name: Install python package in editable mode
         run: |
