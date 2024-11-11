@@ -22,7 +22,7 @@ logging_dir = config.get('logging', dict()).get('path', os.path.expanduser('~/gr
 make_sure_path_exists(logging_dir)
 handler = RotatingFileHandler(
     filename=os.path.join(logging_dir, 'graphai_logger.log'),
-    maxBytes=10 * 1024 * 1024,
+    maxBytes=50 * 1024 * 1024,
     backupCount=10
 )
 logger.addHandler(handler)
