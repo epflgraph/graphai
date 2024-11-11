@@ -62,9 +62,14 @@ class LoggerMiddleware(BaseHTTPMiddleware):
         start = time()
         response = await call_next(request)
 
+        try:
+            ip_address = request.client.host
+        except AttributeError:
+            ip_address = ''
+
         request_data = {
             "hostname": request.url.hostname,
-            "ip_address": request.client.host,
+            "ip_address": ip_address,
             "path": request.url.path,
             "user_agent": get_user_agent(request),
             "method": request.method,
