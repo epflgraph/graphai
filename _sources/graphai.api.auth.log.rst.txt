@@ -1,0 +1,7 @@
+graphai.api.auth.log module
+===========================
+
+.. automodule:: graphai.api.auth.log
+   :members:
+   :undoc-members:
+   :show-inheritance:
