@@ -43,14 +43,12 @@ def get_user_agent(request: Request) -> Union[str, None]:
 
 
 def log_request(request_data: Dict):
+    message = ""
     if manual_handling:
         message = (f"[{datetime.now().astimezone().strftime('%Y-%m-%d %H:%M:%S %z')}] "
                    f"[{os.getpid()}] [DEBUG] ")
-    else:
-        message = ""
     message += f"{json.dumps(request_data)}"
     logger.debug(message)
-    print(request_data)
     return
 
 
