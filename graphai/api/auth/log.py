@@ -37,8 +37,9 @@ def get_user_agent(request: Request) -> Union[str, None]:
 
 
 def log_request(request_data: Dict):
+    instance_name = config.get('logging', dict()).get('server_name', 'graphai')
     message = (f"[{datetime.now().astimezone().strftime('%Y-%m-%d %H:%M:%S %z')}] "
-               f"[{os.getpid()}] [DEBUG] {json.dumps(request_data)}")
+               f"[{instance_name}] [{os.getpid()}] [DEBUG] {json.dumps(request_data)}")
     logger.debug(message)
     return
 
