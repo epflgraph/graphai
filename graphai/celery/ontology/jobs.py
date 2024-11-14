@@ -17,8 +17,8 @@ def cluster_info_job(cluster_id):
     return results
 
 
-def concept_info_job(concept_id):
-    results = tasks.get_concept_info_task.s(concept_id).apply_async(priority=6).get(timeout=10)
+def concept_info_job(concept_ids):
+    results = tasks.get_concept_info_task.s(concept_ids).apply_async(priority=6).get(timeout=10)
     return results
 
 

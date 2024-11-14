@@ -180,13 +180,7 @@ def get_cluster_info(ontology_data_obj, cluster_id):
     }
 
 
-def get_concept_info(ontology_data_obj, concept_id):
-    was_list = True
-    if not isinstance(concept_id, list):
-        concept_ids = [concept_id]
-        was_list = False
-    else:
-        concept_ids = concept_id
+def get_concept_info(ontology_data_obj, concept_ids):
     results = list()
     for current_concept in concept_ids:
         parent_category = ontology_data_obj.get_concept_parent_category(current_concept)
@@ -200,6 +194,6 @@ def get_concept_info(ontology_data_obj, concept_id):
             'branch': branch,
             'parent_cluster': parent_cluster
         })
-    if not was_list:
+    if len(concept_ids) == 1:
         return results[0]
     return results

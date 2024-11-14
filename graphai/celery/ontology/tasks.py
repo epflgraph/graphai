@@ -52,8 +52,8 @@ def get_cluster_info_task(self, cluster_id):
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 5},
              name='ontology_6.concept_info', ignore_result=False, ontology_obj=ontology_data)
-def get_concept_info_task(self, concept_id):
-    return get_concept_info(self.ontology_obj, concept_id)
+def get_concept_info_task(self, concept_ids):
+    return get_concept_info(self.ontology_obj, concept_ids)
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 5},

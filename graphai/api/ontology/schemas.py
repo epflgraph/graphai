@@ -52,7 +52,7 @@ class ConceptDetails(BaseModel):
         title="Concept ID"
     )
 
-    name: str = Field(
+    name: Union[str, None] = Field(
         title="Concept name"
     )
 
@@ -88,6 +88,18 @@ class ClusterDetailsResponse(BaseModel):
     concepts: Union[List[ConceptDetails], None] = Field(
         title="Concepts",
         description="Concepts under this cluster"
+    )
+
+
+class ConceptDetailsSingleResponse(ConceptDetails):
+    parent_category: Union[str, None] = Field(
+        title="Parent category"
+    )
+    parent_cluster: Union[str, None] = Field(
+        title="Parent cluster"
+    )
+    branch: Union[List[str], None] = Field(
+        title="Full category branch"
     )
 
 
