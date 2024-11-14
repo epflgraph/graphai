@@ -1,6 +1,6 @@
-from typing import Union
+from typing import Union, List, Annotated
 
-from fastapi import APIRouter, Security
+from fastapi import APIRouter, Security, Query
 
 from graphai.api.auth.router import get_current_active_user
 import graphai.api.ontology.schemas as schemas
@@ -24,14 +24,20 @@ async def tree():
     return jobs.tree_job()
 
 
-@router.get('/tree/category/{category_id}/info', response_model=Union[schemas.CategoryDetailsResponse, None])
+@router.get('/tree/category/{category_id}', response_model=Union[schemas.CategoryDetailsResponse, None])
 async def cat_info(category_id):
     return jobs.category_info_job(category_id)
 
 
-@router.get('/tree/cluster/{cluster_id}/info', response_model=schemas.ClusterDetailsResponse)
+@router.get('/tree/cluster/{cluster_id}', response_model=schemas.ClusterDetailsResponse)
 async def cluster_info(cluster_id):
     return jobs.cluster_info_job(cluster_id)
+
+
+@router.get('/tree/concept/',
+            response_model=Union[schemas.ConceptDetailsSingleResponse, List[schemas.ConceptDetailsSingleResponse]])
+async def concept_info(concept_id: Annotated[List[str], Query()]):
+    return jobs.concept_info_job(concept_id)
 
 
 @router.get('/openalex/category/{category_id}/nearest_topics', response_model=schemas.OpenalexCategoryNearestTopicsResponse)

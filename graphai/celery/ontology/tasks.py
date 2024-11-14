@@ -11,6 +11,7 @@ from graphai.core.ontology import (
     break_up_cluster,
     get_openalex_nearest,
 )
+from graphai.core.ontology.ontology import get_category_info, get_cluster_info, get_concept_info
 
 ontology_data = OntologyData()
 
@@ -40,33 +41,19 @@ def get_ontology_tree_task(self):
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 5},
              name='ontology_6.category_info', ignore_result=False, ontology_obj=ontology_data)
 def get_category_info_task(self, cat_id):
-    info = self.ontology_obj.get_ontology_category_info(cat_id)
-    parent = self.ontology_obj.get_category_parent(cat_id)
-    child_categories = self.ontology_obj.get_category_children(cat_id)
-    clusters = self.ontology_obj.get_category_cluster_list(cat_id)
-    concepts = self.ontology_obj.get_category_concept_list(cat_id)
-    if concepts is not None:
-        concepts = self.ontology_obj.get_concept_names_list(concepts)
-    return {
-        'info': info,
-        'parent_category': parent,
-        'child_categories': child_categories,
-        'clusters': clusters,
-        'concepts': concepts
-    }
+    return get_category_info(self.ontology_obj, cat_id)
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 5},
-             name='ontology_6.cluster_parent', ignore_result=False, ontology_obj=ontology_data)
+             name='ontology_6.cluster_info', ignore_result=False, ontology_obj=ontology_data)
 def get_cluster_info_task(self, cluster_id):
-    parent = self.ontology_obj.get_cluster_parent(cluster_id)
-    concepts = self.ontology_obj.get_cluster_concept_list(cluster_id)
-    if concepts is not None:
-        concepts = self.ontology_obj.get_concept_names_list(concepts)
-    return {
-        'parent': parent,
-        'concepts': concepts
-    }
+    return get_cluster_info(self.ontology_obj, cluster_id)
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 5},
+             name='ontology_6.concept_info', ignore_result=False, ontology_obj=ontology_data)
+def get_concept_info_task(self, concept_ids):
+    return get_concept_info(self.ontology_obj, concept_ids)
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 5},

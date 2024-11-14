@@ -1070,6 +1070,18 @@ class OntologyData:
             return results[0]
         return None
 
+    def get_category_branch(self, category_id):
+        if category_id is None or category_id not in self.category_depth_dict:
+            return None
+        current_depth = self.category_depth_dict[category_id]
+        current_category = category_id
+        result_list = [category_id]
+        while current_depth > 0:
+            current_category = self.get_category_parent(current_category)
+            result_list.append(current_category)
+            current_depth -= 1
+        return result_list
+
     def get_category_children(self, parent_id):
         self.load_data()
         results = self.category_category.loc[self.category_category.to_id == parent_id, 'from_id'].values.tolist()
