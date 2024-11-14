@@ -150,3 +150,56 @@ def break_up_cluster(ontology_data_obj, cluster_id, n_clusters):
         print(e)
         all_results = None
     return {'results': all_results}
+
+
+def get_category_info(ontology_data_obj, cat_id):
+    info = ontology_data_obj.get_ontology_category_info(cat_id)
+    parent = ontology_data_obj.get_category_parent(cat_id)
+    child_categories = ontology_data_obj.get_category_children(cat_id)
+    clusters = ontology_data_obj.get_category_cluster_list(cat_id)
+    concepts = ontology_data_obj.get_category_concept_list(cat_id)
+    if concepts is not None:
+        concepts = ontology_data_obj.get_concept_names_list(concepts)
+    return {
+        'info': info,
+        'parent_category': parent,
+        'child_categories': child_categories,
+        'clusters': clusters,
+        'concepts': concepts
+    }
+
+
+def get_cluster_info(ontology_data_obj, cluster_id):
+    parent = ontology_data_obj.get_cluster_parent(cluster_id)
+    concepts = ontology_data_obj.get_cluster_concept_list(cluster_id)
+    if concepts is not None:
+        concepts = ontology_data_obj.get_concept_names_list(concepts)
+    return {
+        'parent': parent,
+        'concepts': concepts
+    }
+
+
+def get_concept_info(ontology_data_obj, concept_id):
+    was_list = True
+    if not isinstance(concept_id, list):
+        concept_ids = [concept_id]
+        was_list = False
+    else:
+        concept_ids = concept_id
+    results = list()
+    for current_concept in concept_ids:
+        parent_category = ontology_data_obj.get_concept_parent_category(current_concept)
+        branch = ontology_data_obj.get_category_branch(parent_category)
+        parent_cluster = ontology_data_obj.get_concept_parent_cluster(current_concept)
+        name = ontology_data_obj.get_concept_name(current_concept)
+        results.append({
+            'id': current_concept,
+            'name': name,
+            'parent_category': parent_category,
+            'branch': branch,
+            'parent_cluster': parent_cluster
+        })
+    if not was_list:
+        return results[0]
+    return results

@@ -17,6 +17,11 @@ def cluster_info_job(cluster_id):
     return results
 
 
+def concept_info_job(concept_id):
+    results = tasks.get_concept_info_task.s(concept_id).apply_async(priority=6).get(timeout=10)
+    return results
+
+
 def openalex_category_nearest_topics_job(category_id):
     job = tasks.get_openalex_category_nearest_topics_task.s(category_id)
     return job.apply_async(priority=6).get(timeout=10)
