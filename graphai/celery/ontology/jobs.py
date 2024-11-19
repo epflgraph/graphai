@@ -62,9 +62,10 @@ def graph_distance_job(src, tgt, src_type, tgt_type, avg, coeffs):
     return res
 
 
-def concept_nearest_category_job(src, avg, coeffs, top_n, use_depth_3, return_clusters):
+def concept_nearest_category_job(src, avg, coeffs, top_n, use_depth_3, return_clusters, use_embeddings=False):
     assert coeffs is None or len(coeffs) == 2
-    task = tasks.get_concept_category_closest_task.s(src, avg, coeffs, top_n, use_depth_3, return_clusters)
+    task = tasks.get_concept_category_closest_task.s(src, avg, coeffs, top_n, use_depth_3, return_clusters,
+                                                     use_embeddings)
     res = task.apply_async(priority=6).get(timeout=30)
     return res
 

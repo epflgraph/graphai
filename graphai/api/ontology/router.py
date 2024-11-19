@@ -95,7 +95,8 @@ async def compute_graph_concept_nearest_category(data: schemas.GraphConceptNeare
     top_n = data.top_n
     use_depth_3 = data.top_down_search
     return_clusters = data.return_clusters
-    return jobs.concept_nearest_category_job(src, avg, coeffs, top_n, use_depth_3, return_clusters)
+    use_embeddings = data.use_embeddings
+    return jobs.concept_nearest_category_job(src, avg, coeffs, top_n, use_depth_3, return_clusters, use_embeddings)
 
 
 @router.post('/nearest_neighbor/cluster/category', response_model=schemas.GraphClusterNearestCategoryResponse)

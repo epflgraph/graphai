@@ -287,6 +287,12 @@ class GraphConceptNearestCategoryRequest(GraphNearestCategoryRequest):
         default=3
     )
 
+    use_embeddings: bool = Field(
+        title="Use embeddings",
+        description="Use embeddings instead of the graph",
+        default=False
+    )
+
 
 class GraphClusterNearestCategoryRequest(GraphNearestCategoryRequest):
     src: Union[List[str], str] = Field(

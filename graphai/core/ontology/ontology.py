@@ -5,6 +5,8 @@ from graphai.core.ontology.clustering import (
     convert_cluster_labels_to_dict,
     assign_to_categories_using_existing
 )
+from db_cache_manager.db import DB
+from graphai.core.common.config import config
 
 
 def recompute_clusters(ontology_data_obj, n_clusters, min_n):
@@ -33,12 +35,34 @@ def recompute_clusters(ontology_data_obj, n_clusters, min_n):
             'impurity_count': impurity_count, 'impurity_proportion': impurity_proportion}
 
 
-def get_concept_category_closest(ontology_data_obj, concept_id, avg, coeffs, top_n, use_depth_3, return_clusters):
-    closest, scores, d3_cat, best_clusters = (
-        ontology_data_obj.get_concept_closest_category(concept_id, avg, coeffs, top_n,
-                                                       use_depth_3=use_depth_3,
-                                                       return_clusters=return_clusters)
-    )
+def get_concept_category_closest_embedding(concept_id, top_n=5):
+    db_manager = DB(config['database'])
+    query = """
+    SELECT c.from_id, SUM(a.score) as score_total FROM 
+    graph_ontology.Edges_N_Concept_N_Concept_T_Embeddings a
+    INNER JOIN graph_ontology.Edges_N_ConceptsCluster_N_Concept_T_ParentToChild b
+    INNER JOIN graph_ontology.Edges_N_Category_N_ConceptsCluster_T_ParentToChild c
+    ON a.from_id=b.to_id AND b.from_id=c.to_id WHERE a.from_id=%s
+    GROUP BY c.from_id
+    ORDER BY score_total DESC;
+    """
+    results = db_manager.execute_query(query, values=(concept_id, ))
+    if len(results) == 0:
+        return None, None, None, None
+    results = results[:top_n]
+    return [res[0] for res in results], [res[1] for res in results], None, None
+
+
+def get_concept_category_closest(ontology_data_obj, concept_id, avg, coeffs, top_n, use_depth_3, return_clusters,
+                                 use_embeddings=False):
+    if not use_embeddings:
+        closest, scores, d3_cat, best_clusters = (
+            ontology_data_obj.get_concept_closest_category(concept_id, avg, coeffs, top_n,
+                                                           use_depth_3=use_depth_3,
+                                                           return_clusters=return_clusters)
+        )
+    else:
+        closest, scores, d3_cat, best_clusters = get_concept_category_closest_embedding(concept_id, top_n=5)
     if closest is None:
         return {
             'scores': None,
