@@ -12,12 +12,9 @@ def wikify_text(
     text,
     method,
     restrict_to_ontology,
-    graph_score_smoothing,
-    ontology_score_smoothing,
-    keywords_score_smoothing,
+    score_smoothing,
     aggregation_coef,
     filtering_threshold,
-    filtering_min_agreement_fraction,
     refresh_scores,
 ):
     n = 16
@@ -26,12 +23,9 @@ def wikify_text(
         group(tasks.wikisearch_task.s(fraction=(i / n, (i + 1) / n), method=method) for i in range(n)),
         tasks.compute_scores_task.s(
             restrict_to_ontology=restrict_to_ontology,
-            graph_score_smoothing=graph_score_smoothing,
-            ontology_score_smoothing=ontology_score_smoothing,
-            keywords_score_smoothing=keywords_score_smoothing,
+            score_smoothing=score_smoothing,
             aggregation_coef=aggregation_coef,
             filtering_threshold=filtering_threshold,
-            filtering_min_agreement_fraction=filtering_min_agreement_fraction,
             refresh_scores=refresh_scores,
         )
     )
@@ -44,12 +38,9 @@ def wikify_keywords(
     keyword_list,
     method,
     restrict_to_ontology,
-    graph_score_smoothing,
-    ontology_score_smoothing,
-    keywords_score_smoothing,
+    score_smoothing,
     aggregation_coef,
     filtering_threshold,
-    filtering_min_agreement_fraction,
     refresh_scores,
 ):
     n = 16
@@ -57,12 +48,9 @@ def wikify_keywords(
         group(tasks.wikisearch_task.s(keyword_list, fraction=(i / n, (i + 1) / n), method=method) for i in range(n)),
         tasks.compute_scores_task.s(
             restrict_to_ontology=restrict_to_ontology,
-            graph_score_smoothing=graph_score_smoothing,
-            ontology_score_smoothing=ontology_score_smoothing,
-            keywords_score_smoothing=keywords_score_smoothing,
+            score_smoothing=score_smoothing,
             aggregation_coef=aggregation_coef,
             filtering_threshold=filtering_threshold,
-            filtering_min_agreement_fraction=filtering_min_agreement_fraction,
             refresh_scores=refresh_scores,
         )
     )
