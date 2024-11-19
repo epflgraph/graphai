@@ -41,12 +41,9 @@ async def wikify(
     data: Union[schemas.WikifyFromRawTextRequest, schemas.WikifyFromKeywordsRequest],
     method: Optional[str] = 'es-base',
     restrict_to_ontology: Optional[bool] = False,
-    graph_score_smoothing: Optional[bool] = True,
-    ontology_score_smoothing: Optional[bool] = True,
-    keywords_score_smoothing: Optional[bool] = True,
+    score_smoothing: Optional[bool] = True,
     aggregation_coef: Optional[float] = 0.5,
-    filtering_threshold: Optional[float] = 0.1,
-    filtering_min_agreement_fraction: Optional[float] = 0.8,
+    filtering_threshold: Optional[float] = 0.15,
     refresh_scores: Optional[bool] = True,
 ):
     """
@@ -67,17 +64,12 @@ async def wikify(
     * method (str): Method to retrieve the concepts (Wikipedia pages). It can be either 'wikipedia-api', to use the
     Wikipedia API, or one of {'es-base', 'es-score'}, to use elasticsearch. Default: 'es-base'.
     * restrict_to_ontology (bool): Whether to filter concepts that are not in the ontology. Default: False.
-    * graph_score_smoothing (bool): Whether to apply a transformation to the graph scores that bumps scores to avoid
-    a pronounced negative exponential shape. Default: True.
-    * ontology_score_smoothing (bool): Whether to apply a transformation to the ontology scores that pushes scores away from 0.5. Default: True.
-    * keywords_score_smoothing (bool): Whether to apply a transformation to the keywords scores that bumps scores to avoid
-    a pronounced negative exponential shape. Default: True.
+    * score_smoothing (bool): Whether to apply a transformation to some scores to distribute them more evenly in [0, 1]. Default: True.
     * aggregation_coef (float): A number in [0, 1] that controls how the scores of the aggregated pages are computed.
     A value of 0 takes the sum of scores over Keywords, then normalises in [0, 1]. A value of 1 takes the max of scores over Keywords.
     Any value in between linearly interpolates those two approaches. Default: 0.5.
     * filtering_threshold (float): A number in [0, 1] that is used as a threshold for all the scores to decide whether the page is good enough
-    from that score's perspective. Default: 0.1.
-    * filtering_min_agreement_fraction (float): A number between 0 and 1. A page will be kept iff it is good enough for at least this fraction of scores. Default: 0.8.
+    from that score's perspective. Default: 0.15.
     * refresh_scores (bool): Whether to recompute scores after filtering. Default: True.
     """
 
@@ -90,12 +82,9 @@ async def wikify(
             data.raw_text,
             method,
             restrict_to_ontology,
-            graph_score_smoothing,
-            ontology_score_smoothing,
-            keywords_score_smoothing,
+            score_smoothing,
             aggregation_coef,
             filtering_threshold,
-            filtering_min_agreement_fraction,
             refresh_scores,
         )
 
@@ -111,12 +100,9 @@ async def wikify(
             keyword_list,
             method,
             restrict_to_ontology,
-            graph_score_smoothing,
-            ontology_score_smoothing,
-            keywords_score_smoothing,
+            score_smoothing,
             aggregation_coef,
             filtering_threshold,
-            filtering_min_agreement_fraction,
             refresh_scores,
         )
 

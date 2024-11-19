@@ -64,17 +64,33 @@ def compute_keywords_scores(results, smoothing):
 def compute_mixed_score(results):
     # Compute mixed score as a convex combination of the different scores,
     # with prescribed coefficients found after running some analyses on manually tagged data.
+
+    # Keep old coefficients for reference
+    # old_coefficients = pd.DataFrame({
+    #     'search_score': [0.2],
+    #     'levenshtein_score': [0.15],
+    #     'embedding_local_score': [0],
+    #     'embedding_global_score': [0],
+    #     'graph_score': [0.1],
+    #     'ontology_local_score': [0.15],
+    #     'ontology_global_score': [0.1],
+    #     'embedding_keywords_score': [0],
+    #     'graph_keywords_score': [0],
+    #     'ontology_keywords_score': [0.3],
+    # })
+
+    # New coefficients after running benchmark for embeddings
     coefficients = pd.DataFrame({
-        'search_score': [0.2],
+        'search_score': [0.15],
         'levenshtein_score': [0.15],
-        'embedding_local_score': [0],
-        'embedding_global_score': [0],
-        'graph_score': [0.1],
-        'ontology_local_score': [0.15],
+        'embedding_local_score': [0.05],
+        'embedding_global_score': [0.25],
+        'graph_score': [0.05],
+        'ontology_local_score': [0.1],
         'ontology_global_score': [0.1],
         'embedding_keywords_score': [0],
         'graph_keywords_score': [0],
-        'ontology_keywords_score': [0.3],
+        'ontology_keywords_score': [0.15],
     })
     results['mixed_score'] = results[coefficients.columns] @ coefficients.transpose()
 
@@ -202,43 +218,22 @@ def aggregate_results(results, coef=0.5):
     return results
 
 
-def filter_results(results, epsilon=0.1, min_agreement_fraction=0.8):
+def filter_results(results, epsilon=0.15):
     """
     Filters a DataFrame of concept results depending on their scores, based on some criteria specified in the parameters.
 
     Args:
-        results (pd.DataFrame): A pandas DataFrame with columns ['concept_id', 'concept_name'] and a column 'x_score' for each score.
-        epsilon (float): A number in [0, 1] that is used as a threshold for all the scores to decide whether the concept is good enough
-        from that score's perspective. Default: 0.1.
-        min_agreement_fraction (float): A number between 0 and 1. A concept will be kept iff it is good enough for at least this fraction of scores. Default: 0.8.
+        results (pd.DataFrame): A pandas DataFrame with the column 'mixed_score'.
+        epsilon (float): A number in [0, 1] that is used as a threshold on 'mixed_score' to decide whether to keep the concept. Default: 0.15.
 
     Returns:
-        pd.DataFrame: A pandas DataFrame with columns ['concept_id', 'concept_name'] and a column 'x_score' for each score, which is a subset of results.
+        pd.DataFrame: A DataFrame with the same columns as 'results' and a subset of its rows.
     """
 
-    # Filter results with low scores through a majority vote among all scores
-    # To be kept, we require a concept to have at least a proportion of at least `min_agreement_fraction` scores to be significant (>= epsilon)
+    # Epsilon should be in [0, 1]
     assert 0 <= epsilon <= 1, f"Filtering threshold {epsilon} is not in [0, 1]"
-    assert 0 <= min_agreement_fraction <= 1, f"Filtering minimum agreement fraction {min_agreement_fraction} is not in [0, 1]"
 
-    score_columns = [
-        "search_score",
-        "levenshtein_score",
-        "embedding_local_score",
-        "embedding_global_score",
-        "graph_score",
-        "ontology_local_score",
-        "ontology_global_score",
-        "embedding_keywords_score",
-        "graph_keywords_score",
-        "ontology_keywords_score",
-    ]
-
-    votes = pd.DataFrame()
-    for column in score_columns:
-        votes[column] = (results[column] >= epsilon).astype(int)
-    votes = votes.mean(axis=1)
-    results = results[votes >= min_agreement_fraction]
+    results = results[results['mixed_score'] >= epsilon]
 
     return results
 
@@ -247,12 +242,9 @@ def compute_scores(
     results,
     graph,
     restrict_to_ontology=False,
-    graph_score_smoothing=True,
-    ontology_score_smoothing=True,
-    keywords_score_smoothing=True,
+    score_smoothing=True,
     aggregation_coef=0.5,
-    filtering_threshold=0.1,
-    filtering_min_agreement_fraction=0.8,
+    filtering_threshold=0.15,
     refresh_scores=True,
 ):
     """
@@ -262,17 +254,12 @@ def compute_scores(
         results (pd.DataFrame): A pandas DataFrame with columns ['keywords', 'concept_id', 'concept_name', 'searchrank', 'search_score'].
         graph (ConceptsGraph): The concepts graph and ontology object.
         restrict_to_ontology (bool): Whether to filter concepts that are not in the ontology. Default: False.
-        graph_score_smoothing (bool): Whether to apply a transformation to the graph scores that bumps scores to avoid
-        a pronounced negative exponential shape. Default: True.
-        ontology_score_smoothing (bool): Whether to apply a transformation to the ontology scores that pushes scores away from 0.5. Default: True.
-        keywords_score_smoothing (bool): Whether to apply a transformation to the keywords scores that bumps scores to avoid
-        a pronounced negative exponential shape. Default: True.
+        score_smoothing (bool): Whether to apply a transformation to some scores to distribute them more evenly in [0, 1]. Default: True.
         aggregation_coef (float): A number in [0, 1] that controls how the scores of the aggregated pages are computed.
         A value of 0 takes the sum of scores over Keywords, then normalises in [0, 1]. A value of 1 takes the max of scores over Keywords.
         Any value in between linearly interpolates those two approaches. Default: 0.5.
         filtering_threshold (float): A number in [0, 1] that is used as a threshold for all the scores to decide whether the page is good enough
-        from that score's perspective. Default: 0.1.
-        filtering_min_agreement_fraction (float): A number between 0 and 1. A page will be kept iff it is good enough for at least this fraction of scores. Default: 0.8.
+        from that score's perspective. Default: 0.15.
         refresh_scores (bool): Whether to recompute scores after filtering. Default: True.
 
     Returns:
@@ -298,13 +285,13 @@ def compute_scores(
     results = compute_embedding_scores(results)
 
     # Compute graph score
-    results = graph.add_graph_score(results, smoothing=graph_score_smoothing)
+    results = graph.add_graph_score(results, smoothing=score_smoothing)
 
     # Compute ontology (local and global) scores
-    results = graph.add_ontology_scores(results, smoothing=ontology_score_smoothing)
+    results = graph.add_ontology_scores(results, smoothing=score_smoothing)
 
-    # Compute keywords score
-    results = compute_keywords_scores(results, keywords_score_smoothing)
+    # Compute keywords scores
+    results = compute_keywords_scores(results, smoothing=score_smoothing)
 
     # Return if there are no results
     if len(results) == 0:
@@ -313,8 +300,11 @@ def compute_scores(
     # Aggregate results over keywords to obtain one row per concept
     aggregated_results = aggregate_results(results, coef=aggregation_coef)
 
+    # Compute mixed score
+    aggregated_results = compute_mixed_score(aggregated_results)
+
     # Filter results
-    aggregated_results = filter_results(aggregated_results, epsilon=filtering_threshold, min_agreement_fraction=filtering_min_agreement_fraction)
+    aggregated_results = filter_results(aggregated_results, epsilon=filtering_threshold)
 
     # Return if there are no results
     if len(aggregated_results) == 0:
@@ -322,7 +312,7 @@ def compute_scores(
 
     # If scores don't need to be recomputed, compute mixed score and return
     if not refresh_scores:
-        return compute_mixed_score(aggregated_results)
+        return aggregated_results
 
     # To recompute scores, we keep only the relevant unaggregated results that survive the aggregation and filtering,
     # we keep only the initial columns, as the rest need to be recomputed, and call the function again.
@@ -333,12 +323,9 @@ def compute_scores(
         results,
         graph,
         restrict_to_ontology=restrict_to_ontology,
-        graph_score_smoothing=graph_score_smoothing,
-        ontology_score_smoothing=ontology_score_smoothing,
-        keywords_score_smoothing=keywords_score_smoothing,
+        score_smoothing=score_smoothing,
         aggregation_coef=aggregation_coef,
         filtering_threshold=0,
-        filtering_min_agreement_fraction=0,
         refresh_scores=False,
     )
 
