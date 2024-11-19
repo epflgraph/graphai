@@ -148,19 +148,17 @@ i.e. unique by concept_id.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="graphai.core.text.scores.filter_results">
-<span class="sig-prename descclassname"><span class="pre">graphai.core.text.scores.</span></span><span class="sig-name descname"><span class="pre">filter_results</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">results</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epsilon</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_agreement_fraction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.8</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.text.scores.filter_results" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">graphai.core.text.scores.</span></span><span class="sig-name descname"><span class="pre">filter_results</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">results</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epsilon</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.15</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.text.scores.filter_results" title="Link to this definition"></a></dt>
 <dd><p>Filters a DataFrame of concept results depending on their scores, based on some criteria specified in the parameters.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>results</strong> (<em>pd.DataFrame</em>) – A pandas DataFrame with columns [‘concept_id’, ‘concept_name’] and a column ‘x_score’ for each score.</p></li>
-<li><p><strong>epsilon</strong> (<em>float</em>) – A number in [0, 1] that is used as a threshold for all the scores to decide whether the concept is good enough</p></li>
-<li><p><strong>Default</strong> (<em>from that score's perspective.</em>) – 0.1.</p></li>
-<li><p><strong>min_agreement_fraction</strong> (<em>float</em>) – A number between 0 and 1. A concept will be kept iff it is good enough for at least this fraction of scores. Default: 0.8.</p></li>
+<li><p><strong>results</strong> (<em>pd.DataFrame</em>) – A pandas DataFrame with the column ‘mixed_score’.</p></li>
+<li><p><strong>epsilon</strong> (<em>float</em>) – A number in [0, 1] that is used as a threshold on ‘mixed_score’ to decide whether to keep the concept. Default: 0.15.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>A pandas DataFrame with columns [‘concept_id’, ‘concept_name’] and a column ‘x_score’ for each score, which is a subset of results.</p>
+<dd class="field-even"><p>A DataFrame with the same columns as ‘results’ and a subset of its rows.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>pd.DataFrame</p>
@@ -170,7 +168,7 @@ i.e. unique by concept_id.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="graphai.core.text.scores.compute_scores">
-<span class="sig-prename descclassname"><span class="pre">graphai.core.text.scores.</span></span><span class="sig-name descname"><span class="pre">compute_scores</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">results</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">graph</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">restrict_to_ontology</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">graph_score_smoothing</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ontology_score_smoothing</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keywords_score_smoothing</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">aggregation_coef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filtering_threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filtering_min_agreement_fraction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.8</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">refresh_scores</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.text.scores.compute_scores" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">graphai.core.text.scores.</span></span><span class="sig-name descname"><span class="pre">compute_scores</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">results</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">graph</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">restrict_to_ontology</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">score_smoothing</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">aggregation_coef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filtering_threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.15</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">refresh_scores</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.text.scores.compute_scores" title="Link to this definition"></a></dt>
 <dd><p>Gathers wikisearch results, computes several scores for them, and finally aggregates and filters them.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -178,19 +176,14 @@ i.e. unique by concept_id.</p>
 <li><p><strong>results</strong> (<em>pd.DataFrame</em>) – A pandas DataFrame with columns [‘keywords’, ‘concept_id’, ‘concept_name’, ‘searchrank’, ‘search_score’].</p></li>
 <li><p><strong>graph</strong> (<a class="reference internal" href="graphai.core.text.html#graphai.core.text.ConceptsGraph" title="graphai.core.text.ConceptsGraph"><em>ConceptsGraph</em></a>) – The concepts graph and ontology object.</p></li>
 <li><p><strong>restrict_to_ontology</strong> (<em>bool</em>) – Whether to filter concepts that are not in the ontology. Default: False.</p></li>
-<li><p><strong>graph_score_smoothing</strong> (<em>bool</em>) – Whether to apply a transformation to the graph scores that bumps scores to avoid</p></li>
-<li><p><strong>Default</strong> (<em>from that score's perspective.</em>) – True.</p></li>
-<li><p><strong>ontology_score_smoothing</strong> (<em>bool</em>) – Whether to apply a transformation to the ontology scores that pushes scores away from 0.5. Default: True.</p></li>
-<li><p><strong>keywords_score_smoothing</strong> (<em>bool</em>) – Whether to apply a transformation to the keywords scores that bumps scores to avoid</p></li>
-<li><p><strong>Default</strong> – True.</p></li>
+<li><p><strong>score_smoothing</strong> (<em>bool</em>) – Whether to apply a transformation to some scores to distribute them more evenly in [0, 1]. Default: True.</p></li>
 <li><p><strong>aggregation_coef</strong> (<em>float</em>) – A number in [0, 1] that controls how the scores of the aggregated pages are computed.</p></li>
 <li><p><strong>Keywords</strong> (<em>A value</em><em> of </em><em>0 takes the sum</em><em> of </em><em>scores over</em>) – </p></li>
 <li><p><strong>[</strong><strong>0</strong> (<em>then normalises in</em>) – </p></li>
 <li><p><strong>Keywords.</strong> (<em>1</em><em>]</em><em>. A value</em><em> of </em><em>1 takes the max</em><em> of </em><em>scores over</em>) – </p></li>
-<li><p><strong>Default</strong> – 0.5.</p></li>
+<li><p><strong>Default</strong> (<em>from that score's perspective.</em>) – 0.5.</p></li>
 <li><p><strong>filtering_threshold</strong> (<em>float</em>) – A number in [0, 1] that is used as a threshold for all the scores to decide whether the page is good enough</p></li>
-<li><p><strong>Default</strong> – 0.1.</p></li>
-<li><p><strong>filtering_min_agreement_fraction</strong> (<em>float</em>) – A number between 0 and 1. A page will be kept iff it is good enough for at least this fraction of scores. Default: 0.8.</p></li>
+<li><p><strong>Default</strong> – 0.15.</p></li>
 <li><p><strong>refresh_scores</strong> (<em>bool</em>) – Whether to recompute scores after filtering. Default: True.</p></li>
 </ul>
 </dd>
