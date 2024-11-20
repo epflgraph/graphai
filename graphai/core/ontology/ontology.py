@@ -62,7 +62,7 @@ def get_concept_category_closest(ontology_data_obj, concept_id, avg, coeffs, top
                                                            return_clusters=return_clusters)
         )
     else:
-        closest, scores, d3_cat, best_clusters = get_concept_category_closest_embedding(concept_id, top_n=5)
+        closest, scores, d3_cat, best_clusters = get_concept_category_closest_embedding(concept_id, top_n=top_n)
     if closest is None:
         return {
             'scores': None,
