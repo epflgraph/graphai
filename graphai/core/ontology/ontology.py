@@ -55,20 +55,25 @@ def get_concept_category_closest_embedding(concept_id, top_n=5):
 
 def get_concept_category_closest(ontology_data_obj, concept_id, avg, coeffs, top_n, use_depth_3, return_clusters,
                                  use_embeddings=False):
-    if not use_embeddings:
-        closest, scores, d3_cat, best_clusters = (
-            ontology_data_obj.get_concept_closest_category(concept_id, avg, coeffs, top_n,
-                                                           use_depth_3=use_depth_3,
-                                                           return_clusters=return_clusters)
-        )
-    else:
+    embeddings_used = False
+
+    closest, scores, d3_cat, best_clusters = (
+        ontology_data_obj.get_concept_closest_category(concept_id, avg, coeffs, top_n,
+                                                       use_depth_3=use_depth_3,
+                                                       return_clusters=return_clusters)
+    )
+
+    if closest is None and use_embeddings:
+        # Fall back to embeddings if their use is enabled AND if no closest match is found through the graph
         closest, scores, d3_cat, best_clusters = get_concept_category_closest_embedding(concept_id, top_n=top_n)
+        embeddings_used = True
     if closest is None:
         return {
             'scores': None,
             'parent_category': None,
             'valid': False,
-            'existing_label': None
+            'existing_label': None,
+            'embeddings_used': embeddings_used
         }
     result_list = list()
     for i in range(len(closest)):
@@ -94,7 +99,8 @@ def get_concept_category_closest(ontology_data_obj, concept_id, avg, coeffs, top
         'scores': result_list,
         'parent_category': d3_cat,
         'valid': scores[0] > 0,
-        'existing_label': existing_label
+        'existing_label': existing_label,
+        'embeddings_used': embeddings_used
     }
 
 

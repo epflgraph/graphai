@@ -289,7 +289,8 @@ class GraphConceptNearestCategoryRequest(GraphNearestCategoryRequest):
 
     use_embeddings: bool = Field(
         title="Use embeddings",
-        description="Use embeddings instead of the graph",
+        description="Use embeddings. Currently, embeddings are only used "
+                    "as a fallback if nothing is found through the graph.",
         default=False
     )
 
@@ -361,6 +362,11 @@ class GraphConceptNearestCategoryResponse(BaseModel):
         None, title="Existing category",
         description="If the requested concept already exists as part of the ontology, this value will reflect "
                     "its existing parent category."
+    )
+
+    embeddings_used: bool = Field(
+        title="Embeddings used",
+        description="A flag that indicates whether embeddings were used for calculating the returned result."
     )
 
 
