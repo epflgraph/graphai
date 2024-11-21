@@ -35,7 +35,24 @@ def recompute_clusters(ontology_data_obj, n_clusters, min_n):
             'impurity_count': impurity_count, 'impurity_proportion': impurity_proportion}
 
 
-def get_concept_category_closest_embedding(concept_id, top_n=5):
+def get_concept_closest_cluster_of_category_embedding(concept_id, cat, top_n=None):
+    db_manager = DB(config['database'])
+    query = """
+    SELECT b.from_id, SUM(a.score) as score_total FROM 
+    graph_ontology.Edges_N_Concept_N_Concept_T_Embeddings a
+    INNER JOIN graph_ontology.Edges_N_ConceptsCluster_N_Concept_T_ParentToChild b
+    INNER JOIN graph_ontology.Edges_N_Category_N_ConceptsCluster_T_ParentToChild c
+    ON a.from_id=b.to_id AND b.from_id=c.to_id WHERE a.from_id=%s AND c.from_id=%s
+    GROUP BY b.from_id
+    ORDER BY score_total DESC;
+    """
+    results = db_manager.execute_query(query, values=(concept_id, cat))
+    best_clusters = [res[0] for res in results][:top_n]
+    scores = [res[1] for res in results][:top_n]
+    return best_clusters, scores
+
+
+def get_concept_category_closest_embedding(concept_id, top_n=5, return_clusters=None):
     db_manager = DB(config['database'])
     query = """
     SELECT c.from_id, SUM(a.score) as score_total FROM 
@@ -50,7 +67,14 @@ def get_concept_category_closest_embedding(concept_id, top_n=5):
     if len(results) == 0:
         return None, None, None, None
     results = results[:top_n]
-    return [res[0] for res in results], [res[1] for res in results], None, None
+    best_cats = [res[0] for res in results]
+    scores = [res[1] for res in results]
+    if return_clusters is not None:
+        best_clusters = [get_concept_closest_cluster_of_category_embedding(concept_id, cat, top_n=return_clusters)
+                         for cat in best_cats]
+    else:
+        best_clusters = None
+    return best_cats, scores, None, best_clusters
 
 
 def get_concept_category_closest(ontology_data_obj, concept_id, avg, coeffs, top_n, use_depth_3, return_clusters,
