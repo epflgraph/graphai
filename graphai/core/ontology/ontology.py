@@ -52,7 +52,7 @@ def get_concept_closest_cluster_of_category_embedding(concept_id, cat, top_n=Non
     return best_clusters, scores
 
 
-def get_concept_category_closest_embedding(concept_id, top_n=5, return_clusters=None):
+def get_concept_category_closest_embedding(concept_id, avg='log', top_n=5, return_clusters=None):
     db_manager = DB(config['database'])
     query = """
     SELECT c.from_id, SUM(a.score) as score_total FROM 
@@ -82,14 +82,22 @@ def get_concept_category_closest(ontology_data_obj, concept_id, avg, coeffs, top
     embeddings_used = False
 
     closest, scores, d3_cat, best_clusters = (
-        ontology_data_obj.get_concept_closest_category(concept_id, avg, coeffs, top_n,
+        ontology_data_obj.get_concept_closest_category(concept_id,
+                                                       avg,
+                                                       coeffs,
+                                                       top_n,
                                                        use_depth_3=use_depth_3,
                                                        return_clusters=return_clusters)
     )
 
     if closest is None and use_embeddings:
         # Fall back to embeddings if their use is enabled AND if no closest match is found through the graph
-        closest, scores, d3_cat, best_clusters = get_concept_category_closest_embedding(concept_id, top_n=top_n)
+        closest, scores, d3_cat, best_clusters = get_concept_category_closest_embedding(
+            concept_id,
+            avg,
+            top_n=top_n,
+            return_clusters=return_clusters
+        )
         embeddings_used = True
     if closest is None:
         return {
