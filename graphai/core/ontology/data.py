@@ -171,11 +171,15 @@ def compute_average(score, n, avg):
     return score
 
 
+def ensure_nonzero_denominator(v):
+    return v if v > 0 else 1
+
+
 def compute_average_of_df(df, avg):
     df['score'] = df.apply(
         lambda x:
-        x['score'] / x['len'] if avg == 'linear'
-        else x['score'] / np.log(x['len'] + 1) if avg == 'log'
+        x['score'] / ensure_nonzero_denominator(x['len']) if avg == 'linear'
+        else x['score'] / np.log(ensure_nonzero_denominator(x['len']) + 1) if avg == 'log'
         else x['score'],
         axis=1
     )
