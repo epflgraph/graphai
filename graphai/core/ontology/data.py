@@ -978,7 +978,8 @@ class OntologyData:
         SELECT b.from_id, SUM(a.score) as score_total FROM 
         graph_ontology.Edges_N_Concept_N_Concept_T_Embeddings a
         INNER JOIN graph_ontology.Edges_N_Category_N_Concept_T_AnchorPage b
-        ON a.to_id=b.to_id WHERE a.from_id=%s
+        INNER JOIN graph_ontology.Nodes_N_Category c
+        ON a.to_id=b.to_id AND b.from_id=c.id WHERE a.from_id=%s AND c.depth=4
         GROUP BY b.from_id;
         """
         results_concepts = db_manager.execute_query(concepts_query, values=(concept_id,))
