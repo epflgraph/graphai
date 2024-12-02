@@ -7,6 +7,7 @@ from graphai.core.ontology.clustering import (
 )
 from db_cache_manager.db import DB
 from graphai.core.common.config import config
+import pandas as pd
 
 
 def recompute_clusters(ontology_data_obj, n_clusters, min_n):
@@ -42,7 +43,7 @@ def get_concept_closest_cluster_of_category_embedding(concept_id, cat, top_n=Non
     graph_ontology.Edges_N_Concept_N_Concept_T_Embeddings a
     INNER JOIN graph_ontology.Edges_N_ConceptsCluster_N_Concept_T_ParentToChild b
     INNER JOIN graph_ontology.Edges_N_Category_N_ConceptsCluster_T_ParentToChild c
-    ON a.from_id=b.to_id AND b.from_id=c.to_id WHERE a.from_id=%s AND c.from_id=%s
+    ON a.to_id=b.to_id AND b.from_id=c.to_id WHERE a.from_id=%s AND c.from_id=%s
     GROUP BY b.from_id
     ORDER BY score_total DESC;
     """
@@ -52,23 +53,37 @@ def get_concept_closest_cluster_of_category_embedding(concept_id, cat, top_n=Non
     return best_clusters, scores
 
 
-def get_concept_category_closest_embedding(concept_id, avg='log', top_n=5, return_clusters=None):
+def get_concept_category_closest_embedding(concept_id, avg='log', coeffs=(1, 10), top_n=5, return_clusters=None):
     db_manager = DB(config['database'])
-    query = """
+    concepts_query = """
     SELECT c.from_id, SUM(a.score) as score_total FROM 
     graph_ontology.Edges_N_Concept_N_Concept_T_Embeddings a
     INNER JOIN graph_ontology.Edges_N_ConceptsCluster_N_Concept_T_ParentToChild b
     INNER JOIN graph_ontology.Edges_N_Category_N_ConceptsCluster_T_ParentToChild c
-    ON a.from_id=b.to_id AND b.from_id=c.to_id WHERE a.from_id=%s
-    GROUP BY c.from_id
-    ORDER BY score_total DESC;
+    ON a.to_id=b.to_id AND b.from_id=c.to_id WHERE a.from_id=%s
+    GROUP BY c.from_id;
     """
-    results = db_manager.execute_query(query, values=(concept_id, ))
-    if len(results) == 0:
+    anchors_query = """
+    SELECT b.from_id, SUM(a.score) as score_total FROM 
+    graph_ontology.Edges_N_Concept_N_Concept_T_Embeddings a
+    INNER JOIN graph_ontology.Edges_N_Category_N_Concept_T_AnchorPage b
+    ON a.to_id=b.to_id WHERE a.from_id=%s
+    GROUP BY b.from_id;
+    """
+    results_concepts = db_manager.execute_query(concepts_query, values=(concept_id, ))
+    results_concepts = pd.DataFrame(results_concepts, columns=['category_id', 'score']).assign(coeff=coeffs[1])
+    results_anchors = db_manager.execute_query(anchors_query, values=(concept_id, ))
+    results_anchors = pd.DataFrame(results_anchors, columns=['category_id', 'score']).assign(coeff=coeffs[0])
+    results_combined = pd.concat([results_concepts, results_anchors], axis=0)
+    results_combined['score'] = results_combined['score'] * results_combined['coeff']
+    results_combined = results_combined[['category_id', 'score']].groupby('category_id').\
+        sum().reset_index().sort_values('score', ascending=False)
+    results_combined['score'] = results_combined['score'] / sum(coeffs)
+    if results_combined.shape[0] == 0:
         return None, None, None, None
-    results = results[:top_n]
-    best_cats = [res[0] for res in results]
-    scores = [res[1] for res in results]
+    results_combined = results_combined.head(top_n)
+    best_cats = results_combined.category_id.values.tolist()
+    scores = results_combined.score.values.tolist()
     if return_clusters is not None:
         best_clusters = [get_concept_closest_cluster_of_category_embedding(concept_id, cat, top_n=return_clusters)
                          for cat in best_cats]
@@ -95,6 +110,7 @@ def get_concept_category_closest(ontology_data_obj, concept_id, avg, coeffs, top
         closest, scores, d3_cat, best_clusters = get_concept_category_closest_embedding(
             concept_id,
             avg,
+            coeffs,
             top_n=top_n,
             return_clusters=return_clusters
         )
