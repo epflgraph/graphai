@@ -1005,7 +1005,7 @@ class OntologyData:
                                                                                      cat,
                                                                                      top_n=return_clusters)
                              for cat in best_cats
-            ]
+                             ]
         else:
             best_clusters = None
         return best_cats, scores, None, best_clusters
