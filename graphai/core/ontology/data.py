@@ -171,6 +171,17 @@ def compute_average(score, n, avg):
     return score
 
 
+def compute_average_of_df(df, avg):
+    df['score'] = df.apply(
+        lambda x:
+        x['score'] / x['len'] if avg == 'linear'
+        else x['score'] / np.log(x['len'] + 1) if avg == 'log'
+        else x['score'],
+        axis=1
+    )
+    return df
+
+
 def average_and_combine(s1, s2, l1, l2, avg, coeffs, skip_empty=False):
     assert coeffs is None or (all([c >= 0 for c in coeffs]) and sum(coeffs) > 0)
     if s2 is None or l2 is None:
@@ -935,6 +946,81 @@ class OntologyData:
         else:
             best_clusters = None
         return best_cats, best_scores, selected_d3_category, best_clusters
+
+    def get_concept_category_closest_embedding(self, concept_id, avg='log', coeffs=(1, 10),
+                                               top_n=5, return_clusters=None):
+        self.load_data()
+        d4_cat_id_to_index = self.symmetric_concept_concept_matrix['d4_cat_id_to_index']
+        anchor_lengths = self.symmetric_concept_concept_matrix['d4_cat_anchors_lengths']
+        concept_lengths = self.symmetric_concept_concept_matrix['d4_cat_concepts_lengths']
+        db_manager = DB(config['database'])
+        concepts_query = """
+        SELECT c.from_id, SUM(a.score) as score_total FROM 
+        graph_ontology.Edges_N_Concept_N_Concept_T_Embeddings a
+        INNER JOIN graph_ontology.Edges_N_ConceptsCluster_N_Concept_T_ParentToChild b
+        INNER JOIN graph_ontology.Edges_N_Category_N_ConceptsCluster_T_ParentToChild c
+        ON a.to_id=b.to_id AND b.from_id=c.to_id WHERE a.from_id=%s
+        GROUP BY c.from_id;
+        """
+        anchors_query = """
+        SELECT b.from_id, SUM(a.score) as score_total FROM 
+        graph_ontology.Edges_N_Concept_N_Concept_T_Embeddings a
+        INNER JOIN graph_ontology.Edges_N_Category_N_Concept_T_AnchorPage b
+        ON a.to_id=b.to_id WHERE a.from_id=%s
+        GROUP BY b.from_id;
+        """
+        results_concepts = db_manager.execute_query(concepts_query, values=(concept_id,))
+        results_concepts = pd.DataFrame(results_concepts, columns=['category_id', 'score']).assign(coeff=coeffs[1])
+        results_concepts['len'] = results_concepts['category_id'].apply(
+            lambda x: concept_lengths[0, d4_cat_id_to_index[x]]
+        )
+        results_anchors = db_manager.execute_query(anchors_query, values=(concept_id,))
+        results_anchors = pd.DataFrame(results_anchors, columns=['category_id', 'score']).assign(coeff=coeffs[0])
+        results_anchors['len'] = results_anchors['category_id'].apply(
+            lambda x: anchor_lengths[0, d4_cat_id_to_index[x]]
+        )
+        results_combined = pd.concat([results_concepts, results_anchors], axis=0)
+        results_combined = compute_average_of_df(results_combined, avg)
+        results_combined['score'] = results_combined['score'] * results_combined['coeff'] / sum(coeffs)
+        results_combined = results_combined[['category_id', 'score']].groupby('category_id'). \
+            sum().reset_index().sort_values('score', ascending=False).head(top_n)
+        if results_combined.shape[0] == 0:
+            return None, None, None, None
+        best_cats = results_combined.category_id.values.tolist()
+        scores = results_combined.score.values.tolist()
+        if return_clusters is not None:
+            best_clusters = [self.get_concept_closest_cluster_of_category_embedding(concept_id,
+                                                                                    cat,
+                                                                                    top_n=return_clusters)
+                             for cat in best_cats
+            ]
+        else:
+            best_clusters = None
+        return best_cats, scores, None, best_clusters
+
+    def get_concept_closest_cluster_of_category_embedding(self, concept_id, cat, avg='log', top_n=None):
+        self.load_data()
+        cluster_id_to_index = self.symmetric_concept_concept_matrix['cluster_id_to_index']
+        cluster_lengths = self.symmetric_concept_concept_matrix['cluster_concepts_lengths']
+        db_manager = DB(config['database'])
+        query = """
+        SELECT b.from_id, SUM(a.score) as score_total FROM 
+        graph_ontology.Edges_N_Concept_N_Concept_T_Embeddings a
+        INNER JOIN graph_ontology.Edges_N_ConceptsCluster_N_Concept_T_ParentToChild b
+        INNER JOIN graph_ontology.Edges_N_Category_N_ConceptsCluster_T_ParentToChild c
+        ON a.to_id=b.to_id AND b.from_id=c.to_id WHERE a.from_id=%s AND c.from_id=%s
+        GROUP BY b.from_id
+        ORDER BY score_total DESC;
+        """
+        results = db_manager.execute_query(query, values=(concept_id, cat))
+        results = pd.DataFrame(results, columns=['cluster_id', 'score'])
+        results['len'] = results['cluster_id'].apply(lambda x: cluster_lengths[0, cluster_id_to_index[x]])
+        results = compute_average_of_df(results, avg)
+        results = (results[['cluster_id', 'score']].groupby('cluster_id').
+                   sum().reset_index().sort_values('score', ascending=False)).head(top_n)
+        best_clusters = results.cluster_id.values.tolist()
+        scores = results.score.values.tolist()
+        return best_clusters, scores
 
     def get_cluster_closest_category(self, cluster_id, avg='log', coeffs=(1, 10), top_n=1,
                                      use_depth_3=False):
