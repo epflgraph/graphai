@@ -339,7 +339,14 @@ class NearestCategoryElementWithClusters(NearestCategoryElement):
     )
 
 
-class GraphConceptNearestCategoryResponse(BaseModel):
+class EmbeddingEnabledNearestEntityResponse(BaseModel):
+    embeddings_used: bool = Field(
+        title="Embeddings used",
+        description="A flag that indicates whether embeddings were used for calculating the returned result."
+    )
+
+
+class GraphConceptNearestCategoryResponse(EmbeddingEnabledNearestEntityResponse):
     scores: Union[None, List[NearestCategoryElementWithClusters]] = Field(
         None, title="Closest matches"
     )
@@ -362,11 +369,6 @@ class GraphConceptNearestCategoryResponse(BaseModel):
         None, title="Existing category",
         description="If the requested concept already exists as part of the ontology, this value will reflect "
                     "its existing parent category."
-    )
-
-    embeddings_used: bool = Field(
-        title="Embeddings used",
-        description="A flag that indicates whether embeddings were used for calculating the returned result."
     )
 
 
@@ -399,8 +401,15 @@ class GraphNearestConceptRequest(BaseModel):
         default=1
     )
 
+    use_embeddings: bool = Field(
+        title="Use embeddings",
+        description="Use embeddings. Currently, embeddings are only used "
+                    "as a fallback if nothing is found through the graph.",
+        default=False
+    )
 
-class GraphNearestConceptResponse(BaseModel):
+
+class GraphNearestConceptResponse(EmbeddingEnabledNearestEntityResponse):
     closest: Union[None, List[str]] = Field(
         None, title="Closest matches"
     )

@@ -148,8 +148,8 @@ def get_cluster_category_closest_task(self, cluster_id, avg='log', coeffs=(1, 10
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 5},
              name='ontology_6.concept_closest_concept_graph_task',
              ignore_result=False, ontology_data_obj=ontology_data)
-def get_concept_concept_closest_task(self, concept_id, top_n=1):
-    return get_concept_concept_closest(self.ontology_data_obj, concept_id, top_n)
+def get_concept_concept_closest_task(self, concept_id, top_n=1, use_embeddings=False):
+    return get_concept_concept_closest(self.ontology_data_obj, concept_id, top_n, use_embeddings)
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 5},

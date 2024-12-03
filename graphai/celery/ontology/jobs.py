@@ -77,8 +77,8 @@ def cluster_nearest_category_job(src, avg, coeffs, top_n, use_depth_3):
     return res
 
 
-def concept_nearest_concept_job(src, top_n):
-    task = tasks.get_concept_concept_closest_task.s(src, top_n)
+def concept_nearest_concept_job(src, top_n, use_embeddings=False):
+    task = tasks.get_concept_concept_closest_task.s(src, top_n, use_embeddings)
     res = task.apply_async(priority=6).get(timeout=30)
     return res
 

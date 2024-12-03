@@ -832,6 +832,8 @@ class OntologyData:
         WHERE from_id=%s;
         """
         results = db_manager.execute_query(query, values=(concept_id, ))
+        if len(results) == 0:
+            return None, None
         results = pd.DataFrame(results, columns=['concept_id', 'score'])
         results = results.sort_values('score', ascending=False).head(top_n)
         return results.concept_id.values.tolist(), results.score.values.tolist()

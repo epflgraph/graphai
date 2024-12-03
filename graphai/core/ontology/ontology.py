@@ -134,11 +134,16 @@ def get_cluster_category_closest(ontology_data_obj, cluster_id, avg, coeffs, top
     }
 
 
-def get_concept_concept_closest(ontology_data_obj, concept_id, top_n):
+def get_concept_concept_closest(ontology_data_obj, concept_id, top_n, use_embeddings=False):
+    embeddings_used = False
     closest, scores = ontology_data_obj.get_concept_closest_concept(concept_id, top_n)
+    if closest is None and use_embeddings:
+        closest, scores = ontology_data_obj.get_concept_closest_concept_embedding(concept_id, top_n)
+        embeddings_used = True
     return {
         'closest': closest,
-        'scores': scores
+        'scores': scores,
+        'embeddings_used': embeddings_used
     }
 
 
