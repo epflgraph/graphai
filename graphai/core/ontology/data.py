@@ -221,6 +221,27 @@ def embeddings_table_exists():
     return result == 1
 
 
+def combine_concept_and_anchor_scores(concepts_query, anchors_query, entity_id, avg, coeffs, top_n,
+                                      d4_cat_id_to_index, concept_lengths, anchor_lengths):
+    db_manager = DB(config['database'])
+    results_concepts = db_manager.execute_query(concepts_query, values=(entity_id,))
+    results_concepts = pd.DataFrame(results_concepts, columns=['category_id', 'score']).assign(coeff=coeffs[1])
+    results_concepts['len'] = results_concepts['category_id'].apply(
+        lambda x: concept_lengths[0, d4_cat_id_to_index[x]]
+    )
+    results_anchors = db_manager.execute_query(anchors_query, values=(entity_id,))
+    results_anchors = pd.DataFrame(results_anchors, columns=['category_id', 'score']).assign(coeff=coeffs[0])
+    results_anchors['len'] = results_anchors['category_id'].apply(
+        lambda x: anchor_lengths[0, d4_cat_id_to_index[x]]
+    )
+    results_combined = pd.concat([results_concepts, results_anchors], axis=0)
+    results_combined = compute_average_of_df(results_combined, avg)
+    results_combined['score'] = results_combined['score'] * results_combined['coeff'] / sum(coeffs)
+    results_combined = results_combined[['category_id', 'score']].groupby('category_id'). \
+        sum().reset_index().sort_values('score', ascending=False).head(top_n)
+    return results_combined
+
+
 class OntologyData:
     def __init__(self, test_mode=False, **kwargs):
         self.loaded = False
@@ -981,7 +1002,6 @@ class OntologyData:
         d4_cat_id_to_index = self.symmetric_concept_concept_matrix['d4_cat_id_to_index']
         anchor_lengths = self.symmetric_concept_concept_matrix['d4_cat_anchors_lengths']
         concept_lengths = self.symmetric_concept_concept_matrix['d4_cat_concepts_lengths']
-        db_manager = DB(config['database'])
         # Query to get closest category based on category concepts
         concepts_query = """
         SELECT c.from_id, SUM(a.score) as score_total FROM 
@@ -1000,21 +1020,9 @@ class OntologyData:
         ON a.to_id=b.to_id AND b.from_id=c.id WHERE a.from_id=%s AND c.depth=4
         GROUP BY b.from_id;
         """
-        results_concepts = db_manager.execute_query(concepts_query, values=(concept_id,))
-        results_concepts = pd.DataFrame(results_concepts, columns=['category_id', 'score']).assign(coeff=coeffs[1])
-        results_concepts['len'] = results_concepts['category_id'].apply(
-            lambda x: concept_lengths[0, d4_cat_id_to_index[x]]
-        )
-        results_anchors = db_manager.execute_query(anchors_query, values=(concept_id,))
-        results_anchors = pd.DataFrame(results_anchors, columns=['category_id', 'score']).assign(coeff=coeffs[0])
-        results_anchors['len'] = results_anchors['category_id'].apply(
-            lambda x: anchor_lengths[0, d4_cat_id_to_index[x]]
-        )
-        results_combined = pd.concat([results_concepts, results_anchors], axis=0)
-        results_combined = compute_average_of_df(results_combined, avg)
-        results_combined['score'] = results_combined['score'] * results_combined['coeff'] / sum(coeffs)
-        results_combined = results_combined[['category_id', 'score']].groupby('category_id'). \
-            sum().reset_index().sort_values('score', ascending=False).head(top_n)
+        results_combined = combine_concept_and_anchor_scores(concepts_query, anchors_query,
+                                                             concept_id, avg, coeffs, top_n,
+                                                             d4_cat_id_to_index, concept_lengths, anchor_lengths)
         if results_combined.shape[0] == 0:
             return None, None, None, None
         best_cats = results_combined.category_id.values.tolist()
@@ -1113,6 +1121,49 @@ class OntologyData:
             s1, s2, l1, l2, avg, coeffs, use_depth_3, top_n, d4_cat_indices
         )
         return best_cats, best_scores, selected_d3_category
+
+    def get_cluster_closest_category_embedding(self, cluster_id, avg='log', coeffs=(1, 10), top_n=1):
+        """
+        Finds the closest category to a custom cluster, provided as a list of concepts
+        Args:
+            concept_ids: List of concept IDs
+            avg: Averaging method. Options are ('linear', 'log', and 'none')
+            coeffs: Coefficients for averaging of the scores anchors and concepts
+            top_n: Number of top categories to return
+            use_depth_3: Whether to go through depth-3 or directly use depth-4
+
+        Returns:
+            Top categories, their scores, and parent depth-3 category if use_depth_3==True.
+        """
+        self.load_data()
+        d4_cat_id_to_index = self.symmetric_concept_concept_matrix['d4_cat_id_to_index']
+        anchor_lengths = self.symmetric_concept_concept_matrix['d4_cat_anchors_lengths']
+        concept_lengths = self.symmetric_concept_concept_matrix['d4_cat_concepts_lengths']
+        concepts_query = """
+        SELECT c.from_id, SUM(a.score) as score_total FROM 
+        graph_ontology.Edges_N_ConceptsCluster_N_Concept_T_ParentToChild cc
+        INNER JOIN graph_ontology.Edges_N_Concept_N_Concept_T_Embeddings a
+        INNER JOIN graph_ontology.Edges_N_ConceptsCluster_N_Concept_T_ParentToChild b
+        INNER JOIN graph_ontology.Edges_N_Category_N_ConceptsCluster_T_ParentToChild c
+        ON cc.to_id=a.from_id AND a.to_id=b.to_id AND b.from_id=c.to_id WHERE cc.from_id=%s
+        GROUP BY c.from_id;
+        """
+        # Query to get closest category based on category anchor pages
+        anchors_query = """
+        SELECT b.from_id, SUM(a.score) as score_total FROM 
+        graph_ontology.Edges_N_ConceptsCluster_N_Concept_T_ParentToChild cc
+        INNER JOIN graph_ontology.Edges_N_Concept_N_Concept_T_Embeddings a
+        INNER JOIN graph_ontology.Edges_N_Category_N_Concept_T_AnchorPage b
+        INNER JOIN graph_ontology.Nodes_N_Category c
+        ON cc.to_id=a.from_id AND a.to_id=b.to_id AND b.from_id=c.id WHERE cc.from_id=%s AND c.depth=4
+        GROUP BY b.from_id;
+        """
+        results_combined = combine_concept_and_anchor_scores(concepts_query, anchors_query,
+                                                             cluster_id, avg, coeffs, top_n,
+                                                             d4_cat_id_to_index, concept_lengths, anchor_lengths)
+        best_cats = results_combined.category_id.values.tolist()
+        best_scores = results_combined.score.values.tolist()
+        return best_cats, best_scores, None
 
     def get_category_closest_category(self, category_id, avg='log', coeffs=(1, 10), top_n=1,
                                       use_depth_3=False):
