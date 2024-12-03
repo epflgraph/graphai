@@ -824,6 +824,18 @@ class OntologyData:
             best_scores = [results[i] for i in best_concept_indices]
             return best_concepts, best_scores
 
+    def get_concept_closest_concept_embedding(self, concept_id, top_n=1):
+        self.load_data()
+        db_manager = DB(config['database'])
+        query = """
+        SELECT to_id, score FROM graph_ontology.Edges_N_Concept_N_Concept_T_Embeddings
+        WHERE from_id=%s;
+        """
+        results = db_manager.execute_query(query, values=(concept_id, ))
+        results = pd.DataFrame(results, columns=['concept_id', 'score'])
+        results = results.sort_values('score', ascending=False).head(top_n)
+        return results.concept_id.values.tolist(), results.score.values.tolist()
+
     def _get_concept_closest_cluster_of_category(self, concept_id, category_id, avg='linear', top_n=3):
         """
         For a given concept and category, finds the top clusters under that category in terms of
