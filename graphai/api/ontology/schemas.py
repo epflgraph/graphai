@@ -274,6 +274,13 @@ class GraphNearestCategoryRequest(BaseModel):
         default=False
     )
 
+    use_embeddings: bool = Field(
+        title="Use embeddings",
+        description="Use embeddings. Currently, embeddings are only used "
+                    "as a fallback if nothing is found through the graph.",
+        default=False
+    )
+
 
 class GraphConceptNearestCategoryRequest(GraphNearestCategoryRequest):
     src: str = Field(
@@ -285,13 +292,6 @@ class GraphConceptNearestCategoryRequest(GraphNearestCategoryRequest):
         description="If not null, determines the k for which the top k closest clusters in "
                     "each of the top n categories are returned. If null, clusters are not returned.",
         default=3
-    )
-
-    use_embeddings: bool = Field(
-        title="Use embeddings",
-        description="Use embeddings. Currently, embeddings are only used "
-                    "as a fallback if nothing is found through the graph.",
-        default=False
     )
 
 

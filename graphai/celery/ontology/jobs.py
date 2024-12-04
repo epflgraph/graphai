@@ -70,9 +70,9 @@ def concept_nearest_category_job(src, avg, coeffs, top_n, use_depth_3, return_cl
     return res
 
 
-def cluster_nearest_category_job(src, avg, coeffs, top_n, use_depth_3):
+def cluster_nearest_category_job(src, avg, coeffs, top_n, use_depth_3, use_embeddings=False):
     assert coeffs is None or len(coeffs) == 2
-    task = tasks.get_cluster_category_closest_task.s(src, avg, coeffs, top_n, use_depth_3)
+    task = tasks.get_cluster_category_closest_task.s(src, avg, coeffs, top_n, use_depth_3, use_embeddings)
     res = task.apply_async(priority=6).get(timeout=30)
     return res
 

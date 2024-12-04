@@ -106,14 +106,16 @@ async def compute_graph_cluster_nearest_category(data: schemas.GraphClusterNeare
     coeffs = data.coeffs
     top_n = data.top_n
     use_depth_3 = data.top_down_search
-    return jobs.cluster_nearest_category_job(src, avg, coeffs, top_n, use_depth_3)
+    use_embeddings = data.use_embeddings
+    return jobs.cluster_nearest_category_job(src, avg, coeffs, top_n, use_depth_3, use_embeddings)
 
 
 @router.post('/nearest_neighbor/concept/concept', response_model=schemas.GraphNearestConceptResponse)
 async def compute_graph_nearest_concept(data: schemas.GraphNearestConceptRequest):
     src = data.src
     top_n = data.top_n
-    return jobs.concept_nearest_concept_job(src, top_n)
+    use_embeddings = data.use_embeddings
+    return jobs.concept_nearest_concept_job(src, top_n, use_embeddings)
 
 
 @router.post('/break_up_cluster', response_model=schemas.BreakUpClustersResponse)
