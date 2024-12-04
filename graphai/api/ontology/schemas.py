@@ -372,7 +372,7 @@ class GraphConceptNearestCategoryResponse(EmbeddingEnabledNearestEntityResponse)
     )
 
 
-class GraphClusterNearestCategoryResponse(BaseModel):
+class GraphClusterNearestCategoryResponse(EmbeddingEnabledNearestEntityResponse):
     scores: Union[None, List[NearestCategoryElement]] = Field(
         None, title="Closest matches"
     )
