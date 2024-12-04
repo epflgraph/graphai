@@ -103,6 +103,10 @@ def get_cluster_category_closest(ontology_data_obj, cluster_id, avg, coeffs, top
             ontology_data_obj.get_custom_cluster_closest_category(cluster_id, avg, coeffs, top_n,
                                                                   use_depth_3=use_depth_3)
         )
+        if closest is None and use_embeddings:
+            closest, scores, d3_cat = (
+                ontology_data_obj.get_custom_cluster_closest_category_embedding(cluster_id, avg, coeffs, top_n)
+            )
     else:
         # Otherwise, it's a single string, and represents an existing cluster
         closest, scores, d3_cat = (
