@@ -1023,7 +1023,7 @@ class OntologyData:
         concept_lengths = self.symmetric_concept_concept_matrix['d4_cat_concepts_lengths']
         # Query to get closest category based on category concepts
         concepts_query = """
-        SELECT c.from_id, SUM(a.score) as score_total FROM 
+        SELECT c.from_id, SUM(a.score) as score_total FROM
         graph_ontology.Edges_N_Concept_N_Concept_T_Embeddings a
         INNER JOIN graph_ontology.Edges_N_ConceptsCluster_N_Concept_T_ParentToChild b
         INNER JOIN graph_ontology.Edges_N_Category_N_ConceptsCluster_T_ParentToChild c
@@ -1032,7 +1032,7 @@ class OntologyData:
         """
         # Query to get closest category based on category anchor pages
         anchors_query = """
-        SELECT b.from_id, SUM(a.score) as score_total FROM 
+        SELECT b.from_id, SUM(a.score) as score_total FROM
         graph_ontology.Edges_N_Concept_N_Concept_T_Embeddings a
         INNER JOIN graph_ontology.Edges_N_Category_N_Concept_T_AnchorPage b
         INNER JOIN graph_ontology.Nodes_N_Category c
@@ -1061,7 +1061,7 @@ class OntologyData:
         cluster_lengths = self.symmetric_concept_concept_matrix['cluster_concepts_lengths']
         db_manager = DB(config['database'])
         query = """
-        SELECT b.from_id, SUM(a.score) as score_total FROM 
+        SELECT b.from_id, SUM(a.score) as score_total FROM
         graph_ontology.Edges_N_Concept_N_Concept_T_Embeddings a
         INNER JOIN graph_ontology.Edges_N_ConceptsCluster_N_Concept_T_ParentToChild b
         INNER JOIN graph_ontology.Edges_N_Category_N_ConceptsCluster_T_ParentToChild c
@@ -1159,7 +1159,7 @@ class OntologyData:
         anchor_lengths = self.symmetric_concept_concept_matrix['d4_cat_anchors_lengths']
         concept_lengths = self.symmetric_concept_concept_matrix['d4_cat_concepts_lengths']
         concepts_query = """
-        SELECT c.from_id, SUM(a.score) as score_total FROM 
+        SELECT c.from_id, SUM(a.score) as score_total FROM
         graph_ontology.Edges_N_ConceptsCluster_N_Concept_T_ParentToChild cc
         INNER JOIN graph_ontology.Edges_N_Concept_N_Concept_T_Embeddings a
         INNER JOIN graph_ontology.Edges_N_ConceptsCluster_N_Concept_T_ParentToChild b
@@ -1169,7 +1169,7 @@ class OntologyData:
         """
         # Query to get closest category based on category anchor pages
         anchors_query = """
-        SELECT b.from_id, SUM(a.score) as score_total FROM 
+        SELECT b.from_id, SUM(a.score) as score_total FROM
         graph_ontology.Edges_N_ConceptsCluster_N_Concept_T_ParentToChild cc
         INNER JOIN graph_ontology.Edges_N_Concept_N_Concept_T_Embeddings a
         INNER JOIN graph_ontology.Edges_N_Category_N_Concept_T_AnchorPage b
@@ -1202,17 +1202,17 @@ class OntologyData:
         anchor_lengths = self.symmetric_concept_concept_matrix['d4_cat_anchors_lengths']
         concept_lengths = self.symmetric_concept_concept_matrix['d4_cat_concepts_lengths']
         concepts_query = f"""
-        SELECT c.from_id, SUM(a.score) as score_total FROM 
+        SELECT c.from_id, SUM(a.score) as score_total FROM
         graph_ontology.Edges_N_Concept_N_Concept_T_Embeddings a
         INNER JOIN graph_ontology.Edges_N_ConceptsCluster_N_Concept_T_ParentToChild b
         INNER JOIN graph_ontology.Edges_N_Category_N_ConceptsCluster_T_ParentToChild c
-        ON a.to_id=b.to_id AND b.from_id=c.to_id 
+        ON a.to_id=b.to_id AND b.from_id=c.to_id
         WHERE a.from_id IN ({','.join(["%s"] * len(concept_ids))})
         GROUP BY c.from_id;
         """
         # Query to get closest category based on category anchor pages
         anchors_query = f"""
-        SELECT b.from_id, SUM(a.score) as score_total FROM 
+        SELECT b.from_id, SUM(a.score) as score_total FROM
         graph_ontology.Edges_N_Concept_N_Concept_T_Embeddings a
         INNER JOIN graph_ontology.Edges_N_Category_N_Concept_T_AnchorPage b
         INNER JOIN graph_ontology.Nodes_N_Category c
