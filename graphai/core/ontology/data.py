@@ -1211,7 +1211,7 @@ class OntologyData:
         GROUP BY c.from_id;
         """
         # Query to get closest category based on category anchor pages
-        anchors_query = """
+        anchors_query = f"""
         SELECT b.from_id, SUM(a.score) as score_total FROM 
         graph_ontology.Edges_N_Concept_N_Concept_T_Embeddings a
         INNER JOIN graph_ontology.Edges_N_Category_N_Concept_T_AnchorPage b
