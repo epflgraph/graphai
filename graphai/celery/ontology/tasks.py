@@ -132,24 +132,25 @@ def get_concept_concept_similarity_task(self, concept_1_id, concept_2_id):
              name='ontology_6.concept_closest_category_graph_task',
              ignore_result=False, ontology_data_obj=ontology_data)
 def get_concept_category_closest_task(self, concept_id, avg='log', coeffs=(1, 10), top_n=1,
-                                      use_depth_3=False, return_clusters=None):
+                                      use_depth_3=False, return_clusters=None, use_embeddings=False):
     return get_concept_category_closest(self.ontology_data_obj, concept_id, avg, coeffs,
-                                        top_n, use_depth_3, return_clusters)
+                                        top_n, use_depth_3, return_clusters, use_embeddings)
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 5},
              name='ontology_6.cluster_closest_category_graph_task',
              ignore_result=False, ontology_data_obj=ontology_data)
 def get_cluster_category_closest_task(self, cluster_id, avg='log', coeffs=(1, 10), top_n=1,
-                                      use_depth_3=False):
-    return get_cluster_category_closest(self.ontology_data_obj, cluster_id, avg, coeffs, top_n, use_depth_3)
+                                      use_depth_3=False, use_embeddings=False):
+    return get_cluster_category_closest(self.ontology_data_obj, cluster_id, avg, coeffs, top_n, use_depth_3,
+                                        use_embeddings)
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 5},
              name='ontology_6.concept_closest_concept_graph_task',
              ignore_result=False, ontology_data_obj=ontology_data)
-def get_concept_concept_closest_task(self, concept_id, top_n=1):
-    return get_concept_concept_closest(self.ontology_data_obj, concept_id, top_n)
+def get_concept_concept_closest_task(self, concept_id, top_n=1, use_embeddings=False):
+    return get_concept_concept_closest(self.ontology_data_obj, concept_id, top_n, use_embeddings)
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 5},

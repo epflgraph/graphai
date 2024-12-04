@@ -274,6 +274,13 @@ class GraphNearestCategoryRequest(BaseModel):
         default=False
     )
 
+    use_embeddings: bool = Field(
+        title="Use embeddings",
+        description="Use embeddings. Currently, embeddings are only used "
+                    "as a fallback if nothing is found through the graph.",
+        default=False
+    )
+
 
 class GraphConceptNearestCategoryRequest(GraphNearestCategoryRequest):
     src: str = Field(
@@ -332,7 +339,14 @@ class NearestCategoryElementWithClusters(NearestCategoryElement):
     )
 
 
-class GraphConceptNearestCategoryResponse(BaseModel):
+class EmbeddingEnabledNearestEntityResponse(BaseModel):
+    embeddings_used: bool = Field(
+        title="Embeddings used",
+        description="A flag that indicates whether embeddings were used for calculating the returned result."
+    )
+
+
+class GraphConceptNearestCategoryResponse(EmbeddingEnabledNearestEntityResponse):
     scores: Union[None, List[NearestCategoryElementWithClusters]] = Field(
         None, title="Closest matches"
     )
@@ -358,7 +372,7 @@ class GraphConceptNearestCategoryResponse(BaseModel):
     )
 
 
-class GraphClusterNearestCategoryResponse(BaseModel):
+class GraphClusterNearestCategoryResponse(EmbeddingEnabledNearestEntityResponse):
     scores: Union[None, List[NearestCategoryElement]] = Field(
         None, title="Closest matches"
     )
@@ -387,8 +401,15 @@ class GraphNearestConceptRequest(BaseModel):
         default=1
     )
 
+    use_embeddings: bool = Field(
+        title="Use embeddings",
+        description="Use embeddings. Currently, embeddings are only used "
+                    "as a fallback if nothing is found through the graph.",
+        default=False
+    )
 
-class GraphNearestConceptResponse(BaseModel):
+
+class GraphNearestConceptResponse(EmbeddingEnabledNearestEntityResponse):
     closest: Union[None, List[str]] = Field(
         None, title="Closest matches"
     )

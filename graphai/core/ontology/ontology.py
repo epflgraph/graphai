@@ -33,18 +33,36 @@ def recompute_clusters(ontology_data_obj, n_clusters, min_n):
             'impurity_count': impurity_count, 'impurity_proportion': impurity_proportion}
 
 
-def get_concept_category_closest(ontology_data_obj, concept_id, avg, coeffs, top_n, use_depth_3, return_clusters):
+def get_concept_category_closest(ontology_data_obj, concept_id, avg, coeffs, top_n, use_depth_3, return_clusters,
+                                 use_embeddings=False):
+    embeddings_used = False
+
     closest, scores, d3_cat, best_clusters = (
-        ontology_data_obj.get_concept_closest_category(concept_id, avg, coeffs, top_n,
+        ontology_data_obj.get_concept_closest_category(concept_id,
+                                                       avg,
+                                                       coeffs,
+                                                       top_n,
                                                        use_depth_3=use_depth_3,
                                                        return_clusters=return_clusters)
     )
+
+    if closest is None and use_embeddings:
+        # Fall back to embeddings if their use is enabled AND if no closest match is found through the graph
+        closest, scores, d3_cat, best_clusters = ontology_data_obj.get_concept_category_closest_embedding(
+            concept_id,
+            avg,
+            coeffs,
+            top_n,
+            return_clusters=return_clusters
+        )
+        embeddings_used = True
     if closest is None:
         return {
             'scores': None,
             'parent_category': None,
             'valid': False,
-            'existing_label': None
+            'existing_label': None,
+            'embeddings_used': embeddings_used
         }
     result_list = list()
     for i in range(len(closest)):
@@ -70,28 +88,41 @@ def get_concept_category_closest(ontology_data_obj, concept_id, avg, coeffs, top
         'scores': result_list,
         'parent_category': d3_cat,
         'valid': scores[0] > 0,
-        'existing_label': existing_label
+        'existing_label': existing_label,
+        'embeddings_used': embeddings_used
     }
 
 
-def get_cluster_category_closest(ontology_data_obj, cluster_id, avg, coeffs, top_n, use_depth_3):
+def get_cluster_category_closest(ontology_data_obj, cluster_id, avg, coeffs, top_n, use_depth_3, use_embeddings=False):
+    embeddings_used = False
     if isinstance(cluster_id, list):
         # If it's a list, it's assumed to be a list of concepts (i.e. a "custom" cluster)
         closest, scores, d3_cat = (
             ontology_data_obj.get_custom_cluster_closest_category(cluster_id, avg, coeffs, top_n,
                                                                   use_depth_3=use_depth_3)
         )
+        if closest is None and use_embeddings:
+            closest, scores, d3_cat = (
+                ontology_data_obj.get_custom_cluster_closest_category_embedding(cluster_id, avg, coeffs, top_n)
+            )
+            embeddings_used = True
     else:
         # Otherwise, it's a single string, and represents an existing cluster
         closest, scores, d3_cat = (
             ontology_data_obj.get_cluster_closest_category(cluster_id, avg, coeffs, top_n,
                                                            use_depth_3=use_depth_3)
         )
+        if closest is None and use_embeddings:
+            closest, scores, d3_cat = (
+                ontology_data_obj.get_cluster_closest_category_embedding(cluster_id, avg, coeffs, top_n)
+            )
+            embeddings_used = True
     if closest is None:
         return {
             'scores': None,
             'parent_category': None,
-            'existing_label': None
+            'existing_label': None,
+            'embeddings_used': embeddings_used
         }
     result_list = [
         {
@@ -108,15 +139,21 @@ def get_cluster_category_closest(ontology_data_obj, cluster_id, avg, coeffs, top
     return {
         'scores': result_list,
         'parent_category': d3_cat,
-        'existing_label': existing_label
+        'existing_label': existing_label,
+        'embeddings_used': embeddings_used
     }
 
 
-def get_concept_concept_closest(ontology_data_obj, concept_id, top_n):
+def get_concept_concept_closest(ontology_data_obj, concept_id, top_n, use_embeddings=False):
+    embeddings_used = False
     closest, scores = ontology_data_obj.get_concept_closest_concept(concept_id, top_n)
+    if closest is None and use_embeddings:
+        closest, scores = ontology_data_obj.get_concept_closest_concept_embedding(concept_id, top_n)
+        embeddings_used = True
     return {
         'closest': closest,
-        'scores': scores
+        'scores': scores,
+        'embeddings_used': embeddings_used
     }
 
 
