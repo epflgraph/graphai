@@ -5,9 +5,6 @@ from graphai.core.ontology.clustering import (
     convert_cluster_labels_to_dict,
     assign_to_categories_using_existing
 )
-from db_cache_manager.db import DB
-from graphai.core.common.config import config
-import pandas as pd
 
 
 def recompute_clusters(ontology_data_obj, n_clusters, min_n):
