@@ -207,8 +207,38 @@ graph (represented by an adjacency matrix)
 <dd></dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="graphai.core.ontology.data.ensure_nonzero_denominator">
+<span class="sig-prename descclassname"><span class="pre">graphai.core.ontology.data.</span></span><span class="sig-name descname"><span class="pre">ensure_nonzero_denominator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">v</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.ontology.data.ensure_nonzero_denominator" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.core.ontology.data.compute_average_of_df">
+<span class="sig-prename descclassname"><span class="pre">graphai.core.ontology.data.</span></span><span class="sig-name descname"><span class="pre">compute_average_of_df</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">avg</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.ontology.data.compute_average_of_df" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="graphai.core.ontology.data.average_and_combine">
 <span class="sig-prename descclassname"><span class="pre">graphai.core.ontology.data.</span></span><span class="sig-name descname"><span class="pre">average_and_combine</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">s2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">l1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">l2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">avg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coeffs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skip_empty</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.ontology.data.average_and_combine" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.core.ontology.data.embeddings_table_exists">
+<span class="sig-prename descclassname"><span class="pre">graphai.core.ontology.data.</span></span><span class="sig-name descname"><span class="pre">embeddings_table_exists</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.ontology.data.embeddings_table_exists" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.core.ontology.data.execute_single_entity_concepts_and_anchors_query">
+<span class="sig-prename descclassname"><span class="pre">graphai.core.ontology.data.</span></span><span class="sig-name descname"><span class="pre">execute_single_entity_concepts_and_anchors_query</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">concepts_query</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">anchors_query</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">entity_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.ontology.data.execute_single_entity_concepts_and_anchors_query" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.core.ontology.data.execute_multi_entity_concepts_and_anchors_query">
+<span class="sig-prename descclassname"><span class="pre">graphai.core.ontology.data.</span></span><span class="sig-name descname"><span class="pre">execute_multi_entity_concepts_and_anchors_query</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">concepts_query</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">anchors_query</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">entity_ids</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.ontology.data.execute_multi_entity_concepts_and_anchors_query" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.core.ontology.data.combine_concept_and_anchor_scores">
+<span class="sig-prename descclassname"><span class="pre">graphai.core.ontology.data.</span></span><span class="sig-name descname"><span class="pre">combine_concept_and_anchor_scores</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">concepts_query</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">anchors_query</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">entity_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">avg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coeffs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">top_n</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d4_cat_id_to_index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">concept_lengths</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">anchor_lengths</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.ontology.data.combine_concept_and_anchor_scores" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py class">
@@ -377,20 +407,9 @@ category child-parent relations table.
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="graphai.core.ontology.data.OntologyData.get_concept_closest_cluster_of_category">
-<span class="sig-name descname"><span class="pre">get_concept_closest_cluster_of_category</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">concept_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">category_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">avg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'linear'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">top_n</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.ontology.data.OntologyData.get_concept_closest_cluster_of_category" title="Link to this definition"></a></dt>
-<dd><p>For a given concept and category, finds the top clusters under that category in terms of
-similarity to the concept.
-:param concept_id: Concept ID
-:param category_id: Category ID
-:param avg: Averaging method
-:param top_n: Number of top clusters to return</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Top clusters and their similarity scores with the concept</p>
-</dd>
-</dl>
-</dd></dl>
+<dt class="sig sig-object py" id="graphai.core.ontology.data.OntologyData.get_concept_closest_concept_embedding">
+<span class="sig-name descname"><span class="pre">get_concept_closest_concept_embedding</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">concept_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">top_n</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.ontology.data.OntologyData.get_concept_closest_concept_embedding" title="Link to this definition"></a></dt>
+<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="graphai.core.ontology.data.OntologyData.get_concept_closest_category">
@@ -418,6 +437,11 @@ each top category if return_clusters is not None.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="graphai.core.ontology.data.OntologyData.get_concept_category_closest_embedding">
+<span class="sig-name descname"><span class="pre">get_concept_category_closest_embedding</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">concept_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">avg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'log'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coeffs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(1,</span> <span class="pre">10)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">top_n</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_clusters</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.ontology.data.OntologyData.get_concept_category_closest_embedding" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="graphai.core.ontology.data.OntologyData.get_cluster_closest_category">
 <span class="sig-name descname"><span class="pre">get_cluster_closest_category</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cluster_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">avg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'log'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coeffs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(1,</span> <span class="pre">10)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">top_n</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_depth_3</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.ontology.data.OntologyData.get_cluster_closest_category" title="Link to this definition"></a></dt>
 <dd><p>Finds the closest category to a given cluster
@@ -436,6 +460,38 @@ each top category if return_clusters is not None.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="graphai.core.ontology.data.OntologyData.get_custom_cluster_closest_category">
 <span class="sig-name descname"><span class="pre">get_custom_cluster_closest_category</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">concept_ids</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">avg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'log'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coeffs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(1,</span> <span class="pre">10)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">top_n</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_depth_3</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.ontology.data.OntologyData.get_custom_cluster_closest_category" title="Link to this definition"></a></dt>
+<dd><p>Finds the closest category to a custom cluster, provided as a list of concepts
+:param concept_ids: List of concept IDs
+:param avg: Averaging method. Options are (‘linear’, ‘log’, and ‘none’)
+:param coeffs: Coefficients for averaging of the scores anchors and concepts
+:param top_n: Number of top categories to return
+:param use_depth_3: Whether to go through depth-3 or directly use depth-4</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Top categories, their scores, and parent depth-3 category if use_depth_3==True.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="graphai.core.ontology.data.OntologyData.get_cluster_closest_category_embedding">
+<span class="sig-name descname"><span class="pre">get_cluster_closest_category_embedding</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cluster_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">avg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'log'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coeffs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(1,</span> <span class="pre">10)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">top_n</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.ontology.data.OntologyData.get_cluster_closest_category_embedding" title="Link to this definition"></a></dt>
+<dd><p>Finds the closest category to a custom cluster, provided as a list of concepts
+:param concept_ids: List of concept IDs
+:param avg: Averaging method. Options are (‘linear’, ‘log’, and ‘none’)
+:param coeffs: Coefficients for averaging of the scores anchors and concepts
+:param top_n: Number of top categories to return
+:param use_depth_3: Whether to go through depth-3 or directly use depth-4</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Top categories, their scores, and parent depth-3 category if use_depth_3==True.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="graphai.core.ontology.data.OntologyData.get_custom_cluster_closest_category_embedding">
+<span class="sig-name descname"><span class="pre">get_custom_cluster_closest_category_embedding</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">concept_ids</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">avg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'log'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coeffs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(1,</span> <span class="pre">10)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">top_n</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.ontology.data.OntologyData.get_custom_cluster_closest_category_embedding" title="Link to this definition"></a></dt>
 <dd><p>Finds the closest category to a custom cluster, provided as a list of concepts
 :param concept_ids: List of concept IDs
 :param avg: Averaging method. Options are (‘linear’, ‘log’, and ‘none’)
