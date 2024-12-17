@@ -577,27 +577,18 @@ class FingerprintParameters:
 
     def load_values(self):
         """
-        Loads the values of fingerprinting similarity thresholds from file, or failing that, sets them to defaults
+        Loads the default values of fingerprinting thresholds
         Returns:
             None
         """
         defaults = {
-            'text': '1.0',
-            'image': '1.0',
-            'audio': '1.0',
-            'video': '1.0'
+            'image': 1.0,
+            'audio': 1.0,
+            'video': 1.0
         }
-        try:
-            print('Reading fingerprint min similarity values from config')
-            self.min_similarity['text'] = float(config['fingerprint'].get('text', defaults['text']))
-            self.min_similarity['image'] = float(config['fingerprint'].get('image', defaults['image']))
-            self.min_similarity['audio'] = float(config['fingerprint'].get('audio', defaults['audio']))
-            self.min_similarity['video'] = float(config['fingerprint'].get('video', defaults['video']))
-        except Exception:
-            self.min_similarity = {k: float(v) for k, v in defaults.items()}
-
-    def get_min_sim_text(self):
-        return self.min_similarity['text']
+        self.min_similarity['image'] = defaults['image']
+        self.min_similarity['audio'] = defaults['audio']
+        self.min_similarity['video'] = defaults['video']
 
     def get_min_sim_image(self):
         return self.min_similarity['image']
