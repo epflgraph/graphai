@@ -69,6 +69,6 @@ def wikify_graph_svg(results, concept_score_threshold, edge_threshold, min_compo
     job.apply_async(priority=10).get(timeout=10)
 
 
-def lecture_exercise(lecture_id, description, include_solution):
-    job = chain(tasks.generate_lecture_exercise_task.s(lecture_id, description, include_solution))
+def generate_exercise(data):
+    job = chain(tasks.generate_exercise_task.s(data))
     return job.apply_async(priority=10).get(timeout=60)

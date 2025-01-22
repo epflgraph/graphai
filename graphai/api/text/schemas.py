@@ -1,5 +1,5 @@
 from pydantic import ConfigDict, BaseModel, Field
-from typing import List
+from typing import List, Literal, Union
 
 
 class WikifyFromRawTextRequest(BaseModel):
@@ -525,29 +525,113 @@ class KeywordsRequest(BaseModel):
 
 KeywordsResponse = List[str]
 
+################################################################
 
-class LectureExerciseRequest(BaseModel):
+
+class GenerateTextExerciseRequest(BaseModel):
     """
-    Object containing the input to generate with an LLM a lecture-aware exercise.
+    Object containing the input to generate with an LLM an exercise from a text.
     """
 
-    lecture_id: str = Field(
-        ...,
-        title="lecture_id",
-        description="ID of the lecture for which to generate an exercise with an LLM.",
-        examples=["0_92916guq"]
+    text: str = Field(
+        title="text",
+        description="Some factual content the exercise should be based upon",
+        examples=["For a body whose mass m is constant, it can be written in the form F = ma, where F (force) and a (acceleration) are both vector quantities. If a body has a net force acting on it, it is accelerated in accordance with the equation."]
     )
 
     description: str = Field(
-        ...,
+        default='',
         title="description",
         description="A description in plain language, that will be sent to the LLM, of what the exercise should be about.",
-        examples=[r"An exercise to compute the volume of a sphere cap of angle $\alpha$ using spherical coordinates."]
+        examples=[r"An exercise involving an inclined plane with no friction"]
+    )
+
+    bloom_level: Literal[None, 1, 2, 3, 4, 5, 6] = Field(
+        default=None,
+        title="bloom_level",
+        description="The desired level of the exercise in the Bloom taxonomy (1, 2, 3, 4, 5 or 6)",
+        examples=[5]
     )
 
     include_solution: bool = Field(
-        ...,
+        default=True,
         title="include_solution",
         description="Whether to ask the LLM to return a solution along with the exercise.",
         examples=[True]
     )
+
+    output_format: Literal['plain-text', 'markdown', 'latex'] = Field(
+        default='markdown',
+        title="output_format",
+        description="The output format of the exercise ('plain-text', 'markdown' or 'latex')",
+        examples=['markdown']
+    )
+
+    llm_model: Literal['gpt-4o-mini', 'gpt-4o'] = Field(
+        default='gpt-4o-mini',
+        title="llm_model",
+        description="The name of the LLM to use ('gpt-4o-mini', 'gpt-4o')",
+        examples=['gpt-4o-mini']
+    )
+
+    openai_api_key: str = Field(
+        title="openai_api_key",
+        description="The API key for OpenAI",
+        examples=['foo-bar']
+    )
+
+
+class GenerateLectureExerciseRequest(BaseModel):
+    """
+    Object containing the input to generate with an LLM an exercise from the content of a lecture.
+    """
+
+    lecture_id: str = Field(
+        title="lecture_id",
+        description="The id of the lecture upon which the exercise should be based upon",
+        examples=["0_mp6uyap1"]
+    )
+
+    description: str = Field(
+        default='',
+        title="description",
+        description="A description in plain language, that will be sent to the LLM, of what the exercise should be about.",
+        examples=[r"An exercise involving an inclined plane with no friction"]
+    )
+
+    bloom_level: Literal[None, 1, 2, 3, 4, 5, 6] = Field(
+        default=None,
+        title="bloom_level",
+        description="The desired level of the exercise in the Bloom taxonomy (1, 2, 3, 4, 5 or 6)",
+        examples=[5]
+    )
+
+    include_solution: bool = Field(
+        default=True,
+        title="include_solution",
+        description="Whether to ask the LLM to return a solution along with the exercise.",
+        examples=[True]
+    )
+
+    output_format: Literal['plain-text', 'markdown', 'latex'] = Field(
+        default='markdown',
+        title="output_format",
+        description="The output format of the exercise ('plain-text', 'markdown' or 'latex')",
+        examples=['markdown']
+    )
+
+    llm_model: Literal['gpt-4o-mini', 'gpt-4o'] = Field(
+        default='gpt-4o-mini',
+        title="llm_model",
+        description="The name of the LLM to use ('gpt-4o-mini', 'gpt-4o')",
+        examples=['gpt-4o-mini']
+    )
+
+    openai_api_key: str = Field(
+        title="openai_api_key",
+        description="The API key for OpenAI",
+        examples=['foo-bar']
+    )
+
+
+GenerateExerciseRequest = Union[GenerateTextExerciseRequest, GenerateLectureExerciseRequest]
