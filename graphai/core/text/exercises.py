@@ -25,7 +25,7 @@ def generate_exercise(data):
 
     try:
         payload['text'] = data.text
-    except Exception as e:
+    except Exception:
         payload['lecture_id'] = data.lecture_id
 
     try:
