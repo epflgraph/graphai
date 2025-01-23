@@ -151,3 +151,12 @@ async def wikify_graph_svg(
 
     # Return svg file
     return FileResponse('/tmp/file.svg')
+
+
+@router.post('/generate_exercise')
+async def generate_exercise(data: schemas.GenerateExerciseRequest):
+    """
+    Makes a request to the Chatbot API to generate an exercise.
+    """
+
+    return jobs.generate_exercise(data)

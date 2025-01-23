@@ -14,6 +14,7 @@ from graphai.core.text import (
     compute_scores,
     draw_ontology,
     draw_graph,
+    generate_exercise,
 )
 
 
@@ -76,3 +77,8 @@ def draw_ontology_task(self, results, **kwargs):
 @shared_task(bind=True, name='text_10.draw_graph', graph=graph)
 def draw_graph_task(self, results, **kwargs):
     return draw_graph(results, graph=self.graph, **kwargs)
+
+
+@shared_task(bind=True, name='text_10.generate_lecture_exercise')
+def generate_exercise_task(self, *args, **kwargs):
+    return generate_exercise(*args, **kwargs)

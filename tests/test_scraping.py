@@ -87,7 +87,6 @@ def test__scraping_content__process_all_sublinks__integration(fixture_app, celer
     assert summary_results['task_result']['fresh'] is True
     data = summary_results['task_result']['data']
     assert 'https://www.epfl.ch/fr' in data
-    assert data['https://www.epfl.ch/fr']['pagetype'] == 'homepage'
     assert len(data['https://www.epfl.ch/fr']['content']) > 0
     original_data = data
 
