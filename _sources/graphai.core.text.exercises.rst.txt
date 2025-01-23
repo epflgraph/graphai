@@ -1,0 +1,7 @@
+graphai.core.text.exercises module
+==================================
+
+.. automodule:: graphai.core.text.exercises
+   :members:
+   :undoc-members:
+   :show-inheritance:
