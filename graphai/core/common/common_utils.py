@@ -205,3 +205,7 @@ def is_url(s):
     if s.startswith('http'):
         return True
     return False
+
+
+def is_token(s):
+    return not is_url(s)
