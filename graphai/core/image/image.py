@@ -7,7 +7,9 @@ from graphai.core.common.common_utils import (
     retrieve_generic_file_from_generic_url,
     generate_random_token,
     get_file_size,
-    get_current_datetime
+    get_current_datetime,
+    is_token,
+    is_url
 )
 
 
@@ -20,6 +22,12 @@ def create_image_filename_using_url_format(token, url):
 
 
 def retrieve_image_file_from_url(url, file_manager, force_token=None):
+    if not is_url(url):
+        return {
+            'token': None,
+            'fresh': False,
+            'token_size': None,
+        }
     if force_token is not None:
         token = force_token
     else:
@@ -68,6 +76,12 @@ def retrieve_image_file_from_url_callback(results, url):
 
 
 def cache_lookup_extract_slide_text(token, method):
+    if not is_token(token):
+        return {
+            'results': None,
+            'language': None,
+            'fresh': False
+        }
     ocr_colnames = get_ocr_colnames(method)
     db_manager = SlideDBCachingManager()
     existing_list = db_manager.get_details(token, ocr_colnames + ['language'],
@@ -108,6 +122,12 @@ def cache_lookup_extract_slide_text(token, method):
 
 
 def extract_slide_text(token, file_manager, method='google', api_token=None):
+    if not is_token(token):
+        return {
+            'results': None,
+            'language': None,
+            'fresh': False
+        }
     ocr_colnames = get_ocr_colnames(method)
 
     if method == 'tesseract':

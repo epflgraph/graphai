@@ -39,7 +39,10 @@ from graphai.core.common.common_utils import (
     file_exists,
     get_current_datetime,
     copy_file_within_folder,
-    generate_random_token, get_file_size
+    generate_random_token,
+    get_file_size,
+    is_token,
+    is_url
 )
 from graphai.core.common.fingerprinting import (
     perceptual_hash_image,
@@ -801,6 +804,14 @@ def get_audio_token_status(token):
 
 
 def retrieve_file_from_url(url, file_manager, is_kaltura=True, force_token=None):
+    # This takes a URL as input, not a token
+    if not is_url(url):
+        return {
+            'token': None,
+            'fresh': False,
+            'token_size': 0,
+            'fp_id': None
+        }
     if force_token is not None:
         token = force_token
     else:
@@ -846,7 +857,8 @@ def retrieve_file_from_url_callback(results, url):
 def compute_video_fingerprint(results, file_manager, force=False):
     token = results['token']
     db_manager = VideoDBCachingManager()
-    if token is None or not results.get('fresh', True):
+    # Here, the input must be a token, with fresh results coming in or an explicit fingerprinting request.
+    if token is None or not is_token(token) or not results.get('fresh', True):
         fp = None
         id_and_duration_fp = None
         fresh = False
@@ -934,6 +946,8 @@ def video_id_and_duration_fp_lookup(results):
 
 
 def cache_lookup_retrieve_file_from_url(url, file_manager):
+    if not is_url(url):
+        return None
     db_manager = VideoDBCachingManager()
     existing = db_manager.get_details_using_origin(url, [])
     if existing is not None:
@@ -948,6 +962,9 @@ def cache_lookup_retrieve_file_from_url(url, file_manager):
 
 
 def cache_lookup_extract_audio(token):
+    # The input here must be a token, not a URL
+    if not is_token(token):
+        return None
     # Here, the caching logic is a bit complicated. The results of audio extraction are cached in the
     # audio tables, whereas the closest-matching video is cached in the video tables. As a result, we
     # need to look for the cached extracted audio of two videos: the provided token and its closest
@@ -980,6 +997,12 @@ def cache_lookup_extract_audio(token):
 
 
 def extract_audio(token, file_manager):
+    if not is_token(token):
+        return {
+            'token': None,
+            'fresh': False,
+            'duration': 0.0
+        }
     output_token = generate_audio_token(token)
     results, input_duration = extract_audio_from_video(file_manager.generate_filepath(token),
                                                        file_manager.generate_filepath(output_token),
@@ -1039,6 +1062,12 @@ def extract_audio_callback(results, origin_token, file_manager, force=False):
 
 
 def reextract_cached_audio(token, file_manager):
+    if not is_token(token):
+        return {
+            'token': None,
+            'fresh': False,
+            'duration': 0.0
+        }
     video_db_manager = VideoDBCachingManager()
     closest_token = video_db_manager.get_closest_match(token)
     audio_db_manager = AudioDBCachingManager()
@@ -1078,6 +1107,15 @@ def reextract_cached_audio(token, file_manager):
 
 def compute_audio_fingerprint(results, file_manager, force=False):
     token = results['token']
+    if not is_token(token):
+        return {
+            'result': None,
+            'fp_token': None,
+            'perform_lookup': False,
+            'fresh': False,
+            'duration': 0.0,
+            'original_results': results
+        }
     # Making sure that the cache row for the audio file already exists.
     # This cache row is created when the audio is extracted from its corresponding video, so it must exist!
     # We also need this cache row later in order to be able to return the duration of the audio file.
@@ -1127,6 +1165,8 @@ def compute_audio_fingerprint_callback(results, force=False):
 
 
 def cache_lookup_detect_slides(token):
+    if not is_token(token):
+        return None
     video_db_manager = VideoDBCachingManager()
     # Retrieving the closest match of the current video
     closest_token = video_db_manager.get_closest_match(token)
@@ -1159,6 +1199,12 @@ def cache_lookup_detect_slides(token):
 
 
 def extract_and_sample_frames(token, file_manager):
+    if not is_token(token):
+        return {
+            'result': None,
+            'sample_indices': None,
+            'fresh': False
+        }
     # Extracting frames
     print('Extracting frames...')
     output_folder = token + '_all_frames'
@@ -1398,6 +1444,11 @@ def detect_slides_callback(results, token, file_manager, force=False, attempt=0)
 
 
 def reextract_cached_slides(token, file_manager):
+    if not is_token(token):
+        return {
+            'slide_tokens': None,
+            'fresh': False
+        }
     video_db_manager = VideoDBCachingManager()
     closest_token = video_db_manager.get_closest_match(token)
     slide_db_manager = SlideDBCachingManager()
@@ -1457,6 +1508,13 @@ def reextract_cached_slides(token, file_manager):
 
 def compute_slide_fingerprint(token, file_manager):
     # Making sure the slide's cache row exists, because otherwise, the operation should be cancelled!
+    if not is_token(token):
+        return {
+            'result': None,
+            'fp_token': None,
+            'perform_lookup': False,
+            'fresh': False
+        }
     db_manager = SlideDBCachingManager()
     existing_slide_list = db_manager.get_details(token, cols=[], using_most_similar=False)
     if existing_slide_list[0] is None:
