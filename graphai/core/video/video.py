@@ -4,7 +4,6 @@ import sys
 import math
 import glob
 import re
-import random
 import json
 import time
 from datetime import timedelta
@@ -12,8 +11,8 @@ import gzip
 from itertools import chain
 from multiprocessing import Lock
 
-from sacremoses.tokenize import MosesTokenizer
 import wget
+from sacremoses.tokenize import MosesTokenizer
 import subprocess
 
 import numpy as np
@@ -39,7 +38,8 @@ from graphai.core.common.common_utils import (
     make_sure_path_exists,
     file_exists,
     get_current_datetime,
-    copy_file_within_folder
+    copy_file_within_folder,
+    generate_random_token, get_file_size
 )
 from graphai.core.common.fingerprinting import (
     perceptual_hash_image,
@@ -91,25 +91,7 @@ STOPWORDS = {
 }
 
 
-def generate_random_token():
-    """
-    Generates a random string using the current time and a random number to be used as a token.
-    Returns:
-        Random token
-    """
-    return ('%.06f' % time.time()).replace('.', '') + '%08d' % random.randint(0, int(1e7))
-
-
-def get_file_size(file_path):
-    if file_path is None:
-        return None
-    try:
-        return os.path.getsize(file_path)
-    except OSError:
-        return None
-
-
-def retrieve_file_from_generic_url(url, output_filename_with_path, output_token):
+def retrieve_video_file_from_generic_url(url, output_filename_with_path, output_token):
     """
     Retrieves a file from a given URL using WGET and stores it locally.
     Args:
@@ -137,7 +119,7 @@ def retrieve_file_from_generic_url(url, output_filename_with_path, output_token)
 
 def retrieve_file_from_kaltura(url, output_filename_with_path, output_token):
     """
-    Retrieves a file in m3u8 format from Kaltura and stores it locally
+    Retrieves a video file in m3u8 format from Kaltura and stores it locally
     Args:
         url: URL of the m3u8 playlist
         output_filename_with_path: Full path of output file
@@ -196,10 +178,10 @@ def retrieve_file_from_any_source(url, output_filename_with_path, output_token, 
         if 'youtube.com/' in url or 'youtu.be/' in url:
             return retrieve_file_from_youtube(url, output_filename_with_path, output_token)
         else:
-            return retrieve_file_from_generic_url(url, output_filename_with_path, output_token)
+            return retrieve_video_file_from_generic_url(url, output_filename_with_path, output_token)
 
 
-def create_filename_using_url_format(token, url):
+def create_video_filename_using_url_format(token, url):
     file_format = url.split('.')[-1].lower()
     if file_format not in ['mp4', 'mkv', 'flv', 'avi', 'mov']:
         file_format = 'mp4'
@@ -831,7 +813,7 @@ def retrieve_file_from_url(url, file_manager, is_kaltura=True, force_token=None)
         else:
             # Otherwise, we generate a random token
             token = generate_random_token()
-    filename = create_filename_using_url_format(token, url)
+    filename = create_video_filename_using_url_format(token, url)
     filename_with_path = file_manager.generate_filepath(filename)
     results, fp_id = retrieve_file_from_any_source(url, filename_with_path, filename, is_kaltura)
     return {
