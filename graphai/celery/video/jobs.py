@@ -119,7 +119,7 @@ def get_slide_fingerprint_chain_list(token=None, origin_token=None,
                                      force=False, min_similarity=None, n_jobs=8,
                                      ignore_fp_results=False):
     assert ((token is not None and origin_token is None)
-            or (token is None and origin_token is not None and ignore_fp_results))
+            or (token is None and ignore_fp_results))
     # Loading minimum similarity parameter for image
     if min_similarity is None:
         fp_parameters = FingerprintParameters()
