@@ -22,6 +22,7 @@ import imagehash
 from PIL import Image
 
 import pytesseract
+import pdf2image
 
 import fasttext
 from fasttext_reducer.reduce_fasttext_models import generate_target_path
@@ -444,6 +445,28 @@ def perform_tesseract_ocr(image_path, language=None):
         print(f'Error: File {image_path} does not exist')
         return None
     return pytesseract.image_to_string(Image.open(image_path), lang={'en': 'eng', 'fr': 'fra'}[language])
+
+
+def perform_tesseract_ocr_on_pdf(pdf_path, language=None):
+    """
+    Performs OCR using tesseract on a pdf file
+    Args:
+        pdf_path: Path to the PDF file
+        language: Language of the pdf file
+
+    Returns:
+        String containing the entire PDF file's extracted contents
+    """
+    if language is None:
+        language = 'en'
+    if not file_exists(pdf_path):
+        print(f'Error: File {pdf_path} does not exist')
+        return None
+    pdf_imageset = pdf2image.convert_from_path(pdf_path)
+    return '\n'.join(
+        pytesseract.image_to_string(img, lang={'en': 'eng', 'fr': 'fra'}[language])
+        for img in pdf_imageset
+    )
 
 
 def tesseract_ocr_or_get_cached(ocr_path, image_path, language):
@@ -1506,7 +1529,7 @@ def reextract_cached_slides(token, file_manager):
     }
 
 
-def compute_slide_fingerprint(results, file_manager):
+def compute_single_image_fingerprint(results, file_manager):
     token = results['token']
     # Making sure the slide's cache row exists, because otherwise, the operation should be cancelled!
     if not is_token(token):
