@@ -4,6 +4,7 @@ from graphai.core.image.ocr import get_ocr_colnames, GoogleOCRModel
 from graphai.core.translation.text_utils import detect_text_language
 from graphai.core.video.video import (
     perform_tesseract_ocr,
+    perform_tesseract_ocr_on_pdf,
     get_image_token_status
 )
 from graphai.core.common.common_utils import (
@@ -12,7 +13,8 @@ from graphai.core.common.common_utils import (
     get_file_size,
     get_current_datetime,
     is_token,
-    is_url
+    is_url,
+    is_pdf
 )
 
 
@@ -149,7 +151,10 @@ def extract_slide_text(token, file_manager, method='google', api_token=None):
     ocr_colnames = get_ocr_colnames(method)
 
     if method == 'tesseract':
-        res = perform_tesseract_ocr(file_manager.generate_filepath(token))
+        if is_pdf(token):
+            res = perform_tesseract_ocr_on_pdf(file_manager.generate_filepath(token))
+        else:
+            res = perform_tesseract_ocr(file_manager.generate_filepath(token))
         if res is None:
             results = None
             language = None
