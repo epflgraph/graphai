@@ -22,7 +22,7 @@ from graphai.core.video.video import (
     compute_slide_transitions_callback,
     detect_slides_callback,
     reextract_cached_slides,
-    compute_slide_fingerprint,
+    compute_single_image_fingerprint,
     compute_slide_set_fingerprint,
     compute_slide_fingerprint_callback,
     retrieve_slide_fingerprint_callback,
@@ -299,8 +299,8 @@ def reextract_cached_slides_task(self, token):
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='video_2.slide_fingerprint', ignore_result=False,
              file_manager=file_management_config)
-def compute_slide_fingerprint_task(self, results):
-    return compute_slide_fingerprint(results, self.file_manager)
+def compute_single_image_fingerprint_task(self, results):
+    return compute_single_image_fingerprint(results, self.file_manager)
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
