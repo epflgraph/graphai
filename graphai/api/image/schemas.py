@@ -1,7 +1,10 @@
 from pydantic import BaseModel, Field
 from typing import Union, List, Literal
 
-from graphai.api.common.schemas import TaskStatusResponse
+from graphai.api.common.schemas import (
+    TaskStatusResponse,
+    TokenStatus
+)
 
 
 class RetrieveImageURLRequest(BaseModel):
@@ -13,6 +16,43 @@ class RetrieveImageURLRequest(BaseModel):
     force: bool = Field(
         title="Force redownload",
         default=False
+    )
+
+
+class RetrieveImageURLResponseInner(BaseModel):
+    token: Union[str, None] = Field(
+        None, title="Token",
+        description="Result token, null if task has failed"
+    )
+
+    token_status: Union[TokenStatus, None] = Field(
+        title="Token status",
+        description="Status of the returned token",
+        default=None
+    )
+
+    token_size: Union[int, None] = Field(
+        title="Token size",
+        description="Size of the returned token",
+        default=None
+    )
+
+    fresh: bool = Field(
+        title="Freshness flag",
+        description="False if the URI had already been retrieved before, True if not and if retrieval was successful"
+    )
+
+    successful: bool = Field(
+        title="Success flag",
+        description="True if task successful, False otherwise"
+    )
+
+
+class RetrieveImageURLResponse(TaskStatusResponse):
+    task_result: Union[RetrieveImageURLResponseInner, None] = Field(
+        title="File retrieval response",
+        description="A dict containing a flag for whether the retrieval was successful, plus a token "
+                    "that refers to the now-retrieved file if so (and null if not)."
     )
 
 
