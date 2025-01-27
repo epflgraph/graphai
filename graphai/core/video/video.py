@@ -1639,3 +1639,7 @@ def retrieve_video_fingerprint_callback(results):
 
 def ignore_video_fingerprint_results_callback(results):
     return ignore_fingerprint_results_callback(results, get_video_token_status)
+
+
+def ignore_single_image_fingerprint_results_callback(results):
+    return ignore_fingerprint_results_callback(results, get_image_token_status)
