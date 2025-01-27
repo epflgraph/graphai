@@ -30,7 +30,8 @@ from graphai.core.video.video import (
     ignore_audio_fingerprint_results_callback,
     retrieve_audio_fingerprint_callback,
     retrieve_video_fingerprint_callback,
-    ignore_video_fingerprint_results_callback
+    ignore_video_fingerprint_results_callback,
+    ignore_single_image_fingerprint_results_callback
 )
 from graphai.core.common.caching import (
     AudioDBCachingManager,
@@ -298,8 +299,8 @@ def reextract_cached_slides_task(self, token):
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='video_2.slide_fingerprint', ignore_result=False,
              file_manager=file_management_config)
-def compute_slide_fingerprint_task(self, token):
-    return compute_slide_fingerprint(token, self.file_manager)
+def compute_slide_fingerprint_task(self, results):
+    return compute_slide_fingerprint(results, self.file_manager)
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
@@ -349,3 +350,9 @@ def retrieve_slide_fingerprint_callback_task(self, results):
              name='video_2.ignore_slide_fingerprint_results_callback', ignore_result=False)
 def ignore_slide_fingerprint_results_callback_task(self, results):
     return ignore_slide_fingerprint_results_callback(results)
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
+             name='video_2.ignore_single_image_fingerprint_results_callback', ignore_result=False)
+def ignore_single_image_fingerprint_results_callback_task(self, results):
+    return ignore_single_image_fingerprint_results_callback(results)
