@@ -4,6 +4,18 @@ from typing import Union, List, Literal
 from graphai.api.common.schemas import TaskStatusResponse
 
 
+class RetrieveImageURLRequest(BaseModel):
+    url: str = Field(
+        title="URL",
+        description="The URL that the image is to be retrieved from"
+    )
+
+    force: bool = Field(
+        title="Force redownload",
+        default=False
+    )
+
+
 class ImageFingerprintRequest(BaseModel):
     token: str = Field(
         title="Token",
