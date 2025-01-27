@@ -2,7 +2,10 @@ from graphai.core.common.caching import SlideDBCachingManager
 from graphai.core.common.lookup import database_callback_generic
 from graphai.core.image.ocr import get_ocr_colnames, GoogleOCRModel
 from graphai.core.translation.text_utils import detect_text_language
-from graphai.core.video.video import perform_tesseract_ocr
+from graphai.core.video.video import (
+    perform_tesseract_ocr,
+    get_image_token_status
+)
 from graphai.core.common.common_utils import (
     retrieve_generic_file_from_generic_url,
     generate_random_token,
@@ -19,6 +22,22 @@ def create_image_filename_using_url_format(token, url):
         return None
     filename = token + '.' + file_format
     return filename
+
+
+def cache_lookup_retrieve_image_from_url(url, file_manager):
+    if not is_url(url):
+        return None
+    db_manager = SlideDBCachingManager()
+    existing = db_manager.get_details_using_origin(url, [])
+    if existing is not None:
+        token = existing[0]['id_token']
+        return {
+            'token': token,
+            'fresh': False,
+            'token_status': get_image_token_status(token),
+            'token_size': get_file_size(file_manager.generate_filepath(token))
+        }
+    return None
 
 
 def retrieve_image_file_from_url(url, file_manager, force_token=None):
