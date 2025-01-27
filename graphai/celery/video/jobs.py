@@ -38,7 +38,7 @@ from graphai.celery.video.tasks import (
     audio_fingerprint_find_closest_callback_task,
     retrieve_audio_fingerprint_callback_task,
     ignore_audio_fingerprint_results_callback_task,
-    compute_slide_fingerprint_task,
+    compute_single_image_fingerprint_task,
     compute_slide_set_fingerprint_task,
     compute_slide_fingerprint_callback_task,
     slide_fingerprint_find_closest_retrieve_from_db_task,
@@ -128,9 +128,9 @@ def get_slide_fingerprint_chain_list(token=None, origin_token=None,
     if origin_token is not None:
         task_list = [compute_slide_set_fingerprint_task.s(origin_token)]
     elif token is not None:
-        task_list = [compute_slide_fingerprint_task.s({'token': token})]
+        task_list = [compute_single_image_fingerprint_task.s({'token': token})]
     else:
-        task_list = [compute_slide_fingerprint_task.s()]
+        task_list = [compute_single_image_fingerprint_task.s()]
     task_list += [
         compute_slide_fingerprint_callback_task.s(force)
     ]
