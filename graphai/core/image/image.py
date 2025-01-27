@@ -80,7 +80,6 @@ def retrieve_image_file_from_url_callback(results, url):
         db_manager = SlideDBCachingManager()
         current_datetime = get_current_datetime()
         values = {
-            'date_modified': current_datetime,
             'origin_token': url
         }
         if db_manager.get_details(results['token'], [], using_most_similar=False)[0] is None:
