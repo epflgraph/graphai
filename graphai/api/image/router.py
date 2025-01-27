@@ -3,6 +3,7 @@ from fastapi_user_limiter.limiter import rate_limiter
 
 from graphai.api.common.schemas import TaskIDResponse
 from graphai.api.image.schemas import (
+    RetrieveImageURLRequest,
     ImageFingerprintRequest,
     ImageFingerprintResponse,
     ExtractTextRequest,
@@ -12,6 +13,7 @@ from graphai.api.image.schemas import (
 from graphai.api.common.utils import format_api_results
 
 from graphai.celery.image.jobs import (
+    retrieve_image_from_url_job,
     fingerprint_job,
     ocr_job
 )
@@ -27,6 +29,18 @@ router = APIRouter(
     responses={404: {'description': 'Not found'}},
     dependencies=[Security(get_current_active_user, scopes=['image'])]
 )
+
+
+@router.post('/retrieve_url', response_model=TaskIDResponse,
+             dependencies=[Depends(rate_limiter(get_ratelimit_values()['image']['max_requests'],
+                                                get_ratelimit_values()['image']['window'],
+                                                user=get_user_for_rate_limiter))])
+async def retrieve_file(data: RetrieveImageURLRequest):
+    # The URL to be retrieved
+    url = data.url
+    force = data.force
+    task_id = retrieve_image_from_url_job(url, force)
+    return {'task_id': task_id}
 
 
 @router.post('/calculate_fingerprint', response_model=TaskIDResponse)
