@@ -1506,14 +1506,16 @@ def reextract_cached_slides(token, file_manager):
     }
 
 
-def compute_slide_fingerprint(token, file_manager):
+def compute_slide_fingerprint(results, file_manager):
+    token = results['token']
     # Making sure the slide's cache row exists, because otherwise, the operation should be cancelled!
     if not is_token(token):
         return {
             'result': None,
             'fp_token': None,
             'perform_lookup': False,
-            'fresh': False
+            'fresh': False,
+            'original_results': results
         }
     db_manager = SlideDBCachingManager()
     existing_slide_list = db_manager.get_details(token, cols=[], using_most_similar=False)
@@ -1522,7 +1524,8 @@ def compute_slide_fingerprint(token, file_manager):
             'result': None,
             'fp_token': None,
             'perform_lookup': False,
-            'fresh': False
+            'fresh': False,
+            'original_results': results
         }
     fingerprint = perceptual_hash_image(file_manager.generate_filepath(token))
     if fingerprint is None:
@@ -1530,13 +1533,15 @@ def compute_slide_fingerprint(token, file_manager):
             'result': None,
             'fp_token': None,
             'perform_lookup': False,
-            'fresh': False
+            'fresh': False,
+            'original_results': results
         }
     return {
         'result': fingerprint,
         'fp_token': token,
         'perform_lookup': True,
-        'fresh': True
+        'fresh': True,
+        'original_results': results
     }
 
 
