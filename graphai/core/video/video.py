@@ -43,10 +43,12 @@ from graphai.core.common.common_utils import (
     generate_random_token,
     get_file_size,
     is_token,
-    is_url
+    is_url,
+    is_pdf
 )
 from graphai.core.common.fingerprinting import (
     perceptual_hash_image,
+    perceptual_hash_pdf,
     md5_video_or_audio,
     compare_encoded_fingerprints,
     perceptual_hash_audio
@@ -1550,7 +1552,10 @@ def compute_single_image_fingerprint(results, file_manager):
             'fresh': False,
             'original_results': results
         }
-    fingerprint = perceptual_hash_image(file_manager.generate_filepath(token))
+    if is_pdf(token):
+        fingerprint = perceptual_hash_pdf(file_manager.generate_filepath(token))
+    else:
+        fingerprint = perceptual_hash_image(file_manager.generate_filepath(token))
     if fingerprint is None:
         return {
             'result': None,
