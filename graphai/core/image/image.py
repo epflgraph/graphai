@@ -20,7 +20,7 @@ from graphai.core.common.common_utils import (
 
 def create_image_filename_using_url_format(token, url):
     file_format = url.split('.')[-1].lower()
-    if file_format not in ['png', 'jpg', 'jpeg', 'tiff', 'bmp']:
+    if file_format not in ['png', 'jpg', 'jpeg', 'tiff', 'bmp', 'pdf']:
         return None
     filename = token + '.' + file_format
     return filename
