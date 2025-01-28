@@ -209,3 +209,7 @@ def is_url(s):
 
 def is_token(s):
     return not is_url(s)
+
+
+def is_pdf(s):
+    return s.endswith('.pdf')
