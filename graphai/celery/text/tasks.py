@@ -79,6 +79,6 @@ def draw_graph_task(self, results, **kwargs):
     return draw_graph(results, graph=self.graph, **kwargs)
 
 
-@shared_task(bind=True, name='text_10.generate_lecture_exercise')
+@shared_task(bind=True, name='text_10.generate_exercise_task')
 def generate_exercise_task(self, *args, **kwargs):
     return generate_exercise(*args, **kwargs)
