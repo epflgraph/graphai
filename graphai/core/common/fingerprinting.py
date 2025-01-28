@@ -7,9 +7,10 @@ import fingerprint
 import imagehash
 import numpy as np
 from PIL import Image
+import pdf2image
 from fuzzywuzzy import fuzz
 
-from graphai.core.common.common_utils import file_exists
+from graphai.core.common.common_utils import file_exists, is_pdf
 
 
 def perceptual_hash_text(s):
@@ -120,6 +121,25 @@ def perceptual_hash_image(input_filename_with_path, hash_size=16):
         print(f'File {input_filename_with_path} does not exist')
         return None
     results = imagehash.dhash(Image.open(input_filename_with_path), hash_size=hash_size)
+    return str(results)
+
+
+def perceptual_hash_pdf(input_filename_with_path, hash_size=16):
+    """
+    Computes the perceptual hash of an image file
+    Args:
+        input_filename_with_path: Path of the input file
+        hash_size: Size of hash
+    Returns:
+        String representation of the computed fingerprint. None if file does not exist
+    """
+    if not file_exists(input_filename_with_path) or not is_pdf(input_filename_with_path):
+        print(f'File {input_filename_with_path} does not exist or is not in the right format')
+        return None
+    pdf_imageset = pdf2image.convert_from_path(input_filename_with_path)
+    results = hashlib.md5(
+        ''.join(str(imagehash.dhash(x, hash_size=hash_size)) for x in pdf_imageset).encode('utf8')
+    ).hexdigest()
     return str(results)
 
 
