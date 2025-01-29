@@ -13,3 +13,4 @@ Submodules
    :maxdepth: 1
 
    graphai.core.video.video
+   graphai.core.video.video_utils

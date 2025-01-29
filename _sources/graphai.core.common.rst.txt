@@ -17,3 +17,4 @@ Submodules
    graphai.core.common.config
    graphai.core.common.fingerprinting
    graphai.core.common.lookup
+   graphai.core.common.multimedia_utils
