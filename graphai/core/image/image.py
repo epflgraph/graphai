@@ -1,11 +1,14 @@
 from graphai.core.common.caching import SlideDBCachingManager
 from graphai.core.common.lookup import database_callback_generic
-from graphai.core.image.ocr import get_ocr_colnames, GoogleOCRModel
-from graphai.core.translation.text_utils import detect_text_language
-from graphai.core.video.video import (
+from graphai.core.common.multimedia_utils import (
+    get_image_token_status,
     perform_tesseract_ocr,
-    perform_tesseract_ocr_on_pdf,
-    get_image_token_status
+    detect_text_language
+)
+from graphai.core.image.ocr import (
+    get_ocr_colnames,
+    GoogleOCRModel,
+    perform_tesseract_ocr_on_pdf
 )
 from graphai.core.common.common_utils import (
     retrieve_generic_file_from_generic_url,
