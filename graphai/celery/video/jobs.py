@@ -38,7 +38,7 @@ from graphai.celery.video.tasks import (
     audio_fingerprint_find_closest_callback_task,
     retrieve_audio_fingerprint_callback_task,
     ignore_audio_fingerprint_results_callback_task,
-    compute_slide_fingerprint_task,
+    compute_single_image_fingerprint_task,
     compute_slide_set_fingerprint_task,
     compute_slide_fingerprint_callback_task,
     slide_fingerprint_find_closest_retrieve_from_db_task,
@@ -46,7 +46,8 @@ from graphai.celery.video.tasks import (
     slide_fingerprint_find_closest_direct_task,
     slide_fingerprint_find_closest_callback_task,
     retrieve_slide_fingerprint_callback_task,
-    ignore_slide_fingerprint_results_callback_task
+    ignore_slide_fingerprint_results_callback_task,
+    ignore_single_image_fingerprint_results_callback_task
 )
 from graphai.celery.common.jobs import (
     direct_lookup_generic_job,
@@ -117,16 +118,19 @@ def get_audio_fingerprint_chain_list(token=None, force=False, min_similarity=Non
 def get_slide_fingerprint_chain_list(token=None, origin_token=None,
                                      force=False, min_similarity=None, n_jobs=8,
                                      ignore_fp_results=False):
-    assert (token is not None and not ignore_fp_results) or (origin_token is not None and ignore_fp_results)
+    assert ((token is not None and origin_token is None)
+            or (token is None and ignore_fp_results))
     # Loading minimum similarity parameter for image
     if min_similarity is None:
         fp_parameters = FingerprintParameters()
         min_similarity = fp_parameters.get_min_sim_image()
     # The usual fingerprinting task list consists of fingerprinting and its callback, then lookup
-    if token is not None:
-        task_list = [compute_slide_fingerprint_task.s(token)]
-    else:
+    if origin_token is not None:
         task_list = [compute_slide_set_fingerprint_task.s(origin_token)]
+    elif token is not None:
+        task_list = [compute_single_image_fingerprint_task.s({'token': token})]
+    else:
+        task_list = [compute_single_image_fingerprint_task.s()]
     task_list += [
         compute_slide_fingerprint_callback_task.s(force)
     ]
@@ -139,7 +143,10 @@ def get_slide_fingerprint_chain_list(token=None, origin_token=None,
         ]
     task_list += [slide_fingerprint_find_closest_callback_task.s()]
     if ignore_fp_results:
-        task_list += [ignore_slide_fingerprint_results_callback_task.s()]
+        if origin_token is not None:
+            task_list += [ignore_slide_fingerprint_results_callback_task.s()]
+        else:
+            task_list += [ignore_single_image_fingerprint_results_callback_task.s()]
     else:
         task_list += [retrieve_slide_fingerprint_callback_task.s()]
     return task_list

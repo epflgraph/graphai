@@ -1,8 +1,13 @@
 import errno
 import json
 import os
+import random
+import sys
+import time
 from datetime import datetime
 import shutil
+
+import wget
 
 
 def make_sure_path_exists(path, file_at_the_end=False, full_perm=True):
@@ -154,3 +159,57 @@ def convert_text_back_to_list(s, return_list=False):
     if len(results) == 1 and not return_list:
         return results[0]
     return results
+
+
+def generate_random_token():
+    """
+    Generates a random string using the current time and a random number to be used as a token.
+    Returns:
+        Random token
+    """
+    return ('%.06f' % time.time()).replace('.', '') + '%08d' % random.randint(0, int(1e7))
+
+
+def get_file_size(file_path):
+    if file_path is None:
+        return None
+    try:
+        return os.path.getsize(file_path)
+    except OSError:
+        return None
+
+
+def retrieve_generic_file_from_generic_url(url, output_filename_with_path, output_token):
+    """
+    Retrieves a generic file from a given URL using WGET and stores it locally.
+    Args:
+        url: the URL
+        output_filename_with_path: Path of output file
+        output_token: Token of output file
+
+    Returns:
+        Output token if successful, None otherwise
+    """
+    try:
+        wget.download(url, output_filename_with_path)
+    except Exception as e:
+        print(e, file=sys.stderr)
+        return None
+    if file_exists(output_filename_with_path):
+        return output_token
+    else:
+        return None
+
+
+def is_url(s):
+    if s.startswith('http'):
+        return True
+    return False
+
+
+def is_token(s):
+    return not is_url(s)
+
+
+def is_pdf(s):
+    return s.endswith('.pdf')

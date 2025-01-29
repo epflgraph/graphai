@@ -3,7 +3,10 @@ from datetime import datetime
 
 from db_cache_manager.db import DBCachingManagerBase
 
-from graphai.core.common.common_utils import make_sure_path_exists, file_exists
+from graphai.core.common.common_utils import (
+    make_sure_path_exists,
+    file_exists
+)
 from graphai.core.common.config import config
 
 ROOT_VIDEO_DIR = os.path.normpath(os.path.join(os.path.dirname(__file__), '../../../Storage/'))

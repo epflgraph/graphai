@@ -3,6 +3,8 @@ from fastapi_user_limiter.limiter import rate_limiter
 
 from graphai.api.common.schemas import TaskIDResponse
 from graphai.api.image.schemas import (
+    RetrieveImageURLRequest,
+    RetrieveImageURLResponse,
     ImageFingerprintRequest,
     ImageFingerprintResponse,
     ExtractTextRequest,
@@ -12,6 +14,7 @@ from graphai.api.image.schemas import (
 from graphai.api.common.utils import format_api_results
 
 from graphai.celery.image.jobs import (
+    retrieve_image_from_url_job,
     fingerprint_job,
     ocr_job
 )
@@ -27,6 +30,36 @@ router = APIRouter(
     responses={404: {'description': 'Not found'}},
     dependencies=[Security(get_current_active_user, scopes=['image'])]
 )
+
+
+@router.post('/retrieve_url', response_model=TaskIDResponse,
+             dependencies=[Depends(rate_limiter(get_ratelimit_values()['image']['max_requests'],
+                                                get_ratelimit_values()['image']['window'],
+                                                user=get_user_for_rate_limiter))])
+async def retrieve_image_file(data: RetrieveImageURLRequest):
+    # The URL to be retrieved
+    url = data.url
+    force = data.force
+    task_id = retrieve_image_from_url_job(url, force)
+    return {'task_id': task_id}
+
+
+@router.get('/retrieve_url/status/{task_id}', response_model=RetrieveImageURLResponse)
+async def get_retrieve_image_file_status(task_id):
+    full_results = get_task_info(task_id)
+    task_results = full_results['results']
+    if task_results is not None:
+        if 'token' in task_results:
+            task_results = {
+                'token': task_results['token'],
+                'token_status': task_results['token_status'],
+                'token_size': task_results['token_size'],
+                'fresh': task_results['fresh'],
+                'successful': task_results['token'] is not None
+            }
+        else:
+            task_results = None
+    return format_api_results(full_results['id'], full_results['name'], full_results['status'], task_results)
 
 
 @router.post('/calculate_fingerprint', response_model=TaskIDResponse)
@@ -85,7 +118,7 @@ async def extract_text_status(task_id):
                 'result': task_results['results'],
                 'language': task_results['language'],
                 'fresh': task_results['fresh'],
-                'successful': task_results['results'] is not None
+                'successful': task_results['results'] is not None and not task_results['results'][0].get('fail', False)
             }
         else:
             task_results = None

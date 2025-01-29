@@ -2,6 +2,9 @@ from celery import chain
 
 from graphai.celery.video.jobs import get_slide_fingerprint_chain_list
 from graphai.celery.image.tasks import (
+    cache_lookup_retrieve_image_from_url_task,
+    retrieve_image_from_url_task,
+    retrieve_image_from_url_callback_task,
     cache_lookup_slide_fingerprint_task,
     cache_lookup_extract_slide_text_task,
     extract_slide_text_task,
@@ -12,6 +15,22 @@ from graphai.celery.common.jobs import (
     direct_lookup_generic_job,
     DEFAULT_TIMEOUT
 )
+
+
+def retrieve_image_from_url_job(url, force=False):
+    if not force:
+        direct_lookup_task_id = direct_lookup_generic_job(cache_lookup_retrieve_image_from_url_task, url,
+                                                          False, DEFAULT_TIMEOUT)
+        if direct_lookup_task_id is not None:
+            return direct_lookup_task_id
+
+    # First retrieve the file, and then do the database callback
+    task_list = [retrieve_image_from_url_task.s(url, None),
+                 retrieve_image_from_url_callback_task.s(url)]
+    task_list += get_slide_fingerprint_chain_list(None, None, ignore_fp_results=True)
+    task = chain(task_list)
+    task = task.apply_async(priority=2)
+    return task.id
 
 
 def fingerprint_lookup_job(token):
