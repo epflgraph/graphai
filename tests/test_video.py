@@ -344,3 +344,76 @@ def test__video_extract_audio__extract_audio__integration(fixture_app, celery_wo
     assert audio_lang_result['task_status'] == 'SUCCESS'
     assert audio_lang_result['task_result']['fresh'] is True
     assert audio_lang_result['task_result']['language'] == 'en'
+
+
+################################################################
+# PDF file retrieval and OCR                                   #
+################################################################
+
+
+@pytest.mark.celery(accept_content=['pickle', 'json'], result_serializer='pickle', task_serializer='pickle')
+@pytest.mark.usefixtures('test_pdf_url')
+def test__image_extract_text__extract_text__integration(fixture_app, celery_worker, test_pdf_url, timeout=30):
+    # First retrieving the video (without `force` in order to use cached results if available)
+    response = fixture_app.post('/image/retrieve_url',
+                                data=json.dumps({"url": test_pdf_url}),
+                                timeout=timeout)
+
+    assert response.status_code == 200
+    # Parse resulting task id
+    task_id = response.json()['task_id']
+
+    # Waiting for task chain to succeed
+    current_status = 'PENDING'
+    n_tries = 0
+    while current_status == 'PENDING' and n_tries < 20:
+        # Wait a few seconds
+        sleep(5)
+        # Now get status
+        response = fixture_app.get(f'/image/retrieve_url/status/{task_id}',
+                                   timeout=timeout)
+        current_status = response.json()['task_status']
+        n_tries += 1
+
+    image_token_response = response.json()
+
+    assert isinstance(image_token_response, dict)
+    assert 'task_result' in image_token_response
+    assert image_token_response['task_status'] == 'SUCCESS'
+    assert image_token_response['task_result']['token'] is not None
+    assert image_token_response['task_result']['token_status']['active']
+    assert image_token_response['task_result']['token_status']['fingerprinted']
+    assert image_token_response['task_result']['token_size'] > 0
+
+    image_token = image_token_response['task_result']['token']
+
+    response = fixture_app.post('/image/extract_text',
+                                data=json.dumps({"token": image_token, "method": "tesseract", "force": True}),
+                                timeout=timeout)
+
+    assert response.status_code == 200
+    # Parse resulting task id
+    task_id = response.json()['task_id']
+
+    # Waiting for task chain to succeed
+    current_status = 'PENDING'
+    n_tries = 0
+    while current_status == 'PENDING' and n_tries < 40:
+        # Wait a few seconds
+        sleep(5)
+        # Now get status
+        response = fixture_app.get(f'/image/extract_text/status/{task_id}',
+                                   timeout=timeout)
+        current_status = response.json()['task_status']
+        n_tries += 1
+
+    # Checking OCR results
+    pdf_ocr = response.json()
+
+    assert isinstance(pdf_ocr, dict)
+    assert 'task_result' in pdf_ocr
+    assert pdf_ocr['task_status'] == 'SUCCESS'
+    assert isinstance(pdf_ocr['task_result']['result'], list)
+    assert len(pdf_ocr['task_result']['result']) == 2
+    assert pdf_ocr['task_result']['language'] == 'en'
+    assert 'dummy pdf file' in pdf_ocr['task_result']['result'][0]['text'].lower()

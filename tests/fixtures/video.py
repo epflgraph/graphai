@@ -10,3 +10,8 @@ def test_video_url():
 @pytest.fixture
 def test_video_token():
     return "test_token_vid.mp4"
+
+
+@pytest.fixture
+def test_pdf_url():
+    return "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf"
