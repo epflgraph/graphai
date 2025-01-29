@@ -1,6 +1,5 @@
 from itertools import chain
 
-import langdetect
 from ftfy import fix_encoding
 import numpy as np
 import pysbd
@@ -49,23 +48,6 @@ def generate_translation_text_token(s, src, tgt):
         return md5_text(s) + '_' + src + '_' + tgt
     else:
         return md5_text(convert_list_to_text(s)) + '_' + src + '_' + tgt
-
-
-def detect_text_language(s):
-    """
-    Detects the language of the provided string
-    Args:
-        s: String to detect language for
-
-    Returns:
-        Language of the string
-    """
-    if s is None or s == '':
-        return None
-    try:
-        return langdetect.detect(s)
-    except langdetect.lang_detect_exception.LangDetectException:
-        return None
 
 
 def compute_slide_tfidf_scores(list_of_sets, min_freq=1):

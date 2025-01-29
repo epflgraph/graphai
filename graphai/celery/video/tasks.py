@@ -1,7 +1,6 @@
 from celery import shared_task
 
 from graphai.core.video.video import (
-    NLPModels,
     retrieve_file_from_url,
     retrieve_file_from_url_callback,
     compute_video_fingerprint,
@@ -33,6 +32,7 @@ from graphai.core.video.video import (
     ignore_video_fingerprint_results_callback,
     ignore_single_image_fingerprint_results_callback
 )
+from graphai.core.video.video_utils import NLPModels
 from graphai.core.common.caching import (
     AudioDBCachingManager,
     SlideDBCachingManager,

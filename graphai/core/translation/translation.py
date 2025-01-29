@@ -2,7 +2,7 @@ from graphai.core.common.caching import (
     TextDBCachingManager
 )
 from graphai.core.common.lookup import database_callback_generic, token_based_text_lookup, fingerprint_based_text_lookup
-from graphai.core.translation.text_utils import detect_text_language
+from graphai.core.common.multimedia_utils import detect_text_language
 from graphai.core.common.common_utils import (
     get_current_datetime,
     convert_text_back_to_list
