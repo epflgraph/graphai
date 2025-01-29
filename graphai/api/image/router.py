@@ -118,7 +118,7 @@ async def extract_text_status(task_id):
                 'result': task_results['results'],
                 'language': task_results['language'],
                 'fresh': task_results['fresh'],
-                'successful': task_results['results'] is not None
+                'successful': task_results['results'] is not None and not task_results['results'][0].get('fail', False)
             }
         else:
             task_results = None

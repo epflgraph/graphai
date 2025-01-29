@@ -170,7 +170,13 @@ def extract_slide_text(token, file_manager, method='google', api_token=None):
         # We do not provide Google Cloud Vision OCR for PDFs.
         if is_pdf(token):
             return {
-                'results': 'Google OCR is not available for PDF files.',
+                'results': [
+                    {
+                        'method': 'google',
+                        'text': 'Google OCR is not available for PDF files.',
+                        'fail': True
+                    }
+                ],
                 'language': None,
                 'fresh': False
             }
