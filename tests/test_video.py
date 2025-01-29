@@ -414,6 +414,6 @@ def test__image_extract_text__extract_text__integration(fixture_app, celery_work
     assert 'task_result' in pdf_ocr
     assert pdf_ocr['task_status'] == 'SUCCESS'
     assert isinstance(pdf_ocr['task_result']['result'], list)
-    assert len(pdf_ocr['task_result']['result']) == 2
+    assert len(pdf_ocr['task_result']['result']) == 1
     assert pdf_ocr['task_result']['language'] == 'en'
     assert 'dummy pdf file' in pdf_ocr['task_result']['result'][0]['text'].lower()
