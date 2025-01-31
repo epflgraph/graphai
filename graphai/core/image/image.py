@@ -155,9 +155,9 @@ def extract_slide_text(token, file_manager, method='google', api_token=None):
 
     if method == 'tesseract':
         if is_pdf(token):
-            res = perform_tesseract_ocr_on_pdf(file_manager.generate_filepath(token))
+            res = perform_tesseract_ocr_on_pdf(file_manager.generate_filepath(token), language='enfr')
         else:
-            res = perform_tesseract_ocr(file_manager.generate_filepath(token))
+            res = perform_tesseract_ocr(file_manager.generate_filepath(token), language='enfr')
         if res is None:
             results = None
             language = None

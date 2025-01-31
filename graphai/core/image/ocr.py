@@ -107,18 +107,18 @@ def perform_tesseract_ocr_on_pdf(pdf_path, language=None):
     Performs OCR using tesseract on a pdf file
     Args:
         pdf_path: Path to the PDF file
-        language: Language of the pdf file
+        language: Language of the PDF file
 
     Returns:
         String containing the entire PDF file's extracted contents
     """
     if language is None:
-        language = 'en'
+        language = 'enfr'
     if not file_exists(pdf_path):
         print(f'Error: File {pdf_path} does not exist')
         return None
     pdf_imageset = pdf2image.convert_from_path(pdf_path)
     return '\n'.join(
-        pytesseract.image_to_string(img, lang={'en': 'eng', 'fr': 'fra'}[language])
+        pytesseract.image_to_string(img, lang={'en': 'eng', 'fr': 'fra', 'enfr': 'eng+fra'}[language])
         for img in pdf_imageset
     )
