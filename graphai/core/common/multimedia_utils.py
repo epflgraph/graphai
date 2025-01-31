@@ -113,17 +113,18 @@ def perform_tesseract_ocr(image_path, language=None):
     Performs OCR on an image using Tesseract
     Args:
         image_path: Full path of the image file
-        language: Language of the slide
+        language: Language of the image file
 
     Returns:
         Extracted text
     """
     if language is None:
-        language = 'en'
+        language = 'enfr'
     if not file_exists(image_path):
         print(f'Error: File {image_path} does not exist')
         return None
-    return pytesseract.image_to_string(Image.open(image_path), lang={'en': 'eng', 'fr': 'fra'}[language])
+    return pytesseract.image_to_string(Image.open(image_path),
+                                       lang={'en': 'eng', 'fr': 'fra', 'enfr': 'eng+fra'}[language])
 
 
 def detect_text_language(s):
