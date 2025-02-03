@@ -9,10 +9,12 @@ def generate_exercise(data):
     """
 
     try:
-        url = f"http://{config['chatbot']['host']}:{config['chatbot']['port']}/generate_exercise"
+        url = f"http://{config['chatbot']['host']}:{config['chatbot']['port']}"
     except Exception:
         print("Warning: chatbot configuration not available in file config.ini, defaulting to localhost:5100. Add the variables to the file to suppress this warning.")
         url = 'http://localhost:5100'
+
+    url += '/generate_exercise'
 
     payload = {
         'description': data.description,
