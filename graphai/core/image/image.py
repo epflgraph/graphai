@@ -214,7 +214,7 @@ def extract_slide_text(token, file_manager, method='google', api_token=None, ope
                 results = None
                 language = None
             else:
-                ocr_model = OpenAIOCRModel(api_token)
+                ocr_model = OpenAIOCRModel(openai_token)
                 ocr_model.establish_connection()
                 res = ocr_model.perform_ocr(file_manager.generate_filepath(token))
 
