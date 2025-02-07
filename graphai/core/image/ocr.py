@@ -125,7 +125,7 @@ class GoogleOCRModel(AbstractOCRModel):
         return results
 
 
-class OpenAIOCR(AbstractOCRModel):
+class OpenAIOCRModel(AbstractOCRModel):
     def __init__(self, api_key):
         super().__init__(api_key, OpenAI, "OpenAI")
         self.model_params = dict(
@@ -166,8 +166,10 @@ class OpenAIOCR(AbstractOCRModel):
 def get_ocr_colnames(method):
     if method == 'tesseract':
         return ['ocr_tesseract_results']
-    else:
+    elif method == 'google':
         return ['ocr_google_1_results', 'ocr_google_2_results']
+    else:
+        return ['ocr_openai_results']
 
 
 def perform_tesseract_ocr_on_pdf(pdf_path, language=None):

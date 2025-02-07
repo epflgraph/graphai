@@ -8,6 +8,7 @@ from graphai.core.common.multimedia_utils import (
 from graphai.core.image.ocr import (
     get_ocr_colnames,
     GoogleOCRModel,
+    OpenAIOCRModel,
     perform_tesseract_ocr_on_pdf
 )
 from graphai.core.common.common_utils import (
@@ -144,7 +145,7 @@ def cache_lookup_extract_slide_text(token, method):
     return None
 
 
-def extract_slide_text(token, file_manager, method='google', api_token=None):
+def extract_slide_text(token, file_manager, method='google', api_token=None, openai_token=None):
     if not is_token(token):
         return {
             'results': None,
@@ -170,41 +171,64 @@ def extract_slide_text(token, file_manager, method='google', api_token=None):
                 }
             ]
     else:
-        # We do not provide Google Cloud Vision OCR for PDFs.
+        # We do not provide Google Cloud Vision or OpenAI OCR for PDFs.
         if is_pdf(token):
             return {
                 'results': [
                     {
-                        'method': 'google',
-                        'text': 'Google OCR is not available for PDF files.',
+                        'method': method,
+                        'text': 'Currently, only Tesseract OCR is available for PDFs.',
                         'fail': True
                     }
                 ],
                 'language': None,
                 'fresh': False
             }
-        if api_token is None:
-            results = None
-            language = None
-        else:
-            ocr_model = GoogleOCRModel(api_token)
-            ocr_model.establish_connection()
-            res1, res2 = ocr_model.perform_ocr(file_manager.generate_filepath(token))
-
-            if res1 is None or res2 is None:
+        if method == 'google':
+            # Google OCR
+            if api_token is None:
                 results = None
                 language = None
             else:
-                # Since DTD usually performs better, method #1 is our point of reference for langdetect
-                language = detect_text_language(res1)
-                res_list = [res1, res2]
-                results = [
-                    {
-                        'method': ocr_colnames[i],
-                        'text': res_list[i]
-                    }
-                    for i in range(len(res_list))
-                ]
+                ocr_model = GoogleOCRModel(api_token)
+                ocr_model.establish_connection()
+                res1, res2 = ocr_model.perform_ocr(file_manager.generate_filepath(token))
+
+                if res1 is None or res2 is None:
+                    results = None
+                    language = None
+                else:
+                    # Since DTD usually performs better, method #1 is our point of reference for langdetect
+                    language = detect_text_language(res1)
+                    res_list = [res1, res2]
+                    results = [
+                        {
+                            'method': ocr_colnames[i],
+                            'text': res_list[i]
+                        }
+                        for i in range(len(res_list))
+                    ]
+        else:
+            # OpenAI OCR
+            if openai_token is None:
+                results = None
+                language = None
+            else:
+                ocr_model = OpenAIOCRModel(api_token)
+                ocr_model.establish_connection()
+                res = ocr_model.perform_ocr(file_manager.generate_filepath(token))
+
+                if res is None:
+                    results = None
+                    language = None
+                else:
+                    language = detect_text_language(res)
+                    results = [
+                        {
+                            'method': ocr_colnames[0],
+                            'text': res
+                        }
+                    ]
 
     return {
         'results': results,

@@ -226,6 +226,7 @@ class SlideDBCachingManager(DBCachingManagerBase):
               `ocr_tesseract_results` LONGTEXT DEFAULT NULL,
               `ocr_google_1_results` LONGTEXT DEFAULT NULL,
               `ocr_google_2_results` LONGTEXT DEFAULT NULL,
+              `ocr_openai_results` LONGTEXT DEFAULT NULL,
               `language` VARCHAR(10) DEFAULT NULL,
               `date_added` DATETIME DEFAULT NULL,
               PRIMARY KEY id_token (id_token)
