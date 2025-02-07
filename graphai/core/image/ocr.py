@@ -119,6 +119,12 @@ def perform_tesseract_ocr_on_pdf(pdf_path, language=None):
         return None
     pdf_imageset = pdf2image.convert_from_path(pdf_path)
     return '\n'.join(
-        pytesseract.image_to_string(img, lang={'en': 'eng', 'fr': 'fra', 'enfr': 'eng+fra'}[language])
+        pytesseract.image_to_string(img,
+                                    lang={'en': 'eng',
+                                          'fr': 'fra',
+                                          'enfr': 'eng+fra',
+                                          'eneq': 'eng+equ',
+                                          'freq': 'fra+equ'
+                                          }[language])
         for img in pdf_imageset
     )

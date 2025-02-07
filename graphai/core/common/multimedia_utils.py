@@ -124,7 +124,13 @@ def perform_tesseract_ocr(image_path, language=None):
         print(f'Error: File {image_path} does not exist')
         return None
     return pytesseract.image_to_string(Image.open(image_path),
-                                       lang={'en': 'eng', 'fr': 'fra', 'enfr': 'eng+fra'}[language])
+                                       lang={
+                                           'en': 'eng',
+                                           'fr': 'fra',
+                                           'enfr': 'eng+fra',
+                                           'eneq': 'eng+equ',
+                                           'freq': 'fra+equ'
+                                       }[language])
 
 
 def detect_text_language(s):
