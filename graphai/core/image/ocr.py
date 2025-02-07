@@ -2,46 +2,76 @@ import io
 import time
 from multiprocessing import Lock
 
+from abc import ABC, abstractmethod
+
 import pdf2image
 import pytesseract
 from google.cloud import vision
+from openai import OpenAI
 
 from graphai.core.common.common_utils import file_exists
 
+import base64
 
-class GoogleOCRModel:
-    def __init__(self, api_key):
+
+class ImgToBase64Converter:
+
+    def __init__(self, image_path):
+        with open(image_path, "rb") as image_file:
+            self.base64 = base64.b64encode(image_file.read()).decode('utf-8')
+
+    def get_base64(self):
+        return self.base64
+
+
+class AbstractOCRModel(ABC):
+    def __init__(self, api_key, model_class, model_name):
         self.api_key = api_key
+        self.model_type = model_class
+        self.model_name = model_name
+        self.model_params = None
 
         if self.api_key is None:
             print(
-                "No Google API key was provided. "
-                "Google API endpoints cannot be used as there is no default API key."
+                f"No {model_name} API key was provided. "
+                f"{model_name} API endpoints cannot be used as there is no default API key."
             )
         self.model = None
         self.load_lock = Lock()
 
     def establish_connection(self):
         """
-        Lazily connects to the Google API
+        Lazily connects to the OCR API
         Returns:
             True if a connection already exists or if a new connection is successfully established, False otherwise
         """
         with self.load_lock:
             if self.model is None:
-                if self.api_key is not None:
-                    print('Establishing Google API connection...')
+                if self.model_params is not None and isinstance(self.model_params, dict):
+                    print(f'Establishing {self.model_name} API connection...')
                     try:
-                        self.model = vision.ImageAnnotatorClient(client_options={"api_key": self.api_key})
+                        self.model = self.model_type(**self.model_params)
                         return True
                     except Exception:
-                        print('Failed to connect to Google API!')
+                        print(f'Failed to connect to {self.model_name} API!')
                         return False
                 else:
                     print('No API key provided!')
                     return False
             else:
                 return True
+
+    @abstractmethod
+    def perform_ocr(self, input_filename_with_path):
+        pass
+
+
+class GoogleOCRModel(AbstractOCRModel):
+    def __init__(self, api_key):
+        super().__init__(api_key, vision.ImageAnnotatorClient, 'Google')
+        self.model_params = dict(
+            client_options={"api_key": self.api_key}
+        )
 
     def perform_ocr(self, input_filename_with_path):
         """
@@ -93,6 +123,44 @@ class GoogleOCRModel:
         if results is not None:
             results = results.full_text_annotation.text
         return results
+
+
+class OpenAIOCR(AbstractOCRModel):
+    def __init__(self, api_key):
+        super().__init__(api_key, OpenAI, "OpenAI")
+        self.model_params = dict(
+            api_key=self.api_key
+        )
+
+    def perform_ocr(self, input_filename_with_path):
+        model_loaded = self.establish_connection()
+        if not model_loaded:
+            return None
+        img_b64_str = ImgToBase64Converter(input_filename_with_path).get_base64()
+        img_type = f'image/{input_filename_with_path.split(".")[-1]}'
+        try:
+            response = self.model.chat.completions.create(
+                model="gpt-4o-mini",
+                messages=[
+                    {
+                        "role": "user",
+                        "content": [
+                            {
+                                "type": "text",
+                                "text": "Extract the text contents of the following image with no further explanation."
+                            },
+                            {
+                                "type": "image_url",
+                                "image_url": {"url": f"data:{img_type};base64,{img_b64_str}"},
+                            },
+                        ],
+                    }
+                ],
+            )
+            return response.choices[0].message.content
+        except Exception as e:
+            print(e)
+            return None
 
 
 def get_ocr_colnames(method):
