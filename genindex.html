@@ -104,6 +104,8 @@
 <h2 id="A">A</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="graphai.core.image.ocr.html#graphai.core.image.ocr.AbstractOCRModel">AbstractOCRModel (class in graphai.core.image.ocr)</a>
+</li>
       <li><a href="graphai.api.auth.auth_utils.html#graphai.api.auth.auth_utils.Token.access_token">access_token (graphai.api.auth.auth_utils.Token attribute)</a>
 </li>
       <li><a href="graphai.api.common.schemas.html#graphai.api.common.schemas.TokenStatus.active">active (graphai.api.common.schemas.TokenStatus attribute)</a>
@@ -492,7 +494,7 @@
 </li>
       <li><a href="graphai.core.ontology.data.html#graphai.core.ontology.data.ensure_nonzero_denominator">ensure_nonzero_denominator() (in module graphai.core.ontology.data)</a>
 </li>
-      <li><a href="graphai.core.image.ocr.html#graphai.core.image.ocr.GoogleOCRModel.establish_connection">establish_connection() (graphai.core.image.ocr.GoogleOCRModel method)</a>
+      <li><a href="graphai.core.image.ocr.html#graphai.core.image.ocr.AbstractOCRModel.establish_connection">establish_connection() (graphai.core.image.ocr.AbstractOCRModel method)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
@@ -699,6 +701,8 @@
       <li><a href="graphai.core.common.multimedia_utils.html#graphai.core.common.multimedia_utils.get_audio_token_status">get_audio_token_status() (in module graphai.core.common.multimedia_utils)</a>
 </li>
       <li><a href="graphai.core.common.multimedia_utils.html#graphai.core.common.multimedia_utils.get_available_streams">get_available_streams() (in module graphai.core.common.multimedia_utils)</a>
+</li>
+      <li><a href="graphai.core.image.ocr.html#graphai.core.image.ocr.ImgToBase64Converter.get_base64">get_base64() (graphai.core.image.ocr.ImgToBase64Converter method)</a>
 </li>
       <li><a href="graphai.core.ontology.data.html#graphai.core.ontology.data.OntologyData.get_category_anchor_pages">get_category_anchor_pages() (graphai.core.ontology.data.OntologyData method)</a>
 
@@ -1931,6 +1935,8 @@
 </li>
       <li><a href="graphai.core.video.video.html#graphai.core.video.video.ignore_video_fingerprint_results_callback">ignore_video_fingerprint_results_callback() (in module graphai.core.video.video)</a>
 </li>
+      <li><a href="graphai.core.image.ocr.html#graphai.core.image.ocr.ImgToBase64Converter">ImgToBase64Converter (class in graphai.core.image.ocr)</a>
+</li>
       <li><a href="graphai.api.text.schemas.html#graphai.api.text.schemas.GenerateLectureExerciseRequest.include_solution">include_solution (graphai.api.text.schemas.GenerateLectureExerciseRequest attribute)</a>
 
       <ul>
@@ -2488,14 +2494,16 @@
         <li><a href="graphai.core.ontology.data.html#graphai.core.ontology.data.OntologyData">(class in graphai.core.ontology.data)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="graphai.api.text.schemas.html#graphai.api.text.schemas.GenerateLectureExerciseRequest.openai_api_key">openai_api_key (graphai.api.text.schemas.GenerateLectureExerciseRequest attribute)</a>
 
       <ul>
         <li><a href="graphai.api.text.schemas.html#graphai.api.text.schemas.GenerateTextExerciseRequest.openai_api_key">(graphai.api.text.schemas.GenerateTextExerciseRequest attribute)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="graphai.core.image.ocr.html#graphai.core.image.ocr.OpenAIOCRModel">OpenAIOCRModel (class in graphai.core.image.ocr)</a>
+</li>
       <li><a href="graphai.celery.ontology.jobs.html#graphai.celery.ontology.jobs.openalex_category_nearest_topics_job">openalex_category_nearest_topics_job() (in module graphai.celery.ontology.jobs)</a>
 </li>
       <li><a href="graphai.celery.ontology.jobs.html#graphai.celery.ontology.jobs.openalex_topic_nearest_categories_job">openalex_topic_nearest_categories_job() (in module graphai.celery.ontology.jobs)</a>
@@ -2530,12 +2538,18 @@
 </li>
       <li><a href="graphai.core.ontology.clustering.html#graphai.core.ontology.clustering.perform_constrained_agglomerative">perform_constrained_agglomerative() (in module graphai.core.ontology.clustering)</a>
 </li>
-      <li><a href="graphai.core.image.ocr.html#graphai.core.image.ocr.GoogleOCRModel.perform_ocr">perform_ocr() (graphai.core.image.ocr.GoogleOCRModel method)</a>
+      <li><a href="graphai.core.image.ocr.html#graphai.core.image.ocr.AbstractOCRModel.perform_ocr">perform_ocr() (graphai.core.image.ocr.AbstractOCRModel method)</a>
+
+      <ul>
+        <li><a href="graphai.core.image.ocr.html#graphai.core.image.ocr.GoogleOCRModel.perform_ocr">(graphai.core.image.ocr.GoogleOCRModel method)</a>
 </li>
-      <li><a href="graphai.core.ontology.clustering.html#graphai.core.ontology.clustering.perform_PCA">perform_PCA() (in module graphai.core.ontology.clustering)</a>
+        <li><a href="graphai.core.image.ocr.html#graphai.core.image.ocr.OpenAIOCRModel.perform_ocr">(graphai.core.image.ocr.OpenAIOCRModel method)</a>
 </li>
+      </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="graphai.core.ontology.clustering.html#graphai.core.ontology.clustering.perform_PCA">perform_PCA() (in module graphai.core.ontology.clustering)</a>
+</li>
       <li><a href="graphai.core.common.multimedia_utils.html#graphai.core.common.multimedia_utils.perform_probe">perform_probe() (in module graphai.core.common.multimedia_utils)</a>
 </li>
       <li><a href="graphai.core.video.video_utils.html#graphai.core.video.video_utils.perform_slow_audio_probe">perform_slow_audio_probe() (in module graphai.core.video.video_utils)</a>

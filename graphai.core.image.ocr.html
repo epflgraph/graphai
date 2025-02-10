@@ -101,16 +101,38 @@
   <section id="module-graphai.core.image.ocr">
 <span id="graphai-core-image-ocr-module"></span><h1>graphai.core.image.ocr module<a class="headerlink" href="#module-graphai.core.image.ocr" title="Link to this heading"></a></h1>
 <dl class="py class">
-<dt class="sig sig-object py" id="graphai.core.image.ocr.GoogleOCRModel">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">graphai.core.image.ocr.</span></span><span class="sig-name descname"><span class="pre">GoogleOCRModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">api_key</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.image.ocr.GoogleOCRModel" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="graphai.core.image.ocr.ImgToBase64Converter">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">graphai.core.image.ocr.</span></span><span class="sig-name descname"><span class="pre">ImgToBase64Converter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">image_path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.image.ocr.ImgToBase64Converter" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <dl class="py method">
-<dt class="sig sig-object py" id="graphai.core.image.ocr.GoogleOCRModel.establish_connection">
-<span class="sig-name descname"><span class="pre">establish_connection</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.image.ocr.GoogleOCRModel.establish_connection" title="Link to this definition"></a></dt>
-<dd><p>Lazily connects to the Google API
+<dt class="sig sig-object py" id="graphai.core.image.ocr.ImgToBase64Converter.get_base64">
+<span class="sig-name descname"><span class="pre">get_base64</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.image.ocr.ImgToBase64Converter.get_base64" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="graphai.core.image.ocr.AbstractOCRModel">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">graphai.core.image.ocr.</span></span><span class="sig-name descname"><span class="pre">AbstractOCRModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">api_key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_class</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.image.ocr.AbstractOCRModel" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="graphai.core.image.ocr.AbstractOCRModel.establish_connection">
+<span class="sig-name descname"><span class="pre">establish_connection</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.image.ocr.AbstractOCRModel.establish_connection" title="Link to this definition"></a></dt>
+<dd><p>Lazily connects to the OCR API
 :returns: True if a connection already exists or if a new connection is successfully established, False otherwise</p>
 </dd></dl>
 
+<dl class="py method">
+<dt class="sig sig-object py" id="graphai.core.image.ocr.AbstractOCRModel.perform_ocr">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">perform_ocr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_filename_with_path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.image.ocr.AbstractOCRModel.perform_ocr" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="graphai.core.image.ocr.GoogleOCRModel">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">graphai.core.image.ocr.</span></span><span class="sig-name descname"><span class="pre">GoogleOCRModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">api_key</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.image.ocr.GoogleOCRModel" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#graphai.core.image.ocr.AbstractOCRModel" title="graphai.core.image.ocr.AbstractOCRModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">AbstractOCRModel</span></code></a></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="graphai.core.image.ocr.GoogleOCRModel.perform_ocr">
 <span class="sig-name descname"><span class="pre">perform_ocr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_filename_with_path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.image.ocr.GoogleOCRModel.perform_ocr" title="Link to this definition"></a></dt>
@@ -136,6 +158,17 @@
 </dd>
 </dl>
 </dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="graphai.core.image.ocr.OpenAIOCRModel">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">graphai.core.image.ocr.</span></span><span class="sig-name descname"><span class="pre">OpenAIOCRModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">api_key</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.image.ocr.OpenAIOCRModel" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#graphai.core.image.ocr.AbstractOCRModel" title="graphai.core.image.ocr.AbstractOCRModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">AbstractOCRModel</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="graphai.core.image.ocr.OpenAIOCRModel.perform_ocr">
+<span class="sig-name descname"><span class="pre">perform_ocr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_filename_with_path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.image.ocr.OpenAIOCRModel.perform_ocr" title="Link to this definition"></a></dt>
+<dd></dd></dl>
 
 </dd></dl>
 
