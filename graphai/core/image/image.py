@@ -145,7 +145,7 @@ def cache_lookup_extract_slide_text(token, method):
     return None
 
 
-def extract_slide_text(token, file_manager, method='google', api_token=None, openai_token=None):
+def extract_slide_text(token, file_manager, method='google', api_token=None, openai_token=None, pdf_in_pages=True):
     if not is_token(token):
         return {
             'results': None,
@@ -156,7 +156,8 @@ def extract_slide_text(token, file_manager, method='google', api_token=None, ope
 
     if method == 'tesseract':
         if is_pdf(token):
-            res = perform_tesseract_ocr_on_pdf(file_manager.generate_filepath(token), language='enfr')
+            res = perform_tesseract_ocr_on_pdf(file_manager.generate_filepath(token),
+                                               language='enfr', in_pages=pdf_in_pages)
         else:
             res = perform_tesseract_ocr(file_manager.generate_filepath(token), language='enfr')
         if res is None:
