@@ -137,6 +137,13 @@ class ExtractTextRequest(BaseModel):
         default=None
     )
 
+    pdf_in_pages: bool = Field(
+        title="PDF in pages",
+        description="Whether to return the results of PDF OCR in separate pages (JSON format) or one joined string. "
+                    "Flag only used when the file being OCR'ed is a PDF.",
+        default=True
+    )
+
 
 class IndividualOCRResult(BaseModel):
     method: str = Field(
