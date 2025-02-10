@@ -111,9 +111,9 @@ class ExtractTextRequest(BaseModel):
         description="The token that identifies the requested file"
     )
 
-    method: Literal['google', 'tesseract'] = Field(
+    method: Literal['google', 'tesseract', 'openai'] = Field(
         title="Method",
-        description="OCR method. Available methods are 'google' (default) and 'tesseract' (not recommended)",
+        description="OCR method. Available methods are 'google' (default), 'openai', and 'tesseract' (not recommended)",
         default="google"
     )
 
@@ -126,7 +126,14 @@ class ExtractTextRequest(BaseModel):
     google_api_token: str = Field(
         title="Google API token",
         description="Token that authenticates the user on the Google OCR API."
-                    "Without a valid token, Google OCR will fail. Not required for Tesseract.",
+                    "Without a valid token, Google OCR will fail. Not required for Tesseract or OpenAI.",
+        default=None
+    )
+
+    openai_api_token: str = Field(
+        title="OpenAI API token",
+        description="Token that authenticates the user on the Google OCR API."
+                    "Without a valid token, OpenAI OCR will fail. Not required for Tesseract or Google.",
         default=None
     )
 

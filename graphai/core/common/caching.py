@@ -216,7 +216,7 @@ class SlideDBCachingManager(DBCachingManagerBase):
             f"""
             CREATE TABLE IF NOT EXISTS `{self.schema}`.`{self.cache_table}` (
               `id_token` VARCHAR(255),
-              `origin_token` VARCHAR(255),
+              `origin_token` LONGTEXT,
               `fingerprint` LONGTEXT DEFAULT NULL,
               `timestamp` FLOAT,
               `slide_number` INT UNSIGNED,
@@ -226,6 +226,7 @@ class SlideDBCachingManager(DBCachingManagerBase):
               `ocr_tesseract_results` LONGTEXT DEFAULT NULL,
               `ocr_google_1_results` LONGTEXT DEFAULT NULL,
               `ocr_google_2_results` LONGTEXT DEFAULT NULL,
+              `ocr_openai_results` LONGTEXT DEFAULT NULL,
               `language` VARCHAR(10) DEFAULT NULL,
               `date_added` DATETIME DEFAULT NULL,
               PRIMARY KEY id_token (id_token)
@@ -247,7 +248,7 @@ class SlideDBCachingManager(DBCachingManagerBase):
         try:
             self.db.execute_query(
                 f"""
-                CREATE INDEX `slide_main_origin_token_index` ON `{self.schema}`.`{self.cache_table}` (`origin_token`);
+                CREATE INDEX `slide_main_origin_token_index` ON `{self.schema}`.`{self.cache_table}` (`origin_token`(512));
                 """
             )
         except Exception:
