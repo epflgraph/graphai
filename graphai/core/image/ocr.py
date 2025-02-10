@@ -147,7 +147,10 @@ class OpenAIOCRModel(AbstractOCRModel):
                         "content": [
                             {
                                 "type": "text",
-                                "text": "Extract the text contents of the following image with no further explanation."
+                                "text": """
+                                    Extract the text contents of the following image with no further explanation.
+                                    Formulae (if any) are to be extracted as valid LaTeX.
+                                    """
                             },
                             {
                                 "type": "image_url",
