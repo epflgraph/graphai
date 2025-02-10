@@ -415,5 +415,6 @@ def test__image_extract_text__extract_text__integration(fixture_app, celery_work
     assert pdf_ocr['task_status'] == 'SUCCESS'
     assert isinstance(pdf_ocr['task_result']['result'], list)
     assert len(pdf_ocr['task_result']['result']) == 1
-    assert pdf_ocr['task_result']['language'] == 'en'
-    assert 'dummy pdf file' in pdf_ocr['task_result']['result'][0]['text'].lower()
+    extracted_json = json.loads(pdf_ocr['task_result']['result'][0]['text'])
+    assert 'dummy pdf file' in extracted_json[0]['content'].lower()
+    assert extracted_json[0]['page'] == 1

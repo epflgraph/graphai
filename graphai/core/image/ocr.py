@@ -1,4 +1,5 @@
 import io
+import json
 import time
 from multiprocessing import Lock
 
@@ -175,12 +176,13 @@ def get_ocr_colnames(method):
         return ['ocr_openai_results']
 
 
-def perform_tesseract_ocr_on_pdf(pdf_path, language=None):
+def perform_tesseract_ocr_on_pdf(pdf_path, language=None, in_pages=True):
     """
     Performs OCR using tesseract on a pdf file
     Args:
         pdf_path: Path to the PDF file
         language: Language of the PDF file
+        in_pages: Whether to return the results as a separate pages (in a JSON string) or as a singular string.
 
     Returns:
         String containing the entire PDF file's extracted contents
@@ -191,13 +193,22 @@ def perform_tesseract_ocr_on_pdf(pdf_path, language=None):
         print(f'Error: File {pdf_path} does not exist')
         return None
     pdf_imageset = pdf2image.convert_from_path(pdf_path)
-    return '\n'.join(
-        pytesseract.image_to_string(img,
-                                    lang={'en': 'eng',
-                                          'fr': 'fra',
-                                          'enfr': 'eng+fra',
-                                          'eneq': 'eng+equ',
-                                          'freq': 'fra+equ'
-                                          }[language])
+    results = [
+        pytesseract.image_to_string(
+            img,
+            lang={'en': 'eng', 'fr': 'fra', 'enfr': 'eng+fra', 'eneq': 'eng+equ', 'freq': 'fra+equ'}[language]
+        )
         for img in pdf_imageset
-    )
+    ]
+    if not in_pages:
+        return '\n'.join(results)
+    else:
+        return json.dumps(
+            [
+                {
+                    'page': i + 1,
+                    'content': results[i]
+                }
+                for i in range(len(results))
+            ]
+        )
