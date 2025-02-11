@@ -15,6 +15,15 @@ from graphai.core.common.common_utils import file_exists
 import base64
 
 
+OPENAI_OCR_PROMPT = """
+    You are to extract the text contents of the following image. Formulae (if any) are to be extracted as valid LaTeX.
+    Output your response as a valid JSON with two fields:
+    1. "text": Containing ONLY the extracted text and formulae (if applicable). Do not include ANY extra explanations.
+    2. "keywords": A list of at least 1 and at most 10 keywords that describe the contents of the image.
+    If any LaTeX is present in the "text" field, ensure that it is valid and that it'll compile using XeLaTeX.
+"""
+
+
 class ImgToBase64Converter:
 
     def __init__(self, image_path):
@@ -148,10 +157,7 @@ class OpenAIOCRModel(AbstractOCRModel):
                         "content": [
                             {
                                 "type": "text",
-                                "text": """
-                                    Extract the text contents of the following image with no further explanation.
-                                    Formulae (if any) are to be extracted as valid LaTeX.
-                                    """
+                                "text": OPENAI_OCR_PROMPT
                             },
                             {
                                 "type": "image_url",
@@ -160,6 +166,7 @@ class OpenAIOCRModel(AbstractOCRModel):
                         ],
                     }
                 ],
+                response_format={"type": "json_object"}
             )
             return response.choices[0].message.content
         except Exception as e:
