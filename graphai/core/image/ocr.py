@@ -24,6 +24,10 @@ OPENAI_OCR_PROMPT = """
 """
 
 
+def is_valid_latex(text):
+    return False
+
+
 class ImgToBase64Converter:
 
     def __init__(self, image_path):
@@ -142,7 +146,7 @@ class OpenAIOCRModel(AbstractOCRModel):
             api_key=self.api_key
         )
 
-    def perform_ocr(self, input_filename_with_path):
+    def perform_ocr(self, input_filename_with_path, validate_latex=False):
         model_loaded = self.establish_connection()
         if not model_loaded:
             return None
@@ -168,7 +172,47 @@ class OpenAIOCRModel(AbstractOCRModel):
                 ],
                 response_format={"type": "json_object"}
             )
-            return response.choices[0].message.content
+            results = response.choices[0].message.content
+            text = json.loads(results)['text']
+            if validate_latex and not is_valid_latex(text):
+                print('Retrying for a valid LaTeX')
+                response = self.model.chat.completions.create(
+                    model="gpt-4o-mini",
+                    messages=[
+                        {
+                            "role": "user",
+                            "content": [
+                                {
+                                    "type": "text",
+                                    "text": OPENAI_OCR_PROMPT
+                                },
+                                {
+                                    "type": "image_url",
+                                    "image_url": {"url": f"data:{img_type};base64,{img_b64_str}"},
+                                },
+                            ],
+                        },
+                        {
+                            "role": "assistant",
+                            "content": {
+                                "type": "text",
+                                "text": results
+                            }
+                        },
+                        {
+                            "role": "user",
+                            "content": {
+                                "type": "text",
+                                "text": "The LaTeX you provided has errors. "
+                                        "Regenerate the JSON response and this time make sure "
+                                        "the LaTeX in the 'text' field is fully valid and compiles correctly."
+                            }
+                        }
+                    ],
+                    response_format={"type": "json_object"}
+                )
+                results = response.choices[0].message.content
+            return results
         except Exception as e:
             print(e)
             return None
