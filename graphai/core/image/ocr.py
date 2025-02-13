@@ -9,6 +9,7 @@ import pdf2image
 import pytesseract
 from google.cloud import vision
 from openai import OpenAI
+from pylatexenc.latex2text import LatexNodes2Text
 
 from graphai.core.common.common_utils import file_exists
 
@@ -25,7 +26,13 @@ OPENAI_OCR_PROMPT = """
 
 
 def is_valid_latex(text):
-    return False
+    try:
+        s = LatexNodes2Text().latex_to_text(text, tolerant_parsing=False)
+        print(s)
+        return True
+    except Exception as e:
+        print(e)
+        return False
 
 
 class ImgToBase64Converter:
