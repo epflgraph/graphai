@@ -79,7 +79,8 @@ dependencies = [
     "fastapi-user-limiter>=1.3.0",
     "sentence-transformers",
     "ftfy",
-    "pdf2image"
+    "pdf2image",
+    "pylatexenc"
 ]
 
 [tool.setuptools]

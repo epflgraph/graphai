@@ -9,10 +9,30 @@ import pdf2image
 import pytesseract
 from google.cloud import vision
 from openai import OpenAI
+from pylatexenc.latex2text import LatexNodes2Text
 
 from graphai.core.common.common_utils import file_exists
 
 import base64
+
+
+OPENAI_OCR_PROMPT = """
+    You are to extract the text contents of the following image. Formulae (if any) are to be extracted as valid LaTeX.
+    Output your response as a valid JSON with two fields:
+    1. "text": Containing ONLY the extracted text and formulae (if applicable). Do not include ANY extra explanations.
+    2. "keywords": A list of at least 1 and at most 10 keywords that describe the contents of the image.
+    If any LaTeX is present in the "text" field, ensure that it is valid and that the field would compile using XeLaTeX.
+"""
+
+
+def is_valid_latex(text):
+    try:
+        s = LatexNodes2Text().latex_to_text(text, tolerant_parsing=False)
+        print(s)
+        return True
+    except Exception as e:
+        print(e)
+        return False
 
 
 class ImgToBase64Converter:
@@ -133,7 +153,7 @@ class OpenAIOCRModel(AbstractOCRModel):
             api_key=self.api_key
         )
 
-    def perform_ocr(self, input_filename_with_path):
+    def perform_ocr(self, input_filename_with_path, validate_latex=True):
         model_loaded = self.establish_connection()
         if not model_loaded:
             return None
@@ -148,10 +168,7 @@ class OpenAIOCRModel(AbstractOCRModel):
                         "content": [
                             {
                                 "type": "text",
-                                "text": """
-                                    Extract the text contents of the following image with no further explanation.
-                                    Formulae (if any) are to be extracted as valid LaTeX.
-                                    """
+                                "text": OPENAI_OCR_PROMPT
                             },
                             {
                                 "type": "image_url",
@@ -160,8 +177,49 @@ class OpenAIOCRModel(AbstractOCRModel):
                         ],
                     }
                 ],
+                response_format={"type": "json_object"}
             )
-            return response.choices[0].message.content
+            results = response.choices[0].message.content
+            text = json.loads(results)['text']
+            if validate_latex and not is_valid_latex(text):
+                print('Retrying for a valid LaTeX')
+                response = self.model.chat.completions.create(
+                    model="gpt-4o-mini",
+                    messages=[
+                        {
+                            "role": "user",
+                            "content": [
+                                {
+                                    "type": "text",
+                                    "text": OPENAI_OCR_PROMPT
+                                },
+                                {
+                                    "type": "image_url",
+                                    "image_url": {"url": f"data:{img_type};base64,{img_b64_str}"},
+                                },
+                            ],
+                        },
+                        {
+                            "role": "assistant",
+                            "content": {
+                                "type": "text",
+                                "text": results
+                            }
+                        },
+                        {
+                            "role": "user",
+                            "content": {
+                                "type": "text",
+                                "text": "The LaTeX you provided has errors. "
+                                        "Regenerate the JSON response and this time make sure "
+                                        "the LaTeX in the 'text' field is fully valid and compiles correctly."
+                            }
+                        }
+                    ],
+                    response_format={"type": "json_object"}
+                )
+                results = response.choices[0].message.content
+            return results
         except Exception as e:
             print(e)
             return None
