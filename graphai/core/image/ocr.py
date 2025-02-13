@@ -21,7 +21,7 @@ OPENAI_OCR_PROMPT = """
     Output your response as a valid JSON with two fields:
     1. "text": Containing ONLY the extracted text and formulae (if applicable). Do not include ANY extra explanations.
     2. "keywords": A list of at least 1 and at most 10 keywords that describe the contents of the image.
-    If any LaTeX is present in the "text" field, ensure that it is valid and that it'll compile using XeLaTeX.
+    If any LaTeX is present in the "text" field, ensure that it is valid and that the field would compile using XeLaTeX.
 """
 
 
@@ -153,7 +153,7 @@ class OpenAIOCRModel(AbstractOCRModel):
             api_key=self.api_key
         )
 
-    def perform_ocr(self, input_filename_with_path, validate_latex=False):
+    def perform_ocr(self, input_filename_with_path, validate_latex=True):
         model_loaded = self.establish_connection()
         if not model_loaded:
             return None
