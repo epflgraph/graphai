@@ -8,7 +8,13 @@ def search_lex(text, embedding=None, lang=None, limit=10):
             config['elasticsearch'],
             index=config['elasticsearch'].get('lex_index', RETRIEVAL_PARAMS['lex']['default_index'])
         )
-        return lex_retriever.search(text, embedding, lang, limit)
+        return {
+            'result': lex_retriever.search(text, embedding, lang, limit),
+            'successful': True
+        }
     except Exception as e:
         print(e)
-        return None
+        return {
+            'result': None,
+            'successful': False
+        }
