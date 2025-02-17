@@ -41,6 +41,8 @@ class BaseConfig:
             # custom queues
             # Concept detection
             Queue("text_10", max_priority=10),
+            # Retrieval
+            Queue("retrieval_10", max_priority=10),
             # Cache lookups
             Queue("caching_6", max_priority=6),
             # Translation
