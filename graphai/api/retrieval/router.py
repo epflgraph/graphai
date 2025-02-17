@@ -42,6 +42,7 @@ async def embed_text_status(task_id):
     if task_results is not None:
         if 'result' in task_results:
             task_results = {
+                'n_results': task_results['n_results'],
                 'result': task_results['result'],
                 'successful': task_results['successful'],
             }

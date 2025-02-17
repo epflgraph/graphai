@@ -25,6 +25,9 @@ class LexRetrievalRequest(BaseModel):
 
 
 class LexRetrievalTaskResponse(BaseModel):
+    n_results: int = Field(
+        title="Number of results"
+    )
     result: Union[List[dict], None] = Field(
         title="Retrieval results",
         description="Retrieval results"
