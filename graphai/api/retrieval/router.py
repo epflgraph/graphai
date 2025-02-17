@@ -11,32 +11,33 @@ from graphai.celery.common.celery_config import get_task_info
 
 from graphai.api.common.schemas import TaskIDResponse
 from graphai.api.retrieval.schemas import (
-    LexRetrievalRequest,
-    LexRetrievalResponse
+    RetrievalRequest,
+    RetrievalResponse
 )
 
 router = APIRouter(
-    prefix='/retrieval',
-    tags=['retrieval'],
+    prefix='/rag',
+    tags=['rag'],
     responses={404: {'description': 'Not found'}},
-    dependencies=[Security(get_current_active_user, scopes=['retrieval'])]
+    dependencies=[Security(get_current_active_user, scopes=['rag'])]
 )
 
 
-@router.post('/lex', response_model=TaskIDResponse,
-             dependencies=[Depends(rate_limiter(get_ratelimit_values()['retrieval']['max_requests'],
-                                                get_ratelimit_values()['retrieval']['window'],
+@router.post('/retrieve', response_model=TaskIDResponse,
+             dependencies=[Depends(rate_limiter(get_ratelimit_values()['rag']['max_requests'],
+                                                get_ratelimit_values()['rag']['window'],
                                                 user=get_user_for_rate_limiter))])
-async def retrieve_lex(data: LexRetrievalRequest):
+async def retrieve_from_es(data: RetrievalRequest):
     text = data.text
     lang = data.lang
     limit = data.limit
-    task_id = retrieve_lex_job(text, lang, limit)
+    index_to_search_in = data.index
+    task_id = retrieve_lex_job(text, index_to_search_in, lang, limit)
     return {'task_id': task_id}
 
 
-@router.get('/lex/status/{task_id}', response_model=LexRetrievalResponse)
-async def embed_text_status(task_id):
+@router.get('/retrieve/status/{task_id}', response_model=RetrievalResponse)
+async def retrieve_from_es_status(task_id):
     full_results = get_task_info(task_id)
     task_results = full_results['results']
     if task_results is not None:

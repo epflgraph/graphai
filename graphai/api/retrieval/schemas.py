@@ -4,10 +4,16 @@ from typing import Union, Literal, List, Dict
 from graphai.api.common.schemas import TaskStatusResponse
 
 
-class LexRetrievalRequest(BaseModel):
+class RetrievalRequest(BaseModel):
     text: str = Field(
         title="Text",
         description="Text to search for"
+    )
+
+    index: Literal['lex'] = Field(
+        title="Index",
+        description="Index to search in.",
+        default='lex'
     )
 
     lang: Literal['en', 'fr', None] = Field(
@@ -24,7 +30,7 @@ class LexRetrievalRequest(BaseModel):
     )
 
 
-class LexRetrievalTaskResponse(BaseModel):
+class RetrievalTaskResponse(BaseModel):
     n_results: int = Field(
         title="Number of results"
     )
@@ -39,8 +45,8 @@ class LexRetrievalTaskResponse(BaseModel):
     )
 
 
-class LexRetrievalResponse(TaskStatusResponse):
-    task_result: Union[LexRetrievalTaskResponse, None] = Field(
+class RetrievalResponse(TaskStatusResponse):
+    task_result: Union[RetrievalTaskResponse, None] = Field(
         title="Retrieval response",
-        description="A dict containing the result of the LEX index retrieval."
+        description="A dict containing the result of the ES index retrieval."
     )

@@ -41,7 +41,7 @@ DEFAULT_RATE_LIMITS = {
             'max_requests': 10,
             'window': 10
         },
-        'retrieval': {
+        'rag': {
             'max_requests': 20,
             'window': 1
         }
@@ -71,7 +71,7 @@ DEFAULT_RATE_LIMITS = {
             'max_requests': None,
             'window': None
         },
-        'retrieval': {
+        'rag': {
             'max_requests': None,
             'window': None
         }
