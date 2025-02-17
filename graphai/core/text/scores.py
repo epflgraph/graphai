@@ -331,7 +331,7 @@ def compute_scores(
 
 
 if __name__ == '__main__':
-    from elasticsearch_interface.es import ES
+    from elasticsearch_interface.es import ESConceptDetection
 
     from graphai.core.common.config import config
 
@@ -343,7 +343,8 @@ if __name__ == '__main__':
     pd.set_option('display.max_columns', 500)
     pd.set_option('display.width', 1000)
 
-    es = ES(config['elasticsearch'], index=config['elasticsearch'].get('concept_detection_index', 'concepts_detection'))
+    es = ESConceptDetection(config['elasticsearch'],
+                            index=config['elasticsearch'].get('concept_detection_index', 'concepts_detection'))
     graph = ConceptsGraph()
 
     raw_text = """Consider a nonparametric representation of acoustic wave fields that consists of observing the sound pressure along a straight line or a smooth contour L defined in space. The observed data contains implicit information of the surrounding acoustic scene, both in terms of spatial arrangement of the sources and their respective temporal evolution. We show that such data can be effectively analyzed and processed in what we call the space-time-frequency representation space, consisting of a Gabor representation across the spatio-temporal manifold defined by the spatial axis L and the temporal axis t. In the presence of a source, the spectral patterns generated at L have a characteristic triangular shape that changes according to certain parameters, such as the source distance and direction, the number of sources, the concavity of L, and the analysis window size. Yet, in general, the wave fronts can be expressed as a function of elementary directional components-most notably, plane waves and far-field components. Furthermore, we address the problem of processing the wave field in discrete space and time, i.e., sampled along L and t, where a Gabor representation implies that the wave fronts are processed in a block-wise fashion. The key challenge is how to chose and customize a spatio-temporal filter bank such that it exploits the physical properties of the wave field while satisfying strict requirements such as perfect reconstruction, critical sampling, and computational efficiency. We discuss the architecture of such filter banks, and demonstrate their applicability in the context of real applications, such as spatial filtering, deconvolution, and wave field coding."""

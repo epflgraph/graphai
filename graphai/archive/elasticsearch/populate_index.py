@@ -10,7 +10,7 @@ from multiprocessing import Pool
 
 import pandas as pd
 
-from elasticsearch_interface.es import ES
+from elasticsearch_interface.es import ESConceptDetection
 from db_cache_manager.db import DB
 
 from graphai.core.common.config import config
@@ -21,7 +21,7 @@ from graphai.core.utils.breadcrumb import Breadcrumb
 ################################################################
 
 # Init ES interface for index 'aitor_concepts_YYYY-mm-DD'
-es = ES(config['elasticsearch'], f'aitor_concepts_{now().date()}')
+es = ESConceptDetection(config['elasticsearch'], f'aitor_concepts_{now().date()}')
 
 
 def index_doc(doc):
