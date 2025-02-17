@@ -15,6 +15,7 @@ import graphai.api.voice.router as voice_router
 import graphai.api.translation.router as translation_router
 import graphai.api.embedding.router as embedding_router
 import graphai.api.scraping.router as scraping_router
+import graphai.api.retrieval.router as retrieval_router
 
 from graphai.api.auth.router import (
     unauthenticated_router,
@@ -110,6 +111,7 @@ authenticated_router.include_router(voice_router.router)
 authenticated_router.include_router(translation_router.router)
 authenticated_router.include_router(embedding_router.router)
 authenticated_router.include_router(scraping_router.router)
+authenticated_router.include_router(retrieval_router.router)
 
 
 app.include_router(unauthenticated_router)
