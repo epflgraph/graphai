@@ -10,5 +10,5 @@ def retrieve_lex_job(text, lang_filter=None, limit=10):
         retrieve_lex_task.s(text, lang_filter, limit)
     ]
     task = chain(task_list)
-    task = task.apply_async(priority=10)
+    task = task.apply_async(priority=6)
     return task.id

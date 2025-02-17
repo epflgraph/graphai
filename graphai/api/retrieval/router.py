@@ -11,7 +11,8 @@ from graphai.celery.common.celery_config import get_task_info
 
 from graphai.api.common.schemas import TaskIDResponse
 from graphai.api.retrieval.schemas import (
-    LexRetrievalRequest
+    LexRetrievalRequest,
+    LexRetrievalResponse
 )
 
 router = APIRouter(
