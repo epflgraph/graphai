@@ -50,3 +50,30 @@ class RetrievalResponse(TaskStatusResponse):
         title="Retrieval response",
         description="A dict containing the result of the ES index retrieval."
     )
+
+
+class ChunkRequest(BaseModel):
+    text: Union[str, Dict[int, str]] = Field(
+        title="Text",
+        description="Text to chunk, either a pure string or an int to string dictionary (page number to content)."
+    )
+
+    chunk_size: int = Field(
+        title="Chunk size (tokens)",
+        default=400
+    )
+
+    chunk_overlap: int = Field(
+        title="Chunk overlap (tokens)",
+        default=100
+    )
+
+
+class ChunkResponse(BaseModel):
+    split: List[str] = Field(
+        title="Chunked text"
+    )
+
+    full: str = Field(
+        title="Full text"
+    )
