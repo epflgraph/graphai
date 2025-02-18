@@ -80,7 +80,8 @@ dependencies = [
     "sentence-transformers",
     "ftfy",
     "pdf2image",
-    "pylatexenc"
+    "pylatexenc",
+    "langchain"
 ]
 
 [tool.setuptools]
