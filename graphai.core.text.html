@@ -53,6 +53,7 @@
 <li class="toctree-l3"><a class="reference internal" href="graphai.core.embedding.html">graphai.core.embedding package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="graphai.core.image.html">graphai.core.image package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="graphai.core.ontology.html">graphai.core.ontology package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="graphai.core.retrieval.html">graphai.core.retrieval package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="graphai.core.scraping.html">graphai.core.scraping package</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">graphai.core.text package</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#graphai.core.text.ConceptsGraph"><code class="docutils literal notranslate"><span class="pre">ConceptsGraph</span></code></a></li>
@@ -204,7 +205,7 @@
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>keywords_list</strong> (<em>list</em><em>(</em><em>str</em><em>)</em>) – List containing the sets of keywords for which to search concepts.</p></li>
-<li><p><strong>es</strong> (<em>ES</em>) – Elasticsearch interface.</p></li>
+<li><p><strong>es</strong> (<em>ESConceptDetection</em>) – Elasticsearch interface.</p></li>
 <li><p><strong>fraction</strong> (<em>tuple</em><em>(</em><em>int</em><em>, </em><em>int</em><em>)</em>) – Portion of the keywords_list to be processed, e.g. (1/3, 2/3) means only</p></li>
 <li><p><strong>considered.</strong> (<em>the middle third</em><em> of </em><em>the list is</em>) – </p></li>
 <li><p><strong>method</strong> (<em>str</em>) – Method to retrieve the concepts (Wikipedia pages). It can be either “wikipedia-api”, to use the</p></li>

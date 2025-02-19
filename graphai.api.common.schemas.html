@@ -56,6 +56,7 @@
 <li class="toctree-l3"><a class="reference internal" href="graphai.api.image.html">graphai.api.image package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="graphai.api.main.html">graphai.api.main package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="graphai.api.ontology.html">graphai.api.ontology package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="graphai.api.retrieval.html">graphai.api.retrieval package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="graphai.api.scraping.html">graphai.api.scraping package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="graphai.api.text.html">graphai.api.text package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="graphai.api.translation.html">graphai.api.translation package</a></li>
@@ -112,23 +113,9 @@
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="graphai.api.common.schemas.TaskIDResponse.model_computed_fields">
-<span class="sig-name descname"><span class="pre">model_computed_fields</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ComputedFieldInfo</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{}</span></em><a class="headerlink" href="#graphai.api.common.schemas.TaskIDResponse.model_computed_fields" title="Link to this definition"></a></dt>
-<dd><p>A dictionary of computed field names and their corresponding <cite>ComputedFieldInfo</cite> objects.</p>
-</dd></dl>
-
-<dl class="py attribute">
 <dt class="sig sig-object py" id="graphai.api.common.schemas.TaskIDResponse.model_config">
 <span class="sig-name descname"><span class="pre">model_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">ConfigDict</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{}</span></em><a class="headerlink" href="#graphai.api.common.schemas.TaskIDResponse.model_config" title="Link to this definition"></a></dt>
 <dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="graphai.api.common.schemas.TaskIDResponse.model_fields">
-<span class="sig-name descname"><span class="pre">model_fields</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">FieldInfo</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'task_id':</span> <span class="pre">FieldInfo(annotation=str,</span> <span class="pre">required=True,</span> <span class="pre">title='Task</span> <span class="pre">ID',</span> <span class="pre">description='ID</span> <span class="pre">of</span> <span class="pre">the</span> <span class="pre">task</span> <span class="pre">created</span> <span class="pre">as</span> <span class="pre">a</span> <span class="pre">response</span> <span class="pre">to</span> <span class="pre">an</span> <span class="pre">API</span> <span class="pre">request')}</span></em><a class="headerlink" href="#graphai.api.common.schemas.TaskIDResponse.model_fields" title="Link to this definition"></a></dt>
-<dd><p>Metadata about the fields defined on the model,
-mapping of field names to [<cite>FieldInfo</cite>][pydantic.fields.FieldInfo].</p>
-<p>This replaces <cite>Model.__fields__</cite> from Pydantic V1.</p>
 </dd></dl>
 
 </dd></dl>
@@ -158,23 +145,9 @@ mapping of field names to [<cite>FieldInfo</cite>][pydantic.fields.FieldInfo].</
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="graphai.api.common.schemas.TaskStatusResponse.model_computed_fields">
-<span class="sig-name descname"><span class="pre">model_computed_fields</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ComputedFieldInfo</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{}</span></em><a class="headerlink" href="#graphai.api.common.schemas.TaskStatusResponse.model_computed_fields" title="Link to this definition"></a></dt>
-<dd><p>A dictionary of computed field names and their corresponding <cite>ComputedFieldInfo</cite> objects.</p>
-</dd></dl>
-
-<dl class="py attribute">
 <dt class="sig sig-object py" id="graphai.api.common.schemas.TaskStatusResponse.model_config">
 <span class="sig-name descname"><span class="pre">model_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">ConfigDict</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{}</span></em><a class="headerlink" href="#graphai.api.common.schemas.TaskStatusResponse.model_config" title="Link to this definition"></a></dt>
 <dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="graphai.api.common.schemas.TaskStatusResponse.model_fields">
-<span class="sig-name descname"><span class="pre">model_fields</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">FieldInfo</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'task_id':</span> <span class="pre">FieldInfo(annotation=str,</span> <span class="pre">required=True,</span> <span class="pre">title='Task</span> <span class="pre">ID',</span> <span class="pre">description='ID</span> <span class="pre">of</span> <span class="pre">the</span> <span class="pre">task</span> <span class="pre">created</span> <span class="pre">as</span> <span class="pre">a</span> <span class="pre">response</span> <span class="pre">to</span> <span class="pre">an</span> <span class="pre">API</span> <span class="pre">request'),</span> <span class="pre">'task_name':</span> <span class="pre">FieldInfo(annotation=Union[str,</span> <span class="pre">NoneType],</span> <span class="pre">required=False,</span> <span class="pre">default=None,</span> <span class="pre">title='Task</span> <span class="pre">name',</span> <span class="pre">description='Name</span> <span class="pre">of</span> <span class="pre">the</span> <span class="pre">task'),</span> <span class="pre">'task_result':</span> <span class="pre">FieldInfo(annotation=BaseModel,</span> <span class="pre">required=True,</span> <span class="pre">metadata=[Json]),</span> <span class="pre">'task_status':</span> <span class="pre">FieldInfo(annotation=str,</span> <span class="pre">required=True,</span> <span class="pre">title='Task</span> <span class="pre">status',</span> <span class="pre">description='Status</span> <span class="pre">of</span> <span class="pre">the</span> <span class="pre">task')}</span></em><a class="headerlink" href="#graphai.api.common.schemas.TaskStatusResponse.model_fields" title="Link to this definition"></a></dt>
-<dd><p>Metadata about the fields defined on the model,
-mapping of field names to [<cite>FieldInfo</cite>][pydantic.fields.FieldInfo].</p>
-<p>This replaces <cite>Model.__fields__</cite> from Pydantic V1.</p>
 </dd></dl>
 
 </dd></dl>
@@ -189,23 +162,9 @@ mapping of field names to [<cite>FieldInfo</cite>][pydantic.fields.FieldInfo].</
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="graphai.api.common.schemas.FileRequest.model_computed_fields">
-<span class="sig-name descname"><span class="pre">model_computed_fields</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ComputedFieldInfo</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{}</span></em><a class="headerlink" href="#graphai.api.common.schemas.FileRequest.model_computed_fields" title="Link to this definition"></a></dt>
-<dd><p>A dictionary of computed field names and their corresponding <cite>ComputedFieldInfo</cite> objects.</p>
-</dd></dl>
-
-<dl class="py attribute">
 <dt class="sig sig-object py" id="graphai.api.common.schemas.FileRequest.model_config">
 <span class="sig-name descname"><span class="pre">model_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">ConfigDict</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{}</span></em><a class="headerlink" href="#graphai.api.common.schemas.FileRequest.model_config" title="Link to this definition"></a></dt>
 <dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="graphai.api.common.schemas.FileRequest.model_fields">
-<span class="sig-name descname"><span class="pre">model_fields</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">FieldInfo</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'token':</span> <span class="pre">FieldInfo(annotation=str,</span> <span class="pre">required=True,</span> <span class="pre">title='File</span> <span class="pre">name',</span> <span class="pre">description='The</span> <span class="pre">name</span> <span class="pre">of</span> <span class="pre">the</span> <span class="pre">file</span> <span class="pre">to</span> <span class="pre">be</span> <span class="pre">downloaded</span> <span class="pre">(received</span> <span class="pre">as</span> <span class="pre">a</span> <span class="pre">response</span> <span class="pre">from</span> <span class="pre">another</span> <span class="pre">endpoint).')}</span></em><a class="headerlink" href="#graphai.api.common.schemas.FileRequest.model_fields" title="Link to this definition"></a></dt>
-<dd><p>Metadata about the fields defined on the model,
-mapping of field names to [<cite>FieldInfo</cite>][pydantic.fields.FieldInfo].</p>
-<p>This replaces <cite>Model.__fields__</cite> from Pydantic V1.</p>
 </dd></dl>
 
 </dd></dl>
@@ -225,23 +184,9 @@ mapping of field names to [<cite>FieldInfo</cite>][pydantic.fields.FieldInfo].</
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="graphai.api.common.schemas.TokenStatus.model_computed_fields">
-<span class="sig-name descname"><span class="pre">model_computed_fields</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ComputedFieldInfo</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{}</span></em><a class="headerlink" href="#graphai.api.common.schemas.TokenStatus.model_computed_fields" title="Link to this definition"></a></dt>
-<dd><p>A dictionary of computed field names and their corresponding <cite>ComputedFieldInfo</cite> objects.</p>
-</dd></dl>
-
-<dl class="py attribute">
 <dt class="sig sig-object py" id="graphai.api.common.schemas.TokenStatus.model_config">
 <span class="sig-name descname"><span class="pre">model_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">ConfigDict</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{}</span></em><a class="headerlink" href="#graphai.api.common.schemas.TokenStatus.model_config" title="Link to this definition"></a></dt>
 <dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="graphai.api.common.schemas.TokenStatus.model_fields">
-<span class="sig-name descname"><span class="pre">model_fields</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">FieldInfo</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'active':</span> <span class="pre">FieldInfo(annotation=bool,</span> <span class="pre">required=False,</span> <span class="pre">default=False,</span> <span class="pre">title='Token</span> <span class="pre">active',</span> <span class="pre">description=&quot;Whether</span> <span class="pre">the</span> <span class="pre">token's</span> <span class="pre">file</span> <span class="pre">is</span> <span class="pre">available</span> <span class="pre">(which</span> <span class="pre">makes</span> <span class="pre">calculations</span> <span class="pre">possible,</span> <span class="pre">otherwise</span> <span class="pre">only</span> <span class="pre">cached</span> <span class="pre">results</span> <span class="pre">can</span> <span class="pre">be</span> <span class="pre">returned</span> <span class="pre">for</span> <span class="pre">this</span> <span class="pre">token).&quot;),</span> <span class="pre">'fingerprinted':</span> <span class="pre">FieldInfo(annotation=bool,</span> <span class="pre">required=False,</span> <span class="pre">default=False,</span> <span class="pre">title='Fingerprinted',</span> <span class="pre">description='Whether</span> <span class="pre">this</span> <span class="pre">token</span> <span class="pre">has</span> <span class="pre">a</span> <span class="pre">cached</span> <span class="pre">fingerprint</span> <span class="pre">in</span> <span class="pre">the</span> <span class="pre">database')}</span></em><a class="headerlink" href="#graphai.api.common.schemas.TokenStatus.model_fields" title="Link to this definition"></a></dt>
-<dd><p>Metadata about the fields defined on the model,
-mapping of field names to [<cite>FieldInfo</cite>][pydantic.fields.FieldInfo].</p>
-<p>This replaces <cite>Model.__fields__</cite> from Pydantic V1.</p>
 </dd></dl>
 
 </dd></dl>

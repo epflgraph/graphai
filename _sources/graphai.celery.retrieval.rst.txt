@@ -1,0 +1,16 @@
+graphai.celery.retrieval package
+================================
+
+.. automodule:: graphai.celery.retrieval
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 1
+
+   graphai.celery.retrieval.jobs
+   graphai.celery.retrieval.tasks

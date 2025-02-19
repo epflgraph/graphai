@@ -56,6 +56,7 @@
 <li class="toctree-l3"><a class="reference internal" href="graphai.api.image.html">graphai.api.image package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="graphai.api.main.html">graphai.api.main package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="graphai.api.ontology.html">graphai.api.ontology package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="graphai.api.retrieval.html">graphai.api.retrieval package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="graphai.api.scraping.html">graphai.api.scraping package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="graphai.api.text.html">graphai.api.text package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="graphai.api.translation.html">graphai.api.translation package</a></li>
@@ -121,23 +122,9 @@
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="graphai.api.auth.auth_utils.Token.model_computed_fields">
-<span class="sig-name descname"><span class="pre">model_computed_fields</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ComputedFieldInfo</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{}</span></em><a class="headerlink" href="#graphai.api.auth.auth_utils.Token.model_computed_fields" title="Link to this definition"></a></dt>
-<dd><p>A dictionary of computed field names and their corresponding <cite>ComputedFieldInfo</cite> objects.</p>
-</dd></dl>
-
-<dl class="py attribute">
 <dt class="sig sig-object py" id="graphai.api.auth.auth_utils.Token.model_config">
 <span class="sig-name descname"><span class="pre">model_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">ConfigDict</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{}</span></em><a class="headerlink" href="#graphai.api.auth.auth_utils.Token.model_config" title="Link to this definition"></a></dt>
 <dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="graphai.api.auth.auth_utils.Token.model_fields">
-<span class="sig-name descname"><span class="pre">model_fields</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">FieldInfo</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'access_token':</span> <span class="pre">FieldInfo(annotation=str,</span> <span class="pre">required=True),</span> <span class="pre">'token_type':</span> <span class="pre">FieldInfo(annotation=str,</span> <span class="pre">required=True)}</span></em><a class="headerlink" href="#graphai.api.auth.auth_utils.Token.model_fields" title="Link to this definition"></a></dt>
-<dd><p>Metadata about the fields defined on the model,
-mapping of field names to [<cite>FieldInfo</cite>][pydantic.fields.FieldInfo].</p>
-<p>This replaces <cite>Model.__fields__</cite> from Pydantic V1.</p>
 </dd></dl>
 
 </dd></dl>
@@ -157,23 +144,9 @@ mapping of field names to [<cite>FieldInfo</cite>][pydantic.fields.FieldInfo].</
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="graphai.api.auth.auth_utils.TokenData.model_computed_fields">
-<span class="sig-name descname"><span class="pre">model_computed_fields</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ComputedFieldInfo</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{}</span></em><a class="headerlink" href="#graphai.api.auth.auth_utils.TokenData.model_computed_fields" title="Link to this definition"></a></dt>
-<dd><p>A dictionary of computed field names and their corresponding <cite>ComputedFieldInfo</cite> objects.</p>
-</dd></dl>
-
-<dl class="py attribute">
 <dt class="sig sig-object py" id="graphai.api.auth.auth_utils.TokenData.model_config">
 <span class="sig-name descname"><span class="pre">model_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">ConfigDict</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{}</span></em><a class="headerlink" href="#graphai.api.auth.auth_utils.TokenData.model_config" title="Link to this definition"></a></dt>
 <dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="graphai.api.auth.auth_utils.TokenData.model_fields">
-<span class="sig-name descname"><span class="pre">model_fields</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">FieldInfo</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'scopes':</span> <span class="pre">FieldInfo(annotation=List[str],</span> <span class="pre">required=False,</span> <span class="pre">default=[]),</span> <span class="pre">'username':</span> <span class="pre">FieldInfo(annotation=Union[str,</span> <span class="pre">NoneType],</span> <span class="pre">required=False,</span> <span class="pre">default=None)}</span></em><a class="headerlink" href="#graphai.api.auth.auth_utils.TokenData.model_fields" title="Link to this definition"></a></dt>
-<dd><p>Metadata about the fields defined on the model,
-mapping of field names to [<cite>FieldInfo</cite>][pydantic.fields.FieldInfo].</p>
-<p>This replaces <cite>Model.__fields__</cite> from Pydantic V1.</p>
 </dd></dl>
 
 </dd></dl>
@@ -208,23 +181,9 @@ mapping of field names to [<cite>FieldInfo</cite>][pydantic.fields.FieldInfo].</
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="graphai.api.auth.auth_utils.User.model_computed_fields">
-<span class="sig-name descname"><span class="pre">model_computed_fields</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ComputedFieldInfo</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{}</span></em><a class="headerlink" href="#graphai.api.auth.auth_utils.User.model_computed_fields" title="Link to this definition"></a></dt>
-<dd><p>A dictionary of computed field names and their corresponding <cite>ComputedFieldInfo</cite> objects.</p>
-</dd></dl>
-
-<dl class="py attribute">
 <dt class="sig sig-object py" id="graphai.api.auth.auth_utils.User.model_config">
 <span class="sig-name descname"><span class="pre">model_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">ConfigDict</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{}</span></em><a class="headerlink" href="#graphai.api.auth.auth_utils.User.model_config" title="Link to this definition"></a></dt>
 <dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="graphai.api.auth.auth_utils.User.model_fields">
-<span class="sig-name descname"><span class="pre">model_fields</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">FieldInfo</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'disabled':</span> <span class="pre">FieldInfo(annotation=Union[bool,</span> <span class="pre">NoneType],</span> <span class="pre">required=False,</span> <span class="pre">default=None),</span> <span class="pre">'email':</span> <span class="pre">FieldInfo(annotation=Union[str,</span> <span class="pre">NoneType],</span> <span class="pre">required=False,</span> <span class="pre">default=None),</span> <span class="pre">'full_name':</span> <span class="pre">FieldInfo(annotation=Union[str,</span> <span class="pre">NoneType],</span> <span class="pre">required=False,</span> <span class="pre">default=None),</span> <span class="pre">'scopes':</span> <span class="pre">FieldInfo(annotation=List[str],</span> <span class="pre">required=False,</span> <span class="pre">default=[]),</span> <span class="pre">'username':</span> <span class="pre">FieldInfo(annotation=str,</span> <span class="pre">required=True)}</span></em><a class="headerlink" href="#graphai.api.auth.auth_utils.User.model_fields" title="Link to this definition"></a></dt>
-<dd><p>Metadata about the fields defined on the model,
-mapping of field names to [<cite>FieldInfo</cite>][pydantic.fields.FieldInfo].</p>
-<p>This replaces <cite>Model.__fields__</cite> from Pydantic V1.</p>
 </dd></dl>
 
 </dd></dl>
@@ -239,23 +198,9 @@ mapping of field names to [<cite>FieldInfo</cite>][pydantic.fields.FieldInfo].</
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="graphai.api.auth.auth_utils.UserInDB.model_computed_fields">
-<span class="sig-name descname"><span class="pre">model_computed_fields</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ComputedFieldInfo</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{}</span></em><a class="headerlink" href="#graphai.api.auth.auth_utils.UserInDB.model_computed_fields" title="Link to this definition"></a></dt>
-<dd><p>A dictionary of computed field names and their corresponding <cite>ComputedFieldInfo</cite> objects.</p>
-</dd></dl>
-
-<dl class="py attribute">
 <dt class="sig sig-object py" id="graphai.api.auth.auth_utils.UserInDB.model_config">
 <span class="sig-name descname"><span class="pre">model_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">ConfigDict</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{}</span></em><a class="headerlink" href="#graphai.api.auth.auth_utils.UserInDB.model_config" title="Link to this definition"></a></dt>
 <dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="graphai.api.auth.auth_utils.UserInDB.model_fields">
-<span class="sig-name descname"><span class="pre">model_fields</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">FieldInfo</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'disabled':</span> <span class="pre">FieldInfo(annotation=Union[bool,</span> <span class="pre">NoneType],</span> <span class="pre">required=False,</span> <span class="pre">default=None),</span> <span class="pre">'email':</span> <span class="pre">FieldInfo(annotation=Union[str,</span> <span class="pre">NoneType],</span> <span class="pre">required=False,</span> <span class="pre">default=None),</span> <span class="pre">'full_name':</span> <span class="pre">FieldInfo(annotation=Union[str,</span> <span class="pre">NoneType],</span> <span class="pre">required=False,</span> <span class="pre">default=None),</span> <span class="pre">'hashed_password':</span> <span class="pre">FieldInfo(annotation=str,</span> <span class="pre">required=True),</span> <span class="pre">'scopes':</span> <span class="pre">FieldInfo(annotation=List[str],</span> <span class="pre">required=False,</span> <span class="pre">default=[]),</span> <span class="pre">'username':</span> <span class="pre">FieldInfo(annotation=str,</span> <span class="pre">required=True)}</span></em><a class="headerlink" href="#graphai.api.auth.auth_utils.UserInDB.model_fields" title="Link to this definition"></a></dt>
-<dd><p>Metadata about the fields defined on the model,
-mapping of field names to [<cite>FieldInfo</cite>][pydantic.fields.FieldInfo].</p>
-<p>This replaces <cite>Model.__fields__</cite> from Pydantic V1.</p>
 </dd></dl>
 
 </dd></dl>

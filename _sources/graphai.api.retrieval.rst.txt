@@ -1,0 +1,16 @@
+graphai.api.retrieval package
+=============================
+
+.. automodule:: graphai.api.retrieval
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 1
+
+   graphai.api.retrieval.router
+   graphai.api.retrieval.schemas

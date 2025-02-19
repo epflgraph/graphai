@@ -56,6 +56,7 @@
 </li>
 <li class="toctree-l3"><a class="reference internal" href="graphai.api.main.html">graphai.api.main package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="graphai.api.ontology.html">graphai.api.ontology package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="graphai.api.retrieval.html">graphai.api.retrieval package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="graphai.api.scraping.html">graphai.api.scraping package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="graphai.api.text.html">graphai.api.text package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="graphai.api.translation.html">graphai.api.translation package</a></li>
@@ -99,8 +100,43 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="graphai-api-image-router-module">
-<h1>graphai.api.image.router module<a class="headerlink" href="#graphai-api-image-router-module" title="Link to this heading"></a></h1>
+  <section id="module-graphai.api.image.router">
+<span id="graphai-api-image-router-module"></span><h1>graphai.api.image.router module<a class="headerlink" href="#module-graphai.api.image.router" title="Link to this heading"></a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.api.image.router.retrieve_image_file">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">graphai.api.image.router.</span></span><span class="sig-name descname"><span class="pre">retrieve_image_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="graphai.api.image.schemas.html#graphai.api.image.schemas.RetrieveImageURLRequest" title="graphai.api.image.schemas.RetrieveImageURLRequest"><span class="pre">RetrieveImageURLRequest</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.api.image.router.retrieve_image_file" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.api.image.router.get_retrieve_image_file_status">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">graphai.api.image.router.</span></span><span class="sig-name descname"><span class="pre">get_retrieve_image_file_status</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">task_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.api.image.router.get_retrieve_image_file_status" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.api.image.router.calculate_slide_fingerprint">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">graphai.api.image.router.</span></span><span class="sig-name descname"><span class="pre">calculate_slide_fingerprint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="graphai.api.image.schemas.html#graphai.api.image.schemas.ImageFingerprintRequest" title="graphai.api.image.schemas.ImageFingerprintRequest"><span class="pre">ImageFingerprintRequest</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.api.image.router.calculate_slide_fingerprint" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.api.image.router.calculate_slide_fingerprint_status">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">graphai.api.image.router.</span></span><span class="sig-name descname"><span class="pre">calculate_slide_fingerprint_status</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">task_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.api.image.router.calculate_slide_fingerprint_status" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.api.image.router.extract_text">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">graphai.api.image.router.</span></span><span class="sig-name descname"><span class="pre">extract_text</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="graphai.api.image.schemas.html#graphai.api.image.schemas.ExtractTextRequest" title="graphai.api.image.schemas.ExtractTextRequest"><span class="pre">ExtractTextRequest</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.api.image.router.extract_text" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.api.image.router.extract_text_status">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">graphai.api.image.router.</span></span><span class="sig-name descname"><span class="pre">extract_text_status</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">task_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.api.image.router.extract_text_status" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.api.image.router.detect_ocr_language_status">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">graphai.api.image.router.</span></span><span class="sig-name descname"><span class="pre">detect_ocr_language_status</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">task_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.api.image.router.detect_ocr_language_status" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 </section>
 
 

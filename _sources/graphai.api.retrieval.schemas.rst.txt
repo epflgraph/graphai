@@ -1,0 +1,7 @@
+graphai.api.retrieval.schemas module
+====================================
+
+.. automodule:: graphai.api.retrieval.schemas
+   :members:
+   :undoc-members:
+   :show-inheritance:

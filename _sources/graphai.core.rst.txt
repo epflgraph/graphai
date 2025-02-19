@@ -16,6 +16,7 @@ Subpackages
    graphai.core.embedding
    graphai.core.image
    graphai.core.ontology
+   graphai.core.retrieval
    graphai.core.scraping
    graphai.core.text
    graphai.core.translation

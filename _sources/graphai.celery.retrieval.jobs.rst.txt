@@ -1,0 +1,7 @@
+graphai.celery.retrieval.jobs module
+====================================
+
+.. automodule:: graphai.celery.retrieval.jobs
+   :members:
+   :undoc-members:
+   :show-inheritance:

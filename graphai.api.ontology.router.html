@@ -56,6 +56,7 @@
 <li class="toctree-l4 current"><a class="reference internal" href="graphai.api.ontology.html#submodules">Submodules</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="graphai.api.retrieval.html">graphai.api.retrieval package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="graphai.api.scraping.html">graphai.api.scraping package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="graphai.api.text.html">graphai.api.text package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="graphai.api.translation.html">graphai.api.translation package</a></li>
@@ -99,8 +100,73 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="graphai-api-ontology-router-module">
-<h1>graphai.api.ontology.router module<a class="headerlink" href="#graphai-api-ontology-router-module" title="Link to this heading"></a></h1>
+  <section id="module-graphai.api.ontology.router">
+<span id="graphai-api-ontology-router-module"></span><h1>graphai.api.ontology.router module<a class="headerlink" href="#module-graphai.api.ontology.router" title="Link to this heading"></a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.api.ontology.router.tree">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">graphai.api.ontology.router.</span></span><span class="sig-name descname"><span class="pre">tree</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#graphai.api.ontology.router.tree" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.api.ontology.router.cat_info">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">graphai.api.ontology.router.</span></span><span class="sig-name descname"><span class="pre">cat_info</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">category_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.api.ontology.router.cat_info" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.api.ontology.router.cluster_info">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">graphai.api.ontology.router.</span></span><span class="sig-name descname"><span class="pre">cluster_info</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cluster_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.api.ontology.router.cluster_info" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.api.ontology.router.concept_info">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">graphai.api.ontology.router.</span></span><span class="sig-name descname"><span class="pre">concept_info</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">concept_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.api.ontology.router.concept_info" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.api.ontology.router.openalex_category_nearest_topics">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">graphai.api.ontology.router.</span></span><span class="sig-name descname"><span class="pre">openalex_category_nearest_topics</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">category_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.api.ontology.router.openalex_category_nearest_topics" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.api.ontology.router.openalex_topic_nearest_categories">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">graphai.api.ontology.router.</span></span><span class="sig-name descname"><span class="pre">openalex_topic_nearest_categories</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">topic_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.api.ontology.router.openalex_topic_nearest_categories" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.api.ontology.router.recompute_clusters">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">graphai.api.ontology.router.</span></span><span class="sig-name descname"><span class="pre">recompute_clusters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="graphai.api.ontology.schemas.html#graphai.api.ontology.schemas.RecomputeClustersRequest" title="graphai.api.ontology.schemas.RecomputeClustersRequest"><span class="pre">RecomputeClustersRequest</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.api.ontology.router.recompute_clusters" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.api.ontology.router.recompute_clusters_status">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">graphai.api.ontology.router.</span></span><span class="sig-name descname"><span class="pre">recompute_clusters_status</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">task_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.api.ontology.router.recompute_clusters_status" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.api.ontology.router.compute_graph_distance">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">graphai.api.ontology.router.</span></span><span class="sig-name descname"><span class="pre">compute_graph_distance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="graphai.api.ontology.schemas.html#graphai.api.ontology.schemas.GraphDistanceRequest" title="graphai.api.ontology.schemas.GraphDistanceRequest"><span class="pre">GraphDistanceRequest</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.api.ontology.router.compute_graph_distance" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.api.ontology.router.compute_graph_concept_nearest_category">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">graphai.api.ontology.router.</span></span><span class="sig-name descname"><span class="pre">compute_graph_concept_nearest_category</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="graphai.api.ontology.schemas.html#graphai.api.ontology.schemas.GraphConceptNearestCategoryRequest" title="graphai.api.ontology.schemas.GraphConceptNearestCategoryRequest"><span class="pre">GraphConceptNearestCategoryRequest</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.api.ontology.router.compute_graph_concept_nearest_category" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.api.ontology.router.compute_graph_cluster_nearest_category">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">graphai.api.ontology.router.</span></span><span class="sig-name descname"><span class="pre">compute_graph_cluster_nearest_category</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="graphai.api.ontology.schemas.html#graphai.api.ontology.schemas.GraphClusterNearestCategoryRequest" title="graphai.api.ontology.schemas.GraphClusterNearestCategoryRequest"><span class="pre">GraphClusterNearestCategoryRequest</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.api.ontology.router.compute_graph_cluster_nearest_category" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.api.ontology.router.compute_graph_nearest_concept">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">graphai.api.ontology.router.</span></span><span class="sig-name descname"><span class="pre">compute_graph_nearest_concept</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="graphai.api.ontology.schemas.html#graphai.api.ontology.schemas.GraphNearestConceptRequest" title="graphai.api.ontology.schemas.GraphNearestConceptRequest"><span class="pre">GraphNearestConceptRequest</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.api.ontology.router.compute_graph_nearest_concept" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.api.ontology.router.break_up_cluster">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">graphai.api.ontology.router.</span></span><span class="sig-name descname"><span class="pre">break_up_cluster</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="graphai.api.ontology.schemas.html#graphai.api.ontology.schemas.BreakUpClusterRequest" title="graphai.api.ontology.schemas.BreakUpClusterRequest"><span class="pre">BreakUpClusterRequest</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.api.ontology.router.break_up_cluster" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 </section>
 
 

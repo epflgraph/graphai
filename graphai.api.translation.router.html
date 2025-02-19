@@ -53,6 +53,7 @@
 <li class="toctree-l3"><a class="reference internal" href="graphai.api.image.html">graphai.api.image package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="graphai.api.main.html">graphai.api.main package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="graphai.api.ontology.html">graphai.api.ontology package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="graphai.api.retrieval.html">graphai.api.retrieval package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="graphai.api.scraping.html">graphai.api.scraping package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="graphai.api.text.html">graphai.api.text package</a></li>
 <li class="toctree-l3 current"><a class="reference internal" href="graphai.api.translation.html">graphai.api.translation package</a><ul class="current">
@@ -99,8 +100,38 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="graphai-api-translation-router-module">
-<h1>graphai.api.translation.router module<a class="headerlink" href="#graphai-api-translation-router-module" title="Link to this heading"></a></h1>
+  <section id="module-graphai.api.translation.router">
+<span id="graphai-api-translation-router-module"></span><h1>graphai.api.translation.router module<a class="headerlink" href="#module-graphai.api.translation.router" title="Link to this heading"></a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.api.translation.router.calculate_translation_text_fingerprint">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">graphai.api.translation.router.</span></span><span class="sig-name descname"><span class="pre">calculate_translation_text_fingerprint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="graphai.api.translation.schemas.html#graphai.api.translation.schemas.TranslationRequest" title="graphai.api.translation.schemas.TranslationRequest"><span class="pre">TranslationRequest</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.api.translation.router.calculate_translation_text_fingerprint" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.api.translation.router.calculate_translation_text_fingerprint_status">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">graphai.api.translation.router.</span></span><span class="sig-name descname"><span class="pre">calculate_translation_text_fingerprint_status</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">task_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.api.translation.router.calculate_translation_text_fingerprint_status" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.api.translation.router.translate">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">graphai.api.translation.router.</span></span><span class="sig-name descname"><span class="pre">translate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="graphai.api.translation.schemas.html#graphai.api.translation.schemas.TranslationRequest" title="graphai.api.translation.schemas.TranslationRequest"><span class="pre">TranslationRequest</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.api.translation.router.translate" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.api.translation.router.translate_status">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">graphai.api.translation.router.</span></span><span class="sig-name descname"><span class="pre">translate_status</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">task_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.api.translation.router.translate_status" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.api.translation.router.text_detect_language">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">graphai.api.translation.router.</span></span><span class="sig-name descname"><span class="pre">text_detect_language</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="graphai.api.translation.schemas.html#graphai.api.translation.schemas.TextDetectLanguageRequest" title="graphai.api.translation.schemas.TextDetectLanguageRequest"><span class="pre">TextDetectLanguageRequest</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.api.translation.router.text_detect_language" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.api.translation.router.text_detect_language_status">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">graphai.api.translation.router.</span></span><span class="sig-name descname"><span class="pre">text_detect_language_status</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">task_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.api.translation.router.text_detect_language_status" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 </section>
 
 

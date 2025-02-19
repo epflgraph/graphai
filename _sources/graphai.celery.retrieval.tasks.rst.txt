@@ -1,0 +1,7 @@
+graphai.celery.retrieval.tasks module
+=====================================
+
+.. automodule:: graphai.celery.retrieval.tasks
+   :members:
+   :undoc-members:
+   :show-inheritance:

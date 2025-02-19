@@ -1,0 +1,7 @@
+graphai.core.retrieval.retrieval\_settings module
+=================================================
+
+.. automodule:: graphai.core.retrieval.retrieval_settings
+   :members:
+   :undoc-members:
+   :show-inheritance:

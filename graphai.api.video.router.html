@@ -53,6 +53,7 @@
 <li class="toctree-l3"><a class="reference internal" href="graphai.api.image.html">graphai.api.image package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="graphai.api.main.html">graphai.api.main package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="graphai.api.ontology.html">graphai.api.ontology package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="graphai.api.retrieval.html">graphai.api.retrieval package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="graphai.api.scraping.html">graphai.api.scraping package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="graphai.api.text.html">graphai.api.text package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="graphai.api.translation.html">graphai.api.translation package</a></li>
@@ -99,8 +100,53 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="graphai-api-video-router-module">
-<h1>graphai.api.video.router module<a class="headerlink" href="#graphai-api-video-router-module" title="Link to this heading"></a></h1>
+  <section id="module-graphai.api.video.router">
+<span id="graphai-api-video-router-module"></span><h1>graphai.api.video.router module<a class="headerlink" href="#module-graphai.api.video.router" title="Link to this heading"></a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.api.video.router.retrieve_file">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">graphai.api.video.router.</span></span><span class="sig-name descname"><span class="pre">retrieve_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="graphai.api.video.schemas.html#graphai.api.video.schemas.RetrieveURLRequest" title="graphai.api.video.schemas.RetrieveURLRequest"><span class="pre">RetrieveURLRequest</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.api.video.router.retrieve_file" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.api.video.router.get_retrieve_file_status">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">graphai.api.video.router.</span></span><span class="sig-name descname"><span class="pre">get_retrieve_file_status</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">task_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.api.video.router.get_retrieve_file_status" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.api.video.router.calculate_video_fingerprint">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">graphai.api.video.router.</span></span><span class="sig-name descname"><span class="pre">calculate_video_fingerprint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="graphai.api.video.schemas.html#graphai.api.video.schemas.VideoFingerprintRequest" title="graphai.api.video.schemas.VideoFingerprintRequest"><span class="pre">VideoFingerprintRequest</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.api.video.router.calculate_video_fingerprint" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.api.video.router.calculate_video_fingerprint_status">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">graphai.api.video.router.</span></span><span class="sig-name descname"><span class="pre">calculate_video_fingerprint_status</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">task_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.api.video.router.calculate_video_fingerprint_status" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.api.video.router.get_file">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">graphai.api.video.router.</span></span><span class="sig-name descname"><span class="pre">get_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="graphai.api.common.schemas.html#graphai.api.common.schemas.FileRequest" title="graphai.api.common.schemas.FileRequest"><span class="pre">FileRequest</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.api.video.router.get_file" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.api.video.router.extract_audio">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">graphai.api.video.router.</span></span><span class="sig-name descname"><span class="pre">extract_audio</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="graphai.api.video.schemas.html#graphai.api.video.schemas.ExtractAudioRequest" title="graphai.api.video.schemas.ExtractAudioRequest"><span class="pre">ExtractAudioRequest</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.api.video.router.extract_audio" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.api.video.router.extract_audio_status">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">graphai.api.video.router.</span></span><span class="sig-name descname"><span class="pre">extract_audio_status</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">task_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.api.video.router.extract_audio_status" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.api.video.router.detect_slides">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">graphai.api.video.router.</span></span><span class="sig-name descname"><span class="pre">detect_slides</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="graphai.api.video.schemas.html#graphai.api.video.schemas.DetectSlidesRequest" title="graphai.api.video.schemas.DetectSlidesRequest"><span class="pre">DetectSlidesRequest</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.api.video.router.detect_slides" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.api.video.router.detect_slides_status">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">graphai.api.video.router.</span></span><span class="sig-name descname"><span class="pre">detect_slides_status</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">task_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.api.video.router.detect_slides_status" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 </section>
 
 

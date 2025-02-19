@@ -1,0 +1,7 @@
+graphai.api.retrieval.router module
+===================================
+
+.. automodule:: graphai.api.retrieval.router
+   :members:
+   :undoc-members:
+   :show-inheritance:

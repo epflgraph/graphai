@@ -18,6 +18,7 @@ Subpackages
    graphai.api.image
    graphai.api.main
    graphai.api.ontology
+   graphai.api.retrieval
    graphai.api.scraping
    graphai.api.text
    graphai.api.translation

@@ -56,6 +56,7 @@
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="graphai.api.ontology.html">graphai.api.ontology package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="graphai.api.retrieval.html">graphai.api.retrieval package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="graphai.api.scraping.html">graphai.api.scraping package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="graphai.api.text.html">graphai.api.text package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="graphai.api.translation.html">graphai.api.translation package</a></li>
@@ -99,8 +100,26 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="graphai-api-main-main-module">
-<h1>graphai.api.main.main module<a class="headerlink" href="#graphai-api-main-main-module" title="Link to this heading"></a></h1>
+  <section id="module-graphai.api.main.main">
+<span id="graphai-api-main-main-module"></span><h1>graphai.api.main.main module<a class="headerlink" href="#module-graphai.api.main.main" title="Link to this heading"></a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.api.main.main.lifespan">
+<span class="sig-prename descclassname"><span class="pre">graphai.api.main.main.</span></span><span class="sig-name descname"><span class="pre">lifespan</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">app</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">FastAPI</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.api.main.main.lifespan" title="Link to this definition"></a></dt>
+<dd><dl class="simple">
+<dt>This function has three parts:</dt><dd><ul class="simple">
+<li><p>Before startup: Logic executed right before starting the API. Here we might want to load big objects into memory, etc.</p></li>
+<li><p>Yield: This is the standard way of passing the execution to the FastAPI app, so it can normally boot and serve requests.</p></li>
+<li><p>After shutdown: Logic executed right after shutting down the API. Here we might want to free some memory, do some cleanup, etc.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.api.main.main.redirect_docs">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">graphai.api.main.main.</span></span><span class="sig-name descname"><span class="pre">redirect_docs</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#graphai.api.main.main.redirect_docs" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 </section>
 
 
