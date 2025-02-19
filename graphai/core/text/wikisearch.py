@@ -48,7 +48,7 @@ def search_elasticsearch(text, es, limit=10):
 
     Args:
         text (str): Query text for the search.
-        es (ES): Elasticsearch interface.
+        es (ESConceptDetection): Elasticsearch interface.
         limit (int): Maximum number of returned results.
 
     Returns:
@@ -74,7 +74,7 @@ def wikisearch(keywords_list, es, fraction=(0, 1), method='es-base'):
 
     Args:
         keywords_list (list(str)): List containing the sets of keywords for which to search concepts.
-        es (ES): Elasticsearch interface.
+        es (ESConceptDetection): Elasticsearch interface.
         fraction (tuple(int, int)): Portion of the keywords_list to be processed, e.g. (1/3, 2/3) means only
         the middle third of the list is considered.
         method (str): Method to retrieve the concepts (Wikipedia pages). It can be either "wikipedia-api", to use the
@@ -129,11 +129,12 @@ def wikisearch(keywords_list, es, fraction=(0, 1), method='es-base'):
 
 
 if __name__ == '__main__':
-    from elasticsearch_interface.es import ES
+    from elasticsearch_interface.es import ESConceptDetection
 
     from graphai.core.common.config import config
 
-    es = ES(config['elasticsearch'], index=config['elasticsearch'].get('concept_detection_index', 'concepts_detection'))
+    es = ESConceptDetection(config['elasticsearch'],
+                            index=config['elasticsearch'].get('concept_detection_index', 'concepts_detection'))
 
     results = wikisearch(['Cayley graph', 'Lebesgue measure', 'graph spectra', 'spectral gap'], es)
     print(results)

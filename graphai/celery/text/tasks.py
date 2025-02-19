@@ -2,7 +2,7 @@ import pandas as pd
 
 from celery import shared_task
 
-from elasticsearch_interface.es import ES
+from elasticsearch_interface.es import ESConceptDetection
 
 from graphai.core.common.config import config
 from graphai.core.common.common_utils import strtobool
@@ -26,7 +26,8 @@ from graphai.core.text import (
 graph = ConceptsGraph()
 
 # Elasticsearch interface
-es = ES(config['elasticsearch'], index=config['elasticsearch'].get('concept_detection_index', 'concepts_detection'))
+es = ESConceptDetection(config['elasticsearch'],
+                        index=config['elasticsearch'].get('concept_detection_index', 'concepts_detection'))
 
 
 ################################################################

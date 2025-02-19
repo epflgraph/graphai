@@ -40,6 +40,10 @@ DEFAULT_RATE_LIMITS = {
         'scraping': {
             'max_requests': 10,
             'window': 10
+        },
+        'rag': {
+            'max_requests': 20,
+            'window': 1
         }
     },
     DEFAULT_RATE_LIMIT_SCHEMA: {
@@ -64,6 +68,10 @@ DEFAULT_RATE_LIMITS = {
             'window': None
         },
         'scraping': {
+            'max_requests': None,
+            'window': None
+        },
+        'rag': {
             'max_requests': None,
             'window': None
         }

@@ -21,5 +21,5 @@ while getopts ":h:p:" opt; do
   esac
 done
 
-# uvicorn main:app --host $host --port $port
+#uvicorn --host $host --port $port --workers 1 main:app
 gunicorn main:app -b $host:$port -w 1 -k uvicorn.workers.UvicornWorker --timeout $TIMEOUT

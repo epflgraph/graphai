@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "graphai"
-version = "0.10.1"
+version = "0.13.1"
 authors = [
   { name="Aitor Pérez", email="aitor.perez@epfl.ch" },
   { name="Ramtin Yazdanian", email="ramtin.yazdanian@epfl.ch" }
@@ -62,7 +62,7 @@ dependencies = [
     "sphinx-rtd-theme",
     "pytest-celery",
     "db-cache-manager>=0.2.2",
-    "elasticsearch-interface",
+    "elasticsearch-interface>=0.7.0",
     "scikit-learn",
     "opentelemetry-distro==0.40b0",
     "opentelemetry-exporter-otlp==1.19.0",
@@ -80,7 +80,8 @@ dependencies = [
     "sentence-transformers",
     "ftfy",
     "pdf2image",
-    "pylatexenc"
+    "pylatexenc",
+    "langchain"
 ]
 
 [tool.setuptools]
