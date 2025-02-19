@@ -57,7 +57,10 @@ async def retrieve_from_es_status(task_id):
     return format_api_results(full_results['id'], full_results['name'], full_results['status'], task_results)
 
 
-@router.post('/chunk', response_model=ChunkResponse)
+@router.post('/chunk', response_model=ChunkResponse,
+             dependencies=[Depends(rate_limiter(get_ratelimit_values()['rag']['max_requests'],
+                                                get_ratelimit_values()['rag']['window'],
+                                                user=get_user_for_rate_limiter))])
 async def chunk_text(data: ChunkRequest):
     text = data.text
     chunk_size = data.chunk_size
