@@ -308,6 +308,38 @@
 <span class="sig-prename descclassname"><span class="pre">graphai.core.common.caching.</span></span><span class="sig-name descname"><span class="pre">get_token_file_status</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">token</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_manager</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.caching.get_token_file_status" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.core.common.caching.write_binary_file_to_token">
+<span class="sig-prename descclassname"><span class="pre">graphai.core.common.caching.</span></span><span class="sig-name descname"><span class="pre">write_binary_file_to_token</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">b64_str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">token</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_manager</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.common.caching.write_binary_file_to_token" title="Link to this definition"></a></dt>
+<dd><p>Writes file contents received as a base64 encoded string into the file named <cite>token</cite>
+:param b64_str: Contents of the file.</p>
+<aside class="system-message">
+<p class="system-message-title">System Message: ERROR/3 (<span class="docutils literal">/data/actions-runner/_work/graphai/graphai/main/graphai/core/common/caching.py:docstring of graphai.core.common.caching.write_binary_file_to_token</span>, line 3)</p>
+<p>Unexpected indentation.</p>
+</aside>
+<blockquote>
+<div><dl class="simple">
+<dt>Given a file handle <cite>f</cite> for a binary file (‘rb’), this content could be created using the following line:</dt><dd><p>base64.b64encode(f.read()).decode(‘utf-8’)</p>
+</dd>
+</dl>
+</div></blockquote>
+<aside class="system-message">
+<p class="system-message-title">System Message: WARNING/2 (<span class="docutils literal">/data/actions-runner/_work/graphai/graphai/main/graphai/core/common/caching.py:docstring of graphai.core.common.caching.write_binary_file_to_token</span>, line 5)</p>
+<p>Block quote ends without a blank line; unexpected unindent.</p>
+</aside>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>token</strong> – Name of the file</p></li>
+<li><p><strong>file_manager</strong> – The file manager, which will generate the appropriate directory name based on the token</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Full path of the written file if successful. Throws an exception if not.</p>
+</dd>
+</dl>
+</dd></dl>
+
 </section>
 
 
