@@ -19,6 +19,20 @@ class RetrieveImageURLRequest(BaseModel):
     )
 
 
+class UploadImageRequest(BaseModel):
+    contents: str = Field(
+        title="Contents",
+        description="The contents of the file to be uploaded. Must be a base64 encoded string. Given a file handle f, "
+                    "you could generate it with the following line using the 'base64' library: "
+                    "base64.b64encode(f.read()).decode('utf-8')"
+    )
+
+    file_extension: Literal['bmp', 'png', 'jpg', 'jpeg', 'pdf'] = Field(
+        title="File extension",
+        description="The extension of the file you are uploading"
+    )
+
+
 class RetrieveImageURLResponseInner(BaseModel):
     token: Union[str, None] = Field(
         None, title="Token",
@@ -39,7 +53,8 @@ class RetrieveImageURLResponseInner(BaseModel):
 
     fresh: bool = Field(
         title="Freshness flag",
-        description="False if the URI had already been retrieved before, True if not and if retrieval was successful"
+        description="False if the URI/file had already been retrieved/uploaded before, "
+                    "True if not and if it was successful"
     )
 
     successful: bool = Field(
@@ -47,12 +62,18 @@ class RetrieveImageURLResponseInner(BaseModel):
         description="True if task successful, False otherwise"
     )
 
+    error: Union[str, None] = Field(
+        title="Error",
+        description="Contains whatever exception made the retrieval/upload unsuccessful, if any.",
+        default=None
+    )
+
 
 class RetrieveImageURLResponse(TaskStatusResponse):
     task_result: Union[RetrieveImageURLResponseInner, None] = Field(
         title="File retrieval response",
-        description="A dict containing a flag for whether the retrieval was successful, plus a token "
-                    "that refers to the now-retrieved file if so (and null if not)."
+        description="A dict containing a flag for whether the retrieval/upload was successful, plus a token "
+                    "that refers to the now-retrieved/uploaded file if so (and null if not)."
     )
 
 
