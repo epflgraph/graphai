@@ -116,6 +116,7 @@ def upload_image_from_file(contents, file_extension, file_manager):
         print(e)
         return {
             'token': None,
+            'error': str(e),
             'fresh': False,
             'token_size': None
         }
