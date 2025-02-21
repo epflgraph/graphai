@@ -3,6 +3,7 @@ from celery import shared_task
 from graphai.core.image.image import (
     cache_lookup_retrieve_image_from_url,
     retrieve_image_file_from_url,
+    upload_image_from_file,
     retrieve_image_file_from_url_callback,
     cache_lookup_extract_slide_text,
     extract_slide_text,
@@ -29,6 +30,13 @@ def cache_lookup_retrieve_image_from_url_task(self, url):
              file_manager=file_management_config)
 def retrieve_image_from_url_task(self, url, force_token=None):
     return retrieve_image_file_from_url(url, self.file_manager, force_token)
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
+             name='video_2.upload_image', ignore_result=False,
+             file_manager=file_management_config)
+def upload_image_from_file_task(self, contents, file_extension):
+    return upload_image_from_file(contents, file_extension, self.file_manager)
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},

@@ -1,4 +1,7 @@
-from graphai.core.common.caching import SlideDBCachingManager
+from graphai.core.common.caching import (
+    SlideDBCachingManager,
+    write_binary_file_to_token
+)
 from graphai.core.common.lookup import database_callback_generic
 from graphai.core.common.multimedia_utils import (
     get_image_token_status,
@@ -97,6 +100,26 @@ def retrieve_image_file_from_url_callback(results, url):
             )
         database_callback_generic(results['token'], db_manager, values, use_closest_match=False)
     return results
+
+
+def upload_image_from_file(contents, file_extension, file_manager):
+    token = generate_random_token()
+    filename = token + '.' + file_extension
+    try:
+        filename_with_path = write_binary_file_to_token(contents, filename, file_manager)
+        return {
+            'token': filename,
+            'fresh': True,
+            'token_size': get_file_size(filename_with_path)
+        }
+    except Exception as e:
+        print(e)
+        return {
+            'token': None,
+            'error': str(e),
+            'fresh': False,
+            'token_size': None
+        }
 
 
 def cache_lookup_extract_slide_text(token, method):

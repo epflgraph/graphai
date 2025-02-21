@@ -4,6 +4,7 @@ from graphai.celery.video.jobs import get_slide_fingerprint_chain_list
 from graphai.celery.image.tasks import (
     cache_lookup_retrieve_image_from_url_task,
     retrieve_image_from_url_task,
+    upload_image_from_file_task,
     retrieve_image_from_url_callback_task,
     cache_lookup_slide_fingerprint_task,
     cache_lookup_extract_slide_text_task,
@@ -27,6 +28,17 @@ def retrieve_image_from_url_job(url, force=False):
     # First retrieve the file, and then do the database callback
     task_list = [retrieve_image_from_url_task.s(url, None),
                  retrieve_image_from_url_callback_task.s(url)]
+    task_list += get_slide_fingerprint_chain_list(None, None, ignore_fp_results=True)
+    task = chain(task_list)
+    task = task.apply_async(priority=2)
+    return task.id
+
+
+def upload_image_from_file_job(contents, file_extension):
+    task_list = [
+        upload_image_from_file_task.s(contents, file_extension),
+        retrieve_image_from_url_callback_task.s(None)
+    ]
     task_list += get_slide_fingerprint_chain_list(None, None, ignore_fp_results=True)
     task = chain(task_list)
     task = task.apply_async(priority=2)

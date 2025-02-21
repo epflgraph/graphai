@@ -5,6 +5,7 @@ from graphai.api.common.schemas import TaskIDResponse
 from graphai.api.image.schemas import (
     RetrieveImageURLRequest,
     RetrieveImageURLResponse,
+    UploadImageRequest,
     ImageFingerprintRequest,
     ImageFingerprintResponse,
     ExtractTextRequest,
@@ -15,6 +16,7 @@ from graphai.api.common.utils import format_api_results
 
 from graphai.celery.image.jobs import (
     retrieve_image_from_url_job,
+    upload_image_from_file_job,
     fingerprint_job,
     ocr_job
 )
@@ -44,7 +46,20 @@ async def retrieve_image_file(data: RetrieveImageURLRequest):
     return {'task_id': task_id}
 
 
+@router.post('/upload_file', response_model=TaskIDResponse,
+             dependencies=[Depends(rate_limiter(get_ratelimit_values()['image']['max_requests'],
+                                                get_ratelimit_values()['image']['window'],
+                                                user=get_user_for_rate_limiter))])
+async def upload_image_file(data: UploadImageRequest):
+    # The URL to be retrieved
+    contents = data.contents
+    extension = data.file_extension
+    task_id = upload_image_from_file_job(contents, extension)
+    return {'task_id': task_id}
+
+
 @router.get('/retrieve_url/status/{task_id}', response_model=RetrieveImageURLResponse)
+@router.get('/upload_file/status/{task_id}', response_model=RetrieveImageURLResponse)
 async def get_retrieve_image_file_status(task_id):
     full_results = get_task_info(task_id)
     task_results = full_results['results']
@@ -55,6 +70,7 @@ async def get_retrieve_image_file_status(task_id):
                 'token_status': task_results['token_status'],
                 'token_size': task_results['token_size'],
                 'fresh': task_results['fresh'],
+                'error': task_results.get('error', None),
                 'successful': task_results['token'] is not None
             }
         else:
