@@ -628,5 +628,7 @@ def write_binary_file_to_token(b64_str, token, file_manager):
         raise Exception("No token!")
     if b64_str is None or b64_str == '':
         raise Exception("No data to write!")
-    with open(file_manager.generate_filepath(token), 'wb') as f:
+    filename_with_path = file_manager.generate_filepath(token)
+    with open(filename_with_path, 'wb') as f:
         f.write(base64.b64decode(b64_str.encode('utf-8')))
+    return filename_with_path
