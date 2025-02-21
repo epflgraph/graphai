@@ -622,7 +622,7 @@ def write_binary_file_to_token(b64_str, token, file_manager):
         file_manager: The file manager, which will generate the appropriate directory name based on the token
 
     Returns:
-
+        Full path of the written file if successful. Throws an exception if not.
     """
     if token is None:
         raise Exception("No token!")
