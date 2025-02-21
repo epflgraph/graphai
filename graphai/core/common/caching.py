@@ -1,5 +1,6 @@
 import os
 from datetime import datetime
+import base64
 
 from db_cache_manager.db import DBCachingManagerBase
 
@@ -608,3 +609,24 @@ def get_token_file_status(token, file_manager):
     if token is None:
         raise Exception("Token is null")
     return os.path.isfile(file_manager.generate_filepath(token))
+
+
+def write_binary_file_to_token(b64_str, token, file_manager):
+    """
+    Writes file contents received as a base64 encoded string into the file named `token`
+    Args:
+        b64_str: Contents of the file.
+         Given a file handle `f` for a binary file ('rb'), this content could be created using the following line:
+            base64.b64encode(f.read()).decode('utf-8')
+        token: Name of the file
+        file_manager: The file manager, which will generate the appropriate directory name based on the token
+
+    Returns:
+
+    """
+    if token is None:
+        raise Exception("No token!")
+    if b64_str is None or b64_str == '':
+        raise Exception("No data to write!")
+    with open(file_manager.generate_filepath(token), 'wb') as f:
+        f.write(base64.b64decode(b64_str.encode('utf-8')))
