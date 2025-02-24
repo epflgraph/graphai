@@ -49,7 +49,8 @@ async def retrieve_image_file(data: RetrieveImageURLRequest):
 @router.post('/upload_file', response_model=TaskIDResponse,
              dependencies=[Depends(rate_limiter(get_ratelimit_values()['image']['max_requests'],
                                                 get_ratelimit_values()['image']['window'],
-                                                user=get_user_for_rate_limiter))])
+                                                user=get_user_for_rate_limiter)),
+                           Security(get_current_active_user, scopes=['upload'])])
 async def upload_image_file(data: UploadImageRequest):
     # The URL to be retrieved
     contents = data.contents
