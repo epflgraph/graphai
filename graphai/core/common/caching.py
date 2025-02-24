@@ -1,4 +1,5 @@
 import os
+import sys
 from datetime import datetime
 import base64
 
@@ -22,6 +23,10 @@ OTHER_SUBFOLDER = 'Other'
 TRANSCRIPT_SUBFOLDER = 'Transcripts'
 TRANSCRIPT_FORMATS = ['_transcript.txt', '_subtitle_segments.json']
 TEMP_SUBFOLDER = 'Temp'
+
+
+MAX_UPLOAD_SIZE = 100 * 1024 * 1024
+
 
 # Cache config parameters
 DEFAULT_SCHEMA = 'cache_graphai'
@@ -628,6 +633,8 @@ def write_binary_file_to_token(b64_str, token, file_manager):
         raise Exception("No token!")
     if b64_str is None or b64_str == '':
         raise Exception("No data to write!")
+    if sys.getsizeof(b64_str) > MAX_UPLOAD_SIZE:
+        raise Exception("Uploaded file too large")
     filename_with_path = file_manager.generate_filepath(token)
     with open(filename_with_path, 'wb') as f:
         f.write(base64.b64decode(b64_str.encode('utf-8')))
