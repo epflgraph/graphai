@@ -56,7 +56,10 @@ async def upload_image_file(data: UploadImageRequest):
     contents = data.contents
     extension = data.file_extension
     origin = data.origin
-    origin_info = data.origin_info
+    origin_info = {
+        "id": data.origin_info.id,
+        "name": data.origin_info.name
+    }
     force = data.force
     task_id = upload_image_from_file_job(contents, extension, origin, origin_info, force)
     return {'task_id': task_id}

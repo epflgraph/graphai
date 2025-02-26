@@ -107,7 +107,7 @@ def retrieve_image_file_from_url_callback(results, url):
     return results
 
 
-def upload_image_from_file(origin_token_dict, contents, file_extension, file_manager):
+def upload_image_from_file(contents, file_extension, file_manager):
     token = generate_random_token()
     filename = token + '.' + file_extension
     try:
