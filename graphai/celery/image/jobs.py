@@ -11,11 +11,11 @@ from graphai.celery.image.tasks import (
     extract_slide_text_task,
     extract_slide_text_callback_task
 )
-
 from graphai.celery.common.jobs import (
     direct_lookup_generic_job,
     DEFAULT_TIMEOUT
 )
+from graphai.core.image.image import create_origin_token_using_info
 
 
 def retrieve_image_from_url_job(url, force=False):
@@ -34,10 +34,16 @@ def retrieve_image_from_url_job(url, force=False):
     return task.id
 
 
-def upload_image_from_file_job(contents, file_extension):
+def upload_image_from_file_job(contents, file_extension, origin, origin_info, force=False):
+    effective_url = create_origin_token_using_info(origin, origin_info)
+    if not force:
+        direct_lookup_task_id = direct_lookup_generic_job(cache_lookup_retrieve_image_from_url_task, effective_url,
+                                                          False, DEFAULT_TIMEOUT)
+        if direct_lookup_task_id is not None:
+            return direct_lookup_task_id
     task_list = [
         upload_image_from_file_task.s(contents, file_extension),
-        retrieve_image_from_url_callback_task.s(None)
+        retrieve_image_from_url_callback_task.s(effective_url)
     ]
     task_list += get_slide_fingerprint_chain_list(None, None, ignore_fp_results=True)
     task = chain(task_list)
