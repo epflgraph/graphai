@@ -126,10 +126,13 @@ def get_slide_fingerprint_chain_list(token=None, origin_token=None,
         min_similarity = fp_parameters.get_min_sim_image()
     # The usual fingerprinting task list consists of fingerprinting and its callback, then lookup
     if origin_token is not None:
+        # This is for when the chain is called for the /video/detect_slides endpoint, fingerprinting a set of slides
         task_list = [compute_slide_set_fingerprint_task.s(origin_token)]
     elif token is not None:
+        # This is for the /image/compute_fingerprint endpoint
         task_list = [compute_single_image_fingerprint_task.s({'token': token})]
     else:
+        # This is for the /image/retrieve_url or /image/upload_file endpoint
         task_list = [compute_single_image_fingerprint_task.s()]
     task_list += [
         compute_slide_fingerprint_callback_task.s(force)
