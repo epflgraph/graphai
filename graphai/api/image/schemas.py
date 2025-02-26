@@ -19,6 +19,16 @@ class RetrieveImageURLRequest(BaseModel):
     )
 
 
+class UploadedFileOriginInfo(BaseModel):
+    id: str = Field(
+        title="File ID"
+    )
+
+    name: str = Field(
+        title="File name"
+    )
+
+
 class UploadImageRequest(BaseModel):
     contents: str = Field(
         title="Contents",
@@ -30,6 +40,20 @@ class UploadImageRequest(BaseModel):
     file_extension: Literal['bmp', 'png', 'jpg', 'jpeg', 'pdf'] = Field(
         title="File extension",
         description="The extension of the file you are uploading"
+    )
+
+    origin: Literal['gdrive'] = Field(
+        title="File origin",
+        description="Original location from which the file was retrieved. Currently only 'gdrive' is allowed."
+    )
+
+    origin_info: UploadedFileOriginInfo = Field(
+        title="File origin info"
+    )
+
+    force: bool = Field(
+        title="Force reupload",
+        default=False
     )
 
 
