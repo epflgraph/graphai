@@ -21,6 +21,7 @@ from graphai.core.common.common_utils import (
     get_current_datetime,
     is_token,
     is_url,
+    is_effective_url,
     is_pdf
 )
 
@@ -33,8 +34,12 @@ def create_image_filename_using_url_format(token, url):
     return filename
 
 
+def create_origin_token_using_info(origin, origin_info):
+    return f"{origin}://{origin_info['id']}__{origin_info['name']}"
+
+
 def cache_lookup_retrieve_image_from_url(url, file_manager):
-    if not is_url(url):
+    if not is_effective_url(url):
         return None
     db_manager = SlideDBCachingManager()
     existing = db_manager.get_details_using_origin(url, [])
@@ -102,7 +107,7 @@ def retrieve_image_file_from_url_callback(results, url):
     return results
 
 
-def upload_image_from_file(contents, file_extension, file_manager):
+def upload_image_from_file(origin_token_dict, contents, file_extension, file_manager):
     token = generate_random_token()
     filename = token + '.' + file_extension
     try:

@@ -202,9 +202,15 @@ def retrieve_generic_file_from_generic_url(url, output_filename_with_path, outpu
 
 
 def is_url(s):
-    if s.startswith('http'):
+    if s.startswith('http://') or s.startswith('https://'):
         return True
     return False
+
+
+def is_effective_url(s):
+    if s.startswith('gdrive://'):
+        return True
+    return is_url(s)
 
 
 def is_token(s):
