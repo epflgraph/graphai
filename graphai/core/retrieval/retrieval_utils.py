@@ -19,7 +19,7 @@ def search_lex(text, embedding=None, lang=None, limit=10, return_embeddings=Fals
         print(e)
         return {
             'n_results': 0,
-            'result': None,
+            'result': [{'error': str(e)}],
             'successful': False
         }
 
