@@ -14,8 +14,8 @@ def retrieve_lex_job(text, index_to_search_in, lang_filter=None, limit=10):
         retrieve_from_es_task.s(text, index_to_search_in, lang_filter, limit)
     ]
     task = chain(task_list)
-    task = task.apply_async(priority=6)
-    return task.id
+    results = task.apply_async(priority=6).get(timeout=DEFAULT_TIMEOUT)
+    return results
 
 
 def chunk_text_job(text, chunk_size, chunk_overlap):

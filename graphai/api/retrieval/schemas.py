@@ -30,7 +30,7 @@ class RetrievalRequest(BaseModel):
     )
 
 
-class RetrievalTaskResponse(BaseModel):
+class RetrievalResponse(BaseModel):
     n_results: int = Field(
         title="Number of results"
     )
@@ -42,13 +42,6 @@ class RetrievalTaskResponse(BaseModel):
     successful: bool = Field(
         title="Success flag",
         description="Whether or not the retrieval was successful"
-    )
-
-
-class RetrievalResponse(TaskStatusResponse):
-    task_result: Union[RetrievalTaskResponse, None] = Field(
-        title="Retrieval response",
-        description="A dict containing the result of the ES index retrieval."
     )
 
 
