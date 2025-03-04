@@ -1,8 +1,6 @@
 from pydantic import BaseModel, Field
 from typing import Union, Literal, List, Dict
 
-from graphai.api.common.schemas import TaskStatusResponse
-
 
 class RetrievalRequest(BaseModel):
     text: str = Field(
