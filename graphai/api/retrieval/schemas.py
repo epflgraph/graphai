@@ -8,7 +8,7 @@ class RetrievalRequest(BaseModel):
         description="Text to search for"
     )
 
-    index: Literal['lex'] = Field(
+    index: Literal['lex', 'servicedesk'] = Field(
         title="Index",
         description="Index to search in.",
         default='lex'
@@ -17,6 +17,14 @@ class RetrievalRequest(BaseModel):
     lang: Literal['en', 'fr', None] = Field(
         title="Language filter",
         description="Only retrieves documents that are originally in the provided language. "
+                    "If left empty, all documents will be searched.",
+        default=None
+    )
+
+    category: Literal['EPFL', 'Public', 'Finances', 'Research', 'Service Desk', 'Human Resources'] = Field(
+        title="Category filter",
+        description="Applicable only when index='servicedesk'. "
+                    "Only retrieves documents that are in the given category in the service desk. "
                     "If left empty, all documents will be searched.",
         default=None
     )

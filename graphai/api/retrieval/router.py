@@ -29,9 +29,10 @@ router = APIRouter(
 async def retrieve_from_es(data: RetrievalRequest):
     text = data.text
     lang = data.lang
+    category = data.category
     limit = data.limit
     index_to_search_in = data.index
-    results = retrieve_lex_job(text, index_to_search_in, lang, limit)
+    results = retrieve_lex_job(text, index_to_search_in, lang, category, limit)
     return results
 
 

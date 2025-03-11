@@ -9,7 +9,9 @@ def search_lex(text, embedding=None, lang=None, limit=10, return_embeddings=Fals
             config['elasticsearch'],
             index=config['elasticsearch'].get('lex_index', RETRIEVAL_PARAMS['lex']['default_index'])
         )
-        results = lex_retriever.search(text, embedding, lang, limit=limit, return_embeddings=return_embeddings)
+        results = lex_retriever.search(text, embedding,
+                                       lang=lang,
+                                       limit=limit, return_embeddings=return_embeddings)
         return {
             'n_results': len(results),
             'result': results,
@@ -22,6 +24,30 @@ def search_lex(text, embedding=None, lang=None, limit=10, return_embeddings=Fals
             'result': [{'error': str(e)}],
             'successful': False
         }
+
+
+def search_servicedesk(text, embedding=None, lang=None, cat=None, limit=10, return_embeddings=False):
+    try:
+        servicedesk_retriever = RETRIEVAL_PARAMS['servicedesk']['retrieval_class'](
+            config['elasticsearch'],
+            index=config['elasticsearch'].get('servicedesk_index', RETRIEVAL_PARAMS['servicedesk']['default_index'])
+        )
+        results = servicedesk_retriever.search(text, embedding,
+                                               lang=lang, category=cat,
+                                               limit=limit, return_embeddings=return_embeddings)
+        return {
+            'n_results': len(results),
+            'result': results,
+            'successful': True
+        }
+    except Exception as e:
+        print(e)
+        return {
+            'n_results': 0,
+            'result': [{'error': str(e)}],
+            'successful': False
+        }
+
 
 
 def chunk_text(text, chunk_size=400, chunk_overlap=100):
