@@ -13,10 +13,11 @@ class RetrievalRequest(BaseModel):
         description="Index to search in. Call GET `/rag/retrieve/info` to get list of available indexes.",
     )
 
-    filters: Dict[str, str] = Field(
+    filters: Union[Dict[str, str], None] = Field(
         title="Filters",
         description="A dictionary of filters. "
-                    "Call GET `/rag/retrieve/info` to get list of available filters for each index."
+                    "Call GET `/rag/retrieve/info` to get list of available filters for each index.",
+        default=None
     )
 
     limit: int = Field(
