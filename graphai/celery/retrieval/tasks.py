@@ -25,7 +25,7 @@ def retrieve_from_es_task(self, embedding_results, text, index_to_search_in, fil
     else:
         return {
             'n_results': 0,
-            'result': f'Index "{index_to_search_in}" does not exist.',
+            'result': [{'error': f'Index "{index_to_search_in}" does not exist.'}],
             'successful': False
         }
 
