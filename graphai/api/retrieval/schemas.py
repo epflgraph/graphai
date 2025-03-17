@@ -8,25 +8,15 @@ class RetrievalRequest(BaseModel):
         description="Text to search for"
     )
 
-    index: Literal['lex', 'servicedesk'] = Field(
+    index: str = Field(
         title="Index",
-        description="Index to search in.",
-        default='lex'
+        description="Index to search in. Call GET `/rag/retrieve/info` to get list of available indexes.",
     )
 
-    lang: Literal['en', 'fr', None] = Field(
-        title="Language filter",
-        description="Only retrieves documents that are originally in the provided language. "
-                    "If left empty, all documents will be searched.",
-        default=None
-    )
-
-    category: Literal['EPFL', 'Public', 'Finances', 'Research', 'Service Desk', 'Human Resources'] = Field(
-        title="Category filter",
-        description="Applicable only when index='servicedesk'. "
-                    "Only retrieves documents that are in the given category in the service desk. "
-                    "If left empty, all documents will be searched.",
-        default=None
+    filters: Dict[str, str] = Field(
+        title="Filters",
+        description="A dictionary of filters. "
+                    "Call GET `/rag/retrieve/info` to get list of available filters for each index."
     )
 
     limit: int = Field(
@@ -48,6 +38,24 @@ class RetrievalResponse(BaseModel):
     successful: bool = Field(
         title="Success flag",
         description="Whether or not the retrieval was successful"
+    )
+
+
+class RetrievalIndexType(BaseModel):
+    index: str = Field(
+        title="Index",
+        description="Name of index"
+    )
+
+    filters: Dict[str, List[Union[str, None]]] = Field(
+        title="Filters",
+        description="List of applicable filters for the index with their allowed values"
+    )
+
+
+class RetrievalInfoResponse(BaseModel):
+    indexes: List[RetrievalIndexType] = Field(
+        title="List of indexes"
     )
 
 
