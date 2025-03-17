@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from typing import Union, Literal, List, Dict
+from typing import Union, List, Dict
 
 
 class RetrievalRequest(BaseModel):
