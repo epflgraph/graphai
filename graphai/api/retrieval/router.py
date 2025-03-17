@@ -27,7 +27,7 @@ router = APIRouter(
              dependencies=[Depends(rate_limiter(get_ratelimit_values()['rag']['max_requests'],
                                                 get_ratelimit_values()['rag']['window'],
                                                 user=get_user_for_rate_limiter))])
-async def retrieve_from_es(data: RetrievalRequest):
+async def retrieve_from_es_index(data: RetrievalRequest):
     text = data.text
     filters = data.filters
     limit = data.limit

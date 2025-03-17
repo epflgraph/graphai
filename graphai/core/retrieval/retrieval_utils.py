@@ -49,6 +49,27 @@ def search_servicedesk(text, embedding=None, lang=None, cat=None, limit=10, retu
         }
 
 
+def retrieve_from_es(embedding_results, text, index_to_search_in, filters=None, limit=10):
+    if filters is None:
+        filters = dict()
+    if index_to_search_in == 'lex':
+        return search_lex(text,
+                          embedding_results['result'] if embedding_results['successful'] else None,
+                          filters.get('lang', None),
+                          limit)
+    elif index_to_search_in == 'servicedesk':
+        return search_servicedesk(text,
+                                  embedding_results['result'] if embedding_results['successful'] else None,
+                                  filters.get('lang', None),
+                                  filters.get('category', None),
+                                  limit)
+    else:
+        return {
+            'n_results': 0,
+            'result': [{'error': f'Index "{index_to_search_in}" does not exist.'}],
+            'successful': False
+        }
+
 
 def chunk_text(text, chunk_size=400, chunk_overlap=100):
     # text can be a string or an int to str dict
