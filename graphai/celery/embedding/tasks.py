@@ -78,6 +78,15 @@ def cache_lookup_embedding_text_task(self, token, model_type):
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='text_6.embed_text', embedding_obj=embedding_models, ignore_result=False)
 def embed_text_task(self, text, model_type):
+    if model_type is None:
+        return {
+            'result': None,
+            'successful': False,
+            'text_too_large': False,
+            'fresh': False,
+            'model_type': model_type,
+            'device': None
+        }
     current_embedding_obj, _ = copy_embedding_object(self.embedding_obj, model_type)
     return embed_text(current_embedding_obj, text, model_type)
 

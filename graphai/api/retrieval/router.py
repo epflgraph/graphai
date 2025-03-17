@@ -6,6 +6,7 @@ from graphai.api.auth.auth_utils import get_ratelimit_values
 from graphai.api.retrieval.schemas import (
     RetrievalRequest,
     RetrievalResponse,
+    RetrievalInfoResponse,
     ChunkRequest,
     ChunkResponse
 )
@@ -26,13 +27,37 @@ router = APIRouter(
              dependencies=[Depends(rate_limiter(get_ratelimit_values()['rag']['max_requests'],
                                                 get_ratelimit_values()['rag']['window'],
                                                 user=get_user_for_rate_limiter))])
-async def retrieve_from_es(data: RetrievalRequest):
+async def retrieve_from_es_index(data: RetrievalRequest):
     text = data.text
-    lang = data.lang
+    filters = data.filters
     limit = data.limit
     index_to_search_in = data.index
-    results = retrieve_lex_job(text, index_to_search_in, lang, limit)
+    results = retrieve_lex_job(text, index_to_search_in, filters, limit)
     return results
+
+
+@router.get('/retrieve/info', response_model=RetrievalInfoResponse,
+            dependencies=[Depends(rate_limiter(get_ratelimit_values()['rag']['max_requests'],
+                                               get_ratelimit_values()['rag']['window'],
+                                               user=get_user_for_rate_limiter))])
+async def retrieve_endpoint_info():
+    return {
+        "indexes": [
+            {
+                "index": "lex",
+                "filters": {
+                    "lang": ["en", "fr", None]
+                }
+            },
+            {
+                "index": "servicedesk",
+                "filters": {
+                    "lang": ["en", "fr", None],
+                    "category": ["EPFL", "Public", "Finances", "Research", "Service Desk", "Human Resources", None]
+                }
+            }
+        ]
+    }
 
 
 @router.post('/chunk', response_model=ChunkResponse,

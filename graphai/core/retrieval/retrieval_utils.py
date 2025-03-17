@@ -9,7 +9,9 @@ def search_lex(text, embedding=None, lang=None, limit=10, return_embeddings=Fals
             config['elasticsearch'],
             index=config['elasticsearch'].get('lex_index', RETRIEVAL_PARAMS['lex']['default_index'])
         )
-        results = lex_retriever.search(text, embedding, lang, limit=limit, return_embeddings=return_embeddings)
+        results = lex_retriever.search(text, embedding,
+                                       lang=lang,
+                                       limit=limit, return_embeddings=return_embeddings)
         return {
             'n_results': len(results),
             'result': results,
@@ -20,6 +22,51 @@ def search_lex(text, embedding=None, lang=None, limit=10, return_embeddings=Fals
         return {
             'n_results': 0,
             'result': [{'error': str(e)}],
+            'successful': False
+        }
+
+
+def search_servicedesk(text, embedding=None, lang=None, cat=None, limit=10, return_embeddings=False):
+    try:
+        servicedesk_retriever = RETRIEVAL_PARAMS['servicedesk']['retrieval_class'](
+            config['elasticsearch'],
+            index=config['elasticsearch'].get('servicedesk_index', RETRIEVAL_PARAMS['servicedesk']['default_index'])
+        )
+        results = servicedesk_retriever.search(text, embedding,
+                                               lang=lang, category=cat,
+                                               limit=limit, return_embeddings=return_embeddings)
+        return {
+            'n_results': len(results),
+            'result': results,
+            'successful': True
+        }
+    except Exception as e:
+        print(e)
+        return {
+            'n_results': 0,
+            'result': [{'error': str(e)}],
+            'successful': False
+        }
+
+
+def retrieve_from_es(embedding_results, text, index_to_search_in, filters=None, limit=10):
+    if filters is None:
+        filters = dict()
+    if index_to_search_in == 'lex':
+        return search_lex(text,
+                          embedding_results['result'] if embedding_results['successful'] else None,
+                          filters.get('lang', None),
+                          limit)
+    elif index_to_search_in == 'servicedesk':
+        return search_servicedesk(text,
+                                  embedding_results['result'] if embedding_results['successful'] else None,
+                                  filters.get('lang', None),
+                                  filters.get('category', None),
+                                  limit)
+    else:
+        return {
+            'n_results': 0,
+            'result': [{'error': f'Index "{index_to_search_in}" does not exist.'}],
             'successful': False
         }
 
