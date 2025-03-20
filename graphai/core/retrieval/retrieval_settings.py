@@ -17,3 +17,9 @@ RETRIEVAL_PARAMS["servicedesk"] = {
     "retrieval_class": ESServiceDesk,
     "model": "all-MiniLM-L12-v2"
 }
+
+RETRIEVAL_PARAMS["sac"] = {
+    "default_index": "ramtin_sac_index",
+    "retrieval_class": ESLex,
+    "model": "all-MiniLM-L12-v2"
+}
