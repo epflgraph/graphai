@@ -8,7 +8,7 @@ from graphai.core.retrieval.retrieval_settings import RETRIEVAL_PARAMS
 from graphai.celery.common.jobs import DEFAULT_TIMEOUT
 
 
-def retrieve_lex_job(text, index_to_search_in, filters=None, limit=10):
+def retrieve_from_es_job(text, index_to_search_in, filters=None, limit=10):
     task_list = [
         embed_text_task.s(text, RETRIEVAL_PARAMS.get(index_to_search_in, dict()).get('model', None)),
         retrieve_from_es_task.s(text, index_to_search_in, filters, limit)

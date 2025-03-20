@@ -11,7 +11,7 @@ from graphai.api.retrieval.schemas import (
     ChunkResponse
 )
 from graphai.celery.retrieval.jobs import (
-    retrieve_lex_job,
+    retrieve_from_es_job,
     chunk_text_job
 )
 
@@ -32,7 +32,7 @@ async def retrieve_from_es_index(data: RetrievalRequest):
     filters = data.filters
     limit = data.limit
     index_to_search_in = data.index
-    results = retrieve_lex_job(text, index_to_search_in, filters, limit)
+    results = retrieve_from_es_job(text, index_to_search_in, filters, limit)
     return results
 
 
@@ -46,14 +46,20 @@ async def retrieve_endpoint_info():
             {
                 "index": "lex",
                 "filters": {
-                    "lang": ["en", "fr", None]
+                    "lang": ["en", "fr"]
                 }
             },
             {
                 "index": "servicedesk",
                 "filters": {
-                    "lang": ["en", "fr", None],
-                    "category": ["EPFL", "Public", "Finances", "Research", "Service Desk", "Human Resources", None]
+                    "lang": ["en", "fr"],
+                    "category": ["EPFL", "Public", "Finances", "Research", "Service Desk", "Human Resources"]
+                }
+            },
+            {
+                "index": "sac",
+                "filters": {
+                    "lang": ["en", "fr"]
                 }
             }
         ]
