@@ -3,38 +3,19 @@ from graphai.core.retrieval.retrieval_settings import RETRIEVAL_PARAMS
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 
-def search_lex(text, embedding=None, lang=None, limit=10, return_embeddings=False):
+def search_es_index(retriever_type, text, embedding=None, limit=10, return_embeddings=False, **kwargs):
     try:
-        lex_retriever = RETRIEVAL_PARAMS['lex']['retrieval_class'](
+        retriever = RETRIEVAL_PARAMS[retriever_type]['retrieval_class'](
             config['elasticsearch'],
-            index=config['elasticsearch'].get('lex_index', RETRIEVAL_PARAMS['lex']['default_index'])
+            index=config['elasticsearch'].get(
+                f'{retriever_type}_index', RETRIEVAL_PARAMS[retriever_type]['default_index']
+            )
         )
-        results = lex_retriever.search(text, embedding,
-                                       lang=lang,
-                                       limit=limit, return_embeddings=return_embeddings)
-        return {
-            'n_results': len(results),
-            'result': results,
-            'successful': True
-        }
-    except Exception as e:
-        print(e)
-        return {
-            'n_results': 0,
-            'result': [{'error': str(e)}],
-            'successful': False
-        }
-
-
-def search_servicedesk(text, embedding=None, lang=None, cat=None, limit=10, return_embeddings=False):
-    try:
-        servicedesk_retriever = RETRIEVAL_PARAMS['servicedesk']['retrieval_class'](
-            config['elasticsearch'],
-            index=config['elasticsearch'].get('servicedesk_index', RETRIEVAL_PARAMS['servicedesk']['default_index'])
-        )
-        results = servicedesk_retriever.search(text, embedding,
-                                               lang=lang, category=cat,
-                                               limit=limit, return_embeddings=return_embeddings)
+        kwargs = {k: v for k, v in kwargs.items() if k in RETRIEVAL_PARAMS[retriever_type]['filters']}
+        results = retriever.search(text, embedding,
+                                   limit=limit, return_embeddings=return_embeddings,
+                                   return_scores=False,
+                                   **kwargs)
         return {
             'n_results': len(results),
             'result': results,
@@ -52,17 +33,12 @@ def search_servicedesk(text, embedding=None, lang=None, cat=None, limit=10, retu
 def retrieve_from_es(embedding_results, text, index_to_search_in, filters=None, limit=10):
     if filters is None:
         filters = dict()
-    if index_to_search_in == 'lex':
-        return search_lex(text,
-                          embedding_results['result'] if embedding_results['successful'] else None,
-                          filters.get('lang', None),
-                          limit)
-    elif index_to_search_in == 'servicedesk':
-        return search_servicedesk(text,
-                                  embedding_results['result'] if embedding_results['successful'] else None,
-                                  filters.get('lang', None),
-                                  filters.get('category', None),
-                                  limit)
+    if index_to_search_in in RETRIEVAL_PARAMS.keys():
+        return search_es_index(index_to_search_in,
+                               text,
+                               embedding_results['result'] if embedding_results['successful'] else None,
+                               limit,
+                               **filters)
     else:
         return {
             'n_results': 0,
