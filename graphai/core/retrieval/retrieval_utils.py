@@ -11,6 +11,7 @@ def search_es_index(retriever_type, text, embedding=None, limit=10, return_embed
                 f'{retriever_type}_index', RETRIEVAL_PARAMS[retriever_type]['default_index']
             )
         )
+        kwargs = {k: v for k, v in kwargs.items() if k in RETRIEVAL_PARAMS[retriever_type]['filters']}
         results = retriever.search(text, embedding,
                                    limit=limit, return_embeddings=return_embeddings,
                                    return_scores=False,
