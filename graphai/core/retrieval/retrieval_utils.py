@@ -4,7 +4,7 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 
 def normalize_index_name(index_name):
-    return index_name.lower().replace(' ', '_')
+    return index_name.lower().replace(' ', '_').replace('-', '')
 
 
 def has_invalid_characters(index_name):
