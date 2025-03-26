@@ -26,3 +26,9 @@ RETRIEVAL_PARAMS["sac"] = {
     "model": "all-MiniLM-L12-v2",
     "filters": ["lang"]
 }
+
+RETRIEVAL_PARAMS["default"] = {
+    "default_index": "ramtin_%s_index",
+    "retrieval_class": ESLex,
+    "model": "all-MiniLM-L12-v2"
+}

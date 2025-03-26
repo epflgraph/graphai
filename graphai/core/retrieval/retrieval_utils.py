@@ -3,15 +3,26 @@ from graphai.core.retrieval.retrieval_settings import RETRIEVAL_PARAMS
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 
-def search_es_index(retriever_type, text, embedding=None, limit=10, return_embeddings=False, **kwargs):
+def normalize_index_name(index_name):
+    return index_name.lower().replace(' ', '_').replace('-', '')
+
+
+def has_invalid_characters(index_name):
+    invalid_characters = '\\/*?"<>| ,;:#'
+    for char in invalid_characters:
+        if char in index_name:
+            return True
+    return False
+
+
+def search_es_index(retriever_type, index_name, allowed_filters,
+                    text, embedding=None, limit=10, return_embeddings=False, **kwargs):
     try:
-        retriever = RETRIEVAL_PARAMS[retriever_type]['retrieval_class'](
+        retriever = retriever_type(
             config['elasticsearch'],
-            index=config['elasticsearch'].get(
-                f'{retriever_type}_index', RETRIEVAL_PARAMS[retriever_type]['default_index']
-            )
+            index=index_name
         )
-        kwargs = {k: v for k, v in kwargs.items() if k in RETRIEVAL_PARAMS[retriever_type]['filters']}
+        kwargs = {k: v for k, v in kwargs.items() if k in allowed_filters}
         results = retriever.search(text, embedding,
                                    limit=limit, return_embeddings=return_embeddings,
                                    return_scores=False,
@@ -34,17 +45,37 @@ def retrieve_from_es(embedding_results, text, index_to_search_in, filters=None, 
     if filters is None:
         filters = dict()
     if index_to_search_in in RETRIEVAL_PARAMS.keys():
-        return search_es_index(index_to_search_in,
-                               text,
-                               embedding_results['result'] if embedding_results['successful'] else None,
-                               limit,
-                               **filters)
+        return search_es_index(
+            retriever_type=RETRIEVAL_PARAMS[index_to_search_in]['retrieval_class'],
+            index_name=config['elasticsearch'].get(
+                f'{index_to_search_in}_index', RETRIEVAL_PARAMS[index_to_search_in]['default_index']
+            ),
+            allowed_filters=RETRIEVAL_PARAMS[index_to_search_in]['filters'],
+            text=text,
+            embedding=embedding_results['result'] if embedding_results['successful'] else None,
+            limit=limit,
+            **filters
+        )
     else:
-        return {
-            'n_results': 0,
-            'result': [{'error': f'Index "{index_to_search_in}" does not exist.'}],
-            'successful': False
-        }
+        index_to_search_in = normalize_index_name(index_to_search_in)
+        if has_invalid_characters(index_to_search_in):
+            return {
+                'n_results': 0,
+                'result': [{'error': f'Index name {index_to_search_in} contains invalid characters.'}],
+                'successful': False
+            }
+        filters = dict()
+        return search_es_index(
+            retriever_type=RETRIEVAL_PARAMS['default']['retrieval_class'],
+            index_name=config['elasticsearch'].get(
+                f'{index_to_search_in}_index', RETRIEVAL_PARAMS['default']['default_index'] % index_to_search_in
+            ),
+            allowed_filters=list(),
+            text=text,
+            embedding=embedding_results['result'] if embedding_results['successful'] else None,
+            limit=limit,
+            **filters
+        )
 
 
 def chunk_text(text, chunk_size=400, chunk_overlap=100):
