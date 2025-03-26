@@ -49,6 +49,7 @@ jobs:
           echo "cafile: ${{ vars.es_cafile }}" >> config.ini
           echo "concept_detection_index: ${{ vars.es_cd_index }}" >> config.ini
           echo "course1_index: ${{ vars.es_course1_index }}" >> config.ini
+          echo "course2_index: ${{ vars.es_course2_index }}" >> config.ini
           echo "" >> config.ini
 
           echo "[cache]" >> config.ini
