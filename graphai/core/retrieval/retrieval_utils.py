@@ -15,8 +15,15 @@ def has_invalid_characters(index_name):
     return False
 
 
-def search_es_index(retriever_type, index_name, allowed_filters,
-                    text, embedding=None, limit=10, return_embeddings=False, **kwargs):
+def search_es_index(retriever_type,
+                    index_name,
+                    allowed_filters,
+                    text,
+                    embedding=None,
+                    limit=10,
+                    return_embeddings=False,
+                    return_scores=False,
+                    **kwargs):
     try:
         retriever = retriever_type(
             config['elasticsearch'],
@@ -25,7 +32,7 @@ def search_es_index(retriever_type, index_name, allowed_filters,
         kwargs = {k: v for k, v in kwargs.items() if k in allowed_filters}
         results = retriever.search(text, embedding,
                                    limit=limit, return_embeddings=return_embeddings,
-                                   return_scores=False,
+                                   return_scores=return_scores,
                                    **kwargs)
         return {
             'n_results': len(results),
@@ -41,7 +48,7 @@ def search_es_index(retriever_type, index_name, allowed_filters,
         }
 
 
-def retrieve_from_es(embedding_results, text, index_to_search_in, filters=None, limit=10):
+def retrieve_from_es(embedding_results, text, index_to_search_in, filters=None, limit=10, return_scores=False):
     if filters is None:
         filters = dict()
     if index_to_search_in in RETRIEVAL_PARAMS.keys():
@@ -54,6 +61,7 @@ def retrieve_from_es(embedding_results, text, index_to_search_in, filters=None, 
             text=text,
             embedding=embedding_results['result'] if embedding_results['successful'] else None,
             limit=limit,
+            return_scores=return_scores,
             **filters
         )
     else:
@@ -74,6 +82,7 @@ def retrieve_from_es(embedding_results, text, index_to_search_in, filters=None, 
             text=text,
             embedding=embedding_results['result'] if embedding_results['successful'] else None,
             limit=limit,
+            return_scores=return_scores,
             **filters
         )
 

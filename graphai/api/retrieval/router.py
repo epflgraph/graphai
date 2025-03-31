@@ -32,7 +32,8 @@ async def retrieve_from_es_index(data: RetrievalRequest):
     filters = data.filters
     limit = data.limit
     index_to_search_in = data.index
-    results = retrieve_from_es_job(text, index_to_search_in, filters, limit)
+    return_scores = data.return_scores
+    results = retrieve_from_es_job(text, index_to_search_in, filters, limit, return_scores)
     return results
 
 
