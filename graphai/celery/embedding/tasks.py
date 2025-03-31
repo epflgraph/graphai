@@ -17,6 +17,7 @@ from graphai.core.embedding.embedding import (
     fingerprint_based_embedding_lookup,
     embed_text,
     insert_embedding_into_db,
+    jsonify_embedding_results,
     embedding_text_list_fingerprint_parallel,
     embedding_text_list_fingerprint_callback,
     embedding_text_list_embed_callback
@@ -95,6 +96,12 @@ def embed_text_task(self, text, model_type):
              name='text_6.embed_text_callback', ignore_result=False)
 def embed_text_callback_task(self, results, token, text, model_type, force=False):
     return insert_embedding_into_db(results, token, text, model_type, force)
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
+             name='text_6.embed_text_jsonify_callback', ignore_result=False)
+def embed_text_jsonify_callback_task(self, results):
+    return jsonify_embedding_results(results)
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},

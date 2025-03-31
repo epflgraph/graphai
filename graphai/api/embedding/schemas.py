@@ -16,6 +16,11 @@ class EmbeddingRequestBase(BaseModel):
         default=False
     )
 
+    no_cache: bool = Field(
+        title="No caching",
+        default=False
+    )
+
 
 class EmbeddingFingerprintRequest(EmbeddingRequestBase):
     text: str = Field(

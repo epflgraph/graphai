@@ -8,6 +8,7 @@ from graphai.celery.embedding.tasks import (
     cache_lookup_embedding_text_using_fingerprint_task,
     embed_text_task,
     embed_text_callback_task,
+    embed_text_jsonify_callback_task,
     embedding_text_list_fingerprint_parallel_task,
     embedding_text_list_fingerprint_callback_task,
     embedding_text_list_embed_parallel_task,
@@ -70,13 +71,13 @@ def fingerprint_job(text, model_type, force):
     return fingerprint_compute_job(token, text, model_type, asynchronous=True)
 
 
-def embedding_job(text, model_type, force):
+def embedding_job(text, model_type, force, no_cache=False):
     if isinstance(text, str):
         token = generate_embedding_text_token(text, model_type)
         ########################
         # Embedding cache lookup
         ########################
-        if not force:
+        if not force and not no_cache:
             direct_lookup_task_id = direct_lookup_generic_job(cache_lookup_embedding_text_task, token,
                                                               False, DEFAULT_TIMEOUT, model_type)
             if direct_lookup_task_id is not None:
@@ -85,30 +86,38 @@ def embedding_job(text, model_type, force):
         ####################################
         # Fingerprinting and fp-based lookup
         ####################################
-        current_fingerprint = None
-        # Fingerprint cache lookup
-        direct_fingerprint_lookup_results = fingerprint_lookup_job(token, return_results=True)
-        if direct_fingerprint_lookup_results is not None:
-            current_fingerprint = direct_fingerprint_lookup_results['result']
-        # If the fingerprint was not cached, fingerprinting
-        if current_fingerprint is None:
-            fp_computation_results = fingerprint_compute_job(token, text, model_type, asynchronous=False)
-            current_fingerprint = fp_computation_results['result']
-        # Fingerprint-based lookup
-        if not force and current_fingerprint is not None:
-            fp_based_lookup_task_id = direct_lookup_generic_job(cache_lookup_embedding_text_using_fingerprint_task,
-                                                                token, False, DEFAULT_TIMEOUT,
-                                                                current_fingerprint, model_type)
-            if fp_based_lookup_task_id is not None:
-                return fp_based_lookup_task_id
-        # If we're here, both lookups have failed, so it's time for the actual computation
+        if not no_cache:
+            current_fingerprint = None
+            # Fingerprint cache lookup
+            direct_fingerprint_lookup_results = fingerprint_lookup_job(token, return_results=True)
+            if direct_fingerprint_lookup_results is not None:
+                current_fingerprint = direct_fingerprint_lookup_results['result']
+            # If the fingerprint was not cached, fingerprinting
+            if current_fingerprint is None:
+                fp_computation_results = fingerprint_compute_job(token, text, model_type, asynchronous=False)
+                current_fingerprint = fp_computation_results['result']
+            # Fingerprint-based lookup
+            if not force and current_fingerprint is not None:
+                fp_based_lookup_task_id = direct_lookup_generic_job(cache_lookup_embedding_text_using_fingerprint_task,
+                                                                    token, False, DEFAULT_TIMEOUT,
+                                                                    current_fingerprint, model_type)
+                if fp_based_lookup_task_id is not None:
+                    return fp_based_lookup_task_id
+        # If we're here, both lookups have failed or no_cache==True, so it's time for the actual computation
         #################
         # Computation job
         #################
-        task_list = [
-            embed_text_task.s(text, model_type),
-            embed_text_callback_task.s(token, text, model_type, force)
-        ]
+        if no_cache:
+            task_list = [
+                embed_text_task.s(text, model_type),
+                embed_text_jsonify_callback_task.s()
+            ]
+        else:
+            task_list = [
+                embed_text_task.s(text, model_type),
+                embed_text_callback_task.s(token, text, model_type, force),
+                embed_text_jsonify_callback_task.s()
+            ]
     else:
         tokens = [generate_embedding_text_token(x, model_type) for x in text]
         task_list = [
