@@ -15,6 +15,7 @@ from graphai.core.common.config import config
 from graphai.core.translation.translation import (
     translate_text,
     translate_text_callback,
+    translate_text_return_list_callback,
     compute_translation_text_fingerprint_callback,
     cache_lookup_translation_text_using_fingerprint,
     cache_lookup_translate_text,
@@ -81,8 +82,14 @@ def translate_text_task(self, text, src, tgt, skip_sentence_segmentation=False):
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='text_6.translate_text_callback', ignore_result=False)
-def translate_text_callback_task(self, results, token, text, src, tgt, force=False, return_list=False):
-    return translate_text_callback(results, token, text, src, tgt, force, return_list)
+def translate_text_callback_task(self, results, token, text, src, tgt, force=False):
+    return translate_text_callback(results, token, text, src, tgt, force)
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
+             name='text_6.translate_text_return_list_callback', ignore_result=False)
+def translate_text_return_list_callback_task(self, results, return_list=False):
+    return translate_text_return_list_callback(results, return_list)
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},

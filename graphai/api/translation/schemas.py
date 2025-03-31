@@ -52,6 +52,11 @@ class TranslationRequest(BaseModel):
         default=False
     )
 
+    no_cache: bool = Field(
+        title="No caching",
+        default=False
+    )
+
     skip_segmentation: bool = Field(
         title="Skip sentence segmentation",
         description="If set to true, passes the entire text directly to the translation model without "
