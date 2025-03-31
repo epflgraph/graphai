@@ -42,7 +42,8 @@ async def retrieve_image_file(data: RetrieveImageURLRequest):
     # The URL to be retrieved
     url = data.url
     force = data.force
-    task_id = retrieve_image_from_url_job(url, force)
+    no_cache = data.no_cache
+    task_id = retrieve_image_from_url_job(url, force, no_cache)
     return {'task_id': task_id}
 
 
@@ -61,7 +62,8 @@ async def upload_image_file(data: UploadImageRequest):
         "name": data.origin_info.name
     }
     force = data.force
-    task_id = upload_image_from_file_job(contents, extension, origin, origin_info, force)
+    no_cache = data.no_cache
+    task_id = upload_image_from_file_job(contents, extension, origin, origin_info, force, no_cache)
     return {'task_id': task_id}
 
 

@@ -18,7 +18,7 @@ from graphai.celery.common.jobs import (
 from graphai.core.image.image import create_origin_token_using_info
 
 
-def retrieve_image_from_url_job(url, force=False):
+def retrieve_image_from_url_job(url, force=False, no_cache=False):
     if not force:
         direct_lookup_task_id = direct_lookup_generic_job(cache_lookup_retrieve_image_from_url_task, url,
                                                           False, DEFAULT_TIMEOUT)
@@ -28,13 +28,14 @@ def retrieve_image_from_url_job(url, force=False):
     # First retrieve the file, and then do the database callback
     task_list = [retrieve_image_from_url_task.s(url, None),
                  retrieve_image_from_url_callback_task.s(url)]
-    task_list += get_slide_fingerprint_chain_list(None, None, ignore_fp_results=True)
+    if not no_cache:
+        task_list += get_slide_fingerprint_chain_list(None, None, ignore_fp_results=True)
     task = chain(task_list)
     task = task.apply_async(priority=2)
     return task.id
 
 
-def upload_image_from_file_job(contents, file_extension, origin, origin_info, force=False):
+def upload_image_from_file_job(contents, file_extension, origin, origin_info, force=False, no_cache=False):
     effective_url = create_origin_token_using_info(origin, origin_info)
     if not force:
         direct_lookup_task_id = direct_lookup_generic_job(cache_lookup_retrieve_image_from_url_task, effective_url,
@@ -45,7 +46,8 @@ def upload_image_from_file_job(contents, file_extension, origin, origin_info, fo
         upload_image_from_file_task.s(contents, file_extension),
         retrieve_image_from_url_callback_task.s(effective_url)
     ]
-    task_list += get_slide_fingerprint_chain_list(None, None, ignore_fp_results=True)
+    if not no_cache:
+        task_list += get_slide_fingerprint_chain_list(None, None, ignore_fp_results=True)
     task = chain(task_list)
     task = task.apply_async(priority=2)
     return task.id

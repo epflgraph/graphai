@@ -18,6 +18,11 @@ class RetrieveImageURLRequest(BaseModel):
         default=False
     )
 
+    no_cache: bool = Field(
+        title="No caching",
+        default=False
+    )
+
 
 class UploadedFileOriginInfo(BaseModel):
     id: str = Field(
@@ -53,6 +58,11 @@ class UploadImageRequest(BaseModel):
 
     force: bool = Field(
         title="Force reupload",
+        default=False
+    )
+
+    no_cache: bool = Field(
+        title="No caching",
         default=False
     )
 
