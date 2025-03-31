@@ -124,10 +124,11 @@ async def extract_text(data: ExtractTextRequest):
     token = data.token
     method = data.method
     force = data.force
+    no_cache = data.no_cache
     api_token = data.google_api_token
     openai_token = data.openai_api_token
     pdf_in_pages = data.pdf_in_pages
-    task_id = ocr_job(token, force, method, api_token, openai_token, pdf_in_pages)
+    task_id = ocr_job(token, force, no_cache, method, api_token, openai_token, pdf_in_pages)
     return {'task_id': task_id}
 
 

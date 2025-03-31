@@ -74,11 +74,11 @@ def fingerprint_job(token, force):
     return task.id
 
 
-def ocr_job(token, force=False, method='google', api_token=None, openai_token=None, pdf_in_pages=True):
+def ocr_job(token, force=False, no_cache=False, method='google', api_token=None, openai_token=None, pdf_in_pages=True):
     ##################
     # OCR cache lookup
     ##################
-    if not force:
+    if not force and not no_cache:
         direct_lookup_task_id = direct_lookup_generic_job(cache_lookup_extract_slide_text_task, token,
                                                           False, DEFAULT_TIMEOUT, method)
         if direct_lookup_task_id is not None:
@@ -87,10 +87,15 @@ def ocr_job(token, force=False, method='google', api_token=None, openai_token=No
     #####################
     # OCR computation job
     #####################
-    task_list = [
-        extract_slide_text_task.s(token, method, api_token, openai_token, pdf_in_pages),
-        extract_slide_text_callback_task.s(token, force)
-    ]
+    if no_cache:
+        task_list = [
+            extract_slide_text_task.s(token, method, api_token, openai_token, pdf_in_pages)
+        ]
+    else:
+        task_list = [
+            extract_slide_text_task.s(token, method, api_token, openai_token, pdf_in_pages),
+            extract_slide_text_callback_task.s(token, force)
+        ]
     task = chain(task_list)
     task = task.apply_async(priority=2)
     return task.id

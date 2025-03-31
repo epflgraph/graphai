@@ -168,6 +168,12 @@ class ExtractTextRequest(BaseModel):
         default=False
     )
 
+    no_cache: bool = Field(
+        title="No caching",
+        description="Skips the entire cache: does not do a lookup, and does not write results to cache.",
+        default=False
+    )
+
     google_api_token: str = Field(
         title="Google API token",
         description="Token that authenticates the user on the Google OCR API."
