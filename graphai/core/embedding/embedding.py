@@ -441,6 +441,7 @@ def embedding_text_list_embed_callback(results, model_type, force):
     new_results = list()
     for result in all_results:
         new_result = insert_embedding_into_db(result, result['id_token'], result['source'], model_type, force)
+        new_result = jsonify_embedding_results(new_result)
         del new_result['id_token']
         del new_result['source']
         new_results.append(new_result)

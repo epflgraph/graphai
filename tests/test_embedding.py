@@ -55,9 +55,9 @@ def test__translation_translate__translate_text__run_task(example_word, very_lon
 
 @pytest.mark.celery(accept_content=['pickle', 'json'], result_serializer='pickle', task_serializer='pickle')
 @pytest.mark.usefixtures('example_word', 'very_long_text', 'example_word_list')
-def test__translation_translate__translate_text__integration(fixture_app, celery_worker,
-                                                             example_word, very_long_text, example_word_list,
-                                                             timeout=30):
+def test__embedding_embedding__embed_text__integration(fixture_app, celery_worker,
+                                                       example_word, very_long_text, example_word_list,
+                                                       timeout=30):
     # The celery_worker object is necessary for async tasks, otherwise the status will be permanently stuck on
     # PENDING.
 
