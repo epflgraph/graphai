@@ -64,7 +64,8 @@ async def embed_text(data: EmbeddingRequest):
     text = data.text
     model_type = data.model_type
     force = data.force
-    task_id = embedding_job(text, model_type, force)
+    no_cache = data.no_cache
+    task_id = embedding_job(text, model_type, force, no_cache)
     return {'task_id': task_id}
 
 

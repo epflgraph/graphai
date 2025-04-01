@@ -52,7 +52,7 @@ def translate_text(text, src, tgt, translation_obj, skip_sentence_segmentation=F
     }
 
 
-def translate_text_callback(results, token, text, src, tgt, force=False, return_list=False):
+def translate_text_callback(results, token, text, src, tgt, force=False):
     db_manager = TextDBCachingManager()
     if results['fresh']:
         values_dict = {
@@ -68,7 +68,10 @@ def translate_text_callback(results, token, text, src, tgt, force=False, return_
     elif not results['successful']:
         # in case we fingerprinted something and then failed to translate it, we delete its cache row
         db_manager.delete_cache_rows([token])
+    return results
 
+
+def translate_text_return_list_callback(results, return_list=False):
     # If the computation was successful and return_list is True, we want to convert the text results
     # back to a list (because this flag means that the original input was a list of strings)
     if results['successful']:

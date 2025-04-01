@@ -339,13 +339,17 @@ def retrieve_fingerprint_callback(results, db_manager, has_origin=True):
     return results_to_return
 
 
+def add_token_status_to_results(results, token_status_func):
+    results['token_status'] = token_status_func(results['token'])
+    return results
+
+
 def ignore_fingerprint_results_callback(results, token_status_func):
     # Ignoring the fingerprinting results and returning the results relevant to the task chain.
     # Used in tasks like transcription and OCR, where fingerprinting is performed before the task itself, but where
     # the results of the fingerprinting are not returned.
     results_to_return = results['fp_results']['original_results']
-    results_to_return['token_status'] = token_status_func(results_to_return['token'])
-    return results_to_return
+    return add_token_status_to_results(results_to_return, token_status_func)
 
 
 def is_fingerprinted(token, db_manager):

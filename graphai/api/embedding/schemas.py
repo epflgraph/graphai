@@ -30,6 +30,13 @@ class EmbeddingRequest(EmbeddingRequestBase):
         description="String or list of strings to embed."
     )
 
+    no_cache: bool = Field(
+        title="No caching",
+        description="Disables cache lookup and writing to cache. Only has an effect if the input is one string, "
+                    "and has no effect if input is a list of strings.",
+        default=False
+    )
+
 
 class EmbeddingTaskResponse(BaseModel):
     result: Union[str, None] = Field(

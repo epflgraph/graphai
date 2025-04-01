@@ -18,6 +18,11 @@ class RetrieveImageURLRequest(BaseModel):
         default=False
     )
 
+    no_cache: bool = Field(
+        title="No caching",
+        default=False
+    )
+
 
 class UploadedFileOriginInfo(BaseModel):
     id: str = Field(
@@ -53,6 +58,11 @@ class UploadImageRequest(BaseModel):
 
     force: bool = Field(
         title="Force reupload",
+        default=False
+    )
+
+    no_cache: bool = Field(
+        title="No caching",
         default=False
     )
 
@@ -165,6 +175,12 @@ class ExtractTextRequest(BaseModel):
     force: bool = Field(
         title="Force",
         description="Whether to force a recomputation",
+        default=False
+    )
+
+    no_cache: bool = Field(
+        title="No caching",
+        description="Skips the entire cache: does not do a lookup, and does not write results to cache.",
         default=False
     )
 

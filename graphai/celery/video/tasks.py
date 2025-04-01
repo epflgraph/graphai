@@ -30,7 +30,8 @@ from graphai.core.video.video import (
     retrieve_audio_fingerprint_callback,
     retrieve_video_fingerprint_callback,
     ignore_video_fingerprint_results_callback,
-    ignore_single_image_fingerprint_results_callback
+    ignore_single_image_fingerprint_results_callback,
+    add_token_status_to_single_image
 )
 from graphai.core.video.video_utils import NLPModels
 from graphai.core.common.caching import (
@@ -356,3 +357,9 @@ def ignore_slide_fingerprint_results_callback_task(self, results):
              name='video_2.ignore_single_image_fingerprint_results_callback', ignore_result=False)
 def ignore_single_image_fingerprint_results_callback_task(self, results):
     return ignore_single_image_fingerprint_results_callback(results)
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
+             name='video_2.add_token_status_to_single_image_results_callback', ignore_result=False)
+def add_token_status_to_single_image_results_callback_task(self, results):
+    return add_token_status_to_single_image(results)
