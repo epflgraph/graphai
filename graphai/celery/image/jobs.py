@@ -11,6 +11,7 @@ from graphai.celery.image.tasks import (
     extract_slide_text_task,
     extract_slide_text_callback_task
 )
+from graphai.celery.video.tasks import add_token_status_to_single_image_results_callback_task
 from graphai.celery.common.jobs import (
     direct_lookup_generic_job,
     DEFAULT_TIMEOUT
@@ -30,6 +31,8 @@ def retrieve_image_from_url_job(url, force=False, no_cache=False):
                  retrieve_image_from_url_callback_task.s(url)]
     if not no_cache:
         task_list += get_slide_fingerprint_chain_list(None, None, ignore_fp_results=True)
+    else:
+        task_list += [add_token_status_to_single_image_results_callback_task.s()]
     task = chain(task_list)
     task = task.apply_async(priority=2)
     return task.id
@@ -48,6 +51,8 @@ def upload_image_from_file_job(contents, file_extension, origin, origin_info, fo
     ]
     if not no_cache:
         task_list += get_slide_fingerprint_chain_list(None, None, ignore_fp_results=True)
+    else:
+        task_list += [add_token_status_to_single_image_results_callback_task.s()]
     task = chain(task_list)
     task = task.apply_async(priority=2)
     return task.id
