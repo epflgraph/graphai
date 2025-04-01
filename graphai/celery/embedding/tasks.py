@@ -19,7 +19,9 @@ from graphai.core.embedding.embedding import (
     insert_embedding_into_db,
     jsonify_embedding_results,
     embedding_text_list_fingerprint_parallel,
+    embedding_text_list_dummy_fingerprint_parallel,
     embedding_text_list_fingerprint_callback,
+    embedding_text_list_embed_jsonify_callback,
     embedding_text_list_embed_callback
 )
 from graphai.core.common.config import config
@@ -111,6 +113,12 @@ def embedding_text_list_fingerprint_parallel_task(self, tokens, text_list, i, n)
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
+             name='text_6.embedding_text_list_dummy_fingerprint_parallel', ignore_result=False)
+def embedding_text_list_dummy_fingerprint_parallel_task(self, tokens, text_list, i, n):
+    return embedding_text_list_dummy_fingerprint_parallel(tokens, text_list, i, n)
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='text_6.embedding_text_list_fingerprint_callback', ignore_result=False)
 def embedding_text_list_fingerprint_callback_task(self, results, model_type):
     return embedding_text_list_fingerprint_callback(results, model_type)
@@ -124,7 +132,13 @@ def embedding_text_list_embed_parallel_task(self, input_list, model_type, i, n, 
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='text_6.embedding_text_list_embed_callback', ignore_result=False)
+             name='text_6.embedding_text_list_jsonify_callback', ignore_result=False)
+def embedding_text_list_jsonify_callback_task(self, results):
+    return embedding_text_list_embed_jsonify_callback(results)
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
+             name='text_6.embedding_text_list_db_callback', ignore_result=False)
 def embedding_text_list_embed_callback_task(self, results, model_type, force=False):
     return embedding_text_list_embed_callback(results, model_type, force)
 

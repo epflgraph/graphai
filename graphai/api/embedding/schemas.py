@@ -32,8 +32,7 @@ class EmbeddingRequest(EmbeddingRequestBase):
 
     no_cache: bool = Field(
         title="No caching",
-        description="Disables cache lookup and writing to cache. Only has an effect if the input is one string, "
-                    "and has no effect if input is a list of strings.",
+        description="Disables cache lookup and writing to cache.",
         default=False
     )
 

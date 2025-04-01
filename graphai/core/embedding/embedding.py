@@ -278,7 +278,6 @@ def embed_text(models, text, model_type):
         embedding = str(e)
         success = False
         text_too_large = False
-
     return {
         'result': embedding,
         'successful': success,
@@ -294,7 +293,7 @@ def insert_embedding_into_db(results, token, text, model_type, force=False):
     if results['fresh']:
         values_dict = {
             'source': text,
-            'embedding': embedding_to_json(results['result']),
+            'embedding': results['result'],
             'model_type': model_type
         }
         existing = db_manager.get_details(token, ['date_added'], using_most_similar=False)[0]
@@ -360,6 +359,22 @@ def embedding_text_list_fingerprint_parallel(tokens, text_list, i, n):
     return results
 
 
+def embedding_text_list_dummy_fingerprint_parallel(tokens, text_list, i, n):
+    start_index = int(i * len(tokens) / n)
+    end_index = int((i + 1) * len(tokens) / n)
+    if start_index == end_index:
+        return []
+    return [
+        {
+            'token': tokens[j],
+            'fp': None,
+            'text': text_list[j],
+            'fresh': False
+        }
+        for j in range(start_index, end_index)
+    ]
+
+
 def embedding_text_list_fingerprint_callback(results, model_type):
     db_manager = EmbeddingDBCachingManager()
     all_results = list(chain.from_iterable(results))
@@ -386,6 +401,8 @@ def embedding_text_list_embed_parallel(input_list, embedding_obj, model_type, i,
     if not force:
         for ind in input_list:
             current_dict = input_list[ind]
+            if current_dict['fp'] is None:
+                continue
             current_results = token_based_embedding_lookup(current_dict['token'], model_type)
             if current_results is None:
                 current_results = fingerprint_based_embedding_lookup(
@@ -437,13 +454,15 @@ def embedding_text_list_embed_parallel(input_list, embedding_obj, model_type, i,
 
 
 def embedding_text_list_embed_callback(results, model_type, force):
+    for result in results:
+        insert_embedding_into_db(result, result['id_token'], result['source'], model_type, force)
+        del result['id_token']
+        del result['source']
+    return results
+
+
+def embedding_text_list_embed_jsonify_callback(results):
     all_results = list(chain.from_iterable(results))
-    new_results = list()
-    for result in all_results:
-        new_result = insert_embedding_into_db(result, result['id_token'], result['source'], model_type, force)
-        new_result = jsonify_embedding_results(new_result)
-        del new_result['id_token']
-        del new_result['source']
-        new_results.append(new_result)
+    new_results = [jsonify_embedding_results(result) for result in all_results]
     gc.collect()
     return new_results
