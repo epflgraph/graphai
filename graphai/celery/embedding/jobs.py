@@ -10,8 +10,10 @@ from graphai.celery.embedding.tasks import (
     embed_text_callback_task,
     embed_text_jsonify_callback_task,
     embedding_text_list_fingerprint_parallel_task,
+    embedding_text_list_dummy_fingerprint_parallel_task,
     embedding_text_list_fingerprint_callback_task,
     embedding_text_list_embed_parallel_task,
+    embedding_text_list_jsonify_callback_task,
     embedding_text_list_embed_callback_task
 )
 
@@ -115,19 +117,30 @@ def embedding_job(text, model_type, force, no_cache=False):
         else:
             task_list = [
                 embed_text_task.s(text, model_type),
-                embed_text_callback_task.s(token, text, model_type, force),
-                embed_text_jsonify_callback_task.s()
+                embed_text_jsonify_callback_task.s(),
+                embed_text_callback_task.s(token, text, model_type, force)
             ]
     else:
         tokens = [generate_embedding_text_token(x, model_type) for x in text]
-        task_list = [
-            group(embedding_text_list_fingerprint_parallel_task.s(tokens, text, i, 8) for i in range(8)),
-            embedding_text_list_fingerprint_callback_task.s(model_type),
-            text_dummy_task.s(),
-            group(embedding_text_list_embed_parallel_task.s(model_type, i, 8, force) for i in range(8)),
-            embedding_text_list_embed_callback_task.s(model_type, force),
-            text_dummy_task.s()
-        ]
+        if not no_cache:
+            task_list = [
+                group(embedding_text_list_fingerprint_parallel_task.s(tokens, text, i, 8) for i in range(8)),
+                embedding_text_list_fingerprint_callback_task.s(model_type),
+                text_dummy_task.s(),
+                group(embedding_text_list_embed_parallel_task.s(model_type, i, 8, force) for i in range(8)),
+                embedding_text_list_jsonify_callback_task.s(),
+                embedding_text_list_embed_callback_task.s(model_type, force),
+                text_dummy_task.s()
+            ]
+        else:
+            task_list = [
+                group(embedding_text_list_dummy_fingerprint_parallel_task.s(tokens, text, i, 8) for i in range(8)),
+                embedding_text_list_fingerprint_callback_task.s(model_type),
+                text_dummy_task.s(),
+                group(embedding_text_list_embed_parallel_task.s(model_type, i, 8, True) for i in range(8)),
+                embedding_text_list_jsonify_callback_task.s(),
+                text_dummy_task.s()
+            ]
     task = chain(task_list)
     task = task.apply_async(priority=6)
     return task.id
