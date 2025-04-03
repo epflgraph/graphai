@@ -199,3 +199,19 @@ def extract_username_sync(token):
         return username
     except Exception:
         return '__UNAUTHENTICATED___USER__'
+
+
+def has_rag_access_rights(username, index_name):
+    db_manager = DB(config['database'])
+    try:
+        query = (f"SELECT index_name FROM {AUTH_SCHEMA}.User_Retrieve_Access "
+                 f"WHERE username=%s;")
+        permitted_rags = db_manager.execute_query(query, (username, ))
+        permitted_rags = [row[0] for row in permitted_rags]
+        if index_name in permitted_rags:
+            return True
+        return False
+    except Exception as e:
+        # If the table doesn't exist, anyone is permitted to access any index
+        print(e)
+        return True
