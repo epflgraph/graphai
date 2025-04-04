@@ -231,9 +231,10 @@ def has_rag_access_rights(username, index_name):
     try:
         query = (f"SELECT b.alias_name FROM {AUTH_SCHEMA}.User_Retrieve_Access a "
                  f"INNER JOIN {AUTH_SCHEMA}.Retrieve_Index_Aliases b "
-                 f"ON a.index_name=b.index_name"
+                 f"ON a.index_name=b.index_name "
                  f"WHERE a.username=%s;")
         permitted_rags = db_manager.execute_query(query, (username, ))
+        print(permitted_rags)
         permitted_rags = [row[0] for row in permitted_rags]
         if index_name in permitted_rags:
             return True
