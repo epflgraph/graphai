@@ -245,6 +245,19 @@
 <span class="sig-prename descclassname"><span class="pre">graphai.api.auth.auth_utils.</span></span><span class="sig-name descname"><span class="pre">extract_username_sync</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">token</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.api.auth.auth_utils.extract_username_sync" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
+<dl class="py function">
+<dt class="sig sig-object py" id="graphai.api.auth.auth_utils.has_rag_access_rights">
+<span class="sig-prename descclassname"><span class="pre">graphai.api.auth.auth_utils.</span></span><span class="sig-name descname"><span class="pre">has_rag_access_rights</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">username</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index_name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.api.auth.auth_utils.has_rag_access_rights" title="Link to this definition"></a></dt>
+<dd><p>Checks to see if a given user has access to a given index for the /rag/retreive endpoint.
+:param username: Username
+:param index_name: Name of the index</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>True if the user is granted access or if the access management table has not been set up, False otherwise.</p>
+</dd>
+</dl>
+</dd></dl>
+
 </section>
 
 
