@@ -202,6 +202,7 @@ def extract_username_sync(token):
 
 
 def has_rag_access_rights(username, index_name):
+    print(username)
     db_manager = DB(config['database'])
     try:
         query = (f"SELECT index_name FROM {AUTH_SCHEMA}.User_Retrieve_Access "
