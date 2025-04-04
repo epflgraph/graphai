@@ -1,8 +1,13 @@
 from fastapi import APIRouter, Security, Depends
+from typing import Annotated
 from fastapi_user_limiter.limiter import rate_limiter
 
 from graphai.api.auth.router import get_current_active_user, get_user_for_rate_limiter
-from graphai.api.auth.auth_utils import get_ratelimit_values
+from graphai.api.auth.auth_utils import (
+    User,
+    get_ratelimit_values,
+    has_rag_access_rights
+)
 from graphai.api.retrieval.schemas import (
     RetrievalRequest,
     RetrievalResponse,
@@ -14,6 +19,7 @@ from graphai.celery.retrieval.jobs import (
     retrieve_from_es_job,
     chunk_text_job
 )
+from graphai.core.retrieval.retrieval_utils import INSUFFICIENT_ACCESS_ERROR
 
 router = APIRouter(
     prefix='/rag',
@@ -27,12 +33,15 @@ router = APIRouter(
              dependencies=[Depends(rate_limiter(get_ratelimit_values()['rag']['max_requests'],
                                                 get_ratelimit_values()['rag']['window'],
                                                 user=get_user_for_rate_limiter))])
-async def retrieve_from_es_index(data: RetrievalRequest):
+async def retrieve_from_es_index(data: RetrievalRequest,
+                                 current_user: Annotated[User, Security(get_current_active_user, scopes=['user'])]):
     text = data.text
     filters = data.filters
     limit = data.limit
     index_to_search_in = data.index
     return_scores = data.return_scores
+    if not has_rag_access_rights(current_user.username, index_to_search_in):
+        return INSUFFICIENT_ACCESS_ERROR
     results = retrieve_from_es_job(text, index_to_search_in, filters, limit, return_scores)
     return results
 

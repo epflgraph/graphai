@@ -199,3 +199,48 @@ def extract_username_sync(token):
         return username
     except Exception:
         return '__UNAUTHENTICATED___USER__'
+
+
+@cachetools.func.ttl_cache(maxsize=1024, ttl=12 * 3600)
+def has_rag_access_rights(username, index_name):
+    """
+    Checks to see if a given user has access to a given index for the /rag/retreive endpoint.
+    Args:
+        username: Username
+        index_name: Name of the index
+
+    Returns:
+        True if the user is granted access or if the access management table has not been set up, False otherwise.
+    """
+    db_manager = DB(config['database'])
+    # First, we try without aliases
+    try:
+        query = (f"SELECT index_name FROM {AUTH_SCHEMA}.User_Retrieve_Access "
+                 f"WHERE username=%s;")
+        permitted_rags = db_manager.execute_query(query, (username, ))
+        permitted_rags = [row[0] for row in permitted_rags]
+        # Either the user has access to this particular index, or to any and all indexes.
+        if index_name in permitted_rags or 'ANY/ALL' in permitted_rags:
+            return True
+    except Exception as e:
+        # If the base table doesn't exist, anyone is permitted to access any index
+        print(e)
+        return True
+    # If we're here, the User_Retrieve_Access table exists, and this user seems not to have access.
+    # We now check the aliases to see if that yields something.
+    try:
+        query = (f"SELECT b.alias_name FROM {AUTH_SCHEMA}.User_Retrieve_Access a "
+                 f"INNER JOIN {AUTH_SCHEMA}.Retrieve_Index_Aliases b "
+                 f"ON a.index_name=b.index_name "
+                 f"WHERE a.username=%s;")
+        permitted_rags = db_manager.execute_query(query, (username, ))
+        print(permitted_rags)
+        permitted_rags = [row[0] for row in permitted_rags]
+        if index_name in permitted_rags:
+            return True
+        # If the index is not found in the aliases either, the user does not have access.
+        return False
+    except Exception as e:
+        # If there are no aliases, we conclude that this user does not have access.
+        print(e)
+        return False

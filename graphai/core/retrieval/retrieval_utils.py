@@ -3,6 +3,13 @@ from graphai.core.retrieval.retrieval_settings import RETRIEVAL_PARAMS
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 
+INSUFFICIENT_ACCESS_ERROR = {
+    'n_results': 0,
+    'result': [{'error': 'You do not have access to the selected index.'}],
+    'successful': False
+}
+
+
 def normalize_index_name(index_name):
     return index_name.lower().replace(' ', '_').replace('-', '')
 
