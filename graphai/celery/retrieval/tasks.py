@@ -3,6 +3,13 @@ from graphai.core.retrieval.retrieval_utils import (
     retrieve_from_es,
     chunk_text
 )
+from graphai.core.retrieval.anonymization import (
+    AnonymizerModels,
+    anonymize_text
+)
+
+
+anonymizer_model = AnonymizerModels()
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
@@ -16,3 +23,9 @@ def retrieve_from_es_task(self, embedding_results, text, index_to_search_in,
              name='retrieval_10.chunk', ignore_result=False)
 def chunk_text_task(self, text, chunk_size=400, chunk_overlap=100):
     return chunk_text(text, chunk_size, chunk_overlap)
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
+             name='retrieval_10.anonymize', anonymization_obj=anonymizer_model, ignore_result=False)
+def anonymize_text_task(self, text, lang):
+    return anonymize_text(self.anonymization_obj, text, lang)

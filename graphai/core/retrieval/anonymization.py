@@ -77,3 +77,17 @@ class AnonymizerModels:
         analyzer_results = self.models['analyzer'].analyze(text=text, language=lang)
         anonymized = self.models['anonymizer'].anonymize(text, analyzer_results=analyzer_results)
         return anonymized.text
+
+
+def anonymize_text(anonymizer_model, text, lang):
+    try:
+        result = anonymizer_model.anonymize(text, lang)
+    except NotImplementedError:
+        return {
+            "result": "Language not supported",
+            "successful": False
+        }
+    return {
+        "result": result,
+        "successful": True
+    }
