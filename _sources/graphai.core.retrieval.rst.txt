@@ -12,5 +12,6 @@ Submodules
 .. toctree::
    :maxdepth: 1
 
+   graphai.core.retrieval.anonymization
    graphai.core.retrieval.retrieval_settings
    graphai.core.retrieval.retrieval_utils

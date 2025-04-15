@@ -1,0 +1,7 @@
+graphai.core.retrieval.anonymization module
+===========================================
+
+.. automodule:: graphai.core.retrieval.anonymization
+   :members:
+   :undoc-members:
+   :show-inheritance:
