@@ -14,37 +14,19 @@ model_config = [
         "lang_code": "en",
         "model_name": {
             "spacy": "en_core_web_sm",  # for tokenization, lemmatization
-            "transformers": "StanfordAIMI/stanford-deidentifier-base"  # for NER
+            "transformers": "Davlan/distilbert-base-multilingual-cased-ner-hrl"  # for NER
+        }
+    },
+    {
+        "lang_code": "fr",
+        "model_name": {
+            "spacy": "fr_core_news_sm",  # for tokenization, lemmatization
+            "transformers": "Davlan/distilbert-base-multilingual-cased-ner-hrl"  # for NER
         }
     }
 ]
-
-# Entity mappings between the model's and Presidio's
-mapping = dict(
-    PER="PERSON",
-    LOC="LOCATION",
-    ORG="ORGANIZATION",
-    AGE="AGE",
-    ID="ID",
-    EMAIL="EMAIL",
-    DATE="DATE_TIME",
-    PHONE="PHONE_NUMBER",
-    PERSON="PERSON",
-    LOCATION="LOCATION",
-    GPE="LOCATION",
-    ORGANIZATION="ORGANIZATION",
-    NORP="NRP",
-    PATIENT="PERSON",
-    STAFF="PERSON",
-    HOSP="LOCATION",
-    PATORG="ORGANIZATION",
-    TIME="DATE_TIME",
-    HCW="PERSON",
-    HOSPITAL="LOCATION",
-    FACILITY="LOCATION",
-    VENDOR="ORGANIZATION",
-)
-
+# No need for a mapping since the default works well
+mapping = None
 labels_to_ignore = ["O"]
 
 
@@ -70,8 +52,7 @@ class AnonymizerModels:
         with self.load_lock:
             if self.models is None:
                 self.models = dict()
-                self.models['analyzers'] = dict()
-                print('Loading EN analyzer')
+                print('Loading analyzer and anonymizer')
                 ner_model_configuration = NerModelConfiguration(
                     model_to_presidio_entity_mapping=mapping,
                     alignment_mode="expand",  # "strict", "contract", "expand"
@@ -85,16 +66,15 @@ class AnonymizerModels:
                 # Transformer-based analyzer
                 analyzer = AnalyzerEngine(
                     nlp_engine=transformers_nlp_engine,
-                    supported_languages=["en"]
+                    supported_languages=["en", "fr"]
                 )
-                self.models['analyzers']['en'] = analyzer
+                self.models['analyzer'] = analyzer
                 self.models['anonymizer'] = AnonymizerEngine()
 
     def anonymize(self, text, lang):
         self.load_models()
-        if lang not in self.models['analyzers'].keys():
-            print(f"Language {lang} not implemented, falling back to en...")
-            lang = 'en'
-        analyzer_results = self.models['analyzers'][lang].analyze(text=text, language=lang)
+        if lang not in ['en', 'fr']:
+            raise NotImplementedError("Only English and French are implemented at the moment.")
+        analyzer_results = self.models['analyzer'].analyze(text=text, language=lang)
         anonymized = self.models['anonymizer'].anonymize(text, analyzer_results=analyzer_results)
         return anonymized.text
