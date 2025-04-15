@@ -1,7 +1,6 @@
 from presidio_analyzer import AnalyzerEngine
 from presidio_analyzer.nlp_engine import NerModelConfiguration, TransformersNlpEngine
 from presidio_anonymizer import AnonymizerEngine
-from transformers import AutoTokenizer, AutoModelForTokenClassification
 from graphai.core.common.config import config
 import torch
 from multiprocessing import Lock
