@@ -81,7 +81,10 @@ dependencies = [
     "ftfy",
     "pdf2image",
     "pylatexenc",
-    "langchain"
+    "langchain",
+    "presidio_analyzer[transformers]",
+    "presidio_anonymizer",
+    "spacy"
 ]
 
 [tool.setuptools]
