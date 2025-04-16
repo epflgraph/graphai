@@ -13,11 +13,14 @@ from graphai.api.retrieval.schemas import (
     RetrievalResponse,
     RetrievalInfoResponse,
     ChunkRequest,
-    ChunkResponse
+    ChunkResponse,
+    AnonymizeRequest,
+    AnonymizeResponse
 )
 from graphai.celery.retrieval.jobs import (
     retrieve_from_es_job,
-    chunk_text_job
+    chunk_text_job,
+    anonymize_text_job
 )
 from graphai.core.retrieval.retrieval_utils import INSUFFICIENT_ACCESS_ERROR
 
@@ -85,3 +88,13 @@ async def chunk_text(data: ChunkRequest):
     chunk_size = data.chunk_size
     chunk_overlap = data.chunk_overlap
     return chunk_text_job(text, chunk_size, chunk_overlap)
+
+
+@router.post('/anonymize', response_model=AnonymizeResponse,
+             dependencies=[Depends(rate_limiter(get_ratelimit_values()['rag']['max_requests'],
+                                                get_ratelimit_values()['rag']['window'],
+                                                user=get_user_for_rate_limiter))])
+async def anonymize_text(data: AnonymizeRequest):
+    text = data.text
+    lang = data.lang
+    return anonymize_text_job(text, lang)

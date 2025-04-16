@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from typing import Union, List, Dict
+from typing import Union, List, Dict, Literal
 
 
 class RetrievalRequest(BaseModel):
@@ -90,4 +90,27 @@ class ChunkResponse(BaseModel):
 
     full: str = Field(
         title="Full text"
+    )
+
+
+class AnonymizeRequest(BaseModel):
+    text: str = Field(
+        title="Text",
+        description="Text to anonymize"
+    )
+
+    lang: Literal['en', 'fr'] = Field(
+        title="Language",
+        default="en"
+    )
+
+
+class AnonymizeResponse(BaseModel):
+    result: str = Field(
+        title="Result",
+        description="Anonymized text"
+    )
+
+    successful: bool = Field(
+        title="Successful"
     )

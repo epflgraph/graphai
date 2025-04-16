@@ -1,7 +1,8 @@
 from celery import chain
 from graphai.celery.retrieval.tasks import (
     retrieve_from_es_task,
-    chunk_text_task
+    chunk_text_task,
+    anonymize_text_task
 )
 from graphai.celery.embedding.tasks import embed_text_task
 from graphai.core.retrieval.retrieval_settings import RETRIEVAL_PARAMS
@@ -20,5 +21,11 @@ def retrieve_from_es_job(text, index_to_search_in, filters=None, limit=10, retur
 
 def chunk_text_job(text, chunk_size, chunk_overlap):
     task = chunk_text_task.s(text, chunk_size, chunk_overlap)
+    results = task.apply_async(priority=10).get(timeout=DEFAULT_TIMEOUT)
+    return results
+
+
+def anonymize_text_job(text, lang):
+    task = anonymize_text_task.s(text, lang)
     results = task.apply_async(priority=10).get(timeout=DEFAULT_TIMEOUT)
     return results
