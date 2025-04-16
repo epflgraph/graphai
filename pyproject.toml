@@ -83,7 +83,8 @@ dependencies = [
     "pylatexenc",
     "langchain",
     "presidio_analyzer[transformers]",
-    "presidio_anonymizer"
+    "presidio_anonymizer",
+    "spacy"
 ]
 
 [tool.setuptools]
