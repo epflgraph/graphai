@@ -9,6 +9,10 @@ import pdf2image
 import pytesseract
 from google.cloud import vision
 from openai import OpenAI
+
+from google import genai
+from google.genai import types
+
 from pylatexenc.latex2text import LatexNodes2Text
 
 from graphai.core.common.common_utils import file_exists
@@ -17,11 +21,16 @@ import base64
 
 
 OPENAI_OCR_PROMPT = """
-    You are to extract the text contents of the following image. Formulae (if any) are to be extracted as valid LaTeX.
+    You are to extract the text contents of the following image. Formulae (if any) are to be extracted as valid LaTeX. 
+    Figures are to be extracted as valid TikZ within LaTeX. Bear in mind any math, including Greek letters,
+    needs to be in math mode (e.g. enclosed in dollar sign marks), 
+    including math inside \\begin{tikzpicture} and \\end{tikzpicture} commands.
     Output your response as a valid JSON with two fields:
-    1. "text": Containing ONLY the extracted text and formulae (if applicable). Do not include ANY extra explanations.
+    1. "text": Containing ONLY the extracted text, formulae, and any figures as valid LaTeX. No extra explanations. 
+    Everything that is math must be in math mode (e.g. enclosed by $$).
     2. "keywords": A list of at least 1 and at most 10 keywords that describe the contents of the image.
-    If any LaTeX is present in the "text" field, ensure that it is valid and that the field would compile using XeLaTeX.
+    If any LaTeX is present in the "text" field, ensure that it is valid and that it would compile. It needs to include 
+    all the imports and LaTeX markdown.
 """
 
 
