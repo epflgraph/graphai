@@ -21,16 +21,15 @@ import base64
 
 
 OPENAI_OCR_PROMPT = """
-    You are to extract the text contents of the following image. Formulae (if any) are to be extracted as valid LaTeX. 
-    Figures are to be extracted as valid TikZ within LaTeX. Bear in mind any math, including Greek letters,
-    needs to be in math mode (e.g. enclosed in dollar sign marks), 
+    You are to extract the text contents of the following image and provide the result as a valid JSON.
+    Formulae (if any) are to be extracted as valid LaTeX. Figures are to be extracted as valid TikZ within LaTeX.
     including math inside \\begin{tikzpicture} and \\end{tikzpicture} commands.
-    Output your response as a valid JSON with two fields:
-    1. "text": Containing ONLY the extracted text, formulae, and any figures as valid LaTeX. No extra explanations. 
-    Everything that is math must be in math mode (e.g. enclosed by $$).
+    Output your response as a valid JSON (parsable directly with Python's JSON module) with two fields:
+    1. "text": Valid LaTeX code containing the extracted text, formulae, and any figures as valid LaTeX. 
+    Everything that is math (including Greek letters) must be in math mode (e.g. enclosed by $$).
     2. "keywords": A list of at least 1 and at most 10 keywords that describe the contents of the image.
-    If any LaTeX is present in the "text" field, ensure that it is valid and that it would compile. It needs to include 
-    all the imports and LaTeX markdown.
+    Ensure that the "text" field is valid LaTeX and that it would compile as-is.
+    It needs to include all the imports and LaTeX markdown. For TikZ figures, define coordinates.
 """
 
 
@@ -42,6 +41,15 @@ def is_valid_latex(text):
     except Exception as e:
         print(e)
         return False
+
+
+def cleanup_json(text):
+    text = text.strip()
+    if text.startswith('```json'):
+        text = text[7:].strip()
+    if text.endswith('```'):
+        text = text[:-3].strip()
+    return text
 
 
 class ImgToBase64Converter:
@@ -228,10 +236,45 @@ class OpenAIOCRModel(AbstractOCRModel):
                     response_format={"type": "json_object"}
                 )
                 results = response.choices[0].message.content
-            return results
+            return cleanup_json(results)
         except Exception as e:
             print(e)
             return None
+
+
+class GeminiOCRModel(AbstractOCRModel):
+    def __init__(self, api_key):
+        super().__init__(api_key, genai.Client, "Gemini")
+        self.model_params = dict(
+            api_key=self.api_key
+        )
+
+    def perform_ocr(self, input_filename_with_path):
+        model_loaded = self.establish_connection()
+        if not model_loaded:
+            return None
+        with open(input_filename_with_path, 'rb') as f:
+            image_bytes = f.read()
+
+        if input_filename_with_path.endswith('png'):
+            mime_type = 'image/png'
+        elif input_filename_with_path.endswith('jpg') or input_filename_with_path.endswith('jpeg'):
+            mime_type = 'image/jpeg'
+        else:
+            return None
+
+        response = self.model.models.generate_content(
+            model='gemini-2.0-flash',
+            contents=[
+                types.Part.from_bytes(
+                    data=image_bytes,
+                    mime_type=mime_type,
+                ),
+                OPENAI_OCR_PROMPT
+            ]
+        )
+
+        return cleanup_json(response.text)
 
 
 def get_ocr_colnames(method):

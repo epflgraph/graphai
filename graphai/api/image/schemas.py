@@ -187,14 +187,21 @@ class ExtractTextRequest(BaseModel):
     google_api_token: str = Field(
         title="Google API token",
         description="Token that authenticates the user on the Google OCR API."
-                    "Without a valid token, Google OCR will fail. Not required for Tesseract or OpenAI.",
+                    "Without a valid token, Google OCR will fail. Not required for Tesseract, OpenAI, or Gemini.",
         default=None
     )
 
     openai_api_token: str = Field(
         title="OpenAI API token",
-        description="Token that authenticates the user on the Google OCR API."
-                    "Without a valid token, OpenAI OCR will fail. Not required for Tesseract or Google.",
+        description="Token that authenticates the user on the OpenAI API."
+                    "Without a valid token, OpenAI OCR will fail. Not required for Tesseract, Google, or Gemini.",
+        default=None
+    )
+
+    gemini_api_token: str = Field(
+        title="Gemini API token",
+        description="Token that authenticates the user on the Gemini API."
+                    "Without a valid token, Gemini OCR will fail. Not required for Tesseract, Google, or OpenAI.",
         default=None
     )
 

@@ -12,6 +12,7 @@ from graphai.core.image.ocr import (
     get_ocr_colnames,
     GoogleOCRModel,
     OpenAIOCRModel,
+    GeminiOCRModel,
     perform_tesseract_ocr_on_pdf
 )
 from graphai.core.common.common_utils import (
@@ -173,7 +174,13 @@ def cache_lookup_extract_slide_text(token, method):
     return None
 
 
-def extract_slide_text(token, file_manager, method='google', api_token=None, openai_token=None, pdf_in_pages=True):
+def extract_slide_text(token,
+                       file_manager,
+                       method='google',
+                       api_token=None,
+                       openai_token=None,
+                       gemini_token=None,
+                       pdf_in_pages=True):
     if not is_token(token):
         return {
             'results': None,
@@ -238,15 +245,21 @@ def extract_slide_text(token, file_manager, method='google', api_token=None, ope
                         for i in range(len(res_list))
                     ]
         else:
-            # OpenAI OCR
-            if openai_token is None:
-                results = None
-                language = None
+            if method == 'openai':
+                # OpenAI OCR
+                if openai_token is None:
+                    ocr_model = None
+                else:
+                    ocr_model = OpenAIOCRModel(openai_token)
             else:
-                ocr_model = OpenAIOCRModel(openai_token)
+                # Gemini OCR
+                if gemini_token is None:
+                    ocr_model = None
+                else:
+                    ocr_model = GeminiOCRModel(gemini_token)
+            if ocr_model is not None:
                 ocr_model.establish_connection()
                 res = ocr_model.perform_ocr(file_manager.generate_filepath(token))
-
                 if res is None:
                     results = None
                     language = None
@@ -258,6 +271,9 @@ def extract_slide_text(token, file_manager, method='google', api_token=None, ope
                             'text': res
                         }
                     ]
+            else:
+                results = None
+                language = None
 
     return {
         'results': results,
