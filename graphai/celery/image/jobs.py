@@ -82,7 +82,7 @@ def fingerprint_job(token, force):
 
 
 def ocr_job(token, force=False, no_cache=False, method='google', api_token=None, openai_token=None, gemini_token=None,
-            pdf_in_pages=True):
+            pdf_in_pages=True, model_type=None):
     ##################
     # OCR cache lookup
     ##################
@@ -97,11 +97,11 @@ def ocr_job(token, force=False, no_cache=False, method='google', api_token=None,
     #####################
     if no_cache:
         task_list = [
-            extract_slide_text_task.s(token, method, api_token, openai_token, gemini_token, pdf_in_pages)
+            extract_slide_text_task.s(token, method, api_token, openai_token, gemini_token, pdf_in_pages, model_type)
         ]
     else:
         task_list = [
-            extract_slide_text_task.s(token, method, api_token, openai_token, gemini_token, pdf_in_pages),
+            extract_slide_text_task.s(token, method, api_token, openai_token, gemini_token, pdf_in_pages, model_type),
             extract_slide_text_callback_task.s(token, force)
         ]
     task = chain(task_list)

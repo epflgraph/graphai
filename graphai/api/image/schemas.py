@@ -212,6 +212,13 @@ class ExtractTextRequest(BaseModel):
         default=True
     )
 
+    model_type: str = Field(
+        title="Model type",
+        description="For OpenAI and Gemini options, allows the user to specify the model that they want to use. "
+                    "Do not specify this option unless you know exactly what you are doing.",
+        default=None
+    )
+
 
 class IndividualOCRResult(BaseModel):
     method: str = Field(

@@ -170,15 +170,17 @@ class OpenAIOCRModel(AbstractOCRModel):
             api_key=self.api_key
         )
 
-    def perform_ocr(self, input_filename_with_path, validate_latex=True):
+    def perform_ocr(self, input_filename_with_path, validate_latex=True, model_type=None):
         model_loaded = self.establish_connection()
         if not model_loaded:
             return None
         img_b64_str = ImgToBase64Converter(input_filename_with_path).get_base64()
         img_type = f'image/{input_filename_with_path.split(".")[-1]}'
+        if model_type is None:
+            model_type = "gpt-4o-mini"
         try:
             response = self.model.chat.completions.create(
-                model="gpt-4o-mini",
+                model=model_type,
                 messages=[
                     {
                         "role": "user",
@@ -249,7 +251,7 @@ class GeminiOCRModel(AbstractOCRModel):
             api_key=self.api_key
         )
 
-    def perform_ocr(self, input_filename_with_path):
+    def perform_ocr(self, input_filename_with_path, model_type=None):
         model_loaded = self.establish_connection()
         if not model_loaded:
             return None
@@ -262,9 +264,10 @@ class GeminiOCRModel(AbstractOCRModel):
             mime_type = 'image/jpeg'
         else:
             return None
-
+        if model_type is None:
+            model_type = 'gemini-2.0-flash'
         response = self.model.models.generate_content(
-            model='gemini-2.0-flash',
+            model=model_type,
             contents=[
                 types.Part.from_bytes(
                     data=image_bytes,

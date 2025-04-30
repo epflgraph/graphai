@@ -180,7 +180,8 @@ def extract_slide_text(token,
                        api_token=None,
                        openai_token=None,
                        gemini_token=None,
-                       pdf_in_pages=True):
+                       pdf_in_pages=True,
+                       model_type=None):
     if not is_token(token):
         return {
             'results': None,
@@ -259,7 +260,7 @@ def extract_slide_text(token,
                     ocr_model = GeminiOCRModel(gemini_token)
             if ocr_model is not None:
                 ocr_model.establish_connection()
-                res = ocr_model.perform_ocr(file_manager.generate_filepath(token))
+                res = ocr_model.perform_ocr(file_manager.generate_filepath(token), model_type=model_type)
                 if res is None:
                     results = None
                     language = None
