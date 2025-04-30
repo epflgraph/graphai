@@ -203,7 +203,7 @@ class OpenAIOCRModel(AbstractOCRModel):
             if validate_latex and not is_valid_latex(text):
                 print('Retrying for a valid LaTeX')
                 response = self.model.chat.completions.create(
-                    model="gpt-4o-mini",
+                    model=model_type,
                     messages=[
                         {
                             "role": "user",
