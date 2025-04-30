@@ -61,8 +61,16 @@ def cache_lookup_extract_slide_text_task(self, token, method='tesseract'):
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='video_2.extract_slide_text', ignore_result=False,
              file_manager=file_management_config)
-def extract_slide_text_task(self, token, method='google', api_token=None, openai_token=None, pdf_in_pages=True):
-    return extract_slide_text(token, self.file_manager, method, api_token, openai_token, pdf_in_pages)
+def extract_slide_text_task(self, token, method='google', api_token=None, openai_token=None, gemini_token=None,
+                            pdf_in_pages=True, model_type=None):
+    return extract_slide_text(token,
+                              self.file_manager,
+                              method,
+                              api_token,
+                              openai_token,
+                              gemini_token,
+                              pdf_in_pages,
+                              model_type)
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},

@@ -187,14 +187,21 @@ class ExtractTextRequest(BaseModel):
     google_api_token: str = Field(
         title="Google API token",
         description="Token that authenticates the user on the Google OCR API."
-                    "Without a valid token, Google OCR will fail. Not required for Tesseract or OpenAI.",
+                    "Without a valid token, Google OCR will fail. Not required for Tesseract, OpenAI, or Gemini.",
         default=None
     )
 
     openai_api_token: str = Field(
         title="OpenAI API token",
-        description="Token that authenticates the user on the Google OCR API."
-                    "Without a valid token, OpenAI OCR will fail. Not required for Tesseract or Google.",
+        description="Token that authenticates the user on the OpenAI API."
+                    "Without a valid token, OpenAI OCR will fail. Not required for Tesseract, Google, or Gemini.",
+        default=None
+    )
+
+    gemini_api_token: str = Field(
+        title="Gemini API token",
+        description="Token that authenticates the user on the Gemini API."
+                    "Without a valid token, Gemini OCR will fail. Not required for Tesseract, Google, or OpenAI.",
         default=None
     )
 
@@ -203,6 +210,13 @@ class ExtractTextRequest(BaseModel):
         description="Whether to return the results of PDF OCR in separate pages (JSON format) or one joined string. "
                     "Flag only used when the file being OCR'ed is a PDF.",
         default=True
+    )
+
+    model_type: str = Field(
+        title="Model type",
+        description="For OpenAI and Gemini options, allows the user to specify the model that they want to use. "
+                    "Do not specify this option unless you know exactly what you are doing.",
+        default=None
     )
 
 

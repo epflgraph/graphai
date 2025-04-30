@@ -84,7 +84,9 @@ dependencies = [
     "langchain",
     "presidio_analyzer[transformers]",
     "presidio_anonymizer",
-    "spacy"
+    "spacy",
+    "google-genai",
+    "httpx==0.27.2"
 ]
 
 [tool.setuptools]
