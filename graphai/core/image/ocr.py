@@ -25,7 +25,7 @@ OPENAI_OCR_PROMPT = """
     Formulae (if any) are to be extracted as valid LaTeX. Figures are to be extracted as valid TikZ within LaTeX.
     including math inside \\begin{tikzpicture} and \\end{tikzpicture} commands.
     Output your response as a valid JSON (parsable directly with Python's JSON module) with two fields:
-    1. "text": Valid LaTeX code containing the extracted text, formulae, and any figures as valid LaTeX. 
+    1. "text": Valid LaTeX code containing the extracted text, formulae, and any figures as valid LaTeX.
     Everything that is math (including Greek letters) must be in math mode (e.g. enclosed by $$).
     2. "keywords": A list of at least 1 and at most 10 keywords that describe the contents of the image.
     Ensure that the "text" field is valid LaTeX and that it would compile as-is.
