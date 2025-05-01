@@ -15,6 +15,7 @@ from graphai.core.image.ocr import (
     GeminiOCRModel,
     perform_tesseract_ocr_on_pdf
 )
+import pdf2image
 from graphai.core.common.common_utils import (
     retrieve_generic_file_from_generic_url,
     generate_random_token,
@@ -23,7 +24,8 @@ from graphai.core.common.common_utils import (
     is_token,
     is_url,
     is_effective_url,
-    is_pdf
+    is_pdf,
+    file_exists
 )
 
 
@@ -172,6 +174,24 @@ def cache_lookup_extract_slide_text(token, method):
                 'fresh': fresh
             }
     return None
+
+
+def break_pdf_into_images(token, file_manager):
+    pdf_path = file_manager.generate_filepath(token)
+    if not file_exists(pdf_path):
+        print(f'Error: File {pdf_path} does not exist')
+        return None
+    pdf_imageset = pdf2image.convert_from_path(pdf_path)
+    output_filenames = list()
+    for i in range(len(pdf_imageset)):
+        img_dir = file_manager.generate_filepath(token.replace('.', '__') + f'/page_{i}.png')
+        with open(img_dir, 'wb') as f:
+            pdf_imageset[i].save(f, 'png')
+        output_filenames.append({
+            'page': i + 1,
+            'filename': img_dir
+        })
+    return output_filenames
 
 
 def extract_slide_text(token,
