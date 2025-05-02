@@ -168,7 +168,8 @@ class ExtractTextRequest(BaseModel):
 
     method: Literal['google', 'tesseract', 'openai'] = Field(
         title="Method",
-        description="OCR method. Available methods are 'google' (default), 'openai', and 'tesseract' (not recommended)",
+        description="OCR method. Available methods are 'google' (default), 'openai', 'gemini',"
+                    "and 'tesseract' (not recommended)",
         default="google"
     )
 

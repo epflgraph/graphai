@@ -6,6 +6,7 @@ import sys
 import time
 from datetime import datetime
 import shutil
+from collections import Counter
 
 import wget
 
@@ -219,3 +220,9 @@ def is_token(s):
 
 def is_pdf(s):
     return s.endswith('.pdf')
+
+
+def get_most_common_element(l):
+    if len(l) == 0:
+        return None
+    return Counter(l).most_common(1)[0][0]
