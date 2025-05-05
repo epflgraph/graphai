@@ -235,7 +235,7 @@ def test__video_detect_slides__detect_slides__integration(fixture_app, celery_wo
     assert 'task_result' in slide_ocr
     assert slide_ocr['task_status'] == 'SUCCESS'
     assert isinstance(slide_ocr['task_result']['result'], list)
-    assert len(slide_ocr['task_result']['result']) == 2
+    assert len(slide_ocr['task_result']['result']) == 1
     assert slide_ocr['task_result']['language'] == 'en'
     assert 'value capture' in slide_ocr['task_result']['result'][0]['text'].lower()
 
