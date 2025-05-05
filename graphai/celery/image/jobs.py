@@ -1,4 +1,4 @@
-from celery import chain
+from celery import chain, group
 
 from graphai.celery.video.jobs import get_slide_fingerprint_chain_list
 from graphai.celery.image.tasks import (
@@ -9,7 +9,10 @@ from graphai.celery.image.tasks import (
     cache_lookup_slide_fingerprint_task,
     cache_lookup_extract_slide_text_task,
     extract_slide_text_task,
-    extract_slide_text_callback_task
+    extract_slide_text_callback_task,
+    convert_pdf_to_pages_task,
+    extract_multi_image_text_task,
+    collect_multi_image_ocr_task
 )
 from graphai.celery.video.tasks import add_token_status_to_single_image_results_callback_task
 from graphai.celery.common.jobs import (
@@ -17,6 +20,7 @@ from graphai.celery.common.jobs import (
     DEFAULT_TIMEOUT
 )
 from graphai.core.image.image import create_origin_token_using_info
+from graphai.core.common.common_utils import is_pdf
 
 
 def retrieve_image_from_url_job(url, force=False, no_cache=False):
@@ -95,15 +99,28 @@ def ocr_job(token, force=False, no_cache=False, method='google', api_token=None,
     #####################
     # OCR computation job
     #####################
-    if no_cache:
+    if not is_pdf(token):
         task_list = [
-            extract_slide_text_task.s(token, method, api_token, openai_token, gemini_token, pdf_in_pages, model_type)
+            extract_slide_text_task.s(token, method, api_token, openai_token, gemini_token, model_type)
         ]
     else:
+        n_parallel = 8
         task_list = [
-            extract_slide_text_task.s(token, method, api_token, openai_token, gemini_token, pdf_in_pages, model_type),
-            extract_slide_text_callback_task.s(token, force)
+            convert_pdf_to_pages_task.s(token),
+            group(
+                extract_multi_image_text_task.s(i,
+                                                n_parallel,
+                                                method,
+                                                api_token,
+                                                openai_token,
+                                                gemini_token,
+                                                model_type)
+                for i in range(n_parallel)
+            ),
+            collect_multi_image_ocr_task.s()
         ]
+    if not no_cache:
+        task_list.append(extract_slide_text_callback_task.s(token, force))
     task = chain(task_list)
     task = task.apply_async(priority=2)
     return task.id

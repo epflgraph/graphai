@@ -1,3 +1,5 @@
+import json
+
 from graphai.core.common.caching import (
     SlideDBCachingManager,
     write_binary_file_to_token
@@ -12,9 +14,9 @@ from graphai.core.image.ocr import (
     get_ocr_colnames,
     GoogleOCRModel,
     OpenAIOCRModel,
-    GeminiOCRModel,
-    perform_tesseract_ocr_on_pdf
+    GeminiOCRModel
 )
+import pdf2image
 from graphai.core.common.common_utils import (
     retrieve_generic_file_from_generic_url,
     generate_random_token,
@@ -23,8 +25,10 @@ from graphai.core.common.common_utils import (
     is_token,
     is_url,
     is_effective_url,
-    is_pdf
+    file_exists,
+    get_most_common_element
 )
+from itertools import chain
 
 
 def create_image_filename_using_url_format(token, url):
@@ -174,28 +178,34 @@ def cache_lookup_extract_slide_text(token, method):
     return None
 
 
-def extract_slide_text(token,
-                       file_manager,
-                       method='google',
-                       api_token=None,
-                       openai_token=None,
-                       gemini_token=None,
-                       pdf_in_pages=True,
-                       model_type=None):
-    if not is_token(token):
-        return {
-            'results': None,
-            'language': None,
-            'fresh': False
-        }
+def break_pdf_into_images(token, file_manager):
+    pdf_path = file_manager.generate_filepath(token)
+    if not file_exists(pdf_path):
+        print(f'Error: File {pdf_path} does not exist')
+        return None
+    pdf_imageset = pdf2image.convert_from_path(pdf_path)
+    output_filenames = list()
+    for i in range(len(pdf_imageset)):
+        img_dir = file_manager.generate_filepath(token.replace('.', '__') + f'/page_{i}.png')
+        with open(img_dir, 'wb') as f:
+            pdf_imageset[i].save(f, 'png')
+        output_filenames.append({
+            'page': i + 1,
+            'filename': img_dir
+        })
+    return output_filenames
+
+
+def perform_ocr(file_path,
+                method='google',
+                api_token=None,
+                openai_token=None,
+                gemini_token=None,
+                model_type=None):
     ocr_colnames = get_ocr_colnames(method)
 
     if method == 'tesseract':
-        if is_pdf(token):
-            res = perform_tesseract_ocr_on_pdf(file_manager.generate_filepath(token),
-                                               language='enfr', in_pages=pdf_in_pages)
-        else:
-            res = perform_tesseract_ocr(file_manager.generate_filepath(token), language='enfr')
+        res = perform_tesseract_ocr(file_path, language='enfr')
         if res is None:
             results = None
             language = None
@@ -208,19 +218,6 @@ def extract_slide_text(token,
                 }
             ]
     else:
-        # We do not provide Google Cloud Vision or OpenAI OCR for PDFs.
-        if is_pdf(token):
-            return {
-                'results': [
-                    {
-                        'method': method,
-                        'text': 'Currently, only Tesseract OCR is available for PDFs.',
-                        'fail': True
-                    }
-                ],
-                'language': None,
-                'fresh': False
-            }
         if method == 'google':
             # Google OCR
             if api_token is None:
@@ -229,15 +226,15 @@ def extract_slide_text(token,
             else:
                 ocr_model = GoogleOCRModel(api_token)
                 ocr_model.establish_connection()
-                res1, res2 = ocr_model.perform_ocr(file_manager.generate_filepath(token))
+                res1, res2 = ocr_model.perform_ocr(file_path)
 
-                if res1 is None or res2 is None:
+                if res1 is None:
                     results = None
                     language = None
                 else:
                     # Since DTD usually performs better, method #1 is our point of reference for langdetect
                     language = detect_text_language(res1)
-                    res_list = [res1, res2]
+                    res_list = [res1]
                     results = [
                         {
                             'method': ocr_colnames[i],
@@ -260,7 +257,7 @@ def extract_slide_text(token,
                     ocr_model = GeminiOCRModel(gemini_token)
             if ocr_model is not None:
                 ocr_model.establish_connection()
-                res = ocr_model.perform_ocr(file_manager.generate_filepath(token), model_type=model_type)
+                res = ocr_model.perform_ocr(file_path, model_type=model_type)
                 if res is None:
                     results = None
                     language = None
@@ -279,7 +276,69 @@ def extract_slide_text(token,
     return {
         'results': results,
         'language': language,
-        'fresh': results is not None
+    }
+
+
+def extract_slide_text(token,
+                       file_manager,
+                       method='google',
+                       api_token=None,
+                       openai_token=None,
+                       gemini_token=None,
+                       model_type=None):
+    if not is_token(token):
+        return {
+            'results': None,
+            'language': None,
+            'fresh': False
+        }
+    file_path = file_manager.generate_filepath(token)
+    res = perform_ocr(file_path, method, api_token, openai_token, gemini_token, model_type)
+    res['fresh'] = res['results'] is not None
+
+    return res
+
+
+def extract_multi_image_text(page_and_filename_list,
+                             i,
+                             n,
+                             method='google',
+                             api_token=None,
+                             openai_token=None,
+                             gemini_token=None,
+                             model_type=None
+                             ):
+    n_pages = len(page_and_filename_list)
+    start_index = int(i / n * n_pages)
+    end_index = int((i + 1) / n * n_pages)
+    pages_to_handle = page_and_filename_list[start_index: end_index]
+    results = list()
+    for page in pages_to_handle:
+        results.append(perform_ocr(page['filename'], method, api_token, openai_token, gemini_token, model_type))
+    return {
+        'results': [
+            {
+                'page': pages_to_handle[i]['page'],
+                'content': results[i]['results'][0]['text']
+            }
+            for i in range(len(results))
+        ],
+        'language': get_most_common_element([result['language'] for result in results]),
+        'method': get_most_common_element([result['results'][0]['method'] for result in results])
+    }
+
+
+def collect_multi_image_ocr(results):
+    all_results = list(chain.from_iterable(result['results'] for result in results))
+    language = get_most_common_element([result['language'] for result in results])
+    method = get_most_common_element([result['method'] for result in results])
+    return {
+        'results': [{
+            'text': json.dumps(all_results),
+            'method': method
+        }],
+        'language': language,
+        'fresh': all(result['content'] is not None for result in all_results)
     }
 
 
