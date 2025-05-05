@@ -228,13 +228,13 @@ def perform_ocr(file_path,
                 ocr_model.establish_connection()
                 res1, res2 = ocr_model.perform_ocr(file_path)
 
-                if res1 is None or res2 is None:
+                if res1 is None:
                     results = None
                     language = None
                 else:
                     # Since DTD usually performs better, method #1 is our point of reference for langdetect
                     language = detect_text_language(res1)
-                    res_list = [res1, res2]
+                    res_list = [res1]
                     results = [
                         {
                             'method': ocr_colnames[i],
@@ -319,19 +319,24 @@ def extract_multi_image_text(page_and_filename_list,
         'results': [
             {
                 'page': pages_to_handle[i]['page'],
-                'content': results[i]['results']
+                'content': results[i]['results'][0]['text']
             }
             for i in range(len(results))
         ],
-        'language': get_most_common_element([result['language'] for result in results])
+        'language': get_most_common_element([result['language'] for result in results]),
+        'method': get_most_common_element([result['results'][0]['method'] for result in results])
     }
 
 
 def collect_multi_image_ocr(results):
     all_results = list(chain.from_iterable(result['results'] for result in results))
     language = get_most_common_element([result['language'] for result in results])
+    method = get_most_common_element([result['method'] for result in results])
     return {
-        'results': json.dumps(all_results),
+        'results': [{
+            'text': json.dumps(all_results),
+            'method': method
+        }],
         'language': language,
         'fresh': all(result['content'] is not None for result in all_results)
     }
