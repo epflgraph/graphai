@@ -222,7 +222,9 @@ def is_pdf(s):
     return s.endswith('.pdf')
 
 
-def get_most_common_element(l):
+def get_most_common_element(l, remove_nulls=True):
+    if remove_nulls:
+        l = [x for x in l if x is not None]
     if len(l) == 0:
         return None
     return Counter(l).most_common(1)[0][0]
