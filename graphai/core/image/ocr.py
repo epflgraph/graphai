@@ -285,8 +285,10 @@ def get_ocr_colnames(method):
         return ['ocr_tesseract_results']
     elif method == 'google':
         return ['ocr_google_1_results', 'ocr_google_2_results']
-    else:
+    elif method == 'openai':
         return ['ocr_openai_results']
+    else:
+        return ['ocr_gemini_results']
 
 
 def perform_tesseract_ocr_on_pdf(pdf_path, language=None, in_pages=True):
