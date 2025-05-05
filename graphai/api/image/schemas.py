@@ -166,7 +166,7 @@ class ExtractTextRequest(BaseModel):
         description="The token that identifies the requested file"
     )
 
-    method: Literal['google', 'tesseract', 'openai'] = Field(
+    method: Literal['google', 'tesseract', 'openai', 'gemini'] = Field(
         title="Method",
         description="OCR method. Available methods are 'google' (default), 'openai', 'gemini',"
                     "and 'tesseract' (not recommended)",
