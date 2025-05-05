@@ -329,7 +329,7 @@ def extract_multi_image_text(page_and_filename_list,
 
 def collect_multi_image_ocr(results):
     all_results = list(chain.from_iterable(result['results'] for result in results))
-    language = get_most_common_element(result['language'] for result in results)
+    language = get_most_common_element([result['language'] for result in results])
     return {
         'results': json.dumps(all_results),
         'language': language,
