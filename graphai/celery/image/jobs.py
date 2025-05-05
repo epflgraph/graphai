@@ -108,7 +108,13 @@ def ocr_job(token, force=False, no_cache=False, method='google', api_token=None,
         task_list = [
             convert_pdf_to_pages_task.s(token),
             group(
-                extract_multi_image_text_task.s(i, n_parallel, method, api_token, openai_token, gemini_token, model_type)
+                extract_multi_image_text_task.s(i,
+                                                n_parallel,
+                                                method,
+                                                api_token,
+                                                openai_token,
+                                                gemini_token,
+                                                model_type)
                 for i in range(n_parallel)
             ),
             collect_multi_image_ocr_task.s()

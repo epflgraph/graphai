@@ -104,7 +104,7 @@ def extract_multi_image_text_task(self,
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='video_2.extract_multi_image_text', ignore_result=False)
+             name='video_2.extract_multi_image_text_callback', ignore_result=False)
 def collect_multi_image_ocr_task(self, results):
     return collect_multi_image_ocr(results)
 
