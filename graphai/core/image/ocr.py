@@ -23,7 +23,6 @@ import base64
 DEFAULT_OCR_PROMPT = """
     You are to extract the text contents of the following image and provide the result as a valid JSON.
     First, determine whether the image contains math.
-    
     * IF THE IMAGE CONTAINS MATH:
     Formulae (if any) are to be extracted as valid LaTeX. Figures are to be extracted as valid TikZ within LaTeX.
     including math inside \\begin{tikzpicture} and \\end{tikzpicture} commands.
@@ -33,7 +32,6 @@ DEFAULT_OCR_PROMPT = """
     2. "keywords": A list of at least 1 and at most 10 keywords that describe the contents of the image.
     Ensure that the "text" field is valid LaTeX and that it would compile as-is.
     It needs to include all the imports and LaTeX markdown. For TikZ figures, define coordinates.
-    
     * IF THE IMAGE DOES NOT CONTAIN ANY MATH:
     Output your response as a valid JSON (parsable directly with Python's JSON module) with two fields:
     1. "text": Plain text containing the extracted contents of the image. The text should NOT be in LaTeX.
