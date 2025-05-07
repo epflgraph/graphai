@@ -1,9 +1,8 @@
-from elasticsearch_interface.es import ESLex
-try:
-    from elasticsearch_interface.es import ESServiceDesk
-except ImportError:
-    print('Outdated elasticsearch-interface version, reverting to default ES retriever class')
-    ESServiceDesk = ESLex
+from elasticsearch_interface.es import (
+    ESLex,
+    ESServiceDesk,
+    ESGeneralRAG
+)
 
 RETRIEVAL_PARAMS = dict()
 RETRIEVAL_PARAMS["lex"] = {
@@ -29,6 +28,7 @@ RETRIEVAL_PARAMS["sac"] = {
 
 RETRIEVAL_PARAMS["default"] = {
     "default_index": "ramtin_%s_index",
-    "retrieval_class": ESLex,
-    "model": "all-MiniLM-L12-v2"
+    "retrieval_class": ESGeneralRAG,
+    "model": "all-MiniLM-L12-v2",
+    "filters": None
 }
