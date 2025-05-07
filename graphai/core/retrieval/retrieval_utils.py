@@ -36,7 +36,8 @@ def search_es_index(retriever_type,
             config['elasticsearch'],
             index=index_name
         )
-        kwargs = {k: v for k, v in kwargs.items() if k in allowed_filters}
+        if allowed_filters is not None:
+            kwargs = {k: v for k, v in kwargs.items() if k in allowed_filters}
         results = retriever.search(text, embedding,
                                    limit=limit, return_embeddings=return_embeddings,
                                    return_scores=return_scores,
@@ -85,7 +86,7 @@ def retrieve_from_es(embedding_results, text, index_to_search_in, filters=None, 
             index_name=config['elasticsearch'].get(
                 f'{index_to_search_in}_index', RETRIEVAL_PARAMS['default']['default_index'] % index_to_search_in
             ),
-            allowed_filters=list(),
+            allowed_filters=None,
             text=text,
             embedding=embedding_results['result'] if embedding_results['successful'] else None,
             limit=limit,
