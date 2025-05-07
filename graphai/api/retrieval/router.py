@@ -74,6 +74,13 @@ async def retrieve_endpoint_info():
                 "filters": {
                     "lang": ["en", "fr"]
                 }
+            },
+            {
+                "index": "*ANY OTHER*",
+                "filters": {
+                    "lang": [],
+                    "category": []
+                }
             }
         ]
     }
