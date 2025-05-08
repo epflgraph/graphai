@@ -80,7 +80,6 @@ def retrieve_from_es(embedding_results, text, index_to_search_in, filters=None, 
                 'result': [{'error': f'Index name {index_to_search_in} contains invalid characters.'}],
                 'successful': False
             }
-        filters = dict()
         return search_es_index(
             retriever_type=RETRIEVAL_PARAMS['default']['retrieval_class'],
             index_name=config['elasticsearch'].get(
