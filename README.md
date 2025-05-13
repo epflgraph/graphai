@@ -195,3 +195,7 @@ To add an endpoint to a new router:
 Documentation of the GraphAI python package is available [here](https://epflgraph.github.io/graphai/graphai).
 
 Documentation of the GraphAI API endpoints is available on the ``/docs`` endpoint of the API ([prod](http://graphai.epfl.ch/docs)).
+
+## License
+
+This project is licensed under the [Apache License 2.0](./LICENSE).
