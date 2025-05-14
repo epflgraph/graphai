@@ -159,38 +159,6 @@ The app will be listening on `0.0.0.0:28800` by default. You can change both the
 ./deploy.sh -h <host> -p <port>
 ```
 
-## Development
-New endpoints can be added either to an existing router or to a new one.
-
-To add an endpoint to an existing router:
-1. Create an async function in the corresponding router file (e.g. [graphai/api/video/router.py](graphai/api/video/router.py)), decorated with FastAPI's decorator specifying the HTTP method and endpoint name.
-2. Create also input and output schemas as classes in the corresponding schema file (e.g. [graphai/api/video/schemas.py](graphai/api/video/schemas.py)). These classes should inherit from [pydantic](https://docs.pydantic.dev/)'s ``BaseModel``, and be named by convention like ``NewEndpointRequest`` and either ``NewEndpointResponse`` or ``NewEndpointResponseElem`` with ``NewEndpointResponse = List[NewEndpointResponseElem]``.
-3. Specify these classes as input and output schemas in the function definition in the router.
-4. Populate the function with the needed logic.
-
-To add an endpoint to a new router:
-1. Create an empty subpackage in the `api` subpackage. (e.g. `graphai/api/new`). Be sure to create an init file.
-2. Create a schemas file: `graphai/api/new/schemas.py`, and add the Pydantic schemas there.
-3. Create a router file: `graphai/api/new/router.py`, instantiating a fastapi ``APIRouter`` as follows
-    ```
-    router = APIRouter(
-        prefix='/new',
-        tags=['new'],
-        responses={404: {'description': 'Not found'}}
-    )
-    ```
-4. Register the router in the fastapi application by adding to the [graphai/api/main/main.py](graphai/api/main/main.py) file the lines
-    ```
-    import graphai.api.new.router as new_router
-
-    [...]
-
-    app.include_router(new_router.router)
-    ```
-5. At this point, the new router is already created. Create and endpoint on the new router by following the instructions above. Endpoints on this router are available under the ``/new`` prefix.
-
-> ℹ️ New functionalities should be developed in the [graphai/core](graphai/core) submodule, to make them modular and reusable. API endpoints should be limited to the management of input and output and the orchestration of the different Celery tasks, and should generally rely on functions from that submodule for the actual computation of results.
-
 ## Documentation
 Documentation of the GraphAI python package is available [here](https://epflgraph.github.io/graphai/graphai).
 
