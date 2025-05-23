@@ -47,9 +47,9 @@ class UploadImageRequest(BaseModel):
         description="The extension of the file you are uploading"
     )
 
-    origin: Literal['gdrive'] = Field(
+    origin: Literal['gdrive', 'localdisk'] = Field(
         title="File origin",
-        description="Original location from which the file was retrieved. Currently only 'gdrive' is allowed."
+        description="Original location from which the file was retrieved. 'gdrive' and 'localdisk' are the options."
     )
 
     origin_info: UploadedFileOriginInfo = Field(
