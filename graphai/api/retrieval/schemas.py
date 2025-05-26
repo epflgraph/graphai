@@ -82,6 +82,11 @@ class ChunkRequest(BaseModel):
         default=100
     )
 
+    one_chunk_per_page: bool = Field(
+        title="One chunk per page (for PDFs)",
+        default=False
+    )
+
 
 class ChunkResponse(BaseModel):
     split: List[str] = Field(
