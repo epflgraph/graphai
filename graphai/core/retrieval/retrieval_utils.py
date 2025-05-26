@@ -94,17 +94,23 @@ def retrieve_from_es(embedding_results, text, index_to_search_in, filters=None, 
         )
 
 
-def chunk_text(text, chunk_size=400, chunk_overlap=100):
+def chunk_text(text, chunk_size=400, chunk_overlap=100, one_chunk_per_page=False):
     # text can be a string or an int to str dict
     if isinstance(text, str):
+        keys = None
         full_content = text
     else:
+        text = {int(k): text[k] for k in text}
         keys = sorted(list(text.keys()))
         full_content = ' '.join(text[k] for k in keys)
-    text_splitter = RecursiveCharacterTextSplitter.from_tiktoken_encoder(model_name="gpt-4",
-                                                                         chunk_size=chunk_size,
-                                                                         chunk_overlap=chunk_overlap)
-    split_content = text_splitter.split_text(full_content)
+    if one_chunk_per_page and keys is not None:
+        # If 1 chunk/page is enabled but the original text is one block with no pages, we can't do 1 chunk/page
+        split_content = [text[k] for k in keys]
+    else:
+        text_splitter = RecursiveCharacterTextSplitter.from_tiktoken_encoder(model_name="gpt-4",
+                                                                             chunk_size=chunk_size,
+                                                                             chunk_overlap=chunk_overlap)
+        split_content = text_splitter.split_text(full_content)
     return {
         'split': split_content,
         'full': full_content
