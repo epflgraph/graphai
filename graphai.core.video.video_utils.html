@@ -409,7 +409,7 @@
 
 <dl class="py function">
 <dt class="sig sig-object py" id="graphai.core.video.video_utils.compute_video_ocr_transitions">
-<span class="sig-prename descclassname"><span class="pre">graphai.core.video.video_utils.</span></span><span class="sig-name descname"><span class="pre">compute_video_ocr_transitions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_folder_with_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frame_sample_indices</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ocr_dist_threshold</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hash_dist_threshold</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nlp_models</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">language</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keep_first</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.video.video_utils.compute_video_ocr_transitions" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">graphai.core.video.video_utils.</span></span><span class="sig-name descname"><span class="pre">compute_video_ocr_transitions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_folder_with_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frame_sample_indices</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ocr_dist_threshold</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hash_dist_threshold</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nlp_models</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">language</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keep_first</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keep_last</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.video.video_utils.compute_video_ocr_transitions" title="Link to this definition"></a></dt>
 <dd><p>Computes all the slide transitions for slides extracted from a video file
 :param input_folder_with_path: Path of the slide folder
 :param frame_sample_indices: Indices of sampled frames
@@ -417,7 +417,8 @@
 :param hash_dist_threshold: Threshold for perceptual hash similarity (above which they are considered to be the same)
 :param nlp_models: NLP models for parsing the OCR results
 :param language: Language of the slides
-:param keep_first: Whether to return the first frame index as a slide, True by default</p>
+:param keep_first: Whether to return the first frame index as a slide. True by default
+:param keep_last: Whether to return the final frame index as a slide. True by default.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>List of transitory slides</p>
