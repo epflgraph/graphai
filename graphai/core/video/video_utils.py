@@ -593,7 +593,7 @@ def frame_ocr_transition(input_folder_with_path, k_l, k_r, ocr_dist_threshold, h
                                                                ocr_dist_threshold, hash_similarity_threshold,
                                                                nlp_models, language)
     if k_m == k_l or k_m == k_r:
-        return [k_r, d]
+        return [k_l, d]
     else:
         if threshold_check:
             [k_sep_l, d_l] = frame_ocr_transition(input_folder_with_path, k_l, k_m, ocr_dist_threshold,
@@ -609,7 +609,7 @@ def frame_ocr_transition(input_folder_with_path, k_l, k_r, ocr_dist_threshold, h
             elif k_sep_l is None and k_sep_r is not None:
                 return [k_sep_r, d_r]
             else:
-                if d_r >= d_l:
+                if d_r > d_l:
                     return [k_sep_r, d_r]
                 else:
                     return [k_sep_l, d_l]
