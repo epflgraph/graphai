@@ -544,7 +544,8 @@ def compute_slide_transitions_parallel(results, i, n, language, file_manager, nl
         results['hash_threshold'],
         nlp_model,
         language=language,
-        keep_first=True
+        keep_first=True,
+        keep_last=True
     )
     return {
         'result': results['result'],
