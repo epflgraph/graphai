@@ -618,7 +618,7 @@ def frame_ocr_transition(input_folder_with_path, k_l, k_r, ocr_dist_threshold, h
 
 
 def compute_video_ocr_transitions(input_folder_with_path, frame_sample_indices, ocr_dist_threshold, hash_dist_threshold,
-                                  nlp_models, language=None, keep_first=True):
+                                  nlp_models, language=None, keep_first=True, keep_last=True):
     """
     Computes all the slide transitions for slides extracted from a video file
     Args:
@@ -628,7 +628,8 @@ def compute_video_ocr_transitions(input_folder_with_path, frame_sample_indices, 
         hash_dist_threshold: Threshold for perceptual hash similarity (above which they are considered to be the same)
         nlp_models: NLP models for parsing the OCR results
         language: Language of the slides
-        keep_first: Whether to return the first frame index as a slide, True by default
+        keep_first: Whether to return the first frame index as a slide. True by default
+        keep_last: Whether to return the final frame index as a slide. True by default.
 
     Returns:
         List of transitory slides
@@ -653,6 +654,8 @@ def compute_video_ocr_transitions(input_folder_with_path, frame_sample_indices, 
         )
         if t is not None and t < frame_sample_indices[-1]:
             transition_list.append(t)
+    if keep_last:
+        transition_list.append(frame_sample_indices[-1])
     # Making sure the first and second elements are not the same
     if len(transition_list) >= 2:
         t_check, d, s_hash = check_ocr_and_hash_thresholds(input_folder_with_path,
@@ -661,4 +664,12 @@ def compute_video_ocr_transitions(input_folder_with_path, frame_sample_indices, 
                                                            language)
         if not t_check:
             transition_list = transition_list[1:]
+    # Now making sure the last two elements aren't the same
+    if len(transition_list) >= 2:
+        t_check, d, s_hash = check_ocr_and_hash_thresholds(input_folder_with_path,
+                                                           transition_list[-2], transition_list[-1],
+                                                           ocr_dist_threshold, hash_dist_threshold, nlp_models,
+                                                           language)
+        if not t_check:
+            transition_list = transition_list[:-1]
     return transition_list
