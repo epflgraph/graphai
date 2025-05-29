@@ -546,17 +546,19 @@ def compute_ocr_noise_level(input_folder_with_path, frame_sample_indices, nlp_mo
     return distance_list
 
 
-def compute_ocr_threshold(distance_list, default_threshold=0.05):
+def compute_ocr_threshold(distance_list, multiplier=5, default_threshold=0.05):
     """
-    Computes the OCR noise threshold using a list of subsequent frame distances
+    Computes the OCR noise threshold using a list of subsequent frame distances.
+    Threshold = multiplier * median if a number, else default_threshold
     Args:
         distance_list: List of OCR distances
+        multiplier: Multiplier for median of distance values.
         default_threshold: Default value to use if the list is empty
 
     Returns:
         The noise threshold
     """
-    threshold = float(5 * np.median(distance_list))
+    threshold = float(multiplier * np.median(distance_list))
     if math.isnan(threshold):
         return default_threshold
     return threshold

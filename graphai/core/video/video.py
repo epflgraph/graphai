@@ -504,7 +504,7 @@ def compute_noise_level_parallel(results, i, n, language, file_manager, nlp_mode
     }
 
 
-def compute_noise_threshold_callback(results, hash_thresh):
+def compute_noise_threshold_callback(results, hash_thresh=0.8, multiplier=5, default_threshold=0.05):
     if not results[0]['fresh']:
         return {
             'result': None,
@@ -514,7 +514,7 @@ def compute_noise_threshold_callback(results, hash_thresh):
         }
     list_of_noise_value_lists = [x['noise_level'] for x in results]
     all_noise_values = list(chain.from_iterable(list_of_noise_value_lists))
-    threshold = compute_ocr_threshold(all_noise_values)
+    threshold = compute_ocr_threshold(all_noise_values, multiplier=multiplier, default_threshold=default_threshold)
     return {
         'result': results[0]['result'],
         'sample_indices': results[0]['sample_indices'],

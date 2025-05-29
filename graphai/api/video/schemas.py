@@ -203,6 +203,29 @@ class ExtractAudioResponse(TaskStatusResponse):
     )
 
 
+class SlideDetectionParams(BaseModel):
+    hash_thresh: float = Field(
+        title="Hash threshold",
+        description="The maximum hash-based similarity two images can have without being considered identical. "
+                    "Value between 0 and 1. Higher values are more permissive.",
+        default=0.95
+    )
+
+    multiplier: float = Field(
+        title="OCR noise multiplier",
+        description="The multiplier used in computing the OCR noise threshold. Differences below the threshold are "
+                    "treated as nonexistent. Lower values are more permissive.",
+        default=5.0
+    )
+
+    default_threshold: float = Field(
+        title="OCR default noise threshold",
+        description="The default value used for the OCR noise threshold when its value cannot be computed. "
+                    "Differences below the threshold are treated as nonexistent. Lower values are more permissive.",
+        default=0.05
+    )
+
+
 class DetectSlidesRequest(BaseModel):
     token: str = Field(
         title="Token",
@@ -229,6 +252,11 @@ class DetectSlidesRequest(BaseModel):
         title="Language",
         description="Language of the video",
         default="en"
+    )
+
+    parameters: SlideDetectionParams = Field(
+        title="Parameters (advanced users only)",
+        default=SlideDetectionParams(hash_thresh=0.95, multiplier=5, default_threshold=0.05)
     )
 
 
