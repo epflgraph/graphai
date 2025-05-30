@@ -235,7 +235,7 @@ def extract_audio_job(token, force=False, recalculate_cached=False):
     return task.id
 
 
-def detect_slides_job(token, language, force=False, recalculate_cached=False):
+def detect_slides_job(token, language, force=False, recalculate_cached=False, **kwargs):
     ############################
     # Detect slides cache lookup
     ############################
@@ -256,11 +256,16 @@ def detect_slides_job(token, language, force=False, recalculate_cached=False):
         # Now we add the rest
         n_jobs = 8
         # This is the maximum similarity threshold used for image hashes when finding slide transitions.
-        hash_thresh = 0.95
+        default_hash_thresh = 0.95
+        default_multiplier = 5
+        default_threshold = 0.05
         # The dummy task is there because of a celery peculiarity where a group chord cannot be immediately followed
         # by another group.
         task_list += [group(compute_noise_level_parallel_task.s(i, n_jobs, language) for i in range(n_jobs)),
-                      compute_noise_threshold_callback_task.s(hash_thresh),
+                      compute_noise_threshold_callback_task.s(
+                          kwargs.get('hash_thresh', default_hash_thresh),
+                          kwargs.get('multiplier', default_multiplier),
+                          kwargs.get('default_threshold', default_threshold)),
                       video_dummy_task.s(),
                       group(compute_slide_transitions_parallel_task.s(i, n_jobs, language) for i in range(n_jobs)),
                       compute_slide_transitions_callback_task.s(language),

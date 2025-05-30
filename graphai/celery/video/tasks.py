@@ -265,8 +265,8 @@ def compute_noise_level_parallel_task(self, results, i, n, language=None):
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='video_2.noise_level_callback', ignore_result=False)
-def compute_noise_threshold_callback_task(self, results, hash_thresh=0.8):
-    return compute_noise_threshold_callback(results, hash_thresh)
+def compute_noise_threshold_callback_task(self, results, hash_thresh=0.8, multiplier=5, default_threshold=0.05):
+    return compute_noise_threshold_callback(results, hash_thresh, multiplier, default_threshold)
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
