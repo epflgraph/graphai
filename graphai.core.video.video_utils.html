@@ -373,9 +373,11 @@
 
 <dl class="py function">
 <dt class="sig sig-object py" id="graphai.core.video.video_utils.compute_ocr_threshold">
-<span class="sig-prename descclassname"><span class="pre">graphai.core.video.video_utils.</span></span><span class="sig-name descname"><span class="pre">compute_ocr_threshold</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">distance_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.05</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.video.video_utils.compute_ocr_threshold" title="Link to this definition"></a></dt>
-<dd><p>Computes the OCR noise threshold using a list of subsequent frame distances
+<span class="sig-prename descclassname"><span class="pre">graphai.core.video.video_utils.</span></span><span class="sig-name descname"><span class="pre">compute_ocr_threshold</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">distance_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">multiplier</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.05</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.video.video_utils.compute_ocr_threshold" title="Link to this definition"></a></dt>
+<dd><p>Computes the OCR noise threshold using a list of subsequent frame distances.
+Threshold = multiplier * median if a number, else default_threshold
 :param distance_list: List of OCR distances
+:param multiplier: Multiplier for median of distance values.
 :param default_threshold: Default value to use if the list is empty</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
