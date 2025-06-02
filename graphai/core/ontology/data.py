@@ -299,23 +299,29 @@ class OntologyData:
 
     def load_data(self):
         with self.load_lock:
-            if not self.loaded:
-                self.db_config = config['database']
-                # First loading concepts: ontology concepts, anchor concepts, and ontology-neighborhood concepts
-                self.load_ontology_concept_names()
-                self.load_ontology_categories()
-                self.load_non_ontology_concept_names()
-                # Now loading category-category and category-concept tables
-                self.load_category_category()
-                self.load_category_concept()
-                # Now loading the concept-concept table and the matrix from neighborhood to ontology/anchors
-                self.load_concept_concept_graphscore()
-                self.compute_symmetric_concept_concept_matrix()
-                # Now loading aggregated anchor concept lists for each category
-                self.load_anchor_page_dict()
-                # Finally, we compute aggregated matrices that map each concept to each category
-                self.compute_precalculated_similarity_matrices()
-                self.loaded = True
+            try:
+                if not self.loaded:
+                    self.db_config = config['database']
+                    # First loading concepts: ontology concepts, anchor concepts, and ontology-neighborhood concepts
+                    self.load_ontology_concept_names()
+                    self.load_ontology_categories()
+                    self.load_non_ontology_concept_names()
+                    # Now loading category-category and category-concept tables
+                    self.load_category_category()
+                    self.load_category_concept()
+                    # Now loading the concept-concept table and the matrix from neighborhood to ontology/anchors
+                    self.load_concept_concept_graphscore()
+                    self.compute_symmetric_concept_concept_matrix()
+                    # Now loading aggregated anchor concept lists for each category
+                    self.load_anchor_page_dict()
+                    # Finally, we compute aggregated matrices that map each concept to each category
+                    self.compute_precalculated_similarity_matrices()
+                    self.loaded = True
+                success = True
+            except Exception as e:
+                print(e)
+                success = False
+        return success
 
     def load_ontology_concept_names(self):
         db_manager = DB(self.db_config)
@@ -695,7 +701,9 @@ class OntologyData:
         Returns:
             Similarity score
         """
-        self.load_data()
+        load_success = self.load_data()
+        if not load_success:
+            return None
         concepts = self.symmetric_concept_concept_matrix['concept_id_to_index']
         if concept_1_id not in concepts or concept_2_id not in concepts:
             return None
@@ -714,7 +722,9 @@ class OntologyData:
         Returns:
             Similarity score
         """
-        self.load_data()
+        load_success = self.load_data()
+        if not load_success:
+            return None
         concepts = self.symmetric_concept_concept_matrix['concept_id_to_index']
         clusters = self.symmetric_concept_concept_matrix['cluster_id_to_index']
         if concept_id not in concepts or cluster_id not in clusters:
@@ -736,7 +746,9 @@ class OntologyData:
         Returns:
             Similarity score
         """
-        self.load_data()
+        load_success = self.load_data()
+        if not load_success:
+            return None
         clusters = self.symmetric_concept_concept_matrix['cluster_id_to_index']
         if cluster_1_id not in clusters or cluster_2_id not in clusters:
             return None
@@ -761,7 +773,9 @@ class OntologyData:
         Returns:
             Similarity score
         """
-        self.load_data()
+        load_success = self.load_data()
+        if not load_success:
+            return None
         d4_cats = self.symmetric_concept_concept_matrix['d4_cat_id_to_index']
         concepts = self.symmetric_concept_concept_matrix['concept_id_to_index']
         if category_id not in d4_cats or concept_id not in concepts:
@@ -786,7 +800,9 @@ class OntologyData:
         Returns:
             Similarity score
         """
-        self.load_data()
+        load_success = self.load_data()
+        if not load_success:
+            return None
         clusters = self.symmetric_concept_concept_matrix['cluster_id_to_index']
         d4_cats = self.symmetric_concept_concept_matrix['d4_cat_id_to_index']
         if cluster_id not in clusters or category_id not in d4_cats:
@@ -817,7 +833,9 @@ class OntologyData:
         Returns:
             Similarity score
         """
-        self.load_data()
+        load_success = self.load_data()
+        if not load_success:
+            return None
         d4_cats = self.symmetric_concept_concept_matrix['d4_cat_id_to_index']
         if category_1_id not in d4_cats or category_2_id not in d4_cats:
             return None
@@ -845,7 +863,9 @@ class OntologyData:
         Returns:
             Top concepts and their scores
         """
-        self.load_data()
+        load_success = self.load_data()
+        if not load_success:
+            return None
         concepts = self.symmetric_concept_concept_matrix['concept_id_to_index']
         if concept_id not in concepts:
             return None, None
@@ -865,7 +885,9 @@ class OntologyData:
             return best_concepts, best_scores
 
     def get_concept_closest_concept_embedding(self, concept_id, top_n=1):
-        self.load_data()
+        load_success = self.load_data()
+        if not load_success:
+            return None
         db_manager = DB(config['database'])
         query = """
         SELECT to_id, score FROM graph_ontology.Edges_N_Concept_N_Concept_T_Embeddings
@@ -990,7 +1012,9 @@ class OntologyData:
             Top categories, their scores, parent depth-3 category if use_depth_3==True, and top clusters of
             each top category if return_clusters is not None.
         """
-        self.load_data()
+        load_success = self.load_data()
+        if not load_success:
+            return None
         d4_cat_indices = self.symmetric_concept_concept_matrix['d4_cat_index_to_id']
         concepts = self.symmetric_concept_concept_matrix['concept_id_to_index']
         if concept_id not in concepts:
@@ -1014,7 +1038,9 @@ class OntologyData:
 
     def get_concept_category_closest_embedding(self, concept_id, avg='log', coeffs=(1, 10),
                                                top_n=5, return_clusters=None):
-        self.load_data()
+        load_success = self.load_data()
+        if not load_success:
+            return None
         # If the embedding-based concept-concept similarity table does not exist, this method cannot run
         if not embeddings_table_exists():
             return None, None, None, None
@@ -1093,7 +1119,9 @@ class OntologyData:
         Returns:
             Top categories, their scores, and parent depth-3 category if use_depth_3==True.
         """
-        self.load_data()
+        load_success = self.load_data()
+        if not load_success:
+            return None
         d4_cat_indices = self.symmetric_concept_concept_matrix['d4_cat_index_to_id']
         clusters = self.symmetric_concept_concept_matrix['cluster_id_to_index']
         if cluster_id not in clusters:
@@ -1124,7 +1152,9 @@ class OntologyData:
         Returns:
             Top categories, their scores, and parent depth-3 category if use_depth_3==True.
         """
-        self.load_data()
+        load_success = self.load_data()
+        if not load_success:
+            return None
         d4_cat_indices = self.symmetric_concept_concept_matrix['d4_cat_index_to_id']
         concepts = self.symmetric_concept_concept_matrix['concept_id_to_index']
         if any(concept_id not in concepts for concept_id in concept_ids):
@@ -1154,7 +1184,9 @@ class OntologyData:
         Returns:
             Top categories, their scores, and parent depth-3 category if use_depth_3==True.
         """
-        self.load_data()
+        load_success = self.load_data()
+        if not load_success:
+            return None
         d4_cat_id_to_index = self.symmetric_concept_concept_matrix['d4_cat_id_to_index']
         anchor_lengths = self.symmetric_concept_concept_matrix['d4_cat_anchors_lengths']
         concept_lengths = self.symmetric_concept_concept_matrix['d4_cat_concepts_lengths']
@@ -1197,7 +1229,9 @@ class OntologyData:
         Returns:
             Top categories, their scores, and parent depth-3 category if use_depth_3==True.
         """
-        self.load_data()
+        load_success = self.load_data()
+        if not load_success:
+            return None
         d4_cat_id_to_index = self.symmetric_concept_concept_matrix['d4_cat_id_to_index']
         anchor_lengths = self.symmetric_concept_concept_matrix['d4_cat_anchors_lengths']
         concept_lengths = self.symmetric_concept_concept_matrix['d4_cat_concepts_lengths']
@@ -1242,7 +1276,9 @@ class OntologyData:
         Returns:
             Top categories, their scores, and parent depth-3 category if use_depth_3==True.
         """
-        self.load_data()
+        load_success = self.load_data()
+        if not load_success:
+            return None
         d4_cat_indices = self.symmetric_concept_concept_matrix['d4_cat_index_to_id']
         if category_id not in d4_cat_indices:
             return None, None, None
@@ -1259,41 +1295,55 @@ class OntologyData:
         return best_cats, best_scores, selected_d3_category
 
     def get_ontology_concept_names_table(self, concepts_to_keep=None):
-        self.load_data()
+        load_success = self.load_data()
+        if not load_success:
+            return None
         results = self.ontology_concept_names
         if concepts_to_keep is not None:
             results = results.loc[results["id"].apply(lambda x: x in concepts_to_keep)]
         return results
 
     def get_ontology_category_names(self):
-        self.load_data()
+        load_success = self.load_data()
+        if not load_success:
+            return None
         return self.ontology_categories
 
     def get_ontology_category_info(self, cat_id):
-        self.load_data()
+        load_success = self.load_data()
+        if not load_success:
+            return None
         results = self.ontology_categories.loc[self.ontology_categories.category_id == cat_id].to_dict(orient='records')
         if len(results) > 0:
             return results[0]
         return None
 
     def get_non_ontology_concept_names(self):
-        self.load_data()
+        load_success = self.load_data()
+        if not load_success:
+            return None
         return self.non_ontology_concept_names
 
     def get_concept_concept_graphscore_table(self, concepts_to_keep=None):
-        self.load_data()
+        load_success = self.load_data()
+        if not load_success:
+            return None
         results = self.concept_concept_graphscore
         if concepts_to_keep is not None:
             results = results.loc[results.to_id.apply(lambda x: x in concepts_to_keep)]
         return results
 
     def get_category_to_category(self):
-        self.load_data()
+        load_success = self.load_data()
+        if not load_success:
+            return None
         return (self.category_category.
                 rename(columns={'from_id': 'child_id', 'to_id': 'parent_id'}).to_dict(orient='records'))
 
     def get_category_parent(self, child_id):
-        self.load_data()
+        load_success = self.load_data()
+        if not load_success:
+            return None
         results = self.category_category.loc[self.category_category.from_id == child_id, 'to_id'].values.tolist()
         if len(results) > 0:
             return results[0]
@@ -1312,54 +1362,72 @@ class OntologyData:
         return result_list
 
     def get_category_children(self, parent_id):
-        self.load_data()
+        load_success = self.load_data()
+        if not load_success:
+            return None
         results = self.category_category.loc[self.category_category.to_id == parent_id, 'from_id'].values.tolist()
         if len(results) > 0:
             return results
         return None
 
     def get_cluster_parent(self, cluster_id):
-        self.load_data()
+        load_success = self.load_data()
+        if not load_success:
+            return None
         results = self.category_cluster.loc[self.category_cluster.to_id == cluster_id, 'from_id'].values.tolist()
         if len(results) > 0:
             return results[0]
         return None
 
     def get_cluster_children(self, cluster_id):
-        self.load_data()
+        load_success = self.load_data()
+        if not load_success:
+            return None
         results = self.cluster_concept.loc[self.cluster_concept.from_id == cluster_id, 'to_id'].values.tolist()
         if len(results) > 0:
             return results
         return None
 
     def get_concept_parent_category(self, concept_id):
-        self.load_data()
+        load_success = self.load_data()
+        if not load_success:
+            return None
         results = self.category_concept.loc[self.category_concept.to_id == concept_id, 'from_id'].values.tolist()
         if len(results) > 0:
             return results[0]
         return None
 
     def get_concept_parent_cluster(self, concept_id):
-        self.load_data()
+        load_success = self.load_data()
+        if not load_success:
+            return None
         results = self.cluster_concept.loc[self.cluster_concept.to_id == concept_id, 'from_id'].values.tolist()
         if len(results) > 0:
             return results[0]
         return None
 
     def get_category_cluster_list(self, cat_id):
-        self.load_data()
+        load_success = self.load_data()
+        if not load_success:
+            return None
         return self.category_cluster_dict.get(cat_id, None)
 
     def get_category_concept_list(self, cat_id):
-        self.load_data()
+        load_success = self.load_data()
+        if not load_success:
+            return None
         return self.category_concept_dict.get(cat_id, None)
 
     def get_cluster_concept_list(self, cluster_id):
-        self.load_data()
+        load_success = self.load_data()
+        if not load_success:
+            return None
         return self.cluster_concept_dict.get(cluster_id, None)
 
     def get_category_concept_table(self, concepts_to_keep=None):
-        self.load_data()
+        load_success = self.load_data()
+        if not load_success:
+            return None
         results = self.category_concept
         if concepts_to_keep is not None:
             results = results.loc[results.to_id.apply(lambda x: x in concepts_to_keep)]
@@ -1369,38 +1437,54 @@ class OntologyData:
         return self.category_cluster
 
     def get_category_anchor_pages(self, category_id):
-        self.load_data()
+        load_success = self.load_data()
+        if not load_success:
+            return None
         return self.category_anchors_dict.get(category_id, [])
 
     def get_cluster_concepts(self, cluster_id):
-        self.load_data()
+        load_success = self.load_data()
+        if not load_success:
+            return None
         return self.cluster_concept_dict.get(cluster_id, [])
 
     def get_concept_name(self, concept_id):
-        self.load_data()
+        load_success = self.load_data()
+        if not load_success:
+            return None
         return self.ontology_concept_to_name_dict.get(concept_id, None)
 
     def get_concept_names_list(self, concept_ids):
-        self.load_data()
+        load_success = self.load_data()
+        if not load_success:
+            return None
         return [
             {'id': concept_id, 'name': self.ontology_concept_to_name_dict.get(concept_id, None)}
             for concept_id in concept_ids
         ]
 
     def get_test_concept_names(self):
-        self.load_data()
+        load_success = self.load_data()
+        if not load_success:
+            return None
         return self.test_concept_names
 
     def get_test_category_concept(self):
-        self.load_data()
+        load_success = self.load_data()
+        if not load_success:
+            return None
         return self.test_category_concept
 
     def get_test_cluster_concept(self):
-        self.load_data()
+        load_success = self.load_data()
+        if not load_success:
+            return None
         return self.test_cluster_concept
 
     def get_root_category(self):
-        self.load_data()
+        load_success = self.load_data()
+        if not load_success:
+            return None
         return self.ontology_categories.loc[self.ontology_categories.depth == 0, 'category_id'].values.tolist()[0]
 
     def generate_tree_structure(self, start=None):

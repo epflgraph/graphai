@@ -25,7 +25,9 @@ def ontology_init_task(self):
 
     if strtobool(config['preload'].get('ontology', 'no')):
         print('Loading ontology data...')
-        self.ontology_data_obj.load_data()
+        success = self.ontology_data_obj.load_data()
+        if not success:
+            print('Failed to preload ontology data, make sure the tables exist.')
     else:
         print('Skipping preloading for ontology endpoints.')
 
