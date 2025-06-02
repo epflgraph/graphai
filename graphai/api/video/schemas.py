@@ -225,6 +225,16 @@ class SlideDetectionParams(BaseModel):
         default=0.05
     )
 
+    include_first: bool = Field(
+        title="Force-include first slide",
+        default=True
+    )
+
+    include_last: bool = Field(
+        title="Force-include last slide",
+        default=True
+    )
+
 
 class DetectSlidesRequest(BaseModel):
     token: str = Field(
@@ -256,7 +266,8 @@ class DetectSlidesRequest(BaseModel):
 
     parameters: SlideDetectionParams = Field(
         title="Parameters (advanced users only)",
-        default=SlideDetectionParams(hash_thresh=0.95, multiplier=5, default_threshold=0.05)
+        default=SlideDetectionParams(hash_thresh=0.95, multiplier=5, default_threshold=0.05,
+                                     include_first=True, include_last=True)
     )
 
 

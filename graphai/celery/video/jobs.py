@@ -267,7 +267,13 @@ def detect_slides_job(token, language, force=False, recalculate_cached=False, **
                           kwargs.get('multiplier', default_multiplier),
                           kwargs.get('default_threshold', default_threshold)),
                       video_dummy_task.s(),
-                      group(compute_slide_transitions_parallel_task.s(i, n_jobs, language) for i in range(n_jobs)),
+                      group(compute_slide_transitions_parallel_task.s(
+                          i,
+                          n_jobs,
+                          language,
+                          kwargs.get('include_first', True),
+                          kwargs.get('include_last', True)
+                      ) for i in range(n_jobs)),
                       compute_slide_transitions_callback_task.s(language),
                       detect_slides_callback_task.s(token, force)]
     else:

@@ -145,7 +145,9 @@ async def detect_slides(data: DetectSlidesRequest):
     task_id = detect_slides_job(token, language, force, recalculate,
                                 hash_thresh=parameters.hash_thresh,
                                 multiplier=parameters.multiplier,
-                                default_threshold=parameters.default_threshold)
+                                default_threshold=parameters.default_threshold,
+                                include_first=parameters.include_first,
+                                include_last=parameters.include_last)
     return {'task_id': task_id}
 
 

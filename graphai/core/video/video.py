@@ -524,7 +524,8 @@ def compute_noise_threshold_callback(results, hash_thresh=0.8, multiplier=5, def
     }
 
 
-def compute_slide_transitions_parallel(results, i, n, language, file_manager, nlp_model):
+def compute_slide_transitions_parallel(results, i, n, language, file_manager, nlp_model,
+                                       include_first=True, include_last=True):
     if not results['fresh']:
         return {
             'result': None,
@@ -544,8 +545,8 @@ def compute_slide_transitions_parallel(results, i, n, language, file_manager, nl
         results['hash_threshold'],
         nlp_model,
         language=language,
-        keep_first=True,
-        keep_last=True
+        keep_first=include_first,
+        keep_last=include_last
     )
     return {
         'result': results['result'],
