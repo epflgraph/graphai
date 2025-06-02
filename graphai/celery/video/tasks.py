@@ -272,8 +272,9 @@ def compute_noise_threshold_callback_task(self, results, hash_thresh=0.8, multip
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='video_2.slide_transitions_parallel', ignore_result=False,
              file_manager=file_management_config, nlp_model=local_ocr_nlp_models)
-def compute_slide_transitions_parallel_task(self, results, i, n, language=None):
-    return compute_slide_transitions_parallel(results, i, n, language, self.file_manager, self.nlp_model)
+def compute_slide_transitions_parallel_task(self, results, i, n, language=None, include_first=True, include_last=True):
+    return compute_slide_transitions_parallel(results, i, n, language, self.file_manager, self.nlp_model,
+                                              include_first, include_last)
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
