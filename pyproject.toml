@@ -86,7 +86,8 @@ dependencies = [
     "presidio_anonymizer",
     "spacy",
     "google-genai",
-    "httpx==0.27.2"
+    "httpx==0.27.2",
+    "graphai-client>=1.16.0"
 ]
 
 [tool.setuptools]
