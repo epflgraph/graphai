@@ -512,40 +512,6 @@ class OntologyData:
         self.category_anchors_dict = {category_ids[i]: {'anchors': anchor_lists[i], 'depth': depths_list[i]}
                                       for i in range(len(category_ids))}
 
-    def compute_category_anchors_using_references(self):
-        assert self.category_category is not None and self.ontology_categories is not None
-        print('computing category anchors')
-        anchors = self.ontology_categories.loc[self.ontology_categories.depth == 5, ['category_id', 'depth', 'id']].\
-            copy()
-        anchors['anchor_ids'] = anchors['id'].apply(lambda x: [x])
-        for depth in range(4, -1, -1):
-            current_cat_df = self.ontology_categories.loc[
-                self.ontology_categories.depth == depth, ['category_id', 'depth', 'id']
-            ]
-            current_relationships = pd.merge(current_cat_df, self.category_category, left_on='category_id',
-                                             right_on='to_id', how='left').drop(columns=['to_id'])
-            current_relationships = (pd.merge(current_relationships, anchors, left_on='from_id',
-                                     right_on='category_id', how='left', suffixes=('', '_tgt')).
-                                     drop(columns=['from_id']))
-            current_relationships['anchor_ids'] = current_relationships['anchor_ids'].apply(
-                lambda x: x if isinstance(x, list) else []
-            )
-            new_anchors = (current_relationships[['category_id', 'anchor_ids']].
-                           groupby('category_id').agg("sum").reset_index())
-            base_anchors = current_cat_df.assign(anchor_ids=current_cat_df['id'].apply(lambda x: [x]))
-            all_new_anchors = pd.merge(new_anchors, base_anchors, on='category_id', suffixes=('_children', '_base'))
-            all_new_anchors['anchor_ids'] = all_new_anchors.apply(
-                lambda x: x['anchor_ids_children'] + x['anchor_ids_base'], axis=1
-            )
-            all_new_anchors = all_new_anchors[['category_id', 'depth', 'id', 'anchor_ids']]
-            anchors = pd.concat([anchors, all_new_anchors], axis=0)
-        anchors = anchors.loc[anchors.depth < 5]
-        category_ids = anchors.category_id.values.tolist()
-        anchor_lists = anchors.anchor_ids.values.tolist()
-        depths_list = anchors.depth.values.tolist()
-        return {category_ids[i]: {'anchors': anchor_lists[i], 'depth': depths_list[i]}
-                for i in range(len(category_ids))}
-
     def compute_symmetric_concept_concept_matrix(self):
         """
         Loads the concept-concept matrix and creates its index dictionary
@@ -865,7 +831,7 @@ class OntologyData:
         """
         load_success = self.load_data()
         if not load_success:
-            return None
+            return None, None
         concepts = self.symmetric_concept_concept_matrix['concept_id_to_index']
         if concept_id not in concepts:
             return None, None
@@ -887,7 +853,7 @@ class OntologyData:
     def get_concept_closest_concept_embedding(self, concept_id, top_n=1):
         load_success = self.load_data()
         if not load_success:
-            return None
+            return None, None
         db_manager = DB(config['database'])
         query = """
         SELECT to_id, score FROM graph_ontology.Edges_N_Concept_N_Concept_T_Embeddings
@@ -1014,7 +980,7 @@ class OntologyData:
         """
         load_success = self.load_data()
         if not load_success:
-            return None
+            return None, None, None, None
         d4_cat_indices = self.symmetric_concept_concept_matrix['d4_cat_index_to_id']
         concepts = self.symmetric_concept_concept_matrix['concept_id_to_index']
         if concept_id not in concepts:
@@ -1040,7 +1006,7 @@ class OntologyData:
                                                top_n=5, return_clusters=None):
         load_success = self.load_data()
         if not load_success:
-            return None
+            return None, None, None, None
         # If the embedding-based concept-concept similarity table does not exist, this method cannot run
         if not embeddings_table_exists():
             return None, None, None, None
@@ -1121,7 +1087,7 @@ class OntologyData:
         """
         load_success = self.load_data()
         if not load_success:
-            return None
+            return None, None, None
         d4_cat_indices = self.symmetric_concept_concept_matrix['d4_cat_index_to_id']
         clusters = self.symmetric_concept_concept_matrix['cluster_id_to_index']
         if cluster_id not in clusters:
@@ -1154,7 +1120,7 @@ class OntologyData:
         """
         load_success = self.load_data()
         if not load_success:
-            return None
+            return None, None, None
         d4_cat_indices = self.symmetric_concept_concept_matrix['d4_cat_index_to_id']
         concepts = self.symmetric_concept_concept_matrix['concept_id_to_index']
         if any(concept_id not in concepts for concept_id in concept_ids):
@@ -1186,7 +1152,7 @@ class OntologyData:
         """
         load_success = self.load_data()
         if not load_success:
-            return None
+            return None, None, None
         d4_cat_id_to_index = self.symmetric_concept_concept_matrix['d4_cat_id_to_index']
         anchor_lengths = self.symmetric_concept_concept_matrix['d4_cat_anchors_lengths']
         concept_lengths = self.symmetric_concept_concept_matrix['d4_cat_concepts_lengths']
@@ -1231,7 +1197,7 @@ class OntologyData:
         """
         load_success = self.load_data()
         if not load_success:
-            return None
+            return None, None, None
         d4_cat_id_to_index = self.symmetric_concept_concept_matrix['d4_cat_id_to_index']
         anchor_lengths = self.symmetric_concept_concept_matrix['d4_cat_anchors_lengths']
         concept_lengths = self.symmetric_concept_concept_matrix['d4_cat_concepts_lengths']
@@ -1278,7 +1244,7 @@ class OntologyData:
         """
         load_success = self.load_data()
         if not load_success:
-            return None
+            return None, None, None
         d4_cat_indices = self.symmetric_concept_concept_matrix['d4_cat_index_to_id']
         if category_id not in d4_cat_indices:
             return None, None, None
@@ -1350,6 +1316,9 @@ class OntologyData:
         return None
 
     def get_category_branch(self, category_id):
+        load_success = self.load_data()
+        if not load_success:
+            return None
         if category_id is None or category_id not in self.category_depth_dict:
             return None
         current_depth = self.category_depth_dict[category_id]
@@ -1434,6 +1403,9 @@ class OntologyData:
         return results
 
     def get_category_cluster_table(self):
+        load_success = self.load_data()
+        if not load_success:
+            return None
         return self.category_cluster
 
     def get_category_anchor_pages(self, category_id):
@@ -1487,7 +1459,7 @@ class OntologyData:
             return None
         return self.ontology_categories.loc[self.ontology_categories.depth == 0, 'category_id'].values.tolist()[0]
 
-    def generate_tree_structure(self, start=None):
+    def _generate_tree_structure(self, start=None):
         if start is None:
             start = self.get_root_category()
         children = self.get_category_children(start)
@@ -1496,10 +1468,19 @@ class OntologyData:
         return [{
             'name': start,
             'id': start,
-            'children': list(chain.from_iterable([self.generate_tree_structure(x) for x in children]))
+            'children': list(chain.from_iterable([self._generate_tree_structure(x) for x in children]))
         }]
 
+    def generate_tree_structure(self, start=None):
+        load_success = self.load_data()
+        if not load_success:
+            return None
+        return self._generate_tree_structure(start)
+
     def generate_category_concept_dict(self):
+        load_success = self.load_data()
+        if not load_success:
+            return None
         results = {}
         for category_id in self.category_cluster_dict:
             clusters = self.get_category_cluster_list(category_id)

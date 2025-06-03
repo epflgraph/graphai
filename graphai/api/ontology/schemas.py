@@ -48,7 +48,7 @@ class CategoryInfoResponse(BaseModel):
 
 
 class ConceptDetails(BaseModel):
-    id: str = Field(
+    id: Union[str, None] = Field(
         title="Concept ID"
     )
 
