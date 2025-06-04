@@ -29,7 +29,7 @@ async def cat_info(category_id):
     return jobs.category_info_job(category_id)
 
 
-@router.get('/tree/cluster/{cluster_id}', response_model=schemas.ClusterDetailsResponse)
+@router.get('/tree/cluster/{cluster_id}', response_model=Union[schemas.ClusterDetailsResponse, None])
 async def cluster_info(cluster_id):
     return jobs.cluster_info_job(cluster_id)
 
@@ -76,7 +76,7 @@ async def recompute_clusters_status(task_id):
     return format_api_results(full_results['id'], full_results['name'], full_results['status'], task_results)
 
 
-@router.post('/graph_distance', response_model=schemas.GraphDistanceResponse)
+@router.post('/graph_distance', response_model=Union[schemas.GraphDistanceResponse, None])
 async def compute_graph_distance(data: schemas.GraphDistanceRequest):
     src = data.src
     tgt = data.tgt
@@ -87,7 +87,8 @@ async def compute_graph_distance(data: schemas.GraphDistanceRequest):
     return jobs.graph_distance_job(src, tgt, src_type, tgt_type, avg, coeffs)
 
 
-@router.post('/nearest_neighbor/concept/category', response_model=schemas.GraphConceptNearestCategoryResponse)
+@router.post('/nearest_neighbor/concept/category',
+             response_model=Union[schemas.GraphConceptNearestCategoryResponse, None])
 async def compute_graph_concept_nearest_category(data: schemas.GraphConceptNearestCategoryRequest):
     src = data.src
     avg = data.avg

@@ -11,6 +11,9 @@ def recompute_clusters(ontology_data_obj, n_clusters, min_n):
     concept_concept = ontology_data_obj.get_concept_concept_graphscore_table()
     concept_names = ontology_data_obj.get_ontology_concept_names_table()
     category_concept = ontology_data_obj.get_category_concept_table()
+    if concept_concept is None or concept_names is None or category_concept is None:
+        return {'results': None, 'category_assignments': None,
+                'impurity_count': 0, 'impurity_proportion': 0}
     try:
         graphs_dict, base_graph_dict, row_index_dicts, concept_index_to_name, concept_index_to_id = (
             compute_all_graphs_from_scratch(
@@ -159,6 +162,8 @@ def get_concept_concept_closest(ontology_data_obj, concept_id, top_n, use_embedd
 
 def break_up_cluster(ontology_data_obj, cluster_id, n_clusters):
     concepts_to_use = ontology_data_obj.get_cluster_concepts(cluster_id)
+    if concepts_to_use is None:
+        return {'results': None}
     n_total_concepts = len(concepts_to_use)
     if n_total_concepts == 0:
         return {'results': None}
