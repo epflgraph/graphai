@@ -23,14 +23,14 @@ class ConceptEmbeddings:
         ################################################################
 
         # Fetch concept embeddings
-        table = 'graph.Embedding_Concepts_Ontology_Neighbour'
-        fields = ['id', 'embedding']
+        table = 'graph_ontology.Data_N_Object_T_Embeddings'
+        fields = ['object_id', 'embedding']
         columns = ['concept_id', 'embedding']
         self.embeddings = pd.DataFrame(columns=columns)
 
         batch_size = 1000   # Fetch no more than 1000 concepts at once (otherwise the mysql request will time out because of the maximum query size of 4MB)
         for i in range(0, len(concept_ids), batch_size):
-            conditions = {'id': concept_ids[i: i + batch_size]}
+            conditions = {'object_type': 'Concept', 'object_id': concept_ids[i: i + batch_size]}
             self.embeddings = pd.concat([self.embeddings, pd.DataFrame(db.find(table_name=table, fields=fields, conditions=conditions), columns=columns)])
 
         # Drop concepts with null embeddings
