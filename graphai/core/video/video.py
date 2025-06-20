@@ -138,9 +138,12 @@ def compute_video_fingerprint(results, file_manager, force=False):
                         'fresh': False,
                         'original_results': results
                     }
-                audio_duration = [x for x in streams if x['codec_type'] == 'audio'][0]['duration']
-                if audio_duration is None:
-                    audio_duration = [x for x in streams if x['codec_type'] == 'video'][0]['duration']
+                try:
+                    audio_duration = [x for x in streams if x['codec_type'] == 'audio'][0]['duration']
+                    if audio_duration is None:
+                        audio_duration = [x for x in streams if x['codec_type'] == 'video'][0]['duration']
+                except IndexError:
+                    audio_duration = None
                 if audio_duration is not None:
                     id_and_duration_fp = results['fp_id'] + '___' + '{0:.2f}'.format(audio_duration)
                 else:
