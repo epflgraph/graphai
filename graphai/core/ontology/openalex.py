@@ -24,7 +24,7 @@ def get_openalex_nearest(category_id=None, topic_id=None):
         conditions['topic_id'] = topic_id
 
     # Define table and fields to be fetched
-    table_name = 'data_augmentation.Openalex_Categories_Topics'
+    table_name = 'graph_ontology.Edges_N_Category_N_OAlexTopic_T_Semantic'
     fields = ['category_id', 'category_name', 'topic_id', 'topic_name', 'embedding_score', 'wikipedia_score', 'score']
 
     # Instantiate database connector
