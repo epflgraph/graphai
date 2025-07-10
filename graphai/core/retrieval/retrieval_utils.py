@@ -62,9 +62,10 @@ def retrieve_from_es(embedding_results, text, index_to_search_in,
     if filters is None:
         filters = dict()
     if filter_by_date:
+        right_now = datetime.now().isoformat()
         filters = filters | {
-            'from_date': {'lte': datetime.now().isoformat()},
-            'until_date': {'gte': datetime.now().isoformat()}
+            'from_date': {'lte': right_now},
+            'until_date': {'gte': right_now}
         }
     if index_to_search_in in RETRIEVAL_PARAMS.keys():
         return search_es_index(
