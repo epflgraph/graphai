@@ -9,10 +9,11 @@ from graphai.core.retrieval.retrieval_settings import RETRIEVAL_PARAMS
 from graphai.celery.common.jobs import DEFAULT_TIMEOUT
 
 
-def retrieve_from_es_job(text, index_to_search_in, filters=None, limit=10, return_scores=False):
+def retrieve_from_es_job(text, index_to_search_in,
+                         filters=None, limit=10, return_scores=False, filter_by_date=False):
     task_list = [
         embed_text_task.s(text, RETRIEVAL_PARAMS.get(index_to_search_in, dict()).get('model', None)),
-        retrieve_from_es_task.s(text, index_to_search_in, filters, limit, return_scores)
+        retrieve_from_es_task.s(text, index_to_search_in, filters, limit, return_scores, filter_by_date)
     ]
     task = chain(task_list)
     results = task.apply_async(priority=6).get(timeout=DEFAULT_TIMEOUT)

@@ -15,8 +15,9 @@ anonymizer_model = AnonymizerModels()
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='retrieval_10.retrieve', ignore_result=False)
 def retrieve_from_es_task(self, embedding_results, text, index_to_search_in,
-                          filters=None, limit=10, return_scores=False):
-    return retrieve_from_es(embedding_results, text, index_to_search_in, filters, limit, return_scores)
+                          filters=None, limit=10, return_scores=False, filter_by_date=False):
+    return retrieve_from_es(embedding_results, text, index_to_search_in,
+                            filters, limit, return_scores, filter_by_date)
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
