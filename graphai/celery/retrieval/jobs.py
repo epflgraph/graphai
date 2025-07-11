@@ -20,8 +20,8 @@ def retrieve_from_es_job(text, index_to_search_in,
     return results
 
 
-def chunk_text_job(text, chunk_size, chunk_overlap, one_chunk_per_page=False):
-    task = chunk_text_task.s(text, chunk_size, chunk_overlap, one_chunk_per_page)
+def chunk_text_job(text, chunk_size, chunk_overlap, one_chunk_per_page=False, one_chunk_per_doc=False):
+    task = chunk_text_task.s(text, chunk_size, chunk_overlap, one_chunk_per_page, one_chunk_per_doc)
     results = task.apply_async(priority=10).get(timeout=DEFAULT_TIMEOUT)
     return results
 

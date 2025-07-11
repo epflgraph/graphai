@@ -102,7 +102,8 @@ def retrieve_from_es(embedding_results, text, index_to_search_in,
         )
 
 
-def chunk_text(text, chunk_size=400, chunk_overlap=100, one_chunk_per_page=False):
+def chunk_text(text, chunk_size=400, chunk_overlap=100,
+               one_chunk_per_page=False, one_chunk_per_doc=False):
     # text can be a string or an int to str dict
     if isinstance(text, str):
         keys = None
@@ -111,7 +112,9 @@ def chunk_text(text, chunk_size=400, chunk_overlap=100, one_chunk_per_page=False
         text = {int(k): text[k] for k in text}
         keys = sorted(list(text.keys()))
         full_content = ' '.join(text[k] for k in keys)
-    if one_chunk_per_page and keys is not None:
+    if one_chunk_per_doc:
+        split_content = [full_content]
+    elif one_chunk_per_page and keys is not None:
         # If 1 chunk/page is enabled but the original text is one block with no pages, we can't do 1 chunk/page
         split_content = [text[k] for k in keys]
     else:
