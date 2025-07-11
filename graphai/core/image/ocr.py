@@ -23,9 +23,9 @@ import base64
 def get_ocr_prompt(enable_tikz=True):
     if enable_tikz:
         figure_prompt_section = """
-        Figures are to be extracted as valid TikZ within LaTeX, including math
-        inside \\begin{tikzpicture} and \\end{tikzpicture} commands.
-        For any TikZ figures, define coordinates.
+        Figures are to be extracted as valid TikZ within LaTeX, inside \\begin{tikzpicture} and
+        \\end{tikzpicture} commands. For any TikZ figures, define coordinates.
+        Any math within the TikZ figure should also be extracted.
         """
     else:
         figure_prompt_section = """
@@ -35,7 +35,8 @@ def get_ocr_prompt(enable_tikz=True):
         You are to extract the text contents of the following image and provide the result as a valid JSON.
         First, determine whether the image contains math and code.
         * IF THE IMAGE CONTAINS MATH:
-        Formulae (if any) are to be extracted as valid LaTeX. {figure_prompt_section}
+        Formulae (if any) are to be extracted as valid LaTeX.
+        {figure_prompt_section}
         Output your response as a valid JSON (parsable directly with Python's JSON module) with two fields:
         1. "text": Valid LaTeX code containing the extracted text, formulae, and any figures as valid LaTeX.
         Everything that is math (including Greek letters) must be in math mode (e.g. enclosed by $$).
