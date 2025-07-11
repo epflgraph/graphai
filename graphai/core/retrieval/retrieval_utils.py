@@ -1,3 +1,4 @@
+from datetime import datetime
 from graphai.core.common.config import config
 from graphai.core.retrieval.retrieval_settings import RETRIEVAL_PARAMS
 from langchain_text_splitters import RecursiveCharacterTextSplitter
@@ -56,9 +57,16 @@ def search_es_index(retriever_type,
         }
 
 
-def retrieve_from_es(embedding_results, text, index_to_search_in, filters=None, limit=10, return_scores=False):
+def retrieve_from_es(embedding_results, text, index_to_search_in,
+                     filters=None, limit=10, return_scores=False, filter_by_date=False):
     if filters is None:
         filters = dict()
+    if filter_by_date:
+        right_now = datetime.now().isoformat()
+        filters = filters | {
+            'from_date': {'lte': right_now},
+            'until_date': {'gte': right_now}
+        }
     if index_to_search_in in RETRIEVAL_PARAMS.keys():
         return search_es_index(
             retriever_type=RETRIEVAL_PARAMS[index_to_search_in]['retrieval_class'],

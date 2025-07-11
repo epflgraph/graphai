@@ -43,9 +43,10 @@ async def retrieve_from_es_index(data: RetrievalRequest,
     limit = data.limit
     index_to_search_in = data.index
     return_scores = data.return_scores
+    filter_by_date = data.filter_by_date
     if not has_rag_access_rights(current_user.username, index_to_search_in):
         return INSUFFICIENT_ACCESS_ERROR
-    results = retrieve_from_es_job(text, index_to_search_in, filters, limit, return_scores)
+    results = retrieve_from_es_job(text, index_to_search_in, filters, limit, return_scores, filter_by_date)
     return results
 
 
