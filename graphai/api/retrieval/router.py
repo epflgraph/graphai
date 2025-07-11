@@ -96,7 +96,8 @@ async def chunk_text(data: ChunkRequest):
     chunk_size = data.chunk_size
     chunk_overlap = data.chunk_overlap
     one_chunk_per_page = data.one_chunk_per_page
-    return chunk_text_job(text, chunk_size, chunk_overlap, one_chunk_per_page)
+    one_chunk_per_doc = data.one_chunk_per_doc
+    return chunk_text_job(text, chunk_size, chunk_overlap, one_chunk_per_page, one_chunk_per_doc)
 
 
 @router.post('/anonymize', response_model=AnonymizeResponse,

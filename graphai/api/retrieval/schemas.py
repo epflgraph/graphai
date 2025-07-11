@@ -97,6 +97,11 @@ class ChunkRequest(BaseModel):
         default=False
     )
 
+    one_chunk_per_doc: bool = Field(
+        title="One chunk for the whole document. Overrides one_chunk_per_page if True.",
+        default=False
+    )
+
 
 class ChunkResponse(BaseModel):
     split: List[str] = Field(
