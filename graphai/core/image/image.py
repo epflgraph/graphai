@@ -201,7 +201,8 @@ def perform_ocr(file_path,
                 api_token=None,
                 openai_token=None,
                 gemini_token=None,
-                model_type=None):
+                model_type=None,
+                enable_tikz=True):
     ocr_colnames = get_ocr_colnames(method)
 
     if method == 'tesseract':
@@ -257,7 +258,7 @@ def perform_ocr(file_path,
                     ocr_model = GeminiOCRModel(gemini_token)
             if ocr_model is not None:
                 ocr_model.establish_connection()
-                res = ocr_model.perform_ocr(file_path, model_type=model_type)
+                res = ocr_model.perform_ocr(file_path, model_type=model_type, enable_tikz=enable_tikz)
                 if res is None:
                     results = None
                     language = None
@@ -285,7 +286,8 @@ def extract_slide_text(token,
                        api_token=None,
                        openai_token=None,
                        gemini_token=None,
-                       model_type=None):
+                       model_type=None,
+                       enable_tikz=True):
     if not is_token(token):
         return {
             'results': None,
@@ -293,7 +295,7 @@ def extract_slide_text(token,
             'fresh': False
         }
     file_path = file_manager.generate_filepath(token)
-    res = perform_ocr(file_path, method, api_token, openai_token, gemini_token, model_type)
+    res = perform_ocr(file_path, method, api_token, openai_token, gemini_token, model_type, enable_tikz)
     res['fresh'] = res['results'] is not None
 
     return res
@@ -306,15 +308,19 @@ def extract_multi_image_text(page_and_filename_list,
                              api_token=None,
                              openai_token=None,
                              gemini_token=None,
-                             model_type=None
-                             ):
+                             model_type=None,
+                             enable_tikz=True):
     n_pages = len(page_and_filename_list)
     start_index = int(i / n * n_pages)
     end_index = int((i + 1) / n * n_pages)
     pages_to_handle = page_and_filename_list[start_index: end_index]
     results = list()
     for page in pages_to_handle:
-        results.append(perform_ocr(page['filename'], method, api_token, openai_token, gemini_token, model_type))
+        results.append(
+            perform_ocr(
+                page['filename'], method, api_token, openai_token, gemini_token, model_type, enable_tikz
+            )
+        )
     return {
         'results': [
             {

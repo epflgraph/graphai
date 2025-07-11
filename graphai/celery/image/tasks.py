@@ -65,14 +65,15 @@ def cache_lookup_extract_slide_text_task(self, token, method='tesseract'):
              name='video_2.extract_slide_text', ignore_result=False,
              file_manager=file_management_config)
 def extract_slide_text_task(self, token, method='google', api_token=None, openai_token=None, gemini_token=None,
-                            model_type=None):
+                            model_type=None, enable_tikz=True):
     return extract_slide_text(token,
                               self.file_manager,
                               method,
                               api_token,
                               openai_token,
                               gemini_token,
-                              model_type)
+                              model_type,
+                              enable_tikz)
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
@@ -92,7 +93,8 @@ def extract_multi_image_text_task(self,
                                   api_token=None,
                                   openai_token=None,
                                   gemini_token=None,
-                                  model_type=None):
+                                  model_type=None,
+                                  enable_tikz=True):
     return extract_multi_image_text(page_and_filename_list,
                                     i,
                                     n,
@@ -100,7 +102,8 @@ def extract_multi_image_text_task(self,
                                     api_token,
                                     openai_token,
                                     gemini_token,
-                                    model_type)
+                                    model_type,
+                                    enable_tikz)
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},

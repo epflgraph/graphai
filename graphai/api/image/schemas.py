@@ -206,18 +206,18 @@ class ExtractTextRequest(BaseModel):
         default=None
     )
 
-    pdf_in_pages: bool = Field(
-        title="PDF in pages",
-        description="Whether to return the results of PDF OCR in separate pages (JSON format) or one joined string. "
-                    "Flag only used when the file being OCR'ed is a PDF.",
-        default=True
-    )
-
     model_type: Union[str, None] = Field(
         title="Model type",
         description="For OpenAI and Gemini options, allows the user to specify the model that they want to use. "
                     "Do not specify this option unless you know exactly what you are doing.",
         default=None
+    )
+
+    enable_tikz: bool = Field(
+        title="Enable TikZ",
+        description="For PDF OCR, if True, attempts to extract any figures as valid TikZ. If False, "
+                    "replaces the figures with an alt text describing them instead.",
+        default=False
     )
 
 
