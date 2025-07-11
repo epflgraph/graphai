@@ -130,9 +130,9 @@ async def extract_text(data: ExtractTextRequest):
     api_token = data.google_api_token
     openai_token = data.openai_api_token
     gemini_token = data.gemini_api_token
-    pdf_in_pages = data.pdf_in_pages
     model_type = data.model_type
-    task_id = ocr_job(token, force, no_cache, method, api_token, openai_token, gemini_token, pdf_in_pages, model_type)
+    enable_tikz = data.enable_tikz
+    task_id = ocr_job(token, force, no_cache, method, api_token, openai_token, gemini_token, model_type, enable_tikz)
     return {'task_id': task_id}
 
 

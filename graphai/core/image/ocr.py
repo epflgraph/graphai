@@ -20,23 +20,41 @@ from graphai.core.common.common_utils import file_exists
 import base64
 
 
-DEFAULT_OCR_PROMPT = """
-    You are to extract the text contents of the following image and provide the result as a valid JSON.
-    First, determine whether the image contains math.
-    * IF THE IMAGE CONTAINS MATH:
-    Formulae (if any) are to be extracted as valid LaTeX. Figures are to be extracted as valid TikZ within LaTeX.
-    including math inside \\begin{tikzpicture} and \\end{tikzpicture} commands.
-    Output your response as a valid JSON (parsable directly with Python's JSON module) with two fields:
-    1. "text": Valid LaTeX code containing the extracted text, formulae, and any figures as valid LaTeX.
-    Everything that is math (including Greek letters) must be in math mode (e.g. enclosed by $$).
-    2. "keywords": A list of at least 1 and at most 10 keywords that describe the contents of the image.
-    Ensure that the "text" field is valid LaTeX and that it would compile as-is.
-    It needs to include all the imports and LaTeX markdown. For TikZ figures, define coordinates.
-    * IF THE IMAGE DOES NOT CONTAIN ANY MATH:
-    Output your response as a valid JSON (parsable directly with Python's JSON module) with two fields:
-    1. "text": Plain text containing the extracted contents of the image. The text should NOT be in LaTeX.
-    2. "keywords": A list of at least 1 and at most 10 keywords that describe the contents of the image.
-"""
+def get_ocr_prompt(enable_tikz=True):
+    if enable_tikz:
+        figure_prompt_section = """
+        Figures are to be extracted as valid TikZ within LaTeX, including math
+        inside \\begin{tikzpicture} and \\end{tikzpicture} commands.
+        For any TikZ figures, define coordinates.
+        """
+    else:
+        figure_prompt_section = """
+        Figures should be replaced with an alt text explaining the contents of the figure.
+        """
+    ocr_prompt = f"""
+        You are to extract the text contents of the following image and provide the result as a valid JSON.
+        First, determine whether the image contains math and code.
+        * IF THE IMAGE CONTAINS MATH:
+        Formulae (if any) are to be extracted as valid LaTeX. {figure_prompt_section}
+        Output your response as a valid JSON (parsable directly with Python's JSON module) with two fields:
+        1. "text": Valid LaTeX code containing the extracted text, formulae, and any figures as valid LaTeX.
+        Everything that is math (including Greek letters) must be in math mode (e.g. enclosed by $$).
+        2. "keywords": A list of at least 1 and at most 10 keywords that describe the contents of the image.
+        Ensure that the "text" field is valid LaTeX and that it would compile as-is.
+        It needs to include all the imports and LaTeX markdown.
+        * IF THE IMAGE DOES NOT CONTAIN ANY MATH:
+        Output your response as a valid JSON (parsable directly with Python's JSON module) with two fields:
+        1. "text": Plain text containing the extracted contents of the image. The text should NOT be in LaTeX.
+        2. "keywords": A list of at least 1 and at most 10 keywords that describe the contents of the image.
+        * IN BOTH CASES, IF THE IMAGE CONTAINS CODE:
+        All code should be extracted in markdown, triple backward quote blocks, with the detected language
+        of the code indicated after the opening tripe backward quotes. For example, if the image is from a
+        Jupyter Notebook and you see Python code, extract it within a block like this:
+        ```python
+        [CODE HERE]
+        ```
+    """
+    return ocr_prompt
 
 
 def is_valid_latex(text):
@@ -106,7 +124,7 @@ class AbstractOCRModel(ABC):
                 return True
 
     @abstractmethod
-    def perform_ocr(self, input_filename_with_path):
+    def perform_ocr(self, input_filename_with_path, **kwargs):
         pass
 
 
@@ -176,7 +194,7 @@ class OpenAIOCRModel(AbstractOCRModel):
             api_key=self.api_key
         )
 
-    def perform_ocr(self, input_filename_with_path, validate_latex=True, model_type=None):
+    def perform_ocr(self, input_filename_with_path, validate_latex=True, model_type=None, **kwargs):
         model_loaded = self.establish_connection()
         if not model_loaded:
             return None
@@ -193,7 +211,7 @@ class OpenAIOCRModel(AbstractOCRModel):
                         "content": [
                             {
                                 "type": "text",
-                                "text": DEFAULT_OCR_PROMPT
+                                "text": get_ocr_prompt(**kwargs)
                             },
                             {
                                 "type": "image_url",
@@ -216,7 +234,7 @@ class OpenAIOCRModel(AbstractOCRModel):
                             "content": [
                                 {
                                     "type": "text",
-                                    "text": DEFAULT_OCR_PROMPT
+                                    "text": get_ocr_prompt(**kwargs)
                                 },
                                 {
                                     "type": "image_url",
@@ -257,7 +275,7 @@ class GeminiOCRModel(AbstractOCRModel):
             api_key=self.api_key
         )
 
-    def perform_ocr(self, input_filename_with_path, model_type=None):
+    def perform_ocr(self, input_filename_with_path, model_type=None, **kwargs):
         model_loaded = self.establish_connection()
         if not model_loaded:
             return None
@@ -279,7 +297,7 @@ class GeminiOCRModel(AbstractOCRModel):
                     data=image_bytes,
                     mime_type=mime_type,
                 ),
-                DEFAULT_OCR_PROMPT
+                get_ocr_prompt(**kwargs)
             ]
         )
 

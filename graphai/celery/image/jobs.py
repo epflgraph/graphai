@@ -85,8 +85,9 @@ def fingerprint_job(token, force):
     return task.id
 
 
-def ocr_job(token, force=False, no_cache=False, method='google', api_token=None, openai_token=None, gemini_token=None,
-            pdf_in_pages=True, model_type=None):
+def ocr_job(token, force=False, no_cache=False, method='google',
+            api_token=None, openai_token=None, gemini_token=None,
+            model_type=None, enable_tikz=True):
     ##################
     # OCR cache lookup
     ##################
@@ -101,7 +102,8 @@ def ocr_job(token, force=False, no_cache=False, method='google', api_token=None,
     #####################
     if not is_pdf(token):
         task_list = [
-            extract_slide_text_task.s(token, method, api_token, openai_token, gemini_token, model_type)
+            extract_slide_text_task.s(token, method,
+                                      api_token, openai_token, gemini_token, model_type, enable_tikz)
         ]
     else:
         n_parallel = 8
@@ -114,7 +116,8 @@ def ocr_job(token, force=False, no_cache=False, method='google', api_token=None,
                                                 api_token,
                                                 openai_token,
                                                 gemini_token,
-                                                model_type)
+                                                model_type,
+                                                enable_tikz)
                 for i in range(n_parallel)
             ),
             collect_multi_image_ocr_task.s()
