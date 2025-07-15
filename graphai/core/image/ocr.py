@@ -136,7 +136,7 @@ class GoogleOCRModel(AbstractOCRModel):
             client_options={"api_key": self.api_key}
         )
 
-    def perform_ocr(self, input_filename_with_path):
+    def perform_ocr(self, input_filename_with_path, **kwargs):
         """
         Performs OCR with two methods (text_detection and document_text_detection)
         Args:
