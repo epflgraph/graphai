@@ -569,8 +569,8 @@ def check_ocr_and_hash_thresholds(input_folder_with_path, k_l, k_r,
                                   language=None):
     d = float(frame_ocr_distance(input_folder_with_path, k_l, k_r, nlp_models, language))
     s_hash = float(frame_hash_similarity(input_folder_with_path, k_l, k_r))
-    ocr_dist_pass = d > ocr_dist_threshold
-    hash_sim_pass = s_hash < hash_similarity_threshold
+    ocr_dist_pass = d >= ocr_dist_threshold
+    hash_sim_pass = s_hash <= hash_similarity_threshold
     return (ocr_dist_pass and hash_sim_pass), d, s_hash
 
 
