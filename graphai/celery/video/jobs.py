@@ -271,8 +271,8 @@ def detect_slides_job(token, language, force=False, recalculate_cached=False, **
                           i,
                           n_jobs,
                           language,
-                          kwargs.get('include_first', True),
-                          kwargs.get('include_last', True)
+                          True if i > 0 else kwargs.get('include_first', True),
+                          True if i < n_jobs - 1 else kwargs.get('include_last', True)
                       ) for i in range(n_jobs)),
                       compute_slide_transitions_callback_task.s(language),
                       detect_slides_callback_task.s(token, force)]

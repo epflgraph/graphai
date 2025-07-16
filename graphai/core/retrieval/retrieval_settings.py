@@ -6,28 +6,28 @@ from elasticsearch_interface.es import (
 
 RETRIEVAL_PARAMS = dict()
 RETRIEVAL_PARAMS["lex"] = {
-    "default_index": "ramtin_lex_index",
+    "default_index": "rag_lex_index",
     "retrieval_class": ESLex,
     "model": "all-MiniLM-L12-v2",
     "filters": ["lang"]
 }
 
 RETRIEVAL_PARAMS["servicedesk"] = {
-    "default_index": "ramtin_servicedesk_index",
+    "default_index": "rag_servicedesk_index",
     "retrieval_class": ESServiceDesk,
     "model": "all-MiniLM-L12-v2",
     "filters": ["lang", "category"]
 }
 
 RETRIEVAL_PARAMS["sac"] = {
-    "default_index": "ramtin_sac_index",
+    "default_index": "rag_sac_index",
     "retrieval_class": ESLex,
     "model": "all-MiniLM-L12-v2",
     "filters": ["lang"]
 }
 
 RETRIEVAL_PARAMS["default"] = {
-    "default_index": "ramtin_%s_index",
+    "default_index": "rag_%s_index",
     "retrieval_class": ESGeneralRAG,
     "model": "all-MiniLM-L12-v2",
     "filters": None
