@@ -4,31 +4,33 @@ from elasticsearch_interface.es import (
     ESGeneralRAG
 )
 
+DEFAULT_RETRIEVAL_EMBEDDING_MODEL = "all-MiniLM-L12-v2"
+
 RETRIEVAL_PARAMS = dict()
 RETRIEVAL_PARAMS["lex"] = {
     "default_index": "rag_lex_index",
     "retrieval_class": ESLex,
-    "model": "all-MiniLM-L12-v2",
+    "model": DEFAULT_RETRIEVAL_EMBEDDING_MODEL,
     "filters": ["lang"]
 }
 
 RETRIEVAL_PARAMS["servicedesk"] = {
     "default_index": "rag_servicedesk_index",
     "retrieval_class": ESServiceDesk,
-    "model": "all-MiniLM-L12-v2",
+    "model": DEFAULT_RETRIEVAL_EMBEDDING_MODEL,
     "filters": ["lang", "category"]
 }
 
 RETRIEVAL_PARAMS["sac"] = {
     "default_index": "rag_sac_index",
     "retrieval_class": ESLex,
-    "model": "all-MiniLM-L12-v2",
+    "model": DEFAULT_RETRIEVAL_EMBEDDING_MODEL,
     "filters": ["lang"]
 }
 
 RETRIEVAL_PARAMS["default"] = {
     "default_index": "rag_%s_index",
     "retrieval_class": ESGeneralRAG,
-    "model": "all-MiniLM-L12-v2",
+    "model": DEFAULT_RETRIEVAL_EMBEDDING_MODEL,
     "filters": None
 }
