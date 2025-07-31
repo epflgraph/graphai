@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from typing import Union, List, Dict, Literal
+from typing import Union, List, Dict, Literal, Any
 
 
 class RetrievalRequest(BaseModel):
@@ -13,7 +13,7 @@ class RetrievalRequest(BaseModel):
         description="Index to search in. Call GET `/rag/retrieve/info` to get list of available indexes.",
     )
 
-    filters: Union[Dict[str, str], None] = Field(
+    filters: Union[Dict[str, Any], None] = Field(
         title="Filters",
         description="A dictionary of filters. "
                     "Call GET `/rag/retrieve/info` to get list of available filters for each index.",
