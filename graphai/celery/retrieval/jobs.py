@@ -5,14 +5,16 @@ from graphai.celery.retrieval.tasks import (
     anonymize_text_task
 )
 from graphai.celery.embedding.tasks import embed_text_task
-from graphai.core.retrieval.retrieval_settings import RETRIEVAL_PARAMS
+from graphai.core.retrieval.retrieval_settings import RETRIEVAL_PARAMS, DEFAULT_RETRIEVAL_EMBEDDING_MODEL
 from graphai.celery.common.jobs import DEFAULT_TIMEOUT
 
 
 def retrieve_from_es_job(text, index_to_search_in,
                          filters=None, limit=10, return_scores=False, filter_by_date=False):
     task_list = [
-        embed_text_task.s(text, RETRIEVAL_PARAMS.get(index_to_search_in, dict()).get('model', None)),
+        embed_text_task.s(
+            text, RETRIEVAL_PARAMS.get(index_to_search_in, dict()
+                                       ).get('model', DEFAULT_RETRIEVAL_EMBEDDING_MODEL)),
         retrieve_from_es_task.s(text, index_to_search_in, filters, limit, return_scores, filter_by_date)
     ]
     task = chain(task_list)
