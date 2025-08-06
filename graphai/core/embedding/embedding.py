@@ -222,13 +222,13 @@ class EmbeddingModels:
         return result, text_too_large
 
     def embed(self, text, model_type='all-MiniLM-L12-v2'):
-        if text is None or len(text) == 0:
-            return None
         self.load_model(model_type)
         if model_type not in self.models.keys():
             raise NotImplementedError(f"Selected model type not implemented: {model_type}")
         model = self.models[model_type]
         max_tokens = self._get_model_max_tokens(model)
+        if text is None or len(text) == 0:
+            return None, False, max_tokens
         results, text_too_large = self._embed(model, text)
         return results, text_too_large, max_tokens
 
