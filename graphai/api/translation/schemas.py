@@ -65,6 +65,12 @@ class TranslationRequest(BaseModel):
         default=False
     )
 
+    clean: bool = Field(
+        title="Clean text",
+        description="If set to true, the sentence segmenter will also clean up the text.",
+        default=False
+    )
+
 
 class TranslationTaskResponse(BaseModel):
     result: Union[str, List[str], None] = Field(

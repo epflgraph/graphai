@@ -67,7 +67,8 @@ async def translate(data: TranslationRequest):
     force = data.force
     no_cache = data.no_cache
     skip_sentence_segmentation = data.skip_segmentation
-    task_id = translation_job(text, src, tgt, force, no_cache, skip_sentence_segmentation)
+    clean_and_segment = data.clean
+    task_id = translation_job(text, src, tgt, force, no_cache, skip_sentence_segmentation, clean_and_segment)
     return {'task_id': task_id}
 
 
