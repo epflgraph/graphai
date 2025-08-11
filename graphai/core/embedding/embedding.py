@@ -455,9 +455,10 @@ def embedding_text_list_embed_parallel(input_list, embedding_obj, model_type, i,
 
 def embedding_text_list_embed_callback(results, model_type, force):
     for result in results:
-        insert_embedding_into_db(result, result['id_token'], result['source'], model_type, force)
-        del result['id_token']
-        del result['source']
+        if 'id_token' in result:
+            insert_embedding_into_db(result, result['id_token'], result['source'], model_type, force)
+            del result['id_token']
+            del result['source']
     return results
 
 
