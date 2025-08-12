@@ -171,11 +171,12 @@
 
 <dl class="py method">
 <dt class="sig sig-object py" id="graphai.core.translation.text_utils.TranslationModels.translate">
-<span class="sig-name descname"><span class="pre">translate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">how</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'en-fr'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skip_sentence_segmentation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.translation.text_utils.TranslationModels.translate" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">translate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">how</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'en-fr'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skip_sentence_segmentation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clean_and_segment</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphai.core.translation.text_utils.TranslationModels.translate" title="Link to this definition"></a></dt>
 <dd><p>Translates provided text
 :param text: Text to translate
 :param how: source-target language
-:param skip_sentence_segmentation: If True, skips segmentation</p>
+:param skip_sentence_segmentation: If True, skips segmentation
+:param clean_and_segment: If True, segmenter also cleans text</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Translated text and ‘unpunctuated text too long’ flag</p>
