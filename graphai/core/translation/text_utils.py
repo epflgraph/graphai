@@ -131,6 +131,7 @@ class TranslationModels:
                     "Helsinki-NLP/opus-mt-tc-big-en-fr",
                     cache_dir=self.cache_dir).to(self.device)
                 self.models['en-fr']['segmenter'] = pysbd.Segmenter(language='en', clean=False)
+                self.models['en-fr']['segmenter_cleaner'] = pysbd.Segmenter(language='en', clean=True)
                 print('Loading FR-EN')
                 self.models['fr-en'] = dict()
                 self.models['fr-en']['tokenizer'] = MarianTokenizer.from_pretrained(
@@ -140,6 +141,7 @@ class TranslationModels:
                     "Helsinki-NLP/opus-mt-tc-big-fr-en",
                     cache_dir=self.cache_dir).to(self.device)
                 self.models['fr-en']['segmenter'] = pysbd.Segmenter(language='fr', clean=False)
+                self.models['fr-en']['segmenter_cleaner'] = pysbd.Segmenter(language='fr', clean=True)
                 print('Loading DE-EN')
                 self.models['de-en'] = dict()
                 self.models['de-en']['tokenizer'] = AutoTokenizer.from_pretrained(
@@ -149,6 +151,7 @@ class TranslationModels:
                     "Helsinki-NLP/opus-mt-de-en",
                     cache_dir=self.cache_dir).to(self.device)
                 self.models['de-en']['segmenter'] = pysbd.Segmenter(language='de', clean=False)
+                self.models['de-en']['segmenter_cleaner'] = pysbd.Segmenter(language='de', clean=True)
                 print('Loading IT-EN')
                 self.models['it-en'] = dict()
                 self.models['it-en']['tokenizer'] = AutoTokenizer.from_pretrained(
@@ -158,6 +161,7 @@ class TranslationModels:
                     "Helsinki-NLP/opus-mt-it-en",
                     cache_dir=self.cache_dir).to(self.device)
                 self.models['it-en']['segmenter'] = pysbd.Segmenter(language='it', clean=False)
+                self.models['it-en']['segmenter_cleaner'] = pysbd.Segmenter(language='it', clean=True)
             self.last_model_use = time.time()
 
     def get_device(self):
@@ -236,14 +240,14 @@ class TranslationModels:
 
         return fix_encoding(full_result), False
 
-    def translate(self, text, how='en-fr', skip_sentence_segmentation=False):
+    def translate(self, text, how='en-fr', skip_sentence_segmentation=False, clean_and_segment=False):
         """
         Translates provided text
         Args:
             text: Text to translate
             how: source-target language
             skip_sentence_segmentation: If True, skips segmentation
-
+            clean_and_segment: If True, segmenter also cleans text
         Returns:
             Translated text and 'unpunctuated text too long' flag
         """
@@ -254,7 +258,12 @@ class TranslationModels:
             return None, False
         tokenizer = self.models[how]['tokenizer']
         model = self.models[how]['model']
-        segmenter = self.models[how]['segmenter'] if not skip_sentence_segmentation else None
+        if skip_sentence_segmentation:
+            segmenter = None
+        elif clean_and_segment:
+            segmenter = self.models[how]['segmenter_cleaner']
+        else:
+            segmenter = self.models[how]['segmenter']
         text = convert_text_back_to_list(text, return_list=True)
         results = [self._translate(current_text, tokenizer, model, segmenter) for current_text in text]
         return convert_list_to_text([x[0] for x in results]), any([x[1] for x in results]), [x[1] for x in results]

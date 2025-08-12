@@ -207,7 +207,8 @@ class EmbeddingModels:
             print(self.device)
             model_max_tokens = self._get_model_max_tokens(model)
             n_tokens = self._get_token_count(model, text)
-            if n_tokens > model_max_tokens:
+            if n_tokens > 1.5 * model_max_tokens:
+                # If n_tokens is above model_max_tokens but by little, we do not fail and still encode.
                 return None
             return model.encode(text)
         except IndexError as e:
@@ -455,9 +456,10 @@ def embedding_text_list_embed_parallel(input_list, embedding_obj, model_type, i,
 
 def embedding_text_list_embed_callback(results, model_type, force):
     for result in results:
-        insert_embedding_into_db(result, result['id_token'], result['source'], model_type, force)
-        del result['id_token']
-        del result['source']
+        if 'id_token' in result:
+            insert_embedding_into_db(result, result['id_token'], result['source'], model_type, force)
+            del result['id_token']
+            del result['source']
     return results
 
 
