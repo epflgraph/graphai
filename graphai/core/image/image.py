@@ -191,7 +191,7 @@ def break_pdf_into_images(token, file_manager):
         pix = page.get_pixmap()
         pix.save(img_dir)
         output_filenames.append({
-            'page': i,
+            'page': i + 1,
             'filename': img_dir
         })
     return output_filenames
