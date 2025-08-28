@@ -16,7 +16,7 @@ from graphai.core.image.ocr import (
     OpenAIOCRModel,
     GeminiOCRModel
 )
-import pdf2image
+import pymupdf
 from graphai.core.common.common_utils import (
     retrieve_generic_file_from_generic_url,
     generate_random_token,
@@ -183,12 +183,13 @@ def break_pdf_into_images(token, file_manager):
     if not file_exists(pdf_path):
         print(f'Error: File {pdf_path} does not exist')
         return None
-    pdf_imageset = pdf2image.convert_from_path(pdf_path)
+    pdf_doc = pymupdf.open(pdf_path)
     output_filenames = list()
-    for i in range(len(pdf_imageset)):
+    for page in pdf_doc:
+        i = page.number
         img_dir = file_manager.generate_filepath(token.replace('.', '__') + f'/page_{i}.png')
-        with open(img_dir, 'wb') as f:
-            pdf_imageset[i].save(f, 'png')
+        pix = page.get_pixmap()
+        pix.save(img_dir)
         output_filenames.append({
             'page': i + 1,
             'filename': img_dir
