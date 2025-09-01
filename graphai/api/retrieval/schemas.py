@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ValidationInfo, field_validator
 from typing import Union, List, Dict, Literal, Any
 
 
@@ -31,15 +31,25 @@ class RetrievalRequest(BaseModel):
         default=False
     )
 
-    filter_by_date: bool = Field(
+    filter_by_date: Union[bool, None] = Field(
         title="Filter by current date",
         description="If True, if the requested index has 'from' and 'until' fields, only returns documents "
                     "that are available at the current date and time based on those two fields. Basically "
                     "a smart custom filter that doesn't require the user to manually provide the current "
                     "datetime and ask for 'from' to be before it and for 'until' to be after it. "
                     "If the index does not have 'from' and 'until' fields, this results in an empty response.",
-        default=False
+        default=None
     )
+
+    @field_validator("filter_by_date", mode='after')
+    @classmethod
+    def set_default_filter_by_date_value(cls, value: Union[bool, None], info: ValidationInfo) -> bool:
+        if value is None:
+            if info.data['index'].startswith('course_'):
+                return True
+            return False
+        return value
+
 
 
 class RetrievalResponse(BaseModel):
