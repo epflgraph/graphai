@@ -44,6 +44,12 @@ async def retrieve_from_es_index(data: RetrievalRequest,
     index_to_search_in = data.index
     return_scores = data.return_scores
     filter_by_date = data.filter_by_date
+    # Check for None (default) value in flag and mutate based on selected index
+    if filter_by_date is None:
+        if index_to_search_in.startswith('course_'):
+            filter_by_date = True
+        else:
+            filter_by_date = False
     if not has_rag_access_rights(current_user.username, index_to_search_in):
         return INSUFFICIENT_ACCESS_ERROR
     results = retrieve_from_es_job(text, index_to_search_in, filters, limit, return_scores, filter_by_date)

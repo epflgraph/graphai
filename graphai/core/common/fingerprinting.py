@@ -7,10 +7,13 @@ import fingerprint
 import imagehash
 import numpy as np
 from PIL import Image
-import pdf2image
+import pymupdf
 from fuzzywuzzy import fuzz
 
 from graphai.core.common.common_utils import file_exists, is_pdf
+
+
+Image.MAX_IMAGE_PIXELS = 933120000
 
 
 def perceptual_hash_text(s):
@@ -137,9 +140,10 @@ def perceptual_hash_pdf(input_filename_with_path, hash_size=16):
     if not file_exists(input_filename_with_path) or not is_pdf(input_filename_with_path):
         print(f'File {input_filename_with_path} does not exist or is not in the right format')
         return None
-    pdf_imageset = pdf2image.convert_from_path(input_filename_with_path)
+    pdf_imageset = pymupdf.open(input_filename_with_path)
     results = hashlib.md5(
-        ''.join(str(imagehash.dhash(x, hash_size=hash_size)) for x in pdf_imageset).encode('utf8')
+        ''.join(str(imagehash.dhash(x.get_pixmap().pil_image(),
+                                    hash_size=hash_size)) for x in pdf_imageset).encode('utf8')
     ).hexdigest()
     return str(results)
 
