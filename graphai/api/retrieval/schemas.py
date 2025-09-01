@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field, ValidationInfo, field_validator
+from pydantic import BaseModel, Field
 from typing import Union, List, Dict, Literal, Any
 
 
@@ -40,16 +40,6 @@ class RetrievalRequest(BaseModel):
                     "If the index does not have 'from' and 'until' fields, this results in an empty response.",
         default=None
     )
-
-    @field_validator("filter_by_date", mode='after')
-    @classmethod
-    def set_default_filter_by_date_value(cls, value: Union[bool, None], info: ValidationInfo) -> bool:
-        if value is None:
-            if info.data['index'].startswith('course_'):
-                return True
-            return False
-        return value
-
 
 
 class RetrievalResponse(BaseModel):
