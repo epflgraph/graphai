@@ -65,7 +65,7 @@ def retrieve_from_es(embedding_results, text, index_to_search_in,
         right_now = datetime.now().isoformat()
         filters = filters | {
             'from_date': {'lte': right_now},
-            'until_date': {'gte': right_now}
+            'until_date': {'gt': right_now}
         }
     if index_to_search_in in RETRIEVAL_PARAMS.keys():
         return search_es_index(
