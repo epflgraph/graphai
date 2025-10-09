@@ -37,11 +37,18 @@ sudo apt-get install poppler-utils
 ```
 
 ### Install GraphAI python package
-> ℹ️ At this point we advise to create and activate an isolated python virtual environment.
-
-The GraphAI package may then be installed as a regular python package. To install it, simply run
+At this point we advise to create and activate an isolated virtual environment with python 3.11.13, by running
 ```
-pip install -e .
+pyenv install 3.11.13
+pyenv local 3.11.13
+python --version # should print Python 3.11.13
+python -m venv .venv311
+source .venv311/bin/activate
+```
+
+The GraphAI package may then be installed as a regular python package (subject to some constraints). To install it, simply run
+```
+pip install -e . -c constraints.txt --only-binary=:all:
 ```
 All python dependencies will be automatically installed.
 
@@ -55,6 +62,12 @@ cp example-config.ini config.ini
 then edit it with your credentials and preferences.
 
 > ℹ️ The caching additionally requires either the existence of the schema whose name is specified in the file (`cache_graphai` by default) in your database or otherwise the permission to create a new schema.
+
+#### Whisper model download
+To download the whisper model:
+```
+whisper --model base --download_root path/to/whisper --help >/dev/null
+```
 
 #### Fasttext initialization
 The slide detection pipeline requires English and French-language fasttext models in order to work. 

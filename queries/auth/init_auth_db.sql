@@ -1,7 +1,7 @@
-CREATE SCHEMA IF NOT EXISTS `auth_graphai` ;
+CREATE SCHEMA IF NOT EXISTS `test_graphai_auth` ;
 
 -- The table containing user information
-CREATE TABLE IF NOT EXISTS `auth_graphai`.`Users` (
+CREATE TABLE IF NOT EXISTS `test_graphai_auth`.`Users` (
   `username` varchar(255) NOT NULL,
   `full_name` varchar(255) NOT NULL,
   `email` varchar(255) NOT NULL,
@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS `auth_graphai`.`Users` (
 -- The scopes column should contain a comma-separated string of the scopes that the user is allowed to access.
 -- We recommend using the full list included below for the admin user, and giving more restricted access to other users.
 
-INSERT INTO `auth_graphai`.`Users`
+INSERT INTO `test_graphai_auth`.`Users`
 (`username`,
 `full_name`,
 `email`,
@@ -34,7 +34,7 @@ VALUES
 
 
 -- The table containing user-specific rate-limit overrides
-CREATE TABLE IF NOT EXISTS `auth_graphai`.`User_Rate_Limits` (
+CREATE TABLE IF NOT EXISTS `test_graphai_auth`.`User_Rate_Limits` (
   `username` varchar(255) NOT NULL,
   `api_path` varchar(255) NOT NULL,
   `max_requests` int DEFAULT NULL,
@@ -49,7 +49,7 @@ CREATE TABLE IF NOT EXISTS `auth_graphai`.`User_Rate_Limits` (
 -- Example for the user 'admin' and for the global rate limit:
 -- Valid values for `path` can be found in graphai.api.common.auth_utils.DEFAULT_RATE_LIMITS (`global`, `video`, etc.).
 
-INSERT INTO `auth_graphai`.`User_Rate_Limits`
+INSERT INTO `test_graphai_auth`.`User_Rate_Limits`
 (`username`,
 `api_path`,
 `max_requests`,

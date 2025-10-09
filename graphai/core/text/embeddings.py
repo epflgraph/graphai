@@ -23,7 +23,7 @@ class ConceptEmbeddings:
         ################################################################
 
         # Fetch concept embeddings
-        table = 'graph_ontology.Data_N_Object_T_Embeddings'
+        table = 'test_graph_ontology.Data_N_Object_T_Embeddings'
         fields = ['object_id', 'embedding']
         columns = ['concept_id', 'embedding']
         self.embeddings = pd.DataFrame(columns=columns)
