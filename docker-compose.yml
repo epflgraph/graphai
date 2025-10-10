@@ -3,8 +3,9 @@ services:
     image: rabbitmq:3.13-management
     container_name: rabbitmq
     ports:
-      - "5672:5672"     # AMQP
-      - "15672:15672"   # mgmt UI
+      - "5672:5672"      # AMQP
+      - "15672:15672"    # mgmt UI
+      - "15692:15692"    # Prometheus metrics (management image has plugin)
     environment:
       RABBITMQ_DEFAULT_USER: graphai
       RABBITMQ_DEFAULT_PASS: graphai
@@ -20,6 +21,108 @@ services:
     volumes:
       - redis_data:/data
 
+  # Celery Prometheus exporter (arm64-friendly)
+  celery_exporter:
+    image: danihodovic/celery-exporter:latest
+    platform: linux/amd64           # on Apple Silicon
+    environment:
+      CE_BROKER_URL: amqp://graphai:graphai@rabbitmq:5672//
+      CE_ACCEPT_CONTENT: pickle,json
+      CE_RETRY_INTERVAL: "5"        # optional: keep retrying if broker isn’t ready
+    ports:
+      - "9808:9808"
+    depends_on:
+      - rabbitmq
+    restart: unless-stopped
+
+  # Docker Desktop–friendly container metrics (CPU/RAM/NET/IO) via Docker API
+  docker_stats_exporter:
+    image: wywywywy/docker_stats_exporter:latest
+    container_name: docker_stats_exporter
+    ports:
+      - "9417:9417"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+
+  prometheus:
+    image: prom/prometheus
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    depends_on:
+      - rabbitmq
+      - celery_exporter
+      - docker_stats_exporter
+
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+    depends_on:
+      - prometheus
+
+  # # Optional: cAdvisor (only works on real Linux hosts; not Docker Desktop)
+  # cadvisor:
+  #   image: ghcr.io/google/cadvisor:v0.49.2
+  #   container_name: cadvisor
+  #   profiles: ["linux-only"]
+  #   ports:
+  #     - "8080:8080"
+  #   volumes:
+  #     - /var/run/docker.sock:/var/run/docker.sock
+  #     - /:/rootfs:ro
+  #     - /var/run:/var/run:rw
+  #     - /sys:/sys:ro
+  #     - /var/lib/docker/:/var/lib/docker:ro
+
 volumes:
   rabbitmq_data:
   redis_data:
+  grafana_data:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# services:
+#   rabbitmq:
+#     image: rabbitmq:3.13-management
+#     container_name: rabbitmq
+#     ports:
+#       - "5672:5672"     # AMQP
+#       - "15672:15672"   # mgmt UI
+#     environment:
+#       RABBITMQ_DEFAULT_USER: graphai
+#       RABBITMQ_DEFAULT_PASS: graphai
+#     volumes:
+#       - rabbitmq_data:/var/lib/rabbitmq
+
+#   redis:
+#     image: redis:7
+#     container_name: redis
+#     command: ["redis-server", "--appendonly", "yes"]
+#     ports:
+#       - "6379:6379"
+#     volumes:
+#       - redis_data:/data
+
+# volumes:
+#   rabbitmq_data:
+#   redis_data:

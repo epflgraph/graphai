@@ -31,6 +31,8 @@ from graphai.celery.translation.tasks import translation_init_task
 from graphai.celery.ontology.tasks import ontology_init_task
 from graphai.celery.scraping.tasks import scraping_init_task
 
+from prometheus_fastapi_instrumentator import Instrumentator
+
 
 # Define lifespan cycle of FastAPI app, i.e. what to do before startup and after shutdown
 @asynccontextmanager
@@ -101,6 +103,8 @@ app = FastAPI(
 )
 app.add_middleware(LoggerMiddleware)
 
+# Expose /metrics for Prometheus
+Instrumentator().instrument(app).expose(app)
 
 # Include all routers in the app
 authenticated_router.include_router(image_router.router)

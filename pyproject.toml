@@ -88,7 +88,8 @@ dependencies = [
     "google-genai",
     "httpx==0.27.2",
     "graphai-client>=1.16.0",
-    "pdf2image>=1.16,<2"
+    "pdf2image>=1.16,<2",
+    "prometheus-fastapi-instrumentator"
 ]
 
 [tool.setuptools]

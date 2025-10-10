@@ -93,7 +93,8 @@ def create_celery():
     celery_app.conf.update(result_expires=10800)
     celery_app.conf.update(result_persistent=True)
     celery_app.conf.update(result_extended=True)
-    celery_app.conf.update(worker_send_task_events=False)
+    celery_app.conf.update(worker_send_task_events=True)
+    celery_app.conf.update(task_send_sent_event=True)
     celery_app.conf.update(worker_prefetch_multiplier=1)
     celery_app.conf.update(broker_transport_options={'visibility_timeout': 9999999})
     celery_app.conf.update(beat_schedule={
