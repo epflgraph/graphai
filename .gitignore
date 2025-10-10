@@ -139,7 +139,7 @@ celerybeat-schedule.db
 # Environments
 .env
 .envrc
-.venv
+.venv*
 env/
 venv/
 ENV/
@@ -215,3 +215,4 @@ __marimo__/
 # Repo-specific
 config.ini
 
+.env

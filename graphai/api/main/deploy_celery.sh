@@ -1,6 +1,25 @@
 #!/bin/bash
 set -euo pipefail
 
+# Resolve paths
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# deploy.sh lives in: <repo>/graphai/api/main/deploy.sh
+# repo root is three levels up:
+REPO_ROOT="$(cd "$SCRIPT_DIR/../../.." && pwd)"
+ENV_FILE="$REPO_ROOT/.env"
+
+# Load project env (if present)
+if [ -f "$ENV_FILE" ]; then
+  set -a
+  . "$ENV_FILE"
+  set +a
+else
+  echo "WARN: .env not found at $ENV_FILE"
+fi
+
+# (debug) show what we loaded
+env | egrep '^CELERY_|^VIRTUAL_ENV' || true
+
 # Force isolation to the venv
 # (adjust the venv path if different)
 VENV_DIR="$(cd "$(dirname "$0")/../.."; pwd)/.venv311"
