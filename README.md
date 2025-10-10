@@ -25,6 +25,11 @@ sudo apt-get install rabbitmq-server
 sudo apt-get install redis
 ```
 
+or using Docker compose:
+```
+docker compose up -d
+```
+
 ### Install audio/video processing software
 The audio/video endpoints require the packages `ffmpeg` (for general handling of video/audio), 
 `chromaprint` (for audio fingerprinting), `tesseract` (for OCR that is used in slide detection), 
@@ -34,6 +39,11 @@ sudo apt-get install ffmpeg
 sudo apt-get install libchromaprint-tools
 sudo apt-get install libleptonica-dev tesseract-ocr libtesseract-dev python3-pil tesseract-ocr-eng tesseract-ocr-fra tesseract-ocr-script-latn
 sudo apt-get install poppler-utils
+```
+
+or with Homebrew on MacOS:
+```
+brew install ffmpeg chromaprint tesseract leptonica ghostscript imagemagick libjpeg libpng libtiff freetype poppler
 ```
 
 ### Install GraphAI python package
@@ -48,7 +58,7 @@ source .venv311/bin/activate
 
 The GraphAI package may then be installed as a regular python package (subject to some constraints). To install it, simply run
 ```
-pip install -e . -c constraints.txt --only-binary=:all:
+pip install -e . -c constraints.txt
 ```
 All python dependencies will be automatically installed.
 
@@ -57,6 +67,11 @@ The project requires a `config.ini` that is used to specify the configuration fo
 
 ```
 cp example-config.ini config.ini
+```
+
+It also requires the .env file, which you can copy from the example:
+```
+cp example-env .env
 ```
 
 then edit it with your credentials and preferences.

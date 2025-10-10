@@ -17,6 +17,8 @@ if [ -f "$ENV_FILE" ]; then
   set +a
 else
   echo "WARN: .env not found at $ENV_FILE"
+  # Exit
+  exit 1
 fi
 
 # (debug) show what we loaded
