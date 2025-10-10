@@ -23,3 +23,8 @@ google-resumable-media==2.7.2
 
 # avoid breaking S3/GCS URL loaders
 smart-open<7.0.0
+
+# authentication / crypto stack
+passlib>=1.7.4,<2
+bcrypt>=4,<5
+

@@ -78,6 +78,11 @@ then edit it with your credentials and preferences.
 
 > ℹ️ The caching additionally requires either the existence of the schema whose name is specified in the file (`cache_graphai` by default) in your database or otherwise the permission to create a new schema.
 
+Verify installation by running:
+```
+./tests/verify_stack.sh
+```
+
 #### Whisper model download
 To download the whisper model:
 ```
@@ -117,6 +122,11 @@ curl -X 'POST' 'http://host:28800/token' -H 'accept: application/json' -H 'Conte
 The access token received from this endpoint can then be used as part of the header for requests to other endpoints:
 ```
 -H 'Authorization: Bearer ACCESS_TOKEN_GOES_HERE'
+```
+
+You can set up a new user with the interactive script:
+```
+./tests/setup_auth.sh
 ```
 
 ### Rate limiting
