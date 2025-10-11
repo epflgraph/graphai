@@ -197,6 +197,16 @@ The app will be listening on `0.0.0.0:28800` by default. You can change both the
 ./deploy.sh -h <host> -p <port>
 ```
 
+### Monitoring
+```
+brew install telegraf
+brew services start telegraf
+telegraf --config telegraf.conf
+curl -s http://localhost:9273/metrics | grep cpu
+```
+
+
+
 ## Documentation
 Documentation of the GraphAI python package is available [here](https://epflgraph.github.io/graphai/graphai).
 
