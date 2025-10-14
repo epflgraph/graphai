@@ -21,6 +21,14 @@ services:
     volumes:
       - redis_data:/data
 
+  redis-commander:
+    image: visol/redis-commander:0.8.0   # multi-arch incl. arm64
+    environment:
+      - REDIS_HOSTS=local:redis:6379
+    ports:
+      - "8081:8081"
+    depends_on: [redis]
+
   # Celery Prometheus exporter (arm64-friendly)
   celery_exporter:
     image: danihodovic/celery-exporter:latest
@@ -80,10 +88,43 @@ services:
   #     - /sys:/sys:ro
   #     - /var/lib/docker/:/var/lib/docker:ro
 
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.15.0
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=true
+      - xpack.security.http.ssl.enabled=true # HTTPS on HTTP layer
+      - xpack.security.http.ssl.certificate=certs/http.crt
+      - xpack.security.http.ssl.key=certs/http.key
+      - xpack.security.http.ssl.certificate_authorities=certs/ca.crt
+      - xpack.security.transport.ssl.enabled=false # Transport TLS disabled for single-node (ok)
+      - ES_JAVA_OPTS=-Xms1g -Xmx1g
+      - http.port=9203 # Make ES listen on 9203 to match your mapping
+    ports:
+      - "9203:9203"
+    volumes:
+      - es_data:/usr/share/elasticsearch/data
+      - ./.certs:/usr/share/elasticsearch/config/certs:ro
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.15.0
+    environment:
+      - ELASTICSEARCH_HOSTS=https://elasticsearch:9203 # Match ES URL + port + https
+      - ELASTICSEARCH_SSL_CERTIFICATEAUTHORITIES=/usr/share/kibana/config/certs/ca.crt # CA path relative to /usr/share/kibana/config
+      - ELASTICSEARCH_SERVICEACCOUNTTOKEN=${KIBANA_SERVICE_TOKEN} # Service account token tied to THIS ES cluster
+      - SERVER_PORT=5604 # Run Kibana on 5604 inside the container to match your mapping
+    ports:
+      - "5604:5604"
+    depends_on:
+      - elasticsearch
+    volumes:
+      - ./.certs:/usr/share/kibana/config/certs:ro
+
 volumes:
   rabbitmq_data:
   redis_data:
   grafana_data:
+  es_data:
 
 
 
