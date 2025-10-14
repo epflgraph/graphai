@@ -216,3 +216,5 @@ __marimo__/
 config.ini
 
 .env
+.certs
+.vscode
