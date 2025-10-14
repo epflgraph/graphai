@@ -28,3 +28,6 @@ smart-open<7.0.0
 passlib>=1.7.4,<2
 bcrypt>=4,<5
 
+# elasticsearch
+elasticsearch>=8.12,<9
+elastic-transport>=8,<9
