@@ -183,17 +183,17 @@ def break_pdf_into_images(token, file_manager):
     if not file_exists(pdf_path):
         print(f'Error: File {pdf_path} does not exist')
         return None
-    pdf_doc = pymupdf.open(pdf_path)
     output_filenames = list()
-    for page in pdf_doc:
-        i = page.number
-        img_dir = file_manager.generate_filepath(token.replace('.', '__') + f'/page_{i}.png')
-        pix = page.get_pixmap()
-        pix.save(img_dir)
-        output_filenames.append({
-            'page': i + 1,
-            'filename': img_dir
-        })
+    with pymupdf.open(pdf_path) as pdf_doc:
+        for page in pdf_doc:
+            i = page.number
+            img_dir = file_manager.generate_filepath(token.replace('.', '__') + f'/page_{i}.png')
+            pix = page.get_pixmap()
+            pix.save(img_dir)
+            output_filenames.append({
+                'page': i + 1,
+                'filename': img_dir
+            })
     return output_filenames
 
 
