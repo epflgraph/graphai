@@ -113,6 +113,20 @@ def create_celery():
             # Every 24 hours
         }
     })
+    # Configuring the broker to avoid accidentally-missed heartbeats
+    celery_app.conf.update(task_acks_late=True)
+    celery_app.conf.update(worker_send_task_events=True)
+    celery_app.conf.update(send_events=True)
+    celery_app.conf.update(send_sent_event=True)
+    celery_app.conf.update(task_track_started=True)
+    celery_app.conf.update(redis_socket_keepalive=True)
+    celery_app.conf.update(broker_pool_limit=None)
+    celery_app.conf.update(broker_connection_timeout=300)
+    celery_app.conf.update(broker_max_retries=None)
+    celery_app.conf.update(worker_lost_wait=300)
+    celery_app.conf.update(worker_cancel_long_running_tasks_on_connection_loss=True)
+    celery_app.conf.update(broker_connection_retry_on_startup=True)
+    celery_app.conf.update(broker_channel_error_retry=True)
 
     return celery_app
 
