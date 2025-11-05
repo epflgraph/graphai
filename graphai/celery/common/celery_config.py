@@ -128,7 +128,6 @@ def create_celery():
     celery_app.conf.update(broker_connection_retry_on_startup=True)
     celery_app.conf.update(broker_channel_error_retry=True)
 
-
     return celery_app
 
 
