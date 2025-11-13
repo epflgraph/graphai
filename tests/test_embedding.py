@@ -18,7 +18,7 @@ from graphai.core.common.caching import EmbeddingDBCachingManager
 
 @patch('graphai.celery.embedding.tasks.embed_text_task.run')
 @pytest.mark.usefixtures('example_word')
-def test__embedding_embed__translate_text__mock_task(mock_run, example_word):
+def test__embedding_embed__embed_text__mock_task(mock_run, example_word):
     # Mock calling the task
     embed_text_task.run(example_word, 'all-MiniLM-L12-v2')
 
@@ -30,7 +30,7 @@ def test__embedding_embed__translate_text__mock_task(mock_run, example_word):
 
 
 @pytest.mark.usefixtures('example_word', 'very_long_text')
-def test__translation_translate__translate_text__run_task(example_word, very_long_text):
+def test__embedding_embed__embed_text__run_task(example_word, very_long_text):
     # Call the task
     embedding = embed_text_task.run(example_word, "all-MiniLM-L12-v2")
 
@@ -45,12 +45,11 @@ def test__translation_translate__translate_text__run_task(example_word, very_lon
     # Call the task
     embedding = embed_text_task.run(very_long_text, "all-MiniLM-L12-v2")
 
-    # Assert that the results are correct
+    # Assert that a very long text is properly broken up and embedded
     assert isinstance(embedding, dict)
     assert 'result' in embedding
-    assert embedding['successful'] is False
-    assert embedding['text_too_large'] is True
-    assert embedding['result'] == "Text over token limit for selected model (128)."
+    assert embedding['successful'] is True
+    assert embedding['text_too_large'] is False
 
 
 @pytest.mark.celery(accept_content=['pickle', 'json'], result_serializer='pickle', task_serializer='pickle')
@@ -174,8 +173,5 @@ def test__embedding_embedding__embed_text__integration(fixture_app, celery_worke
     assert len(embedding['task_result']) == 2 + len(example_word_list)
     assert embedding['task_result'][0]['successful'] is True
     assert embedding['task_result'][0]['result'] == original_results
-    assert embedding['task_result'][1]['successful'] is False
-    assert embedding['task_result'][1]['result'] == "Text over token limit for selected model (128)."
-    # All except one must have been successful
-    assert sum([1 if embedding['task_result'][i]['successful'] else 0
-                for i in range(len(embedding['task_result']))]) == len(embedding['task_result']) - 1
+    assert embedding['task_result'][1]['successful'] is True
+    assert embedding['task_result'][1]['text_too_large'] is False
