@@ -253,7 +253,7 @@ class EmbeddingModels:
                 text_too_large = True
         return result, text_too_large
 
-    def embed(self, text, model_type='all-MiniLM-L12-v2', force_split=False):
+    def embed(self, text, model_type='all-MiniLM-L12-v2', force_split=True):
         self.load_model(model_type)
         if model_type not in self.models.keys():
             raise NotImplementedError(f"Selected model type not implemented: {model_type}")
