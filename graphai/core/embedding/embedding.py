@@ -461,19 +461,17 @@ def embedding_text_list_embed_parallel(input_list, embedding_obj, model_type, i,
                 j -= 1
             if j == i:
                 j = i + 1
-            current_results_list = embed_text(current_embedding_obj,
-                                              [input_list[remaining_indices[k]]['text'] for k in range(i, j)],
-                                              model_type)
+            current_results_list = [embed_text(current_embedding_obj,
+                                               input_list[remaining_indices[k]]['text'],
+                                               model_type) for k in range(i, j)]
             for k in range(i, j):
                 current_results = {
-                    'result': current_results_list['result'][k - i]
-                    if not isinstance(current_results_list['result'], str)
-                    else current_results_list['result'],
-                    'successful': current_results_list['successful'],
-                    'text_too_large': current_results_list['text_too_large'],
-                    'fresh': current_results_list['fresh'],
-                    'model_type': current_results_list['model_type'],
-                    'device': current_results_list['device'],
+                    'result': current_results_list[k - i]['result'],
+                    'successful': current_results_list[k - i]['successful'],
+                    'text_too_large': current_results_list[k - i]['text_too_large'],
+                    'fresh': current_results_list[k - i]['fresh'],
+                    'model_type': current_results_list[k - i]['model_type'],
+                    'device': current_results_list[k - i]['device'],
                     'id_token': input_list[remaining_indices[k]]['token'],
                     'source': input_list[remaining_indices[k]]['text']
                 }
