@@ -47,8 +47,8 @@ def split_text(text, max_length, split_characters=('\n', '.', ';', ',', ' ', '$'
         for split_char in split_characters:
             pos = text[:max_length].rfind(split_char)
             if pos > 0:
-                result.append(text[:pos+1])
-                text = text[pos+1:]
+                result.append(text[:pos + 1])
+                text = text[pos + 1:]
                 break
         if len(text) > max_length:
             result.append(text[:max_length])
