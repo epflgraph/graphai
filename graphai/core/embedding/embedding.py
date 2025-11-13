@@ -40,6 +40,24 @@ def embedding_from_json(s):
     return np.array(json.loads(s))
 
 
+def split_text(text, max_length, split_characters=('\n', '.', ';', ',', ' ', '$')):
+    result = []
+    assert max_length > 0
+    while len(text) > max_length:
+        for split_char in split_characters:
+            pos = text[:max_length].rfind(split_char)
+            if pos > 0:
+                result.append(text[:pos+1])
+                text = text[pos+1:]
+                break
+        if len(text) > max_length:
+            result.append(text[:max_length])
+            text = text[max_length:]
+    if len(text) > 0:
+        result.append(text)
+    return result
+
+
 def generate_embedding_text_token(s, model_type):
     """
     Generates an md5-based token for a string
@@ -215,14 +233,27 @@ class EmbeddingModels:
             print(e)
             return None
 
-    def _embed(self, model, text):
+    def _embed(self, model, text, force_split):
         text_too_large = False
         result = self._get_model_output(model, text)
         if result is None:
-            text_too_large = True
+            if force_split:
+                model_max_tokens = self._get_model_max_tokens(model)
+                text_parts = split_text(text, model_max_tokens)
+                total_len = sum(len(text_part) for text_part in text_parts)
+                weights = [len(current_text) / total_len for current_text in text_parts]
+                results = [self._get_model_output(model, current_text) for current_text in text_parts]
+                if any(res is None for res in results):
+                    text_too_large = True
+                else:
+                    results = np.vstack([weights[i] * np.reshape(results[i], (1, len(results[i])))
+                                         for i in range(len(results))])
+                    result = results.sum(axis=0).flatten()
+            else:
+                text_too_large = True
         return result, text_too_large
 
-    def embed(self, text, model_type='all-MiniLM-L12-v2'):
+    def embed(self, text, model_type='all-MiniLM-L12-v2', force_split=False):
         self.load_model(model_type)
         if model_type not in self.models.keys():
             raise NotImplementedError(f"Selected model type not implemented: {model_type}")
@@ -230,7 +261,7 @@ class EmbeddingModels:
         max_tokens = self._get_model_max_tokens(model)
         if text is None or len(text) == 0:
             return None, False, max_tokens
-        results, text_too_large = self._embed(model, text)
+        results, text_too_large = self._embed(model, text, force_split)
         return results, text_too_large, max_tokens
 
 
