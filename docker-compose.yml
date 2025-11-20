@@ -1,4 +1,5 @@
 services:
+
   rabbitmq:
     image: rabbitmq:3.13-management
     container_name: rabbitmq
@@ -6,9 +7,11 @@ services:
       - "5672:5672"      # AMQP
       - "15672:15672"    # mgmt UI
       - "15692:15692"    # Prometheus metrics (management image has plugin)
+    env_file:
+      - .env
     environment:
-      RABBITMQ_DEFAULT_USER: graphai
-      RABBITMQ_DEFAULT_PASS: graphai
+      RABBITMQ_DEFAULT_USER: ${AI_RABBITMQ_DEV_CELERY_USER}
+      RABBITMQ_DEFAULT_PASS: ${AI_RABBITMQ_DEV_CELERY_PASS}
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
 
@@ -24,7 +27,8 @@ services:
   redis-commander:
     image: visol/redis-commander:0.8.0   # multi-arch incl. arm64
     environment:
-      - REDIS_HOSTS=local:redis:6379
+      # - REDIS_HOSTS=local:redis:6379
+      - REDIS_HOSTS=local:redis:6379:1
     ports:
       - "8081:8081"
     depends_on: [redis]
@@ -33,8 +37,10 @@ services:
   celery_exporter:
     image: danihodovic/celery-exporter:latest
     platform: linux/amd64           # on Apple Silicon
+    env_file:
+      - .env
     environment:
-      CE_BROKER_URL: amqp://graphai:graphai@rabbitmq:5672//
+      CE_BROKER_URL: amqp://${AI_RABBITMQ_DEV_CELERY_USER}:${AI_RABBITMQ_DEV_CELERY_PASS}@rabbitmq:5672//
       CE_ACCEPT_CONTENT: pickle,json
       CE_RETRY_INTERVAL: "5"        # optional: keep retrying if broker isn’t ready
     ports:
@@ -43,50 +49,33 @@ services:
       - rabbitmq
     restart: unless-stopped
 
+  # Flower for Celery management
+  flower:
+    image: mher/flower:2.0
+    container_name: flower
+    env_file:
+      - .env
+    command: >
+      celery --broker=amqp://${AI_RABBITMQ_DEV_CELERY_USER}:${AI_RABBITMQ_DEV_CELERY_PASS}@rabbitmq:5672// flower
+      --port=5555
+      --basic_auth=${AI_FLOWER_DEV_CELERY_USER}:${AI_FLOWER_DEV_CELERY_PASS}
+    environment:
+      - CELERY_BROKER_URL=amqp://${AI_RABBITMQ_DEV_CELERY_USER}:${AI_RABBITMQ_DEV_CELERY_PASS}@rabbitmq:5672//
+      - CELERY_RESULT_BACKEND=redis://redis:6379/1
+    ports:
+      - "5555:5555"
+    depends_on:
+      - rabbitmq
+      - redis
+
   # Docker Desktop–friendly container metrics (CPU/RAM/NET/IO) via Docker API
   docker_stats_exporter:
     image: wywywywy/docker_stats_exporter:latest
     container_name: docker_stats_exporter
     ports:
-      - "9417:9417"
+      - "9417:9487"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-
-  prometheus:
-    image: prom/prometheus
-    container_name: prometheus
-    ports:
-      - "9090:9090"
-    volumes:
-      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
-    depends_on:
-      - rabbitmq
-      - celery_exporter
-      - docker_stats_exporter
-
-  grafana:
-    image: grafana/grafana
-    container_name: grafana
-    ports:
-      - "3000:3000"
-    volumes:
-      - grafana_data:/var/lib/grafana
-    depends_on:
-      - prometheus
-
-  # # Optional: cAdvisor (only works on real Linux hosts; not Docker Desktop)
-  # cadvisor:
-  #   image: ghcr.io/google/cadvisor:v0.49.2
-  #   container_name: cadvisor
-  #   profiles: ["linux-only"]
-  #   ports:
-  #     - "8080:8080"
-  #   volumes:
-  #     - /var/run/docker.sock:/var/run/docker.sock
-  #     - /:/rootfs:ro
-  #     - /var/run:/var/run:rw
-  #     - /sys:/sys:ro
-  #     - /var/lib/docker/:/var/lib/docker:ro
 
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.15.0
@@ -106,22 +95,61 @@ services:
       - es_data:/usr/share/elasticsearch/data
       - ./.certs:/usr/share/elasticsearch/config/certs:ro
 
-  kibana:
-    image: docker.elastic.co/kibana/kibana:8.15.0
-    environment:
-      - ELASTICSEARCH_HOSTS=https://elasticsearch:9203 # Match ES URL + port + https
-      - ELASTICSEARCH_SSL_CERTIFICATEAUTHORITIES=/usr/share/kibana/config/certs/ca.crt # CA path relative to /usr/share/kibana/config
-      - ELASTICSEARCH_SERVICEACCOUNTTOKEN=${KIBANA_SERVICE_TOKEN} # Service account token tied to THIS ES cluster
-      - SERVER_PORT=5604 # Run Kibana on 5604 inside the container to match your mapping
+  mysql:
+    image: mysql:8.4
+    container_name: mysql
     ports:
-      - "5604:5604"
-    depends_on:
-      - elasticsearch
+      - "3306:3306"
+    networks: [graphai_net, default]
+    env_file:
+      - .env
+    environment:
+      MYSQL_ROOT_PASSWORD: ${AI_MYSQL_DEV_ROOT_PASS}
+      MYSQL_DATABASE: graphai
+      MYSQL_USER: ${AI_MYSQL_DEV_CELERY_USER}
+      MYSQL_PASSWORD: ${AI_MYSQL_DEV_CELERY_PASS}
+    command: >
+      --mysql-native-password=ON
+      --character-set-server=utf8mb4
+      --collation-server=utf8mb4_unicode_ci
     volumes:
-      - ./.certs:/usr/share/kibana/config/certs:ro
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-p${AI_MYSQL_DEV_ROOT_PASS}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  adminer:
+    image: adminer
+    container_name: adminer
+    ports:
+      - "8082:8080"
+    depends_on: [mysql]
+    environment:
+      ADMINER_DEFAULT_SERVER: mysql
+    networks: [graphai_net, default]
+
+  nvidia_gpu_exporter:
+    image: nvidia/dcgm-exporter:latest
+    container_name: nvidia_gpu_exporter
+    environment:
+      - DCGM_EXPORTER_LISTEN=:9400
+    ports:
+      - "9400:9400"
+    restart: unless-stopped
+    gpus: all
+    networks:
+      - graphai_net
+
+networks:
+  graphai_net:
+    name: graphai_net
+    driver: bridge
 
 volumes:
   rabbitmq_data:
   redis_data:
-  grafana_data:
   es_data:
+  mysql_data:

@@ -5,7 +5,7 @@ import pandas as pd
 
 
 def check_if_concept_has_been_added(db_manager, concept_id):
-    query = ("SELECT COUNT(*) FROM test_graph_ontology.Edges_N_ConceptsCluster_N_Concept_T_ParentToChild "
+    query = ("SELECT COUNT(*) FROM graph_ontology.Edges_N_ConceptsCluster_N_Concept_T_ParentToChild "
              "WHERE to_id=%s")
     result = db_manager.execute_query(query, values=(concept_id, ))[0][0]
     if result == 0:
@@ -17,7 +17,7 @@ def check_if_concept_has_been_added(db_manager, concept_id):
 
 
 def get_number_of_ontology_concepts(db_manager):
-    query = "SELECT COUNT(*) FROM test_graph_ontology.Nodes_N_Concept WHERE is_ontology_concept=1;"
+    query = "SELECT COUNT(*) FROM graph_ontology.Nodes_N_Concept WHERE is_ontology_concept=1;"
     result = db_manager.execute_query(query)[0][0]
     return result
 
@@ -25,7 +25,7 @@ def get_number_of_ontology_concepts(db_manager):
 def verify_category_cluster_relationship(db_manager, cluster_id, category_id):
     if cluster_id == '-':
         return True
-    query = ("SELECT COUNT(*) FROM test_graph_ontology.Edges_N_Category_N_ConceptsCluster_T_ParentToChild "
+    query = ("SELECT COUNT(*) FROM graph_ontology.Edges_N_Category_N_ConceptsCluster_T_ParentToChild "
              "WHERE from_id=%s AND to_id=%s;")
     result = db_manager.execute_query(query, values=(category_id, cluster_id))[0][0]
     if result == 0:
@@ -35,12 +35,12 @@ def verify_category_cluster_relationship(db_manager, cluster_id, category_id):
 
 def add_concept_to_existing_cluster(db_manager, concept_id, cluster_id):
     # Insert concept into cluster-concept table
-    query = ("INSERT INTO `test_graph_ontology`.`Edges_N_ConceptsCluster_N_Concept_T_ParentToChild` (`from_id`, `to_id`) "
+    query = ("INSERT INTO `graph_ontology`.`Edges_N_ConceptsCluster_N_Concept_T_ParentToChild` (`from_id`, `to_id`) "
              "VALUES (%s, %s)")
     db_manager.execute_query(query, values=(cluster_id, concept_id))
 
     # Fix the flags for the concept node
-    query = ("UPDATE `test_graph_ontology`.`Nodes_N_Concept` SET "
+    query = ("UPDATE `graph_ontology`.`Nodes_N_Concept` SET "
              "`is_ontology_concept` = 1, "
              "`is_ontology_neighbour` = 0, "
              "`is_unused` = 0 "
@@ -51,18 +51,18 @@ def add_concept_to_existing_cluster(db_manager, concept_id, cluster_id):
 def add_concept_to_new_cluster(db_manager, concept_id, category_id):
     # Generate new cluster id
     query = ("SELECT CAST(MAX(CAST(from_id AS UNSIGNED)) + 1 AS CHAR(255)) "
-             "FROM test_graph_ontology.Edges_N_ConceptsCluster_N_Concept_T_ParentToChild")
+             "FROM graph_ontology.Edges_N_ConceptsCluster_N_Concept_T_ParentToChild")
     new_cluster_id = db_manager.execute_query(query)[0][0]
     # Insert concept into cluster-concept table
-    query = ("INSERT INTO `test_graph_ontology`.`Edges_N_ConceptsCluster_N_Concept_T_ParentToChild` (`from_id`, `to_id`) "
+    query = ("INSERT INTO `graph_ontology`.`Edges_N_ConceptsCluster_N_Concept_T_ParentToChild` (`from_id`, `to_id`) "
              "VALUES (%s, %s)")
     db_manager.execute_query(query, values=(new_cluster_id, concept_id))
     # Insert new cluster into category-cluster table
-    query = ("INSERT INTO `test_graph_ontology`.`Edges_N_Category_N_ConceptsCluster_T_ParentToChild` (`from_id`, `to_id`) "
+    query = ("INSERT INTO `graph_ontology`.`Edges_N_Category_N_ConceptsCluster_T_ParentToChild` (`from_id`, `to_id`) "
              "VALUES (%s, %s);")
     db_manager.execute_query(query, values=(category_id, new_cluster_id))
     # Fix the flags for the concept node
-    query = ("UPDATE `test_graph_ontology`.`Nodes_N_Concept` SET "
+    query = ("UPDATE `graph_ontology`.`Nodes_N_Concept` SET "
              "`is_ontology_concept` = 1, "
              "`is_ontology_neighbour` = 0, "
              "`is_unused` = 0 "

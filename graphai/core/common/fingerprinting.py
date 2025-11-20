@@ -86,8 +86,9 @@ def md5_video_or_audio(input_filename_with_path, video=True):
         result, _ = ffmpeg.output(
             in_stream, 'pipe:', c='copy', format='md5'
         ).run(capture_stdout=True)
-    except Exception:
-        print("An error occurred while fingerprinting")
+    except Exception as e:
+        print("An error occurred while fingerprinting:")
+        print(e)
         return None
     # The result looks like 'MD5=9735151f36a3e628b0816b1bba3b9640\n' so we clean it up
     return (result.decode('utf8').strip())[4:]

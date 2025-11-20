@@ -31,7 +31,7 @@ class ConceptsGraph:
         ################################################################
 
         # Load Concept nodes
-        table_name = 'test_graph_ontology.Nodes_N_Concept'
+        table_name = 'graph_ontology.Nodes_N_Concept'
         fields = ['id', 'name']
         columns = ['concept_id', 'concept_name']
         conditions = {'is_unused': False}
@@ -40,7 +40,7 @@ class ConceptsGraph:
         ################################################################
 
         # Load Concept-Concept edges (graph)
-        table_name = 'test_graph_ontology.Edges_N_Concept_N_Concept_T_Undirected'
+        table_name = 'graph_ontology.Edges_N_Concept_N_Concept_T_Undirected'
         fields = ['from_id', 'to_id', 'normalised_score']
         columns = ['source_concept_id', 'target_concept_id', 'score']
         self.concepts_concepts = pd.DataFrame(db.find(table_name, fields=fields), columns=columns)
@@ -54,7 +54,7 @@ class ConceptsGraph:
         ################################################################
 
         # Load Category nodes
-        table_name = 'test_graph_ontology.Nodes_N_Category'
+        table_name = 'graph_ontology.Nodes_N_Category'
         fields = ['id', 'name', 'depth']
         columns = ['category_id', 'category_name', 'depth']
         self.categories = pd.DataFrame(db.find(table_name, fields=fields), columns=columns)
@@ -62,7 +62,7 @@ class ConceptsGraph:
         ################################################################
 
         # Load Category-Category edges (ontology category tree)
-        table_name = 'test_graph_ontology.Edges_N_Category_N_Category_T_ChildToParent'
+        table_name = 'graph_ontology.Edges_N_Category_N_Category_T_ChildToParent'
         fields = ['from_id', 'to_id']
         columns = ['child_category_id', 'parent_category_id']
         self.categories_categories = pd.DataFrame(db.find(table_name, fields=fields), columns=columns)
@@ -74,13 +74,13 @@ class ConceptsGraph:
         #   and from concept clusters to level 4 categories.
 
         # Load Concept-Cluster edges
-        table_name = 'test_graph_ontology.Edges_N_ConceptsCluster_N_Concept_T_ParentToChild'
+        table_name = 'graph_ontology.Edges_N_ConceptsCluster_N_Concept_T_ParentToChild'
         fields = ['to_id', 'from_id']
         columns = ['concept_id', 'cluster_id']
         concepts_clusters = pd.DataFrame(db.find(table_name, fields=fields), columns=columns)
 
         # Load Cluster-Category edges
-        table_name = 'test_graph_ontology.Edges_N_Category_N_ConceptsCluster_T_ParentToChild'
+        table_name = 'graph_ontology.Edges_N_Category_N_ConceptsCluster_T_ParentToChild'
         fields = ['to_id', 'from_id']
         columns = ['cluster_id', 'category_id']
         clusters_categories = pd.DataFrame(db.find(table_name, fields=fields), columns=columns)

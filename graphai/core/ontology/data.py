@@ -215,7 +215,7 @@ def average_and_combine(s1, s2, l1, l2, avg, coeffs, skip_empty=False):
 
 def embeddings_table_exists():
     query = ("SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES "
-             "WHERE TABLE_SCHEMA='test_graph_ontology' AND TABLE_NAME='Edges_N_Concept_N_Concept_T_Embeddings';")
+             "WHERE TABLE_SCHEMA='graph_ontology' AND TABLE_NAME='Edges_N_Concept_N_Concept_T_Embeddings';")
     db_manager = DB(config['database'])
     result = db_manager.execute_query(query)[0][0]
     return result == 1
@@ -326,7 +326,7 @@ class OntologyData:
     def load_ontology_concept_names(self):
         db_manager = DB(self.db_config)
         self.ontology_concept_names = db_results_to_pandas_df(db_manager.execute_query(
-            "SELECT id, name FROM test_graph_ontology.Nodes_N_Concept WHERE is_ontology_concept=1"),
+            "SELECT id, name FROM graph_ontology.Nodes_N_Concept WHERE is_ontology_concept=1"),
             ['id', 'name']
         )
         self.ontology_concept_names['id'] = self.ontology_concept_names['id'].astype(str)
@@ -336,7 +336,7 @@ class OntologyData:
         db_manager = DB(self.db_config)
         self.ontology_categories = db_results_to_pandas_df(db_manager.execute_query(
             "SELECT a.id AS category_id, a.depth AS depth, b.id AS concept_id, b.name AS concept_name "
-            "FROM test_graph_ontology.Nodes_N_Category a JOIN test_graph_ontology.Nodes_N_Concept b "
+            "FROM graph_ontology.Nodes_N_Category a JOIN graph_ontology.Nodes_N_Concept b "
             "ON a.reference_page_id=b.id "
             "WHERE b.is_ontology_category=1;"),
             ['category_id', 'depth', 'id', 'name']
@@ -349,7 +349,7 @@ class OntologyData:
     def load_non_ontology_concept_names(self):
         db_manager = DB(self.db_config)
         self.non_ontology_concept_names = db_results_to_pandas_df(db_manager.execute_query(
-            "SELECT id, name FROM test_graph_ontology.Nodes_N_Concept WHERE is_ontology_neighbour=1"),
+            "SELECT id, name FROM graph_ontology.Nodes_N_Concept WHERE is_ontology_neighbour=1"),
             ['id', 'name']
         )
         self.non_ontology_concept_names['id'] = self.non_ontology_concept_names['id'].astype(str)
@@ -357,7 +357,7 @@ class OntologyData:
     def load_concept_concept_graphscore(self):
         db_manager = DB(self.db_config)
         self.concept_concept_graphscore = db_results_to_pandas_df(db_manager.execute_query(
-            "SELECT from_id, to_id, score FROM test_graph_ontology.Edges_N_Concept_N_Concept_T_Undirected"),
+            "SELECT from_id, to_id, score FROM graph_ontology.Edges_N_Concept_N_Concept_T_Undirected"),
             ['from_id', 'to_id', 'score']
         )
         self.concept_edge_counts = get_col_to_col_dict(
@@ -371,7 +371,7 @@ class OntologyData:
     def load_category_category(self):
         db_manager = DB(self.db_config)
         self.category_category = db_results_to_pandas_df(db_manager.execute_query(
-            "SELECT from_id, to_id FROM test_graph_ontology.Edges_N_Category_N_Category_T_ChildToParent;"),
+            "SELECT from_id, to_id FROM graph_ontology.Edges_N_Category_N_Category_T_ChildToParent;"),
             ['from_id', 'to_id']
         )
         category_category_agg = self.category_category.assign(
@@ -382,11 +382,11 @@ class OntologyData:
     def load_category_concept(self):
         db_manager = DB(self.db_config)
         self.category_cluster = db_results_to_pandas_df(db_manager.execute_query(
-            "SELECT from_id, to_id FROM test_graph_ontology.Edges_N_Category_N_ConceptsCluster_T_ParentToChild"),
+            "SELECT from_id, to_id FROM graph_ontology.Edges_N_Category_N_ConceptsCluster_T_ParentToChild"),
             ['from_id', 'to_id']
         )
         self.cluster_concept = db_results_to_pandas_df(db_manager.execute_query(
-            "SELECT from_id, to_id FROM test_graph_ontology.Edges_N_ConceptsCluster_N_Concept_T_ParentToChild"),
+            "SELECT from_id, to_id FROM graph_ontology.Edges_N_ConceptsCluster_N_Concept_T_ParentToChild"),
             ['from_id', 'to_id']
         )
 
@@ -466,7 +466,7 @@ class OntologyData:
         db_manager = DB(self.db_config)
         # Load the direct anchor page table
         base_anchors = db_results_to_pandas_df(db_manager.execute_query(
-            "SELECT from_id, to_id FROM test_graph_ontology.Edges_N_Category_N_Concept_T_AnchorPage"
+            "SELECT from_id, to_id FROM graph_ontology.Edges_N_Category_N_Concept_T_AnchorPage"
         ), ['from_id', 'to_id'])
         # Aggregate the direct anchors of each category into a list
         base_anchors['to_id'] = base_anchors['to_id'].apply(lambda x: [x])
@@ -856,7 +856,7 @@ class OntologyData:
             return None, None
         db_manager = DB(config['database'])
         query = """
-        SELECT to_id, score FROM test_graph_ontology.Edges_N_Concept_N_Concept_T_Embeddings
+        SELECT to_id, score FROM graph_ontology.Edges_N_Concept_N_Concept_T_Embeddings
         WHERE from_id=%s;
         """
         results = db_manager.execute_query(query, values=(concept_id, ))
@@ -1016,18 +1016,18 @@ class OntologyData:
         # Query to get closest category based on category concepts
         concepts_query = """
         SELECT c.from_id, SUM(a.score) as score_total FROM
-        test_graph_ontology.Edges_N_Concept_N_Concept_T_Embeddings a
-        INNER JOIN test_graph_ontology.Edges_N_ConceptsCluster_N_Concept_T_ParentToChild b
-        INNER JOIN test_graph_ontology.Edges_N_Category_N_ConceptsCluster_T_ParentToChild c
+        graph_ontology.Edges_N_Concept_N_Concept_T_Embeddings a
+        INNER JOIN graph_ontology.Edges_N_ConceptsCluster_N_Concept_T_ParentToChild b
+        INNER JOIN graph_ontology.Edges_N_Category_N_ConceptsCluster_T_ParentToChild c
         ON a.to_id=b.to_id AND b.from_id=c.to_id WHERE a.from_id=%s
         GROUP BY c.from_id;
         """
         # Query to get closest category based on category anchor pages
         anchors_query = """
         SELECT b.from_id, SUM(a.score) as score_total FROM
-        test_graph_ontology.Edges_N_Concept_N_Concept_T_Embeddings a
-        INNER JOIN test_graph_ontology.Edges_N_Category_N_Concept_T_AnchorPage b
-        INNER JOIN test_graph_ontology.Nodes_N_Category c
+        graph_ontology.Edges_N_Concept_N_Concept_T_Embeddings a
+        INNER JOIN graph_ontology.Edges_N_Category_N_Concept_T_AnchorPage b
+        INNER JOIN graph_ontology.Nodes_N_Category c
         ON a.to_id=b.to_id AND b.from_id=c.id WHERE a.from_id=%s AND c.depth=4
         GROUP BY b.from_id;
         """
@@ -1054,9 +1054,9 @@ class OntologyData:
         db_manager = DB(config['database'])
         query = """
         SELECT b.from_id, SUM(a.score) as score_total FROM
-        test_graph_ontology.Edges_N_Concept_N_Concept_T_Embeddings a
-        INNER JOIN test_graph_ontology.Edges_N_ConceptsCluster_N_Concept_T_ParentToChild b
-        INNER JOIN test_graph_ontology.Edges_N_Category_N_ConceptsCluster_T_ParentToChild c
+        graph_ontology.Edges_N_Concept_N_Concept_T_Embeddings a
+        INNER JOIN graph_ontology.Edges_N_ConceptsCluster_N_Concept_T_ParentToChild b
+        INNER JOIN graph_ontology.Edges_N_Category_N_ConceptsCluster_T_ParentToChild c
         ON a.to_id=b.to_id AND b.from_id=c.to_id WHERE a.from_id=%s AND c.from_id=%s
         GROUP BY b.from_id
         ORDER BY score_total DESC;
@@ -1158,20 +1158,20 @@ class OntologyData:
         concept_lengths = self.symmetric_concept_concept_matrix['d4_cat_concepts_lengths']
         concepts_query = """
         SELECT c.from_id, SUM(a.score) as score_total FROM
-        test_graph_ontology.Edges_N_ConceptsCluster_N_Concept_T_ParentToChild cc
-        INNER JOIN test_graph_ontology.Edges_N_Concept_N_Concept_T_Embeddings a
-        INNER JOIN test_graph_ontology.Edges_N_ConceptsCluster_N_Concept_T_ParentToChild b
-        INNER JOIN test_graph_ontology.Edges_N_Category_N_ConceptsCluster_T_ParentToChild c
+        graph_ontology.Edges_N_ConceptsCluster_N_Concept_T_ParentToChild cc
+        INNER JOIN graph_ontology.Edges_N_Concept_N_Concept_T_Embeddings a
+        INNER JOIN graph_ontology.Edges_N_ConceptsCluster_N_Concept_T_ParentToChild b
+        INNER JOIN graph_ontology.Edges_N_Category_N_ConceptsCluster_T_ParentToChild c
         ON cc.to_id=a.from_id AND a.to_id=b.to_id AND b.from_id=c.to_id WHERE cc.from_id=%s
         GROUP BY c.from_id;
         """
         # Query to get closest category based on category anchor pages
         anchors_query = """
         SELECT b.from_id, SUM(a.score) as score_total FROM
-        test_graph_ontology.Edges_N_ConceptsCluster_N_Concept_T_ParentToChild cc
-        INNER JOIN test_graph_ontology.Edges_N_Concept_N_Concept_T_Embeddings a
-        INNER JOIN test_graph_ontology.Edges_N_Category_N_Concept_T_AnchorPage b
-        INNER JOIN test_graph_ontology.Nodes_N_Category c
+        graph_ontology.Edges_N_ConceptsCluster_N_Concept_T_ParentToChild cc
+        INNER JOIN graph_ontology.Edges_N_Concept_N_Concept_T_Embeddings a
+        INNER JOIN graph_ontology.Edges_N_Category_N_Concept_T_AnchorPage b
+        INNER JOIN graph_ontology.Nodes_N_Category c
         ON cc.to_id=a.from_id AND a.to_id=b.to_id AND b.from_id=c.id WHERE cc.from_id=%s AND c.depth=4
         GROUP BY b.from_id;
         """
@@ -1203,9 +1203,9 @@ class OntologyData:
         concept_lengths = self.symmetric_concept_concept_matrix['d4_cat_concepts_lengths']
         concepts_query = f"""
         SELECT c.from_id, SUM(a.score) as score_total FROM
-        test_graph_ontology.Edges_N_Concept_N_Concept_T_Embeddings a
-        INNER JOIN test_graph_ontology.Edges_N_ConceptsCluster_N_Concept_T_ParentToChild b
-        INNER JOIN test_graph_ontology.Edges_N_Category_N_ConceptsCluster_T_ParentToChild c
+        graph_ontology.Edges_N_Concept_N_Concept_T_Embeddings a
+        INNER JOIN graph_ontology.Edges_N_ConceptsCluster_N_Concept_T_ParentToChild b
+        INNER JOIN graph_ontology.Edges_N_Category_N_ConceptsCluster_T_ParentToChild c
         ON a.to_id=b.to_id AND b.from_id=c.to_id
         WHERE a.from_id IN ({','.join(["%s"] * len(concept_ids))})
         GROUP BY c.from_id;
@@ -1213,9 +1213,9 @@ class OntologyData:
         # Query to get closest category based on category anchor pages
         anchors_query = f"""
         SELECT b.from_id, SUM(a.score) as score_total FROM
-        test_graph_ontology.Edges_N_Concept_N_Concept_T_Embeddings a
-        INNER JOIN test_graph_ontology.Edges_N_Category_N_Concept_T_AnchorPage b
-        INNER JOIN test_graph_ontology.Nodes_N_Category c
+        graph_ontology.Edges_N_Concept_N_Concept_T_Embeddings a
+        INNER JOIN graph_ontology.Edges_N_Category_N_Concept_T_AnchorPage b
+        INNER JOIN graph_ontology.Nodes_N_Category c
         ON a.to_id=b.to_id AND b.from_id=c.id
         WHERE a.from_id IN ({','.join(["%s"] * len(concept_ids))}) AND c.depth=4
         GROUP BY b.from_id;

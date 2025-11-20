@@ -218,3 +218,8 @@ config.ini
 .env
 .certs
 .vscode
+env-bak
+.gitleaks.toml
+.infisical.env
+notes.txt
+prometheus.yml

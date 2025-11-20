@@ -10,6 +10,9 @@ numba==0.62.1
 llvmlite==0.45.1
 torch==2.2.2
 
+# langchain
+langchain-text-splitters>=0.2.0
+
 # protobuf/grpc stability for Google libs
 protobuf<5
 grpcio>=1.48,<2

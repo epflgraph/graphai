@@ -360,6 +360,10 @@ def reextract_cached_audio(token, file_manager):
 
 
 def compute_audio_fingerprint(results, file_manager, force=False):
+    import rich
+    print('==================================================================')
+    rich.print_json(data=results)
+    print('==================================================================')
     token = results['token']
     if not is_token(token):
         return {

@@ -1,0 +1,19 @@
+# environment.yml
+name: tools
+channels:
+  - conda-forge
+
+dependencies:
+  # CLI binaries
+  - jq
+  - ffmpeg
+  - tesseract
+  - imagemagick
+  - poppler
+  - leptonica
+  - ghostscript
+  - libjpeg-turbo
+  - libpng
+  - libtiff
+  - freetype
+

@@ -12,7 +12,7 @@ SET @concepts_to_add := '<CONCEPT ID 1>,<CONCEPT ID 2>,...';
 SET @values_to_insert = REPLACE(@concepts_to_add, ',', CONCAT(', ', @cluster_id, '),('));
 SET @values_to_insert = CONCAT('(', @values_to_insert, ', ', @cluster_id, ')'); -- This produces a string like this -> (<CONCEPT ID 1>, <CLUSTER ID>),(<CONCEPT ID 2>, <CLUSTER ID>),...
 
-SET @insert_statement = CONCAT('INSERT INTO `test_graph_ontology`.`Edges_N_ConceptsCluster_N_Concept_T_ParentToChild` (`to_id`, `from_id`) VALUES', @values_to_insert); -- Build INSERT statement like this -> INSERT INTO RolesMenus VALUES(1, 100),(2, 100),(3, 100)
+SET @insert_statement = CONCAT('INSERT INTO `graph_ontology`.`Edges_N_ConceptsCluster_N_Concept_T_ParentToChild` (`to_id`, `from_id`) VALUES', @values_to_insert); -- Build INSERT statement like this -> INSERT INTO RolesMenus VALUES(1, 100),(2, 100),(3, 100)
 
 -- Execute INSERT statement
 PREPARE stmt FROM @insert_statement;
@@ -21,7 +21,7 @@ DEALLOCATE PREPARE stmt;
 
 -- Switching the is_ontology_concept flag on in the concepts table
 
-UPDATE `test_graph_ontology`.`Nodes_N_Concept`
+UPDATE `graph_ontology`.`Nodes_N_Concept`
 SET
 `is_ontology_concept` = 1,
 `is_ontology_neighbour` = 0,
