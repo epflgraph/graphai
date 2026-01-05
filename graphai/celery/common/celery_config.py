@@ -10,6 +10,23 @@ from graphai.core.common.config import config
 DEFAULT_BROKER = "amqp://guest:guest@localhost:5672//"
 DEFAULT_BACKEND = "redis://localhost:6379/0"
 
+# Queue priorities (1 = lowest, 9 = highest)
+queue_priorities = {
+    "celery": 1,
+    "caching": 9,
+    "video": 5,
+    "image": 7,
+    "voice": 5,
+    "voice_gpu": 5,
+    "translation": 5,
+    "translation_gpu": 5,
+    "embedding_gpu": 8,
+    "ontology": 4,
+    "text": 6,
+    "scraping": 3,
+    "rag": 8
+}
+
 
 def route_task(name, args, kwargs, options, task=None, **kw):
     # Naming convention: name of a task follows the `queue.taskname` format. `taskname` may have further dots.
@@ -36,23 +53,31 @@ class BaseConfig:
 
         self.CELERY_WORKER_REDIRECT_STDOUTS: bool = False
         self.CELERY_TASK_QUEUES: list = [
-            # default queue
-            Queue("celery"),
-            # custom queues
-            # Concept detection
-            Queue("text_10", max_priority=10),
-            # Retrieval
-            Queue("retrieval_10", max_priority=10),
-            # Cache lookups
-            Queue("caching_6", max_priority=6),
-            # Translation
-            Queue("text_6", max_priority=6),
-            # Video, voice, image
-            Queue("video_2", max_priority=2),
-            # Ontology
-            Queue("ontology_6", max_priority=6),
-            # Scraping
-            Queue("scraping_6", max_priority=6)
+            
+            #----------------------#
+            # Default Celery Queue #
+            #----------------------#
+            Queue("celery", max_priority=queue_priorities["celery"]), # ⚪ Lowest priority fallback queue
+
+            #---------------#
+            # Caching Queue #
+            #---------------#
+            Queue("caching", max_priority=queue_priorities["caching"]), # 🔴 Highest priority (cache hits)
+
+            #-----------------#
+            # Endpoint Queues #
+            #-----------------#
+            Queue("video"          , max_priority=queue_priorities["video"]),           # /video ................. 🔵 Graph pipeline work
+            Queue("image"          , max_priority=queue_priorities["image"]),           # /image ................. 🔴 High priority (for RAG pipeline)
+            Queue("voice"          , max_priority=queue_priorities["voice"]),           # /voice ................. 🔵 Graph pipeline work
+            Queue("voice_gpu"      , max_priority=queue_priorities["voice_gpu"]),       # /voice (GPU) ........... 🔵 Graph pipeline work (slow tasks)
+            Queue("translation"    , max_priority=queue_priorities["translation"]),     # /translation ........... 🔵 Graph pipeline work
+            Queue("translation_gpu", max_priority=queue_priorities["translation_gpu"]), # /translation (GPU) ..... 🔵 Graph pipeline work (slow tasks)
+            Queue("embedding_gpu"  , max_priority=queue_priorities["embedding_gpu"]),   # /embedding (GPU) ....... 🔴 Misson critical (for Chatbot)
+            Queue("ontology"       , max_priority=queue_priorities["ontology"]),        # /ontology .............. 🟢 Used sparingly
+            Queue("text"           , max_priority=queue_priorities["text"]),            # /text .................. 🟡 Concept detection (lots of tasks) 
+            Queue("scraping"       , max_priority=queue_priorities["scraping"]),        # /scraping .............. 🟢 Used sparingly
+            Queue("rag"            , max_priority=queue_priorities["rag"])              # /rag ................... 🔴 Misson critical (for Chatbot)
         ]
 
         self.CELERY_TASK_ROUTES = (route_task,)
@@ -99,17 +124,17 @@ def create_celery():
     celery_app.conf.update(broker_transport_options={'visibility_timeout': 9999999})
     celery_app.conf.update(beat_schedule={
         'cleanup-embedding-model-every-six-hours': {
-            'task': 'text_6.clean_up_large_embedding_objects',
+            'task': 'embedding_gpu.clean_up_large_embedding_objects',
             'schedule': 6 * 3600.0
             # Every 6 hours
         },
         'cleanup-translation-model-every-six-hours': {
-            'task': 'text_6.clean_up_translation_object',
+            'task': 'translation_gpu.clean_up_translation_object',
             'schedule': 6 * 3600.0
             # Every 6 hours
         },
         'cleanup-whisper-model-every-twentyfour-hours': {
-            'task': 'video_2.clean_up_transcription_object',
+            'task': 'voice_gpu.clean_up_transcription_object',
             'schedule': 24 * 3600.0
             # Every 24 hours
         }

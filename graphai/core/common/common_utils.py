@@ -203,6 +203,12 @@ def retrieve_generic_file_from_generic_url(url, output_filename_with_path, outpu
 
 
 def is_url(s):
+    print('===================================')
+    print(s)
+    print('===================================')
+    if s is None:
+        print("ERROR: null URL value.")
+        return False
     if s.startswith('http://') or s.startswith('https://'):
         return True
     return False

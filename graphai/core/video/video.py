@@ -768,6 +768,8 @@ def reextract_cached_slides(token, file_manager):
 
 def compute_single_image_fingerprint(results, file_manager):
     token = results['token']
+    import rich
+    rich.print_json(data=results)
     # Making sure the slide's cache row exists, because otherwise, the operation should be cancelled!
     if not is_token(token):
         return {

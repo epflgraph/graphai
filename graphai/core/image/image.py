@@ -1,4 +1,5 @@
 import json
+from loguru import logger as sysmsg
 
 from graphai.core.common.caching import (
     SlideDBCachingManager,
@@ -123,6 +124,7 @@ def upload_image_from_file(contents, file_extension, file_manager):
             'token_size': get_file_size(filename_with_path)
         }
     except Exception as e:
+        sysmsg.error("[KNbs06RW] Error uploading image from file.")
         print(e)
         return {
             'token': None,
