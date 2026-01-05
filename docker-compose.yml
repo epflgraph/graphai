@@ -51,7 +51,7 @@ services:
 
   # Flower for Celery management
   flower:
-    image: mher/flower:2.0
+    image: mher/flower:2.0.1
     container_name: flower
     env_file:
       - .env
@@ -79,8 +79,10 @@ services:
 
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.15.0
+    container_name: elasticsearch
     environment:
       - discovery.type=single-node
+      - ELASTIC_PASSWORD=elastic_pw
       - xpack.security.enabled=true
       - xpack.security.http.ssl.enabled=true # HTTPS on HTTP layer
       - xpack.security.http.ssl.certificate=certs/http.crt
@@ -92,7 +94,7 @@ services:
     ports:
       - "9203:9203"
     volumes:
-      - es_data:/usr/share/elasticsearch/data
+      - .data/docker/elasticsearch:/usr/share/elasticsearch/data
       - ./.certs:/usr/share/elasticsearch/config/certs:ro
 
   mysql:
@@ -151,5 +153,4 @@ networks:
 volumes:
   rabbitmq_data:
   redis_data:
-  es_data:
   mysql_data:
