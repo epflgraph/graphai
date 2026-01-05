@@ -228,3 +228,4 @@ NS_*.*
 promtail-*
 prometheus.yml
 scripts/ontology
+scripts/infisical
