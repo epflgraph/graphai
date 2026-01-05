@@ -214,7 +214,6 @@ __marimo__/
 
 # Repo-specific
 config.ini
-
 .env
 .certs
 .vscode
@@ -225,3 +224,7 @@ notes.txt
 prometheus.yml
 .trash
 .data
+NS_*.*
+promtail-*
+prometheus.yml
+scripts/ontology
