@@ -31,7 +31,7 @@ embedding_models = EmbeddingModels()
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='text_6.init_embedding', ignore_result=False,
+             name='embedding_gpu.init_embedding', ignore_result=False,
              embedding_obj=embedding_models)
 def embedding_init_task(self):
     print('Start init_embedding task')
@@ -49,37 +49,37 @@ def embedding_init_task(self):
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='caching_6.cache_lookup_fingerprint_embedding_text', ignore_result=False)
+             name='caching.cache_lookup_fingerprint_embedding_text', ignore_result=False)
 def cache_lookup_embedding_text_fingerprint_task(self, token):
     return fingerprint_cache_lookup(token, EmbeddingDBCachingManager())
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='text_6.fingerprint_embedding_text', ignore_result=False)
+             name='text.fingerprint_embedding_text', ignore_result=False)
 def compute_embedding_text_fingerprint_task(self, token, text):
     return compute_text_fingerprint(token, text)
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='text_6.fingerprint_embedding_text_callback', ignore_result=False)
+             name='text.fingerprint_embedding_text_callback', ignore_result=False)
 def compute_embedding_text_fingerprint_callback_task(self, results, text, model_type):
     return compute_embedding_text_fingerprint_callback(results, text, model_type)
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='caching_6.embedding_text_lookup_using_fingerprint', ignore_result=False)
+             name='caching.embedding_text_lookup_using_fingerprint', ignore_result=False)
 def cache_lookup_embedding_text_using_fingerprint_task(self, token, fp, model_type):
     return fingerprint_based_embedding_lookup(token, fp, model_type)
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='caching_6.cache_lookup_embedding_text', ignore_result=False)
+             name='caching.cache_lookup_embedding_text', ignore_result=False)
 def cache_lookup_embedding_text_task(self, token, model_type):
     return token_based_embedding_lookup(token, model_type)
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='text_6.embed_text', embedding_obj=embedding_models, ignore_result=False)
+             name='embedding_gpu.embed_text', embedding_obj=embedding_models, ignore_result=False)
 def embed_text_task(self, text, model_type):
     if model_type is None:
         return {
@@ -95,55 +95,55 @@ def embed_text_task(self, text, model_type):
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='text_6.embed_text_callback', ignore_result=False)
+             name='embedding_gpu.embed_text_callback', ignore_result=False)
 def embed_text_callback_task(self, results, token, text, model_type, force=False):
     return insert_embedding_into_db(results, token, text, model_type, force)
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='text_6.embed_text_jsonify_callback', ignore_result=False)
+             name='embedding_gpu.embed_text_jsonify_callback', ignore_result=False)
 def embed_text_jsonify_callback_task(self, results):
     return jsonify_embedding_results(results)
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='text_6.embedding_text_list_fingerprint_parallel', ignore_result=False)
+             name='text.embedding_text_list_fingerprint_parallel', ignore_result=False)
 def embedding_text_list_fingerprint_parallel_task(self, tokens, text_list, i, n):
     return embedding_text_list_fingerprint_parallel(tokens, text_list, i, n)
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='text_6.embedding_text_list_dummy_fingerprint_parallel', ignore_result=False)
+             name='text.embedding_text_list_dummy_fingerprint_parallel', ignore_result=False)
 def embedding_text_list_dummy_fingerprint_parallel_task(self, tokens, text_list, i, n):
     return embedding_text_list_dummy_fingerprint_parallel(tokens, text_list, i, n)
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='text_6.embedding_text_list_fingerprint_callback', ignore_result=False)
+             name='text.embedding_text_list_fingerprint_callback', ignore_result=False)
 def embedding_text_list_fingerprint_callback_task(self, results, model_type):
     return embedding_text_list_fingerprint_callback(results, model_type)
 
 
 @shared_task(bind=True, autoretry_for=(RuntimeError,), retry_backoff=True,
              retry_kwargs={"max_retries": 3, "countdown": 3.0},
-             name='text_6.embedding_text_list_embed_parallel', embedding_obj=embedding_models, ignore_result=False)
+             name='embedding_gpu.embedding_text_list_embed_parallel', embedding_obj=embedding_models, ignore_result=False)
 def embedding_text_list_embed_parallel_task(self, input_list, model_type, i, n, force=False):
     return embedding_text_list_embed_parallel(input_list, self.embedding_obj, model_type, i, n, force)
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='text_6.embedding_text_list_jsonify_callback', ignore_result=False)
+             name='embedding_gpu.embedding_text_list_jsonify_callback', ignore_result=False)
 def embedding_text_list_jsonify_callback_task(self, results):
     return embedding_text_list_embed_jsonify_callback(results)
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='text_6.embedding_text_list_db_callback', ignore_result=False)
+             name='embedding_gpu.embedding_text_list_db_callback', ignore_result=False)
 def embedding_text_list_embed_callback_task(self, results, model_type, force=False):
     return embedding_text_list_embed_callback(results, model_type, force)
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='text_6.clean_up_large_embedding_objects', embedding_obj=embedding_models, ignore_result=False)
+             name='embedding_gpu.clean_up_large_embedding_objects', embedding_obj=embedding_models, ignore_result=False)
 def cleanup_large_embedding_objects_task(self):
     return self.embedding_obj.unload_model(EMBEDDING_UNLOAD_WAITING_PERIOD)

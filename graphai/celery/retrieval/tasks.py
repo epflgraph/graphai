@@ -13,7 +13,7 @@ anonymizer_model = AnonymizerModels()
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='retrieval_10.retrieve', ignore_result=False)
+             name='rag.retrieve', ignore_result=False)
 def retrieve_from_es_task(self, embedding_results, text, index_to_search_in,
                           filters=None, limit=10, return_scores=False, filter_by_date=False):
     return retrieve_from_es(embedding_results, text, index_to_search_in,
@@ -21,13 +21,13 @@ def retrieve_from_es_task(self, embedding_results, text, index_to_search_in,
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='retrieval_10.chunk', ignore_result=False)
+             name='rag.chunk', ignore_result=False)
 def chunk_text_task(self, text, chunk_size=400, chunk_overlap=100,
                     one_chunk_per_page=False, one_chunk_per_doc=False):
     return chunk_text(text, chunk_size, chunk_overlap, one_chunk_per_page, one_chunk_per_doc)
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='retrieval_10.anonymize', anonymization_obj=anonymizer_model, ignore_result=False)
+             name='rag.anonymize', anonymization_obj=anonymizer_model, ignore_result=False)
 def anonymize_text_task(self, text, lang):
     return anonymize_text(self.anonymization_obj, text, lang)

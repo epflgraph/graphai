@@ -35,7 +35,7 @@ es = ESConceptDetection(config['elasticsearch'],
 ################################################################
 
 
-@shared_task(bind=True, name='text_10.init', graph=graph)
+@shared_task(bind=True, name='text.init', graph=graph)
 def text_init_task(self):
     """
     Celery task that spawns and populates graph and ontology objects so that they are held in memory ready for requests to arrive.
@@ -55,31 +55,31 @@ def text_init_task(self):
     return True
 
 
-@shared_task(bind=True, name='text_10.extract_keywords')
+@shared_task(bind=True, name='text.extract_keywords')
 def extract_keywords_task(self, raw_text, **kwargs):
     return extract_keywords(raw_text, **kwargs)
 
 
-@shared_task(bind=True, name='text_10.wikisearch', es=es)
+@shared_task(bind=True, name='text.wikisearch', es=es)
 def wikisearch_task(self, keywords_list, **kwargs):
     return wikisearch(keywords_list, es=self.es, **kwargs)
 
 
-@shared_task(bind=True, name='text_10.compute_scores', graph=graph)
+@shared_task(bind=True, name='text.compute_scores', graph=graph)
 def compute_scores_task(self, results, **kwargs):
     return compute_scores(pd.concat(results, ignore_index=True), graph=self.graph, **kwargs)
 
 
-@shared_task(bind=True, name='text_10.draw_ontology', graph=graph)
+@shared_task(bind=True, name='text.draw_ontology', graph=graph)
 def draw_ontology_task(self, results, **kwargs):
     return draw_ontology(results, graph=self.graph, **kwargs)
 
 
-@shared_task(bind=True, name='text_10.draw_graph', graph=graph)
+@shared_task(bind=True, name='text.draw_graph', graph=graph)
 def draw_graph_task(self, results, **kwargs):
     return draw_graph(results, graph=self.graph, **kwargs)
 
 
-@shared_task(bind=True, name='text_10.generate_exercise_task')
+@shared_task(bind=True, name='text.generate_exercise_task')
 def generate_exercise_task(self, *args, **kwargs):
     return generate_exercise(*args, **kwargs)
