@@ -1,11 +1,24 @@
 import RAKE
-import nltk
+# import nltk
 from rake_nltk import Rake
 
 from graphai.core.utils.text.clean import normalize
 
 # Download nltk resources
-nltk.download('stopwords', quiet=True)
+# nltk.download('stopwords', quiet=True)
+
+import os
+import nltk
+
+try:
+    nltk.data.find("corpora/stopwords")
+except LookupError:
+    nltk.download(
+        "stopwords",
+        download_dir=os.environ.get("NLTK_DATA", "/home/dockerhost/nltk_data"),
+    )
+
+from nltk.corpus import stopwords
 
 
 # Initialise RAKE model
