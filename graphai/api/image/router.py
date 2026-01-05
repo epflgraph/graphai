@@ -1,3 +1,5 @@
+from loguru import logger as sysmsg
+
 from fastapi import APIRouter, Security, Depends
 from fastapi_user_limiter.limiter import rate_limiter
 
