@@ -11,6 +11,27 @@ from graphai.core.common.common_utils import (
 )
 from graphai.core.common.config import config
 
+#----------------------#
+# Set up sysmsg logger #
+#----------------------#
+from loguru import logger as sysmsg
+import sys
+sysmsg.remove()
+sysmsg.add(
+    sys.stdout,
+    level="TRACE",
+    colorize=True,      # FORCE ANSI colors
+    enqueue=True,       # REQUIRED for Celery / multiprocessing
+    format="<green>{time:YYYY-MM-DD HH:mm:ss}</green> | "
+           "<level>{level: <8}</level> | "
+           "<cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - "
+           "{message}",
+)
+#----------------------#
+
+
+
+
 ROOT_VIDEO_DIR = os.path.normpath(os.path.join(os.path.dirname(__file__), '../../../Storage/'))
 # Formats with a . in their name indicate single files, whereas formats without a . indicate folders (e.g. '_slides')
 VIDEO_SUBFOLDER = 'Video'
@@ -32,8 +53,11 @@ MAX_UPLOAD_SIZE = 100 * 1024 * 1024
 DEFAULT_SCHEMA = 'cache_graphai'
 try:
     cache_schema = config['cache']['schema']
-except Exception:
+    sysmsg.trace(f"Using cache schema from config: {cache_schema}")
+except Exception as e:
     cache_schema = DEFAULT_SCHEMA
+    sysmsg.trace(f"No cache schema found in config, using default: {cache_schema}")
+    print('Error message:', str(e))
 
 
 def delete_file(file_path):
@@ -80,8 +104,9 @@ class VideoDBCachingManager(DBCachingManagerBase):
             f"""
             CREATE DATABASE IF NOT EXISTS `{self.schema}`
             DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci
-            DEFAULT ENCRYPTION='N';
             """
+            # DEFAULT ENCRYPTION='N';
+
         )
 
         # Creating the cache table if it does not exist
@@ -148,8 +173,9 @@ class AudioDBCachingManager(DBCachingManagerBase):
             f"""
             CREATE DATABASE IF NOT EXISTS `{self.schema}`
             DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci
-            DEFAULT ENCRYPTION='N';
             """
+            # DEFAULT ENCRYPTION='N';
+
         )
 
         # Creating the cache table if it does not exist
@@ -213,8 +239,9 @@ class SlideDBCachingManager(DBCachingManagerBase):
             f"""
             CREATE DATABASE IF NOT EXISTS `{self.schema}`
             DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci
-            DEFAULT ENCRYPTION='N';
             """
+            # DEFAULT ENCRYPTION='N';
+
         )
 
         # Creating the cache table if it does not exist
@@ -289,8 +316,9 @@ class TextDBCachingManager(DBCachingManagerBase):
             f"""
             CREATE DATABASE IF NOT EXISTS `{self.schema}`
             DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci
-            DEFAULT ENCRYPTION='N';
             """
+            # DEFAULT ENCRYPTION='N';
+
         )
 
         # Creating the cache table if it does not exist
@@ -350,8 +378,9 @@ class ScrapingDBCachingManager(DBCachingManagerBase):
             f"""
             CREATE DATABASE IF NOT EXISTS `{self.schema}`
             DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci
-            DEFAULT ENCRYPTION='N';
             """
+            # DEFAULT ENCRYPTION='N';
+
         )
 
         # Creating the cache table if it does not exist
@@ -450,8 +479,9 @@ class EmbeddingDBCachingManager(DBCachingManagerBase):
             f"""
             CREATE DATABASE IF NOT EXISTS `{self.schema}`
             DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci
-            DEFAULT ENCRYPTION='N';
             """
+            # DEFAULT ENCRYPTION='N';
+
         )
 
         # Creating the cache table if it does not exist
