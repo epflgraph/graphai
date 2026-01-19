@@ -21,6 +21,25 @@ import torch
 from multiprocessing import Lock
 
 
+#----------------------#
+# Set up sysmsg logger #
+#----------------------#
+from loguru import logger as sysmsg
+import sys, rich
+sysmsg.remove()
+sysmsg.add(
+    sys.stdout,
+    level="TRACE",
+    colorize=True,      # FORCE ANSI colors
+    enqueue=True,       # REQUIRED for Celery / multiprocessing
+    format="<green>{time:YYYY-MM-DD HH:mm:ss}</green> | "
+           "<level>{level: <8}</level> | "
+           "<cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - "
+           "{message}",
+)
+#----------------------#
+
+
 MODEL_TYPES = {
     'all-MiniLM-L12-v2': 'sentence-transformers/all-MiniLM-L12-v2',
     'Solon-embeddings-large-0.1': 'OrdalieTech/Solon-embeddings-large-0.1'
@@ -31,16 +50,19 @@ LONG_TEXT_ERROR = "Text over token limit for selected model (%d)."
 
 
 def embedding_to_json(v):
+    sysmsg.trace("Converting embedding to JSON")
     v_list = v.tolist()
     v_list = [round(x, 9) for x in v_list]
     return json.dumps(v_list)
 
 
 def embedding_from_json(s):
+    sysmsg.trace("Converting embedding from JSON")
     return np.array(json.loads(s))
 
 
 def split_text(text, max_length, split_characters=('\n', '.', ';', ',', ' ', '$')):
+    sysmsg.trace("Splitting text into chunks")
     result = []
     assert max_length > 0
     while len(text) > max_length:
@@ -68,17 +90,21 @@ def generate_embedding_text_token(s, model_type):
     Returns:
         Token
     """
+    sysmsg.trace("Generating embedding text token")
     assert isinstance(s, str)
     return md5_text(s) + '_' + model_type
 
 
 def get_text_token_count_using_model(model_tokenizer, text):
+    sysmsg.trace("Getting text token count using model tokenizer")
     input_ids = model_tokenizer.tokenizer(
         text, return_attention_mask=False, return_token_type_ids=False
     )['input_ids']
     if isinstance(text, str):
+        sysmsg.trace("Text is a single string")
         return len(input_ids)
     else:
+        sysmsg.trace("Text is a list of strings")
         return sum([len(x) for x in input_ids])
 
 
@@ -101,6 +127,7 @@ class EmbeddingModels:
             self.cache_dir = None
 
     def get_device(self):
+        sysmsg.trace("Getting device for embedding models")
         return self.device
 
     def load_models(self, load_heavies=True):
@@ -109,6 +136,7 @@ class EmbeddingModels:
         Returns:
             None
         """
+        sysmsg.trace("Loading embedding models")
         with self.load_lock:
             if self.models is None:
                 self.models = dict()
@@ -127,6 +155,7 @@ class EmbeddingModels:
                 self.last_heavy_model_use = time.time()
 
     def load_model(self, model_type):
+        sysmsg.trace("Loading embedding model of type: {}", model_type)
         if model_type not in MODEL_TYPES.keys():
             return False
         with self.load_lock:
@@ -143,18 +172,22 @@ class EmbeddingModels:
         return True
 
     def model_loaded(self, model_type):
+        sysmsg.trace("Checking if model of type {} is loaded", model_type)
         return self.models is not None and model_type in self.models.keys()
 
     def _get_tokenizer(self, model_type):
+        sysmsg.trace("Getting tokenizer for model type: {}", model_type)
         return self.models[model_type][0]
 
     def get_tokenizer(self, model_type):
+        sysmsg.trace("Getting tokenizer for model type: {}", model_type)
         loaded = self.load_model(model_type)
         if not loaded:
             return None
         return self._get_tokenizer(model_type)
 
     def set_tokenizer(self, model_type, tokenizer):
+        sysmsg.trace("Setting tokenizer for model type: {}", model_type)
         loaded = self.load_model(model_type)
         if not loaded:
             return False
@@ -168,6 +201,7 @@ class EmbeddingModels:
         return True
 
     def get_last_usage(self):
+        sysmsg.trace("Getting last usage time for heavy models")
         return self.last_heavy_model_use
 
     def unload_model(self, unload_period=EMBEDDING_UNLOAD_WAITING_PERIOD):
@@ -180,6 +214,7 @@ class EmbeddingModels:
         Returns:
             None if not enough time has passed since last use, a list of unloaded models otherwise.
         """
+        sysmsg.trace("Unloading embedding models if unused for more than {} seconds", unload_period)
         deleted_models = None
         with self.load_lock:
             if time.time() - self.get_last_usage() > unload_period:
@@ -197,14 +232,17 @@ class EmbeddingModels:
 
     @staticmethod
     def _get_token_count(model, text):
+        sysmsg.trace("Getting token count for text using model")
         model_tokenizer = model[0]
         return get_text_token_count_using_model(model_tokenizer, text)
 
     @staticmethod
     def _get_model_max_tokens(model):
+        sysmsg.trace("Getting model max tokens")
         return model.max_seq_length
 
     def get_token_count(self, text, model_type):
+        sysmsg.trace("Getting token count for text using model type: {}", model_type)
         if text is None or len(text) == 0:
             return 0
         self.load_model(model_type)
@@ -214,6 +252,7 @@ class EmbeddingModels:
         return self._get_token_count(model_to_use, text)
 
     def get_max_tokens(self, model_type):
+        sysmsg.trace("Getting max tokens for model type: {}", model_type)
         self.load_model(model_type)
         if model_type not in self.models.keys():
             raise NotImplementedError(f"Selected model type not implemented: {model_type}")
@@ -221,6 +260,7 @@ class EmbeddingModels:
         return self._get_model_max_tokens(model_to_use)
 
     def _get_model_output(self, model, text):
+        sysmsg.trace("Getting model output for text")
         try:
             print(self.device)
             model_max_tokens = self._get_model_max_tokens(model)
@@ -234,6 +274,7 @@ class EmbeddingModels:
             return None
 
     def _embed(self, model, text, force_split):
+        sysmsg.trace("Embedding text using model")
         text_too_large = False
         result = self._get_model_output(model, text)
 
@@ -261,6 +302,7 @@ class EmbeddingModels:
         return result, text_too_large
 
     def embed(self, text, model_type='all-MiniLM-L12-v2', force_split=True):
+        sysmsg.trace("Embedding text using model type: {}", model_type)
         self.load_model(model_type)
         if model_type not in self.models.keys():
             raise NotImplementedError(f"Selected model type not implemented: {model_type}")
@@ -273,6 +315,7 @@ class EmbeddingModels:
 
 
 def copy_embedding_object(embedding_obj, model_type):
+    sysmsg.trace("Copying embedding object for model type: {}", model_type)
     tokenizer = embedding_obj.get_tokenizer(model_type)
     if tokenizer is None:
         raise NotImplementedError(f"Model type {model_type} cannot be found!")
@@ -284,6 +327,7 @@ def copy_embedding_object(embedding_obj, model_type):
 
 def compute_embedding_text_fingerprint_callback(results, text, model_type):
     # This task does not have the condition of the 'fresh' flag being True because text fingerprinting never fails
+    sysmsg.trace("Computing embedding text fingerprint callback")
     token = results['token']
     values_dict = {
         'fingerprint': results['result'],
@@ -296,10 +340,12 @@ def compute_embedding_text_fingerprint_callback(results, text, model_type):
 
 
 def token_based_embedding_lookup(token, model_type):
+    sysmsg.trace("Performing token-based embedding lookup for token: {}", token)
     return token_based_text_lookup(token, EmbeddingDBCachingManager(), 'embedding', model_type=model_type)
 
 
 def fingerprint_based_embedding_lookup(token, fp, model_type):
+    sysmsg.trace("Performing fingerprint-based embedding lookup for token: {}", token)
     return fingerprint_based_text_lookup(token, fp, EmbeddingDBCachingManager(),
                                          main_col='embedding', extra_cols=['model_type'],
                                          equality_conditions={'model_type': model_type},
@@ -307,12 +353,16 @@ def fingerprint_based_embedding_lookup(token, fp, model_type):
 
 
 def embed_text(models, text, model_type):
+    sysmsg.trace("Embedding text using model type: {}", model_type)
     try:
+        sysmsg.trace("Attempting to embed text")
         embedding, text_too_large, model_max_tokens = models.embed(text, model_type)
         success = embedding is not None
         if text_too_large:
+            sysmsg.trace("Text too large for model type: {}", model_type)
             embedding = LONG_TEXT_ERROR % model_max_tokens
     except NotImplementedError as e:
+        sysmsg.trace("Embedding failed with error: {}", e)
         print(e)
         embedding = str(e)
         success = False
@@ -328,8 +378,10 @@ def embed_text(models, text, model_type):
 
 
 def insert_embedding_into_db(results, token, text, model_type, force=False):
+    sysmsg.trace(f"Inserting embedding into DB for token {token}, fresh: {results['fresh']}, successful: {results['successful']}")
     db_manager = EmbeddingDBCachingManager()
     if results['fresh']:
+        sysmsg.trace(f"Embedding is fresh, inserting into DB for token {token}")
         values_dict = {
             'source': text,
             'embedding': results['result'],
@@ -337,27 +389,40 @@ def insert_embedding_into_db(results, token, text, model_type, force=False):
         }
         existing = db_manager.get_details(token, ['date_added'], using_most_similar=False)[0]
         if existing is None or existing['date_added'] is None:
+            sysmsg.trace(f"No existing date_added for token {token}, setting it now")
             current_datetime = get_current_datetime()
             values_dict['date_added'] = current_datetime
+        else:
+            sysmsg.trace(f"Existing date_added found for token {token}, not updating it")
+
         # Inserting values for original token
-        db_manager.insert_or_update_details(
-            token, values_dict
-        )
+        sysmsg.trace(f"Inserting into DB for original token {token}")
+        rich.print_json(data=values_dict)
+        db_manager.insert_or_update_details(token, values_dict)
+
         if not force:
+            sysmsg.trace(f"Not forcing insertion for closest matches for token {token}")
             # Inserting the same values for closest token if different than original token
             # Only happens if the other token has been fingerprinted first without having its embedding calculated.
             closest = db_manager.get_closest_match(token)
             if closest is not None and closest != token:
-                db_manager.insert_or_update_details(
-                    closest, values_dict
-                )
+                sysmsg.trace(f"Inserting into DB for closest match token {closest}")
+                db_manager.insert_or_update_details(closest, values_dict)
+            else:
+                sysmsg.trace(f"No closest match found or closest match is the same as original token for token {token}")
+        else:
+            sysmsg.trace(f"Forcing insertion for closest matches for token {token}")
     elif not results['successful']:
+        sysmsg.trace(f"Embedding not successful, deleting cache row for token {token}")
         # in case we fingerprinted something and then failed to embed it, we delete its cache row
         db_manager.delete_cache_rows([token])
+    else:
+        sysmsg.trace(f"Embedding not fresh but successful for token {token}, no DB action taken")
     return results
 
 
 def jsonify_embedding_results(results):
+    sysmsg.trace("JSONifying embedding results")
     if results['fresh']:
         # If the computation is fresh, we need to JSONify the resulting numpy array.
         # Non-fresh successful computation results come from cache hits, and those are already in JSON.
@@ -367,6 +432,7 @@ def jsonify_embedding_results(results):
 
 
 def embedding_text_list_fingerprint_parallel(tokens, text_list, i, n):
+    sysmsg.trace("Computing embedding text fingerprints in parallel for chunk {}/{}", i + 1, n)
     start_index = int(i * len(tokens) / n)
     end_index = int((i + 1) * len(tokens) / n)
     if start_index == end_index:
@@ -399,6 +465,7 @@ def embedding_text_list_fingerprint_parallel(tokens, text_list, i, n):
 
 
 def embedding_text_list_dummy_fingerprint_parallel(tokens, text_list, i, n):
+    sysmsg.trace("Generating dummy embedding text fingerprints in parallel for chunk {}/{}", i + 1, n)
     start_index = int(i * len(tokens) / n)
     end_index = int((i + 1) * len(tokens) / n)
     if start_index == end_index:
@@ -415,8 +482,10 @@ def embedding_text_list_dummy_fingerprint_parallel(tokens, text_list, i, n):
 
 
 def embedding_text_list_fingerprint_callback(results, model_type):
+    sysmsg.trace("Embedding text list fingerprint callback")
     db_manager = EmbeddingDBCachingManager()
     all_results = list(chain.from_iterable(results))
+    sysmsg.trace(f"Total fingerprints to process: {len(all_results)}")
     for result in all_results:
         if result['fresh']:
             values_dict = {
@@ -425,11 +494,17 @@ def embedding_text_list_fingerprint_callback(results, model_type):
                 'model_type': model_type,
                 'date_added': get_current_datetime()
             }
-            db_manager.insert_or_update_details(result['token'], values_dict)
+            sysmsg.trace(f"Inserting fingerprint into DB for token {result['token']}")
+            rich.print_json(data=values_dict)
+            out = db_manager.insert_or_update_details(result['token'], values_dict)
+            sysmsg.trace(f"DB insert/update output: {out}")
+        else:
+            sysmsg.trace(f"Fingerprint not fresh for token {result['token']}, no DB action taken")
     return all_results
 
 
 def embedding_text_list_embed_parallel(input_list, embedding_obj, model_type, i, n, force=False):
+    sysmsg.trace("Embedding text list in parallel for chunk {}/{}", i + 1, n)
     start_index = int(i * len(input_list) / n)
     end_index = int((i + 1) * len(input_list) / n)
     if start_index == end_index:
@@ -491,6 +566,7 @@ def embedding_text_list_embed_parallel(input_list, embedding_obj, model_type, i,
 
 
 def embedding_text_list_embed_callback(results, model_type, force):
+    sysmsg.trace("Embedding text list embed callback")
     for result in results:
         if 'id_token' in result:
             insert_embedding_into_db(result, result['id_token'], result['source'], model_type, force)
@@ -500,6 +576,7 @@ def embedding_text_list_embed_callback(results, model_type, force):
 
 
 def embedding_text_list_embed_jsonify_callback(results):
+    sysmsg.trace("Embedding text list embed jsonify callback")
     all_results = list(chain.from_iterable(results))
     new_results = [jsonify_embedding_results(result) for result in all_results]
     gc.collect()
