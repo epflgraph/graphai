@@ -338,7 +338,7 @@ class RCPOCRModel(AbstractOCRModel):
         messages = get_ocr_messages(input_filename_with_path)
 
         try:
-            response = self.model.chat.completions.create(model=model_type, messages=messages)
+            response = self.model.chat.completions.create(model=model_type, messages=messages, response_format={"type": "json_object"})
             content = response.choices[0].message.content.strip()
 
             # Strip thinking tokens
@@ -346,7 +346,12 @@ class RCPOCRModel(AbstractOCRModel):
             if thinking_tag in response:
                 content = content.split(thinking_tag)[-1].strip()
 
-            # Return string otherwise
+            # Try to parse json and extract text, otherwise keep as is
+            try:
+                content = json.loads(content)['text']
+            except Exception:
+                pass
+
             return content
         except Exception as e:
             print(e)
