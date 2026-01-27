@@ -99,7 +99,7 @@ services:
     network_mode: "host"
     volumes:
       - ./nginx.graphai-https.conf:/etc/nginx/conf.d/default.conf:ro
-      - ./.certs:/etc/nginx/certs:ro
+      - /home/dockerhost/graphcert.cede-apps.ch:/etc/nginx/certs:ro
     restart: unless-stopped
 
 networks:
