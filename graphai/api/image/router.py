@@ -129,12 +129,24 @@ async def extract_text(data: ExtractTextRequest):
     method = data.method
     force = data.force
     no_cache = data.no_cache
-    api_token = data.google_api_token
-    openai_token = data.openai_api_token
-    gemini_token = data.gemini_api_token
+    google_api_token = data.google_api_token
+    openai_api_token = data.openai_api_token
+    gemini_api_token = data.gemini_api_token
+    rcp_api_token = data.rcp_api_token
     model_type = data.model_type
     enable_tikz = data.enable_tikz
-    task_id = ocr_job(token, force, no_cache, method, api_token, openai_token, gemini_token, model_type, enable_tikz)
+    task_id = ocr_job(
+        token,
+        force=force,
+        no_cache=no_cache,
+        method=method,
+        google_api_token=google_api_token,
+        openai_api_token=openai_api_token,
+        gemini_api_token=gemini_api_token,
+        rcp_api_token=rcp_api_token,
+        model_type=model_type,
+        enable_tikz=enable_tikz,
+    )
     return {'task_id': task_id}
 
 

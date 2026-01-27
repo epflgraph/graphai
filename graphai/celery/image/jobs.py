@@ -24,39 +24,77 @@ from graphai.core.common.common_utils import is_pdf
 
 
 def retrieve_image_from_url_job(url, force=False, no_cache=False):
+    ##################
+    # Cache lookup
+    ##################
     if not force:
-        direct_lookup_task_id = direct_lookup_generic_job(cache_lookup_retrieve_image_from_url_task, url,
-                                                          False, DEFAULT_TIMEOUT)
+        direct_lookup_task_id = direct_lookup_generic_job(
+            cache_lookup_retrieve_image_from_url_task,
+            url,
+            False,
+            DEFAULT_TIMEOUT
+        )
         if direct_lookup_task_id is not None:
             return direct_lookup_task_id
 
+    ##################
+    # Retrieve image
+    ##################
     # First retrieve the file, and then do the database callback
-    task_list = [retrieve_image_from_url_task.s(url, None),
-                 retrieve_image_from_url_callback_task.s(url)]
-    if not no_cache:
-        task_list += get_slide_fingerprint_chain_list(None, None, ignore_fp_results=True)
-    else:
+    task_list = [
+        retrieve_image_from_url_task.s(url, None),
+        retrieve_image_from_url_callback_task.s(url),
+    ]
+
+    if no_cache:
         task_list += [add_token_status_to_single_image_results_callback_task.s()]
+    else:
+        task_list += get_slide_fingerprint_chain_list(
+            token=None,
+            origin_token=None,
+            ignore_fp_results=True,
+        )
+
     task = chain(task_list)
     task = task.apply_async(priority=2)
     return task.id
 
 
-def upload_image_from_file_job(contents, file_extension, origin, origin_info, force=False, no_cache=False):
+def upload_image_from_file_job(
+    contents,
+    file_extension,
+    origin,
+    origin_info,
+    force=False,
+    no_cache=False,
+):
     effective_url = create_origin_token_using_info(origin, origin_info)
+
     if not force:
-        direct_lookup_task_id = direct_lookup_generic_job(cache_lookup_retrieve_image_from_url_task, effective_url,
-                                                          False, DEFAULT_TIMEOUT)
+        direct_lookup_task_id = direct_lookup_generic_job(
+            cache_lookup_retrieve_image_from_url_task,
+            effective_url,
+            False,
+            DEFAULT_TIMEOUT,
+        )
+
         if direct_lookup_task_id is not None:
             return direct_lookup_task_id
+
     task_list = [
         upload_image_from_file_task.s(contents, file_extension),
-        retrieve_image_from_url_callback_task.s(effective_url)
+        retrieve_image_from_url_callback_task.s(effective_url),
     ]
-    if not no_cache:
-        task_list += get_slide_fingerprint_chain_list(None, None, ignore_fp_results=True)
-    else:
+
+    if no_cache:
         task_list += [add_token_status_to_single_image_results_callback_task.s()]
+    else:
+        task_list += get_slide_fingerprint_chain_list(
+            token=None,
+            origin_token=None,
+            ignore_fp_results=True
+        )
+
     task = chain(task_list)
     task = task.apply_async(priority=2)
     return task.id
@@ -85,45 +123,79 @@ def fingerprint_job(token, force):
     return task.id
 
 
-def ocr_job(token, force=False, no_cache=False, method='google',
-            api_token=None, openai_token=None, gemini_token=None,
-            model_type=None, enable_tikz=True):
+def ocr_job(
+    token,
+    force=False,
+    no_cache=False,
+    method='google',
+    google_api_token=None,
+    openai_api_token=None,
+    gemini_api_token=None,
+    rcp_api_token=None,
+    model_type=None,
+    enable_tikz=False,
+):
     ##################
     # OCR cache lookup
     ##################
     if not force and not no_cache:
-        direct_lookup_task_id = direct_lookup_generic_job(cache_lookup_extract_slide_text_task, token,
-                                                          False, DEFAULT_TIMEOUT, method)
+        direct_lookup_task_id = direct_lookup_generic_job(
+            cache_lookup_extract_slide_text_task,
+            token,
+            False,
+            DEFAULT_TIMEOUT,
+            method,
+        )
         if direct_lookup_task_id is not None:
             return direct_lookup_task_id
 
     #####################
     # OCR computation job
     #####################
-    if not is_pdf(token):
-        task_list = [
-            extract_slide_text_task.s(token, method,
-                                      api_token, openai_token, gemini_token, model_type, enable_tikz)
-        ]
-    else:
+    if is_pdf(token):
         n_parallel = 8
         task_list = [
             convert_pdf_to_pages_task.s(token),
             group(
-                extract_multi_image_text_task.s(i,
-                                                n_parallel,
-                                                method,
-                                                api_token,
-                                                openai_token,
-                                                gemini_token,
-                                                model_type,
-                                                enable_tikz)
+                extract_multi_image_text_task.s(
+                    i,
+                    n_parallel,
+                    method,
+                    google_api_token,
+                    openai_api_token,
+                    gemini_api_token,
+                    rcp_api_token,
+                    model_type,
+                    enable_tikz,
+                )
                 for i in range(n_parallel)
             ),
             collect_multi_image_ocr_task.s()
         ]
+    else:
+        task_list = [
+            extract_slide_text_task.s(
+                token,
+                method,
+                google_api_token,
+                openai_api_token,
+                gemini_api_token,
+                rcp_api_token,
+                model_type,
+                enable_tikz,
+            )
+        ]
+
+    ##################
+    # OCR cache write
+    ##################
     if not no_cache:
         task_list.append(extract_slide_text_callback_task.s(token, force))
+
+    ##################
+    # Run task list
+    ##################
     task = chain(task_list)
     task = task.apply_async(priority=2)
+
     return task.id
