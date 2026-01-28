@@ -338,8 +338,11 @@ class RCPOCRModel(AbstractOCRModel):
         messages = get_ocr_messages(input_filename_with_path)
 
         try:
+            print(f'Performing OCR on RCP for file {input_filename_with_path}')
             response = self.model.chat.completions.create(model=model_type, messages=messages, response_format={"type": "json_object"})
+            print(f'Got {response}')
             content = response.choices[0].message.content.strip()
+            print(f'Got {content}')
 
             # Strip thinking tokens
             thinking_tag = '</think>'
