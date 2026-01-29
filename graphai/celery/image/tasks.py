@@ -142,6 +142,7 @@ def extract_slide_text_task(
     file_manager=file_management_config,
 )
 def convert_pdf_to_pages_task(self, token):
+    print(f'Starting {convert_pdf_to_pages_task} task for token {token}')
     return break_pdf_into_images(token, self.file_manager)
 
 
@@ -166,6 +167,7 @@ def extract_multi_image_text_task(
     model_type=None,
     enable_tikz=False,
 ):
+    print(f'Starting {extract_multi_image_text_task} task for page_and_filename_list {page_and_filename_list}, i {i} and n {n}')
     return extract_multi_image_text(
         page_and_filename_list,
         i,
@@ -189,6 +191,7 @@ def extract_multi_image_text_task(
     ignore_result=False,
 )
 def collect_multi_image_ocr_task(self, results):
+    print(f'Starting {collect_multi_image_ocr_task} task for results {results}')
     return collect_multi_image_ocr(results)
 
 
