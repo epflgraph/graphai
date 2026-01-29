@@ -296,9 +296,7 @@ def extract_slide_text(
 
 
 def extract_multi_image_text(
-    page_and_filename_list,
-    i,
-    n,
+    page_and_filename,
     method="google",
     google_api_token=None,
     openai_api_token=None,
@@ -307,44 +305,31 @@ def extract_multi_image_text(
     model_type=None,
     enable_tikz=False,
 ):
-    # Extract subset of pages to process
-    n_pages = len(page_and_filename_list)
-    start_index = int(i / n * n_pages)
-    end_index = int((i + 1) / n * n_pages)
-    pages_to_handle = page_and_filename_list[start_index: end_index]
-
-    # Perform OCR on subset of pages
-    results = list()
-    for page in pages_to_handle:
-        results.append(
-            perform_ocr(
-                page["filename"],
-                method,
-                google_api_token,
-                openai_api_token,
-                gemini_api_token,
-                rcp_api_token,
-                model_type,
-                enable_tikz,
-            )
-        )
+    # Perform OCR on page
+    result = perform_ocr(
+        page_and_filename["filename"],
+        method,
+        google_api_token,
+        openai_api_token,
+        gemini_api_token,
+        rcp_api_token,
+        model_type,
+        enable_tikz,
+    )
 
     # Build result and return it
     return {
-        'results': [
-            {
-                'page': pages_to_handle[i]['page'],
-                'content': results[i]['results'][0]['text']
-            }
-            for i in range(len(results))
-        ],
-        'language': get_most_common_element([result['language'] for result in results]),
-        'method': get_most_common_element([result['results'][0]['method'] for result in results])
+        'result': {
+            'page': page_and_filename['page'],
+            'content': result['results'][0]['text']
+        },
+        'language': result['language'],
+        'method': result['method'],
     }
 
 
 def collect_multi_image_ocr(results):
-    all_results = list(chain.from_iterable(result['results'] for result in results))
+    all_results = [result['result'] for result in results]
     language = get_most_common_element([result['language'] for result in results])
     method = get_most_common_element([result['method'] for result in results])
     return {

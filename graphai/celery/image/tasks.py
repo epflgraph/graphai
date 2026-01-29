@@ -197,9 +197,7 @@ def fanout_pdf_ocr_task(
 )
 def extract_multi_image_text_task(
     self,
-    page_and_filename_list,
-    i,
-    n,
+    page_and_filename,
     method="google",
     google_api_token=None,
     openai_api_token=None,
@@ -208,11 +206,9 @@ def extract_multi_image_text_task(
     model_type=None,
     enable_tikz=False,
 ):
-    print(f'Starting {extract_multi_image_text_task} task for page_and_filename_list {page_and_filename_list}, i {i} and n {n}')
+    print(f'Starting {extract_multi_image_text_task} task for page_and_filename {page_and_filename}')
     return extract_multi_image_text(
-        page_and_filename_list,
-        i,
-        n,
+        page_and_filename,
         method,
         google_api_token,
         openai_api_token,
