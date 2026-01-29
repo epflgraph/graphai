@@ -324,7 +324,7 @@ def extract_multi_image_text(
             'content': result['results'][0]['text']
         },
         'language': result['language'],
-        'method': result['method'],
+        'method': result['results'][0]['method'],
     }
 
 
