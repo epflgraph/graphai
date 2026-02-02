@@ -184,7 +184,7 @@ def fanout_pdf_ocr_task(
     callback = collect_multi_image_ocr_task.s()
 
     # Replace this task with the chord so the outer chain waits properly
-    raise self.replace(chord(header)(callback))
+    raise self.replace(chord(header, callback))
 
 
 @shared_task(
