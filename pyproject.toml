@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "graphai"
-version = "0.14.1"
+version = "0.14.2"
 authors = [
   { name="Aitor Pérez", email="aitor.perez@epfl.ch" },
   { name="Ramtin Yazdanian", email="ramtin.yazdanian@epfl.ch" }
@@ -87,7 +87,8 @@ dependencies = [
     "spacy",
     "google-genai",
     "httpx==0.27.2",
-    "graphai-client>=1.16.0"
+    "graphai-client>=1.16.0",
+    "langchain_text_splitters",
 ]
 
 [tool.setuptools]
