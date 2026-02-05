@@ -317,6 +317,8 @@ def extract_multi_image_text(
         enable_tikz,
     )
 
+    print(f"Performed OCR on page {page_and_filename['page']}. Result: {result}")
+
     # Build result and return it
     return {
         'result': {
