@@ -210,30 +210,19 @@ def perform_ocr(
     model_type=None,
     enable_tikz=False,
 ):
-    ocr_colnames = get_ocr_colnames(method)
-
-    results = None
-    language = None
+    text = None
 
     if method == 'tesseract':
-        res = perform_tesseract_ocr(file_path, language='enfr')
+        text = perform_tesseract_ocr(file_path, language='enfr')
 
-        if res:
-            language = detect_text_language(res)
-            results = [{'method': ocr_colnames[0], 'text': res}]
     elif method == 'google' and google_api_token:
         ocr_model = GoogleOCRModel(google_api_token)
         ocr_model.establish_connection()
-        res1, res2 = ocr_model.perform_ocr(file_path)
+        text1, text2 = ocr_model.perform_ocr(file_path)
 
-        if res1:
-            # Since DTD usually performs better, method #1 is our point of reference for langdetect
-            language = detect_text_language(res1)
-            res_list = [res1]
-            results = [
-                {'method': ocr_colnames[i], 'text': res_list[i]}
-                for i in range(len(res_list))
-            ]
+        # Since DTD usually performs better, method #1 is our point of reference for langdetect
+        text = text1
+
     else:
         ocr_model = None
         if method == 'openai' and openai_api_token:
@@ -245,17 +234,14 @@ def perform_ocr(
 
         if ocr_model:
             ocr_model.establish_connection()
-            res = ocr_model.perform_ocr(
-                file_path, model_type=model_type, enable_tikz=enable_tikz
-            )
+            text = ocr_model.perform_ocr(file_path, model_type=model_type, enable_tikz=enable_tikz)
 
-            if res:
-                language = detect_text_language(res)
-                results = [{'method': ocr_colnames[0], 'text': res}]
+    if not text:
+        text = ''
 
     return {
-        'results': results,
-        'language': language,
+        'results': [{'method': get_ocr_colnames(method)[0], 'text': text}],
+        'language': detect_text_language(text),
     }
 
 
