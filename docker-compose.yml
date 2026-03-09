@@ -15,6 +15,7 @@ services:
       RABBITMQ_DEFAULT_PASS: ${AI_RABBITMQ_DEV_CELERY_PASS}
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
+      - ./rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf:ro
 
   # Redis with AOF persistence
   redis:

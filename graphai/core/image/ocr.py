@@ -20,7 +20,7 @@ from graphai.core.common.common_utils import file_exists
 import base64
 
 
-def get_ocr_prompt(enable_tikz=True):
+def get_ocr_prompt(enable_tikz=False):
     if enable_tikz:
         figure_prompt_section = """
         Figures are to be extracted as valid TikZ within LaTeX, inside \\begin{tikzpicture} and
@@ -56,6 +56,22 @@ def get_ocr_prompt(enable_tikz=True):
         ```
     """
     return ocr_prompt
+
+
+def get_ocr_messages(image_path):
+    # Convert image to data uri
+    img_b64_str = ImgToBase64Converter(image_path).get_base64()
+    img_type = f'image/{image_path.split(".")[-1]}'
+    img_uri = f"data:{img_type};base64,{img_b64_str}"
+
+    messages = [
+        {"role": "user", "content": [
+            {"type": "text", "text": get_ocr_prompt()},
+            {"type": "image_url", "image_url": {"url": img_uri}},
+        ]}
+    ]
+
+    return messages
 
 
 def is_valid_latex(text):
@@ -95,10 +111,7 @@ class AbstractOCRModel(ABC):
         self.model_params = None
 
         if self.api_key is None:
-            print(
-                f"No {model_name} API key was provided. "
-                f"{model_name} API endpoints cannot be used as there is no default API key."
-            )
+            print(f"No {model_name} API key was provided. {model_name} API endpoints cannot be used as there is no default API key.")
         self.model = None
         self.load_lock = Lock()
 
@@ -305,6 +318,48 @@ class GeminiOCRModel(AbstractOCRModel):
         return cleanup_json(response.text)
 
 
+class RCPOCRModel(AbstractOCRModel):
+    def __init__(self, api_key):
+        super().__init__(api_key, OpenAI, "RCP")
+        self.model_params = dict(
+            base_url='https://inference.rcp.epfl.ch/v1',
+            api_key=self.api_key,
+        )
+
+    def perform_ocr(self, input_filename_with_path, model_type=None, **kwargs):
+        model_loaded = self.establish_connection()
+
+        if not model_loaded:
+            return None
+
+        if model_type is None:
+            model_type = "Qwen/Qwen3-VL-235B-A22B-Thinking-fp8"
+
+        messages = get_ocr_messages(input_filename_with_path)
+
+        try:
+            print(f'Performing OCR on RCP for file {input_filename_with_path}')
+            response = self.model.chat.completions.create(model=model_type, messages=messages, response_format={"type": "json_object"})
+            print(f'Got {response}')
+            content = response.choices[0].message.content.strip()
+
+            # Strip thinking tokens
+            thinking_tag = '</think>'
+            if thinking_tag in response:
+                content = content.split(thinking_tag)[-1].strip()
+
+            # Try to parse json and extract text, otherwise keep as is
+            try:
+                content = json.loads(content)['text']
+            except Exception:
+                pass
+
+            return content
+        except Exception as e:
+            print(e)
+            return None
+
+
 def get_ocr_colnames(method):
     if method == 'tesseract':
         return ['ocr_tesseract_results']
@@ -312,8 +367,12 @@ def get_ocr_colnames(method):
         return ['ocr_google_1_results', 'ocr_google_2_results']
     elif method == 'openai':
         return ['ocr_openai_results']
-    else:
+    elif method == 'gemini':
         return ['ocr_gemini_results']
+    elif method == 'rcp':
+        return ['ocr_rcp_results']
+    else:
+        raise ValueError(f'Unexpected method {method}')
 
 
 def perform_tesseract_ocr_on_pdf(pdf_path, language=None, in_pages=True):

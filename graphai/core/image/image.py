@@ -15,7 +15,8 @@ from graphai.core.image.ocr import (
     get_ocr_colnames,
     GoogleOCRModel,
     OpenAIOCRModel,
-    GeminiOCRModel
+    GeminiOCRModel,
+    RCPOCRModel,
 )
 import pymupdf
 from graphai.core.common.common_utils import (
@@ -199,146 +200,124 @@ def break_pdf_into_images(token, file_manager):
     return output_filenames
 
 
-def perform_ocr(file_path,
-                method='google',
-                api_token=None,
-                openai_token=None,
-                gemini_token=None,
-                model_type=None,
-                enable_tikz=True):
-    ocr_colnames = get_ocr_colnames(method)
+def perform_ocr(
+    file_path,
+    method="google",
+    google_api_token=None,
+    openai_api_token=None,
+    gemini_api_token=None,
+    rcp_api_token=None,
+    model_type=None,
+    enable_tikz=False,
+):
+    text = None
 
     if method == 'tesseract':
-        res = perform_tesseract_ocr(file_path, language='enfr')
-        if res is None:
-            results = None
-            language = None
-        else:
-            language = detect_text_language(res)
-            results = [
-                {
-                    'method': ocr_colnames[0],
-                    'text': res
-                }
-            ]
-    else:
-        if method == 'google':
-            # Google OCR
-            if api_token is None:
-                results = None
-                language = None
-            else:
-                ocr_model = GoogleOCRModel(api_token)
-                ocr_model.establish_connection()
-                res1, res2 = ocr_model.perform_ocr(file_path)
+        text = perform_tesseract_ocr(file_path, language='enfr')
 
-                if res1 is None:
-                    results = None
-                    language = None
-                else:
-                    # Since DTD usually performs better, method #1 is our point of reference for langdetect
-                    language = detect_text_language(res1)
-                    res_list = [res1]
-                    results = [
-                        {
-                            'method': ocr_colnames[i],
-                            'text': res_list[i]
-                        }
-                        for i in range(len(res_list))
-                    ]
-        else:
-            if method == 'openai':
-                # OpenAI OCR
-                if openai_token is None:
-                    ocr_model = None
-                else:
-                    ocr_model = OpenAIOCRModel(openai_token)
-            else:
-                # Gemini OCR
-                if gemini_token is None:
-                    ocr_model = None
-                else:
-                    ocr_model = GeminiOCRModel(gemini_token)
-            if ocr_model is not None:
-                ocr_model.establish_connection()
-                res = ocr_model.perform_ocr(file_path, model_type=model_type, enable_tikz=enable_tikz)
-                if res is None:
-                    results = None
-                    language = None
-                else:
-                    language = detect_text_language(res)
-                    results = [
-                        {
-                            'method': ocr_colnames[0],
-                            'text': res
-                        }
-                    ]
-            else:
-                results = None
-                language = None
+    elif method == 'google' and google_api_token:
+        ocr_model = GoogleOCRModel(google_api_token)
+        ocr_model.establish_connection()
+        text1, text2 = ocr_model.perform_ocr(file_path)
+
+        # Since DTD usually performs better, method #1 is our point of reference for langdetect
+        text = text1
+
+    else:
+        ocr_model = None
+        if method == 'openai' and openai_api_token:
+            ocr_model = OpenAIOCRModel(openai_api_token)
+        elif method == 'gemini' and gemini_api_token:
+            ocr_model = GeminiOCRModel(gemini_api_token)
+        elif method == 'rcp' and rcp_api_token:
+            ocr_model = RCPOCRModel(rcp_api_token)
+
+        if ocr_model:
+            ocr_model.establish_connection()
+            text = ocr_model.perform_ocr(file_path, model_type=model_type, enable_tikz=enable_tikz)
+
+    if not text:
+        text = ''
 
     return {
-        'results': results,
-        'language': language,
+        'results': [{'method': get_ocr_colnames(method)[0], 'text': text}],
+        'language': detect_text_language(text),
     }
 
 
-def extract_slide_text(token,
-                       file_manager,
-                       method='google',
-                       api_token=None,
-                       openai_token=None,
-                       gemini_token=None,
-                       model_type=None,
-                       enable_tikz=True):
+def extract_slide_text(
+    token,
+    file_manager,
+    method="google",
+    google_api_token=None,
+    openai_api_token=None,
+    gemini_api_token=None,
+    rcp_api_token=None,
+    model_type=None,
+    enable_tikz=False,
+):
+    # Return no results if not a token
     if not is_token(token):
         return {
             'results': None,
             'language': None,
             'fresh': False
         }
+
+    # Perform OCR
     file_path = file_manager.generate_filepath(token)
-    res = perform_ocr(file_path, method, api_token, openai_token, gemini_token, model_type, enable_tikz)
-    res['fresh'] = res['results'] is not None
+    res = perform_ocr(
+        file_path,
+        method,
+        google_api_token,
+        openai_api_token,
+        gemini_api_token,
+        rcp_api_token,
+        model_type,
+        enable_tikz,
+    )
+    res["fresh"] = res["results"] is not None
 
     return res
 
 
-def extract_multi_image_text(page_and_filename_list,
-                             i,
-                             n,
-                             method='google',
-                             api_token=None,
-                             openai_token=None,
-                             gemini_token=None,
-                             model_type=None,
-                             enable_tikz=True):
-    n_pages = len(page_and_filename_list)
-    start_index = int(i / n * n_pages)
-    end_index = int((i + 1) / n * n_pages)
-    pages_to_handle = page_and_filename_list[start_index: end_index]
-    results = list()
-    for page in pages_to_handle:
-        results.append(
-            perform_ocr(
-                page['filename'], method, api_token, openai_token, gemini_token, model_type, enable_tikz
-            )
-        )
+def extract_multi_image_text(
+    page_and_filename,
+    method="google",
+    google_api_token=None,
+    openai_api_token=None,
+    gemini_api_token=None,
+    rcp_api_token=None,
+    model_type=None,
+    enable_tikz=False,
+):
+    # Perform OCR on page
+    result = perform_ocr(
+        page_and_filename["filename"],
+        method,
+        google_api_token,
+        openai_api_token,
+        gemini_api_token,
+        rcp_api_token,
+        model_type,
+        enable_tikz,
+    )
+
+    print(f"Performed OCR on page {page_and_filename['page']}. Result: {result}")
+
+    # Build result and return it
     return {
-        'results': [
-            {
-                'page': pages_to_handle[i]['page'],
-                'content': results[i]['results'][0]['text']
-            }
-            for i in range(len(results))
-        ],
-        'language': get_most_common_element([result['language'] for result in results]),
-        'method': get_most_common_element([result['results'][0]['method'] for result in results])
+        'result': {
+            'page': page_and_filename['page'],
+            'content': result['results'][0]['text']
+        },
+        'language': result['language'],
+        'method': result['results'][0]['method'],
     }
 
 
 def collect_multi_image_ocr(results):
-    all_results = list(chain.from_iterable(result['results'] for result in results))
+    all_results = [result['result'] for result in results]
     language = get_most_common_element([result['language'] for result in results])
     method = get_most_common_element([result['method'] for result in results])
     return {

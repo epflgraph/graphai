@@ -166,10 +166,9 @@ class ExtractTextRequest(BaseModel):
         description="The token that identifies the requested file"
     )
 
-    method: Literal['google', 'tesseract', 'openai', 'gemini'] = Field(
+    method: Literal['tesseract', 'google', 'openai', 'gemini', 'rcp'] = Field(
         title="Method",
-        description="OCR method. Available methods are 'google' (default), 'openai', 'gemini',"
-                    "and 'tesseract' (not recommended)",
+        description="OCR method. Available methods are 'tesseract' (not recommended), 'google' (default), 'openai', 'gemini' and 'rcp'",
         default="google"
     )
 
@@ -187,36 +186,37 @@ class ExtractTextRequest(BaseModel):
 
     google_api_token: Union[str, None] = Field(
         title="Google API token",
-        description="Token that authenticates the user on the Google OCR API."
-                    "Without a valid token, Google OCR will fail. Not required for Tesseract, OpenAI, or Gemini.",
+        description="Token that authenticates the user on the Google OCR API. Without a valid token, Google OCR will fail. Only required for method 'google'.",
         default=None
     )
 
     openai_api_token: Union[str, None] = Field(
         title="OpenAI API token",
-        description="Token that authenticates the user on the OpenAI API."
-                    "Without a valid token, OpenAI OCR will fail. Not required for Tesseract, Google, or Gemini.",
+        description="Token that authenticates the user on the OpenAI API. Without a valid token, OpenAI OCR will fail. Only required for method 'openai'.",
         default=None
     )
 
     gemini_api_token: Union[str, None] = Field(
         title="Gemini API token",
-        description="Token that authenticates the user on the Gemini API."
-                    "Without a valid token, Gemini OCR will fail. Not required for Tesseract, Google, or OpenAI.",
+        description="Token that authenticates the user on the Gemini API. Without a valid token, Gemini OCR will fail. Only required for method 'gemini'.",
+        default=None
+    )
+
+    rcp_api_token: Union[str, None] = Field(
+        title="RCP API token",
+        description="Token that authenticates the user on the RCP platform. Without a valid token, RCP OCR will fail. Only required for method 'rcp'.",
         default=None
     )
 
     model_type: Union[str, None] = Field(
         title="Model type",
-        description="For OpenAI and Gemini options, allows the user to specify the model that they want to use. "
-                    "Do not specify this option unless you know exactly what you are doing.",
+        description="For LLM-based options, allows the user to specify the model that they want to use. Do not specify this option unless you know exactly what you are doing.",
         default=None
     )
 
     enable_tikz: bool = Field(
         title="Enable TikZ",
-        description="For PDF OCR, if True, attempts to extract any figures as valid TikZ. If False, "
-                    "replaces the figures with an alt text describing them instead.",
+        description="For PDF OCR, if True, attempts to extract any figures as valid TikZ. If False, replaces the figures with an alt text describing them instead.",
         default=False
     )
 
