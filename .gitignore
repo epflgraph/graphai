@@ -71,6 +71,7 @@ instance/
 
 # Sphinx documentation
 docs/_build/
+docs/source/
 
 # PyBuilder
 .pybuilder/
@@ -229,3 +230,4 @@ promtail-*
 prometheus.yml
 scripts/ontology
 scripts/infisical
+graphai/archive/**/data
