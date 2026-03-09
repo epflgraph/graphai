@@ -11,6 +11,7 @@ from graphai.celery.image.tasks import (
     extract_slide_text_task,
     extract_slide_text_callback_task,
     convert_pdf_to_pages_task,
+    fanout_pdf_ocr_task,
     extract_multi_image_text_task,
     collect_multi_image_ocr_task
 )
@@ -153,24 +154,17 @@ def ocr_job(
     # OCR computation job
     #####################
     if is_pdf(token):
-        n_parallel = 8
         task_list = [
             convert_pdf_to_pages_task.s(token),
-            group(
-                extract_multi_image_text_task.s(
-                    i,
-                    n_parallel,
-                    method,
-                    google_api_token,
-                    openai_api_token,
-                    gemini_api_token,
-                    rcp_api_token,
-                    model_type,
-                    enable_tikz,
-                )
-                for i in range(n_parallel)
+            fanout_pdf_ocr_task.s(
+                method,
+                google_api_token,
+                openai_api_token,
+                gemini_api_token,
+                rcp_api_token,
+                model_type,
+                enable_tikz,
             ),
-            collect_multi_image_ocr_task.s()
         ]
     else:
         task_list = [

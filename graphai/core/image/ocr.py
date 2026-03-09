@@ -342,7 +342,6 @@ class RCPOCRModel(AbstractOCRModel):
             response = self.model.chat.completions.create(model=model_type, messages=messages, response_format={"type": "json_object"})
             print(f'Got {response}')
             content = response.choices[0].message.content.strip()
-            print(f'Got {content}')
 
             # Strip thinking tokens
             thinking_tag = '</think>'

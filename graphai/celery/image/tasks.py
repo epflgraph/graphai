@@ -1,4 +1,4 @@
-from celery import shared_task
+from celery import shared_task, group, chord
 
 from graphai.core.image.image import (
     cache_lookup_retrieve_image_from_url,
@@ -151,14 +151,53 @@ def convert_pdf_to_pages_task(self, token):
     autoretry_for=(Exception,),
     retry_backoff=True,
     retry_kwargs={"max_retries": 2},
+    name="image.fanout_pdf_ocr_task",
+    ignore_result=False,
+)
+def fanout_pdf_ocr_task(
+    self,
+    pages,
+    method,
+    google_api_token=None,
+    openai_api_token=None,
+    gemini_api_token=None,
+    rcp_api_token=None,
+    model_type=None,
+    enable_tikz=False,
+):
+    # Build one OCR task per page
+    header = group(
+        extract_multi_image_text_task.s(
+            page,
+            method,
+            google_api_token,
+            openai_api_token,
+            gemini_api_token,
+            rcp_api_token,
+            model_type,
+            enable_tikz,
+        )
+        for page in pages
+    )
+
+    # When all pages are OCR'd, collect results
+    callback = collect_multi_image_ocr_task.s()
+
+    # Replace this task with the chord so the outer chain waits properly
+    raise self.replace(chord(header, callback))
+
+
+@shared_task(
+    bind=True,
+    autoretry_for=(Exception,),
+    retry_backoff=True,
+    retry_kwargs={"max_retries": 2},
     name="image.extract_multi_image_text",
     ignore_result=False,
 )
 def extract_multi_image_text_task(
     self,
-    page_and_filename_list,
-    i,
-    n,
+    page_and_filename,
     method="google",
     google_api_token=None,
     openai_api_token=None,
@@ -167,11 +206,9 @@ def extract_multi_image_text_task(
     model_type=None,
     enable_tikz=False,
 ):
-    print(f'Starting {extract_multi_image_text_task} task for page_and_filename_list {page_and_filename_list}, i {i} and n {n}')
+    print(f'Starting {extract_multi_image_text_task} task for page_and_filename {page_and_filename}')
     return extract_multi_image_text(
-        page_and_filename_list,
-        i,
-        n,
+        page_and_filename,
         method,
         google_api_token,
         openai_api_token,
