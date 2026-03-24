@@ -8,6 +8,7 @@ SERVICES=(
   celery-cpu-img.service
   celery-cpu-ontl_scrp_celery.service
   celery-cpu-text.service
+  celery-cpu-embedding.service
   celery-cpu-video_voice_transl.service
   celery-gpu0-embedding.service
   celery-gpu1-voice.service

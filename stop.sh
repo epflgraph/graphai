@@ -5,6 +5,7 @@ systemctl --user stop celery-cpu-rag.service
 systemctl --user stop celery-cpu-img.service
 systemctl --user stop celery-cpu-ontl_scrp_celery.service
 systemctl --user stop celery-cpu-text.service
+systemctl --user stop celery-cpu-embedding.service
 systemctl --user stop celery-cpu-video_voice_transl.service
 systemctl --user stop celery-gpu0-embedding.service
 systemctl --user stop celery-gpu1-voice.service
