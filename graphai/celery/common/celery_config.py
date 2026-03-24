@@ -20,6 +20,7 @@ queue_priorities = {
     "voice_gpu": 5,
     "translation": 5,
     "translation_gpu": 5,
+    "embedding": 8,
     "embedding_gpu": 8,
     "ontology": 4,
     "text": 6,
@@ -73,6 +74,7 @@ class BaseConfig:
             Queue("voice_gpu"      , max_priority=queue_priorities["voice_gpu"]),       # /voice (GPU) ........... 🔵 Graph pipeline work (slow tasks)
             Queue("translation"    , max_priority=queue_priorities["translation"]),     # /translation ........... 🔵 Graph pipeline work
             Queue("translation_gpu", max_priority=queue_priorities["translation_gpu"]), # /translation (GPU) ..... 🔵 Graph pipeline work (slow tasks)
+            Queue("embedding"      , max_priority=queue_priorities["embedding"]),       # /embedding ............. 🔴 Misson critical (for Chatbot)
             Queue("embedding_gpu"  , max_priority=queue_priorities["embedding_gpu"]),   # /embedding (GPU) ....... 🔴 Misson critical (for Chatbot)
             Queue("ontology"       , max_priority=queue_priorities["ontology"]),        # /ontology .............. 🟢 Used sparingly
             Queue("text"           , max_priority=queue_priorities["text"]),            # /text .................. 🟡 Concept detection (lots of tasks) 

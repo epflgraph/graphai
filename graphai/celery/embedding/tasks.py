@@ -55,13 +55,13 @@ def cache_lookup_embedding_text_fingerprint_task(self, token):
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='text.fingerprint_embedding_text', ignore_result=False)
+             name='embedding.fingerprint_embedding_text', ignore_result=False)
 def compute_embedding_text_fingerprint_task(self, token, text):
     return compute_text_fingerprint(token, text)
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='text.fingerprint_embedding_text_callback', ignore_result=False)
+             name='embedding.fingerprint_embedding_text_callback', ignore_result=False)
 def compute_embedding_text_fingerprint_callback_task(self, results, text, model_type):
     return compute_embedding_text_fingerprint_callback(results, text, model_type)
 
@@ -107,19 +107,19 @@ def embed_text_jsonify_callback_task(self, results):
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='text.embedding_text_list_fingerprint_parallel', ignore_result=False)
+             name='embedding.embedding_text_list_fingerprint_parallel', ignore_result=False)
 def embedding_text_list_fingerprint_parallel_task(self, tokens, text_list, i, n):
     return embedding_text_list_fingerprint_parallel(tokens, text_list, i, n)
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='text.embedding_text_list_dummy_fingerprint_parallel', ignore_result=False)
+             name='embedding.embedding_text_list_dummy_fingerprint_parallel', ignore_result=False)
 def embedding_text_list_dummy_fingerprint_parallel_task(self, tokens, text_list, i, n):
     return embedding_text_list_dummy_fingerprint_parallel(tokens, text_list, i, n)
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
-             name='text.embedding_text_list_fingerprint_callback', ignore_result=False)
+             name='embedding.embedding_text_list_fingerprint_callback', ignore_result=False)
 def embedding_text_list_fingerprint_callback_task(self, results, model_type):
     return embedding_text_list_fingerprint_callback(results, model_type)
 
