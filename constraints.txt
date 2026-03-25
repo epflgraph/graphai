@@ -9,6 +9,8 @@ numpy<2
 numba==0.62.1
 llvmlite==0.45.1
 torch==2.2.2
+transformers==4.44.2
+sentence-transformers<4
 
 # langchain
 langchain-text-splitters>=0.2.0
