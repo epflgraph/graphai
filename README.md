@@ -1,6 +1,30 @@
-# GraphAI
+<img src="assets/icon.png" alt="Project logo" height="64">
 
-This package contains projects and services enhancing the [EPFL Graph](https://www.epfl.ch/education/educational-initiatives/cede/campusanalytics/epfl-graph/) project with AI-based utilities.
+[![License](https://img.shields.io/github/license/epflgraph/graphai)](https://github.com/epflgraph/graphai/blob/master/LICENSE)
+[![Latest Release on Github](https://img.shields.io/github/v/release/epflgraph/graphai?sort=semver)](https://github.com/epflgraph/graphai/releases/latest)
+[![GitHub Stars](https://img.shields.io/github/stars/epflgraph/graphai?style=social)](https://github.com/epflgraph/graphai/stargazers)
+[![Contributors](https://img.shields.io/github/contributors/epflgraph/graphai)](https://github.com/epflgraph/graphai/graphs/contributors)
+[![Last Commit](https://img.shields.io/github/last-commit/epflgraph/graphai)](https://github.com/epflgraph/graphai/commits/master)
+[![Open Issues](https://img.shields.io/github/issues/epflgraph/graphai)](https://github.com/epflgraph/graphai/issues)
+[![Open PRs](https://img.shields.io/github/issues-pr/epflgraph/graphai)](https://github.com/epflgraph/graphai/pulls)
+
+Why Graph?
+==========
+The *Graph Data Platform* - developed by the AI engineering team at the [EPFL Center for Digital Education](https://www.epfl.ch/education/educational-initiatives/cede/) - is an open-source alternative to proprietary research information systems like Elsevier Pure. It federates educational and institutional data into a semantically interconnected knowledge graph of people, publications, labs, startups, courses, video lectures, and other educational resources. The [GraphSearch](https://graphsearch.epfl.ch/en) application provides lightning-fast search and discovery of the knowledge graph, as well as LLM-powered [chatbot](https://graphsearch.epfl.ch/en/chatbot) interaction with the indexed resources.
+
+**List of Graph services:**<br/>
+ [Registry](https://github.com/epflgraph/graphregistry/)  |
+        AI                                                |
+ [Ontology](https://github.com/epflgraph/graphontology/)  |
+   [Search](https://github.com/epflgraph/graphsearch_ui/) |
+     [Chat](https://github.com/epflgraph/graphchatbot/)   |
+     [Dash](https://github.com/epflgraph/graphdashboard/) |
+[DB client](https://github.com/epflgraph/graphdb-client/) |
+[ES client](https://github.com/epflgraph/graphes-client/)
+
+Graph AI
+===============
+*Graph AI* is a semantic analysis platform and API that powers other Graph services - particularly those requiring some form of text processing, understanding, and/or synthesis, such as the Graph Registry, GraphChat, and adjacent RAG creation pipelines.
 
 ## Contents
 
@@ -17,7 +41,14 @@ To provide these services, GraphAI connects to a database that contains graph-li
 
 There are two types of services: *synchronous* and *asynchronous*. The former are usual REST API endpoints: given an input, they perform some operations and return the result. The latter are composed of two endpoints: one that queues a task and immediately returns a task id, and another that, with the task id as input, polls whether the result is available.
 
-## Setup
+Installation
+============
+
+## 🐳 Deploy with Docker
+Graph AI is available as a Docker image, which provides a convenient way to use the API without needing to set up a local Python environment. The image includes all necessary dependencies and can be easily updated by pulling the latest version from Docker Hub.
+
+## 👨🏻‍💻 Local installation
+
 ### Install RabbitMQ and Redis
 Aside from the regular dependencies, that are specified in the [pyproject.toml](pyproject.toml) file included in the project, GraphAI relies on Celery, which requires a message broker and a results backend. GraphAI works with [RabbitMQ](https://www.rabbitmq.com/) as the message broker and [Redis](https://redis.io/) as the results backend. In ubuntu, you can install these packages with
 ```
