@@ -1,0 +1,42 @@
+.git
+.github
+.venv
+.data
+.vscode
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+*.swp
+*.swo
+*.log
+tests
+docs
+graphai/archive
+promtail-positions.yaml
+promtail-positions.yaml.stashed
+
+# local runtime secrets/config (must never enter build context)
+.env
+.env.*
+!.env.deploy.example
+config.ini
+*.ini.local
+*.secret
+*.secrets
+
+# credentials / keys / certs
+.certs
+certificates
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+id_rsa
+id_ed25519
+
+# local artifacts and notes
+.trash
+NS_notes.txt
+NS_errors.txt

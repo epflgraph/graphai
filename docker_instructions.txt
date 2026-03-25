@@ -1,0 +1,19 @@
+# 1) Build CPU base (smaller, recommended default)
+#TARGET=base-cpu PRELOAD_MODELS=0 ./docker-build.sh latest
+
+# 2) Check size
+#docker images epflgraph/graphai:latest
+
+# 3) Publish CPU base
+#TARGET=base-cpu PRELOAD_MODELS=0 ./docker-publish.sh latest
+
+# Build/push GPU as separate tag
+#TARGET=base-gpu PRELOAD_MODELS=0 ./docker-build.sh gpu
+#TARGET=base-gpu PRELOAD_MODELS=0 ./docker-publish.sh gpu
+
+
+# CPU-only image -> latest
+TARGET=base-cpu PRELOAD_MODELS=0 ./docker-publish.sh latest
+
+# GPU-capable image -> gpu
+TARGET=base-gpu PRELOAD_MODELS=0 ./docker-publish.sh gpu
