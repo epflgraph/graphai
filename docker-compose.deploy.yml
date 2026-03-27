@@ -22,6 +22,7 @@ x-graphai-common: &graphai-common
     ES_PORT: ${ES_PORT:-9200}
     ES_USERNAME: ${ES_USERNAME:-elastic}
     ES_PASSWORD: ${ES_PASSWORD:-changeme}
+    API_TITLE: ${API_TITLE:-EPFL Graph AI API @ RCP 🔥}
   working_dir: /app/graphai/api/main
   entrypoint: ["/bin/bash", "-lc"]
   volumes:
