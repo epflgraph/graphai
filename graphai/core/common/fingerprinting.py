@@ -11,9 +11,12 @@ import pymupdf
 from fuzzywuzzy import fuzz
 
 from graphai.core.common.common_utils import file_exists, is_pdf
+from graphai.core.common.runtime_tools import configure_runtime_external_tools
 
 
 Image.MAX_IMAGE_PIXELS = 933120000
+RUNTIME_TOOLS = configure_runtime_external_tools()
+FFMPEG_CMD = RUNTIME_TOOLS.get("ffmpeg") or "ffmpeg"
 
 
 def perceptual_hash_text(s):
@@ -85,7 +88,7 @@ def md5_video_or_audio(input_filename_with_path, video=True):
     try:
         result, _ = ffmpeg.output(
             in_stream, 'pipe:', c='copy', format='md5'
-        ).run(capture_stdout=True)
+        ).run(capture_stdout=True, cmd=FFMPEG_CMD)
     except Exception as e:
         print("An error occurred while fingerprinting:")
         print(e)

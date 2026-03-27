@@ -16,9 +16,12 @@ from graphai.core.common.lookup import fingerprint_cache_lookup_with_most_simila
     database_callback_generic
 from graphai.core.common.common_utils import file_exists
 from graphai.core.common.config import config
+from graphai.core.common.runtime_tools import configure_runtime_external_tools
 
 # 12 hours
 WHISPER_UNLOAD_WAITING_PERIOD = 12 * 3600.0
+RUNTIME_TOOLS = configure_runtime_external_tools()
+FFMPEG_CMD = RUNTIME_TOOLS.get("ffmpeg") or "ffmpeg"
 
 
 class WhisperTranscriptionModel:
@@ -183,7 +186,7 @@ def extract_media_segment(input_filename_with_path, output_filename_with_path, o
     try:
         err = ffmpeg.input(input_filename_with_path). \
             output(output_filename_with_path, c='copy', ss=start, t=length). \
-            overwrite_output().run(capture_stdout=True)
+            overwrite_output().run(capture_stdout=True, cmd=FFMPEG_CMD)
     except Exception as e:
         print(e, file=sys.stderr)
         err = str(e)

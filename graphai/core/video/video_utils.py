@@ -4,17 +4,21 @@ import json
 import math
 import os
 import re
+import shutil
+import ssl
 import subprocess
 import sys
 import time
 from datetime import timedelta
 from multiprocessing import Lock
+from urllib.request import Request, urlopen
 
 import fasttext
 import ffmpeg
 import imagehash
 import numpy as np
 import wget
+import certifi
 from fasttext_reducer.reduce_fasttext_models import generate_target_path
 from sacremoses import MosesTokenizer
 
@@ -29,6 +33,29 @@ from graphai.core.common.multimedia_utils import (
     get_available_streams,
     perform_tesseract_ocr
 )
+from graphai.core.common.runtime_tools import configure_runtime_external_tools
+
+
+#----------------------#
+# Set up sysmsg logger #
+#----------------------#
+from loguru import logger as sysmsg
+import sys
+sysmsg.remove()
+sysmsg.add(
+    sys.stdout,
+    level="TRACE",
+    colorize=True,      # FORCE ANSI colors
+    enqueue=True,       # REQUIRED for Celery / multiprocessing
+    format="<green>{time:YYYY-MM-DD HH:mm:ss}</green> | "
+           "<level>{level: <8}</level> | "
+           "<cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - "
+           "{message}",
+)
+#----------------------#
+
+RUNTIME_TOOLS = configure_runtime_external_tools()
+FFMPEG_CMD = RUNTIME_TOOLS.get("ffmpeg") or "ffmpeg"
 
 FRAME_FORMAT_PNG = 'frame-%06d.png'
 FRAME_FORMAT_JPG = 'frame-%06d.jpg'
@@ -77,17 +104,35 @@ def retrieve_video_file_from_generic_url(url, output_filename_with_path, output_
         Output token if successful, None otherwise
     """
     try:
+        sysmsg.debug("Downloading '{}' to '{}' with wget.", url, output_filename_with_path)
         wget.download(url, output_filename_with_path)
+        sysmsg.debug("wget download finished for '{}'.", url)
     except Exception as e:
-        print(e, file=sys.stderr)
-        return None
+        err_text = str(e)
+        sysmsg.debug("wget failed for '{}': {}", url, err_text)
+        if 'CERTIFICATE_VERIFY_FAILED' in err_text:
+            sysmsg.warning("SSL verification failed with wget. Retrying '{}' with urllib + certifi CA bundle.", url)
+            try:
+                context = ssl.create_default_context(cafile=certifi.where())
+                request = Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+                with urlopen(request, context=context, timeout=120) as response, open(output_filename_with_path, 'wb') as out:
+                    shutil.copyfileobj(response, out)
+                sysmsg.debug("Fallback urllib download succeeded for '{}'.", url)
+            except Exception:
+                sysmsg.exception("Fallback urllib download failed for '{}'.", url)
+                return None, None
+        else:
+            sysmsg.exception("Download failed for '{}'.", url)
+            return None, None
     if file_exists(output_filename_with_path):
+        sysmsg.debug("Downloaded file exists at '{}'.", output_filename_with_path)
         if '/entryId/' in url:
             entry_id = url.split('/')[url.split('/').index('entryId') + 1]
         else:
             entry_id = url
         return output_token, entry_id
     else:
+        sysmsg.warning("Download finished but file is missing at '{}'.", output_filename_with_path)
         return None, None
 
 
@@ -106,7 +151,7 @@ def retrieve_file_from_kaltura(url, output_filename_with_path, output_token):
     try:
         err = ffmpeg.input(url, protocol_whitelist="file,http,https,tcp,tls,crypto"). \
             output(output_filename_with_path, c="copy"). \
-            overwrite_output().run(capture_stdout=True)
+            overwrite_output().run(capture_stdout=True, cmd=FFMPEG_CMD)
         err = str(err[0])
     except Exception as e:
         print(e, file=sys.stderr)
@@ -147,11 +192,15 @@ def retrieve_file_from_youtube(url, output_filename_with_path, output_token):
 
 def retrieve_file_from_any_source(url, output_filename_with_path, output_token, is_kaltura=False):
     if is_kaltura:
+        sysmsg.debug(f"Retrieving file from Kaltura URL '{url}' using 'retrieve_file_from_kaltura'.")
         return retrieve_file_from_kaltura(url, output_filename_with_path, output_token)
     else:
+        sysmsg.debug(f"Retrieving file from URL '{url}' using 'retrieve_file_from_any_source'.")
         if 'youtube.com/' in url or 'youtu.be/' in url:
+            sysmsg.debug(f"URL '{url}' identified as YouTube URL. Using 'retrieve_file_from_youtube' for retrieval.")
             return retrieve_file_from_youtube(url, output_filename_with_path, output_token)
         else:
+            sysmsg.debug(f"URL '{url}' identified as generic URL. Using 'retrieve_video_file_from_generic_url' for retrieval.")
             return retrieve_video_file_from_generic_url(url, output_filename_with_path, output_token)
 
 
@@ -174,7 +223,10 @@ def perform_slow_audio_probe(input_filename_with_path):
         """
     if not file_exists(input_filename_with_path):
         raise Exception(f'ffmpeg error: File {input_filename_with_path} does not exist')
-    results = ffmpeg.input(input_filename_with_path).audio.output('pipe:', format='null').run(capture_stderr=True)
+    results = ffmpeg.input(input_filename_with_path).audio.output('pipe:', format='null').run(
+        capture_stderr=True,
+        cmd=FFMPEG_CMD
+    )
     all_matches = re.findall(r"time=\d{2}:\d{2}:\d{2}\.\d{2}", str(results[1]))
     final_time_str = all_matches[-1][5:]
     final_time_parsed = time.strptime(final_time_str, '%H:%M:%S.%f')
@@ -250,7 +302,7 @@ def extract_audio_from_video(input_filename_with_path, output_filename_with_path
     try:
         err = ffmpeg.input(input_filename_with_path).audio. \
             output(output_filename_with_path, acodec='libopus', ar=48000). \
-            overwrite_output().run(capture_stdout=True)
+            overwrite_output().run(capture_stdout=True, cmd=FFMPEG_CMD)
     except Exception as e:
         print(e, file=sys.stderr)
         err = str(e)
@@ -288,12 +340,12 @@ def extract_frames(input_filename_with_path, output_folder_with_path, output_fol
             # be changed (the algorithm assumes that timestamp == frame number).
             err = ffmpeg.input(input_filename_with_path).video. \
                 filter("fps", 1).output(os.path.join(output_folder_with_path, FRAME_FORMAT_PNG)). \
-                overwrite_output().run(capture_stdout=True)
+                overwrite_output().run(capture_stdout=True, cmd=FFMPEG_CMD)
         else:
             # If the video stream is just an image, the fps filter would fail (and it'd be unneeded), so it's skipped.
             err = ffmpeg.input(input_filename_with_path).video. \
                 output(os.path.join(output_folder_with_path, FRAME_FORMAT_PNG)). \
-                overwrite_output().run(capture_stdout=True)
+                overwrite_output().run(capture_stdout=True, cmd=FFMPEG_CMD)
     except Exception as e:
         print(e, file=sys.stderr)
         err = str(e)

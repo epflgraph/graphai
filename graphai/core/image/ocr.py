@@ -16,8 +16,11 @@ from google.genai import types
 from pylatexenc.latex2text import LatexNodes2Text
 
 from graphai.core.common.common_utils import file_exists
+from graphai.core.common.runtime_tools import configure_runtime_external_tools
 
 import base64
+
+RUNTIME_TOOLS = configure_runtime_external_tools()
 
 
 def get_ocr_prompt(enable_tikz=False):
@@ -391,7 +394,11 @@ def perform_tesseract_ocr_on_pdf(pdf_path, language=None, in_pages=True):
     if not file_exists(pdf_path):
         print(f'Error: File {pdf_path} does not exist')
         return None
-    pdf_imageset = pdf2image.convert_from_path(pdf_path)
+    poppler_path = RUNTIME_TOOLS.get("poppler_path")
+    if poppler_path is not None:
+        pdf_imageset = pdf2image.convert_from_path(pdf_path, poppler_path=poppler_path)
+    else:
+        pdf_imageset = pdf2image.convert_from_path(pdf_path)
     results = [
         pytesseract.image_to_string(
             img,

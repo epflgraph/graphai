@@ -1,3 +1,4 @@
+import os
 import sys
 
 import ffmpeg
@@ -14,6 +15,10 @@ from graphai.core.common.caching import (
 )
 from graphai.core.common.common_utils import file_exists
 from graphai.core.common.lookup import is_fingerprinted
+from graphai.core.common.runtime_tools import configure_runtime_external_tools
+
+
+RUNTIME_TOOLS = configure_runtime_external_tools()
 
 
 def get_video_token_status(token):
@@ -87,8 +92,14 @@ def perform_probe(input_filename_with_path):
     """
     if not file_exists(input_filename_with_path):
         raise Exception(f'ffmpeg error: File {input_filename_with_path} does not exist')
+    ffprobe_cmd = RUNTIME_TOOLS.get("ffprobe")
+    if ffprobe_cmd is None:
+        raise FileNotFoundError(
+            "ffprobe binary not found. Set FFPROBE_PATH or add ffprobe to PATH. "
+            f"Current PATH: {os.environ.get('PATH', '')}"
+        )
     try:
-        return ffmpeg.probe(input_filename_with_path, cmd='ffprobe')
+        return ffmpeg.probe(input_filename_with_path, cmd=ffprobe_cmd)
     except Exception as e:
         raise e
 

@@ -53,10 +53,30 @@ from graphai.core.video.video_utils import (
     compute_video_ocr_transitions
 )
 
+#----------------------#
+# Set up sysmsg logger #
+#----------------------#
+from loguru import logger as sysmsg
+import sys
+sysmsg.remove()
+sysmsg.add(
+    sys.stdout,
+    level="TRACE",
+    colorize=True,      # FORCE ANSI colors
+    enqueue=True,       # REQUIRED for Celery / multiprocessing
+    format="<green>{time:YYYY-MM-DD HH:mm:ss}</green> | "
+           "<level>{level: <8}</level> | "
+           "<cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - "
+           "{message}",
+)
+#----------------------#
+
+
 
 def retrieve_file_from_url(url, file_manager, is_kaltura=True, force_token=None):
     # This takes a URL as input, not a token
     if not is_url(url):
+        sysmsg.debug(f"Input '{url}' is not a valid URL. Returning None.")
         return {
             'token': None,
             'fresh': False,
@@ -64,20 +84,36 @@ def retrieve_file_from_url(url, file_manager, is_kaltura=True, force_token=None)
             'fp_id': None
         }
     if force_token is not None:
+        sysmsg.debug(f"Force token '{force_token}' provided. Using it directly without checking the cache.")
         token = force_token
     else:
+        sysmsg.debug(f"No force token provided. Checking cache for URL '{url}'.")
         db_manager = VideoDBCachingManager()
+        sysmsg.debug(f"Looking up cache for URL '{url}' using 'get_details_using_origin'.")
         existing = db_manager.get_details_using_origin(url, [])
+        sysmsg.debug(f"Cache lookup for URL '{url}' returned: {existing}")
         if existing is not None:
+            sysmsg.debug(f"Cache hit for URL '{url}'. Using existing token '{existing[0]['id_token']}' from cache.")
             # If the cache row already exists, then we don't create a new token, but instead
             # use the id_token of the existing row (we remove the file extension because it will be re-added soon)
             token = existing[0]['id_token'].split('.')[0]
         else:
+            sysmsg.debug(f"Cache miss for URL '{url}'. Generating a new random token.")
             # Otherwise, we generate a random token
             token = generate_random_token()
+            sysmsg.debug(f"Generated random token '{token}' for URL '{url}'.")
     filename = create_video_filename_using_url_format(token, url)
+    sysmsg.debug(f"Generated filename '{filename}' for URL '{url}' with token '{token}'")
     filename_with_path = file_manager.generate_filepath(filename)
-    results, fp_id = retrieve_file_from_any_source(url, filename_with_path, filename, is_kaltura)
+    sysmsg.debug(f"Generated filename with path '{filename_with_path}' for filename '{filename}'")
+    sysmsg.debug("Calling retrieve_file_from_any_source for '{}'.", url)
+    source_result = retrieve_file_from_any_source(url, filename_with_path, filename, is_kaltura)
+    if source_result is None:
+        sysmsg.error("retrieve_file_from_any_source returned None for '{}'.", url)
+        results, fp_id = None, None
+    else:
+        results, fp_id = source_result
+    sysmsg.debug("Source retrieval completed. token='{}' fp_id='{}'", results, fp_id)
     return {
         'token': results,
         'fresh': results == filename,
