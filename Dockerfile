@@ -61,7 +61,7 @@ ARG WHISPER_MODEL_TYPE=base
 ARG FASTTEXT_DIM=30
 
 RUN python -m pip install --upgrade pip setuptools wheel && \
-    python -m pip install -c constraints.txt -e .
+    python -m pip install -c constraints.txt -e .[ml]
 
 RUN mkdir -p \
       "${NLTK_DATA}" \
@@ -99,7 +99,7 @@ ARG WHISPER_MODEL_TYPE=base
 ARG FASTTEXT_DIM=30
 
 RUN python -m pip install --upgrade pip setuptools wheel && \
-    python -m pip install -c constraints.txt -e . && \
+    python -m pip install -c constraints.txt -e .[ml] && \
     python -m pip uninstall -y $(python -m pip freeze | awk -F== '/^(nvidia-|triton)/ {print $1}') || true && \
     python -m pip install --index-url https://download.pytorch.org/whl/cpu --extra-index-url https://pypi.org/simple "torch==2.2.2+cpu"
 
