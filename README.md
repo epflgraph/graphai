@@ -54,7 +54,7 @@ Steps to deploy with Docker:
     docker pull epflgraph/graphai:latest
     ```
 
-2. Pull the examples files from repo's folder `docker/deployment`. Use this python script to pull only the required files - without cloning the full repo - into your local app folder:
+2. Pull the example files from the repo's folder `docker/deployment`. Use this python script to pull only the required files into your local app folder, without cloning the full repo:
     ```bash
     curl -s https://api.github.com/repos/epflgraph/graphai/contents/docker/deployment\?ref\=rcp_deployment \
     | python3 -c '
