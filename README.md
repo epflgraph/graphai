@@ -45,12 +45,43 @@ Installation
 ============
 
 ## 🐳 Deploy with Docker
-Graph AI is available as a Docker image, which provides a convenient way to use the API without needing to set up a local Python environment. The image includes all necessary dependencies and can be easily updated by pulling the latest version from Docker Hub.
+Graph AI is available as a Docker image, which provides a convenient way to use the API without needing to set up a local Python environment. The image includes all necessary dependencies, tools, and models, and can be easily updated by pulling the latest version from Docker Hub.
 
-To deploy the API using Docker, simply run the following command:
-```docker run -d -p 28800:28800 epflgraph/graphai:latest```
+Steps to deploy with Docker:
 
-This command will pull the latest Graph AI image from Docker Hub and run it in detached mode, mapping port 28800 of the container to port 28800 on your host machine. You can then access the API at `http://localhost:28800`.
+1. Pull the image (size: ~16GB) from Docker Hub:
+    ```bash
+    docker pull epflgraph/graphai:latest
+    ```
+
+2. Pull the examples files from repo's folder `docker/deployment`. Use this python script to pull only the required files - without cloning the full repo - into your local app folder:
+    ```bash
+    curl -s https://api.github.com/repos/epflgraph/graphai/contents/docker/deployment\?ref\=rcp_deployment \
+    | python3 -c '
+    import sys, json, urllib.request, os
+    items = json.load(sys.stdin)
+    for item in items:
+        if item["type"] == "file":
+            url = item["download_url"]
+            name = item["name"]
+            print(f"downloading {name}")
+            urllib.request.urlretrieve(url, name)
+    '
+    ```
+
+3. Modify the example files in accordance with your service configurations and credentials, and rename them as `.env`, `config.ini`, and `docker-compose.yml`. Some credentials need to be duplicated in both the environment and config files.
+
+4. Run the docker container with the following command:
+    ```bash
+    docker compose up -d
+    ```
+
+You should now have the API running and accessible at `http://localhost:28800/`. You can log the output of the container with `docker compose logs -f` and stop it with `docker compose down`.
+
+If it fails to start due to connection errors, you can test your MySQL and ElasticSearch connections using the provided script:
+```bash
+./test-connections.sh
+```
 
 ## 👨🏻‍💻 Local installation
 
