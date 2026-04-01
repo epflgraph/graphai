@@ -1,0 +1,1 @@
+DOCKER_BUILDKIT=0 docker build --no-cache --pull --build-arg PRELOAD_MODELS=0 -t epflgraph/graphai:latest .

@@ -47,6 +47,11 @@ Installation
 ## 🐳 Deploy with Docker
 Graph AI is available as a Docker image, which provides a convenient way to use the API without needing to set up a local Python environment. The image includes all necessary dependencies and can be easily updated by pulling the latest version from Docker Hub.
 
+To deploy the API using Docker, simply run the following command:
+```docker run -d -p 28800:28800 epflgraph/graphai:latest```
+
+This command will pull the latest Graph AI image from Docker Hub and run it in detached mode, mapping port 28800 of the container to port 28800 on your host machine. You can then access the API at `http://localhost:28800`.
+
 ## 👨🏻‍💻 Local installation
 
 ### Install RabbitMQ and Redis

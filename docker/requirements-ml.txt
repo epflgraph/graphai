@@ -1,0 +1,10 @@
+openai-whisper
+transformers
+sentencepiece
+sacremoses
+pysbd
+fasttext-wheel
+fasttext-reducer>=0.1.1
+sentence-transformers
+presidio_analyzer[transformers]
+presidio_anonymizer
