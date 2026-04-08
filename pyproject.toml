@@ -54,7 +54,7 @@ dependencies = [
   "rake-nltk",
   "levenshtein",
   "wikitext-asymptote",
-  "db-cache-manager>=0.2.2",
+  "db-cache-manager @ git+https://github.com/epflgraph/db-cache-manager.git",
   "elasticsearch-interface>=1.6.0",
   "scikit-learn",
   "opentelemetry-distro==0.40b0",
@@ -82,14 +82,17 @@ dependencies = [
 
 [project.optional-dependencies]
 ml = [
-  "openai-whisper",
+  "torch",
+  "torchvision",
+  "torchaudio",
+  "openai-whisper==20250625",
   "transformers",
   "sentencepiece",
   "sacremoses",
   "pysbd",
   "fasttext-wheel",
   "fasttext-reducer>=0.1.1",
-  "sentence-transformers",
+  "sentence-transformers<4",
   "presidio_analyzer[transformers]",
   "presidio_anonymizer"
 ]

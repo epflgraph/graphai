@@ -1,3 +1,9 @@
+# IMPORTANT:
+# This project runs on Tesla V100 GPUs (compute capability 7.0 / sm_70).
+# Use a PyTorch build that includes sm_70 support.
+# Install with:
+#   pip install --no-cache-dir -c constraints.txt -e ".[ml]" --extra-index-url https://download.pytorch.org/whl/cu118
+
 # networking compat with FastAPI/Starlette you’re using
 httpx==0.27.2
 
