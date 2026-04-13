@@ -73,7 +73,10 @@ sysmsg.add(
 
 
 
-def retrieve_file_from_url(url, file_manager, is_kaltura=True, force_token=None):
+def retrieve_file_from_url(url, file_manager, is_kaltura=False, force_token=None):
+
+    sysmsg.debug(f"[hshjd657] Starting retrieve_file_from_url with url='{url}', is_kaltura='{is_kaltura}', force_token='{force_token}'")
+
     # This takes a URL as input, not a token
     if not is_url(url):
         sysmsg.debug(f"Input '{url}' is not a valid URL. Returning None.")
@@ -107,6 +110,10 @@ def retrieve_file_from_url(url, file_manager, is_kaltura=True, force_token=None)
     filename_with_path = file_manager.generate_filepath(filename)
     sysmsg.debug(f"Generated filename with path '{filename_with_path}' for filename '{filename}'")
     sysmsg.debug("Calling retrieve_file_from_any_source for '{}'.", url)
+
+    sysmsg.debug("retrieve_file_from_url input url repr={}", repr(url))
+    sysmsg.debug("retrieve_file_from_url is_kaltura={}", is_kaltura)
+
     source_result = retrieve_file_from_any_source(url, filename_with_path, filename, is_kaltura)
     if source_result is None:
         sysmsg.error("retrieve_file_from_any_source returned None for '{}'.", url)

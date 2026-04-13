@@ -17,7 +17,6 @@ import fasttext
 import ffmpeg
 import imagehash
 import numpy as np
-import wget
 import certifi
 from fasttext_reducer.reduce_fasttext_models import generate_target_path
 from sacremoses import MosesTokenizer
@@ -94,7 +93,7 @@ STOPWORDS = {
 
 def retrieve_video_file_from_generic_url(url, output_filename_with_path, output_token):
     """
-    Retrieves a file from a given URL using WGET and stores it locally.
+    Retrieves a file from a given URL and stores it locally.
     Args:
         url: the URL
         output_filename_with_path: Path of output file
@@ -104,26 +103,18 @@ def retrieve_video_file_from_generic_url(url, output_filename_with_path, output_
         Output token if successful, None otherwise
     """
     try:
-        sysmsg.debug("Downloading '{}' to '{}' with wget.", url, output_filename_with_path)
-        wget.download(url, output_filename_with_path)
-        sysmsg.debug("wget download finished for '{}'.", url)
-    except Exception as e:
-        err_text = str(e)
-        sysmsg.debug("wget failed for '{}': {}", url, err_text)
-        if 'CERTIFICATE_VERIFY_FAILED' in err_text:
-            sysmsg.warning("SSL verification failed with wget. Retrying '{}' with urllib + certifi CA bundle.", url)
-            try:
-                context = ssl.create_default_context(cafile=certifi.where())
-                request = Request(url, headers={'User-Agent': 'Mozilla/5.0'})
-                with urlopen(request, context=context, timeout=120) as response, open(output_filename_with_path, 'wb') as out:
-                    shutil.copyfileobj(response, out)
-                sysmsg.debug("Fallback urllib download succeeded for '{}'.", url)
-            except Exception:
-                sysmsg.exception("Fallback urllib download failed for '{}'.", url)
-                return None, None
-        else:
-            sysmsg.exception("Download failed for '{}'.", url)
-            return None, None
+        sysmsg.debug("Downloading '{}' to '{}' with urllib.", url, output_filename_with_path)
+        context = ssl.create_default_context(cafile=certifi.where())
+        sysmsg.debug("generic download raw url repr={}", repr(url))
+        request = Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+        sysmsg.debug("generic download request.full_url repr={}", repr(request.full_url))
+        with urlopen(request, context=context, timeout=120) as response, open(output_filename_with_path, 'wb') as out:
+            shutil.copyfileobj(response, out)
+        sysmsg.debug("urllib download finished for '{}'.", url)
+    except Exception:
+        sysmsg.exception("Download failed for '{}'.", url)
+        return None, None
+
     if file_exists(output_filename_with_path):
         sysmsg.debug("Downloaded file exists at '{}'.", output_filename_with_path)
         if '/entryId/' in url:
@@ -131,9 +122,9 @@ def retrieve_video_file_from_generic_url(url, output_filename_with_path, output_
         else:
             entry_id = url
         return output_token, entry_id
-    else:
-        sysmsg.warning("Download finished but file is missing at '{}'.", output_filename_with_path)
-        return None, None
+
+    sysmsg.warning("Download finished but file is missing at '{}'.", output_filename_with_path)
+    return None, None
 
 
 def retrieve_file_from_kaltura(url, output_filename_with_path, output_token):
@@ -149,6 +140,8 @@ def retrieve_file_from_kaltura(url, output_filename_with_path, output_token):
     """
     # Downloading using ffmpeg
     try:
+        sysmsg.debug("kaltura download raw url repr={}", repr(url))
+        sysmsg.debug("kaltura download target path='{}'", output_filename_with_path)
         err = ffmpeg.input(url, protocol_whitelist="file,http,https,tcp,tls,crypto"). \
             output(output_filename_with_path, c="copy"). \
             overwrite_output().run(capture_stdout=True, cmd=FFMPEG_CMD)
@@ -189,19 +182,36 @@ def retrieve_file_from_youtube(url, output_filename_with_path, output_token):
     else:
         return str(result_code), None
 
+def is_kaltura_manifest_url(url: str) -> bool:
+    url_lower = url.lower()
+    return (
+        'api.cast.switch.ch/' in url_lower
+        or '/playmanifest/' in url_lower
+        or url_lower.endswith('.m3u8')
+    )
 
 def retrieve_file_from_any_source(url, output_filename_with_path, output_token, is_kaltura=False):
-    if is_kaltura:
-        sysmsg.debug(f"Retrieving file from Kaltura URL '{url}' using 'retrieve_file_from_kaltura'.")
+
+    sysmsg.debug("retrieve_file_from_any_source input url repr={}", repr(url))
+    sysmsg.debug("retrieve_file_from_any_source is_kaltura arg={}", is_kaltura)
+    sysmsg.debug("retrieve_file_from_any_source is_kaltura_manifest_url={}", is_kaltura_manifest_url(url))
+
+    sysmsg.debug(f"Retrieving file from URL '{url}' using 'retrieve_file_from_any_source'.")
+    url_lower = url.lower()
+
+    if 'youtube.com/' in url_lower or 'youtu.be/' in url_lower:
+        sysmsg.debug("selected source handler=youtube")
+        sysmsg.debug(f"URL '{url}' identified as YouTube URL. Using 'retrieve_file_from_youtube' for retrieval.")
+        return retrieve_file_from_youtube(url, output_filename_with_path, output_token)
+
+    if is_kaltura or is_kaltura_manifest_url(url):
+        sysmsg.debug("selected source handler=kaltura")
+        sysmsg.debug(f"URL '{url}' identified as Kaltura/manifest URL. Using 'retrieve_file_from_kaltura' for retrieval.")
         return retrieve_file_from_kaltura(url, output_filename_with_path, output_token)
-    else:
-        sysmsg.debug(f"Retrieving file from URL '{url}' using 'retrieve_file_from_any_source'.")
-        if 'youtube.com/' in url or 'youtu.be/' in url:
-            sysmsg.debug(f"URL '{url}' identified as YouTube URL. Using 'retrieve_file_from_youtube' for retrieval.")
-            return retrieve_file_from_youtube(url, output_filename_with_path, output_token)
-        else:
-            sysmsg.debug(f"URL '{url}' identified as generic URL. Using 'retrieve_video_file_from_generic_url' for retrieval.")
-            return retrieve_video_file_from_generic_url(url, output_filename_with_path, output_token)
+
+    sysmsg.debug("selected source handler=generic")
+    sysmsg.debug(f"URL '{url}' identified as generic URL. Using 'retrieve_video_file_from_generic_url' for retrieval.")
+    return retrieve_video_file_from_generic_url(url, output_filename_with_path, output_token)
 
 
 def create_video_filename_using_url_format(token, url):
