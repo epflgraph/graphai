@@ -1,33 +1,120 @@
+# --- VCS / editor ---
 .git
+.gitignore
 .github
-.venv
-.data
-.vscode
-__pycache__
-*.pyc
-*.pyo
-*.pyd
-*.swp
-*.swo
-*.log
-tests
-docs
-graphai/archive
-promtail-positions.yaml
-promtail-positions.yaml.stashed
+.vscode/
+.idea/
+.cursorignore
+.cursorindexingignore
 
-# local runtime secrets/config (must never enter build context)
+# --- Python cache / compiled ---
+__pycache__/
+*.py[codz]
+*$py.class
+*.so
+*.pyd
+
+# --- Packaging / build outputs ---
+.Python
+build/
+dist/
+downloads/
+develop-eggs/
+eggs/
+.eggs/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+pip-wheel-metadata/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# --- Test / coverage / type-checker caches ---
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py.cover
+.hypothesis/
+.pytest_cache/
+cover/
+.mypy_cache/
+.dmypy.json
+dmypy.json
+.pyre/
+.pytype/
+.ruff_cache/
+
+# --- Notebook / interactive ---
+.ipynb_checkpoints/
+*.ipynb
+profile_default/
+ipython_config.py
+__marimo__/
+marimo/_static/
+marimo/_lsp/
+
+# --- Local envs ---
 .env
 .env.*
 !.env.deploy.example
+.envrc
+.venv
+.venv*/
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+env-bak/
+pyvenv.cfg
+.pdm-python
+.pdm-build/
+.pixi/
+__pypackages__/
+
+# --- Runtime / app state ---
+.data/
+.trash/
+instance/
+.webassets-cache
+.scrapy
+celerybeat-schedule
+celerybeat.pid
+celerybeat-schedule.db
+db.sqlite3
+db.sqlite3-journal
+local_settings.py
+
+# --- Logs ---
+*.log
+pip-log.txt
+pip-delete-this-directory.txt
+
+# --- Docs / tests / large non-runtime content ---
+tests/
+docs/
+site/
+graphai/archive/
+scripts/ontology/
+scripts/infisical/
+
+# --- Local config / secrets ---
 config.ini
 *.ini.local
 *.secret
 *.secrets
-
-# credentials / keys / certs
-.certs
-certificates
+.certs/
+certificates/
 *.pem
 *.key
 *.crt
@@ -35,8 +122,33 @@ certificates
 *.pfx
 id_rsa
 id_ed25519
+.infisical.env
+.pypirc
+.gitleaks.toml
 
-# local artifacts and notes
-.trash
-NS_notes.txt
-NS_errors.txt
+# --- OS / editor junk ---
+*.swp
+*.swo
+.DS_Store
+.spyderproject
+.spyproject
+.ropeproject
+.abstra/
+
+# --- Repo-specific local / generated files ---
+notes.txt
+NS_*.*
+promtail-*
+prometheus.yml
+project_tree.txt
+Brewfile
+services_path.txt
+purge.sh
+init/api_add_user_docker.sh
+init/api_add_user.sh.bak
+scripts/list_functions.py
+graphai/api/main/api_stop.sh
+
+# --- Buildx cache directories ---
+.buildx-cache
+.buildx-cache-new
