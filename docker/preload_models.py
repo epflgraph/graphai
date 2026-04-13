@@ -2,18 +2,21 @@ import argparse
 import os
 
 from sentence_transformers import SentenceTransformer
-from transformers import MarianTokenizer, MarianMTModel, AutoTokenizer, AutoModelForSeq2SeqLM
+from transformers import MarianMTModel, MarianTokenizer, AutoModelForSeq2SeqLM, AutoTokenizer
 from presidio_analyzer.nlp_engine import NerModelConfiguration, TransformersNlpEngine
 
 
-def preload_huggingface(cache_dir: str = "/opt/models/huggingface") -> None:
+def preload_sentence_models(cache_dir: str) -> None:
     sentence_models = [
         "sentence-transformers/all-MiniLM-L12-v2",
         "OrdalieTech/Solon-embeddings-large-0.1",
     ]
     for model in sentence_models:
+        print(f"Preloading sentence model: {model}")
         SentenceTransformer(model, cache_folder=cache_dir)
 
+
+def preload_translation_models(cache_dir: str) -> None:
     translation_models = [
         "Helsinki-NLP/opus-mt-tc-big-en-fr",
         "Helsinki-NLP/opus-mt-tc-big-fr-en",
@@ -21,6 +24,7 @@ def preload_huggingface(cache_dir: str = "/opt/models/huggingface") -> None:
         "Helsinki-NLP/opus-mt-it-en",
     ]
     for model in translation_models:
+        print(f"Preloading translation model: {model}")
         if "tc-big" in model:
             MarianTokenizer.from_pretrained(model, cache_dir=cache_dir)
             MarianMTModel.from_pretrained(model, cache_dir=cache_dir)
@@ -28,6 +32,8 @@ def preload_huggingface(cache_dir: str = "/opt/models/huggingface") -> None:
             AutoTokenizer.from_pretrained(model, cache_dir=cache_dir)
             AutoModelForSeq2SeqLM.from_pretrained(model, cache_dir=cache_dir)
 
+
+def preload_ner_models(cache_dir: str) -> None:
     nlp_models = [
         {
             "lang_code": "en",
@@ -44,6 +50,7 @@ def preload_huggingface(cache_dir: str = "/opt/models/huggingface") -> None:
             },
         },
     ]
+    print("Preloading Presidio / NER models")
     TransformersNlpEngine(
         models=nlp_models,
         ner_model_configuration=NerModelConfiguration(
@@ -53,6 +60,12 @@ def preload_huggingface(cache_dir: str = "/opt/models/huggingface") -> None:
     )
 
 
+def preload_all(cache_dir: str) -> None:
+    preload_sentence_models(cache_dir)
+    preload_translation_models(cache_dir)
+    preload_ner_models(cache_dir)
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Preload GraphAI Hugging Face models.")
     parser.add_argument(
@@ -60,10 +73,25 @@ def parse_args() -> argparse.Namespace:
         default=os.environ.get("HF_HOME", "/opt/models/huggingface"),
         help="Target cache directory for Hugging Face and sentence-transformers models.",
     )
+    parser.add_argument(
+        "--group",
+        choices=["all", "sentence", "translation", "ner"],
+        default="all",
+        help="Which model group to preload.",
+    )
     return parser.parse_args()
 
 
 if __name__ == "__main__":
     args = parse_args()
-    preload_huggingface(args.cache_dir)
-    print("Hugging Face model preload finished")
+
+    if args.group == "sentence":
+        preload_sentence_models(args.cache_dir)
+    elif args.group == "translation":
+        preload_translation_models(args.cache_dir)
+    elif args.group == "ner":
+        preload_ner_models(args.cache_dir)
+    else:
+        preload_all(args.cache_dir)
+
+    print(f"Hugging Face model preload finished for group: {args.group}")

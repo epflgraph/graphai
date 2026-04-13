@@ -1,2 +1,13 @@
-docker build -t epflgraph/graphai:latest .
-docker push     epflgraph/graphai:latest
+# To build the Docker image locally, use the following command. This will build the image and load it into your local Docker environment.
+docker buildx build --progress=plain -t epflgraph/graphai:latest --load .
+
+# To push to Docker Hub, use the following command instead. Make sure you are logged in to Docker Hub using `docker login` before running this command.
+docker buildx build \
+  --progress=plain \
+  --cache-from=type=registry,ref=epflgraph/graphai:buildcache \
+  --cache-to=type=registry,ref=epflgraph/graphai:buildcache,mode=max \
+  -t epflgraph/graphai:latest \
+  --push .
+
+# If you have built the image locally and want to push it to Docker Hub, you can use the following command. This assumes that the image is already tagged as `epflgraph/graphai:latest` in your local Docker environment.
+docker push epflgraph/graphai:latest
