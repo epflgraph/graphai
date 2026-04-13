@@ -1,0 +1,150 @@
+x-graphai-env: &graphai-env
+  NLTK_DATA: ${NLTK_DATA:-/opt/nltk_data}
+  PYTHONPATH: /app
+  GRAPH_CACHE_ROOT: ${GRAPH_CACHE_ROOT:-/var/graphai/storage}
+  GRAPH_LOG_ROOT: ${GRAPH_LOG_ROOT:-/var/graphai/logs}
+  WHISPER_MODEL_ROOT: ${WHISPER_MODEL_ROOT:-/opt/models/whisper}
+  HF_HOME: ${HF_HOME:-/opt/models/huggingface}
+  SENTENCE_TRANSFORMERS_HOME: ${SENTENCE_TRANSFORMERS_HOME:-/opt/models/huggingface}
+  FASTTEXT_MODEL_ROOT: ${FASTTEXT_MODEL_ROOT:-/opt/models/fasttext}
+  CELERY_BROKER_URL: ${CELERY_BROKER_URL:-amqp://guest:guest@rabbitmq:5672//}
+  CELERY_RESULT_BACKEND: ${CELERY_RESULT_BACKEND:-redis://redis:6379/1}
+  DB_HOST: ${DB_HOST}
+  DB_PORT: ${DB_PORT}
+  DB_USER: ${DB_USER}
+  DB_PASSWORD: ${DB_PASSWORD}
+  ES_HOST: ${ES_HOST}
+  ES_PORT: ${ES_PORT}
+  ES_USERNAME: ${ES_USERNAME}
+  ES_PASSWORD: ${ES_PASSWORD}
+  ES_CAFILE: ${ES_CAFILE}
+  API_TITLE: ${API_TITLE:-GraphAI API}
+
+x-graphai-common: &graphai-common
+  image: ${GRAPH_IMAGE}
+  env_file:
+    - .env
+  environment:
+    <<: *graphai-env
+  volumes:
+    - ${HOST_CACHE_DIR}:${GRAPH_CACHE_ROOT}
+    - ${HOST_LOG_DIR}:${GRAPH_LOG_ROOT}
+    - /home/ubuntu/certs:/app/certs:ro
+    - ./config.ini:/app/config.ini:ro
+  depends_on:
+    rabbitmq:
+      condition: service_healthy
+    redis:
+      condition: service_healthy
+  network_mode: host
+
+services:
+  rabbitmq:
+    image: ${RABBITMQ_IMAGE:-rabbitmq:3.13-management}
+    container_name: rabbitmq
+    env_file:
+      - .env
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER:-guest}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS:-guest}
+    ports:
+      - "${RABBITMQ_AMQP_PORT:-5672}:5672"
+      - "${RABBITMQ_HTTP_PORT:-15672}:15672"
+      - "${RABBITMQ_PROM_PORT:-15692}:15692"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+      - ./rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf:ro
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+    networks:
+      - graphai_net
+
+  redis:
+    image: ${REDIS_IMAGE:-redis:7}
+    container_name: redis
+    command: ["redis-server", "--appendonly", "yes"]
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+    networks:
+      - graphai_net
+
+  redis-commander:
+    image: ${REDIS_COMMANDER_IMAGE:-visol/redis-commander:0.8.0}
+    profiles: ["ops"]
+    environment:
+      REDIS_HOSTS: local:redis:6379:1
+    ports:
+      - "${REDIS_COMMANDER_PORT:-8081}:8081"
+    depends_on:
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - graphai_net
+
+  api:
+    <<: *graphai-common
+    container_name: graphai_api
+    environment:
+      <<: *graphai-env
+      ES_CAFILE: /app/certs/graph-engine-elasticsearch.crt
+      GRAPHAI_ROLE: api
+      API_HOST: ${API_HOST:-0.0.0.0}
+      API_PORT: ${API_PORT:-28800}
+      API_WORKERS: ${API_WORKERS:-1}
+      API_PROXY_HEADERS: ${API_PROXY_HEADERS:-1}
+      API_FORWARDED_ALLOW_IPS: ${API_FORWARDED_ALLOW_IPS:-*}
+    restart: on-failure
+
+  beat:
+    <<: *graphai-common
+    container_name: graphai_beat
+    profiles: ["scheduler"]
+    environment:
+      <<: *graphai-env
+      GRAPHAI_ROLE: beat
+      CELERY_LOG_LEVEL: ${CELERY_BEAT_LOG_LEVEL:-info}
+    restart: on-failure
+
+  flower:
+    <<: *graphai-common
+    container_name: graphai_flower
+    profiles: ["ops"]
+    environment:
+      <<: *graphai-env
+      GRAPHAI_ROLE: flower
+      FLOWER_PORT: ${FLOWER_PORT:-5555}
+      FLOWER_BASIC_AUTH: ${FLOWER_BASIC_AUTH:-}
+    restart: on-failure
+   
+  celery-local:
+    <<: *graphai-common
+    environment:
+      <<: *graphai-env
+      GRAPHAI_ROLE: worker                     
+      CELERY_QUEUES: caching,celery,embedding,embedding_gpu,image,ontology,rag,scraping,text,translation,translation_gpu,video,voice,voice_gpu
+      CELERY_POOL: prefork
+      CELERY_CONCURRENCY: 1
+      CELERY_PREFETCH_MULTIPLIER: 1
+      CELERY_WORKER_NAME: local_all_in_one
+
+networks:
+  graphai_net:
+    name: graphai_net
+    driver: bridge
+
+volumes:
+  rabbitmq_data:
+  redis_data:
