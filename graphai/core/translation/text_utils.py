@@ -152,6 +152,16 @@ class TranslationModels:
                     cache_dir=self.cache_dir).to(self.device)
                 self.models['de-en']['segmenter'] = pysbd.Segmenter(language='de', clean=False)
                 self.models['de-en']['segmenter_cleaner'] = pysbd.Segmenter(language='de', clean=True)
+                print('Loading EN-DE')
+                self.models['en-de'] = dict()
+                self.models['en-de']['tokenizer'] = AutoTokenizer.from_pretrained(
+                    "Helsinki-NLP/opus-mt-en-de",
+                    cache_dir=self.cache_dir)
+                self.models['en-de']['model'] = AutoModelForSeq2SeqLM.from_pretrained(
+                    "Helsinki-NLP/opus-mt-en-de",
+                    cache_dir=self.cache_dir).to(self.device)
+                self.models['en-de']['segmenter'] = pysbd.Segmenter(language='en', clean=False)
+                self.models['en-de']['segmenter_cleaner'] = pysbd.Segmenter(language='en', clean=True)
                 print('Loading IT-EN')
                 self.models['it-en'] = dict()
                 self.models['it-en']['tokenizer'] = AutoTokenizer.from_pretrained(
@@ -162,6 +172,16 @@ class TranslationModels:
                     cache_dir=self.cache_dir).to(self.device)
                 self.models['it-en']['segmenter'] = pysbd.Segmenter(language='it', clean=False)
                 self.models['it-en']['segmenter_cleaner'] = pysbd.Segmenter(language='it', clean=True)
+                print('Loading EN-IT')
+                self.models['en-it'] = dict()
+                self.models['en-it']['tokenizer'] = AutoTokenizer.from_pretrained(
+                    "Helsinki-NLP/opus-mt-en-it",
+                    cache_dir=self.cache_dir)
+                self.models['en-it']['model'] = AutoModelForSeq2SeqLM.from_pretrained(
+                    "Helsinki-NLP/opus-mt-en-it",
+                    cache_dir=self.cache_dir).to(self.device)
+                self.models['en-it']['segmenter'] = pysbd.Segmenter(language='en', clean=False)
+                self.models['en-it']['segmenter_cleaner'] = pysbd.Segmenter(language='en', clean=True)
             self.last_model_use = time.time()
 
     def get_device(self):
@@ -253,7 +273,10 @@ class TranslationModels:
         """
         self.load_models()
         if how not in self.models.keys():
-            raise NotImplementedError("Source or target language not implemented")
+            available_pairs = ", ".join(sorted(self.models.keys()))
+            raise NotImplementedError(
+                f"Model not available for language pair '{how}'. Available pairs: {available_pairs}."
+            )
         if text is None or len(text) == 0:
             return None, False
         tokenizer = self.models[how]['tokenizer']

@@ -103,14 +103,16 @@ def cache_lookup_translation_text_using_fingerprint(token, fp, src, tgt, return_
         token, fp, TextDBCachingManager(), main_col='target', extra_cols=[],
         equality_conditions={'source_lang': src, 'target_lang': tgt},
         modify_result_func=convert_text_back_to_list,
-        modify_result_args={'return_list': return_list}
+        modify_result_args={'return_list': return_list},
+        require_non_empty_string=True
     )
 
 
 def cache_lookup_translate_text(token, return_list):
     return token_based_text_lookup(token, TextDBCachingManager(), 'target',
                                    modify_result_func=convert_text_back_to_list,
-                                   modify_result_args={'return_list': return_list})
+                                   modify_result_args={'return_list': return_list},
+                                   require_non_empty_string=True)
 
 
 def detect_language_translation(text):

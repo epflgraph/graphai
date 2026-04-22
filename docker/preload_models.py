@@ -22,6 +22,8 @@ def preload_translation_models(cache_dir: str) -> None:
         "Helsinki-NLP/opus-mt-tc-big-fr-en",
         "Helsinki-NLP/opus-mt-de-en",
         "Helsinki-NLP/opus-mt-it-en",
+        "Helsinki-NLP/opus-mt-en-de",
+        "Helsinki-NLP/opus-mt-en-it",
     ]
     for model in translation_models:
         print(f"Preloading translation model: {model}")
