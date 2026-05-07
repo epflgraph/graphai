@@ -4,6 +4,12 @@ import os
 from sentence_transformers import SentenceTransformer
 from transformers import MarianMTModel, MarianTokenizer, AutoModelForSeq2SeqLM, AutoTokenizer
 from presidio_analyzer.nlp_engine import NerModelConfiguration, TransformersNlpEngine
+from graphai.core.retrieval.anonymization import DEFAULT_GLINER_MODEL, mapping as presidio_model_mapping
+
+try:
+    from gliner import GLiNER
+except ImportError:
+    GLiNER = None
 
 
 def preload_sentence_models(cache_dir: str) -> None:
@@ -56,16 +62,26 @@ def preload_ner_models(cache_dir: str) -> None:
     TransformersNlpEngine(
         models=nlp_models,
         ner_model_configuration=NerModelConfiguration(
-            model_to_presidio_entity_mapping=None,
+            model_to_presidio_entity_mapping=presidio_model_mapping,
             labels_to_ignore=["O"],
         ),
     )
+
+
+def preload_pii_models(cache_dir: str) -> None:
+    if GLiNER is None:
+        print("Skipping GLiNER PII model preload because gliner is not installed")
+        return
+
+    print(f"Preloading GLiNER PII model: {DEFAULT_GLINER_MODEL}")
+    GLiNER.from_pretrained(DEFAULT_GLINER_MODEL, cache_dir=cache_dir)
 
 
 def preload_all(cache_dir: str) -> None:
     preload_sentence_models(cache_dir)
     preload_translation_models(cache_dir)
     preload_ner_models(cache_dir)
+    preload_pii_models(cache_dir)
 
 
 def parse_args() -> argparse.Namespace:
@@ -77,7 +93,7 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--group",
-        choices=["all", "sentence", "translation", "ner"],
+        choices=["all", "sentence", "translation", "ner", "pii"],
         default="all",
         help="Which model group to preload.",
     )
@@ -93,6 +109,8 @@ if __name__ == "__main__":
         preload_translation_models(args.cache_dir)
     elif args.group == "ner":
         preload_ner_models(args.cache_dir)
+    elif args.group == "pii":
+        preload_pii_models(args.cache_dir)
     else:
         preload_all(args.cache_dir)
 

@@ -86,14 +86,14 @@ ml = [
   "torchvision",
   "torchaudio",
   "openai-whisper==20250625",
-  "transformers",
+  "transformers>=4.51.3,<5",
   "sentencepiece",
   "sacremoses",
   "pysbd",
   "fasttext-wheel",
   "fasttext-reducer>=0.1.1",
   "sentence-transformers<4",
-  "presidio_analyzer[transformers]",
+  "presidio_analyzer[gliner,transformers]",
   "presidio_anonymizer"
 ]
 
