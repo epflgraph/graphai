@@ -8,6 +8,7 @@ import time
 
 
 # Transformer model config
+supported_languages = ["en", "fr"]
 model_config = [
     {
         "lang_code": "en",
@@ -24,8 +25,26 @@ model_config = [
         }
     }
 ]
-# No need for a mapping since the default works well
-mapping = None
+# Davlan/distilbert-base-multilingual-cased-ner-hrl emits BIO labels. Presidio
+# requires an explicit model-to-Presidio mapping for NLP engine entities.
+mapping = {
+    "B-DATE": "DATE_TIME",
+    "I-DATE": "DATE_TIME",
+    "DATE": "DATE_TIME",
+    "B-PER": "PERSON",
+    "I-PER": "PERSON",
+    "PER": "PERSON",
+    "PERSON": "PERSON",
+    "B-ORG": "ORGANIZATION",
+    "I-ORG": "ORGANIZATION",
+    "ORG": "ORGANIZATION",
+    "ORGANIZATION": "ORGANIZATION",
+    "B-LOC": "LOCATION",
+    "I-LOC": "LOCATION",
+    "LOC": "LOCATION",
+    "LOCATION": "LOCATION",
+    "GPE": "LOCATION",
+}
 labels_to_ignore = ["O"]
 
 
@@ -50,7 +69,6 @@ class AnonymizerModels:
     def load_models(self):
         with self.load_lock:
             if self.models is None:
-                self.models = dict()
                 print('Loading analyzer and anonymizer')
                 ner_model_configuration = NerModelConfiguration(
                     model_to_presidio_entity_mapping=mapping,
@@ -65,14 +83,16 @@ class AnonymizerModels:
                 # Transformer-based analyzer
                 analyzer = AnalyzerEngine(
                     nlp_engine=transformers_nlp_engine,
-                    supported_languages=["en", "fr"]
+                    supported_languages=supported_languages
                 )
-                self.models['analyzer'] = analyzer
-                self.models['anonymizer'] = AnonymizerEngine()
+                self.models = {
+                    'analyzer': analyzer,
+                    'anonymizer': AnonymizerEngine(),
+                }
 
     def anonymize(self, text, lang):
         self.load_models()
-        if lang not in ['en', 'fr']:
+        if lang not in supported_languages:
             raise NotImplementedError("Only English and French are implemented at the moment.")
         analyzer_results = self.models['analyzer'].analyze(text=text, language=lang)
         anonymized = self.models['anonymizer'].anonymize(text, analyzer_results=analyzer_results)
