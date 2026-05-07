@@ -1,6 +1,7 @@
 import pandas as pd
 
 from celery import shared_task
+from celery.exceptions import SoftTimeLimitExceeded
 
 from elasticsearch_interface.es import ESConceptDetection
 
@@ -60,9 +61,22 @@ def extract_keywords_task(self, raw_text, **kwargs):
     return extract_keywords(raw_text, **kwargs)
 
 
-@shared_task(bind=True, name='text.wikisearch', es=es)
+@shared_task(bind=True, name='text.wikisearch', es=es, soft_time_limit=30, time_limit=45)
 def wikisearch_task(self, keywords_list, **kwargs):
-    return wikisearch(keywords_list, es=self.es, **kwargs)
+    es_timeout = config['elasticsearch'].get('request_timeout', 10)
+    wikipedia_timeout = config['elasticsearch'].get('wikipedia_timeout', 6)
+
+    try:
+        return wikisearch(
+            keywords_list,
+            es=self.es,
+            es_timeout=es_timeout,
+            wikipedia_timeout=wikipedia_timeout,
+            **kwargs,
+        )
+    except SoftTimeLimitExceeded:
+        print('[WARNING] text.wikisearch exceeded soft time limit; returning empty result for this shard.')
+        return pd.DataFrame()
 
 
 @shared_task(bind=True, name='text.compute_scores', graph=graph)

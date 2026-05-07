@@ -3,7 +3,42 @@ import requests
 import pandas as pd
 
 
-def search_wikipedia_api(text, limit=10):
+#----------------------#
+# Set up sysmsg logger #
+#----------------------#
+from loguru import logger as sysmsg
+import sys
+sysmsg.remove()
+sysmsg.add(
+    sys.stdout,
+    level="TRACE",
+    colorize=True,      # FORCE ANSI colors
+    enqueue=True,       # REQUIRED for Celery / multiprocessing
+    format="<green>{time:YYYY-MM-DD HH:mm:ss}</green> | "
+           "<level>{level: <8}</level> | "
+           "<cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - "
+           "{message}",
+)
+#----------------------#
+
+
+
+
+DEFAULT_WIKIPEDIA_TIMEOUT = 6
+DEFAULT_ES_TIMEOUT = 10
+
+
+def _safe_timeout(value, default):
+    try:
+        timeout = float(value)
+        if timeout > 0:
+            return timeout
+    except (TypeError, ValueError):
+        pass
+    return float(default)
+
+
+def search_wikipedia_api(text, limit=10, timeout=DEFAULT_WIKIPEDIA_TIMEOUT):
     """
     Perform search query to Wikipedia API for a given text.
 
@@ -14,7 +49,7 @@ def search_wikipedia_api(text, limit=10):
     Returns:
         list: A list of dictionaries with keys 'concept_id' and 'concept_name' containing the top matches for the search.
     """
-
+    sysmsg.debug(f'Searching Wikipedia API for text: "{text}" with limit {limit} and timeout {timeout}s.')
     params = {
         'format': 'json',
         'action': 'query',
@@ -28,21 +63,23 @@ def search_wikipedia_api(text, limit=10):
 
     try:
         # Make request
-        response = requests.get(url, params=params, headers=headers, timeout=6).json()
+        response = requests.get(url, params=params, headers=headers, timeout=timeout).json()
 
         # Extract list of results
         hits = response['query']['search']
+
+        sysmsg.debug(f'Wikipedia API returned {len(hits)} hits for text: "{text}".')
 
         # Return as list of dictionaries with keys 'concept_id' and 'concept_name'
         return [{'concept_id': hit['pageid'], 'concept_name': hit['title']} for hit in hits]
 
     except Exception:
         # If something goes wrong, avoid crashing and return empty list
-        print('[ERROR] Error connecting to Wikipedia API.')
+        sysmsg.error('Error connecting to Wikipedia API.')
         return []
 
 
-def search_elasticsearch(text, es, limit=10):
+def search_elasticsearch(text, es, limit=10, timeout=DEFAULT_ES_TIMEOUT):
     """
     Perform search query to elasticserch cluster for a given text.
 
@@ -54,21 +91,41 @@ def search_elasticsearch(text, es, limit=10):
     Returns:
         list: A list of dictionaries with keys 'concept_id', 'concept_name' and 'score' containing the top matches for the search.
     """
+    
+    
+    sysmsg.info(f'⚡️ Searching Elasticsearch cluster for text: "{text}" with limit {limit} and timeout {timeout}s.')
 
+    original_client = None
     try:
+        # Override ES timeout for this call only.
+        original_client = getattr(es, 'client', None)
+        if original_client is not None and hasattr(original_client, 'options'):
+            es.client = original_client.options(request_timeout=timeout)
+
         # Send search request
         hits = es.search(text, limit)
+
+        if hits is None:
+            sysmsg.warning(f'⚠️ Elasticsearch search returned None for text: "{text}".')
+            return []
+        else:
+            sysmsg.success(f'✅ Elasticsearch search returned {len(hits)} hits for text: "{text}".')
 
         # Return as list of dictionaries with keys 'concept_id', 'concept_name' and 'score'
         return [{'concept_id': hit['_source']['id'], 'concept_name': hit['_source']['title'], 'score': hit['_score']} for hit in hits]
 
     except Exception:
         # If something goes wrong, avoid crashing and return empty list
-        print('[ERROR] Error connecting to elasticsearch cluster.')
+        sysmsg.critical('Error connecting to elasticsearch cluster.')
         return []
+    finally:
+        # Restore original client to avoid side effects across calls.
+        if original_client is not None:
+            es.client = original_client
+            sysmsg.debug('Restored original Elasticsearch client after search.')
 
 
-def wikisearch(keywords_list, es, fraction=(0, 1), method='es-base'):
+def wikisearch(keywords_list, es, fraction=(0, 1), method='es-base', es_timeout=DEFAULT_ES_TIMEOUT, wikipedia_timeout=DEFAULT_WIKIPEDIA_TIMEOUT):
     """
     Finds 10 relevant concepts (Wikipedia pages) for each set of keywords in a list.
 
@@ -86,27 +143,37 @@ def wikisearch(keywords_list, es, fraction=(0, 1), method='es-base'):
         starting with 1. The search score is the elasticsearch score for method "es-score" or 1 - (searchrank - 1)/n
         for the other methods. Default: 'es-base'. Fallback: 'wikipedia-api'.
     """
+    sysmsg.info(f'Starting wikisearch with method "{method}" on {len(keywords_list)} sets of keywords, processing fraction {fraction}.')
 
     # Slice keywords_list
     begin = int(fraction[0] * len(keywords_list))
     end = int(fraction[1] * len(keywords_list))
     keywords_list = keywords_list[begin:end]
 
+    # Normalise timeout values once per call.
+    es_timeout = _safe_timeout(es_timeout, DEFAULT_ES_TIMEOUT)
+    wikipedia_timeout = _safe_timeout(wikipedia_timeout, DEFAULT_WIKIPEDIA_TIMEOUT)
+
     # Iterate over all keyword sets and request the results
     all_results = pd.DataFrame()
     for keywords in keywords_list:
         if method == 'wikipedia-api':
-            results_list = search_wikipedia_api(keywords)
+            sysmsg.warning(f'⚠️ Using Wikipedia API for keywords: "{keywords}".')
+            results_list = search_wikipedia_api(keywords, timeout=wikipedia_timeout)
         else:
-            results_list = search_elasticsearch(keywords, es)
+            sysmsg.debug(f'⚡️ Using Elasticsearch cluster for keywords: "{keywords}".')
+            results_list = search_elasticsearch(keywords, es, timeout=es_timeout)
 
             # Fallback to Wikipedia API if no results from elasticsearch
             if not results_list:
-                print(f'[WARNING] No results from elasticsearch cluster for keywords {keywords}. Falling back to Wikipedia API.')
-                results_list = search_wikipedia_api(keywords)
+                sysmsg.warning(f'⚠️ No results from elasticsearch cluster for keywords {keywords}. Falling back to Wikipedia API.')
+                results_list = search_wikipedia_api(keywords, timeout=wikipedia_timeout)
+            else:
+                sysmsg.success(f'✅ Found {len(results_list)} results for keywords: "{keywords}".')
 
         # Ignore set of keywords if no pages are found
         if not results_list:
+            sysmsg.warning(f'⚠️ No results found for keywords: "{keywords}". Skipping.')
             continue
 
         # Build results DataFrame
@@ -118,12 +185,17 @@ def wikisearch(keywords_list, es, fraction=(0, 1), method='es-base'):
             columns=['keywords', 'concept_id', 'concept_name', 'searchrank', 'search_score'],
         )
 
+        sysmsg.debug(f'Constructed results DataFrame for keywords: "{keywords}". Sample:\n{results.head()}')
+
         # Replace search score with linear function on searchrank if needed
         if method != 'es-score':
             results['search_score'] = 1 - (results['searchrank'] - 1) / len(results)
+            sysmsg.debug(f'Updated search scores based on search rank for keywords: "{keywords}". Sample:\n{results.head()}')
 
         # Append results
         all_results = pd.concat([all_results, results], ignore_index=True)
+
+        sysmsg.debug(f'Appended results for keywords: "{keywords}". Total results so far: {len(all_results)}.')
 
     return all_results
 
