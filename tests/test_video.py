@@ -25,6 +25,7 @@ from graphai.core.common.config import config
 
 
 @pytest.mark.usefixtures('test_video_url', 'test_video_token')
+@pytest.mark.integration
 def test__video_retrieve_url__retrieve_file_from_url_task__run_task(test_video_url, test_video_token):
     results = retrieve_file_from_url_task(test_video_url, True,
                                           force_token=test_video_token[:-4])
@@ -41,6 +42,7 @@ def test__video_retrieve_url__retrieve_file_from_url_task__run_task(test_video_u
 
 
 @pytest.mark.usefixtures('test_video_token')
+@pytest.mark.integration
 def test__video_calculate_fingerprint__compute_video_fingerprint_task__run_task(test_video_token):
     results = compute_video_fingerprint_task({'token': test_video_token})
 
@@ -57,6 +59,7 @@ def test__video_calculate_fingerprint__compute_video_fingerprint_task__run_task(
 
 
 @pytest.mark.usefixtures('test_video_token')
+@pytest.mark.integration
 def test__video_detect_slides__extract_and_sample_frames_task__run_task(test_video_token):
     results = extract_and_sample_frames_task(test_video_token)
 
@@ -72,6 +75,7 @@ def test__video_detect_slides__extract_and_sample_frames_task__run_task(test_vid
 
 
 @pytest.mark.usefixtures('test_video_token')
+@pytest.mark.integration
 def test__video_extract_audio__extract_audio_task__run_task(test_video_token):
     results = extract_audio_task(test_video_token)
 

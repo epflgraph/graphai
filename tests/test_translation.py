@@ -29,6 +29,7 @@ def test__translation_translate__translate_text__mock_task(mock_run, en_to_fr_te
 
 
 @pytest.mark.usefixtures('en_to_fr_text', 'fr_to_en_text')
+@pytest.mark.integration
 def test__translation_translate__translate_text__run_task(en_to_fr_text, fr_to_en_text):
     # Call the task
     en_fr_translated = translate_text_task.run(en_to_fr_text, "en", "fr")

@@ -165,6 +165,7 @@ def test__text_wikify__compute_scores__mock_task(mock_run):
 ################################################################
 
 
+@pytest.mark.integration
 def test__text_wikify__wikisearch__run_task():
     # Call task
     results = wikisearch_task.run([])

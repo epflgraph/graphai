@@ -28,6 +28,7 @@ def test__scraping_sublinks__initialize_url_and_get_sublinks_task__mock_task(moc
 
 
 @pytest.mark.usefixtures('test_url')
+@pytest.mark.integration
 def test__scraping_sublinks__initialize_url_and_get_sublinks_task__run_task(test_url):
     # Call the task
     sublinks_results = initialize_url_and_get_sublinks_task.run(create_base_url_token(test_url), test_url)
