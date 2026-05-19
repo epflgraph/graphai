@@ -1,0 +1,8 @@
+numpy<2
+scipy
+pandas
+matplotlib
+scikit-learn
+pyamg
+numba==0.62.1
+llvmlite==0.45.1

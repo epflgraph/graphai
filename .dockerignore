@@ -152,3 +152,17 @@ graphai/api/main/api_stop.sh
 # --- Buildx cache directories ---
 .buildx-cache
 .buildx-cache-new
+
+# --- Docker build context exclusions ---
+docker/models/fasttext/cc.*.300.bin
+docker/models/whisper/**/.git
+docker/models/**/.DS_Store
+docker/models/**/.git
+docker/models/**/*.lock
+docker/models/**/*.zip
+docker/models/huggingface/.locks/
+docker/models/huggingface/**/tf_model.h5
+docker/models/huggingface/**/flax_model.msgpack
+docker/models/huggingface/**/rust_model.ot
+docker/__pycache__/
+docker/models/huggingface/**/.locks/

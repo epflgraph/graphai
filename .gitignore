@@ -224,15 +224,14 @@ env-bak
 notes.txt
 prometheus.yml
 .trash
+_trash
 .data
 NS_*.*
 promtail-*
 prometheus.yml
 scripts/ontology
 scripts/infisical
-<<<<<<< HEAD
 graphai/archive/**/data
-=======
 services_path.txt
 graphai/api/main/api_stop.sh
 init/api_add_user_docker.sh
@@ -240,4 +239,4 @@ init/api_add_user.sh
 init/api_add_user.sh.bak
 scripts/list_functions.py
 purge.sh
->>>>>>> 0abdd5fc (Consolidate branch.)
+docker/models

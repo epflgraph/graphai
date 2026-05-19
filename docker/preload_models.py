@@ -4,12 +4,45 @@ import os
 from sentence_transformers import SentenceTransformer
 from transformers import MarianMTModel, MarianTokenizer, AutoModelForSeq2SeqLM, AutoTokenizer
 from presidio_analyzer.nlp_engine import NerModelConfiguration, TransformersNlpEngine
-from graphai.core.retrieval.anonymization import DEFAULT_GLINER_MODEL, mapping as presidio_model_mapping
 
 try:
     from gliner import GLiNER
 except ImportError:
     GLiNER = None
+
+
+FALLBACK_DEFAULT_GLINER_MODEL = "urchade/gliner_multi_pii-v1"
+FALLBACK_PRESIDIO_MODEL_MAPPING = {
+    "B-DATE": "DATE_TIME",
+    "I-DATE": "DATE_TIME",
+    "DATE": "DATE_TIME",
+    "B-PER": "PERSON",
+    "I-PER": "PERSON",
+    "PER": "PERSON",
+    "PERSON": "PERSON",
+    "B-ORG": "ORGANIZATION",
+    "I-ORG": "ORGANIZATION",
+    "ORG": "ORGANIZATION",
+    "ORGANIZATION": "ORGANIZATION",
+    "B-LOC": "LOCATION",
+    "I-LOC": "LOCATION",
+    "LOC": "LOCATION",
+    "LOCATION": "LOCATION",
+    "GPE": "LOCATION",
+}
+
+
+def get_presidio_model_settings() -> tuple[str, dict[str, str]]:
+    try:
+        from graphai.core.retrieval.anonymization import (
+            DEFAULT_GLINER_MODEL,
+            mapping as presidio_model_mapping,
+        )
+    except ImportError:
+        print("graphai package not available during preload; using built-in NER defaults")
+        return FALLBACK_DEFAULT_GLINER_MODEL, FALLBACK_PRESIDIO_MODEL_MAPPING
+
+    return DEFAULT_GLINER_MODEL, presidio_model_mapping
 
 
 def preload_sentence_models(cache_dir: str) -> None:
@@ -42,6 +75,8 @@ def preload_translation_models(cache_dir: str) -> None:
 
 
 def preload_ner_models(cache_dir: str) -> None:
+    _, presidio_model_mapping = get_presidio_model_settings()
+
     nlp_models = [
         {
             "lang_code": "en",
@@ -69,12 +104,14 @@ def preload_ner_models(cache_dir: str) -> None:
 
 
 def preload_pii_models(cache_dir: str) -> None:
+    default_gliner_model, _ = get_presidio_model_settings()
+
     if GLiNER is None:
         print("Skipping GLiNER PII model preload because gliner is not installed")
         return
 
-    print(f"Preloading GLiNER PII model: {DEFAULT_GLINER_MODEL}")
-    GLiNER.from_pretrained(DEFAULT_GLINER_MODEL, cache_dir=cache_dir)
+    print(f"Preloading GLiNER PII model: {default_gliner_model}")
+    GLiNER.from_pretrained(default_gliner_model, cache_dir=cache_dir)
 
 
 def preload_all(cache_dir: str) -> None:

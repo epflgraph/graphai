@@ -11,3 +11,8 @@ docker buildx build \
 
 # If you have built the image locally and want to push it to Docker Hub, you can use the following command. This assumes that the image is already tagged as `epflgraph/graphai:latest` in your local Docker environment.
 docker push epflgraph/graphai:latest
+
+
+# Currently using only this:
+docker buildx build --progress=plain --load -t epflgraph/graphai:latest .
+docker push epflgraph/graphai:latest

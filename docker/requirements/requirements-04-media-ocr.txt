@@ -1,0 +1,10 @@
+ffmpeg-python
+pyacoustid
+imagehash
+fingerprint
+pytesseract
+pymupdf
+pdf2image>=1.16,<2
+beautifulsoup4
+wget
+yt-dlp>=2025.4.30

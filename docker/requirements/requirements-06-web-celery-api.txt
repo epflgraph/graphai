@@ -1,0 +1,12 @@
+loguru
+fastapi>=0.95.0
+gunicorn
+uvicorn
+pydantic
+python-multipart
+celery[redis]
+flower
+kombu
+fastapi-user-limiter>=1.3.0
+prometheus-fastapi-instrumentator
+unidecode
