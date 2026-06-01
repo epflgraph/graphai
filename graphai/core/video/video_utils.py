@@ -11,6 +11,8 @@ import sys
 import time
 from datetime import timedelta
 from multiprocessing import Lock
+from urllib.error import HTTPError
+from urllib.parse import urlparse
 from urllib.request import Request, urlopen
 
 import fasttext
@@ -91,6 +93,41 @@ STOPWORDS = {
 }
 
 
+def is_kaltura_serveflavor_url(url: str) -> bool:
+    if not url:
+        return False
+    url_lower = url.lower()
+    path = urlparse(url).path.lower()
+    return 'api.cast.switch.ch/' in url_lower and '/serveflavor/' in path
+
+
+def _extract_useful_ffmpeg_error_text(raw_text: str, max_chars: int = 4000) -> str:
+    if not raw_text:
+        return ""
+    lines = [line.rstrip() for line in raw_text.splitlines() if line.strip()]
+    if not lines:
+        return raw_text[:max_chars]
+    # Keep both head and tail: ffmpeg prints version/config first, actionable error often at the end.
+    head = lines[:8]
+    tail = lines[-25:] if len(lines) > 25 else lines
+    merged = head + (["..."] if len(lines) > (len(head) + len(tail)) else []) + tail
+    compact = "\n".join(merged)
+    return compact[:max_chars]
+
+
+def _kaltura_failure_reason_from_stderr(stderr_text: str) -> str:
+    text = (stderr_text or "").lower()
+    if "404" in text or "not found" in text:
+        return "kaltura_http_404"
+    if "403" in text or "forbidden" in text or "unauthorized" in text:
+        return "kaltura_access_denied"
+    if "timed out" in text or "timeout" in text:
+        return "kaltura_timeout"
+    if "connection refused" in text or "network is unreachable" in text or "could not resolve" in text:
+        return "kaltura_network_error"
+    return "kaltura_ffmpeg_failed"
+
+
 def retrieve_video_file_from_generic_url(url, output_filename_with_path, output_token):
     """
     Retrieves a file from a given URL and stores it locally.
@@ -100,7 +137,7 @@ def retrieve_video_file_from_generic_url(url, output_filename_with_path, output_
         output_token: Token of output file
 
     Returns:
-        Output token if successful, None otherwise
+        Tuple (token, fp_id, failure_reason)
     """
     try:
         sysmsg.debug("Downloading '{}' to '{}' with urllib.", url, output_filename_with_path)
@@ -111,9 +148,32 @@ def retrieve_video_file_from_generic_url(url, output_filename_with_path, output_
         with urlopen(request, context=context, timeout=120) as response, open(output_filename_with_path, 'wb') as out:
             shutil.copyfileobj(response, out)
         sysmsg.debug("urllib download finished for '{}'.", url)
+    except HTTPError as e:
+        sysmsg.error(
+            "HTTP download failed for '{}' with status={} reason='{}'",
+            url,
+            e.code,
+            e.reason,
+        )
+        if e.code == 404 and is_kaltura_serveflavor_url(url):
+            sysmsg.warning(
+                "Generic download got 404 for Kaltura serveFlavor URL '{}'; retrying with ffmpeg path.",
+                url
+            )
+            kaltura_result = retrieve_file_from_kaltura(url, output_filename_with_path, output_token)
+            if kaltura_result is None:
+                return None, None, "kaltura_fallback_failed_after_http_404"
+            if len(kaltura_result) == 3:
+                token, fp_id, kaltura_reason = kaltura_result
+                if kaltura_reason:
+                    return token, fp_id, f"{kaltura_reason}_after_http_404"
+                return token, fp_id, None
+            return kaltura_result
+        sysmsg.exception("Download failed for '{}'.", url)
+        return None, None, f"http_{e.code}"
     except Exception:
         sysmsg.exception("Download failed for '{}'.", url)
-        return None, None
+        return None, None, "generic_download_failed"
 
     if file_exists(output_filename_with_path):
         sysmsg.debug("Downloaded file exists at '{}'.", output_filename_with_path)
@@ -121,10 +181,10 @@ def retrieve_video_file_from_generic_url(url, output_filename_with_path, output_
             entry_id = url.split('/')[url.split('/').index('entryId') + 1]
         else:
             entry_id = url
-        return output_token, entry_id
+        return output_token, entry_id, None
 
     sysmsg.warning("Download finished but file is missing at '{}'.", output_filename_with_path)
-    return None, None
+    return None, None, "generic_missing_output_file"
 
 
 def retrieve_file_from_kaltura(url, output_filename_with_path, output_token):
@@ -136,28 +196,50 @@ def retrieve_file_from_kaltura(url, output_filename_with_path, output_token):
         output_token: Token of output file
 
     Returns:
-        Output token if retrieval is successful, None otherwise
+        Tuple (token, fp_id, failure_reason)
     """
-    # Downloading using ffmpeg
+    ffmpeg_stderr = ""
     try:
         sysmsg.debug("kaltura download raw url repr={}", repr(url))
         sysmsg.debug("kaltura download target path='{}'", output_filename_with_path)
-        err = ffmpeg.input(url, protocol_whitelist="file,http,https,tcp,tls,crypto"). \
-            output(output_filename_with_path, c="copy"). \
-            overwrite_output().run(capture_stdout=True, cmd=FFMPEG_CMD)
-        err = str(err[0])
-    except Exception as e:
-        print(e, file=sys.stderr)
-        err = str(e)
-    # If the file exists and there were no errors, the download has been successful
-    if file_exists(output_filename_with_path) and ('ffmpeg error' not in err.lower()):
+        sysmsg.debug("kaltura download ffmpeg cmd='{}'", FFMPEG_CMD)
+        _, stderr = (
+            ffmpeg.input(url, protocol_whitelist="file,http,https,tcp,tls,crypto")
+            .output(output_filename_with_path, c="copy")
+            .global_args("-hide_banner", "-loglevel", "error")
+            .overwrite_output()
+            .run(capture_stdout=True, capture_stderr=True, cmd=FFMPEG_CMD)
+        )
+        ffmpeg_stderr = (
+            stderr.decode("utf-8", errors="replace")
+            if isinstance(stderr, (bytes, bytearray))
+            else str(stderr)
+        )
+    except ffmpeg.Error as e:
+        stderr = e.stderr.decode("utf-8", errors="replace") if isinstance(e.stderr, (bytes, bytearray)) else str(e.stderr)
+        stdout = e.stdout.decode("utf-8", errors="replace") if isinstance(e.stdout, (bytes, bytearray)) else str(e.stdout)
+        ffmpeg_stderr = stderr or stdout or str(e)
+        useful_err = _extract_useful_ffmpeg_error_text(ffmpeg_stderr)
+        sysmsg.error("kaltura ffmpeg download failed for '{}': {}", url, useful_err)
+        return None, None, _kaltura_failure_reason_from_stderr(ffmpeg_stderr)
+    except Exception:
+        sysmsg.exception("Unexpected error during kaltura ffmpeg download for '{}'.", url)
+        return None, None, "kaltura_exception"
+
+    if file_exists(output_filename_with_path) and ('ffmpeg error' not in ffmpeg_stderr.lower()):
         if '/entryId/' in url:
             entry_id = url.split('/')[url.split('/').index('entryId') + 1]
         else:
             entry_id = url
-        return output_token, entry_id
-    else:
-        return None, None
+        return output_token, entry_id, None
+
+    if ffmpeg_stderr:
+        useful_err = _extract_useful_ffmpeg_error_text(ffmpeg_stderr)
+        sysmsg.warning("kaltura ffmpeg stderr for '{}': {}", url, useful_err)
+        return None, None, _kaltura_failure_reason_from_stderr(ffmpeg_stderr)
+
+    sysmsg.warning("kaltura retrieval produced no output file at '{}'.", output_filename_with_path)
+    return None, None, "kaltura_missing_output_file"
 
 
 def retrieve_file_from_youtube(url, output_filename_with_path, output_token):
@@ -178,16 +260,19 @@ def retrieve_file_from_youtube(url, output_filename_with_path, output_token):
             vid_id = url.split('?v=')[1]
         else:
             vid_id = url
-        return output_token, vid_id
+        return output_token, vid_id, None
     else:
-        return str(result_code), None
+        return None, None, f"youtube_returncode_{result_code.returncode}"
 
 def is_kaltura_manifest_url(url: str) -> bool:
+    if not url:
+        return False
     url_lower = url.lower()
+    path = urlparse(url).path.lower()
     return (
-        'api.cast.switch.ch/' in url_lower
-        or '/playmanifest/' in url_lower
-        or url_lower.endswith('.m3u8')
+        '/playmanifest/' in url_lower
+        or '/manifest/' in path
+        or path.endswith('.m3u8')
     )
 
 def retrieve_file_from_any_source(url, output_filename_with_path, output_token, is_kaltura=False):

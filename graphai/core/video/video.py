@@ -84,7 +84,8 @@ def retrieve_file_from_url(url, file_manager, is_kaltura=False, force_token=None
             'token': None,
             'fresh': False,
             'token_size': 0,
-            'fp_id': None
+            'fp_id': None,
+            'failure_reason': 'invalid_url'
         }
     if force_token is not None:
         sysmsg.debug(f"Force token '{force_token}' provided. Using it directly without checking the cache.")
@@ -115,17 +116,28 @@ def retrieve_file_from_url(url, file_manager, is_kaltura=False, force_token=None
     sysmsg.debug("retrieve_file_from_url is_kaltura={}", is_kaltura)
 
     source_result = retrieve_file_from_any_source(url, filename_with_path, filename, is_kaltura)
+    failure_reason = None
     if source_result is None:
         sysmsg.error("retrieve_file_from_any_source returned None for '{}'.", url)
         results, fp_id = None, None
+        failure_reason = 'source_handler_returned_none'
     else:
-        results, fp_id = source_result
-    sysmsg.debug("Source retrieval completed. token='{}' fp_id='{}'", results, fp_id)
+        if len(source_result) == 3:
+            results, fp_id, failure_reason = source_result
+        else:
+            results, fp_id = source_result
+    sysmsg.debug(
+        "Source retrieval completed. token='{}' fp_id='{}' failure_reason='{}'",
+        results,
+        fp_id,
+        failure_reason,
+    )
     return {
         'token': results,
         'fresh': results == filename,
         'token_size': get_file_size(filename_with_path),
-        'fp_id': fp_id
+        'fp_id': fp_id,
+        'failure_reason': failure_reason
     }
 
 

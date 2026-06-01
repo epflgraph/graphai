@@ -91,6 +91,12 @@ class RetrieveURLResponseInner(BaseModel):
         description="True if task successful, False otherwise"
     )
 
+    failure_reason: Union[str, None] = Field(
+        title="Failure reason",
+        description="Machine-readable reason for failed retrieval when token is null.",
+        default=None
+    )
+
 
 class RetrieveURLResponse(TaskStatusResponse):
     task_result: Union[RetrieveURLResponseInner, None] = Field(
