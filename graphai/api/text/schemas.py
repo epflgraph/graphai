@@ -528,6 +528,47 @@ KeywordsResponse = List[str]
 ################################################################
 
 
+class WikiSearchRequest(BaseModel):
+    """
+    Object containing the search term to query the concept-detection Elasticsearch index.
+    """
+    search_term: str = Field(
+        ...,
+        title="Search Term",
+        description="Search term sent to the Wikipedia concept-detection Elasticsearch index",
+        examples=["acoustic wave fields"]
+    )
+
+
+class WikiSearchResponseElem(BaseModel):
+    """
+    Object representing a single Elasticsearch match from the concept-detection index.
+    """
+
+    concept_id: int = Field(
+        ...,
+        title="Concept ID",
+        description="ID of the concept (wikipage)"
+    )
+
+    concept_name: str = Field(
+        ...,
+        title="Concept name",
+        description="Name of the concept (wikipage)"
+    )
+
+    score: float = Field(
+        ...,
+        title="Score",
+        description="Raw Elasticsearch relevance score"
+    )
+
+
+WikiSearchResponse = List[WikiSearchResponseElem]
+
+################################################################
+
+
 class GenerateTextExerciseRequest(BaseModel):
     """
     Object containing the input to generate with an LLM an exercise from a text.

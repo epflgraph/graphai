@@ -8,6 +8,7 @@ import pandas as pd
 from graphai.celery.text.tasks import (
     extract_keywords_task,
     wikisearch_task,
+    wiki_search_task,
     compute_scores_task,
     draw_ontology_task,
     draw_graph_task,
@@ -137,6 +138,51 @@ def test__text_keywords__integration(fixture_app, celery_worker, sultans, wave_f
     assert isinstance(keywords_list, list)
     assert len(keywords_list) > 0
     assert 'schreier graphs' in keywords_list
+
+
+################################################################
+# /text/wiki_search                                            #
+################################################################
+
+
+@patch('graphai.celery.text.tasks.search_elasticsearch')
+def test__text_wiki_search__run_task(mock_search):
+    mock_search.return_value = [
+        {'concept_id': 5786179, 'concept_name': 'Acoustic wave', 'score': 42.0},
+        {'concept_id': 33516, 'concept_name': 'Wave', 'score': 21.0},
+    ]
+
+    results = wiki_search_task.run('acoustic wave fields', limit=2)
+
+    assert results == mock_search.return_value
+    mock_search.assert_called_once()
+    _, kwargs = mock_search.call_args
+    assert kwargs['limit'] == 2
+
+
+def test__text_wiki_search__integration(fixture_app):
+    with patch('graphai.celery.text.jobs.wiki_search') as mock_wiki_search:
+        mock_wiki_search.return_value = [
+            {'concept_id': 5786179, 'concept_name': 'Acoustic wave', 'score': 42.0},
+            {'concept_id': 33516, 'concept_name': 'Wave', 'score': 21.0},
+        ]
+
+        response = fixture_app.post(
+            '/text/wiki_search?limit=2',
+            json={'search_term': 'acoustic wave fields'},
+            timeout=30,
+        )
+
+    assert response.status_code == 200
+
+    results = response.json()
+
+    assert isinstance(results, list)
+    assert results == [
+        {'concept_id': 5786179, 'concept_name': 'Acoustic wave', 'score': 42.0},
+        {'concept_id': 33516, 'concept_name': 'Wave', 'score': 21.0},
+    ]
+    mock_wiki_search.assert_called_once_with('acoustic wave fields', 2)
 
 
 ################################################################

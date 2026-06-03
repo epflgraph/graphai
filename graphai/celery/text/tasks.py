@@ -17,6 +17,7 @@ from graphai.core.text import (
     draw_graph,
     generate_exercise,
 )
+from graphai.core.text.wikisearch import search_elasticsearch
 
 
 ################################################################
@@ -79,6 +80,24 @@ def wikisearch_task(self, keywords_list, **kwargs):
     except SoftTimeLimitExceeded:
         print('[WARNING] text.wikisearch exceeded soft time limit; returning empty result for this shard.')
         return pd.DataFrame()
+
+
+@shared_task(bind=True, name='text.wiki_search', es=es, soft_time_limit=30, time_limit=45)
+def wiki_search_task(self, search_term, limit=10):
+    es_timeout = config['elasticsearch'].get('request_timeout', 10)
+    es_timeout_retries = config['elasticsearch'].get('request_timeout_retries', 2)
+
+    try:
+        return search_elasticsearch(
+            search_term,
+            es=self.es,
+            limit=limit,
+            timeout=es_timeout,
+            timeout_retries=es_timeout_retries,
+        )
+    except SoftTimeLimitExceeded:
+        print('[WARNING] text.wiki_search exceeded soft time limit; returning empty result.')
+        return []
 
 
 @shared_task(bind=True, name='text.compute_scores', graph=graph)

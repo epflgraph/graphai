@@ -1,6 +1,6 @@
 from typing import Optional, Union
 
-from fastapi import APIRouter, Security
+from fastapi import APIRouter, Query, Security
 from fastapi.responses import FileResponse
 
 import pandas as pd
@@ -34,6 +34,24 @@ async def keywords(data: schemas.KeywordsRequest, use_nltk: Optional[bool] = Fal
         return []
 
     return jobs.keywords(data.raw_text, use_nltk)
+
+
+@router.post('/wiki_search', response_model=schemas.WikiSearchResponse)
+async def wiki_search(
+    data: schemas.WikiSearchRequest,
+    limit: Optional[int] = Query(default=10, ge=1, le=100),
+):
+    """
+    Searches the Wikipedia concept-detection Elasticsearch index and returns the ordered matches.
+    """
+
+    search_term = data.search_term.strip()
+
+    # Return if no input
+    if not search_term:
+        return []
+
+    return jobs.wiki_search(search_term, limit)
 
 
 @router.post('/wikify', response_model=schemas.WikifyResponse)

@@ -8,6 +8,11 @@ def keywords(raw_text, use_nltk):
     return job.apply_async(priority=10).get(timeout=10)
 
 
+def wiki_search(search_term, limit):
+    job = chain(tasks.wiki_search_task.s(search_term, limit=limit))
+    return job.apply_async(priority=10).get(timeout=30)
+
+
 def wikify_text(
     text,
     method,
