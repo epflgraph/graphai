@@ -17,7 +17,7 @@ from graphai.core.text import (
     draw_graph,
     generate_exercise,
 )
-from graphai.core.text.wikisearch import search_elasticsearch
+from graphai.core.text.wikisearch import search_elasticsearch_http
 
 
 ################################################################
@@ -27,9 +27,12 @@ from graphai.core.text.wikisearch import search_elasticsearch
 # Object that holds all graph and ontology data in memory
 graph = ConceptsGraph()
 
+
 # Elasticsearch interface
-es = ESConceptDetection(config['elasticsearch'],
-                        index=config['elasticsearch'].get('concept_detection_index', 'concepts_detection'))
+es = ESConceptDetection(
+    config['elasticsearch'],
+    index=config['elasticsearch'].get('concept_detection_index', 'concepts_detection'),
+)
 
 
 ################################################################
@@ -88,9 +91,10 @@ def wiki_search_task(self, search_term, limit=10):
     es_timeout_retries = config['elasticsearch'].get('request_timeout_retries', 2)
 
     try:
-        return search_elasticsearch(
+        return search_elasticsearch_http(
             search_term,
-            es=self.es,
+            config['elasticsearch'],
+            index=config['elasticsearch'].get('concept_detection_index', 'concepts_detection'),
             limit=limit,
             timeout=es_timeout,
             timeout_retries=es_timeout_retries,

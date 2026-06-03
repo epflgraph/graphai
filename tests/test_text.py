@@ -5,6 +5,7 @@ from unittest.mock import patch
 
 import pandas as pd
 
+from graphai.core.common.config import config
 from graphai.celery.text.tasks import (
     extract_keywords_task,
     wikisearch_task,
@@ -145,7 +146,7 @@ def test__text_keywords__integration(fixture_app, celery_worker, sultans, wave_f
 ################################################################
 
 
-@patch('graphai.celery.text.tasks.search_elasticsearch')
+@patch('graphai.celery.text.tasks.search_elasticsearch_http')
 def test__text_wiki_search__run_task(mock_search):
     mock_search.return_value = [
         {'concept_id': 5786179, 'concept_name': 'Acoustic wave', 'score': 42.0},
@@ -155,9 +156,14 @@ def test__text_wiki_search__run_task(mock_search):
     results = wiki_search_task.run('acoustic wave fields', limit=2)
 
     assert results == mock_search.return_value
-    mock_search.assert_called_once()
-    _, kwargs = mock_search.call_args
-    assert kwargs['limit'] == 2
+    mock_search.assert_called_once_with(
+        'acoustic wave fields',
+        config['elasticsearch'],
+        index=config['elasticsearch'].get('concept_detection_index', 'concepts_detection'),
+        limit=2,
+        timeout=config['elasticsearch'].get('request_timeout', 10),
+        timeout_retries=config['elasticsearch'].get('request_timeout_retries', 2),
+    )
 
 
 def test__text_wiki_search__integration(fixture_app):

@@ -1,6 +1,16 @@
+import json
 import requests
+from ssl import create_default_context
 
 import pandas as pd
+import urllib3
+
+from elasticsearch_interface.utils import (
+    bool_query,
+    match_query,
+    multi_match_query,
+    dis_max_query,
+)
 
 try:
     from elastic_transport import ConnectionError as ESConnectionError
@@ -62,6 +72,111 @@ def _is_es_timeout_error(exc):
 
     message = str(exc).lower()
     return 'timed out' in message or 'timeout' in message
+
+
+def _build_wikipedia_search_query(text):
+    return bool_query(
+        should=[
+            multi_match_query(fields=['all_near_match^10', 'all_near_match_asciifolding^7.5'], text=text),
+            bool_query(
+                filter=[
+                    bool_query(
+                        should=[
+                            match_query('all', text=text, operator='and'),
+                            match_query('all.plain', text=text, operator='and'),
+                        ]
+                    )
+                ],
+                should=[
+                    multi_match_query(fields=['title^3', 'title.plain^1'], text=text, type='most_fields', boost=0.3, minimum_should_match=1),
+                    multi_match_query(fields=['category^3', 'category.plain^1'], text=text, type='most_fields', boost=0.05, minimum_should_match=1),
+                    multi_match_query(fields=['heading^3', 'heading.plain^1'], text=text, type='most_fields', boost=0.05, minimum_should_match=1),
+                    multi_match_query(fields=['auxiliary_text^3', 'auxiliary_text.plain^1'], text=text, type='most_fields', boost=0.05, minimum_should_match=1),
+                    multi_match_query(fields=['file_text^3', 'file_text.plain^1'], text=text, type='most_fields', boost=0.5, minimum_should_match=1),
+                    dis_max_query([
+                        multi_match_query(fields=['redirect^3', 'redirect.plain^1'], text=text, type='most_fields', boost=0.27, minimum_should_match=1),
+                        multi_match_query(fields=['suggest'], text=text, type='most_fields', boost=0.2, minimum_should_match=1),
+                    ]),
+                    dis_max_query([
+                        multi_match_query(fields=['text^3', 'text.plain^1'], text=text, type='most_fields', boost=0.6, minimum_should_match=1),
+                        multi_match_query(fields=['opening_text^3', 'opening_text.plain^1'], text=text, type='most_fields', boost=0.5, minimum_should_match=1),
+                    ]),
+                ],
+            ),
+        ]
+    )
+
+
+def search_elasticsearch_http(
+    text,
+    es_config,
+    index,
+    limit=10,
+    timeout=DEFAULT_ES_TIMEOUT,
+    timeout_retries=DEFAULT_ES_TIMEOUT_RETRIES,
+):
+    sysmsg.info(f'⚡️ Searching Elasticsearch over HTTP for text: "{text}" with limit {limit} and timeout {timeout}s.')
+
+    timeout = _safe_timeout(timeout, DEFAULT_ES_TIMEOUT)
+    timeout_retries = _safe_positive_int(timeout_retries, DEFAULT_ES_TIMEOUT_RETRIES)
+    url = f"https://{es_config['host']}:{es_config['port']}/{index}/_search"
+    body = {
+        'query': _build_wikipedia_search_query(text),
+        'size': limit,
+        'profile': True,
+    }
+    headers = {
+        **urllib3.make_headers(basic_auth=f"{es_config['username']}:{es_config['password']}"),
+        'Content-Type': 'application/json',
+    }
+    request_kwargs = {
+        'body': json.dumps(body).encode('utf-8'),
+        'headers': headers,
+        'timeout': urllib3.Timeout(connect=timeout, read=timeout),
+        'retries': False,
+    }
+    http = urllib3.PoolManager(
+        num_pools=1,
+        maxsize=1,
+        block=True,
+        ssl_context=create_default_context(cafile=es_config['cafile']),
+    )
+
+    for attempt in range(1, timeout_retries + 1):
+        try:
+            response = http.request('POST', url, **request_kwargs)
+            if response.status >= 400:
+                sysmsg.critical(
+                    f'Elasticsearch HTTP request failed for text "{text}": '
+                    f'HTTP {response.status}: {response.data.decode("utf-8", errors="replace")}'
+                )
+                return []
+
+            hits = json.loads(response.data.decode('utf-8')).get('hits', {}).get('hits', [])
+            sysmsg.success(f'✅ Elasticsearch HTTP search returned {len(hits)} hits for text: "{text}".')
+            return [
+                {
+                    'concept_id': hit['_source']['id'],
+                    'concept_name': hit['_source']['title'],
+                    'score': hit['_score'],
+                }
+                for hit in hits
+            ]
+        except urllib3.exceptions.TimeoutError as exc:
+            if attempt < timeout_retries:
+                sysmsg.warning(
+                    f'⚠️ Elasticsearch HTTP timeout for text "{text}" (attempt {attempt}/{timeout_retries}): {exc}. Retrying...'
+                )
+                continue
+            sysmsg.warning(
+                f'⚠️ Elasticsearch HTTP timeout for text "{text}" after {attempt} attempt(s): {exc}'
+            )
+            return []
+        except urllib3.exceptions.HTTPError as exc:
+            sysmsg.critical(f'Elasticsearch HTTP request failed for text "{text}": {type(exc).__name__}: {exc}')
+            return []
+
+    return []
 
 
 def search_wikipedia_api(text, limit=10, timeout=DEFAULT_WIKIPEDIA_TIMEOUT):
