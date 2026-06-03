@@ -64,6 +64,7 @@ def extract_keywords_task(self, raw_text, **kwargs):
 @shared_task(bind=True, name='text.wikisearch', es=es, soft_time_limit=30, time_limit=45)
 def wikisearch_task(self, keywords_list, **kwargs):
     es_timeout = config['elasticsearch'].get('request_timeout', 10)
+    es_timeout_retries = config['elasticsearch'].get('request_timeout_retries', 2)
     wikipedia_timeout = config['elasticsearch'].get('wikipedia_timeout', 6)
 
     try:
@@ -71,6 +72,7 @@ def wikisearch_task(self, keywords_list, **kwargs):
             keywords_list,
             es=self.es,
             es_timeout=es_timeout,
+            es_timeout_retries=es_timeout_retries,
             wikipedia_timeout=wikipedia_timeout,
             **kwargs,
         )

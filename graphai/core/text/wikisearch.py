@@ -2,6 +2,13 @@ import requests
 
 import pandas as pd
 
+try:
+    from elastic_transport import ConnectionError as ESConnectionError
+    from elastic_transport import ConnectionTimeout as ESConnectionTimeout
+except Exception:  # pragma: no cover - keep runtime resilient if transport internals change
+    ESConnectionError = ()
+    ESConnectionTimeout = ()
+
 
 #----------------------#
 # Set up sysmsg logger #
@@ -26,6 +33,7 @@ sysmsg.add(
 
 DEFAULT_WIKIPEDIA_TIMEOUT = 6
 DEFAULT_ES_TIMEOUT = 10
+DEFAULT_ES_TIMEOUT_RETRIES = 2
 
 
 def _safe_timeout(value, default):
@@ -36,6 +44,24 @@ def _safe_timeout(value, default):
     except (TypeError, ValueError):
         pass
     return float(default)
+
+
+def _safe_positive_int(value, default):
+    try:
+        parsed = int(value)
+        if parsed > 0:
+            return parsed
+    except (TypeError, ValueError):
+        pass
+    return int(default)
+
+
+def _is_es_timeout_error(exc):
+    if ESConnectionTimeout and isinstance(exc, ESConnectionTimeout):
+        return True
+
+    message = str(exc).lower()
+    return 'timed out' in message or 'timeout' in message
 
 
 def search_wikipedia_api(text, limit=10, timeout=DEFAULT_WIKIPEDIA_TIMEOUT):
@@ -79,7 +105,7 @@ def search_wikipedia_api(text, limit=10, timeout=DEFAULT_WIKIPEDIA_TIMEOUT):
         return []
 
 
-def search_elasticsearch(text, es, limit=10, timeout=DEFAULT_ES_TIMEOUT):
+def search_elasticsearch(text, es, limit=10, timeout=DEFAULT_ES_TIMEOUT, timeout_retries=DEFAULT_ES_TIMEOUT_RETRIES):
     """
     Perform search query to elasticserch cluster for a given text.
 
@@ -96,28 +122,53 @@ def search_elasticsearch(text, es, limit=10, timeout=DEFAULT_ES_TIMEOUT):
     sysmsg.info(f'⚡️ Searching Elasticsearch cluster for text: "{text}" with limit {limit} and timeout {timeout}s.')
 
     original_client = None
+    timeout_retries = _safe_positive_int(timeout_retries, DEFAULT_ES_TIMEOUT_RETRIES)
     try:
         # Override ES timeout for this call only.
         original_client = getattr(es, 'client', None)
         if original_client is not None and hasattr(original_client, 'options'):
             es.client = original_client.options(request_timeout=timeout)
 
-        # Send search request
-        hits = es.search(text, limit)
+        for attempt in range(1, timeout_retries + 1):
+            try:
+                # Send search request
+                hits = es.search(text, limit)
 
-        if hits is None:
-            sysmsg.warning(f'⚠️ Elasticsearch search returned None for text: "{text}".')
-            return []
-        else:
-            sysmsg.success(f'✅ Elasticsearch search returned {len(hits)} hits for text: "{text}".')
+                if hits is None:
+                    sysmsg.warning(f'⚠️ Elasticsearch search returned None for text: "{text}".')
+                    return []
 
-        # Return as list of dictionaries with keys 'concept_id', 'concept_name' and 'score'
-        return [{'concept_id': hit['_source']['id'], 'concept_name': hit['_source']['title'], 'score': hit['_score']} for hit in hits]
+                sysmsg.success(f'✅ Elasticsearch search returned {len(hits)} hits for text: "{text}".')
 
-    except Exception:
-        # If something goes wrong, avoid crashing and return empty list
-        sysmsg.critical('Error connecting to elasticsearch cluster.')
-        return []
+                # Return as list of dictionaries with keys 'concept_id', 'concept_name' and 'score'
+                return [{'concept_id': hit['_source']['id'], 'concept_name': hit['_source']['title'], 'score': hit['_score']} for hit in hits]
+            except Exception as exc:
+                error_kind = type(exc).__name__
+                error_message = str(exc)
+                timed_out = _is_es_timeout_error(exc)
+                network_error = ESConnectionError and isinstance(exc, ESConnectionError)
+
+                if timed_out and attempt < timeout_retries:
+                    sysmsg.warning(
+                        f'⚠️ Elasticsearch timeout for text "{text}" (attempt {attempt}/{timeout_retries}): '
+                        f'{error_kind}: {error_message}. Retrying...'
+                    )
+                    continue
+
+                if timed_out:
+                    sysmsg.warning(
+                        f'⚠️ Elasticsearch timeout for text "{text}" after {attempt} attempt(s): '
+                        f'{error_kind}: {error_message}'
+                    )
+                elif network_error:
+                    sysmsg.critical(
+                        f'Elasticsearch network error for text "{text}": {error_kind}: {error_message}'
+                    )
+                else:
+                    sysmsg.critical(
+                        f'Elasticsearch request failed for text "{text}": {error_kind}: {error_message}'
+                    )
+                return []
     finally:
         # Restore original client to avoid side effects across calls.
         if original_client is not None:
@@ -125,7 +176,15 @@ def search_elasticsearch(text, es, limit=10, timeout=DEFAULT_ES_TIMEOUT):
             sysmsg.debug('Restored original Elasticsearch client after search.')
 
 
-def wikisearch(keywords_list, es, fraction=(0, 1), method='es-base', es_timeout=DEFAULT_ES_TIMEOUT, wikipedia_timeout=DEFAULT_WIKIPEDIA_TIMEOUT):
+def wikisearch(
+    keywords_list,
+    es,
+    fraction=(0, 1),
+    method='es-base',
+    es_timeout=DEFAULT_ES_TIMEOUT,
+    wikipedia_timeout=DEFAULT_WIKIPEDIA_TIMEOUT,
+    es_timeout_retries=DEFAULT_ES_TIMEOUT_RETRIES,
+):
     """
     Finds 10 relevant concepts (Wikipedia pages) for each set of keywords in a list.
 
@@ -153,6 +212,7 @@ def wikisearch(keywords_list, es, fraction=(0, 1), method='es-base', es_timeout=
     # Normalise timeout values once per call.
     es_timeout = _safe_timeout(es_timeout, DEFAULT_ES_TIMEOUT)
     wikipedia_timeout = _safe_timeout(wikipedia_timeout, DEFAULT_WIKIPEDIA_TIMEOUT)
+    es_timeout_retries = _safe_positive_int(es_timeout_retries, DEFAULT_ES_TIMEOUT_RETRIES)
 
     # Iterate over all keyword sets and request the results
     all_results = pd.DataFrame()
@@ -162,7 +222,12 @@ def wikisearch(keywords_list, es, fraction=(0, 1), method='es-base', es_timeout=
             results_list = search_wikipedia_api(keywords, timeout=wikipedia_timeout)
         else:
             sysmsg.debug(f'⚡️ Using Elasticsearch cluster for keywords: "{keywords}".')
-            results_list = search_elasticsearch(keywords, es, timeout=es_timeout)
+            results_list = search_elasticsearch(
+                keywords,
+                es,
+                timeout=es_timeout,
+                timeout_retries=es_timeout_retries,
+            )
 
             # Fallback to Wikipedia API if no results from elasticsearch
             if not results_list:
