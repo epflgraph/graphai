@@ -26,6 +26,7 @@ from graphai.core.embedding.embedding import (
 )
 from graphai.core.common.config import config
 from graphai.core.common.common_utils import strtobool
+from graphai.celery.common.log import log
 
 embedding_models = EmbeddingModels()
 
@@ -34,17 +35,15 @@ embedding_models = EmbeddingModels()
              name='text_6.init_embedding', ignore_result=False,
              embedding_obj=embedding_models)
 def embedding_init_task(self):
-    print('Start init_embedding task')
-
+    log('Start embedding_init_task task')
     if strtobool(config['preload'].get('embedding', 'no')):
-        print('Loading embedding models...')
+        log('Loading embedding models...')
         self.embedding_obj.load_models(load_heavies=False)
     else:
-        print('Skipping preloading for embedding models.')
-
-    print('Initializing db caching managers...')
+        log('Skipping preloading for embedding models.')
+    log('Initializing db caching managers...')
     EmbeddingDBCachingManager(initialize_database=True)
-
+    log('embedding_init_task done')
     return True
 
 

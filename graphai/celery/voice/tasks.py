@@ -18,6 +18,7 @@ from graphai.core.common.caching import (
 )
 from graphai.core.common.config import config
 from graphai.core.common.common_utils import strtobool
+from graphai.celery.common.log import log
 
 file_management_config = VideoConfig()
 
@@ -28,17 +29,17 @@ transcription_model = WhisperTranscriptionModel()
              name='video_2.init_transcription', ignore_result=False,
              transcription_obj=transcription_model)
 def transcript_init_task(self):
-    print('Start init_transcription task')
+    log('Start transcript_init_task task')
 
     if strtobool(config['preload'].get('video', 'no')):
-        print('Loading transcription model...')
+        log('Loading transcription model...')
         self.transcription_obj.load_model_whisper()
     else:
-        print('Skipping preloading for voice endpoints')
+        log('Skipping preloading for voice endpoints')
 
-    print('Initializing db caching managers...')
+    log('Initializing db caching managers...')
     AudioDBCachingManager(initialize_database=True)
-
+    log('transcript_init_task done')
     return True
 
 

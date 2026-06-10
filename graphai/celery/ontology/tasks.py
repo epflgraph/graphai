@@ -12,6 +12,7 @@ from graphai.core.ontology import (
     get_openalex_nearest,
 )
 from graphai.core.ontology.ontology import get_category_info, get_cluster_info, get_concept_info
+from graphai.celery.common.log import log
 
 ontology_data = OntologyData()
 
@@ -21,16 +22,15 @@ ontology_data = OntologyData()
              ontology_data_obj=ontology_data)
 def ontology_init_task(self):
     # This task initialises the video celery worker by loading into memory the transcription and NLP models
-    print('Start init_ontology task')
-
+    log('Start ontology_init_task task')
     if strtobool(config['preload'].get('ontology', 'no')):
-        print('Loading ontology data...')
+        log('Loading ontology data...')
         success = self.ontology_data_obj.load_data()
         if not success:
-            print('Failed to preload ontology data, make sure the tables exist.')
+            log('Failed to preload ontology data, make sure the tables exist.')
     else:
-        print('Skipping preloading for ontology endpoints.')
-
+        log('Skipping preloading for ontology endpoints.')
+    log('ontology_init_task done')
     return True
 
 

@@ -43,7 +43,7 @@ from graphai.core.common.caching import (
 from graphai.core.common.common_utils import (
     strtobool
 )
-
+from graphai.celery.common.log import log
 from graphai.core.common.lookup import (
     fingerprint_lookup_retrieve_from_db,
     fingerprint_lookup_parallel,
@@ -63,18 +63,16 @@ local_ocr_nlp_models = NLPModels()
              nlp_obj=local_ocr_nlp_models)
 def slide_detection_init_task(self):
     # This task initialises the video celery worker by loading into memory the transcription and NLP models
-    print('Start init_slide_detection task')
-
+    log('Start slide_detection_init_task task')
     if strtobool(config['preload'].get('video', 'no')):
-        print('Loading NLP models...')
+        log('Loading NLP models...')
         self.nlp_obj.load_nlp_models()
     else:
-        print('Skipping preloading for slide detection endpoint')
-
-    print('Initializing db caching managers...')
+        log('Skipping preloading for slide detection endpoint')
+    log('Initializing db caching managers...')
     VideoDBCachingManager(initialize_database=True)
     SlideDBCachingManager(initialize_database=True)
-
+    log('slide_detection_init_task done')
     return True
 
 

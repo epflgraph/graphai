@@ -21,6 +21,7 @@ from graphai.core.translation.translation import (
     cache_lookup_translate_text,
     detect_language_translation
 )
+from graphai.celery.common.log import log
 
 translation_models = TranslationModels()
 
@@ -30,17 +31,15 @@ translation_models = TranslationModels()
              translation_obj=translation_models)
 def translation_init_task(self):
     # This task initialises the video celery worker by loading into memory the transcription and NLP models
-    print('Start init_translation task')
-
+    log('Start translation_init_task task')
     if strtobool(config['preload'].get('video', 'no')):
-        print('Loading translation models...')
+        log('Loading translation models...')
         self.translation_obj.load_models()
     else:
-        print('Skipping preloading for video endpoints.')
-
-    print('Initializing db caching managers...')
+        log('Skipping preloading for video endpoints.')
+    log('Initializing db caching managers...')
     TextDBCachingManager(initialize_database=True)
-
+    log('translation_init_task done')
     return True
 
 

@@ -16,6 +16,7 @@ from graphai.core.text import (
     draw_graph,
     generate_exercise,
 )
+from graphai.celery.common.log import log
 
 
 ################################################################
@@ -42,16 +43,13 @@ def text_init_task(self):
     """
 
     # This task initialises the text celery worker by loading into memory the graph and ontology tables
-    print('Start text_init task')
-
+    log('Start text_init_task task')
     if strtobool(config['preload']['text']):
-        print('Loading concepts graph and ontology tables...')
+        log('Loading concepts graph and ontology tables...')
         self.graph.load_from_db()
     else:
-        print('Skipping preloading for text endpoints')
-
-    print('Concepts graph and ontology tables loaded')
-
+        log('Skipping preloading for text endpoints')
+    log('text_init_task done')
     return True
 
 

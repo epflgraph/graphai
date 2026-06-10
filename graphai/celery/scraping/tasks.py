@@ -10,14 +10,16 @@ from graphai.core.scraping.scraping import (
     extract_scraping_content_callback
 )
 from graphai.core.common.caching import ScrapingDBCachingManager
+from graphai.celery.common.log import log
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='scraping_6.init_scraping', ignore_result=False)
 def scraping_init_task(self):
-    print('Initializing db caching managers...')
+    log('starting scraping_init_task task')
+    log('Initializing db caching managers...')
     ScrapingDBCachingManager(initialize_database=True)
-
+    log('scraping_init_task done')
     return True
 
 
