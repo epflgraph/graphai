@@ -79,8 +79,7 @@ class VideoDBCachingManager(DBCachingManagerBase):
         self.db.execute_query(
             f"""
             CREATE DATABASE IF NOT EXISTS `{self.schema}`
-            DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci
-            DEFAULT ENCRYPTION='N';
+            DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
             """
         )
 
@@ -95,7 +94,7 @@ class VideoDBCachingManager(DBCachingManagerBase):
               `date_modified` DATETIME DEFAULT NULL,
               `id_and_duration` VARCHAR(1024) DEFAULT NULL,
               PRIMARY KEY id_token (id_token)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
             """
         )
 
@@ -127,7 +126,7 @@ class VideoDBCachingManager(DBCachingManagerBase):
               `most_similar_token` VARCHAR(255) DEFAULT NULL,
               PRIMARY KEY id_token (id_token),
               KEY most_similar_token (most_similar_token)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
             """
         )
 
@@ -147,8 +146,7 @@ class AudioDBCachingManager(DBCachingManagerBase):
         self.db.execute_query(
             f"""
             CREATE DATABASE IF NOT EXISTS `{self.schema}`
-            DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci
-            DEFAULT ENCRYPTION='N';
+            DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
             """
         )
 
@@ -170,7 +168,7 @@ class AudioDBCachingManager(DBCachingManagerBase):
               `fp_nosilence` INT DEFAULT NULL,
               `date_added` DATETIME DEFAULT NULL,
               PRIMARY KEY id_token (id_token)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
             """
         )
 
@@ -192,7 +190,7 @@ class AudioDBCachingManager(DBCachingManagerBase):
               `most_similar_token` VARCHAR(255) DEFAULT NULL,
               PRIMARY KEY id_token (id_token),
               KEY most_similar_token (most_similar_token)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
             """
         )
 
@@ -212,8 +210,7 @@ class SlideDBCachingManager(DBCachingManagerBase):
         self.db.execute_query(
             f"""
             CREATE DATABASE IF NOT EXISTS `{self.schema}`
-            DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci
-            DEFAULT ENCRYPTION='N';
+            DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
             """
         )
 
@@ -236,7 +233,7 @@ class SlideDBCachingManager(DBCachingManagerBase):
               `language` VARCHAR(10) DEFAULT NULL,
               `date_added` DATETIME DEFAULT NULL,
               PRIMARY KEY id_token (id_token)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
             """
         )
 
@@ -268,7 +265,7 @@ class SlideDBCachingManager(DBCachingManagerBase):
               `most_similar_token` VARCHAR(255) DEFAULT NULL,
               PRIMARY KEY id_token (id_token),
               KEY most_similar_token (most_similar_token)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
             """
         )
 
@@ -288,8 +285,7 @@ class TextDBCachingManager(DBCachingManagerBase):
         self.db.execute_query(
             f"""
             CREATE DATABASE IF NOT EXISTS `{self.schema}`
-            DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci
-            DEFAULT ENCRYPTION='N';
+            DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
             """
         )
 
@@ -305,7 +301,7 @@ class TextDBCachingManager(DBCachingManagerBase):
               `target_lang` VARCHAR(10) DEFAULT NULL,
               `date_added` DATETIME DEFAULT NULL,
               PRIMARY KEY id_token (id_token)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
             """
         )
 
@@ -327,7 +323,7 @@ class TextDBCachingManager(DBCachingManagerBase):
               `most_similar_token` VARCHAR(255) DEFAULT NULL,
               PRIMARY KEY id_token (id_token),
               KEY most_similar_token (most_similar_token)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
             """
         )
 
@@ -349,8 +345,7 @@ class ScrapingDBCachingManager(DBCachingManagerBase):
         self.db.execute_query(
             f"""
             CREATE DATABASE IF NOT EXISTS `{self.schema}`
-            DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci
-            DEFAULT ENCRYPTION='N';
+            DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
             """
         )
 
@@ -368,7 +363,7 @@ class ScrapingDBCachingManager(DBCachingManagerBase):
               `long_patterns_removed` INT DEFAULT NULL,
               `date_added` DATETIME,
               PRIMARY KEY id_token (id_token)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
             """
         )
 
@@ -400,7 +395,7 @@ class ScrapingDBCachingManager(DBCachingManagerBase):
               `most_similar_token` VARCHAR(255) DEFAULT NULL,
               PRIMARY KEY id_token (id_token),
               KEY most_similar_token (most_similar_token)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
             """
         )
 
@@ -449,8 +444,7 @@ class EmbeddingDBCachingManager(DBCachingManagerBase):
         self.db.execute_query(
             f"""
             CREATE DATABASE IF NOT EXISTS `{self.schema}`
-            DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci
-            DEFAULT ENCRYPTION='N';
+            DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
             """
         )
 
@@ -465,7 +459,7 @@ class EmbeddingDBCachingManager(DBCachingManagerBase):
               `embedding` VARCHAR(32767) CHARACTER SET ascii DEFAULT NULL,
               `date_added` DATETIME DEFAULT NULL,
               PRIMARY KEY id_token (id_token)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
             """
         )
 
@@ -487,7 +481,7 @@ class EmbeddingDBCachingManager(DBCachingManagerBase):
               `most_similar_token` VARCHAR(255) DEFAULT NULL,
               PRIMARY KEY id_token (id_token),
               KEY most_similar_token (most_similar_token)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
             """
         )
 

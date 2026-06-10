@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS `auth_graphai`.`Users` (
   PRIMARY KEY (`username`),
   KEY `full_name` (`full_name`),
   KEY `email` (`email`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- You can hash your chosen password using graphai.core.common.auth_utils.get_password_hash before inserting it below
 -- The scopes column should contain a comma-separated string of the scopes that the user is allowed to access.
@@ -40,7 +40,7 @@ CREATE TABLE IF NOT EXISTS `auth_graphai`.`User_Rate_Limits` (
   `max_requests` int DEFAULT NULL,
   `window_size` int DEFAULT NULL,
   PRIMARY KEY (`username`, `path`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- In order to disable rate limiting for a user for a given endpoint group, insert the username and path with
 -- max_requests and window set to NULL. Doing this for every endpoint group disables rate limiting for that user
