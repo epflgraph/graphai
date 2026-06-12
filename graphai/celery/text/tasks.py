@@ -17,7 +17,7 @@ from graphai.core.text import (
     draw_graph,
     generate_exercise,
 )
-from graphai.core.text.wikisearch import search_elasticsearch_http
+from graphai.core.text.wikisearch import search_elasticsearch_http, validate_elasticsearch_index_http
 
 
 ################################################################
@@ -48,6 +48,16 @@ def text_init_task(self):
 
     # This task initialises the text celery worker by loading into memory the graph and ontology tables
     print('Start text_init task')
+
+    es_config = config['elasticsearch']
+    es_index = es_config.get('concept_detection_index', 'concepts_detection')
+    es_timeout = es_config.get('request_timeout', 10)
+    print(
+        f'Validating Elasticsearch concept detection index at '
+        f'https://{es_config["host"]}:{es_config["port"]}/{es_index} ...'
+    )
+    es_doc_count = validate_elasticsearch_index_http(es_config, es_index, timeout=es_timeout)
+    print(f'Elasticsearch concept detection index is reachable with {es_doc_count} documents')
 
     if strtobool(config['preload']['text']):
         print('Loading concepts graph and ontology tables...')

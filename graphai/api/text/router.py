@@ -1,11 +1,12 @@
 from typing import Optional, Union
 
-from fastapi import APIRouter, Query, Security
+from fastapi import APIRouter, HTTPException, Query, Security
 from fastapi.responses import FileResponse
 
 import pandas as pd
 
 from graphai.api.auth.router import get_current_active_user
+from graphai.core.text.wikisearch import ElasticsearchSearchError
 import graphai.api.text.schemas as schemas
 import graphai.celery.text.jobs as jobs
 
@@ -51,7 +52,10 @@ async def wiki_search(
     if not search_term:
         return []
 
-    return jobs.wiki_search(search_term, limit)
+    try:
+        return jobs.wiki_search(search_term, limit)
+    except ElasticsearchSearchError as exc:
+        raise HTTPException(status_code=exc.api_status_code, detail=str(exc)) from exc
 
 
 @router.post('/wikify', response_model=schemas.WikifyResponse)
@@ -96,15 +100,18 @@ async def wikify(
         if not data.raw_text:
             return []
 
-        return jobs.wikify_text(
-            data.raw_text,
-            method,
-            restrict_to_ontology,
-            score_smoothing,
-            aggregation_coef,
-            filtering_threshold,
-            refresh_scores,
-        )
+        try:
+            return jobs.wikify_text(
+                data.raw_text,
+                method,
+                restrict_to_ontology,
+                score_smoothing,
+                aggregation_coef,
+                filtering_threshold,
+                refresh_scores,
+            )
+        except ElasticsearchSearchError as exc:
+            raise HTTPException(status_code=exc.api_status_code, detail=str(exc)) from exc
 
     if isinstance(data, schemas.WikifyFromKeywordsRequest):
         # Return if no input
@@ -114,15 +121,18 @@ async def wikify(
         # Remove duplicate keywords
         keyword_list = list(set(data.keywords))
 
-        return jobs.wikify_keywords(
-            keyword_list,
-            method,
-            restrict_to_ontology,
-            score_smoothing,
-            aggregation_coef,
-            filtering_threshold,
-            refresh_scores,
-        )
+        try:
+            return jobs.wikify_keywords(
+                keyword_list,
+                method,
+                restrict_to_ontology,
+                score_smoothing,
+                aggregation_coef,
+                filtering_threshold,
+                refresh_scores,
+            )
+        except ElasticsearchSearchError as exc:
+            raise HTTPException(status_code=exc.api_status_code, detail=str(exc)) from exc
 
     return []
 

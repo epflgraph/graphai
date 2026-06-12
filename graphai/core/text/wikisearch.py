@@ -46,6 +46,13 @@ DEFAULT_ES_TIMEOUT = 10
 DEFAULT_ES_TIMEOUT_RETRIES = 2
 
 
+class ElasticsearchSearchError(RuntimeError):
+    def __init__(self, message, api_status_code=503, upstream_status=None):
+        super().__init__(message)
+        self.api_status_code = int(api_status_code)
+        self.upstream_status = upstream_status
+
+
 def _safe_timeout(value, default):
     try:
         timeout = float(value)
@@ -72,6 +79,104 @@ def _is_es_timeout_error(exc):
 
     message = str(exc).lower()
     return 'timed out' in message or 'timeout' in message
+
+
+def _es_base_url(es_config):
+    return f"https://{es_config['host']}:{es_config['port']}"
+
+
+def _es_headers(es_config):
+    return {
+        **urllib3.make_headers(basic_auth=f"{es_config['username']}:{es_config['password']}"),
+        'Content-Type': 'application/json',
+    }
+
+
+def _es_http_pool(es_config):
+    return urllib3.PoolManager(
+        num_pools=1,
+        maxsize=1,
+        block=True,
+        ssl_context=create_default_context(cafile=es_config['cafile']),
+    )
+
+
+def _extract_es_error_reason(payload):
+    if not isinstance(payload, dict):
+        return None
+
+    error = payload.get('error')
+    if isinstance(error, dict):
+        reason = error.get('reason')
+        if reason:
+            return str(reason)
+
+        root_cause = error.get('root_cause')
+        if isinstance(root_cause, list) and root_cause:
+            first_cause = root_cause[0]
+            if isinstance(first_cause, dict) and first_cause.get('reason'):
+                return str(first_cause['reason'])
+    elif error:
+        return str(error)
+
+    return None
+
+
+def _build_es_http_error(response, es_config, index, operation):
+    body_text = response.data.decode('utf-8', errors='replace')
+    payload = None
+    try:
+        payload = json.loads(body_text)
+    except json.JSONDecodeError:
+        payload = None
+
+    reason = _extract_es_error_reason(payload)
+    target = f"{_es_base_url(es_config)}/{index}"
+
+    if response.status == 404:
+        message = f'Elasticsearch index "{index}" is unavailable for {operation} on {target}.'
+        if reason:
+            message = f'{message} {reason}'
+        return ElasticsearchSearchError(message, api_status_code=503, upstream_status=response.status)
+
+    message = f'Elasticsearch {operation} failed on {target} with HTTP {response.status}.'
+    if reason:
+        message = f'{message} {reason}'
+    return ElasticsearchSearchError(message, api_status_code=503, upstream_status=response.status)
+
+
+def validate_elasticsearch_index_http(es_config, index, timeout=DEFAULT_ES_TIMEOUT):
+    timeout = _safe_timeout(timeout, DEFAULT_ES_TIMEOUT)
+    http = _es_http_pool(es_config)
+
+    try:
+        response = http.request(
+            'GET',
+            f"{_es_base_url(es_config)}/{index}/_count",
+            headers=_es_headers(es_config),
+            timeout=urllib3.Timeout(connect=timeout, read=timeout),
+            retries=False,
+        )
+        if response.status >= 400:
+            raise _build_es_http_error(response, es_config, index, operation='index validation')
+
+        payload = json.loads(response.data.decode('utf-8'))
+        return int(payload.get('count', 0))
+    except urllib3.exceptions.TimeoutError as exc:
+        raise ElasticsearchSearchError(
+            f'Elasticsearch index validation timed out for "{index}" on {_es_base_url(es_config)}: {exc}',
+            api_status_code=503,
+        ) from exc
+    except urllib3.exceptions.HTTPError as exc:
+        raise ElasticsearchSearchError(
+            f'Elasticsearch index validation failed for "{index}" on {_es_base_url(es_config)}: {type(exc).__name__}: {exc}',
+            api_status_code=503,
+        ) from exc
+    except json.JSONDecodeError as exc:
+        raise ElasticsearchSearchError(
+            f'Elasticsearch index validation returned invalid JSON for "{index}" on {_es_base_url(es_config)}.',
+            api_status_code=503,
+        ) from exc
 
 
 def _build_wikipedia_search_query(text):
@@ -119,38 +224,27 @@ def search_elasticsearch_http(
 
     timeout = _safe_timeout(timeout, DEFAULT_ES_TIMEOUT)
     timeout_retries = _safe_positive_int(timeout_retries, DEFAULT_ES_TIMEOUT_RETRIES)
-    url = f"https://{es_config['host']}:{es_config['port']}/{index}/_search"
+    url = f"{_es_base_url(es_config)}/{index}/_search"
     body = {
         'query': _build_wikipedia_search_query(text),
         'size': limit,
         'profile': True,
     }
-    headers = {
-        **urllib3.make_headers(basic_auth=f"{es_config['username']}:{es_config['password']}"),
-        'Content-Type': 'application/json',
-    }
     request_kwargs = {
         'body': json.dumps(body).encode('utf-8'),
-        'headers': headers,
+        'headers': _es_headers(es_config),
         'timeout': urllib3.Timeout(connect=timeout, read=timeout),
         'retries': False,
     }
-    http = urllib3.PoolManager(
-        num_pools=1,
-        maxsize=1,
-        block=True,
-        ssl_context=create_default_context(cafile=es_config['cafile']),
-    )
+    http = _es_http_pool(es_config)
 
     for attempt in range(1, timeout_retries + 1):
         try:
             response = http.request('POST', url, **request_kwargs)
             if response.status >= 400:
-                sysmsg.critical(
-                    f'Elasticsearch HTTP request failed for text "{text}": '
-                    f'HTTP {response.status}: {response.data.decode("utf-8", errors="replace")}'
-                )
-                return []
+                error = _build_es_http_error(response, es_config, index, operation='search')
+                sysmsg.critical(str(error))
+                raise error
 
             hits = json.loads(response.data.decode('utf-8')).get('hits', {}).get('hits', [])
             sysmsg.success(f'✅ Elasticsearch HTTP search returned {len(hits)} hits for text: "{text}".')
@@ -171,12 +265,27 @@ def search_elasticsearch_http(
             sysmsg.warning(
                 f'⚠️ Elasticsearch HTTP timeout for text "{text}" after {attempt} attempt(s): {exc}'
             )
-            return []
+            raise ElasticsearchSearchError(
+                f'Elasticsearch HTTP search timed out for text "{text}" on {_es_base_url(es_config)}/{index}: {exc}',
+                api_status_code=503,
+            ) from exc
         except urllib3.exceptions.HTTPError as exc:
             sysmsg.critical(f'Elasticsearch HTTP request failed for text "{text}": {type(exc).__name__}: {exc}')
-            return []
+            raise ElasticsearchSearchError(
+                f'Elasticsearch HTTP request failed for text "{text}" on {_es_base_url(es_config)}/{index}: '
+                f'{type(exc).__name__}: {exc}',
+                api_status_code=503,
+            ) from exc
+        except json.JSONDecodeError as exc:
+            raise ElasticsearchSearchError(
+                f'Elasticsearch HTTP search returned invalid JSON for text "{text}" on {_es_base_url(es_config)}/{index}.',
+                api_status_code=503,
+            ) from exc
 
-    return []
+    raise ElasticsearchSearchError(
+        f'Elasticsearch HTTP search exhausted retries for text "{text}" on {_es_base_url(es_config)}/{index}.',
+        api_status_code=503,
+    )
 
 
 def search_wikipedia_api(text, limit=10, timeout=DEFAULT_WIKIPEDIA_TIMEOUT):
@@ -250,8 +359,10 @@ def search_elasticsearch(text, es, limit=10, timeout=DEFAULT_ES_TIMEOUT, timeout
                 hits = es.search(text, limit)
 
                 if hits is None:
-                    sysmsg.warning(f'⚠️ Elasticsearch search returned None for text: "{text}".')
-                    return []
+                    raise ElasticsearchSearchError(
+                        f'Elasticsearch search returned no payload for text "{text}" on index "{getattr(es, "index", "<unknown>")}".',
+                        api_status_code=503,
+                    )
 
                 sysmsg.success(f'✅ Elasticsearch search returned {len(hits)} hits for text: "{text}".')
 
@@ -275,15 +386,29 @@ def search_elasticsearch(text, es, limit=10, timeout=DEFAULT_ES_TIMEOUT, timeout
                         f'⚠️ Elasticsearch timeout for text "{text}" after {attempt} attempt(s): '
                         f'{error_kind}: {error_message}'
                     )
-                elif network_error:
+                    raise ElasticsearchSearchError(
+                        f'Elasticsearch search timed out for text "{text}" on index "{getattr(es, "index", "<unknown>")}": '
+                        f'{error_kind}: {error_message}',
+                        api_status_code=503,
+                    ) from exc
+                if network_error:
                     sysmsg.critical(
                         f'Elasticsearch network error for text "{text}": {error_kind}: {error_message}'
                     )
-                else:
-                    sysmsg.critical(
-                        f'Elasticsearch request failed for text "{text}": {error_kind}: {error_message}'
-                    )
-                return []
+                    raise ElasticsearchSearchError(
+                        f'Elasticsearch network error for text "{text}" on index "{getattr(es, "index", "<unknown>")}": '
+                        f'{error_kind}: {error_message}',
+                        api_status_code=503,
+                    ) from exc
+
+                sysmsg.critical(
+                    f'Elasticsearch request failed for text "{text}": {error_kind}: {error_message}'
+                )
+                raise ElasticsearchSearchError(
+                    f'Elasticsearch request failed for text "{text}" on index "{getattr(es, "index", "<unknown>")}": '
+                    f'{error_kind}: {error_message}',
+                    api_status_code=503,
+                ) from exc
     finally:
         # Restore original client to avoid side effects across calls.
         if original_client is not None:
