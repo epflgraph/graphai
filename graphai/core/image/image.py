@@ -1,8 +1,10 @@
 import json
 from loguru import logger as sysmsg
 
+from graphai.core.common import common_utils
 from graphai.core.common.caching import (
     SlideDBCachingManager,
+    VideoConfig,
     write_binary_file_to_token
 )
 from graphai.core.common.lookup import database_callback_generic
@@ -140,8 +142,11 @@ def cache_lookup_extract_slide_text(token, method):
         return {
             'results': None,
             'language': None,
-            'fresh': False
+            'fresh': False,
+            'file_found': None
         }
+    file_manager = VideoConfig()
+    file_found = common_utils.get_token_file_found(token, file_manager)
     ocr_colnames = get_ocr_colnames(method)
     db_manager = SlideDBCachingManager()
     existing_list = db_manager.get_details(token, ocr_colnames + ['language'],
@@ -151,7 +156,8 @@ def cache_lookup_extract_slide_text(token, method):
         return {
             'results': None,
             'language': None,
-            'fresh': False
+            'fresh': False,
+            'file_found': file_found
         }
     for existing in existing_list:
         if existing is None:
@@ -176,16 +182,22 @@ def cache_lookup_extract_slide_text(token, method):
             return {
                 'results': results,
                 'language': language,
-                'fresh': fresh
+                'fresh': fresh,
+                'file_found': file_found
             }
     return None
 
 
 def break_pdf_into_images(token, file_manager):
-    pdf_path = file_manager.generate_filepath(token)
-    if not file_exists(pdf_path):
+    file_found = common_utils.get_token_file_found(token, file_manager)
+    if file_found is False:
+        pdf_path = file_manager.generate_filepath(token)
         print(f'Error: File {pdf_path} does not exist')
-        return None
+        return {
+            'pages': None,
+            'file_found': False,
+        }
+    pdf_path = file_manager.generate_filepath(token)
     output_filenames = list()
     with pymupdf.open(pdf_path) as pdf_doc:
         for page in pdf_doc:
@@ -197,7 +209,10 @@ def break_pdf_into_images(token, file_manager):
                 'page': i + 1,
                 'filename': img_dir
             })
-    return output_filenames
+    return {
+        'pages': output_filenames,
+        'file_found': True,
+    }
 
 
 def perform_ocr(
@@ -261,7 +276,17 @@ def extract_slide_text(
         return {
             'results': None,
             'language': None,
-            'fresh': False
+            'fresh': False,
+            'file_found': None
+        }
+
+    file_found = common_utils.get_token_file_found(token, file_manager)
+    if file_found is False:
+        return {
+            'results': None,
+            'language': None,
+            'fresh': False,
+            'file_found': False
         }
 
     # Perform OCR
@@ -277,6 +302,7 @@ def extract_slide_text(
         enable_tikz,
     )
     res["fresh"] = res["results"] is not None
+    res["file_found"] = file_found
 
     return res
 
@@ -316,7 +342,7 @@ def extract_multi_image_text(
     }
 
 
-def collect_multi_image_ocr(results):
+def collect_multi_image_ocr(results, file_found=True):
     all_results = [result['result'] for result in results]
     language = get_most_common_element([result['language'] for result in results])
     method = get_most_common_element([result['method'] for result in results])
@@ -326,7 +352,8 @@ def collect_multi_image_ocr(results):
             'method': method
         }],
         'language': language,
-        'fresh': all(result['content'] is not None for result in all_results)
+        'fresh': all(result['content'] is not None for result in all_results),
+        'file_found': file_found
     }
 
 

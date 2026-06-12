@@ -3,6 +3,11 @@ from graphai.core.common.fingerprinting import (
     find_closest_text_fingerprint_from_list,
     find_closest_image_fingerprint_from_list
 )
+from graphai.core.common import common_utils
+from graphai.core.common.caching import VideoConfig
+
+
+token_file_config = VideoConfig()
 
 
 def lookup_latest_allowed_date(fp_tokens, db_manager):
@@ -367,7 +372,8 @@ def fingerprint_cache_lookup(token, db_manager):
             'closest': existing_closest,
             'fp_token': existing['id_token'],
             'perform_lookup': False,
-            'fresh': False
+            'fresh': False,
+            'file_found': common_utils.get_token_file_found(token, token_file_config)
         }
     return None
 
@@ -395,7 +401,8 @@ def fingerprint_cache_lookup_with_most_similar(token, db_manager, extra_cols=Non
                 'result': existing['fingerprint'],
                 'fresh': False,
                 'closest': existing_closest,
-                'closest_origin': existing_closest_origin
+                'closest_origin': existing_closest_origin,
+                'file_found': common_utils.get_token_file_found(token, token_file_config)
             }
             if extra_cols is not None:
                 for extra_col in extra_cols:
@@ -415,7 +422,8 @@ def cache_lookup_generic(token, db_manager, cols):
             print('Returning cached result')
             result = {
                 'token': token,
-                'fresh': False
+                'fresh': False,
+                'file_found': common_utils.get_token_file_found(token, token_file_config)
             }
             for col in cols:
                 result[col] = existing[col]

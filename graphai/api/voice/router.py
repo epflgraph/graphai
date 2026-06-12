@@ -50,7 +50,8 @@ async def calculate_audio_fingerprint_status(task_id):
                 'closest_token': task_results['closest'],
                 'closest_token_origin': task_results['closest_origin'],
                 'duration': task_results['duration'],
-                'successful': task_results['result'] is not None
+                'successful': task_results['result'] is not None,
+                'file_found': task_results.get('file_found', None)
             }
         else:
             task_results = None
@@ -80,7 +81,8 @@ async def transcribe_status(task_id):
                 'transcript_results': task_results['transcript_results'],
                 'subtitle_results': task_results['subtitle_results'],
                 'language': task_results['language'],
-                'fresh': task_results['fresh']
+                'fresh': task_results['fresh'],
+                'file_found': task_results.get('file_found', None)
             }
         else:
             task_results = None
@@ -107,7 +109,8 @@ async def detect_language_status(task_id):
         if 'language' in task_results:
             task_results = {
                 'language': task_results['language'],
-                'fresh': task_results['fresh']
+                'fresh': task_results['fresh'],
+                'file_found': task_results.get('file_found', None)
             }
         else:
             task_results = None

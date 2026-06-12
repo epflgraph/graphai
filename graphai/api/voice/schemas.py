@@ -52,6 +52,12 @@ class AudioFingerprintTaskResponse(BaseModel):
         description="Whether the computation was successful."
     )
 
+    file_found: Union[bool, None] = Field(
+        default=None,
+        title="Input file found",
+        description="Whether the file backing the input token currently exists on disk."
+    )
+
 
 class AudioFingerprintResponse(TaskStatusResponse):
     task_result: Union[AudioFingerprintTaskResponse, None] = Field(
@@ -82,6 +88,12 @@ class AudioDetectLanguageTaskResponse(BaseModel):
     fresh: bool = Field(
         title="Freshness flag",
         description="Whether the result was computed freshly or an existing cached result was returned."
+    )
+
+    file_found: Union[bool, None] = Field(
+        default=None,
+        title="Input file found",
+        description="Whether the file backing the input token currently exists on disk."
     )
 
 
@@ -139,6 +151,12 @@ class AudioTranscriptionTaskResponse(BaseModel):
     fresh: bool = Field(
         title="Freshness flag",
         description="Whether the result was computed freshly or an existing cached result was returned."
+    )
+
+    file_found: Union[bool, None] = Field(
+        default=None,
+        title="Input file found",
+        description="Whether the file backing the input token currently exists on disk."
     )
 
 

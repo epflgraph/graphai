@@ -1,4 +1,4 @@
-from celery import shared_task, group, chord
+from celery import shared_task, group, chord, signature
 
 from graphai.core.image.image import (
     cache_lookup_retrieve_image_from_url,
@@ -156,7 +156,7 @@ def convert_pdf_to_pages_task(self, token):
 )
 def fanout_pdf_ocr_task(
     self,
-    pages,
+    pdf_pages_payload,
     method,
     google_api_token=None,
     openai_api_token=None,
@@ -165,25 +165,40 @@ def fanout_pdf_ocr_task(
     model_type=None,
     enable_tikz=False,
 ):
-    # Build one OCR task per page
-    header = group(
-        extract_multi_image_text_task.s(
-            page,
-            method,
-            google_api_token,
-            openai_api_token,
-            gemini_api_token,
-            rcp_api_token,
-            model_type,
-            enable_tikz,
+    if pdf_pages_payload.get('file_found') is False or not pdf_pages_payload.get('pages'):
+        return {
+            'results': None,
+            'language': None,
+            'fresh': False,
+            'file_found': pdf_pages_payload.get('file_found')
+        }
+
+    # Build one OCR task per page.
+    page_ocr_tasks = [
+        signature(
+            'image.extract_multi_image_text',
+            args=(
+                page,
+                method,
+                google_api_token,
+                openai_api_token,
+                gemini_api_token,
+                rcp_api_token,
+                model_type,
+                enable_tikz,
+            ),
         )
-        for page in pages
+        for page in pdf_pages_payload['pages']
+    ]
+    header = group(page_ocr_tasks)
+
+    # When all pages are OCR'd, collect results.
+    callback = signature(
+        'image.extract_multi_image_text_callback',
+        args=(pdf_pages_payload.get('file_found'),),
     )
 
-    # When all pages are OCR'd, collect results
-    callback = collect_multi_image_ocr_task.s()
-
-    # Replace this task with the chord so the outer chain waits properly
+    # Replace this task with the chord so the outer chain waits properly.
     raise self.replace(chord(header, callback))
 
 
@@ -227,9 +242,9 @@ def extract_multi_image_text_task(
     name="image.extract_multi_image_text_callback",
     ignore_result=False,
 )
-def collect_multi_image_ocr_task(self, results):
+def collect_multi_image_ocr_task(self, results, file_found=True):
     print(f'Starting {collect_multi_image_ocr_task} task for results {results}')
-    return collect_multi_image_ocr(results)
+    return collect_multi_image_ocr(results, file_found)
 
 
 @shared_task(

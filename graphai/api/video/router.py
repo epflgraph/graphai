@@ -90,7 +90,8 @@ async def calculate_video_fingerprint_status(task_id):
                 'result': task_results['result'],
                 'fresh': task_results['fresh'],
                 'closest_token': task_results['closest'],
-                'successful': task_results['result'] is not None
+                'successful': task_results['result'] is not None,
+                'file_found': task_results.get('file_found', None)
             }
         else:
             task_results = None
@@ -126,7 +127,8 @@ async def extract_audio_status(task_id):
                 'token_status': task_results['token_status'],
                 'fresh': task_results['fresh'],
                 'duration': task_results['duration'],
-                'successful': task_results['token'] is not None
+                'successful': task_results['token'] is not None,
+                'file_found': task_results.get('file_found', None)
             }
         else:
             task_results = None
@@ -161,7 +163,8 @@ async def detect_slides_status(task_id):
             task_results = {
                 'slide_tokens': task_results['slide_tokens'],
                 'fresh': task_results['fresh'],
-                'successful': task_results['slide_tokens'] is not None
+                'successful': task_results['slide_tokens'] is not None,
+                'file_found': task_results.get('file_found', None)
             }
         else:
             task_results = None

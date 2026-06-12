@@ -3,7 +3,9 @@ import shutil
 import sys
 from itertools import chain
 
+from graphai.core.common import common_utils
 from graphai.core.common.caching import (
+    VideoConfig,
     VideoDBCachingManager,
     SlideDBCachingManager,
     AudioDBCachingManager
@@ -71,6 +73,12 @@ sysmsg.add(
 )
 #----------------------#
 
+
+
+def _resolve_file_found(file_manager, token, results=None):
+    if results is not None and results.get('file_found') is not None:
+        return results.get('file_found')
+    return common_utils.get_token_file_found(token, file_manager)
 
 
 def retrieve_file_from_url(url, file_manager, is_kaltura=False, force_token=None):
@@ -162,9 +170,10 @@ def retrieve_file_from_url_callback(results, url):
 
 def compute_video_fingerprint(results, file_manager, force=False):
     token = results['token']
+    file_found = _resolve_file_found(file_manager, token, results)
     db_manager = VideoDBCachingManager()
     # Here, the input must be a token, with fresh results coming in or an explicit fingerprinting request.
-    if token is None or not is_token(token) or not results.get('fresh', True):
+    if token is None or not is_token(token) or not results.get('fresh', True) or file_found is False:
         fp = None
         id_and_duration_fp = None
         fresh = False
@@ -191,6 +200,7 @@ def compute_video_fingerprint(results, file_manager, force=False):
                         'fp_token': None,
                         'perform_lookup': False,
                         'fresh': False,
+                        'file_found': file_found,
                         'original_results': results
                     }
                 try:
@@ -214,6 +224,7 @@ def compute_video_fingerprint(results, file_manager, force=False):
         'fp_token': fp_token,
         'perform_lookup': perform_lookup,
         'fresh': fresh,
+        'file_found': file_found,
         'original_results': results
     }
 
@@ -274,6 +285,8 @@ def cache_lookup_extract_audio(token):
     # The input here must be a token, not a URL
     if not is_token(token):
         return None
+    file_manager = VideoConfig()
+    file_found = common_utils.get_token_file_found(token, file_manager)
     # Here, the caching logic is a bit complicated. The results of audio extraction are cached in the
     # audio tables, whereas the closest-matching video is cached in the video tables. As a result, we
     # need to look for the cached extracted audio of two videos: the provided token and its closest
@@ -299,7 +312,8 @@ def cache_lookup_extract_audio(token):
                 'token': existing[0]['id_token'],
                 'fresh': False,
                 'duration': existing[0]['duration'],
-                'token_status': get_audio_token_status(existing[0]['id_token'])
+                'token_status': get_audio_token_status(existing[0]['id_token']),
+                'file_found': file_found
             }
 
     return None
@@ -310,7 +324,16 @@ def extract_audio(token, file_manager):
         return {
             'token': None,
             'fresh': False,
-            'duration': 0.0
+            'duration': 0.0,
+            'file_found': None
+        }
+    file_found = common_utils.get_token_file_found(token, file_manager)
+    if file_found is False:
+        return {
+            'token': None,
+            'fresh': False,
+            'duration': 0.0,
+            'file_found': False
         }
     output_token = generate_audio_token(token)
     results, input_duration = extract_audio_from_video(file_manager.generate_filepath(token),
@@ -320,12 +343,14 @@ def extract_audio(token, file_manager):
         return {
             'token': None,
             'fresh': False,
-            'duration': 0.0
+            'duration': 0.0,
+            'file_found': file_found
         }
     return {
         'token': results,
         'fresh': True,
-        'duration': input_duration
+        'duration': input_duration,
+        'file_found': file_found
     }
 
 
@@ -375,8 +400,10 @@ def reextract_cached_audio(token, file_manager):
         return {
             'token': None,
             'fresh': False,
-            'duration': 0.0
+            'duration': 0.0,
+            'file_found': None
         }
+    file_found = common_utils.get_token_file_found(token, file_manager)
     video_db_manager = VideoDBCachingManager()
     closest_token = video_db_manager.get_closest_match(token)
     audio_db_manager = AudioDBCachingManager()
@@ -390,7 +417,8 @@ def reextract_cached_audio(token, file_manager):
         return {
             'token': None,
             'fresh': False,
-            'duration': 0.0
+            'duration': 0.0,
+            'file_found': file_found
         }
     existing_audio = existing_audio_own if existing_audio_own is not None else existing_audio_closest
     token_to_use_as_name = existing_audio[0]['id_token']
@@ -404,13 +432,15 @@ def reextract_cached_audio(token, file_manager):
         return {
             'token': None,
             'fresh': False,
-            'duration': 0.0
+            'duration': 0.0,
+            'file_found': file_found
         }
 
     return {
         'token': output_filename,
         'fresh': True,
-        'duration': existing_audio[0]['duration']
+        'duration': existing_audio[0]['duration'],
+        'file_found': file_found
     }
 
 
@@ -420,13 +450,15 @@ def compute_audio_fingerprint(results, file_manager, force=False):
     rich.print_json(data=results)
     print('==================================================================')
     token = results['token']
-    if not is_token(token):
+    file_found = _resolve_file_found(file_manager, token, results)
+    if not is_token(token) or file_found is False:
         return {
             'result': None,
             'fp_token': None,
             'perform_lookup': False,
             'fresh': False,
             'duration': 0.0,
+            'file_found': file_found,
             'original_results': results
         }
     # Making sure that the cache row for the audio file already exists.
@@ -442,6 +474,7 @@ def compute_audio_fingerprint(results, file_manager, force=False):
             'perform_lookup': False,
             'fresh': False,
             'duration': 0.0,
+            'file_found': file_found,
             'original_results': results
         }
     if not force and existing['fingerprint'] is not None:
@@ -460,6 +493,7 @@ def compute_audio_fingerprint(results, file_manager, force=False):
         'perform_lookup': perform_lookup,
         'fresh': fresh,
         'duration': existing['duration'],
+        'file_found': file_found,
         'original_results': results
     }
 
@@ -480,6 +514,8 @@ def compute_audio_fingerprint_callback(results, force=False):
 def cache_lookup_detect_slides(token):
     if not is_token(token):
         return None
+    file_manager = VideoConfig()
+    file_found = common_utils.get_token_file_found(token, file_manager)
     video_db_manager = VideoDBCachingManager()
     # Retrieving the closest match of the current video
     closest_token = video_db_manager.get_closest_match(token)
@@ -498,6 +534,7 @@ def cache_lookup_detect_slides(token):
             print('Returning cached result')
             return {
                 'fresh': False,
+                'file_found': file_found,
                 'slide_tokens': {
                     x['slide_number']: {
                         'token': x['id_token'],
@@ -516,7 +553,16 @@ def extract_and_sample_frames(token, file_manager):
         return {
             'result': None,
             'sample_indices': None,
-            'fresh': False
+            'fresh': False,
+            'file_found': None
+        }
+    file_found = common_utils.get_token_file_found(token, file_manager)
+    if file_found is False:
+        return {
+            'result': None,
+            'sample_indices': None,
+            'fresh': False,
+            'file_found': False
         }
     # Extracting frames
     print('Extracting frames...')
@@ -529,14 +575,16 @@ def extract_and_sample_frames(token, file_manager):
         return {
             'result': None,
             'sample_indices': None,
-            'fresh': False
+            'fresh': False,
+            'file_found': file_found
         }
     # Generating frame sample indices
     frame_indices = generate_frame_sample_indices(file_manager.generate_filepath(output_folder))
     return {
         'result': output_folder,
         'sample_indices': frame_indices,
-        'fresh': True
+        'fresh': True,
+        'file_found': file_found
     }
 
 
@@ -546,7 +594,8 @@ def compute_noise_level_parallel(results, i, n, language, file_manager, nlp_mode
             'result': None,
             'sample_indices': None,
             'noise_level': None,
-            'fresh': False
+            'fresh': False,
+            'file_found': results.get('file_found')
         }
     all_sample_indices = results['sample_indices']
     start_index = int(i * len(all_sample_indices) / n)
@@ -562,7 +611,8 @@ def compute_noise_level_parallel(results, i, n, language, file_manager, nlp_mode
         'result': results['result'],
         'sample_indices': results['sample_indices'],
         'noise_level': noise_level_list,
-        'fresh': True
+        'fresh': True,
+        'file_found': results.get('file_found')
     }
 
 
@@ -572,7 +622,8 @@ def compute_noise_threshold_callback(results, hash_thresh=0.8, multiplier=5, def
             'result': None,
             'sample_indices': None,
             'threshold': None,
-            'fresh': False
+            'fresh': False,
+            'file_found': results[0].get('file_found')
         }
     list_of_noise_value_lists = [x['noise_level'] for x in results]
     all_noise_values = list(chain.from_iterable(list_of_noise_value_lists))
@@ -582,7 +633,8 @@ def compute_noise_threshold_callback(results, hash_thresh=0.8, multiplier=5, def
         'sample_indices': results[0]['sample_indices'],
         'threshold': threshold,
         'hash_threshold': hash_thresh,
-        'fresh': True
+        'fresh': True,
+        'file_found': results[0].get('file_found')
     }
 
 
@@ -594,7 +646,8 @@ def compute_slide_transitions_parallel(results, i, n, language, file_manager, nl
             'transitions': None,
             'threshold': None,
             'hash_threshold': None,
-            'fresh': False
+            'fresh': False,
+            'file_found': results.get('file_found')
         }
     all_sample_indices = results['sample_indices']
     start_index = int(i * len(all_sample_indices) / n)
@@ -615,7 +668,8 @@ def compute_slide_transitions_parallel(results, i, n, language, file_manager, nl
         'transitions': slide_transition_list,
         'threshold': results['threshold'],
         'hash_threshold': results['hash_threshold'],
-        'fresh': True
+        'fresh': True,
+        'file_found': results.get('file_found')
     }
 
 
@@ -624,7 +678,8 @@ def compute_slide_transitions_callback(results, language, file_manager, nlp_mode
         return {
             'result': None,
             'slides': None,
-            'fresh': False
+            'fresh': False,
+            'file_found': results[0].get('file_found')
         }
     # Cleaning up the slides in-between slices
     original_list_of_slide_transition_lists = [x['transitions'] for x in results]
@@ -650,7 +705,8 @@ def compute_slide_transitions_callback(results, language, file_manager, nlp_mode
     return {
         'result': results[0]['result'],
         'slides': all_transitions,
-        'fresh': True
+        'fresh': True,
+        'file_found': results[0].get('file_found')
     }
 
 
@@ -754,7 +810,8 @@ def detect_slides_callback(results, token, file_manager, force=False, attempt=0)
                     })
     return {
         'slide_tokens': slide_tokens,
-        'fresh': results['fresh']
+        'fresh': results['fresh'],
+        'file_found': results.get('file_found')
     }
 
 
@@ -762,8 +819,10 @@ def reextract_cached_slides(token, file_manager):
     if not is_token(token):
         return {
             'slide_tokens': None,
-            'fresh': False
+            'fresh': False,
+            'file_found': None
         }
+    file_found = common_utils.get_token_file_found(token, file_manager)
     video_db_manager = VideoDBCachingManager()
     closest_token = video_db_manager.get_closest_match(token)
     slide_db_manager = SlideDBCachingManager()
@@ -776,7 +835,8 @@ def reextract_cached_slides(token, file_manager):
     if existing_slides_own is None and existing_slides_closest is None:
         return {
             'slide_tokens': None,
-            'fresh': False
+            'fresh': False,
+            'file_found': file_found
         }
     existing_slides = existing_slides_own if existing_slides_own is not None else existing_slides_closest
     output_folder = existing_slides[0]['id_token'].split('/')[0]
@@ -792,7 +852,8 @@ def reextract_cached_slides(token, file_manager):
     if output_folder is None:
         return {
             'slide_tokens': None,
-            'fresh': False
+            'fresh': False,
+            'file_found': file_found
         }
     slides_to_timestamps = {FRAME_FORMAT_PNG % x: x for x in timestamps_to_keep}
     # Fix rounding errors in frame extraction
@@ -817,21 +878,24 @@ def reextract_cached_slides(token, file_manager):
                     for i in range(len(slide_tokens))}
     return {
         'slide_tokens': slide_tokens,
-        'fresh': True
+        'fresh': True,
+        'file_found': file_found
     }
 
 
 def compute_single_image_fingerprint(results, file_manager):
     token = results['token']
+    file_found = _resolve_file_found(file_manager, token, results)
     import rich
     rich.print_json(data=results)
     # Making sure the slide's cache row exists, because otherwise, the operation should be cancelled!
-    if not is_token(token):
+    if not is_token(token) or file_found is False:
         return {
             'result': None,
             'fp_token': None,
             'perform_lookup': False,
             'fresh': False,
+            'file_found': file_found,
             'original_results': results
         }
     db_manager = SlideDBCachingManager()
@@ -842,6 +906,7 @@ def compute_single_image_fingerprint(results, file_manager):
             'fp_token': None,
             'perform_lookup': False,
             'fresh': False,
+            'file_found': file_found,
             'original_results': results
         }
     if is_pdf(token):
@@ -854,6 +919,7 @@ def compute_single_image_fingerprint(results, file_manager):
             'fp_token': None,
             'perform_lookup': False,
             'fresh': False,
+            'file_found': file_found,
             'original_results': results
         }
     return {
@@ -861,6 +927,7 @@ def compute_single_image_fingerprint(results, file_manager):
         'fp_token': token,
         'perform_lookup': True,
         'fresh': True,
+        'file_found': file_found,
         'original_results': results
     }
 

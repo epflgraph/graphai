@@ -12,6 +12,7 @@ from graphai.core.common.caching import (
     AudioDBCachingManager,
     TEMP_SUBFOLDER
 )
+from graphai.core.common import common_utils
 from graphai.core.common.lookup import fingerprint_cache_lookup_with_most_similar, cache_lookup_generic, \
     database_callback_generic
 from graphai.core.common.common_utils import file_exists
@@ -199,6 +200,14 @@ def extract_media_segment(input_filename_with_path, output_filename_with_path, o
 
 def detect_language_retrieve_from_db_and_split(input_dict, file_manager, n_divs=5, segment_length=30):
     token = input_dict['token']
+    file_found = common_utils.get_token_file_found(token, file_manager)
+    if file_found is False:
+        return {
+            'temp_tokens': None,
+            'lang': None,
+            'fresh': False,
+            'file_found': False
+        }
     db_manager = AudioDBCachingManager()
     existing = db_manager.get_details(token, ['duration'],
                                       using_most_similar=True)[0]
@@ -207,7 +216,8 @@ def detect_language_retrieve_from_db_and_split(input_dict, file_manager, n_divs=
         return {
             'temp_tokens': None,
             'lang': None,
-            'fresh': False
+            'fresh': False,
+            'file_found': file_found
         }
 
     duration = existing['duration']
@@ -227,7 +237,8 @@ def detect_language_retrieve_from_db_and_split(input_dict, file_manager, n_divs=
             return {
                 'lang': None,
                 'temp_tokens': None,
-                'fresh': False
+                'fresh': False,
+                'file_found': file_found
             }
 
         result_tokens.append(current_result)
@@ -235,7 +246,8 @@ def detect_language_retrieve_from_db_and_split(input_dict, file_manager, n_divs=
     return {
         'lang': None,
         'temp_tokens': result_tokens,
-        'fresh': True
+        'fresh': True,
+        'file_found': file_found
     }
 
 
@@ -243,7 +255,8 @@ def detect_language_parallel(tokens_dict, i, model, file_manager):
     if not tokens_dict['fresh']:
         return {
             'lang': None,
-            'fresh': False
+            'fresh': False,
+            'file_found': tokens_dict.get('file_found')
         }
 
     current_token = tokens_dict['temp_tokens'][i]
@@ -254,16 +267,20 @@ def detect_language_parallel(tokens_dict, i, model, file_manager):
     except Exception:
         return {
             'lang': None,
-            'fresh': False
+            'fresh': False,
+            'file_found': tokens_dict.get('file_found')
         }
 
     return {
         'lang': language,
-        'fresh': True
+        'fresh': True,
+        'file_found': tokens_dict.get('file_found')
     }
 
 
 def detect_language_callback(token, results_list, force):
+    file_found_values = [x.get('file_found') for x in results_list if x.get('file_found') is not None]
+    file_found = all(file_found_values) if len(file_found_values) > 0 else None
     if all([x['lang'] is not None for x in results_list]):
         # This indicates success (regardless of freshness)
         languages = [x['lang'] for x in results_list]
@@ -273,18 +290,21 @@ def detect_language_callback(token, results_list, force):
         return {
             'token': token,
             'language': most_common_lang,
-            'fresh': True
+            'fresh': True,
+            'file_found': file_found
         }
     return {
         'token': None,
         'language': None,
-        'fresh': False
+        'fresh': False,
+        'file_found': file_found
     }
 
 
 def transcribe_audio_to_text(input_dict, model, file_manager, strict_silence=False):
     token = input_dict['token']
     lang = input_dict['language']
+    file_found = input_dict.get('file_found')
 
     # If the token is null, it means that some error happened in the previous step (e.g. the file didn't exist
     # in language detection)
@@ -293,7 +313,18 @@ def transcribe_audio_to_text(input_dict, model, file_manager, strict_silence=Fal
             'transcript_results': None,
             'subtitle_results': None,
             'language': None,
-            'fresh': False
+            'fresh': False,
+            'file_found': file_found
+        }
+
+    file_found = common_utils.get_token_file_found(token, file_manager)
+    if file_found is False:
+        return {
+            'transcript_results': None,
+            'subtitle_results': None,
+            'language': None,
+            'fresh': False,
+            'file_found': False
         }
 
     result_dict = model.transcribe_audio_whisper(file_manager.generate_filepath(token),
@@ -305,7 +336,8 @@ def transcribe_audio_to_text(input_dict, model, file_manager, strict_silence=Fal
             'transcript_results': None,
             'subtitle_results': None,
             'language': None,
-            'fresh': False
+            'fresh': False,
+            'file_found': file_found
         }
 
     transcript_results = result_dict['text']
@@ -317,7 +349,8 @@ def transcribe_audio_to_text(input_dict, model, file_manager, strict_silence=Fal
         'transcript_results': transcript_results,
         'subtitle_results': subtitle_results,
         'language': language_result,
-        'fresh': True
+        'fresh': True,
+        'file_found': file_found
     }
 
 

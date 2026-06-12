@@ -141,6 +141,12 @@ class VideoFingerprintTaskResponse(BaseModel):
         description="Whether the computation was successful."
     )
 
+    file_found: Union[bool, None] = Field(
+        default=None,
+        title="Input file found",
+        description="Whether the file backing the input token currently exists on disk."
+    )
+
 
 class VideoFingerprintResponse(TaskStatusResponse):
     task_result: Union[VideoFingerprintTaskResponse, None] = Field(
@@ -197,6 +203,12 @@ class ExtractAudioTaskResponse(BaseModel):
         title="Audio duration",
         description="Duration of audio based on the length of its video file. This value is exact as it is based "
                     "on video metadata."
+    )
+
+    file_found: Union[bool, None] = Field(
+        default=None,
+        title="Input file found",
+        description="Whether the file backing the input token currently exists on disk."
     )
 
 
@@ -307,6 +319,12 @@ class DetectSlidesTaskResponse(BaseModel):
     fresh: bool = Field(
         title="Freshness flag",
         description="Whether the result was computed freshly or an existing cached result was returned."
+    )
+
+    file_found: Union[bool, None] = Field(
+        default=None,
+        title="Input file found",
+        description="Whether the file backing the input token currently exists on disk."
     )
 
 

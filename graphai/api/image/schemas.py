@@ -152,6 +152,12 @@ class ImageFingerprintTaskResponse(BaseModel):
         description="Whether the computation was successful."
     )
 
+    file_found: Union[bool, None] = Field(
+        default=None,
+        title="Input file found",
+        description="Whether the file backing the input token currently exists on disk."
+    )
+
 
 class ImageFingerprintResponse(TaskStatusResponse):
     task_result: Union[ImageFingerprintTaskResponse, None] = Field(
@@ -254,6 +260,12 @@ class ExtractTextTaskResponse(BaseModel):
         description="Whether the computation was successful."
     )
 
+    file_found: Union[bool, None] = Field(
+        default=None,
+        title="Input file found",
+        description="Whether the file backing the input token currently exists on disk."
+    )
+
 
 class ExtractTextResponse(TaskStatusResponse):
     task_result: Union[ExtractTextTaskResponse, None] = Field(
@@ -276,6 +288,12 @@ class DetectOCRLanguageTaskResponse(BaseModel):
     successful: bool = Field(
         title="Success flag",
         description="Whether the computation was successful."
+    )
+
+    file_found: Union[bool, None] = Field(
+        default=None,
+        title="Input file found",
+        description="Whether the file backing the input token currently exists on disk."
     )
 
 

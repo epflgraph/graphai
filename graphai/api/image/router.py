@@ -108,7 +108,8 @@ async def calculate_slide_fingerprint_status(task_id):
                 'fresh': task_results['fresh'],
                 'closest_token': task_results['closest'],
                 'closest_token_origin': task_results['closest_origin'],
-                'successful': task_results['result'] is not None
+                'successful': task_results['result'] is not None,
+                'file_found': task_results.get('file_found', None)
             }
         else:
             task_results = None
@@ -160,7 +161,8 @@ async def extract_text_status(task_id):
                 'result': task_results['results'],
                 'language': task_results['language'],
                 'fresh': task_results['fresh'],
-                'successful': task_results['results'] is not None and not task_results['results'][0].get('fail', False)
+                'successful': task_results['results'] is not None and not task_results['results'][0].get('fail', False),
+                'file_found': task_results.get('file_found', None)
             }
         else:
             task_results = None
@@ -176,7 +178,8 @@ async def detect_ocr_language_status(task_id):
             task_results = {
                 'language': task_results['language'],
                 'fresh': task_results['fresh'],
-                'successful': task_results['results'] is not None
+                'successful': task_results['results'] is not None,
+                'file_found': task_results.get('file_found', None)
             }
         else:
             task_results = None

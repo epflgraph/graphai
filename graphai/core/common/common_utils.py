@@ -224,6 +224,26 @@ def is_token(s):
     return not is_url(s)
 
 
+def get_token_file_found(token, file_manager, force_dir=None):
+    """
+    Resolves whether the file behind a token currently exists on disk.
+    Args:
+        token: Token to resolve
+        file_manager: Storage config object with generate_filepath
+        force_dir: Optional storage subfolder override
+
+    Returns:
+        True if the token resolves to an existing file/folder, False if it does not,
+        and None if the input is not a token.
+    """
+    if token is None or not is_token(token):
+        return None
+    try:
+        return file_exists(file_manager.generate_filepath(token, force_dir=force_dir))
+    except Exception:
+        return False
+
+
 def is_pdf(s):
     return s.endswith('.pdf')
 

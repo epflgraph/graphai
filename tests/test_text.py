@@ -8,12 +8,14 @@ import pandas as pd
 from graphai.core.common.config import config
 from graphai.celery.text.tasks import (
     extract_keywords_task,
+    text_init_task,
     wikisearch_task,
     wiki_search_task,
     compute_scores_task,
     draw_ontology_task,
     draw_graph_task,
 )
+from graphai.core.text.wikisearch import ElasticsearchSearchError, search_elasticsearch_http
 
 ################################################################
 # /text/keywords                                               #
@@ -189,6 +191,109 @@ def test__text_wiki_search__integration(fixture_app):
         {'concept_id': 33516, 'concept_name': 'Wave', 'score': 21.0},
     ]
     mock_wiki_search.assert_called_once_with('acoustic wave fields', 2)
+
+
+def test__text_wiki_search__integration__es_error_returns_503(fixture_app):
+    with patch('graphai.celery.text.jobs.wiki_search') as mock_wiki_search:
+        mock_wiki_search.side_effect = ElasticsearchSearchError(
+            'Elasticsearch index "concepts_detection" is unavailable.',
+            api_status_code=503,
+            upstream_status=404,
+        )
+
+        response = fixture_app.post(
+            '/text/wiki_search?limit=2',
+            json={'search_term': 'acoustic wave fields'},
+            timeout=30,
+        )
+
+    assert response.status_code == 503
+    assert response.json() == {'detail': 'Elasticsearch index "concepts_detection" is unavailable.'}
+
+
+
+def test__text_wikify__integration__es_error_returns_503_from_raw_text(fixture_app):
+    with patch('graphai.celery.text.jobs.wikify_text') as mock_wikify_text:
+        mock_wikify_text.side_effect = ElasticsearchSearchError(
+            'Elasticsearch index "concepts_detection" is unavailable.',
+            api_status_code=503,
+            upstream_status=404,
+        )
+
+        response = fixture_app.post(
+            '/text/wikify',
+            json={'raw_text': 'acoustic wave fields'},
+            timeout=30,
+        )
+
+    assert response.status_code == 503
+    assert response.json() == {'detail': 'Elasticsearch index "concepts_detection" is unavailable.'}
+
+
+def test__text_wikify__integration__es_error_returns_503_from_keywords(fixture_app):
+    with patch('graphai.celery.text.jobs.wikify_keywords') as mock_wikify_keywords:
+        mock_wikify_keywords.side_effect = ElasticsearchSearchError(
+            'Elasticsearch index "concepts_detection" is unavailable.',
+            api_status_code=503,
+            upstream_status=404,
+        )
+
+        response = fixture_app.post(
+            '/text/wikify',
+            json={'keywords': ['acoustic wave fields']},
+            timeout=30,
+        )
+
+    assert response.status_code == 503
+    assert response.json() == {'detail': 'Elasticsearch index "concepts_detection" is unavailable.'}
+
+class _DummyHTTPResponse:
+    def __init__(self, status, payload):
+        self.status = status
+        self.data = payload.encode('utf-8')
+
+
+class _DummyHTTPPool:
+    def __init__(self, response):
+        self.response = response
+
+    def request(self, *args, **kwargs):
+        return self.response
+
+
+def test__text_wiki_search__http_error_raises():
+    es_config = {
+        'host': 'es01',
+        'port': '9200',
+        'username': 'elastic',
+        'password': 'secret',
+        'cafile': '/tmp/dummy.crt',
+    }
+    response = _DummyHTTPResponse(
+        404,
+        '{"error":{"type":"index_not_found_exception","reason":"no such index [concepts_detection]"},"status":404}',
+    )
+
+    with patch('graphai.core.text.wikisearch._es_http_pool', return_value=_DummyHTTPPool(response)):
+        with pytest.raises(ElasticsearchSearchError) as exc_info:
+            search_elasticsearch_http('acoustic wave fields', es_config, 'concepts_detection', limit=5, timeout=1, timeout_retries=1)
+
+    assert exc_info.value.api_status_code == 503
+    assert exc_info.value.upstream_status == 404
+    assert 'concepts_detection' in str(exc_info.value)
+
+
+@patch('graphai.celery.text.tasks.validate_elasticsearch_index_http', return_value=1579904)
+@patch('graphai.celery.text.tasks.strtobool', return_value=False)
+def test__text_init__run_task__validates_es_index(mock_preload, mock_validate):
+    result = text_init_task.run()
+
+    assert result is True
+    mock_validate.assert_called_once_with(
+        config['elasticsearch'],
+        config['elasticsearch'].get('concept_detection_index', 'concepts_detection'),
+        timeout=config['elasticsearch'].get('request_timeout', 10),
+    )
 
 
 ################################################################
