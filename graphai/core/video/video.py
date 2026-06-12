@@ -942,6 +942,7 @@ def compute_slide_set_fingerprint(results, origin_token, file_manager):
             'fp_token': None,
             'perform_lookup': False,
             'fresh': False,
+            'file_found': results.get('file_found'),
             'original_results': results
         }
     if all(existing_slide['fingerprint'] is not None for existing_slide in existing_slide_list):
@@ -950,6 +951,7 @@ def compute_slide_set_fingerprint(results, origin_token, file_manager):
             'fp_token': None,
             'perform_lookup': False,
             'fresh': False,
+            'file_found': results.get('file_found'),
             'original_results': results
         }
     tokens = [existing_slide['id_token'] for existing_slide in existing_slide_list
@@ -961,6 +963,7 @@ def compute_slide_set_fingerprint(results, origin_token, file_manager):
             'fp_token': None,
             'perform_lookup': False,
             'fresh': False,
+            'file_found': results.get('file_found'),
             'original_results': results
         }
     return {
@@ -968,6 +971,7 @@ def compute_slide_set_fingerprint(results, origin_token, file_manager):
         'fp_token': tokens,
         'perform_lookup': True,
         'fresh': True,
+        'file_found': results.get('file_found'),
         'original_results': results
     }
 
@@ -1004,12 +1008,14 @@ def retrieve_slide_fingerprint_callback(results):
 def add_token_status_to_slide_list(results):
     slide_tokens = results['slide_tokens']
     fresh = results['fresh']
+    file_found = results.get('file_found')
     if slide_tokens is not None:
         for slide_number in slide_tokens:
             slide_tokens[slide_number]['token_status'] = get_image_token_status(slide_tokens[slide_number]['token'])
     return {
         'slide_tokens': slide_tokens,
-        'fresh': fresh
+        'fresh': fresh,
+        'file_found': file_found
     }
 
 

@@ -3,7 +3,7 @@ import os
 from graphai.core.common.caching import VideoConfig
 from graphai.core.image.image import break_pdf_into_images, extract_slide_text
 from graphai.core.video.video import extract_audio, extract_and_sample_frames
-from graphai.core.video.video import compute_video_fingerprint
+from graphai.core.video.video import compute_video_fingerprint, ignore_slide_fingerprint_results_callback
 from graphai.core.voice.transcribe import detect_language_retrieve_from_db_and_split, transcribe_audio_to_text
 
 
@@ -91,4 +91,20 @@ def test_break_pdf_into_images_reports_missing_input_file():
     result = break_pdf_into_images(token, file_manager)
 
     assert result['pages'] is None
+    assert result['file_found'] is False
+
+
+def test_ignore_slide_fingerprint_results_preserves_file_found_on_failure():
+    result = ignore_slide_fingerprint_results_callback({
+        'fp_results': {
+            'original_results': {
+                'slide_tokens': None,
+                'fresh': False,
+                'file_found': False,
+            }
+        }
+    })
+
+    assert result['slide_tokens'] is None
+    assert result['fresh'] is False
     assert result['file_found'] is False
