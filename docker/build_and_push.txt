@@ -14,5 +14,22 @@ docker push epflgraph/graphai:latest
 
 
 # Currently using only this:
-docker buildx build --progress=plain --load -t epflgraph/graphai:latest .
-docker push epflgraph/graphai:latest
+#docker buildx build --progress=plain --load -t epflgraph/graphai:latest .
+#docker push epflgraph/graphai:latest
+
+
+# Build and push with a specific version tag
+docker buildx build --progress=plain --load -t epflgraph/graphai:1.1.2 .
+docker push epflgraph/graphai:1.1.2
+
+
+docker pull epflgraph/graphai:v1.0.0
+docker tag epflgraph/graphai:v1.0.0 epflgraph/graphai:1.0.0
+docker tag epflgraph/graphai:v1.0.0 epflgraph/graphai:latest-stable
+docker push epflgraph/graphai:1.0.0
+docker push epflgraph/graphai:latest-stable
+
+
+docker pull epflgraph/graphai:v1.1.0
+docker tag epflgraph/graphai:v1.1.0 epflgraph/graphai:1.1.0
+docker push epflgraph/graphai:1.1.0

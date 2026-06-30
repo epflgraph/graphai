@@ -27,14 +27,16 @@ services:
     volumes:
       - redis_data:/data
 
+  # Redis Commander for web-based Redis management
   redis-commander:
-    image: visol/redis-commander:0.8.0   # multi-arch incl. arm64
+    image: rediscommander/redis-commander:latest
     environment:
       # - REDIS_HOSTS=local:redis:6379
       - REDIS_HOSTS=local:redis:6379:1
     ports:
       - "8081:8081"
     depends_on: [redis]
+    restart: unless-stopped
 
   # Celery Prometheus exporter (arm64-friendly)
   celery_exporter:
@@ -70,6 +72,7 @@ services:
     depends_on:
       - rabbitmq
       - redis
+    restart: unless-stopped
 
   # Docker Desktop–friendly container metrics (CPU/RAM/NET/IO) via Docker API
   docker_stats_exporter:

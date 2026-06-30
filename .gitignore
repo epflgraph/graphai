@@ -240,3 +240,10 @@ init/api_add_user.sh.bak
 scripts/list_functions.py
 purge.sh
 docker/models
+.opencode
+resources
+opencode.sh
+restart.sh
+Dockerfile.app
+Dockerfile.base
+docker/build_and_push.txt

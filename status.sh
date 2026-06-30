@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-echo "Starting all services..."
+echo "Restarting all services..."
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$SCRIPT_DIR"
@@ -50,20 +50,3 @@ fi
 
 wait_for_tcp_port "$BROKER_HOST" "$BROKER_PORT" "RabbitMQ"
 wait_for_tcp_port "$REDIS_HOST" "$REDIS_PORT" "Redis"
-
-systemctl --user start promtail.service
-systemctl --user start celery-cpu-cache.service
-systemctl --user start celery-cpu-embedding.service
-systemctl --user start celery-cpu-image.service
-systemctl --user start celery-cpu-ontl_scrp_celery.service
-systemctl --user start celery-cpu-rag.service
-systemctl --user start celery-cpu-text.service
-systemctl --user start celery-cpu-translate.service
-systemctl --user start celery-cpu-video.service
-systemctl --user start celery-cpu-voice.service
-systemctl --user start celery-gpu0-embedding.service
-systemctl --user start celery-gpu1-voice.service
-systemctl --user start celery-gpu2-voice.service
-systemctl --user start celery-gpu3-translation.service
-systemctl --user start uvicorn-api-graphai.service
-echo "All services started."
