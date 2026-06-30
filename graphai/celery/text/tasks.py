@@ -75,11 +75,11 @@ def extract_keywords_task(self, raw_text, **kwargs):
     return extract_keywords(raw_text, **kwargs)
 
 
-@shared_task(bind=True, name='text.wikisearch', es=es, soft_time_limit=30, time_limit=45)
+@shared_task(bind=True, name='text.wikisearch', es=es, soft_time_limit=300000, time_limit=300000)
 def wikisearch_task(self, keywords_list, **kwargs):
-    es_timeout = config['elasticsearch'].get('request_timeout', 10)
-    es_timeout_retries = config['elasticsearch'].get('request_timeout_retries', 2)
-    wikipedia_timeout = config['elasticsearch'].get('wikipedia_timeout', 6)
+    es_timeout = config['elasticsearch'].get('request_timeout', 300000)
+    es_timeout_retries = config['elasticsearch'].get('request_timeout_retries', 300000)
+    wikipedia_timeout = config['elasticsearch'].get('wikipedia_timeout', 300000)
 
     try:
         return wikisearch(
@@ -95,10 +95,10 @@ def wikisearch_task(self, keywords_list, **kwargs):
         return pd.DataFrame()
 
 
-@shared_task(bind=True, name='text.wiki_search', es=es, soft_time_limit=30, time_limit=45)
+@shared_task(bind=True, name='text.wiki_search', es=es, soft_time_limit=300000, time_limit=300000)
 def wiki_search_task(self, search_term, limit=10):
-    es_timeout = config['elasticsearch'].get('request_timeout', 10)
-    es_timeout_retries = config['elasticsearch'].get('request_timeout_retries', 2)
+    es_timeout = config['elasticsearch'].get('request_timeout', 300000)
+    es_timeout_retries = config['elasticsearch'].get('request_timeout_retries', 300000)
 
     try:
         return search_elasticsearch_http(

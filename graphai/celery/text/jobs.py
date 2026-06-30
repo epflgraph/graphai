@@ -5,7 +5,7 @@ import graphai.celery.text.tasks as tasks
 
 def keywords(raw_text, use_nltk):
     job = chain(tasks.extract_keywords_task.s(raw_text, use_nltk=use_nltk))
-    return job.apply_async(priority=10).get(timeout=10)
+    return job.apply_async(priority=10).get(timeout=300000)
 
 
 def wiki_search(search_term, limit):
@@ -34,7 +34,7 @@ def wikify_text(
             refresh_scores=refresh_scores,
         )
     )
-    results = job.apply_async(priority=10).get(timeout=300)
+    results = job.apply_async(priority=10).get(timeout=300000)
 
     return results.to_dict(orient='records')
 
@@ -59,21 +59,21 @@ def wikify_keywords(
             refresh_scores=refresh_scores,
         )
     )
-    results = job.apply_async(priority=10).get(timeout=300)
+    results = job.apply_async(priority=10).get(timeout=300000)
 
     return results.to_dict(orient='records')
 
 
 def wikify_ontology_svg(results, level):
     job = tasks.draw_ontology_task.s(results, level=level)
-    job.apply_async(priority=10).get(timeout=10)
+    job.apply_async(priority=10).get(timeout=300000)
 
 
 def wikify_graph_svg(results, concept_score_threshold, edge_threshold, min_component_size):
     job = tasks.draw_graph_task.s(results, concept_score_threshold=concept_score_threshold, edge_threshold=edge_threshold, min_component_size=min_component_size)
-    job.apply_async(priority=10).get(timeout=10)
+    job.apply_async(priority=10).get(timeout=300000)
 
 
 def generate_exercise(data):
     job = chain(tasks.generate_exercise_task.s(data))
-    return job.apply_async(priority=10).get(timeout=60)
+    return job.apply_async(priority=10).get(timeout=300000)
