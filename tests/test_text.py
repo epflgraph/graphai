@@ -326,47 +326,51 @@ def test__text_wikify__compute_scores__mock_task(mock_run):
 def test__text_wikify__wikisearch__run_task():
     # Call task
     results = wikisearch_task.run([])
+    df = results.to_dataframe() if hasattr(results, 'to_dataframe') else results
 
     # Check returned value
-    assert isinstance(results, pd.DataFrame)
-    assert len(results) == 0
+    assert isinstance(df, pd.DataFrame)
+    assert len(df) == 0
 
     ################
 
     # Call task
     results = wikisearch_task.run(['acoustic wave fields'])
+    df = results.to_dataframe() if hasattr(results, 'to_dataframe') else results
 
     # Check returned value
-    assert isinstance(results, pd.DataFrame)
-    assert len(results) > 0
-    assert not results.isna().values.any()
-    assert 5786179 in results['concept_id'].values        # Acoustic wave wikipage
-    assert list(results.columns) == ['keywords', 'concept_id', 'concept_name', 'searchrank', 'search_score']
+    assert isinstance(df, pd.DataFrame)
+    assert len(df) > 0
+    assert not df.isna().values.any()
+    assert 5786179 in df['concept_id'].values        # Acoustic wave wikipage
+    assert list(df.columns) == ['keywords', 'concept_id', 'concept_name', 'searchrank', 'search_score']
 
     ################
 
     # Call task
     results = wikisearch_task.run(['schreier graphs'])
+    df = results.to_dataframe() if hasattr(results, 'to_dataframe') else results
 
     # Check returned value
-    assert isinstance(results, pd.DataFrame)
-    assert len(results) > 0
-    assert not results.isna().values.any()
-    assert 358277 in results['concept_id'].values        # Cayley graph wikipage
-    assert list(results.columns) == ['keywords', 'concept_id', 'concept_name', 'searchrank', 'search_score']
+    assert isinstance(df, pd.DataFrame)
+    assert len(df) > 0
+    assert not df.isna().values.any()
+    assert 358277 in df['concept_id'].values        # Cayley graph wikipage
+    assert list(df.columns) == ['keywords', 'concept_id', 'concept_name', 'searchrank', 'search_score']
 
 
 @pytest.mark.usefixtures('wave_fields_wikisearch_df')
 def test__text_wikify__compute_scores__run_task(wave_fields_wikisearch_df):
     # Call task
     results = compute_scores_task.run([wave_fields_wikisearch_df])
+    df = results.to_dataframe() if hasattr(results, 'to_dataframe') else results
 
     # Check returned value
-    assert isinstance(results, pd.DataFrame)
-    assert len(results) > 0
-    assert not results.isna().values.any()
-    assert '33516' in results['concept_id'].values        # Wave wikipage
-    assert list(results.columns) == ['concept_id', 'concept_name', 'search_score', 'levenshtein_score', 'embedding_local_score', 'embedding_global_score', 'graph_score', 'ontology_local_score', 'ontology_global_score', 'embedding_keywords_score', 'graph_keywords_score', 'ontology_keywords_score', 'mixed_score']
+    assert isinstance(df, pd.DataFrame)
+    assert len(df) > 0
+    assert not df.isna().values.any()
+    assert '33516' in df['concept_id'].values        # Wave wikipage
+    assert list(df.columns) == ['concept_id', 'concept_name', 'search_score', 'levenshtein_score', 'embedding_local_score', 'embedding_global_score', 'graph_score', 'ontology_local_score', 'ontology_global_score', 'embedding_keywords_score', 'graph_keywords_score', 'ontology_keywords_score', 'mixed_score']
 
 ################################################################
 
