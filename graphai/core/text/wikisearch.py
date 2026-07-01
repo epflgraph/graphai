@@ -20,24 +20,9 @@ except Exception:  # pragma: no cover - keep runtime resilient if transport inte
     ESConnectionTimeout = ()
 
 
-#----------------------#
-# Set up sysmsg logger #
-#----------------------#
-from loguru import logger as sysmsg
-import sys
-sysmsg.remove()
-sysmsg.add(
-    sys.stdout,
-    level="TRACE",
-    colorize=True,      # FORCE ANSI colors
-    enqueue=True,       # REQUIRED for Celery / multiprocessing
-    format="<green>{time:YYYY-MM-DD HH:mm:ss}</green> | "
-           "<level>{level: <8}</level> | "
-           "<cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - "
-           "{message}",
-)
-#----------------------#
+from graphai.core.common.logging import get_logger
 
+logger = get_logger('graphai.core.text.wikisearch')
 
 
 
@@ -220,7 +205,13 @@ def search_elasticsearch_http(
     timeout=DEFAULT_ES_TIMEOUT,
     timeout_retries=DEFAULT_ES_TIMEOUT_RETRIES,
 ):
-    sysmsg.info(f'⚡️ Searching Elasticsearch over HTTP for text: "{text}" with limit {limit} and timeout {timeout}s.')
+    logger.info(
+        '⚡️ Searching Elasticsearch over HTTP',
+        text=text,
+        limit=limit,
+        timeout=timeout,
+        index=index,
+    )
 
     timeout = _safe_timeout(timeout, DEFAULT_ES_TIMEOUT)
     timeout_retries = _safe_positive_int(timeout_retries, DEFAULT_ES_TIMEOUT_RETRIES)
@@ -243,11 +234,21 @@ def search_elasticsearch_http(
             response = http.request('POST', url, **request_kwargs)
             if response.status >= 400:
                 error = _build_es_http_error(response, es_config, index, operation='search')
-                sysmsg.critical(str(error))
+                logger.error(
+                    '❌ Elasticsearch HTTP search request failed',
+                    error=str(error),
+                    status_code=error.api_status_code,
+                    upstream_status=error.upstream_status,
+                )
                 raise error
 
             hits = json.loads(response.data.decode('utf-8')).get('hits', {}).get('hits', [])
-            sysmsg.success(f'✅ Elasticsearch HTTP search returned {len(hits)} hits for text: "{text}".')
+            logger.info(
+                '✅ Elasticsearch HTTP search returned hits',
+                text=text,
+                num_hits=len(hits),
+                index=index,
+            )
             return [
                 {
                     'concept_id': hit['_source']['id'],
@@ -258,19 +259,31 @@ def search_elasticsearch_http(
             ]
         except urllib3.exceptions.TimeoutError as exc:
             if attempt < timeout_retries:
-                sysmsg.warning(
-                    f'⚠️ Elasticsearch HTTP timeout for text "{text}" (attempt {attempt}/{timeout_retries}): {exc}. Retrying...'
+                logger.warning(
+                    '⚠️ Elasticsearch HTTP timeout, retrying',
+                    text=text,
+                    attempt=attempt,
+                    max_attempts=timeout_retries,
+                    error=str(exc),
                 )
                 continue
-            sysmsg.warning(
-                f'⚠️ Elasticsearch HTTP timeout for text "{text}" after {attempt} attempt(s): {exc}'
+            logger.warning(
+                '⚠️ Elasticsearch HTTP timeout exhausted retries',
+                text=text,
+                attempts=attempt,
+                error=str(exc),
             )
             raise ElasticsearchSearchError(
                 f'Elasticsearch HTTP search timed out for text "{text}" on {_es_base_url(es_config)}/{index}: {exc}',
                 api_status_code=503,
             ) from exc
         except urllib3.exceptions.HTTPError as exc:
-            sysmsg.critical(f'Elasticsearch HTTP request failed for text "{text}": {type(exc).__name__}: {exc}')
+            logger.error(
+                '❌ Elasticsearch HTTP request failed',
+                text=text,
+                error_type=type(exc).__name__,
+                error=str(exc),
+            )
             raise ElasticsearchSearchError(
                 f'Elasticsearch HTTP request failed for text "{text}" on {_es_base_url(es_config)}/{index}: '
                 f'{type(exc).__name__}: {exc}',
@@ -299,7 +312,12 @@ def search_wikipedia_api(text, limit=10, timeout=DEFAULT_WIKIPEDIA_TIMEOUT):
     Returns:
         list: A list of dictionaries with keys 'concept_id' and 'concept_name' containing the top matches for the search.
     """
-    sysmsg.debug(f'Searching Wikipedia API for text: "{text}" with limit {limit} and timeout {timeout}s.')
+    logger.debug(
+        '🔍 Searching Wikipedia API',
+        text=text,
+        limit=limit,
+        timeout=timeout,
+    )
     params = {
         'format': 'json',
         'action': 'query',
@@ -318,14 +336,18 @@ def search_wikipedia_api(text, limit=10, timeout=DEFAULT_WIKIPEDIA_TIMEOUT):
         # Extract list of results
         hits = response['query']['search']
 
-        sysmsg.debug(f'Wikipedia API returned {len(hits)} hits for text: "{text}".')
+        logger.debug(
+            '✅ Wikipedia API returned hits',
+            text=text,
+            num_hits=len(hits),
+        )
 
         # Return as list of dictionaries with keys 'concept_id' and 'concept_name'
         return [{'concept_id': hit['pageid'], 'concept_name': hit['title']} for hit in hits]
 
     except Exception:
         # If something goes wrong, avoid crashing and return empty list
-        sysmsg.error('Error connecting to Wikipedia API.')
+        logger.error('❌ Error connecting to Wikipedia API', text=text)
         return []
 
 
@@ -343,7 +365,13 @@ def search_elasticsearch(text, es, limit=10, timeout=DEFAULT_ES_TIMEOUT, timeout
     """
     
     
-    sysmsg.info(f'⚡️ Searching Elasticsearch cluster for text: "{text}" with limit {limit} and timeout {timeout}s.')
+    logger.info(
+        '⚡️ Searching Elasticsearch cluster',
+        text=text,
+        limit=limit,
+        timeout=timeout,
+        index=getattr(es, 'index', '<unknown>'),
+    )
 
     original_client = None
     timeout_retries = _safe_positive_int(timeout_retries, DEFAULT_ES_TIMEOUT_RETRIES)
@@ -364,7 +392,12 @@ def search_elasticsearch(text, es, limit=10, timeout=DEFAULT_ES_TIMEOUT, timeout
                         api_status_code=503,
                     )
 
-                sysmsg.success(f'✅ Elasticsearch search returned {len(hits)} hits for text: "{text}".')
+                logger.info(
+                    '✅ Elasticsearch search returned hits',
+                    text=text,
+                    num_hits=len(hits),
+                    index=getattr(es, 'index', '<unknown>'),
+                )
 
                 # Return as list of dictionaries with keys 'concept_id', 'concept_name' and 'score'
                 return [{'concept_id': hit['_source']['id'], 'concept_name': hit['_source']['title'], 'score': hit['_score']} for hit in hits]
@@ -375,16 +408,23 @@ def search_elasticsearch(text, es, limit=10, timeout=DEFAULT_ES_TIMEOUT, timeout
                 network_error = ESConnectionError and isinstance(exc, ESConnectionError)
 
                 if timed_out and attempt < timeout_retries:
-                    sysmsg.warning(
-                        f'⚠️ Elasticsearch timeout for text "{text}" (attempt {attempt}/{timeout_retries}): '
-                        f'{error_kind}: {error_message}. Retrying...'
+                    logger.warning(
+                        '⚠️ Elasticsearch timeout, retrying',
+                        text=text,
+                        attempt=attempt,
+                        max_attempts=timeout_retries,
+                        error_type=error_kind,
+                        error=error_message,
                     )
                     continue
 
                 if timed_out:
-                    sysmsg.warning(
-                        f'⚠️ Elasticsearch timeout for text "{text}" after {attempt} attempt(s): '
-                        f'{error_kind}: {error_message}'
+                    logger.warning(
+                        '⚠️ Elasticsearch timeout exhausted retries',
+                        text=text,
+                        attempts=attempt,
+                        error_type=error_kind,
+                        error=error_message,
                     )
                     raise ElasticsearchSearchError(
                         f'Elasticsearch search timed out for text "{text}" on index "{getattr(es, "index", "<unknown>")}": '
@@ -392,8 +432,11 @@ def search_elasticsearch(text, es, limit=10, timeout=DEFAULT_ES_TIMEOUT, timeout
                         api_status_code=503,
                     ) from exc
                 if network_error:
-                    sysmsg.critical(
-                        f'Elasticsearch network error for text "{text}": {error_kind}: {error_message}'
+                    logger.error(
+                        '❌ Elasticsearch network error',
+                        text=text,
+                        error_type=error_kind,
+                        error=error_message,
                     )
                     raise ElasticsearchSearchError(
                         f'Elasticsearch network error for text "{text}" on index "{getattr(es, "index", "<unknown>")}": '
@@ -401,8 +444,11 @@ def search_elasticsearch(text, es, limit=10, timeout=DEFAULT_ES_TIMEOUT, timeout
                         api_status_code=503,
                     ) from exc
 
-                sysmsg.critical(
-                    f'Elasticsearch request failed for text "{text}": {error_kind}: {error_message}'
+                logger.error(
+                    '❌ Elasticsearch request failed',
+                    text=text,
+                    error_type=error_kind,
+                    error=error_message,
                 )
                 raise ElasticsearchSearchError(
                     f'Elasticsearch request failed for text "{text}" on index "{getattr(es, "index", "<unknown>")}": '
@@ -413,7 +459,7 @@ def search_elasticsearch(text, es, limit=10, timeout=DEFAULT_ES_TIMEOUT, timeout
         # Restore original client to avoid side effects across calls.
         if original_client is not None:
             es.client = original_client
-            sysmsg.debug('Restored original Elasticsearch client after search.')
+            logger.debug('Restored original Elasticsearch client after search')
 
 
 def wikisearch(
@@ -442,7 +488,12 @@ def wikisearch(
         starting with 1. The search score is the elasticsearch score for method "es-score" or 1 - (searchrank - 1)/n
         for the other methods. Default: 'es-base'. Fallback: 'wikipedia-api'.
     """
-    sysmsg.info(f'Starting wikisearch with method "{method}" on {len(keywords_list)} sets of keywords, processing fraction {fraction}.')
+    logger.info(
+        '🚀 Starting wikisearch',
+        method=method,
+        num_keyword_sets=len(keywords_list),
+        fraction=fraction,
+    )
 
     # Slice keywords_list
     begin = int(fraction[0] * len(keywords_list))
@@ -458,10 +509,10 @@ def wikisearch(
     all_results = pd.DataFrame()
     for keywords in keywords_list:
         if method == 'wikipedia-api':
-            sysmsg.warning(f'⚠️ Using Wikipedia API for keywords: "{keywords}".')
+            logger.warning('⚠️ Using Wikipedia API fallback', keywords=keywords)
             results_list = search_wikipedia_api(keywords, timeout=wikipedia_timeout)
         else:
-            sysmsg.debug(f'⚡️ Using Elasticsearch cluster for keywords: "{keywords}".')
+            logger.debug('⚡️ Searching Elasticsearch for keywords', keywords=keywords)
             results_list = search_elasticsearch(
                 keywords,
                 es,
@@ -471,14 +522,21 @@ def wikisearch(
 
             # Fallback to Wikipedia API if no results from elasticsearch
             if not results_list:
-                sysmsg.warning(f'⚠️ No results from elasticsearch cluster for keywords {keywords}. Falling back to Wikipedia API.')
+                logger.warning(
+                    '⚠️ No results from Elasticsearch, falling back to Wikipedia API',
+                    keywords=keywords,
+                )
                 results_list = search_wikipedia_api(keywords, timeout=wikipedia_timeout)
             else:
-                sysmsg.success(f'✅ Found {len(results_list)} results for keywords: "{keywords}".')
+                logger.info(
+                    '✅ Found results for keywords',
+                    keywords=keywords,
+                    num_results=len(results_list),
+                )
 
         # Ignore set of keywords if no pages are found
         if not results_list:
-            sysmsg.warning(f'⚠️ No results found for keywords: "{keywords}". Skipping.')
+            logger.warning('⚠️ No results found for keywords, skipping', keywords=keywords)
             continue
 
         # Build results DataFrame
@@ -490,17 +548,31 @@ def wikisearch(
             columns=['keywords', 'concept_id', 'concept_name', 'searchrank', 'search_score'],
         )
 
-        sysmsg.debug(f'Constructed results DataFrame for keywords: "{keywords}". Sample:\n{results.head()}')
+        logger.debug(
+            'Constructed results DataFrame',
+            keywords=keywords,
+            rows=len(results),
+            columns=list(results.columns),
+        )
 
         # Replace search score with linear function on searchrank if needed
         if method != 'es-score':
             results['search_score'] = 1 - (results['searchrank'] - 1) / len(results)
-            sysmsg.debug(f'Updated search scores based on search rank for keywords: "{keywords}". Sample:\n{results.head()}')
+            logger.debug(
+                'Updated search scores based on search rank',
+                keywords=keywords,
+                rows=len(results),
+            )
 
         # Append results
         all_results = pd.concat([all_results, results], ignore_index=True)
 
-        sysmsg.debug(f'Appended results for keywords: "{keywords}". Total results so far: {len(all_results)}.')
+        logger.debug(
+            'Appended results for keywords',
+            keywords=keywords,
+            total_results=len(all_results),
+            batch_results=len(results),
+        )
 
     return all_results
 

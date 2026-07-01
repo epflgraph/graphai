@@ -36,7 +36,7 @@ def wikify_text(
     )
     results = job.apply_async(priority=10).get(timeout=300000)
 
-    return results.to_dict(orient='records')
+    return results.records if hasattr(results, 'records') else results.to_dict(orient='records')
 
 
 def wikify_keywords(
@@ -61,7 +61,7 @@ def wikify_keywords(
     )
     results = job.apply_async(priority=10).get(timeout=300000)
 
-    return results.to_dict(orient='records')
+    return results.records if hasattr(results, 'records') else results.to_dict(orient='records')
 
 
 def wikify_ontology_svg(results, level):

@@ -7,6 +7,36 @@ from elasticsearch_interface.es import ESConceptDetection
 
 from graphai.core.common.config import config
 from graphai.core.common.common_utils import strtobool
+from graphai.core.common.logging import get_logger
+
+logger = get_logger('graphai.celery.text')
+
+
+class DataFrameResult:
+    """Lightweight wrapper around a DataFrame's records for Celery serialization.
+
+    Celery logs task return values via ``repr()``.  A raw pandas DataFrame produces
+    multi-line dumps such as ``[10 rows x 13 columns]`` and individual row lines.
+    This wrapper stores the records and renders as a single short line, while still
+    being pickle-serializable and cheap to unwrap back into a DataFrame.
+    """
+
+    def __init__(self, records, columns=None):
+        self.records = records
+        self.columns = columns
+
+    def to_dataframe(self):
+        if not self.records:
+            return pd.DataFrame(columns=self.columns)
+        return pd.DataFrame(self.records)
+
+    def __repr__(self):
+        n = len(self.records)
+        m = len(self.columns) if self.columns else 0
+        return f'<DataFrameResult: {n} rows x {m} columns>'
+
+    def __len__(self):
+        return len(self.records)
 
 from graphai.core.text import (
     ConceptsGraph,
@@ -47,25 +77,31 @@ def text_init_task(self):
     """
 
     # This task initialises the text celery worker by loading into memory the graph and ontology tables
-    print('Start text_init task')
+    logger.info('🚀 Start text_init task')
 
     es_config = config['elasticsearch']
     es_index = es_config.get('concept_detection_index', 'concepts_detection')
     es_timeout = es_config.get('request_timeout', 10)
-    print(
-        f'Validating Elasticsearch concept detection index at '
-        f'https://{es_config["host"]}:{es_config["port"]}/{es_index} ...'
+    logger.info(
+        '🔍 Validating Elasticsearch concept detection index',
+        host=es_config['host'],
+        port=es_config['port'],
+        index=es_index,
     )
     es_doc_count = validate_elasticsearch_index_http(es_config, es_index, timeout=es_timeout)
-    print(f'Elasticsearch concept detection index is reachable with {es_doc_count} documents')
+    logger.info(
+        '✅ Elasticsearch concept detection index is reachable',
+        index=es_index,
+        document_count=es_doc_count,
+    )
 
     if strtobool(config['preload']['text']):
-        print('Loading concepts graph and ontology tables...')
+        logger.info('⏳ Loading concepts graph and ontology tables')
         self.graph.load_from_db()
     else:
-        print('Skipping preloading for text endpoints')
+        logger.info('⏭️ Skipping preloading for text endpoints')
 
-    print('Concepts graph and ontology tables loaded')
+    logger.info('✅ Concepts graph and ontology tables loaded')
 
     return True
 
@@ -82,7 +118,7 @@ def wikisearch_task(self, keywords_list, **kwargs):
     wikipedia_timeout = config['elasticsearch'].get('wikipedia_timeout', 300000)
 
     try:
-        return wikisearch(
+        df = wikisearch(
             keywords_list,
             es=self.es,
             es_timeout=es_timeout,
@@ -90,9 +126,13 @@ def wikisearch_task(self, keywords_list, **kwargs):
             wikipedia_timeout=wikipedia_timeout,
             **kwargs,
         )
+        return DataFrameResult(df.to_dict(orient='records'), columns=list(df.columns))
     except SoftTimeLimitExceeded:
-        print('[WARNING] text.wikisearch exceeded soft time limit; returning empty result for this shard.')
-        return pd.DataFrame()
+        logger.warning(
+            '⚠️ text.wikisearch exceeded soft time limit; returning empty result for this shard',
+            keywords_count=len(keywords_list),
+        )
+        return DataFrameResult([], columns=['keywords', 'concept_id', 'concept_name', 'searchrank', 'search_score'])
 
 
 @shared_task(bind=True, name='text.wiki_search', es=es, soft_time_limit=300000, time_limit=300000)
@@ -110,13 +150,22 @@ def wiki_search_task(self, search_term, limit=10):
             timeout_retries=es_timeout_retries,
         )
     except SoftTimeLimitExceeded:
-        print('[WARNING] text.wiki_search exceeded soft time limit; returning empty result.')
+        logger.warning(
+            '⚠️ text.wiki_search exceeded soft time limit; returning empty result',
+            search_term=search_term,
+        )
         return []
 
 
 @shared_task(bind=True, name='text.compute_scores', graph=graph)
 def compute_scores_task(self, results, **kwargs):
-    return compute_scores(pd.concat(results, ignore_index=True), graph=self.graph, **kwargs)
+    # Unwrap DataFrameResult wrappers (or plain DataFrames for backward compat).
+    dataframes = [
+        r.to_dataframe() if isinstance(r, DataFrameResult) else r
+        for r in results
+    ]
+    df = compute_scores(pd.concat(dataframes, ignore_index=True), graph=self.graph, **kwargs)
+    return DataFrameResult(df.to_dict(orient='records'), columns=list(df.columns))
 
 
 @shared_task(bind=True, name='text.draw_ontology', graph=graph)

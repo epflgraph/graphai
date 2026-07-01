@@ -6,6 +6,7 @@ from fastapi.responses import RedirectResponse
 
 from graphai.celery.common.celery_tools import celery_instance
 from graphai.api.common.rate_limiter import close_rate_limiter_connection
+from graphai.core.common.logging import configure_stdlib_logging
 
 from graphai.celery.common.log import log
 
@@ -123,6 +124,9 @@ authenticated_router.include_router(retrieval_router.router)
 app.include_router(unauthenticated_router)
 app.include_router(authenticated_router)
 app.celery_app = celery_instance
+
+# Apply GraphAI's structured logging to uvicorn/Celery library output as well.
+configure_stdlib_logging(force=True)
 
 
 # Root endpoint redirects to docs

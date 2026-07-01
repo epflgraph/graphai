@@ -1,11 +1,12 @@
 from typing import Optional, Union
 
-from fastapi import APIRouter, HTTPException, Query, Security
+from fastapi import APIRouter, HTTPException, Query, Security, Request
 from fastapi.responses import FileResponse
 
 import pandas as pd
 
 from graphai.api.auth.router import get_current_active_user
+from graphai.core.common.logging import get_logger
 from graphai.core.text.wikisearch import ElasticsearchSearchError
 import graphai.api.text.schemas as schemas
 import graphai.celery.text.jobs as jobs
@@ -13,6 +14,8 @@ import graphai.celery.text.jobs as jobs
 pd.set_option('display.max_rows', 400)
 pd.set_option('display.max_columns', 500)
 pd.set_option('display.width', 1000)
+
+logger = get_logger('graphai.api.text')
 
 # Initialise text router
 router = APIRouter(
@@ -60,6 +63,7 @@ async def wiki_search(
 
 @router.post('/wikify', response_model=schemas.WikifyResponse)
 async def wikify(
+    request: Request,
     data: Union[schemas.WikifyFromRawTextRequest, schemas.WikifyFromKeywordsRequest],
     method: Optional[str] = 'es-base',
     restrict_to_ontology: Optional[bool] = False,
@@ -95,13 +99,31 @@ async def wikify(
     * refresh_scores (bool): Whether to recompute scores after filtering. Default: True.
     """
 
+    log = logger.bind(
+        endpoint=str(request.url.path),
+        method=request.method,
+        wiki_method=method,
+        restrict_to_ontology=restrict_to_ontology,
+        score_smoothing=score_smoothing,
+        aggregation_coef=aggregation_coef,
+        filtering_threshold=filtering_threshold,
+        refresh_scores=refresh_scores,
+    )
+    log.info('🚀 Wikify endpoint invoked')
+
     if isinstance(data, schemas.WikifyFromRawTextRequest):
+        input_type = 'raw_text'
+        raw_text_len = len(data.raw_text)
+        log = log.bind(input_type=input_type, raw_text_length=raw_text_len)
+
         # Return if no input
         if not data.raw_text:
+            log.warning('⚠️ Empty raw text received; returning empty result')
             return []
 
+        log.info('📝 Starting wikify from raw text')
         try:
-            return jobs.wikify_text(
+            results = jobs.wikify_text(
                 data.raw_text,
                 method,
                 restrict_to_ontology,
@@ -110,19 +132,38 @@ async def wikify(
                 filtering_threshold,
                 refresh_scores,
             )
+            log.info('✅ Wikify from raw text completed', num_results=len(results))
+            return results
         except ElasticsearchSearchError as exc:
+            log.error(
+                '❌ Elasticsearch search failed while wikifying raw text',
+                status_code=exc.api_status_code,
+                upstream_status=exc.upstream_status,
+                error=str(exc),
+            )
             raise HTTPException(status_code=exc.api_status_code, detail=str(exc)) from exc
 
     if isinstance(data, schemas.WikifyFromKeywordsRequest):
+        input_type = 'keywords'
+        keywords_count = len(data.keywords)
+        log = log.bind(input_type=input_type, keywords_count=keywords_count)
+
         # Return if no input
         if not data.keywords:
+            log.warning('⚠️ Empty keyword list received; returning empty result')
             return []
 
         # Remove duplicate keywords
         keyword_list = list(set(data.keywords))
+        deduped_count = len(keyword_list)
+        log.info(
+            '🔑 Starting wikify from keywords',
+            unique_keywords_count=deduped_count,
+            duplicate_keywords_removed=keywords_count - deduped_count,
+        )
 
         try:
-            return jobs.wikify_keywords(
+            results = jobs.wikify_keywords(
                 keyword_list,
                 method,
                 restrict_to_ontology,
@@ -131,9 +172,18 @@ async def wikify(
                 filtering_threshold,
                 refresh_scores,
             )
+            log.info('✅ Wikify from keywords completed', num_results=len(results))
+            return results
         except ElasticsearchSearchError as exc:
+            log.error(
+                '❌ Elasticsearch search failed while wikifying keywords',
+                status_code=exc.api_status_code,
+                upstream_status=exc.upstream_status,
+                error=str(exc),
+            )
             raise HTTPException(status_code=exc.api_status_code, detail=str(exc)) from exc
 
+    log.warning('⚠️ Unrecognized wikify input type; returning empty result')
     return []
 
 

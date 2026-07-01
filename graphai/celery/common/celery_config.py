@@ -1,11 +1,46 @@
+import logging
 import os
 from functools import lru_cache
 
 from celery import current_app as current_celery_app
 from celery.result import AsyncResult
+from celery import signals
 from kombu import Queue
 
 from graphai.core.common.config import config
+from graphai.core.common.logging import configure_stdlib_logging, get_logger
+
+logger = get_logger('graphai.celery.common.celery_config')
+
+
+class SuppressTaskSuccessFilter(logging.Filter):
+    """Drop Celery task-success messages that include return-value dumps.
+
+    Keeps task failures, retries and warnings from celery.app.trace.
+    """
+
+    def filter(self, record):
+        msg = str(getattr(record, 'msg', ''))
+        if 'Task ' in msg and 'succeeded' in msg:
+            return False
+        return True
+
+
+@signals.setup_logging.connect
+@signals.worker_process_init.connect
+@signals.beat_init.connect
+def _setup_graphai_logging(**kwargs):
+    """Replace Celery's default logging with GraphAI's structured logging.
+
+    This runs when the worker starts and again in each child process so that
+    Celery cannot reset the log formatters back to its bracketed default.
+    """
+    configure_stdlib_logging(force=True)
+    trace_logger = logging.getLogger('celery.app.trace')
+    for f in list(trace_logger.filters):
+        if isinstance(f, SuppressTaskSuccessFilter):
+            trace_logger.removeFilter(f)
+    trace_logger.addFilter(SuppressTaskSuccessFilter())
 
 DEFAULT_BROKER = "amqp://guest:guest@localhost:5672//"
 DEFAULT_BACKEND = "redis://localhost:6379/0"
@@ -41,13 +76,13 @@ class BaseConfig:
 
     def __init__(self):
         try:
-            print("Reading celery configuration from config")
+            logger.info('📖 Reading celery configuration from config')
             self.broker_url = config['celery'].get('broker_url', DEFAULT_BROKER)
             self.result_backend = config['celery'].get('result_backend', DEFAULT_BACKEND)
         except Exception:
-            print(
-                "The celery configuration could not be found in the config file, using default parameters. "
-                "To use different ones, make sure to add a [celery] section with the corresponding parameters."
+            logger.warning(
+                '⚠️ Celery configuration not found in config file; using default parameters',
+                hint='Add a [celery] section with broker_url and result_backend to customize.',
             )
             self.broker_url = DEFAULT_BROKER
             self.result_backend = DEFAULT_BACKEND
@@ -119,7 +154,8 @@ def create_celery():
     celery_app.conf.update(accept_content=['pickle', 'json'])
     celery_app.conf.update(result_expires=10800)
     celery_app.conf.update(result_persistent=True)
-    celery_app.conf.update(result_extended=True)
+    # result_extended=False avoids dumping task return values (e.g. DataFrames) in worker logs.
+    celery_app.conf.update(result_extended=False)
     celery_app.conf.update(worker_send_task_events=True)
     celery_app.conf.update(task_send_sent_event=True)
     celery_app.conf.update(worker_prefetch_multiplier=1)
