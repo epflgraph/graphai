@@ -34,4 +34,4 @@ echo "Backend: $CELERY_RESULT_BACKEND"
 # Ensure uvicorn import path is correct (adjust if this script isn't in api/main)
 cd "$SCRIPT_DIR"
 
-uvicorn main:app --host 0.0.0.0 --port 28800 --workers 1
+uvicorn main:app --host 0.0.0.0 --port 28800 --workers "${API_WORKERS:-4}"

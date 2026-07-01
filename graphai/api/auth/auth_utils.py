@@ -11,9 +11,10 @@ from graphai.core.common.config import config
 import string
 import random
 import cachetools.func
+from cachetools import TTLCache
 
 AUTH_SCHEMA = config['auth']['schema']
-ALL_SCOPES = ['user', 'voice', 'video', 'translation', 'text', 'scraping', 'ontology', 'image', 'completion']
+ALL_SCOPES = ['user', 'voice', 'video', 'translation', 'text', 'scraping', 'ontology', 'image', 'rag', 'completion']
 DEFAULT_RATE_LIMIT_SCHEMA = 'unlimited'
 DEFAULT_RATE_LIMITS = {
     'base': {
@@ -42,6 +43,10 @@ DEFAULT_RATE_LIMITS = {
             'window': 10
         },
         'rag': {
+            'max_requests': 20,
+            'window': 1
+        },
+        'embedding': {
             'max_requests': 20,
             'window': 1
         }
@@ -74,6 +79,10 @@ DEFAULT_RATE_LIMITS = {
         'rag': {
             'max_requests': None,
             'window': None
+        },
+        'embedding': {
+            'max_requests': None,
+            'window': None
         }
     },
 }
@@ -88,10 +97,14 @@ def get_ratelimit_values():
             rate_limit_values.update(DEFAULT_RATE_LIMITS)
     except (FileNotFoundError, json.JSONDecodeError):
         rate_limit_values = DEFAULT_RATE_LIMITS
-    # Fill in the blanks of the rate-limit dictionary
-    for key in DEFAULT_RATE_LIMITS[DEFAULT_RATE_LIMIT_SCHEMA].keys():
-        if key not in rate_limit_values:
-            rate_limit_values[key] = DEFAULT_RATE_LIMITS[DEFAULT_RATE_LIMIT_SCHEMA][key]
+    # Ensure every schema contains all known rate-limit scopes.  Custom limit
+    # files may define only a subset of scopes, so merge missing keys from the
+    # default unlimited schema to avoid KeyError at router import time.
+    default_scope_values = DEFAULT_RATE_LIMITS[DEFAULT_RATE_LIMIT_SCHEMA]
+    for schema_name, schema_values in rate_limit_values.items():
+        for key in default_scope_values.keys():
+            if key not in schema_values:
+                schema_values[key] = default_scope_values[key]
     # Load selected rate-limiting schema
     limit_schema = config.get(
         'ratelimiting', {'limit': DEFAULT_RATE_LIMIT_SCHEMA}
@@ -156,8 +169,26 @@ def get_user(username: str):
         return UserInDB(**user_dict)
 
 
-@cachetools.func.ttl_cache(maxsize=1024, ttl=12 * 3600)
+# Per-user, per-path rate-limit overrides are queried from MySQL.  They change
+# rarely, so cache them for a short TTL to avoid hitting the database on every
+# authenticated request.  The TTL is configurable via config.ini; a missing key
+# defaults to 60 seconds.
+try:
+    _RATE_LIMIT_OVERRIDE_TTL = int(
+        config.get('ratelimiting', {}).get('override_cache_ttl_seconds', '60')
+    )
+except Exception:
+    _RATE_LIMIT_OVERRIDE_TTL = 60
+
+_rate_limit_override_cache: TTLCache = TTLCache(maxsize=1024, ttl=_RATE_LIMIT_OVERRIDE_TTL)
+
+
 def get_user_ratelimit_overrides(username: str, path: str):
+    cache_key = (username, path)
+    cached = _rate_limit_override_cache.get(cache_key)
+    if cached is not None or cache_key in _rate_limit_override_cache:
+        return cached
+
     db_manager = DB(config['database'])
     columns = ['username', 'max_requests', 'window_size']
     try:
@@ -165,11 +196,14 @@ def get_user_ratelimit_overrides(username: str, path: str):
                  f"WHERE username=%s AND api_path=%s")
         results = db_manager.execute_query(query, (username, path, ))
         if len(results) > 0:
-            return {columns[i]: results[0][i] for i in range(len(columns))}
+            value = {columns[i]: results[0][i] for i in range(len(columns))}
         else:
-            return None
+            value = None
     except Exception:
-        return None
+        value = None
+
+    _rate_limit_override_cache[cache_key] = value
+    return value
 
 
 def authenticate_user(username: str, password: str):

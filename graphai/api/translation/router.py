@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Security, Depends
-from fastapi_user_limiter.limiter import rate_limiter
+from graphai.api.common.rate_limiter import rate_limiter
 
 from graphai.api.common.schemas import TaskIDResponse
 from graphai.api.translation.schemas import (

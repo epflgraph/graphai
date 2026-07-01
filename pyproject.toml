@@ -67,7 +67,6 @@ dependencies = [
   "passlib[bcrypt]",
   "pybind11",
   "cachetools",
-  "fastapi-user-limiter>=1.3.0",
   "ftfy",
   "pymupdf",
   "pylatexenc",

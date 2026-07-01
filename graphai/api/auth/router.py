@@ -26,7 +26,7 @@ from fastapi.security import (
 )
 from jose import ExpiredSignatureError, JWTError, jwt
 from pydantic import ValidationError
-from fastapi_user_limiter.limiter import rate_limiter
+from graphai.api.common.rate_limiter import rate_limiter
 
 # to get a secret key run:
 # openssl rand -hex 32
@@ -44,6 +44,7 @@ oauth2_scheme = OAuth2PasswordBearer(
         "scraping": "Access website scraping endpoints.",
         "ontology": "Access ontology endpoints.",
         "image": "Access slide OCR endpoints.",
+        "rag": "Access retrieval / RAG endpoints.",
         "completion": "Access slide subset selection endpoint (formerly included ChatGPT-based endpoints, now deleted)."
     }
 )

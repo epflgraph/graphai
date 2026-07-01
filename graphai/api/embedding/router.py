@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Security, Depends
-from fastapi_user_limiter.limiter import rate_limiter
+from graphai.api.common.rate_limiter import rate_limiter
 import json
 
 from graphai.api.common.schemas import TaskIDResponse
@@ -57,8 +57,8 @@ async def calculate_embedding_text_fingerprint_status(task_id):
 
 
 @router.post('/embed', response_model=TaskIDResponse,
-             dependencies=[Depends(rate_limiter(get_ratelimit_values()['translation']['max_requests'],
-                                                get_ratelimit_values()['translation']['window'],
+             dependencies=[Depends(rate_limiter(get_ratelimit_values()['embedding']['max_requests'],
+                                                get_ratelimit_values()['embedding']['window'],
                                                 user=get_user_for_rate_limiter))])
 async def embed_text(data: EmbeddingRequest):
     text = data.text

@@ -5,6 +5,7 @@ from fastapi import FastAPI
 from fastapi.responses import RedirectResponse
 
 from graphai.celery.common.celery_tools import celery_instance
+from graphai.api.common.rate_limiter import close_rate_limiter_connection
 
 from graphai.celery.common.log import log
 
@@ -88,7 +89,7 @@ async def lifespan(app: FastAPI):
     ################################################################
     # After shutdown                                               #
     ################################################################
-    pass
+    await close_rate_limiter_connection()
 
 
 # Initialise FastAPI

@@ -1,3 +1,4 @@
+import asyncio
 from datetime import datetime
 from time import time
 from typing import Union, Dict
@@ -71,6 +72,17 @@ class LoggerMiddleware(BaseHTTPMiddleware):
             "created_at": datetime.now().isoformat(),
         }
 
-        log_request(request_data)
+        # Offload the synchronous file logging to the default thread pool so
+        # that slow filesystem I/O does not block the async event loop and
+        # delay the first response byte.
+        asyncio.create_task(_log_request_async(request_data))
 
         return response
+
+
+async def _log_request_async(request_data: Dict):
+    try:
+        await asyncio.to_thread(log_request, request_data)
+    except Exception as exc:
+        # Do not let a logging failure break a request or spam the event loop.
+        logger.warning(f"Failed to write access log: {exc}")

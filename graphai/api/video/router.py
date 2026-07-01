@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Security, Depends
 from fastapi.responses import FileResponse
-from fastapi_user_limiter.limiter import rate_limiter
+from graphai.api.common.rate_limiter import rate_limiter
 
 from graphai.api.common.schemas import TaskIDResponse, FileRequest
 from graphai.api.video.schemas import (

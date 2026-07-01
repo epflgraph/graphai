@@ -27,7 +27,7 @@ case "${ROLE}" in
       main:app
       --host "${API_HOST:-0.0.0.0}"
       --port "${API_PORT:-28800}"
-      --workers "${API_WORKERS:-1}"
+      --workers "${API_WORKERS:-4}"
     )
 
     if [[ "${API_PROXY_HEADERS:-0}" == "1" ]]; then

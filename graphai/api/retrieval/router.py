@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Security, Depends
 from typing import Annotated
-from fastapi_user_limiter.limiter import rate_limiter
+from graphai.api.common.rate_limiter import rate_limiter
 
 from graphai.api.auth.router import get_current_active_user, get_user_for_rate_limiter
 from graphai.api.auth.auth_utils import (
