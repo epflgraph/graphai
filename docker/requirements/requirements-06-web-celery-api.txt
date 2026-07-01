@@ -1,4 +1,5 @@
 loguru
+structlog
 fastapi>=0.95.0
 gunicorn
 uvicorn
