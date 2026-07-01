@@ -2,7 +2,10 @@ import RAKE
 # import nltk
 from rake_nltk import Rake
 
+from graphai.core.common.logging import get_logger
 from graphai.core.utils.text.clean import normalize
+
+logger = get_logger('graphai.core.text.keywords')
 
 # Download nltk resources
 # nltk.download('stopwords', quiet=True)
@@ -166,6 +169,7 @@ def extract_keywords(text, use_nltk=False):
     """
 
     text = normalize(text)
+    logger.info('🔑 Extracting keywords from normalized text', text_length=len(text), use_nltk=use_nltk)
 
     # Extract keywords from text. We perform two extractions:
     #   * One with the full text.
@@ -181,5 +185,7 @@ def extract_keywords(text, use_nltk=False):
     # If no keywords are extracted at all and text is short, use it as a single keyword
     if not keyword_list and 1 < len(text) < 50:
         keyword_list = [text]
+        logger.info('📝 Using full short text as single keyword', text_length=len(text))
 
+    logger.info('✅ Keyword extraction complete', num_keywords=len(keyword_list))
     return keyword_list

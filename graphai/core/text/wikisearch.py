@@ -1,5 +1,6 @@
 import json
 import requests
+import time
 from ssl import create_default_context
 
 import pandas as pd
@@ -205,6 +206,7 @@ def search_elasticsearch_http(
     timeout=DEFAULT_ES_TIMEOUT,
     timeout_retries=DEFAULT_ES_TIMEOUT_RETRIES,
 ):
+    start = time.perf_counter()
     logger.info(
         '⚡️ Searching Elasticsearch over HTTP',
         text=text,
@@ -248,6 +250,7 @@ def search_elasticsearch_http(
                 text=text,
                 num_hits=len(hits),
                 index=index,
+                duration_ms=int((time.perf_counter() - start) * 1000),
             )
             return [
                 {
@@ -363,8 +366,8 @@ def search_elasticsearch(text, es, limit=10, timeout=DEFAULT_ES_TIMEOUT, timeout
     Returns:
         list: A list of dictionaries with keys 'concept_id', 'concept_name' and 'score' containing the top matches for the search.
     """
-    
-    
+
+    start = time.perf_counter()
     logger.info(
         '⚡️ Searching Elasticsearch cluster',
         text=text,
@@ -397,6 +400,7 @@ def search_elasticsearch(text, es, limit=10, timeout=DEFAULT_ES_TIMEOUT, timeout
                     text=text,
                     num_hits=len(hits),
                     index=getattr(es, 'index', '<unknown>'),
+                    duration_ms=int((time.perf_counter() - start) * 1000),
                 )
 
                 # Return as list of dictionaries with keys 'concept_id', 'concept_name' and 'score'
@@ -488,10 +492,12 @@ def wikisearch(
         starting with 1. The search score is the elasticsearch score for method "es-score" or 1 - (searchrank - 1)/n
         for the other methods. Default: 'es-base'. Fallback: 'wikipedia-api'.
     """
+    start = time.perf_counter()
+    total_keyword_sets = len(keywords_list)
     logger.info(
         '🚀 Starting wikisearch',
         method=method,
-        num_keyword_sets=len(keywords_list),
+        num_keyword_sets=total_keyword_sets,
         fraction=fraction,
     )
 
@@ -499,6 +505,7 @@ def wikisearch(
     begin = int(fraction[0] * len(keywords_list))
     end = int(fraction[1] * len(keywords_list))
     keywords_list = keywords_list[begin:end]
+    shard_keyword_sets = len(keywords_list)
 
     # Normalise timeout values once per call.
     es_timeout = _safe_timeout(es_timeout, DEFAULT_ES_TIMEOUT)
@@ -507,6 +514,7 @@ def wikisearch(
 
     # Iterate over all keyword sets and request the results
     all_results = pd.DataFrame()
+    processed_sets = 0
     for keywords in keywords_list:
         if method == 'wikipedia-api':
             logger.warning('⚠️ Using Wikipedia API fallback', keywords=keywords)
@@ -566,6 +574,7 @@ def wikisearch(
 
         # Append results
         all_results = pd.concat([all_results, results], ignore_index=True)
+        processed_sets += 1
 
         logger.debug(
             'Appended results for keywords',
@@ -574,6 +583,16 @@ def wikisearch(
             batch_results=len(results),
         )
 
+    logger.info(
+        '✅ Wikisearch complete',
+        method=method,
+        fraction=fraction,
+        total_keyword_sets=total_keyword_sets,
+        shard_keyword_sets=shard_keyword_sets,
+        processed_sets=processed_sets,
+        total_results=len(all_results),
+        duration_ms=int((time.perf_counter() - start) * 1000),
+    )
     return all_results
 
 

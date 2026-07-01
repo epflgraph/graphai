@@ -1,3 +1,5 @@
+import time
+
 import pandas as pd
 
 from celery import shared_task
@@ -76,7 +78,7 @@ def text_init_task(self):
     Celery task that spawns and populates graph and ontology objects so that they are held in memory ready for requests to arrive.
     """
 
-    # This task initialises the text celery worker by loading into memory the graph and ontology tables
+    start = time.perf_counter()
     logger.info('🚀 Start text_init task')
 
     es_config = config['elasticsearch']
@@ -101,18 +103,45 @@ def text_init_task(self):
     else:
         logger.info('⏭️ Skipping preloading for text endpoints')
 
-    logger.info('✅ Concepts graph and ontology tables loaded')
+    logger.info(
+        '✅ Concepts graph and ontology tables loaded',
+        duration_ms=int((time.perf_counter() - start) * 1000),
+    )
 
     return True
 
 
 @shared_task(bind=True, name='text.extract_keywords')
 def extract_keywords_task(self, raw_text, **kwargs):
-    return extract_keywords(raw_text, **kwargs)
+    start = time.perf_counter()
+    logger.info(
+        '🔑 Extracting keywords',
+        task_id=self.request.id,
+        raw_text_length=len(raw_text) if raw_text else 0,
+    )
+    keywords = extract_keywords(raw_text, **kwargs)
+    logger.info(
+        '✅ Keywords extracted',
+        task_id=self.request.id,
+        num_keywords=len(keywords),
+        duration_ms=int((time.perf_counter() - start) * 1000),
+    )
+    return keywords
 
 
 @shared_task(bind=True, name='text.wikisearch', es=es, soft_time_limit=300000, time_limit=300000)
 def wikisearch_task(self, keywords_list, **kwargs):
+    start = time.perf_counter()
+    fraction = kwargs.get('fraction')
+    method = kwargs.get('method', 'es-base')
+    logger.info(
+        '🔎 Searching concepts for keyword shard',
+        task_id=self.request.id,
+        method=method,
+        fraction=fraction,
+        keywords_count=len(keywords_list) if keywords_list else 0,
+    )
+
     es_timeout = config['elasticsearch'].get('request_timeout', 300000)
     es_timeout_retries = config['elasticsearch'].get('request_timeout_retries', 300000)
     wikipedia_timeout = config['elasticsearch'].get('wikipedia_timeout', 300000)
@@ -126,22 +155,41 @@ def wikisearch_task(self, keywords_list, **kwargs):
             wikipedia_timeout=wikipedia_timeout,
             **kwargs,
         )
-        return DataFrameResult(df.to_dict(orient='records'), columns=list(df.columns))
+        result = DataFrameResult(df.to_dict(orient='records'), columns=list(df.columns))
+        logger.info(
+            '✅ Concept shard search completed',
+            task_id=self.request.id,
+            method=method,
+            fraction=fraction,
+            num_results=len(result),
+            duration_ms=int((time.perf_counter() - start) * 1000),
+        )
+        return result
     except SoftTimeLimitExceeded:
         logger.warning(
             '⚠️ text.wikisearch exceeded soft time limit; returning empty result for this shard',
-            keywords_count=len(keywords_list),
+            task_id=self.request.id,
+            fraction=fraction,
+            keywords_count=len(keywords_list) if keywords_list else 0,
         )
         return DataFrameResult([], columns=['keywords', 'concept_id', 'concept_name', 'searchrank', 'search_score'])
 
 
 @shared_task(bind=True, name='text.wiki_search', es=es, soft_time_limit=300000, time_limit=300000)
 def wiki_search_task(self, search_term, limit=10):
+    start = time.perf_counter()
+    logger.info(
+        '🔍 Searching Elasticsearch for term',
+        task_id=self.request.id,
+        search_term=search_term,
+        limit=limit,
+    )
+
     es_timeout = config['elasticsearch'].get('request_timeout', 300000)
     es_timeout_retries = config['elasticsearch'].get('request_timeout_retries', 300000)
 
     try:
-        return search_elasticsearch_http(
+        result = search_elasticsearch_http(
             search_term,
             config['elasticsearch'],
             index=config['elasticsearch'].get('concept_detection_index', 'concepts_detection'),
@@ -149,9 +197,18 @@ def wiki_search_task(self, search_term, limit=10):
             timeout=es_timeout,
             timeout_retries=es_timeout_retries,
         )
+        logger.info(
+            '✅ Elasticsearch term search completed',
+            task_id=self.request.id,
+            search_term=search_term,
+            num_results=len(result),
+            duration_ms=int((time.perf_counter() - start) * 1000),
+        )
+        return result
     except SoftTimeLimitExceeded:
         logger.warning(
             '⚠️ text.wiki_search exceeded soft time limit; returning empty result',
+            task_id=self.request.id,
             search_term=search_term,
         )
         return []
@@ -159,25 +216,90 @@ def wiki_search_task(self, search_term, limit=10):
 
 @shared_task(bind=True, name='text.compute_scores', graph=graph)
 def compute_scores_task(self, results, **kwargs):
+    start = time.perf_counter()
+    logger.info(
+        '🧮 Computing concept scores',
+        task_id=self.request.id,
+        input_shards=len(results),
+        restrict_to_ontology=kwargs.get('restrict_to_ontology'),
+        score_smoothing=kwargs.get('score_smoothing'),
+        aggregation_coef=kwargs.get('aggregation_coef'),
+        filtering_threshold=kwargs.get('filtering_threshold'),
+        refresh_scores=kwargs.get('refresh_scores'),
+    )
+
     # Unwrap DataFrameResult wrappers (or plain DataFrames for backward compat).
     dataframes = [
         r.to_dataframe() if isinstance(r, DataFrameResult) else r
         for r in results
     ]
-    df = compute_scores(pd.concat(dataframes, ignore_index=True), graph=self.graph, **kwargs)
-    return DataFrameResult(df.to_dict(orient='records'), columns=list(df.columns))
+    combined = pd.concat(dataframes, ignore_index=True)
+    logger.info(
+        '📊 Aggregated shard results',
+        task_id=self.request.id,
+        input_rows=len(combined),
+    )
+
+    df = compute_scores(combined, graph=self.graph, **kwargs)
+    result = DataFrameResult(df.to_dict(orient='records'), columns=list(df.columns))
+    logger.info(
+        '✅ Concept scores computed',
+        task_id=self.request.id,
+        num_results=len(result),
+        duration_ms=int((time.perf_counter() - start) * 1000),
+    )
+    return result
 
 
 @shared_task(bind=True, name='text.draw_ontology', graph=graph)
 def draw_ontology_task(self, results, **kwargs):
-    return draw_ontology(results, graph=self.graph, **kwargs)
+    start = time.perf_counter()
+    level = kwargs.get('level', 2)
+    logger.info(
+        '🎨 Drawing ontology SVG',
+        task_id=self.request.id,
+        num_results=len(results),
+        level=level,
+    )
+    svg = draw_ontology(results, graph=self.graph, **kwargs)
+    logger.info(
+        '✅ Ontology SVG drawn',
+        task_id=self.request.id,
+        svg_size_bytes=len(svg) if isinstance(svg, (str, bytes)) else None,
+        duration_ms=int((time.perf_counter() - start) * 1000),
+    )
+    return svg
 
 
 @shared_task(bind=True, name='text.draw_graph', graph=graph)
 def draw_graph_task(self, results, **kwargs):
-    return draw_graph(results, graph=self.graph, **kwargs)
+    start = time.perf_counter()
+    logger.info(
+        '🕸️ Drawing graph SVG',
+        task_id=self.request.id,
+        num_results=len(results),
+        concept_score_threshold=kwargs.get('concept_score_threshold'),
+        edge_threshold=kwargs.get('edge_threshold'),
+        min_component_size=kwargs.get('min_component_size'),
+    )
+    svg = draw_graph(results, graph=self.graph, **kwargs)
+    logger.info(
+        '✅ Graph SVG drawn',
+        task_id=self.request.id,
+        svg_size_bytes=len(svg) if isinstance(svg, (str, bytes)) else None,
+        duration_ms=int((time.perf_counter() - start) * 1000),
+    )
+    return svg
 
 
 @shared_task(bind=True, name='text.generate_exercise_task')
 def generate_exercise_task(self, *args, **kwargs):
-    return generate_exercise(*args, **kwargs)
+    start = time.perf_counter()
+    logger.info('🎓 Generating exercise', task_id=self.request.id)
+    exercise = generate_exercise(*args, **kwargs)
+    logger.info(
+        '✅ Exercise generated',
+        task_id=self.request.id,
+        duration_ms=int((time.perf_counter() - start) * 1000),
+    )
+    return exercise

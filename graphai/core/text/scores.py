@@ -1,8 +1,13 @@
+import time
+
 import pandas as pd
 
 import Levenshtein
 
+from graphai.core.common.logging import get_logger
 from graphai.core.text.embeddings import compute_embedding_scores
+
+logger = get_logger('graphai.core.text.scores')
 
 
 def compute_levenshtein_score(results):
@@ -267,8 +272,20 @@ def compute_scores(
         including a 'mixed_score' with a weighted average of the other scores.
     """
 
+    start = time.perf_counter()
+    logger.info(
+        '🧮 Starting score computation pipeline',
+        input_rows=len(results),
+        restrict_to_ontology=restrict_to_ontology,
+        score_smoothing=score_smoothing,
+        aggregation_coef=aggregation_coef,
+        filtering_threshold=filtering_threshold,
+        refresh_scores=refresh_scores,
+    )
+
     # Return if there are no results
     if len(results) == 0:
+        logger.info('⏭️ Empty input; skipping score computation')
         return results
 
     # Parse concept id type from int to string
@@ -276,46 +293,74 @@ def compute_scores(
 
     # Restrict to ontology if needed
     if restrict_to_ontology:
+        before = len(results)
         results = results[results['concept_id'].isin(graph.get_ontology_concepts())]
+        logger.info(
+            '📚 Restricted results to ontology',
+            before_rows=before,
+            after_rows=len(results),
+        )
 
     # Compute levenshtein score
     results = compute_levenshtein_score(results)
+    logger.info('📏 Computed Levenshtein scores', rows=len(results))
 
     # Compute embeddings (local and global) scores
     results = compute_embedding_scores(results)
+    logger.info('🔢 Computed embedding scores', rows=len(results))
 
     # Compute graph score
     results = graph.add_graph_score(results, smoothing=score_smoothing)
+    logger.info('🕸️ Computed graph scores', rows=len(results))
 
     # Compute ontology (local and global) scores
     results = graph.add_ontology_scores(results, smoothing=score_smoothing)
+    logger.info('📖 Computed ontology scores', rows=len(results))
 
     # Compute keywords scores
     results = compute_keywords_scores(results, smoothing=score_smoothing)
+    logger.info('🔑 Computed keyword scores', rows=len(results))
 
     # Return if there are no results
     if len(results) == 0:
+        logger.warning('⚠️ No results left after per-keyword scoring')
         return results
 
     # Aggregate results over keywords to obtain one row per concept
     aggregated_results = aggregate_results(results, coef=aggregation_coef)
+    logger.info('📊 Aggregated results over keywords', rows=len(aggregated_results))
 
     # Compute mixed score
     aggregated_results = compute_mixed_score(aggregated_results)
+    logger.info('🧪 Computed mixed score', rows=len(aggregated_results))
 
     # Filter results
+    before_filter = len(aggregated_results)
     aggregated_results = filter_results(aggregated_results, epsilon=filtering_threshold)
+    logger.info(
+        '🔍 Filtered results by threshold',
+        before_rows=before_filter,
+        after_rows=len(aggregated_results),
+        threshold=filtering_threshold,
+    )
 
     # Return if there are no results
     if len(aggregated_results) == 0:
+        logger.info('⏭️ No results survived filtering; returning empty DataFrame')
         return pd.DataFrame()
 
     # If scores don't need to be recomputed, compute mixed score and return
     if not refresh_scores:
+        logger.info(
+            '✅ Score computation complete',
+            output_rows=len(aggregated_results),
+            duration_ms=int((time.perf_counter() - start) * 1000),
+        )
         return aggregated_results
 
     # To recompute scores, we keep only the relevant unaggregated results that survive the aggregation and filtering,
     # we keep only the initial columns, as the rest need to be recomputed, and call the function again.
+    logger.info('🔄 Refreshing scores for surviving concepts', num_concepts=len(aggregated_results))
     results = pd.merge(results, aggregated_results['concept_id'], how='inner', on='concept_id')
     results = results[['keywords', 'concept_id', 'concept_name', 'search_score']]
 
