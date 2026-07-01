@@ -190,7 +190,9 @@ def test__text_wiki_search__integration(fixture_app):
         {'concept_id': 5786179, 'concept_name': 'Acoustic wave', 'score': 42.0},
         {'concept_id': 33516, 'concept_name': 'Wave', 'score': 21.0},
     ]
-    mock_wiki_search.assert_called_once_with('acoustic wave fields', 2)
+    mock_wiki_search.assert_called_once()
+    assert mock_wiki_search.call_args.args == ('acoustic wave fields', 2)
+    assert 'request_id' in mock_wiki_search.call_args.kwargs
 
 
 def test__text_wiki_search__integration__es_error_returns_503(fixture_app):

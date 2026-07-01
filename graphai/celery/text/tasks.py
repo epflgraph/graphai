@@ -1,6 +1,8 @@
 import time
 
 import pandas as pd
+import structlog
+from structlog.contextvars import bind_contextvars, clear_contextvars
 
 from celery import shared_task
 from celery.exceptions import SoftTimeLimitExceeded
@@ -11,7 +13,16 @@ from graphai.core.common.config import config
 from graphai.core.common.common_utils import strtobool
 from graphai.core.common.logging import get_logger
 
+from typing import Optional
+
 logger = get_logger('graphai.celery.text')
+
+
+def _bind_request_id(request_id: Optional[str]) -> None:
+    """Clear stale contextvars and bind the API request id for this task."""
+    clear_contextvars()
+    if request_id:
+        bind_contextvars(request_id=request_id)
 
 
 class DataFrameResult:
@@ -73,11 +84,12 @@ es = ESConceptDetection(
 
 
 @shared_task(bind=True, name='text.init', graph=graph)
-def text_init_task(self):
+def text_init_task(self, request_id: Optional[str] = None):
     """
     Celery task that spawns and populates graph and ontology objects so that they are held in memory ready for requests to arrive.
     """
 
+    _bind_request_id(request_id)
     start = time.perf_counter()
     logger.info('🚀 Start text_init task')
 
@@ -112,7 +124,8 @@ def text_init_task(self):
 
 
 @shared_task(bind=True, name='text.extract_keywords')
-def extract_keywords_task(self, raw_text, **kwargs):
+def extract_keywords_task(self, raw_text, request_id: Optional[str] = None, **kwargs):
+    _bind_request_id(request_id)
     start = time.perf_counter()
     logger.info(
         '🔑 Extracting keywords',
@@ -130,7 +143,8 @@ def extract_keywords_task(self, raw_text, **kwargs):
 
 
 @shared_task(bind=True, name='text.wikisearch', es=es, soft_time_limit=300000, time_limit=300000)
-def wikisearch_task(self, keywords_list, **kwargs):
+def wikisearch_task(self, keywords_list, request_id: Optional[str] = None, **kwargs):
+    _bind_request_id(request_id)
     start = time.perf_counter()
     fraction = kwargs.get('fraction')
     method = kwargs.get('method', 'es-base')
@@ -176,7 +190,8 @@ def wikisearch_task(self, keywords_list, **kwargs):
 
 
 @shared_task(bind=True, name='text.wiki_search', es=es, soft_time_limit=300000, time_limit=300000)
-def wiki_search_task(self, search_term, limit=10):
+def wiki_search_task(self, search_term, limit=10, request_id: Optional[str] = None):
+    _bind_request_id(request_id)
     start = time.perf_counter()
     logger.info(
         '🔍 Searching Elasticsearch for term',
@@ -215,7 +230,8 @@ def wiki_search_task(self, search_term, limit=10):
 
 
 @shared_task(bind=True, name='text.compute_scores', graph=graph)
-def compute_scores_task(self, results, **kwargs):
+def compute_scores_task(self, results, request_id: Optional[str] = None, **kwargs):
+    _bind_request_id(request_id)
     start = time.perf_counter()
     logger.info(
         '🧮 Computing concept scores',
@@ -252,7 +268,8 @@ def compute_scores_task(self, results, **kwargs):
 
 
 @shared_task(bind=True, name='text.draw_ontology', graph=graph)
-def draw_ontology_task(self, results, **kwargs):
+def draw_ontology_task(self, results, request_id: Optional[str] = None, **kwargs):
+    _bind_request_id(request_id)
     start = time.perf_counter()
     level = kwargs.get('level', 2)
     logger.info(
@@ -272,7 +289,8 @@ def draw_ontology_task(self, results, **kwargs):
 
 
 @shared_task(bind=True, name='text.draw_graph', graph=graph)
-def draw_graph_task(self, results, **kwargs):
+def draw_graph_task(self, results, request_id: Optional[str] = None, **kwargs):
+    _bind_request_id(request_id)
     start = time.perf_counter()
     logger.info(
         '🕸️ Drawing graph SVG',
@@ -293,7 +311,8 @@ def draw_graph_task(self, results, **kwargs):
 
 
 @shared_task(bind=True, name='text.generate_exercise_task')
-def generate_exercise_task(self, *args, **kwargs):
+def generate_exercise_task(self, *args, request_id: Optional[str] = None, **kwargs):
+    _bind_request_id(request_id)
     start = time.perf_counter()
     logger.info('🎓 Generating exercise', task_id=self.request.id)
     exercise = generate_exercise(*args, **kwargs)

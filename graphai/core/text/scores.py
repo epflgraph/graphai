@@ -10,6 +10,20 @@ from graphai.core.text.embeddings import compute_embedding_scores
 logger = get_logger('graphai.core.text.scores')
 
 
+def _format_top_concepts(results, max_items=10):
+    """Format the top-scored concepts as a compact one-liner for logs."""
+    if results.empty or 'mixed_score' not in results.columns:
+        return []
+    top = results.sort_values('mixed_score', ascending=False).head(max_items)
+    formatted = [
+        f"{row.get('concept_id', '?')}:{row.get('concept_name', '?')}={row['mixed_score']:.3f}"
+        for _, row in top.iterrows()
+    ]
+    if len(results) > max_items:
+        formatted.append(f'... ({len(results) - max_items} more)')
+    return formatted
+
+
 def compute_levenshtein_score(results):
     # Compute levenshtein score
     results['levenshtein_score'] = results.apply(
@@ -251,6 +265,7 @@ def compute_scores(
     aggregation_coef=0.5,
     filtering_threshold=0.15,
     refresh_scores=True,
+    pass_number=1,
 ):
     """
     Gathers wikisearch results, computes several scores for them, and finally aggregates and filters them.
@@ -275,6 +290,7 @@ def compute_scores(
     start = time.perf_counter()
     logger.info(
         '🧮 Starting score computation pipeline',
+        pass_number=pass_number,
         input_rows=len(results),
         restrict_to_ontology=restrict_to_ontology,
         score_smoothing=score_smoothing,
@@ -353,7 +369,9 @@ def compute_scores(
     if not refresh_scores:
         logger.info(
             '✅ Score computation complete',
+            pass_number=pass_number,
             output_rows=len(aggregated_results),
+            top_concepts=_format_top_concepts(aggregated_results),
             duration_ms=int((time.perf_counter() - start) * 1000),
         )
         return aggregated_results
@@ -372,6 +390,7 @@ def compute_scores(
         aggregation_coef=aggregation_coef,
         filtering_threshold=0,
         refresh_scores=False,
+        pass_number=pass_number + 1,
     )
 
 

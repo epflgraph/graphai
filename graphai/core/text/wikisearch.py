@@ -26,6 +26,19 @@ from graphai.core.common.logging import get_logger
 logger = get_logger('graphai.core.text.wikisearch')
 
 
+def _format_concept_hits(hits, max_hits=5):
+    """Format search hits as a compact one-liner for logs."""
+    if not hits:
+        return []
+    formatted = [
+        f"{hit.get('concept_id', '?')}:{hit.get('concept_name', '?')}"
+        for hit in hits[:max_hits]
+    ]
+    if len(hits) > max_hits:
+        formatted.append(f'... ({len(hits) - max_hits} more)')
+    return formatted
+
+
 
 DEFAULT_WIKIPEDIA_TIMEOUT = 300000
 DEFAULT_ES_TIMEOUT = 300000
@@ -540,6 +553,7 @@ def wikisearch(
                     '✅ Found results for keywords',
                     keywords=keywords,
                     num_results=len(results_list),
+                    top_concepts=_format_concept_hits(results_list),
                 )
 
         # Ignore set of keywords if no pages are found

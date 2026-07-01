@@ -7,6 +7,13 @@ from graphai.core.utils.text.clean import normalize
 
 logger = get_logger('graphai.core.text.keywords')
 
+
+def _truncate_list(items, max_items=10):
+    """Return a list truncated for concise logging, with a count hint if needed."""
+    if len(items) <= max_items:
+        return list(items)
+    return list(items[:max_items]) + [f'... ({len(items) - max_items} more)']
+
 # Download nltk resources
 # nltk.download('stopwords', quiet=True)
 
@@ -187,5 +194,9 @@ def extract_keywords(text, use_nltk=False):
         keyword_list = [text]
         logger.info('📝 Using full short text as single keyword', text_length=len(text))
 
-    logger.info('✅ Keyword extraction complete', num_keywords=len(keyword_list))
+    logger.info(
+        '✅ Keyword extraction complete',
+        num_keywords=len(keyword_list),
+        keywords=_truncate_list(keyword_list, 10),
+    )
     return keyword_list

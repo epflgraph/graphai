@@ -61,7 +61,7 @@ async def keywords(
         return []
 
     log.info('📝 Extracting keywords', raw_text_length=len(data.raw_text))
-    result = jobs.keywords(data.raw_text, use_nltk)
+    result = jobs.keywords(data.raw_text, use_nltk, request_id=_request_id(request))
     log.info(
         '✅ Keywords extracted',
         num_keywords=len(result),
@@ -96,7 +96,7 @@ async def wiki_search(
 
     log.info('🔍 Searching Wikipedia concept index')
     try:
-        result = jobs.wiki_search(search_term, limit)
+        result = jobs.wiki_search(search_term, limit, request_id=_request_id(request))
         log.info(
             '✅ Wiki search completed',
             num_results=len(result),
@@ -186,6 +186,7 @@ async def wikify(
                 aggregation_coef,
                 filtering_threshold,
                 refresh_scores,
+                request_id=_request_id(request),
             )
             log.info(
                 '✅ Wikify from raw text completed',
@@ -231,6 +232,7 @@ async def wikify(
                 aggregation_coef,
                 filtering_threshold,
                 refresh_scores,
+                request_id=_request_id(request),
             )
             log.info(
                 '✅ Wikify from keywords completed',
@@ -280,7 +282,7 @@ async def wikify_ontology_svg(
         log.info('⚙️ Invalid level provided; defaulting to 2')
 
     log.info('🎨 Generating ontology SVG')
-    jobs.wikify_ontology_svg(results, level)
+    jobs.wikify_ontology_svg(results, level, request_id=_request_id(request))
     log.info('✅ Ontology SVG generated', duration_ms=_duration_ms(start))
 
     # Return svg file
@@ -314,7 +316,7 @@ async def wikify_graph_svg(
     results = [vars(result) for result in results]
 
     log.info('🕸️ Generating graph SVG')
-    jobs.wikify_graph_svg(results, concept_score_threshold, edge_threshold, min_component_size)
+    jobs.wikify_graph_svg(results, concept_score_threshold, edge_threshold, min_component_size, request_id=_request_id(request))
     log.info('✅ Graph SVG generated', duration_ms=_duration_ms(start))
 
     # Return svg file
@@ -334,6 +336,6 @@ async def generate_exercise(request: Request, data: schemas.GenerateExerciseRequ
         request_id=_request_id(request),
     )
     log.info('🎓 Generating exercise')
-    result = jobs.generate_exercise(data)
+    result = jobs.generate_exercise(data, request_id=_request_id(request))
     log.info('✅ Exercise generated', duration_ms=_duration_ms(start))
     return result
