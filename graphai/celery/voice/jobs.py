@@ -29,11 +29,11 @@ def get_audio_language_detection_task_chain(token, force, n_divs=15, len_segment
 
 
 def fingerprint_lookup_job(token):
-    return direct_lookup_generic_job(cache_lookup_audio_fingerprint_task, token, False, DEFAULT_TIMEOUT)
+    return direct_lookup_generic_job(cache_lookup_audio_fingerprint_task, token, return_results=False, timeout=DEFAULT_TIMEOUT)
 
 
 def language_lookup_job(token, return_results=False):
-    return direct_lookup_generic_job(cache_lookup_audio_language_task, token, return_results, DEFAULT_TIMEOUT)
+    return direct_lookup_generic_job(cache_lookup_audio_language_task, token, return_results=return_results, timeout=DEFAULT_TIMEOUT)
 
 
 def fingerprint_job(token, force):
@@ -80,7 +80,7 @@ def transcribe_job(token, force, lang=None, strict_silence=False):
     #########################
     if not force:
         direct_lookup_task_id = direct_lookup_generic_job(cache_lookup_audio_transcript_task, token,
-                                                          False, DEFAULT_TRANSCRIPT_TIMEOUT)
+                                                          return_results=False, timeout=DEFAULT_TRANSCRIPT_TIMEOUT)
         if direct_lookup_task_id is not None:
             return direct_lookup_task_id
 

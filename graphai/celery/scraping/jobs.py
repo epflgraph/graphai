@@ -21,7 +21,7 @@ from graphai.core.scraping.scraping import create_base_url_token
 
 
 def sublink_lookup_job(token, return_results=False):
-    return direct_lookup_generic_job(cache_lookup_get_sublinks_task, token, return_results, DEFAULT_TIMEOUT)
+    return direct_lookup_generic_job(cache_lookup_get_sublinks_task, token, return_results=return_results, timeout=DEFAULT_TIMEOUT)
 
 
 def extract_sublinks_job(url, force=False):
@@ -53,8 +53,9 @@ def extract_content_job(url, force=False, headers=False, long_patterns=False):
     #################################
     if not force:
         direct_lookup_task_id = direct_lookup_generic_job(cache_lookup_process_all_sublinks_task,
-                                                          token, False, DEFAULT_TIMEOUT,
-                                                          headers, long_patterns)
+                                                          token,
+                                                          headers, long_patterns,
+                                                          return_results=False, timeout=DEFAULT_TIMEOUT)
         if direct_lookup_task_id is not None:
             return direct_lookup_task_id
     #################################

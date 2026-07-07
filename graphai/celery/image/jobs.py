@@ -32,8 +32,8 @@ def retrieve_image_from_url_job(url, force=False, no_cache=False):
         direct_lookup_task_id = direct_lookup_generic_job(
             cache_lookup_retrieve_image_from_url_task,
             url,
-            False,
-            DEFAULT_TIMEOUT
+            return_results=False,
+            timeout=DEFAULT_TIMEOUT
         )
         if direct_lookup_task_id is not None:
             return direct_lookup_task_id
@@ -75,8 +75,8 @@ def upload_image_from_file_job(
         direct_lookup_task_id = direct_lookup_generic_job(
             cache_lookup_retrieve_image_from_url_task,
             effective_url,
-            False,
-            DEFAULT_TIMEOUT,
+            return_results=False,
+            timeout=DEFAULT_TIMEOUT,
         )
 
         if direct_lookup_task_id is not None:
@@ -102,7 +102,7 @@ def upload_image_from_file_job(
 
 
 def fingerprint_lookup_job(token):
-    return direct_lookup_generic_job(cache_lookup_slide_fingerprint_task, token, False, DEFAULT_TIMEOUT)
+    return direct_lookup_generic_job(cache_lookup_slide_fingerprint_task, token, return_results=False, timeout=DEFAULT_TIMEOUT)
 
 
 def fingerprint_job(token, force):
@@ -143,9 +143,9 @@ def ocr_job(
         direct_lookup_task_id = direct_lookup_generic_job(
             cache_lookup_extract_slide_text_task,
             token,
-            False,
-            DEFAULT_TIMEOUT,
             method,
+            return_results=False,
+            timeout=DEFAULT_TIMEOUT,
         )
         if direct_lookup_task_id is not None:
             return direct_lookup_task_id

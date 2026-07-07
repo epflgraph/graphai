@@ -1,7 +1,7 @@
 DEFAULT_TIMEOUT = 40
 
 
-def direct_lookup_generic_job(task_fn, token, return_results=False, timeout=DEFAULT_TIMEOUT, request_id=None, *args):
+def direct_lookup_generic_job(task_fn, token, *args, return_results=False, timeout=DEFAULT_TIMEOUT, request_id=None):
     """
     Launches a direct cache lookup job
     Args:

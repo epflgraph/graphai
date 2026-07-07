@@ -32,7 +32,7 @@ def get_translation_text_fingerprint_chain_list(token, text, src, tgt):
 
 def fingerprint_lookup_job(token, return_results=False):
     return direct_lookup_generic_job(cache_lookup_translation_text_fingerprint_task, token,
-                                     return_results, DEFAULT_TIMEOUT)
+                                     return_results=return_results, timeout=DEFAULT_TIMEOUT)
 
 
 def fingerprint_compute_job(token, text, src, tgt, asynchronous=True):
@@ -78,8 +78,8 @@ def translation_job(text, src, tgt, force, no_cache=False,
     ##########################
     if not force and not no_cache:
         direct_lookup_task_id = direct_lookup_generic_job(cache_lookup_translate_text_task, token,
-                                                          False, DEFAULT_TIMEOUT,
-                                                          return_list)
+                                                          return_list,
+                                                          return_results=False, timeout=DEFAULT_TIMEOUT)
         if direct_lookup_task_id is not None:
             return direct_lookup_task_id
 
@@ -99,8 +99,9 @@ def translation_job(text, src, tgt, force, no_cache=False,
         # Fingerprint-based lookup
         if not force and current_fingerprint is not None:
             fp_based_lookup_task_id = direct_lookup_generic_job(cache_lookup_translation_text_using_fingerprint_task,
-                                                                token, False, DEFAULT_TIMEOUT,
-                                                                current_fingerprint, src, tgt, return_list)
+                                                                token,
+                                                                current_fingerprint, src, tgt, return_list,
+                                                                return_results=False, timeout=DEFAULT_TIMEOUT)
             if fp_based_lookup_task_id is not None:
                 return fp_based_lookup_task_id
     # If we're here, both lookups have failed, so it's time for the actual computation

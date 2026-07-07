@@ -169,7 +169,7 @@ def retrieve_url_job(url, force=False, is_playlist=False, request_id=None):
     if not force:
         log.debug('🔍 Checking cache for video URL', target_queue=_task_queue(cache_lookup_retrieve_file_from_url_task))
         direct_lookup_task_id = direct_lookup_generic_job(
-            cache_lookup_retrieve_file_from_url_task, url, False, DEFAULT_TIMEOUT, request_id=request_id
+            cache_lookup_retrieve_file_from_url_task, url, return_results=False, timeout=DEFAULT_TIMEOUT, request_id=request_id
         )
         if direct_lookup_task_id is not None:
             log.info('✅ Video URL cache hit', cache_task_id=direct_lookup_task_id, target_queue=_task_queue(cache_lookup_retrieve_file_from_url_task))
@@ -195,7 +195,7 @@ def retrieve_url_job(url, force=False, is_playlist=False, request_id=None):
 
 def fingerprint_lookup_job(token, request_id=None):
     return direct_lookup_generic_job(
-        cache_lookup_fingerprint_video_task, token, False, DEFAULT_TIMEOUT, request_id=request_id
+        cache_lookup_fingerprint_video_task, token, return_results=False, timeout=DEFAULT_TIMEOUT, request_id=request_id
     )
 
 
@@ -237,7 +237,7 @@ def extract_audio_job(token, force=False, recalculate_cached=False, request_id=N
     if not force and not recalculate_cached:
         log.debug('🔍 Checking cache for audio extraction', target_queue=_task_queue(cache_lookup_extract_audio_task))
         direct_lookup_task_id = direct_lookup_generic_job(
-            cache_lookup_extract_audio_task, token, False, DEFAULT_TIMEOUT, request_id=request_id
+            cache_lookup_extract_audio_task, token, return_results=False, timeout=DEFAULT_TIMEOUT, request_id=request_id
         )
         if direct_lookup_task_id is not None:
             log.info('✅ Audio extraction cache hit', cache_task_id=direct_lookup_task_id)
@@ -282,7 +282,7 @@ def detect_slides_job(token, language, force=False, recalculate_cached=False, re
     if not force and not recalculate_cached:
         log.debug('🔍 Checking cache for slide detection', target_queue=_task_queue(cache_lookup_detect_slides_task))
         direct_lookup_task_id = direct_lookup_generic_job(
-            cache_lookup_detect_slides_task, token, False, DEFAULT_SLIDE_TIMEOUT, request_id=request_id
+            cache_lookup_detect_slides_task, token, return_results=False, timeout=DEFAULT_SLIDE_TIMEOUT, request_id=request_id
         )
         if direct_lookup_task_id is not None:
             log.info('✅ Slide detection cache hit', cache_task_id=direct_lookup_task_id)
