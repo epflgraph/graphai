@@ -10,14 +10,14 @@ logger = get_logger('graphai.celery.text.jobs')
 def keywords(raw_text, use_nltk, request_id=None):
     job = chain(tasks.extract_keywords_task.s(raw_text, use_nltk=use_nltk, request_id=request_id))
     async_result = job.apply_async(priority=10)
-    logger.info('🔑 Submitted keywords job', task_id=async_result.id, request_id=request_id, use_nltk=use_nltk)
+    logger.debug('🔑 Submitted keywords job', task_id=async_result.id, request_id=request_id, use_nltk=use_nltk)
     return async_result.get(timeout=300000)
 
 
 def wiki_search(search_term, limit, request_id=None):
     job = chain(tasks.wiki_search_task.s(search_term, limit=limit, request_id=request_id))
     async_result = job.apply_async(priority=10)
-    logger.info('🔍 Submitted wiki_search job', task_id=async_result.id, request_id=request_id, search_term=search_term, limit=limit)
+    logger.debug('🔍 Submitted wiki_search job', task_id=async_result.id, request_id=request_id, search_term=search_term, limit=limit)
     return async_result.get(timeout=30)
 
 
@@ -101,7 +101,7 @@ def wikify_keywords(
 def wikify_ontology_svg(results, level, request_id=None):
     job = tasks.draw_ontology_task.s(results, level=level, request_id=request_id)
     async_result = job.apply_async(priority=10)
-    logger.info('🎨 Submitted wikify_ontology_svg job', task_id=async_result.id, request_id=request_id, num_results=len(results), level=level)
+    logger.debug('🎨 Submitted wikify_ontology_svg job', task_id=async_result.id, request_id=request_id, num_results=len(results), level=level)
     async_result.get(timeout=300000)
     logger.info('✅ wikify_ontology_svg job completed', task_id=async_result.id, request_id=request_id)
 
@@ -109,7 +109,7 @@ def wikify_ontology_svg(results, level, request_id=None):
 def wikify_graph_svg(results, concept_score_threshold, edge_threshold, min_component_size, request_id=None):
     job = tasks.draw_graph_task.s(results, concept_score_threshold=concept_score_threshold, edge_threshold=edge_threshold, min_component_size=min_component_size, request_id=request_id)
     async_result = job.apply_async(priority=10)
-    logger.info(
+    logger.debug(
         '🕸️ Submitted wikify_graph_svg job',
         task_id=async_result.id,
         request_id=request_id,
@@ -125,7 +125,7 @@ def wikify_graph_svg(results, concept_score_threshold, edge_threshold, min_compo
 def generate_exercise(data, request_id=None):
     job = chain(tasks.generate_exercise_task.s(data, request_id=request_id))
     async_result = job.apply_async(priority=10)
-    logger.info('🎓 Submitted generate_exercise job', task_id=async_result.id, request_id=request_id)
+    logger.debug('🎓 Submitted generate_exercise job', task_id=async_result.id, request_id=request_id)
     result = async_result.get(timeout=300000)
     logger.info('✅ generate_exercise job completed', task_id=async_result.id, request_id=request_id)
     return result

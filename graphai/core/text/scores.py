@@ -288,7 +288,7 @@ def compute_scores(
     """
 
     start = time.perf_counter()
-    logger.info(
+    logger.debug(
         '🧮 Starting score computation pipeline',
         pass_number=pass_number,
         input_rows=len(results),
@@ -301,7 +301,7 @@ def compute_scores(
 
     # Return if there are no results
     if len(results) == 0:
-        logger.info('⏭️ Empty input; skipping score computation')
+        logger.debug('⏭️ Empty input; skipping score computation')
         return results
 
     # Parse concept id type from int to string
@@ -311,7 +311,7 @@ def compute_scores(
     if restrict_to_ontology:
         before = len(results)
         results = results[results['concept_id'].isin(graph.get_ontology_concepts())]
-        logger.info(
+        logger.debug(
             '📚 Restricted results to ontology',
             before_rows=before,
             after_rows=len(results),
@@ -319,23 +319,23 @@ def compute_scores(
 
     # Compute levenshtein score
     results = compute_levenshtein_score(results)
-    logger.info('📏 Computed Levenshtein scores', rows=len(results))
+    logger.debug('📏 Computed Levenshtein scores', rows=len(results))
 
     # Compute embeddings (local and global) scores
     results = compute_embedding_scores(results)
-    logger.info('🔢 Computed embedding scores', rows=len(results))
+    logger.debug('🔢 Computed embedding scores', rows=len(results))
 
     # Compute graph score
     results = graph.add_graph_score(results, smoothing=score_smoothing)
-    logger.info('🕸️ Computed graph scores', rows=len(results))
+    logger.debug('🕸️ Computed graph scores', rows=len(results))
 
     # Compute ontology (local and global) scores
     results = graph.add_ontology_scores(results, smoothing=score_smoothing)
-    logger.info('📖 Computed ontology scores', rows=len(results))
+    logger.debug('📖 Computed ontology scores', rows=len(results))
 
     # Compute keywords scores
     results = compute_keywords_scores(results, smoothing=score_smoothing)
-    logger.info('🔑 Computed keyword scores', rows=len(results))
+    logger.debug('🔑 Computed keyword scores', rows=len(results))
 
     # Return if there are no results
     if len(results) == 0:
@@ -344,16 +344,16 @@ def compute_scores(
 
     # Aggregate results over keywords to obtain one row per concept
     aggregated_results = aggregate_results(results, coef=aggregation_coef)
-    logger.info('📊 Aggregated results over keywords', rows=len(aggregated_results))
+    logger.debug('📊 Aggregated results over keywords', rows=len(aggregated_results))
 
     # Compute mixed score
     aggregated_results = compute_mixed_score(aggregated_results)
-    logger.info('🧪 Computed mixed score', rows=len(aggregated_results))
+    logger.debug('🧪 Computed mixed score', rows=len(aggregated_results))
 
     # Filter results
     before_filter = len(aggregated_results)
     aggregated_results = filter_results(aggregated_results, epsilon=filtering_threshold)
-    logger.info(
+    logger.debug(
         '🔍 Filtered results by threshold',
         before_rows=before_filter,
         after_rows=len(aggregated_results),
@@ -378,7 +378,7 @@ def compute_scores(
 
     # To recompute scores, we keep only the relevant unaggregated results that survive the aggregation and filtering,
     # we keep only the initial columns, as the rest need to be recomputed, and call the function again.
-    logger.info('🔄 Refreshing scores for surviving concepts', num_concepts=len(aggregated_results))
+    logger.debug('🔄 Refreshing scores for surviving concepts', num_concepts=len(aggregated_results))
     results = pd.merge(results, aggregated_results['concept_id'], how='inner', on='concept_id')
     results = results[['keywords', 'concept_id', 'concept_name', 'search_score']]
 

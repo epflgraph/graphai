@@ -176,7 +176,7 @@ def extract_keywords(text, use_nltk=False):
     """
 
     text = normalize(text)
-    logger.info('🔑 Extracting keywords from normalized text', text_length=len(text), use_nltk=use_nltk)
+    logger.debug('🔑 Extracting keywords from normalized text', text_length=len(text), use_nltk=use_nltk)
 
     # Extract keywords from text. We perform two extractions:
     #   * One with the full text.
@@ -192,7 +192,7 @@ def extract_keywords(text, use_nltk=False):
     # If no keywords are extracted at all and text is short, use it as a single keyword
     if not keyword_list and 1 < len(text) < 50:
         keyword_list = [text]
-        logger.info('📝 Using full short text as single keyword', text_length=len(text))
+        logger.debug('📝 Using full short text as single keyword', text_length=len(text))
 
     logger.info(
         '✅ Keyword extraction complete',

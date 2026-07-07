@@ -220,7 +220,7 @@ def search_elasticsearch_http(
     timeout_retries=DEFAULT_ES_TIMEOUT_RETRIES,
 ):
     start = time.perf_counter()
-    logger.info(
+    logger.debug(
         '⚡️ Searching Elasticsearch over HTTP',
         text=text,
         limit=limit,
@@ -258,7 +258,7 @@ def search_elasticsearch_http(
                 raise error
 
             hits = json.loads(response.data.decode('utf-8')).get('hits', {}).get('hits', [])
-            logger.info(
+            logger.debug(
                 '✅ Elasticsearch HTTP search returned hits',
                 text=text,
                 num_hits=len(hits),
@@ -381,7 +381,7 @@ def search_elasticsearch(text, es, limit=10, timeout=DEFAULT_ES_TIMEOUT, timeout
     """
 
     start = time.perf_counter()
-    logger.info(
+    logger.debug(
         '⚡️ Searching Elasticsearch cluster',
         text=text,
         limit=limit,
@@ -408,7 +408,7 @@ def search_elasticsearch(text, es, limit=10, timeout=DEFAULT_ES_TIMEOUT, timeout
                         api_status_code=503,
                     )
 
-                logger.info(
+                logger.debug(
                     '✅ Elasticsearch search returned hits',
                     text=text,
                     num_hits=len(hits),
@@ -507,12 +507,13 @@ def wikisearch(
     """
     start = time.perf_counter()
     total_keyword_sets = len(keywords_list)
-    logger.info(
+    logger.debug(
         '🚀 Starting wikisearch',
         method=method,
-        num_keyword_sets=total_keyword_sets,
+        num_keyword_sets=len(keywords_list),
         fraction=fraction,
     )
+
 
     # Slice keywords_list
     begin = int(fraction[0] * len(keywords_list))
@@ -549,7 +550,7 @@ def wikisearch(
                 )
                 results_list = search_wikipedia_api(keywords, timeout=wikipedia_timeout)
             else:
-                logger.info(
+                logger.debug(
                     '✅ Found results for keywords',
                     keywords=keywords,
                     num_results=len(results_list),
@@ -558,7 +559,7 @@ def wikisearch(
 
         # Ignore set of keywords if no pages are found
         if not results_list:
-            logger.warning('⚠️ No results found for keywords, skipping', keywords=keywords)
+            logger.debug('⚠️ No results found for keywords, skipping', keywords=keywords)
             continue
 
         # Build results DataFrame

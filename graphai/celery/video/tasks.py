@@ -86,7 +86,7 @@ def bind_request_id(task_fn):
         # Celery task names are "queue.taskname"; the first segment is the queue/service.
         full_name = getattr(self, 'name', '')
         queue = full_name.split('.')[0] if full_name else 'unknown'
-        logger.info(
+        logger.debug(
             f'▶️ Starting {task_name}',
             task_id=self.request.id,
             task_name=task_name,
@@ -94,7 +94,7 @@ def bind_request_id(task_fn):
         )
         try:
             result = task_fn(self, *args, **kwargs)
-            logger.info(
+            logger.debug(
                 f'✅ Completed {task_name}',
                 task_id=self.request.id,
                 task_name=task_name,
@@ -131,12 +131,12 @@ def slide_detection_init_task(self):
     logger.info('🚀 Start video init_slide_detection task')
 
     if strtobool(config['preload'].get('video', 'no')):
-        logger.info('⏳ Loading NLP models for slide detection')
+        logger.debug('⏳ Loading NLP models for slide detection')
         self.nlp_obj.load_nlp_models()
     else:
-        logger.info('⏭️ Skipping preloading for slide detection endpoint')
+        logger.debug('⏭️ Skipping preloading for slide detection endpoint')
 
-    logger.info('🗄️ Initializing video and slide database caching managers')
+    logger.debug('🗄️ Initializing video and slide database caching managers')
     VideoDBCachingManager(initialize_database=True)
     SlideDBCachingManager(initialize_database=True)
 
@@ -158,7 +158,7 @@ def cache_lookup_retrieve_file_from_url_task(self, url):
              name='video.retrieve_url', ignore_result=False,
              file_manager=file_management_config)
 def retrieve_file_from_url_task(self, url, is_kaltura=True, force_token=None):
-    logger.info('📥 Retrieving video from URL', url=url, is_kaltura=is_kaltura, force_token=force_token)
+    logger.debug('📥 Retrieving video from URL', url=url, is_kaltura=is_kaltura, force_token=force_token)
     result = retrieve_file_from_url(url, self.file_manager, is_kaltura, force_token)
     token = result.get('token') if isinstance(result, dict) else None
     logger.info('✅ Video retrieved from URL', url=url, token=token)
@@ -183,7 +183,7 @@ def cache_lookup_fingerprint_video_task(self, token):
              name='video.fingerprint_video', ignore_result=False,
              file_manager=file_management_config)
 def compute_video_fingerprint_task(self, results, force=False):
-    logger.info('🎬 Computing video fingerprint', force=force)
+    logger.debug('🎬 Computing video fingerprint', force=force)
     result = compute_video_fingerprint(results, self.file_manager, force)
     logger.info('✅ Video fingerprint computed', force=force)
     return result
@@ -253,7 +253,7 @@ def cache_lookup_extract_audio_task(self, token):
              name='video.extract_audio', ignore_result=False,
              file_manager=file_management_config)
 def extract_audio_task(self, token):
-    logger.info('🎵 Extracting audio from video', token=token)
+    logger.debug('🎵 Extracting audio from video', token=token)
     result = extract_audio(token, self.file_manager)
     logger.info('✅ Audio extraction complete', token=token, has_audio=result is not None)
     return result
@@ -263,7 +263,7 @@ def extract_audio_task(self, token):
              name='video.extract_audio_callback', ignore_result=False,
              file_manager=file_management_config)
 def extract_audio_callback_task(self, results, origin_token, force=False):
-    logger.info('🎵 Processing extracted audio callback', origin_token=origin_token, force=force)
+    logger.debug('🎵 Processing extracted audio callback', origin_token=origin_token, force=force)
     result = extract_audio_callback(results, origin_token, self.file_manager, force)
     logger.info('✅ Audio callback processed', origin_token=origin_token)
     return result
@@ -273,7 +273,7 @@ def extract_audio_callback_task(self, results, origin_token, force=False):
              name='video.reextract_cached_audio', ignore_result=False,
              file_manager=file_management_config)
 def reextract_cached_audio_task(self, token):
-    logger.info('🔄 Re-extracting cached audio', token=token)
+    logger.debug('🔄 Re-extracting cached audio', token=token)
     result = reextract_cached_audio(token, self.file_manager)
     logger.info('✅ Cached audio re-extracted', token=token)
     return result
@@ -283,7 +283,7 @@ def reextract_cached_audio_task(self, token):
              name='voice.audio_fingerprint', ignore_result=False,
              file_manager=file_management_config)
 def compute_audio_fingerprint_task(self, results, force=False):
-    logger.info('🎵 Computing audio fingerprint', force=force)
+    logger.debug('🎵 Computing audio fingerprint', force=force)
     result = compute_audio_fingerprint(results, self.file_manager, force)
     logger.info('✅ Audio fingerprint computed', force=force)
     return result
@@ -342,7 +342,7 @@ def cache_lookup_detect_slides_task(self, token):
              name='video.extract_and_sample_frames', ignore_result=False,
              file_manager=file_management_config)
 def extract_and_sample_frames_task(self, token):
-    logger.info('🖼️ Extracting and sampling video frames', token=token)
+    logger.debug('🖼️ Extracting and sampling video frames', token=token)
     result = extract_and_sample_frames(token, self.file_manager)
     logger.info('✅ Frames extracted and sampled', token=token)
     return result
@@ -353,18 +353,18 @@ def extract_and_sample_frames_task(self, token):
              file_manager=file_management_config,
              nlp_model=local_ocr_nlp_models)
 def compute_noise_level_parallel_task(self, results, i, n, language=None):
-    logger.info('🔊 Computing noise level for frame shard', shard=i, total_shards=n, language=language)
+    logger.debug('🔊 Computing noise level for frame shard', shard=i, total_shards=n, language=language)
     result = compute_noise_level_parallel(results, i, n, language, self.file_manager, self.nlp_model)
-    logger.info('✅ Noise level computed for frame shard', shard=i, total_shards=n)
+    logger.debug('✅ Noise level computed for frame shard', shard=i, total_shards=n)
     return result
 
 
 @shared_video_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
              name='video.noise_level_callback', ignore_result=False)
 def compute_noise_threshold_callback_task(self, results, hash_thresh=0.8, multiplier=5, default_threshold=0.05):
-    logger.info('📊 Computing noise threshold', hash_thresh=hash_thresh, multiplier=multiplier, default_threshold=default_threshold)
+    logger.debug('📊 Computing noise threshold', hash_thresh=hash_thresh, multiplier=multiplier, default_threshold=default_threshold)
     result = compute_noise_threshold_callback(results, hash_thresh, multiplier, default_threshold)
-    logger.info('✅ Noise threshold computed')
+    logger.debug('✅ Noise threshold computed')
     return result
 
 
@@ -372,10 +372,10 @@ def compute_noise_threshold_callback_task(self, results, hash_thresh=0.8, multip
              name='video.slide_transitions_parallel', ignore_result=False,
              file_manager=file_management_config, nlp_model=local_ocr_nlp_models)
 def compute_slide_transitions_parallel_task(self, results, i, n, language=None, include_first=True, include_last=True):
-    logger.info('🖼️ Computing slide transitions for shard', shard=i, total_shards=n, language=language)
+    logger.debug('🖼️ Computing slide transitions for shard', shard=i, total_shards=n, language=language)
     result = compute_slide_transitions_parallel(results, i, n, language, self.file_manager, self.nlp_model,
                                                 include_first, include_last)
-    logger.info('✅ Slide transitions computed for shard', shard=i, total_shards=n)
+    logger.debug('✅ Slide transitions computed for shard', shard=i, total_shards=n)
     return result
 
 
@@ -383,7 +383,7 @@ def compute_slide_transitions_parallel_task(self, results, i, n, language=None, 
              name='video.slide_transitions_callback', ignore_result=False,
              file_manager=file_management_config, nlp_model=local_ocr_nlp_models)
 def compute_slide_transitions_callback_task(self, results, language=None):
-    logger.info('🖼️ Aggregating slide transitions', language=language)
+    logger.debug('🖼️ Aggregating slide transitions', language=language)
     result = compute_slide_transitions_callback(results, language, self.file_manager, self.nlp_model)
     logger.info('✅ Slide transitions aggregated', language=language)
     return result
@@ -393,7 +393,7 @@ def compute_slide_transitions_callback_task(self, results, language=None):
              name='video.detect_slides_callback', ignore_result=False,
              file_manager=file_management_config)
 def detect_slides_callback_task(self, results, token, force=False):
-    logger.info('🖼️ Finalizing slide detection', token=token, force=force, retries=self.request.retries)
+    logger.debug('🖼️ Finalizing slide detection', token=token, force=force, retries=self.request.retries)
     result = detect_slides_callback(results, token, self.file_manager, force, self.request.retries)
     slide_count = len(result) if isinstance(result, (list, tuple)) else None
     logger.info('✅ Slide detection finalized', token=token, slide_count=slide_count)
@@ -404,7 +404,7 @@ def detect_slides_callback_task(self, results, token, force=False):
              name='video.reextract_cached_slides', ignore_result=False,
              file_manager=file_management_config)
 def reextract_cached_slides_task(self, token):
-    logger.info('🔄 Re-extracting cached slides', token=token)
+    logger.debug('🔄 Re-extracting cached slides', token=token)
     result = reextract_cached_slides(token, self.file_manager)
     logger.info('✅ Cached slides re-extracted', token=token)
     return result
@@ -414,7 +414,7 @@ def reextract_cached_slides_task(self, token):
              name='image.slide_fingerprint', ignore_result=False,
              file_manager=file_management_config)
 def compute_single_image_fingerprint_task(self, results):
-    logger.info('🖼️ Computing single image fingerprint')
+    logger.debug('🖼️ Computing single image fingerprint')
     result = compute_single_image_fingerprint(results, self.file_manager)
     logger.info('✅ Single image fingerprint computed')
     return result
@@ -424,7 +424,7 @@ def compute_single_image_fingerprint_task(self, results):
              name='image.slide_set_fingerprint', ignore_result=False,
              file_manager=file_management_config)
 def compute_slide_set_fingerprint_task(self, results, origin_token):
-    logger.info('🖼️ Computing slide set fingerprint', origin_token=origin_token)
+    logger.debug('🖼️ Computing slide set fingerprint', origin_token=origin_token)
     result = compute_slide_set_fingerprint(results, origin_token, self.file_manager)
     logger.info('✅ Slide set fingerprint computed', origin_token=origin_token)
     return result

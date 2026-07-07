@@ -60,7 +60,7 @@ async def keywords(
         log.warning('⚠️ Empty raw text received; returning empty result')
         return []
 
-    log.info('📝 Extracting keywords', raw_text_length=len(data.raw_text))
+    log.debug('📝 Extracting keywords', raw_text_length=len(data.raw_text))
     result = jobs.keywords(data.raw_text, use_nltk, request_id=_request_id(request))
     log.info(
         '✅ Keywords extracted',
@@ -94,7 +94,7 @@ async def wiki_search(
         log.warning('⚠️ Empty search term received; returning empty result')
         return []
 
-    log.info('🔍 Searching Wikipedia concept index')
+    log.debug('🔍 Searching Wikipedia concept index')
     try:
         result = jobs.wiki_search(search_term, limit, request_id=_request_id(request))
         log.info(
@@ -176,7 +176,7 @@ async def wikify(
             log.warning('⚠️ Empty raw text received; returning empty result')
             return []
 
-        log.info('📝 Starting wikify from raw text')
+        log.debug('📝 Starting wikify from raw text')
         try:
             results = jobs.wikify_text(
                 data.raw_text,
@@ -217,7 +217,7 @@ async def wikify(
         # Remove duplicate keywords
         keyword_list = list(set(data.keywords))
         deduped_count = len(keyword_list)
-        log.info(
+        log.debug(
             '🔑 Starting wikify from keywords',
             unique_keywords_count=deduped_count,
             duplicate_keywords_removed=keywords_count - deduped_count,
@@ -279,9 +279,9 @@ async def wikify_ontology_svg(
     # Switch to default level if not properly defined
     if level not in [1, 2, 3, 4, 5]:
         level = 2
-        log.info('⚙️ Invalid level provided; defaulting to 2')
+        log.debug('⚙️ Invalid level provided; defaulting to 2')
 
-    log.info('🎨 Generating ontology SVG')
+    log.debug('🎨 Generating ontology SVG')
     jobs.wikify_ontology_svg(results, level, request_id=_request_id(request))
     log.info('✅ Ontology SVG generated', duration_ms=_duration_ms(start))
 
@@ -315,7 +315,7 @@ async def wikify_graph_svg(
     # Convert WikifyResponseElems into dictionaries
     results = [vars(result) for result in results]
 
-    log.info('🕸️ Generating graph SVG')
+    log.debug('🕸️ Generating graph SVG')
     jobs.wikify_graph_svg(results, concept_score_threshold, edge_threshold, min_component_size, request_id=_request_id(request))
     log.info('✅ Graph SVG generated', duration_ms=_duration_ms(start))
 
@@ -335,7 +335,7 @@ async def generate_exercise(request: Request, data: schemas.GenerateExerciseRequ
         method=request.method,
         request_id=_request_id(request),
     )
-    log.info('🎓 Generating exercise')
+    log.debug('🎓 Generating exercise')
     result = jobs.generate_exercise(data, request_id=_request_id(request))
     log.info('✅ Exercise generated', duration_ms=_duration_ms(start))
     return result

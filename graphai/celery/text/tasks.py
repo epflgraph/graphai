@@ -96,7 +96,7 @@ def text_init_task(self, request_id: Optional[str] = None):
     es_config = config['elasticsearch']
     es_index = es_config.get('concept_detection_index', 'concepts_detection')
     es_timeout = es_config.get('request_timeout', 10)
-    logger.info(
+    logger.debug(
         '🔍 Validating Elasticsearch concept detection index',
         host=es_config['host'],
         port=es_config['port'],
@@ -110,10 +110,10 @@ def text_init_task(self, request_id: Optional[str] = None):
     )
 
     if strtobool(config['preload']['text']):
-        logger.info('⏳ Loading concepts graph and ontology tables')
+        logger.debug('⏳ Loading concepts graph and ontology tables')
         self.graph.load_from_db()
     else:
-        logger.info('⏭️ Skipping preloading for text endpoints')
+        logger.debug('⏭️ Skipping preloading for text endpoints')
 
     logger.info(
         '✅ Concepts graph and ontology tables loaded',
@@ -127,7 +127,7 @@ def text_init_task(self, request_id: Optional[str] = None):
 def extract_keywords_task(self, raw_text, request_id: Optional[str] = None, **kwargs):
     _bind_request_id(request_id)
     start = time.perf_counter()
-    logger.info(
+    logger.debug(
         '🔑 Extracting keywords',
         task_id=self.request.id,
         raw_text_length=len(raw_text) if raw_text else 0,
@@ -148,7 +148,7 @@ def wikisearch_task(self, keywords_list, request_id: Optional[str] = None, **kwa
     start = time.perf_counter()
     fraction = kwargs.get('fraction')
     method = kwargs.get('method', 'es-base')
-    logger.info(
+    logger.debug(
         '🔎 Searching concepts for keyword shard',
         task_id=self.request.id,
         method=method,
@@ -193,7 +193,7 @@ def wikisearch_task(self, keywords_list, request_id: Optional[str] = None, **kwa
 def wiki_search_task(self, search_term, limit=10, request_id: Optional[str] = None):
     _bind_request_id(request_id)
     start = time.perf_counter()
-    logger.info(
+    logger.debug(
         '🔍 Searching Elasticsearch for term',
         task_id=self.request.id,
         search_term=search_term,
@@ -233,7 +233,7 @@ def wiki_search_task(self, search_term, limit=10, request_id: Optional[str] = No
 def compute_scores_task(self, results, request_id: Optional[str] = None, **kwargs):
     _bind_request_id(request_id)
     start = time.perf_counter()
-    logger.info(
+    logger.debug(
         '🧮 Computing concept scores',
         task_id=self.request.id,
         input_shards=len(results),
@@ -250,7 +250,7 @@ def compute_scores_task(self, results, request_id: Optional[str] = None, **kwarg
         for r in results
     ]
     combined = pd.concat(dataframes, ignore_index=True)
-    logger.info(
+    logger.debug(
         '📊 Aggregated shard results',
         task_id=self.request.id,
         input_rows=len(combined),
@@ -272,7 +272,7 @@ def draw_ontology_task(self, results, request_id: Optional[str] = None, **kwargs
     _bind_request_id(request_id)
     start = time.perf_counter()
     level = kwargs.get('level', 2)
-    logger.info(
+    logger.debug(
         '🎨 Drawing ontology SVG',
         task_id=self.request.id,
         num_results=len(results),
@@ -292,7 +292,7 @@ def draw_ontology_task(self, results, request_id: Optional[str] = None, **kwargs
 def draw_graph_task(self, results, request_id: Optional[str] = None, **kwargs):
     _bind_request_id(request_id)
     start = time.perf_counter()
-    logger.info(
+    logger.debug(
         '🕸️ Drawing graph SVG',
         task_id=self.request.id,
         num_results=len(results),
@@ -314,7 +314,7 @@ def draw_graph_task(self, results, request_id: Optional[str] = None, **kwargs):
 def generate_exercise_task(self, *args, request_id: Optional[str] = None, **kwargs):
     _bind_request_id(request_id)
     start = time.perf_counter()
-    logger.info('🎓 Generating exercise', task_id=self.request.id)
+    logger.debug('🎓 Generating exercise', task_id=self.request.id)
     exercise = generate_exercise(*args, **kwargs)
     logger.info(
         '✅ Exercise generated',

@@ -167,7 +167,7 @@ def _task_queue(task_fn):
 def retrieve_url_job(url, force=False, is_playlist=False, request_id=None):
     log = logger.bind(endpoint='/video/retrieve_url', request_id=request_id, url=url, force=force, is_playlist=is_playlist)
     if not force:
-        log.info('🔍 Checking cache for video URL', target_queue=_task_queue(cache_lookup_retrieve_file_from_url_task))
+        log.debug('🔍 Checking cache for video URL', target_queue=_task_queue(cache_lookup_retrieve_file_from_url_task))
         direct_lookup_task_id = direct_lookup_generic_job(
             cache_lookup_retrieve_file_from_url_task, url, False, DEFAULT_TIMEOUT, request_id=request_id
         )
@@ -205,12 +205,13 @@ def fingerprint_job(token, force, request_id=None):
     # Cache lookup
     ##############
     if not force:
-        log.info('🔍 Checking cache for video fingerprint', target_queue=_task_queue(cache_lookup_fingerprint_video_task))
+        log.debug('🔍 Checking cache for video fingerprint', target_queue=_task_queue(cache_lookup_fingerprint_video_task))
         direct_lookup_task_id = fingerprint_lookup_job(token, request_id=request_id)
         if direct_lookup_task_id is not None:
-            log.info('✅ Video fingerprint cache hit', cache_task_id=direct_lookup_task_id, target_queue=_task_queue(cache_lookup_fingerprint_video_task))
+            log.info('✅ Video fingerprint cache hit', cache_task_id=direct_lookup_task_id)
             return direct_lookup_task_id
         log.info('⏭️ Video fingerprint cache miss; starting computation')
+
 
     #################
     # Computation job
@@ -234,14 +235,15 @@ def extract_audio_job(token, force=False, recalculate_cached=False, request_id=N
     # Extract audio cache lookup
     ############################
     if not force and not recalculate_cached:
-        log.info('🔍 Checking cache for audio extraction', target_queue=_task_queue(cache_lookup_extract_audio_task))
+        log.debug('🔍 Checking cache for audio extraction', target_queue=_task_queue(cache_lookup_extract_audio_task))
         direct_lookup_task_id = direct_lookup_generic_job(
             cache_lookup_extract_audio_task, token, False, DEFAULT_TIMEOUT, request_id=request_id
         )
         if direct_lookup_task_id is not None:
-            log.info('✅ Audio extraction cache hit', cache_task_id=direct_lookup_task_id, target_queue=_task_queue(cache_lookup_extract_audio_task))
+            log.info('✅ Audio extraction cache hit', cache_task_id=direct_lookup_task_id)
             return direct_lookup_task_id
         log.info('⏭️ Audio extraction cache miss; starting extraction')
+
 
     #################
     # (Re)Computation
@@ -278,14 +280,15 @@ def detect_slides_job(token, language, force=False, recalculate_cached=False, re
     # Detect slides cache lookup
     ############################
     if not force and not recalculate_cached:
-        log.info('🔍 Checking cache for slide detection', target_queue=_task_queue(cache_lookup_detect_slides_task))
+        log.debug('🔍 Checking cache for slide detection', target_queue=_task_queue(cache_lookup_detect_slides_task))
         direct_lookup_task_id = direct_lookup_generic_job(
             cache_lookup_detect_slides_task, token, False, DEFAULT_SLIDE_TIMEOUT, request_id=request_id
         )
         if direct_lookup_task_id is not None:
-            log.info('✅ Slide detection cache hit', cache_task_id=direct_lookup_task_id, target_queue=_task_queue(cache_lookup_detect_slides_task))
+            log.info('✅ Slide detection cache hit', cache_task_id=direct_lookup_task_id)
             return direct_lookup_task_id
         log.info('⏭️ Slide detection cache miss; starting detection')
+
 
     #################
     # (Re)Computation
