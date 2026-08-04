@@ -220,8 +220,17 @@ def retrieve_file_from_kaltura(url, output_filename_with_path, output_token):
         stdout = e.stdout.decode("utf-8", errors="replace") if isinstance(e.stdout, (bytes, bytearray)) else str(e.stdout)
         ffmpeg_stderr = stderr or stdout or str(e)
         useful_err = _extract_useful_ffmpeg_error_text(ffmpeg_stderr)
+        sysmsg.debug("ffmpeg full stderr for '{}': {}", url, ffmpeg_stderr)
+        failure_reason = _kaltura_failure_reason_from_stderr(ffmpeg_stderr)
+        if failure_reason == "kaltura_ffmpeg_failed":
+            sysmsg.warning(
+                "ffmpeg failed for '{}'; falling back to generic HTTP download. useful_err='{}'",
+                url,
+                useful_err,
+            )
+            return retrieve_video_file_from_generic_url(url, output_filename_with_path, output_token)
         sysmsg.error("kaltura ffmpeg download failed for '{}': {}", url, useful_err)
-        return None, None, _kaltura_failure_reason_from_stderr(ffmpeg_stderr)
+        return None, None, failure_reason
     except Exception:
         sysmsg.exception("Unexpected error during kaltura ffmpeg download for '{}'.", url)
         return None, None, "kaltura_exception"
@@ -269,6 +278,11 @@ def is_kaltura_manifest_url(url: str) -> bool:
         return False
     url_lower = url.lower()
     path = urlparse(url).path.lower()
+    # Kaltura /playManifest/.../format/url returns a 302 redirect to a single
+    # MP4 file, not an HLS playlist. Treat it as a direct file so we avoid a
+    # wasted (and occasionally crashing) ffmpeg invocation.
+    if '/playmanifest/' in url_lower and '/format/url' in url_lower:
+        return False
     return (
         '/playmanifest/' in url_lower
         or '/manifest/' in path
