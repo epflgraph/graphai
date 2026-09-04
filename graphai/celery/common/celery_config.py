@@ -161,11 +161,10 @@ def create_celery():
     celery_app.conf.update(worker_prefetch_multiplier=1)
     celery_app.conf.update(broker_transport_options={'visibility_timeout': 9999999})
     celery_app.conf.update(beat_schedule={
-        'cleanup-embedding-model-every-six-hours': {
-            'task': 'embedding_gpu.clean_up_large_embedding_objects',
-            'schedule': 6 * 3600.0
-            # Every 6 hours
-        },
+        # NOTE: The GPU embedding model is kept permanently hot in production
+        # because LLM tutors hit it constantly. Do NOT add a periodic cleanup
+        # entry for it here. The RAG anonymizer may be deloaded; only
+        # rag.retrieve and rag.chunk need to stay fast.
         'cleanup-translation-model-every-six-hours': {
             'task': 'translation_gpu.clean_up_translation_object',
             'schedule': 6 * 3600.0
@@ -175,6 +174,16 @@ def create_celery():
             'task': 'voice_gpu.clean_up_transcription_object',
             'schedule': 24 * 3600.0
             # Every 24 hours
+        },
+        'cleanup-video-nlp-models-every-six-hours': {
+            'task': 'video.clean_up_nlp_objects',
+            'schedule': 6 * 3600.0
+            # Every 6 hours
+        },
+        'cleanup-rag-anonymizer-every-three-hours': {
+            'task': 'rag.clean_up_anonymizer_object',
+            'schedule': 3 * 3600.0
+            # Every 3 hours
         }
     })
     # Configuring the broker to avoid accidentally-missed heartbeats

@@ -112,7 +112,7 @@ class EmbeddingModels:
     def __init__(self):
         self.models = None
         self.load_lock = Lock()
-        self.device = "cuda" if torch.cuda.is_available() else "cpu"
+        self._device = None
         self.last_heavy_model_use = time.time()
         try:
             print("Reading HuggingFace model path from config")
@@ -125,6 +125,14 @@ class EmbeddingModels:
                 "To use a different one, make sure to add a [huggingface] section with the model_path parameter."
             )
             self.cache_dir = None
+
+    @property
+    def device(self):
+        # Defer CUDA probing until the device is actually needed. This keeps
+        # CPU-only workers from opening the NVIDIA driver at import time.
+        if self._device is None:
+            self._device = "cuda" if torch.cuda.is_available() else "cpu"
+        return self._device
 
     def get_device(self):
         sysmsg.trace("Getting device for embedding models")

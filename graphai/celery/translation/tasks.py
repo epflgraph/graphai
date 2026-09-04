@@ -29,14 +29,14 @@ translation_models = TranslationModels()
              name='translation_gpu.init_translation', ignore_result=False,
              translation_obj=translation_models)
 def translation_init_task(self):
-    # This task initialises the video celery worker by loading into memory the transcription and NLP models
+    # This task initialises the translation celery worker by loading into memory the translation models
     print('Start init_translation task')
 
-    if strtobool(config['preload'].get('video', 'no')):
+    if strtobool(config['preload'].get('translation', 'no')):
         print('Loading translation models...')
         self.translation_obj.load_models()
     else:
-        print('Skipping preloading for video endpoints.')
+        print('Skipping preloading for translation endpoints.')
 
     print('Initializing db caching managers...')
     TextDBCachingManager(initialize_database=True)

@@ -16,7 +16,7 @@ mkdir -p \
   "${GRAPH_CACHE_ROOT:-/var/graphai/storage}" \
   "${GRAPH_LOG_ROOT:-/var/graphai/logs}"
 
-cd /app/graphai/api/main
+cd /app
 
 ROLE="${GRAPHAI_ROLE:-api}"
 
@@ -43,10 +43,12 @@ case "${ROLE}" in
 
   worker)
     CELERY_QUEUES="${CELERY_QUEUES:?CELERY_QUEUES is required for GRAPHAI_ROLE=worker}"
+    GRAPHAI_CELERY_IMPORTS="${GRAPHAI_CELERY_IMPORTS:?GRAPHAI_CELERY_IMPORTS is required for GRAPHAI_ROLE=worker}"
+    export GRAPHAI_CELERY_IMPORTS
 
     WORKER_ARGS=(
       --broker="${CELERY_BROKER_URL}"
-      -A main.celery_instance
+      -A graphai.celery_app
       worker
       -l "${CELERY_LOG_LEVEL:-info}"
       -Q "${CELERY_QUEUES}"
@@ -83,7 +85,7 @@ case "${ROLE}" in
     echo "[graphai] Starting Celery beat..."
     exec celery \
       --broker="${CELERY_BROKER_URL}" \
-      -A main.celery_instance \
+      -A graphai.celery_app \
       beat \
       -l "${CELERY_LOG_LEVEL:-info}"
     ;;
@@ -92,7 +94,7 @@ case "${ROLE}" in
     echo "[graphai] Starting Flower..."
     FLOWER_ARGS=(
       --broker="${CELERY_BROKER_URL}"
-      -A main.celery_instance
+      -A graphai.celery_app
       flower
       --port "${FLOWER_PORT:-5555}"
     )

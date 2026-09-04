@@ -5,6 +5,7 @@ from graphai.core.retrieval.retrieval_utils import (
 )
 from graphai.core.retrieval.anonymization import (
     AnonymizerModels,
+    ANONYMIZER_UNLOAD_WAITING_PERIOD,
     anonymize_text
 )
 
@@ -31,3 +32,10 @@ def chunk_text_task(self, text, chunk_size=400, chunk_overlap=100,
              name='rag.anonymize', anonymization_obj=anonymizer_model, ignore_result=False)
 def anonymize_text_task(self, text, lang):
     return anonymize_text(self.anonymization_obj, text, lang)
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
+             name='rag.clean_up_anonymizer_object', anonymization_obj=anonymizer_model, ignore_result=False)
+def cleanup_anonymizer_object_task(self):
+    """Periodic task that releases the presidio/GLiNER anonymizer stack."""
+    return self.anonymization_obj.unload_model(ANONYMIZER_UNLOAD_WAITING_PERIOD)

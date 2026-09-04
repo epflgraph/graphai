@@ -30,8 +30,8 @@ export CELERY_RESULT_BACKEND="redis://localhost:6379/1"
 echo "Broker:  amqp://${AI_RABBITMQ_DEV_CELERY_USER}:***@localhost:5672//"
 echo "Backend: $CELERY_RESULT_BACKEND"
 
-# Make sure we're in api/main so `-A main.celery_instance` resolves correctly
-cd "$SCRIPT_DIR"
+# Run from repo root so `-A graphai.celery_app` resolves correctly
+cd "$REPO_ROOT"
 
 # ---------------------------------------------------------------------
 # 1b) Add micromamba tools env to PATH
@@ -105,7 +105,7 @@ echo "=== [GraphAI] Starting new Celery workers ==="
 echo "---------------------------------------------"
 echo "🚀 Launching "embedding_gpu" worker on GPU #0"
 echo "---------------------------------------------"
-CUDA_VISIBLE_DEVICES=0 celery --broker="$CELERY_BROKER_URL" -A main.celery_instance worker -l info -Q embedding_gpu --concurrency=1 -n RCP_GPU0_Embedding &
+GRAPHAI_CELERY_IMPORTS=graphai.celery.embedding.tasks CUDA_VISIBLE_DEVICES=0 celery --broker="$CELERY_BROKER_URL" -A graphai.celery_app worker -l info -Q embedding_gpu --concurrency=1 -n RCP_GPU0_Embedding &
 # echo "✅ Worker launched on GPU #0."
 echo
 
@@ -113,7 +113,7 @@ echo
 echo "-----------------------------------------"
 echo "🚀 Launching "voice_gpu" worker on GPU #1"
 echo "-----------------------------------------"
-CUDA_VISIBLE_DEVICES=1 celery --broker="$CELERY_BROKER_URL" -A main.celery_instance worker -l info -Q voice_gpu --concurrency=1 -n RCP_GPU1_Voice &
+GRAPHAI_CELERY_IMPORTS=graphai.celery.voice.tasks CUDA_VISIBLE_DEVICES=1 celery --broker="$CELERY_BROKER_URL" -A graphai.celery_app worker -l info -Q voice_gpu --concurrency=1 -n RCP_GPU1_Voice &
 # echo "✅ Worker launched on GPU #1."
 echo
 
@@ -121,7 +121,7 @@ echo
 echo "-----------------------------------------"
 echo "🚀 Launching "voice_gpu" worker on GPU #2"
 echo "-----------------------------------------"
-CUDA_VISIBLE_DEVICES=2 celery --broker="$CELERY_BROKER_URL" -A main.celery_instance worker -l info -Q voice_gpu --concurrency=1 -n RCP_GPU2_Voice &
+GRAPHAI_CELERY_IMPORTS=graphai.celery.voice.tasks CUDA_VISIBLE_DEVICES=2 celery --broker="$CELERY_BROKER_URL" -A graphai.celery_app worker -l info -Q voice_gpu --concurrency=1 -n RCP_GPU2_Voice &
 # echo "✅ Worker launched on GPU #2."
 echo
 
@@ -129,7 +129,7 @@ echo
 echo "-----------------------------------------------"
 echo "🚀 Launching "translation_gpu" worker on GPU #3"
 echo "-----------------------------------------------"
-CUDA_VISIBLE_DEVICES=3 celery --broker="$CELERY_BROKER_URL" -A main.celery_instance worker -l info -Q translation_gpu --concurrency=1 -n RCP_GPU3_Translation &
+GRAPHAI_CELERY_IMPORTS=graphai.celery.translation.tasks CUDA_VISIBLE_DEVICES=3 celery --broker="$CELERY_BROKER_URL" -A graphai.celery_app worker -l info -Q translation_gpu --concurrency=1 -n RCP_GPU3_Translation &
 # echo "✅ Worker launched on GPU #3."
 echo
 
@@ -142,7 +142,7 @@ unset CUDA_VISIBLE_DEVICES
 echo "---------------------------------------------------"
 echo "🚀 Launching "caching, rag, image" worker on 8 CPUs"
 echo "---------------------------------------------------"
-celery --broker="$CELERY_BROKER_URL" -A main.celery_instance worker -l info -P prefork -c 8 -Q caching,rag,image -n RCP_CPUx8_Cache_Rag_Img &
+GRAPHAI_CELERY_IMPORTS=graphai.celery.caching.tasks,graphai.celery.retrieval.tasks,graphai.celery.image.tasks celery --broker="$CELERY_BROKER_URL" -A graphai.celery_app worker -l info -P prefork -c 8 -Q caching,rag,image -n RCP_CPUx8_Cache_Rag_Img &
 # echo "✅ Worker launched on 8 CPUs."
 echo
 
@@ -150,7 +150,7 @@ echo
 echo "------------------------------------"
 echo "🚀 Launching "text" worker on 6 CPUs"
 echo "------------------------------------"
-celery --broker="$CELERY_BROKER_URL" -A main.celery_instance worker -l info -P prefork -c 6 -Q text -n RCP_CPUx6_Text &
+GRAPHAI_CELERY_IMPORTS=graphai.celery.text.tasks celery --broker="$CELERY_BROKER_URL" -A graphai.celery_app worker -l info -P prefork -c 6 -Q text -n RCP_CPUx6_Text &
 # echo "✅ Worker launched on 6 CPUs."
 echo
 
@@ -158,7 +158,7 @@ echo
 echo "---------------------------------------------------------"
 echo "🚀 Launching "video, voice, translation" worker on 4 CPUs"
 echo "---------------------------------------------------------"
-celery --broker="$CELERY_BROKER_URL" -A main.celery_instance worker -l info -P prefork -c 4 -Q video,voice,translation -n RCP_CPUx6_Video_Voice_Transl &
+GRAPHAI_CELERY_IMPORTS=graphai.celery.video.tasks,graphai.celery.voice.tasks,graphai.celery.translation.tasks celery --broker="$CELERY_BROKER_URL" -A graphai.celery_app worker -l info -P prefork -c 4 -Q video,voice,translation -n RCP_CPUx6_Video_Voice_Transl &
 # echo "✅ Worker launched on 4 CPUs."
 echo
 
@@ -166,7 +166,7 @@ echo
 echo "----------------------------------------------------------"
 echo "🚀 Launching "ontology, scraping, celery" worker on 2 CPUs"
 echo "----------------------------------------------------------"
-celery --broker="$CELERY_BROKER_URL" -A main.celery_instance worker -l info -P prefork -c 2 -Q ontology,scraping,celery -n RCP_CPUx6_Ontl_Scrp_Celery &
+GRAPHAI_CELERY_IMPORTS=graphai.celery.ontology.tasks,graphai.celery.scraping.tasks celery --broker="$CELERY_BROKER_URL" -A graphai.celery_app worker -l info -P prefork -c 2 -Q ontology,scraping,celery -n RCP_CPUx6_Ontl_Scrp_Celery &
 # echo "✅ Worker launched on 2 CPUs."
 echo
 

@@ -18,6 +18,47 @@ HUGGINGFACE_MAX_TOKENS = 512
 # 3 hours
 HUGGINGFACE_UNLOAD_WAITING_PERIOD = 3 * 3600.0
 
+# Configuration for each supported language pair. Keeping this table outside the
+# class makes it easy to load models lazily, one pair at a time.
+TRANSLATION_MODEL_CONFIGS = {
+    'en-fr': {
+        'model_name': 'Helsinki-NLP/opus-mt-tc-big-en-fr',
+        'tokenizer_cls': MarianTokenizer,
+        'model_cls': MarianMTModel,
+        'segmenter_lang': 'en',
+    },
+    'fr-en': {
+        'model_name': 'Helsinki-NLP/opus-mt-tc-big-fr-en',
+        'tokenizer_cls': MarianTokenizer,
+        'model_cls': MarianMTModel,
+        'segmenter_lang': 'fr',
+    },
+    'de-en': {
+        'model_name': 'Helsinki-NLP/opus-mt-de-en',
+        'tokenizer_cls': AutoTokenizer,
+        'model_cls': AutoModelForSeq2SeqLM,
+        'segmenter_lang': 'de',
+    },
+    'en-de': {
+        'model_name': 'Helsinki-NLP/opus-mt-en-de',
+        'tokenizer_cls': AutoTokenizer,
+        'model_cls': AutoModelForSeq2SeqLM,
+        'segmenter_lang': 'en',
+    },
+    'it-en': {
+        'model_name': 'Helsinki-NLP/opus-mt-it-en',
+        'tokenizer_cls': AutoTokenizer,
+        'model_cls': AutoModelForSeq2SeqLM,
+        'segmenter_lang': 'it',
+    },
+    'en-it': {
+        'model_name': 'Helsinki-NLP/opus-mt-en-it',
+        'tokenizer_cls': AutoTokenizer,
+        'model_cls': AutoModelForSeq2SeqLM,
+        'segmenter_lang': 'en',
+    },
+}
+
 
 def generate_src_tgt_dict(src, tgt):
     """
@@ -97,10 +138,10 @@ def find_best_slide_subset(slides_and_concepts, coverage=1.0, priorities=True, m
 
 class TranslationModels:
     def __init__(self):
-        self.models = None
+        self.models = dict()
         self.load_lock = Lock()
         self.last_model_use = time.time()
-        self.device = "cuda" if torch.cuda.is_available() else "cpu"
+        self._device = None
         try:
             print("Reading HuggingFace model path from config")
             self.cache_dir = config['huggingface']['model_path']
@@ -113,79 +154,45 @@ class TranslationModels:
             )
             self.cache_dir = None
 
-    def load_models(self):
-        """
-        Loads Huggingface translation and tokenization models plus a pysbd segmenter
-        Returns:
-            None
-        """
+    @property
+    def device(self):
+        # Defer CUDA probing until the device is actually needed. This keeps
+        # CPU-only workers from opening the NVIDIA driver at import time.
+        if self._device is None:
+            self._device = "cuda" if torch.cuda.is_available() else "cpu"
+        return self._device
+
+    def _load_model(self, how):
+        """Loads a single language pair on demand."""
+        if how not in TRANSLATION_MODEL_CONFIGS:
+            available = ", ".join(sorted(TRANSLATION_MODEL_CONFIGS.keys()))
+            raise NotImplementedError(
+                f"Model not available for language pair '{how}'. Available pairs: {available}."
+            )
         with self.load_lock:
-            if self.models is None:
-                self.models = dict()
-                print('Loading EN-FR')
-                self.models['en-fr'] = dict()
-                self.models['en-fr']['tokenizer'] = MarianTokenizer.from_pretrained(
-                    "Helsinki-NLP/opus-mt-tc-big-en-fr",
-                    cache_dir=self.cache_dir)
-                self.models['en-fr']['model'] = MarianMTModel.from_pretrained(
-                    "Helsinki-NLP/opus-mt-tc-big-en-fr",
-                    cache_dir=self.cache_dir).to(self.device)
-                self.models['en-fr']['segmenter'] = pysbd.Segmenter(language='en', clean=False)
-                self.models['en-fr']['segmenter_cleaner'] = pysbd.Segmenter(language='en', clean=True)
-                print('Loading FR-EN')
-                self.models['fr-en'] = dict()
-                self.models['fr-en']['tokenizer'] = MarianTokenizer.from_pretrained(
-                    "Helsinki-NLP/opus-mt-tc-big-fr-en",
-                    cache_dir=self.cache_dir)
-                self.models['fr-en']['model'] = MarianMTModel.from_pretrained(
-                    "Helsinki-NLP/opus-mt-tc-big-fr-en",
-                    cache_dir=self.cache_dir).to(self.device)
-                self.models['fr-en']['segmenter'] = pysbd.Segmenter(language='fr', clean=False)
-                self.models['fr-en']['segmenter_cleaner'] = pysbd.Segmenter(language='fr', clean=True)
-                print('Loading DE-EN')
-                self.models['de-en'] = dict()
-                self.models['de-en']['tokenizer'] = AutoTokenizer.from_pretrained(
-                    "Helsinki-NLP/opus-mt-de-en",
-                    cache_dir=self.cache_dir)
-                self.models['de-en']['model'] = AutoModelForSeq2SeqLM.from_pretrained(
-                    "Helsinki-NLP/opus-mt-de-en",
-                    cache_dir=self.cache_dir).to(self.device)
-                self.models['de-en']['segmenter'] = pysbd.Segmenter(language='de', clean=False)
-                self.models['de-en']['segmenter_cleaner'] = pysbd.Segmenter(language='de', clean=True)
-                print('Loading EN-DE')
-                self.models['en-de'] = dict()
-                self.models['en-de']['tokenizer'] = AutoTokenizer.from_pretrained(
-                    "Helsinki-NLP/opus-mt-en-de",
-                    cache_dir=self.cache_dir)
-                self.models['en-de']['model'] = AutoModelForSeq2SeqLM.from_pretrained(
-                    "Helsinki-NLP/opus-mt-en-de",
-                    cache_dir=self.cache_dir).to(self.device)
-                self.models['en-de']['segmenter'] = pysbd.Segmenter(language='en', clean=False)
-                self.models['en-de']['segmenter_cleaner'] = pysbd.Segmenter(language='en', clean=True)
-                print('Loading IT-EN')
-                self.models['it-en'] = dict()
-                self.models['it-en']['tokenizer'] = AutoTokenizer.from_pretrained(
-                    "Helsinki-NLP/opus-mt-it-en",
-                    cache_dir=self.cache_dir)
-                self.models['it-en']['model'] = AutoModelForSeq2SeqLM.from_pretrained(
-                    "Helsinki-NLP/opus-mt-it-en",
-                    cache_dir=self.cache_dir).to(self.device)
-                self.models['it-en']['segmenter'] = pysbd.Segmenter(language='it', clean=False)
-                self.models['it-en']['segmenter_cleaner'] = pysbd.Segmenter(language='it', clean=True)
-                print('Loading EN-IT')
-                self.models['en-it'] = dict()
-                self.models['en-it']['tokenizer'] = AutoTokenizer.from_pretrained(
-                    "Helsinki-NLP/opus-mt-en-it",
-                    cache_dir=self.cache_dir)
-                self.models['en-it']['model'] = AutoModelForSeq2SeqLM.from_pretrained(
-                    "Helsinki-NLP/opus-mt-en-it",
-                    cache_dir=self.cache_dir).to(self.device)
-                self.models['en-it']['segmenter'] = pysbd.Segmenter(language='en', clean=False)
-                self.models['en-it']['segmenter_cleaner'] = pysbd.Segmenter(language='en', clean=True)
+            if how not in self.models:
+                cfg = TRANSLATION_MODEL_CONFIGS[how]
+                print(f'Loading {how}')
+                tokenizer = cfg['tokenizer_cls'].from_pretrained(
+                    cfg['model_name'], cache_dir=self.cache_dir)
+                model = cfg['model_cls'].from_pretrained(
+                    cfg['model_name'], cache_dir=self.cache_dir).to(self.device)
+                seg_lang = cfg['segmenter_lang']
+                self.models[how] = {
+                    'tokenizer': tokenizer,
+                    'model': model,
+                    'segmenter': pysbd.Segmenter(language=seg_lang, clean=False),
+                    'segmenter_cleaner': pysbd.Segmenter(language=seg_lang, clean=True),
+                }
             self.last_model_use = time.time()
 
-    def get_device(self):
-        return self.device
+    def load_models(self):
+        """
+        Loads all configured translation models. Kept for backward compatibility
+        with the init task; normal operation loads models on demand.
+        """
+        for how in TRANSLATION_MODEL_CONFIGS:
+            self._load_model(how)
 
     def get_last_usage(self):
         return self.last_model_use
@@ -194,12 +201,9 @@ class TranslationModels:
         deleted_models = None
         with self.load_lock:
             if time.time() - self.get_last_usage() > unload_period:
-                if self.models is None:
-                    deleted_models = list()
-                else:
-                    deleted_models = list(self.models.keys())
-                    self.models = None
-                    gc.collect()
+                deleted_models = list(self.models.keys())
+                self.models.clear()
+                gc.collect()
         return deleted_models
 
     def _tokenize_and_get_model_output(self, sentence, tokenizer, model):
@@ -271,12 +275,7 @@ class TranslationModels:
         Returns:
             Translated text and 'unpunctuated text too long' flag
         """
-        self.load_models()
-        if how not in self.models.keys():
-            available_pairs = ", ".join(sorted(self.models.keys()))
-            raise NotImplementedError(
-                f"Model not available for language pair '{how}'. Available pairs: {available_pairs}."
-            )
+        self._load_model(how)
         if text is None or len(text) == 0:
             return None, False
         tokenizer = self.models[how]['tokenizer']

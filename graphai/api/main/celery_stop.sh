@@ -30,21 +30,21 @@ export CELERY_RESULT_BACKEND="redis://localhost:6379/1"
 echo "Broker:  amqp://${AI_RABBITMQ_DEV_CELERY_USER}:***@localhost:5672//"
 echo "Backend: $CELERY_RESULT_BACKEND"
 
-# Make sure we're in api/main so `-A main.celery_instance` resolves correctly
-cd "$SCRIPT_DIR"
+# Run from repo root so `-A graphai.celery_app` resolves correctly
+cd "$REPO_ROOT"
 
 # ---------------------------------------------------------------------
 # 2) Stop existing Celery workers
 # ---------------------------------------------------------------------
 echo "=== [GraphAI] Stopping existing Celery workers ==="
-PIDS="$(pgrep -f 'celery.*main.celery_instance' || true)"
+PIDS="$(pgrep -f 'celery.*graphai.celery_app' || true)"
 
 if [ -n "$PIDS" ]; then
   echo "Killing PIDs: $PIDS"
   kill $PIDS || true
   sleep 3
 
-  PIDS="$(pgrep -f 'celery.*main.celery_instance' || true)"
+  PIDS="$(pgrep -f 'celery.*graphai.celery_app' || true)"
   if [ -n "$PIDS" ]; then
     echo "Force killing remaining PIDs: $PIDS"
     kill -9 $PIDS || true

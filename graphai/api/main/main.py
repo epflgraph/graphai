@@ -4,7 +4,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.responses import RedirectResponse
 
-from graphai.celery.common.celery_tools import celery_instance
+from graphai.celery_app import celery_instance
 from graphai.api.common.rate_limiter import close_rate_limiter_connection
 from graphai.core.common.logging import configure_stdlib_logging
 

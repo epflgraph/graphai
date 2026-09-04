@@ -51,6 +51,7 @@ fi
 wait_for_tcp_port "$BROKER_HOST" "$BROKER_PORT" "RabbitMQ"
 wait_for_tcp_port "$REDIS_HOST" "$REDIS_PORT" "Redis"
 
+systemctl --user daemon-reload
 systemctl --user start promtail.service
 systemctl --user start celery-cpu-cache.service
 systemctl --user start celery-cpu-embedding.service

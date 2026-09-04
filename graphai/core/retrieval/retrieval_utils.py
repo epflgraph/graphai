@@ -1,7 +1,7 @@
 from datetime import datetime
+
 from graphai.core.common.config import config
 from graphai.core.retrieval.retrieval_settings import RETRIEVAL_PARAMS
-from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 
 INSUFFICIENT_ACCESS_ERROR = {
@@ -104,6 +104,10 @@ def retrieve_from_es(embedding_results, text, index_to_search_in,
 
 def chunk_text(text, chunk_size=400, chunk_overlap=100,
                one_chunk_per_page=False, one_chunk_per_doc=False):
+    # Import langchain lazily: it pulls in a large ML stack and probes CUDA at
+    # import time, which is only needed for the chunking task.
+    from langchain_text_splitters import RecursiveCharacterTextSplitter
+
     # text can be a string or an int to str dict
     if isinstance(text, str):
         keys = None

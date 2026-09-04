@@ -1,13 +1,24 @@
-from presidio_analyzer import AnalyzerEngine
-from presidio_analyzer.nlp_engine import NerModelConfiguration, TransformersNlpEngine
-from presidio_analyzer.predefined_recognizers import GLiNERRecognizer
-from presidio_anonymizer import AnonymizerEngine
-from graphai.core.common.config import config
-from graphai.core.common.common_utils import strtobool
-import torch
 from importlib.util import find_spec
+import gc
 from multiprocessing import Lock
 import time
+
+import torch
+
+from graphai.core.common.common_utils import strtobool
+from graphai.core.common.config import config
+
+# Presidio classes are imported lazily on first use so that workers which never
+# anonymize do not pay the ~600 MiB import cost. These module-level placeholders
+# are kept so that tests and callers can monkeypatch them before the first load.
+AnalyzerEngine = None
+AnonymizerEngine = None
+GLiNERRecognizer = None
+NerModelConfiguration = None
+TransformersNlpEngine = None
+
+# Unload the presidio/GLiNER anonymizer stack after this many seconds of inactivity.
+ANONYMIZER_UNLOAD_WAITING_PERIOD = 3 * 3600.0
 
 
 # Transformer model config
@@ -141,6 +152,10 @@ def build_gliner_recognizers(device=None, cache_dir=None):
         )
         return []
 
+    global GLiNERRecognizer
+    if GLiNERRecognizer is None:
+        from presidio_analyzer.predefined_recognizers import GLiNERRecognizer
+
     anonymization_config = _anonymization_config()
     model_name = anonymization_config.get("gliner_model_name", DEFAULT_GLINER_MODEL)
     threshold = _get_anonymization_float("gliner_threshold", "0.30")
@@ -169,7 +184,7 @@ class AnonymizerModels:
         self.models = None
         self.load_lock = Lock()
         self.last_model_use = time.time()
-        self.device = "cuda" if torch.cuda.is_available() else "cpu"
+        self._device = None
         try:
             print("Reading HuggingFace model path from config")
             self.cache_dir = config['huggingface']['model_path']
@@ -182,10 +197,28 @@ class AnonymizerModels:
             )
             self.cache_dir = None
 
+    @property
+    def device(self):
+        # Defer CUDA probing until the device is actually needed. This keeps
+        # CPU-only workers from opening the NVIDIA driver at import time.
+        if self._device is None:
+            self._device = "cuda" if torch.cuda.is_available() else "cpu"
+        return self._device
+
     def load_models(self):
         with self.load_lock:
             if self.models is None:
                 print('Loading analyzer and anonymizer')
+                # Import presidio lazily so that workers which never anonymize
+                # (e.g. video, text, image) do not pay the ~600 MiB baseline.
+                global AnalyzerEngine, AnonymizerEngine, NerModelConfiguration, TransformersNlpEngine
+                if AnalyzerEngine is None:
+                    from presidio_analyzer import AnalyzerEngine
+                if AnonymizerEngine is None:
+                    from presidio_anonymizer import AnonymizerEngine
+                if NerModelConfiguration is None or TransformersNlpEngine is None:
+                    from presidio_analyzer.nlp_engine import NerModelConfiguration, TransformersNlpEngine
+
                 ner_model_configuration = NerModelConfiguration(
                     model_to_presidio_entity_mapping=mapping,
                     alignment_mode="expand",  # "strict", "contract", "expand"
@@ -207,6 +240,7 @@ class AnonymizerModels:
                     'analyzer': analyzer,
                     'anonymizer': AnonymizerEngine(),
                 }
+                self.last_model_use = time.time()
 
     def anonymize(self, text, lang):
         self.load_models()
@@ -214,7 +248,21 @@ class AnonymizerModels:
             raise NotImplementedError("Only English and French are implemented at the moment.")
         analyzer_results = self.models['analyzer'].analyze(text=text, language=lang)
         anonymized = self.models['anonymizer'].anonymize(text, analyzer_results=analyzer_results)
+        self.last_model_use = time.time()
         return anonymized.text
+
+    def unload_model(self, unload_period=ANONYMIZER_UNLOAD_WAITING_PERIOD):
+        """
+        Unloads the presidio/GLiNER stack if it has not been used recently.
+        Returns the list of unloaded model names, or an empty list.
+        """
+        unloaded = []
+        with self.load_lock:
+            if time.time() - self.last_model_use > unload_period:
+                self.models = None
+                gc.collect()
+                unloaded = ['analyzer', 'anonymizer']
+        return unloaded
 
 
 def anonymize_text(anonymizer_model, text, lang):

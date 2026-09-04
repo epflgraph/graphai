@@ -41,7 +41,7 @@ from graphai.core.video.video import (
     ignore_single_image_fingerprint_results_callback,
     add_token_status_to_single_image
 )
-from graphai.core.video.video_utils import NLPModels
+from graphai.core.video.video_utils import NLPModels, NLP_UNLOAD_WAITING_PERIOD
 from graphai.core.common.caching import (
     AudioDBCachingManager,
     SlideDBCachingManager,
@@ -145,6 +145,16 @@ def slide_detection_init_task(self):
         duration_ms=int((time.perf_counter() - start) * 1000),
     )
     return True
+
+
+@shared_video_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},
+             name='video.clean_up_nlp_objects', ignore_result=False,
+             nlp_model=local_ocr_nlp_models)
+def cleanup_nlp_objects_task(self):
+    """Periodic task that releases the large fasttext models from memory."""
+    unloaded = self.nlp_model.unload_model(NLP_UNLOAD_WAITING_PERIOD)
+    logger.info('🧹 Cleaned up NLP objects', unloaded_languages=unloaded)
+    return unloaded
 
 
 @shared_video_task(bind=True, autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 2},

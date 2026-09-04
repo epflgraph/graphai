@@ -1,4 +1,5 @@
 import glob
+import gc
 import gzip
 import json
 import math
@@ -89,8 +90,13 @@ STOPWORDS = {
            'couldn', "couldn't", 'didn', "didn't", 'doesn', "doesn't", 'hadn', "hadn't", 'hasn', "hasn't", 'haven',
            "haven't", 'isn', "isn't", 'ma', 'mightn', "mightn't", 'mustn', "mustn't", 'needn', "needn't", 'shan',
            "shan't", 'shouldn', "shouldn't", 'wasn', "wasn't", 'weren', "weren't", 'won', "won't", 'wouldn',
-           "wouldn't"]
+            "wouldn't"]
 }
+
+# Unload fasttext models after this many seconds of inactivity. The models are
+# ~700 MiB each on disk and ~2.2 GiB resident, so releasing them between batches
+# of slide-detection work keeps the video worker child from growing monotonically.
+NLP_UNLOAD_WAITING_PERIOD = 6 * 3600.0
 
 
 def is_kaltura_serveflavor_url(url: str) -> bool:
@@ -566,31 +572,53 @@ class NLPModels:
             lang: generate_target_path(self.base_dir, lang, self.n_dims)
             for lang in ['en', 'fr']
         }
-        self.nlp_models = None
-        self.tokenizers = None
-        self.stopwords = None
+        self.nlp_models = dict()
+        self.tokenizers = dict()
+        self.stopwords = STOPWORDS
         self.load_lock = Lock()
+        self.last_model_use = time.time()
+
+    def _load_nlp_model(self, lang):
+        # Guard against languages that have no configured fasttext model.
+        if lang not in self.model_paths:
+            lang = 'en'
+        with self.load_lock:
+            if lang not in self.nlp_models:
+                self.nlp_models[lang] = fasttext.load_model(self.model_paths[lang])
+                self.tokenizers[lang] = MosesTokenizer(lang)
+            self.last_model_use = time.time()
 
     def load_nlp_models(self):
         """
-        Lazy-loads and returns the NLP models used for local OCR in slide detection
-        Returns:
-            The NLP model dict
+        Loads all configured NLP models. Kept for backward compatibility with
+        the video init task; in normal operation models are loaded on demand.
         """
+        for lang in self.model_paths:
+            self._load_nlp_model(lang)
+
+    def unload_model(self, unload_period=NLP_UNLOAD_WAITING_PERIOD):
+        """
+        Unloads all fasttext models if they have not been used recently.
+        Returns the list of languages that were unloaded, or an empty list.
+        """
+        unloaded = []
         with self.load_lock:
-            if self.nlp_models is None:
-                self.nlp_models = {
-                    lang: fasttext.load_model(self.model_paths[lang])
-                    for lang in self.model_paths
-                }
-                self.tokenizers = {
-                    lang: MosesTokenizer(lang)
-                    for lang in self.nlp_models
-                }
-                self.stopwords = STOPWORDS
+            if time.time() - self.last_model_use > unload_period:
+                self.nlp_models.clear()
+                self.tokenizers.clear()
+                unloaded = list(self.model_paths.keys())
+                gc.collect()
+                # Return malloc-allocated memory to the OS on Linux. Fasttext
+                # keeps large mmap/C++ allocations that glibc otherwise retains.
+                try:
+                    import ctypes
+                    ctypes.CDLL('libc.so.6').malloc_trim(0)
+                except Exception:
+                    pass
+        return unloaded
 
     def get_words(self, text, lang='en', valid_only=False):
-        self.load_nlp_models()
+        self._load_nlp_model(lang)
         if len(text) == 0:
             return []
         current_tokenizer = self.tokenizers[lang]
@@ -605,12 +633,12 @@ class NLPModels:
         return all_words
 
     def get_text_word_vector(self, text, lang='en', valid_only=True):
-        self.load_nlp_models()
+        self._load_nlp_model(lang)
         all_valid_words = self.get_words(text, lang, valid_only=valid_only)
         return self._word_list_to_word_vector(all_valid_words, lang)
 
     def get_text_word_vector_using_words(self, words, lang='en'):
-        self.load_nlp_models()
+        self._load_nlp_model(lang)
         return self._word_list_to_word_vector(words, lang)
 
     def _word_list_to_word_vector(self, words, lang='en'):
