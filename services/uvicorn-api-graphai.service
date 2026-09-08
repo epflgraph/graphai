@@ -1,0 +1,22 @@
+[Unit]
+Description=FastAPI server
+After=default.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/dockerhost/graphai/graphai/api/main
+
+EnvironmentFile=/home/dockerhost/graphai/.env
+
+ExecStart=/home/dockerhost/graphai/.venv.graphai/bin/uvicorn main:app \
+  --host 127.0.0.1 \
+  --port 28800 \
+  --workers 1 \
+  --proxy-headers \
+  --forwarded-allow-ips 127.0.0.1
+
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=default.target

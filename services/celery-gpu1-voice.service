@@ -1,0 +1,24 @@
+[Unit]
+Description=Celery Worker: voice_gpu on GPU 1
+After=default.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/dockerhost/graphai/graphai/api/main
+
+EnvironmentFile=/home/dockerhost/graphai/.env
+Environment=NLTK_DATA=/home/dockerhost/nltk_data
+
+ExecStart=/usr/bin/env CUDA_VISIBLE_DEVICES=1 \
+  /home/dockerhost/graphai/.venv.graphai/bin/celery --broker="${CELERY_BROKER_URL}" \
+         -A main.celery_instance worker \
+         -l info \
+         -Q voice_gpu \
+         --concurrency=1 \
+         -n RCP_GPU1_Voice
+
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=default.target

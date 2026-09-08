@@ -1,0 +1,26 @@
+[Unit]
+Description=Celery Worker: image on CPUs
+After=default.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/dockerhost/graphai/graphai/api/main
+
+EnvironmentFile=/home/dockerhost/graphai/.env
+Environment=NLTK_DATA=/home/dockerhost/nltk_data
+
+ExecStart=/home/dockerhost/graphai/.venv.graphai/bin/celery \
+    --broker=${CELERY_BROKER_URL} \
+    -A main.celery_instance worker \
+    -l info \
+    -P prefork \
+    -c 1 \
+    --prefetch-multiplier=1 \
+    -Q image \
+    -n RCP_Img
+
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=default.target

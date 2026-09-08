@@ -1,0 +1,24 @@
+[Unit]
+Description=Celery Worker: translation_gpu on GPU 3
+After=default.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/dockerhost/graphai/graphai/api/main
+
+EnvironmentFile=/home/dockerhost/graphai/.env
+Environment=NLTK_DATA=/home/dockerhost/nltk_data
+
+ExecStart=/usr/bin/env CUDA_VISIBLE_DEVICES=3 \
+  /home/dockerhost/graphai/.venv.graphai/bin/celery --broker="${CELERY_BROKER_URL}" \
+         -A main.celery_instance worker \
+         -l info \
+         -Q translation_gpu \
+         --concurrency=1 \
+         -n RCP_GPU3_Translation
+
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=default.target
