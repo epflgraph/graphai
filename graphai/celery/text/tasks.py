@@ -142,7 +142,7 @@ def extract_keywords_task(self, raw_text, request_id: Optional[str] = None, **kw
     return keywords
 
 
-@shared_task(bind=True, name='text.wikisearch', es=es, soft_time_limit=300000, time_limit=300000)
+@shared_task(bind=True, name='text.wikisearch', es=es, soft_time_limit=180, time_limit=300)
 def wikisearch_task(self, keywords_list, request_id: Optional[str] = None, **kwargs):
     _bind_request_id(request_id)
     start = time.perf_counter()
@@ -156,14 +156,14 @@ def wikisearch_task(self, keywords_list, request_id: Optional[str] = None, **kwa
         keywords_count=len(keywords_list) if keywords_list else 0,
     )
 
-    es_timeout = config['elasticsearch'].get('request_timeout', 300000)
-    es_timeout_retries = config['elasticsearch'].get('request_timeout_retries', 300000)
-    wikipedia_timeout = config['elasticsearch'].get('wikipedia_timeout', 300000)
+    es_timeout = config['elasticsearch'].get('request_timeout', 30)
+    es_timeout_retries = config['elasticsearch'].get('request_timeout_retries', 3)
+    wikipedia_timeout = config['elasticsearch'].get('wikipedia_timeout', 30)
 
     try:
         df = wikisearch(
             keywords_list,
-            es=self.es,
+            es_config=config['elasticsearch'],
             es_timeout=es_timeout,
             es_timeout_retries=es_timeout_retries,
             wikipedia_timeout=wikipedia_timeout,
@@ -189,7 +189,7 @@ def wikisearch_task(self, keywords_list, request_id: Optional[str] = None, **kwa
         return DataFrameResult([], columns=['keywords', 'concept_id', 'concept_name', 'searchrank', 'search_score'])
 
 
-@shared_task(bind=True, name='text.wiki_search', es=es, soft_time_limit=300000, time_limit=300000)
+@shared_task(bind=True, name='text.wiki_search', es=es, soft_time_limit=30, time_limit=60)
 def wiki_search_task(self, search_term, limit=10, request_id: Optional[str] = None):
     _bind_request_id(request_id)
     start = time.perf_counter()
@@ -200,8 +200,8 @@ def wiki_search_task(self, search_term, limit=10, request_id: Optional[str] = No
         limit=limit,
     )
 
-    es_timeout = config['elasticsearch'].get('request_timeout', 300000)
-    es_timeout_retries = config['elasticsearch'].get('request_timeout_retries', 300000)
+    es_timeout = config['elasticsearch'].get('request_timeout', 30)
+    es_timeout_retries = config['elasticsearch'].get('request_timeout_retries', 3)
 
     try:
         result = search_elasticsearch_http(

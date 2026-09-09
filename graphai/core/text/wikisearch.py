@@ -40,9 +40,9 @@ def _format_concept_hits(hits, max_hits=5):
 
 
 
-DEFAULT_WIKIPEDIA_TIMEOUT = 300000
-DEFAULT_ES_TIMEOUT = 300000
-DEFAULT_ES_TIMEOUT_RETRIES = 300000
+DEFAULT_WIKIPEDIA_TIMEOUT = 30
+DEFAULT_ES_TIMEOUT = 30
+DEFAULT_ES_TIMEOUT_RETRIES = 3
 
 
 class ElasticsearchSearchError(RuntimeError):
@@ -481,7 +481,8 @@ def search_elasticsearch(text, es, limit=10, timeout=DEFAULT_ES_TIMEOUT, timeout
 
 def wikisearch(
     keywords_list,
-    es,
+    es=None,
+    es_config=None,
     fraction=(0, 1),
     method='es-base',
     es_timeout=DEFAULT_ES_TIMEOUT,
@@ -493,7 +494,9 @@ def wikisearch(
 
     Args:
         keywords_list (list(str)): List containing the sets of keywords for which to search concepts.
-        es (ESConceptDetection): Elasticsearch interface.
+        es (ESConceptDetection, optional): Elasticsearch interface. Either this or ``es_config`` must be provided.
+        es_config (dict, optional): Elasticsearch configuration dict. When provided, a fresh HTTP connection is
+            used for each search, avoiding stale persistent connections in the ES client pool.
         fraction (tuple(int, int)): Portion of the keywords_list to be processed, e.g. (1/3, 2/3) means only
         the middle third of the list is considered.
         method (str): Method to retrieve the concepts (Wikipedia pages). It can be either "wikipedia-api", to use the
@@ -505,6 +508,8 @@ def wikisearch(
         starting with 1. The search score is the elasticsearch score for method "es-score" or 1 - (searchrank - 1)/n
         for the other methods. Default: 'es-base'. Fallback: 'wikipedia-api'.
     """
+    if es is None and es_config is None:
+        raise ValueError('wikisearch requires either an ES client (es) or an ES config dict (es_config).')
     start = time.perf_counter()
     total_keyword_sets = len(keywords_list)
     logger.debug(
@@ -535,12 +540,23 @@ def wikisearch(
             results_list = search_wikipedia_api(keywords, timeout=wikipedia_timeout)
         else:
             logger.debug('⚡️ Searching Elasticsearch for keywords', keywords=keywords)
-            results_list = search_elasticsearch(
-                keywords,
-                es,
-                timeout=es_timeout,
-                timeout_retries=es_timeout_retries,
-            )
+            if es_config is not None:
+                index = es_config.get('concept_detection_index', 'concepts_detection')
+                results_list = search_elasticsearch_http(
+                    keywords,
+                    es_config,
+                    index=index,
+                    limit=10,
+                    timeout=es_timeout,
+                    timeout_retries=es_timeout_retries,
+                )
+            else:
+                results_list = search_elasticsearch(
+                    keywords,
+                    es,
+                    timeout=es_timeout,
+                    timeout_retries=es_timeout_retries,
+                )
 
             # Fallback to Wikipedia API if no results from elasticsearch
             if not results_list:
