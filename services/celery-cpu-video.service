@@ -14,7 +14,7 @@ ExecStart=/home/dockerhost/graphai/.venv.graphai/bin/celery \
     -A main.celery_instance worker \
     -l info \
     -P prefork \
-    -c 1 \
+    -c 8 \
     --prefetch-multiplier=1 \
     -Q video \
     -n RCP_Video
