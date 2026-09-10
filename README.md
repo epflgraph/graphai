@@ -29,7 +29,7 @@ AI |
 
 Overview
 ========
-*Graph AI* is a semantic analysis platform and API that powers other Graph services - particularly those requiring some form of text processing, understanding, and/or synthesis, such as the Graph Registry, GraphChat, and adjacent RAG creation pipelines.
+**Graph AI** is a semantic analysis platform and API that powers other Graph services - particularly those requiring some form of text processing, understanding, and/or synthesis, such as the Graph Registry, GraphChat, and adjacent RAG creation pipelines.
 
 ## Contents
 
