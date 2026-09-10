@@ -1,4 +1,4 @@
-<img src="assets/icon.png" alt="Project logo" height="64">
+<img src="assets/icon-f3278959.png" alt="Project logo" height="64">
 
 [![License](https://img.shields.io/github/license/epflgraph/graphai)](https://github.com/epflgraph/graphai/blob/master/LICENSE)
 [![Latest Release on Github](https://img.shields.io/github/v/release/epflgraph/graphai?sort=semver)](https://github.com/epflgraph/graphai/releases/latest)
@@ -9,7 +9,7 @@
 [![Open PRs](https://img.shields.io/github/issues-pr/epflgraph/graphai)](https://github.com/epflgraph/graphai/pulls)
 =
 
-🏠 [Graph Project](https://github.com/epflgraph/graphproject) > AI
+🏠 [Project Home](https://github.com/epflgraph/graphproject) > AI
 
 **List of core services:**<br/>
 [Registry](https://github.com/epflgraph/graphregistry) |
@@ -27,11 +27,7 @@ AI |
 
 <br />
 
-Why Graph?
-==========
-The *Graph Data Platform* - developed by the AI engineering team at the [EPFL Center for Digital Education](https://www.epfl.ch/education/educational-initiatives/cede/) - is an open-source alternative to proprietary research information systems like Elsevier Pure. It federates educational and institutional data into a semantically interconnected knowledge graph of people, publications, labs, startups, courses, video lectures, and other educational resources. The [GraphSearch](https://graphsearch.epfl.ch/en) application provides lightning-fast search and discovery of the knowledge graph, as well as LLM-powered [chatbot](https://graphsearch.epfl.ch/en/chatbot) interaction with the indexed resources.
-
-Graph AI
+Overview
 ========
 *Graph AI* is a semantic analysis platform and API that powers other Graph services - particularly those requiring some form of text processing, understanding, and/or synthesis, such as the Graph Registry, GraphChat, and adjacent RAG creation pipelines.
 
