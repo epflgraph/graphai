@@ -1,0 +1,106 @@
+publiccodeYmlVersion: "0"
+
+name: Graph AI
+applicationSuite: EPFL Graph Platform
+url: "https://github.com/epflgraph/graphai"
+# TODO: update once a release is tagged from rcp_deployment
+softwareVersion: "0.18.0"
+releaseDate: "2025-06-04"
+logo: assets/version_01_vector.svg
+
+platforms:
+  - web
+  - linux
+
+categories:
+  - knowledge-management
+  - data-analytics
+  - translation
+  - educational-content
+
+usedBy:
+  - EPFL
+
+developmentStatus: stable
+
+softwareType: "standalone/backend"
+
+organisation:
+  uri: "https://www.epfl.ch"
+  name: École polytechnique fédérale de Lausanne (EPFL)
+
+intendedAudience:
+  scope:
+    - education
+    - research
+
+description:
+  en:
+    shortDescription: >-
+      Semantic analysis API of the EPFL Graph Platform: video, audio and text
+      processing, translation, embeddings, RAG and concept detection.
+    longDescription: >-
+      **Graph AI** is the semantic analysis engine of the
+      [EPFL Graph Platform](https://github.com/epflgraph/graphplatform). It
+      powers the other Graph services that need to process, understand or
+      synthesise text, such as the Graph Registry, GraphChat and the
+      pipelines that build retrieval-augmented generation (RAG) indexes.
+
+
+      It exposes a REST API that processes lecture videos, audio, slides,
+      documents and text: it segments videos, extracts text from slides with
+      OCR, transcribes speech, translates content, computes embeddings and
+      detects the academic concepts a text is about, using the Graph
+      Ontology.
+
+
+      Long-running tasks are queued and run in the background, so clients
+      can submit work and collect results later. Access is controlled with
+      user accounts and per-user rate limits. Graph AI runs best with a GPU
+      and is available as a Docker image.
+    documentation: "https://epflgraph.github.io/graphai/graphai"
+    # TODO: make sure this is reachable ?
+    apiDocumentation: "https://graphai.epfl.ch/docs"
+    features:
+      - Detection of academic concepts in text, linked to the Graph Ontology
+      - Video segmentation and slide detection
+      - Text extraction from slides and PDF documents (OCR)
+      - Speech transcription of lecture audio
+      - Translation of text and transcripts
+      - Text embeddings and building of RAG indexes
+      - Queueing of long-running tasks with result polling
+      - User accounts, access scopes and rate limiting
+      - Docker image for simple deployment
+
+legal:
+  license: Apache-2.0
+  mainCopyrightOwner: EPFL
+
+maintenance:
+  type: internal
+  contacts:
+    # TODO: main maintainers (GitHub: RamtinYazdanian, aitor-perez)
+    - name: Francisco Pinto
+      email: francisco.pinto@epfl.ch
+      affiliation: EPFL Center for Digital Education (CEDE)
+
+localisation:
+  localisationReady: false
+  availableLanguages:
+    - en
+
+dependsOn:
+  open:
+    - name: MySQL or MariaDB
+    - name: Elasticsearch
+      optional: true
+    - name: RabbitMQ
+    - name: Redis
+    - name: FFmpeg
+    - name: Chromaprint
+    - name: Tesseract OCR
+    - name: Poppler
+    - name: Graph Ontology
+  hardware:
+    - name: GPU (e.g. NVIDIA A100)
+      optional: true
