@@ -31,7 +31,6 @@ services:
   redis-commander:
     image: rediscommander/redis-commander:latest
     environment:
-      # - REDIS_HOSTS=local:redis:6379
       - REDIS_HOSTS=local:redis:6379:1
     ports:
       - "8081:8081"
@@ -103,9 +102,19 @@ services:
     network_mode: "host"
     volumes:
       - ./nginx.graphai-https.conf:/etc/nginx/conf.d/default.conf:ro
-      # - /etc/letsencrypt/live/graphcert.cede-apps.ch:/etc/nginx/certs:ro
       - /etc/letsencrypt:/etc/letsencrypt:ro
     restart: unless-stopped
+
+  # Certificate watcher that reloads Nginx on certificate changes
+  cert-watcher:
+    build: ./cert-watcher
+    container_name: graphai-cert-watcher
+    restart: unless-stopped
+    volumes:
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      - NGINX_CONTAINER=nginx_graphai
 
 networks:
   graphai_net:
