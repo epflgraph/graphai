@@ -32,6 +32,8 @@ services:
     image: rediscommander/redis-commander:latest
     environment:
       - REDIS_HOSTS=local:redis:6379:1
+      - HTTP_USER=${AI_REDIS_COMMANDER_USER}
+      - HTTP_PASSWORD=${AI_REDIS_COMMANDER_PASSWORD}
     ports:
       - "8081:8081"
     depends_on: [redis]
@@ -45,6 +47,11 @@ services:
       - .env
     environment:
       CE_BROKER_URL: amqp://${AI_RABBITMQ_DEV_CELERY_USER}:${AI_RABBITMQ_DEV_CELERY_PASS}@rabbitmq:5672//
+      # CELERY_* vars inherited from .env point at localhost (correct for the
+      # host-run workers) and override CE_BROKER_URL inside this container —
+      # re-point them at the in-network services (same as the flower service).
+      CELERY_BROKER_URL: amqp://${AI_RABBITMQ_DEV_CELERY_USER}:${AI_RABBITMQ_DEV_CELERY_PASS}@rabbitmq:5672//
+      CELERY_RESULT_BACKEND: redis://redis:6379/1
       CE_ACCEPT_CONTENT: pickle,json
       CE_RETRY_INTERVAL: "5"        # optional: keep retrying if broker isn’t ready
     ports:
@@ -63,6 +70,7 @@ services:
       celery --broker=amqp://${AI_RABBITMQ_DEV_CELERY_USER}:${AI_RABBITMQ_DEV_CELERY_PASS}@rabbitmq:5672// flower
       --port=5555
       --basic_auth=${AI_FLOWER_DEV_CELERY_USER}:${AI_FLOWER_DEV_CELERY_PASS}
+      --url-prefix=/flower
     environment:
       - CELERY_BROKER_URL=amqp://${AI_RABBITMQ_DEV_CELERY_USER}:${AI_RABBITMQ_DEV_CELERY_PASS}@rabbitmq:5672//
       - CELERY_RESULT_BACKEND=redis://redis:6379/1
@@ -81,6 +89,7 @@ services:
       - "9417:9487"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+    restart: unless-stopped
 
   # NVIDIA GPU metrics exporter
   nvidia_gpu_exporter:

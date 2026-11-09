@@ -746,7 +746,7 @@ w_cmd=$((TERM_WIDTH - total_fixed_width))
 
 clear 2>/dev/null || true
 
-printf "%s%s🧠  PROCESS MEMORY / SWAP / CPU / CELERY INSPECTOR%s\n" \
+printf "%s%s🧠  RAM / SWAP / CPU / GPU / CELERY INSPECTOR%s\n" \
     "$BOLD" "$CYAN" "$RESET"
 
 printf "%s%s%s\n" "$DIM" "$(repeat_char '-' 80)" "$RESET"
@@ -972,6 +972,307 @@ if (( ${#queue_rss[@]} > 0 )); then
 
     printf "\n"
 fi
+
+
+# ─────────────────────────────────────────────────────────────
+# GPU inspector
+# ─────────────────────────────────────────────────────────────
+
+gpu_human_mib() {
+    local mib="${1:-0}"
+
+    awk -v mib="$mib" '
+        BEGIN {
+            if (mib >= 1024)
+                printf "%.2f GiB", mib / 1024
+            else
+                printf "%.0f MiB", mib
+        }
+    '
+}
+
+gpu_color_percent() {
+    local value="${1:-0}"
+
+    if awk -v v="$value" 'BEGIN { exit !(v >= 90) }'; then
+        printf '%s' "$RED"
+    elif awk -v v="$value" 'BEGIN { exit !(v >= 70) }'; then
+        printf '%s' "$YELLOW"
+    else
+        printf '%s' "$GREEN"
+    fi
+}
+
+gpu_bar() {
+    local percent="${1:-0}"
+    local width="${2:-25}"
+
+    awk -v p="$percent" -v w="$width" '
+        BEGIN {
+            p += 0
+            if (p < 0) p = 0
+            if (p > 100) p = 100
+
+            filled = int(p * w / 100 + 0.5)
+
+            printf "["
+
+            for (i = 0; i < filled; i++)
+                printf "#"
+
+            for (i = filled; i < w; i++)
+                printf "."
+
+            printf "]"
+        }
+    '
+}
+
+scan_nvidia_gpus() {
+    local gpu_data
+    local gpu_count=0
+
+    gpu_data="$(
+        nvidia-smi \
+            --query-gpu=index,name,uuid,memory.total,memory.used,memory.free,utilization.gpu,utilization.memory,temperature.gpu,power.draw,power.limit \
+            --format=csv,noheader,nounits \
+            2>/dev/null
+    )"
+
+    [[ -n "$gpu_data" ]] || return 1
+
+    printf "%s%s NVIDIA GPUs%s\n\n" \
+        "$BOLD" "$GREEN" "$RESET"
+
+    while IFS=',' read -r \
+        gpu_index \
+        gpu_name \
+        gpu_uuid \
+        mem_total \
+        mem_used \
+        mem_free \
+        gpu_util \
+        mem_util \
+        temperature \
+        power_draw \
+        power_limit
+    do
+        # Trim whitespace
+        gpu_index="$(echo "$gpu_index" | xargs)"
+        gpu_name="$(echo "$gpu_name" | xargs)"
+        gpu_uuid="$(echo "$gpu_uuid" | xargs)"
+        mem_total="$(echo "$mem_total" | xargs)"
+        mem_used="$(echo "$mem_used" | xargs)"
+        mem_free="$(echo "$mem_free" | xargs)"
+        gpu_util="$(echo "$gpu_util" | xargs)"
+        mem_util="$(echo "$mem_util" | xargs)"
+        temperature="$(echo "$temperature" | xargs)"
+        power_draw="$(echo "$power_draw" | xargs)"
+        power_limit="$(echo "$power_limit" | xargs)"
+
+        ((gpu_count++))
+
+        # Calculate VRAM usage percentage
+        mem_percent="$(
+            awk -v used="$mem_used" -v total="$mem_total" '
+                BEGIN {
+                    if (total > 0)
+                        printf "%.1f", used / total * 100
+                    else
+                        printf "0.0"
+                }
+            '
+        )"
+
+        gpu_color="$(gpu_color_percent "$gpu_util")"
+        mem_color="$(gpu_color_percent "$mem_percent")"
+
+        printf "%sGPU %s%s  %s\n" \
+            "$BOLD" "$gpu_index" "$RESET" "$gpu_name"
+
+        printf "  GPU LOAD  %s%s%s %s%s%%%s\n" \
+            "$gpu_color" \
+            "$(gpu_bar "$gpu_util")" \
+            "$RESET" \
+            "$gpu_color" "$gpu_util" "$RESET"
+
+        printf "  VRAM      %s%s%s %s / %s (%s%%)\n" \
+            "$mem_color" \
+            "$(gpu_bar "$mem_percent")" \
+            "$RESET" \
+            "$(gpu_human_mib "$mem_used")" \
+            "$(gpu_human_mib "$mem_total")" \
+            "$mem_percent"
+
+        printf "  MEM LOAD  %s%%\n" "$mem_util"
+        printf "  TEMP      %s°C\n" "$temperature"
+        printf "  POWER     %s W / %s W\n" \
+            "$power_draw" "$power_limit"
+
+        printf "\n"
+
+    done <<< "$gpu_data"
+
+    printf "  Detected NVIDIA GPUs: %s\n\n" "$gpu_count"
+
+    return 0
+}
+
+scan_nvidia_gpu_processes() {
+    local process_data
+    local pid
+    local gpu_uuid
+    local gpu_memory
+    local process_name
+    local process_user
+    local process_cmd
+    local process_count=0
+
+    process_data="$(
+        nvidia-smi \
+            --query-compute-apps=pid,gpu_uuid,used_gpu_memory \
+            --format=csv,noheader,nounits \
+            2>/dev/null
+    )"
+
+    printf "%s%s GPU PROCESS MEMORY%s\n\n" \
+        "$BOLD" "$CYAN" "$RESET"
+
+    if [[ -z "$process_data" ]]; then
+        printf "  No GPU compute processes reported.\n\n"
+        return
+    fi
+
+    printf "  %-9s %-15s %-12s %s\n" \
+        "PID" "USER" "VRAM" "COMMAND"
+
+    printf "  %s\n" "$(repeat_char '-' 75)"
+
+    while IFS=',' read -r pid gpu_uuid gpu_memory; do
+        pid="$(echo "$pid" | xargs)"
+        gpu_uuid="$(echo "$gpu_uuid" | xargs)"
+        gpu_memory="$(echo "$gpu_memory" | xargs)"
+
+        [[ "$pid" =~ ^[0-9]+$ ]] || continue
+
+        process_user="$(
+            ps -o user= -p "$pid" 2>/dev/null |
+                xargs
+        )"
+
+        [[ -n "$process_user" ]] || process_user="unknown"
+
+        process_cmd="$(
+            get_raw_cmdline "$pid" 2>/dev/null || true
+        )"
+
+        if [[ -z "$process_cmd" ]]; then
+            process_cmd="$(
+                ps -o comm= -p "$pid" 2>/dev/null |
+                    xargs
+            )"
+        fi
+
+        [[ -n "$process_cmd" ]] || process_cmd="unknown"
+
+        # Avoid exposing command-line arguments, which may contain secrets.
+        process_name="${process_cmd%% *}"
+        process_name="${process_name##*/}"
+
+        if [[ "$gpu_memory" =~ ^[0-9]+$ ]]; then
+            gpu_memory="$(gpu_human_mib "$gpu_memory")"
+        else
+            gpu_memory="N/A"
+        fi
+
+        printf "  %-9s %-15s %-12s %s\n" \
+            "$pid" \
+            "$process_user" \
+            "$gpu_memory" \
+            "$process_name"
+
+        ((process_count++))
+
+    done <<< "$process_data"
+
+    printf "\n  GPU compute process entries: %d\n\n" \
+        "$process_count"
+
+    printf "%s%sNote: GPU process reporting may exclude graphics processes or be limited by driver permissions.%s\n\n" \
+        "$DIM" "$YELLOW" "$RESET"
+}
+
+scan_amd_gpus() {
+    printf "%s%s AMD GPU / ROCm%s\n\n" \
+        "$BOLD" "$MAGENTA" "$RESET"
+
+    if command -v rocm-smi >/dev/null 2>&1; then
+        rocm-smi \
+            --showproductname \
+            --showuse \
+            --showmemuse \
+            --showtemp \
+            --showpower \
+            2>/dev/null || true
+    else
+        printf "  AMD GPU detected, but rocm-smi is unavailable.\n"
+    fi
+
+    printf "\n"
+}
+
+scan_gpus() {
+    printf "\n"
+    printf "%s%s🎮 GPU / VRAM INSPECTOR%s\n" \
+        "$BOLD" "$CYAN" "$RESET"
+
+    printf "%s%s%s\n" \
+        "$DIM" \
+        "$(repeat_char '-' 80)" \
+        "$RESET"
+
+    local detected=0
+
+    # NVIDIA
+    if command -v nvidia-smi >/dev/null 2>&1; then
+        if scan_nvidia_gpus; then
+            detected=1
+            scan_nvidia_gpu_processes
+        fi
+    fi
+
+    # AMD: check for DRM devices with AMD vendor ID (0x1002)
+    local amd_found=0
+    local vendor_file
+
+    for vendor_file in /sys/class/drm/card*/device/vendor; do
+        [[ -r "$vendor_file" ]] || continue
+
+        if grep -qi '^0x1002$' "$vendor_file"; then
+            amd_found=1
+            break
+        fi
+    done
+
+    if (( amd_found )); then
+        detected=1
+        scan_amd_gpus
+    fi
+
+    if (( ! detected )); then
+        printf "  %sNo supported GPUs detected.%s\n" \
+            "$DIM" "$RESET"
+
+        printf "  NVIDIA: nvidia-smi unavailable or no accessible GPUs\n"
+        printf "  AMD: No AMD DRM device detected\n\n"
+    fi
+
+    printf "%s%sGPU scanning completed without sudo.%s\n" \
+        "$DIM" "$RESET"
+}
+
+# Run GPU scan
+scan_gpus
 
 # ─────────────────────────────────────────────────────────────
 # Legend
